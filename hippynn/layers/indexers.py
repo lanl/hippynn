@@ -1,0 +1,191 @@
+"""
+Layers for encoding, decoding, index states, besides pairs
+"""
+
+import torch
+
+class OneHotSpecies(torch.nn.Module):
+    """
+    Encodes species as one-hot map using `species_set`
+    :param species_set iterable of species types. Typically this will be the Z-value of the elemeent.
+    Note: 0 denotes a 'blank atom' used only for padding purposes
+
+    :returns OneHotSpecies
+
+    """
+    def __init__(self, species_set):
+        super().__init__()
+
+        self.species_set = torch.as_tensor(species_set)
+        self.n_species = self.species_set.shape[0]
+
+        max_z = torch.max(self.species_set)
+        zmap = torch.zeros((max_z + 1,), dtype=torch.long)
+        zmap[self.species_set] = torch.arange(0, self.n_species, dtype=torch.long)
+
+        self.species_map = torch.nn.Parameter(torch.as_tensor(zmap, dtype=torch.long), requires_grad=False)
+
+    def forward(self, species):
+        """
+        :param species:
+        :return: Initial one-hotted features, nonblank atoms
+        """
+
+        onehot_species = torch.eye(self.n_species, dtype=torch.bool, device=species.device)[self.species_map[species]]
+        nonblank = ~onehot_species[:, :, 0]
+        initial_features = onehot_species[:, :, 1:] # remove atoms that are 0 in the species map.
+
+        return initial_features, nonblank
+
+
+class PaddingIndexer(torch.nn.Module):
+    """
+    Hipnn's indexer
+
+    Description:
+        This indexer allows us to go from rectangular (mol,atom) representations
+        To (flatatom) representations and a corresponding
+        molecule index for those atoms.
+        The 'real_index' allows us to take _values_ from a flattened rectangular
+        representation (mol*atom)
+        And select only the real ones.
+        The 'inv_real_index', when indexed, converts a (mol*atom) index set into a (flatatom) index set
+
+    """
+    def forward(self, features, nonblank):
+        """
+        Pytorch Enforced Forward function
+
+        :param features:
+        :param nonblank:
+        :return: real atoms, amd inverse atoms mappings
+        """
+        n_molecules, n_atoms_max = nonblank.shape
+        n_fictitious_atoms = nonblank.shape[0] * nonblank.shape[1]
+        # Just calculate the total number of atoms in the dataset
+
+        flat_nonblank = nonblank.reshape(n_fictitious_atoms)
+        # Flatten the nonblank n_mol x n_atoms nonblank matrix
+
+        real_atoms = torch.nonzero(flat_nonblank,as_tuple=False)[:, 0]
+        #print(real_atoms)
+        # Grab the indexes of each real atom, give it an atom get an index back
+
+        n_real_atoms = real_atoms.shape[0]
+        # Count how many real atoms there are
+
+        inv_real_atoms = torch.zeros((n_fictitious_atoms,), dtype=torch.long, device=features.device)
+        # Create a vector of 0's
+
+        inv_real_atoms[real_atoms] = torch.arange(n_real_atoms, dtype=torch.long, device=features.device)
+        # Create the inverse real atom "function" give it an index get an atom back
+
+        # Flatten incoming features to atom representation
+        indexed_features = features.reshape(n_molecules * n_atoms_max, -1)[real_atoms]
+        if indexed_features.ndimension() == 1:
+            indexed_features = indexed_features.unsqueeze(1)
+
+        # Get molecule index for atoms
+        mol_index_shaped = torch.arange(n_molecules,
+                                        dtype=torch.long,
+                                        device=features.device).unsqueeze(1).expand(-1, n_atoms_max)
+        atom_index_shaped = torch.arange(n_atoms_max,
+                                        dtype=torch.long,
+                                        device=features.device).unsqueeze(0).expand(n_molecules,-1)
+        atom_index = atom_index_shaped.reshape(n_fictitious_atoms)[real_atoms]
+        mol_index = mol_index_shaped.reshape(n_fictitious_atoms)[real_atoms]
+
+        return indexed_features, real_atoms, inv_real_atoms, mol_index,atom_index,n_molecules, n_atoms_max
+
+
+class AtomReIndexer(torch.nn.Module):
+    def forward(self, molatom_thing, real_atoms):
+        m,a,*rest = molatom_thing.shape
+        out = molatom_thing.reshape(m * a, *rest)[real_atoms]
+        if len(rest) == 0:
+            out = out.unsqueeze(1)
+        return out
+
+
+class MolSummer(torch.nn.Module):
+    """
+    Molecule Summer
+
+    Description:
+        This sums (flatatom) things into (mol) things.
+        It actually works similarly to the interaction layer
+    """
+    def forward(self, features, mol_index ,n_molecules):
+        featshape = (1,) if features.ndimension() == 1 else features.shape[1:]
+        out_shape = (n_molecules, *featshape)
+        result = torch.zeros(*out_shape, device=features.device,dtype=features.dtype)
+        result.index_add_(0, mol_index, features)
+
+        return result
+
+class AtomDeIndexer(torch.nn.Module):
+    def forward(self, features, mol_index, atom_index, n_molecules, n_atoms_max):
+        featshape = 1 if features.ndimension() == 1 else features.shape[1:]
+        out_shape = (n_molecules,n_atoms_max, *featshape)
+        result = torch.zeros(*out_shape, device=features.device,dtype=features.dtype)
+        result[mol_index,atom_index] = features
+        return result
+
+
+class CellScaleInducer(torch.nn.Module):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.pbc = False
+
+    def forward(self,coordinates,cell):
+        strain = torch.eye(coordinates.shape[2],
+                           dtype=coordinates.dtype,
+                           device=coordinates.device,
+                           requires_grad=True).unsqueeze(0)
+        strained_coordinates = torch.bmm(coordinates,strain)
+        if cell.dim() == 2:
+            strained_cell = torch.mm(cell, strain.squeeze(0))
+        return strained_coordinates, strained_cell, strain
+
+
+class QuadPack(torch.nn.Module):
+    """
+    Converts quadrupoles flattened form to packed triangular, assumes symmmetric.
+    Packed form: (molecule)   XX, YY, ZZ, XY, XZ, YZ
+    Index                      0,  4,  8,  1,  2,  5
+    Unpacked form: (molecule) XX, XY, XZ, YX, YY, YZ , ZX, ZY, ZZ
+    Index                      00 01  02, 10, 11, 12,  20, 21, 22
+    """
+    def __init__(self):
+        super().__init__()
+        ind1 = [0, 1, 2, 0, 0, 1]
+        ind2 = [0, 1, 2, 1, 2, 2]
+        self.register_buffer('ind_1', torch.LongTensor(ind1))
+        self.register_buffer('ind_2', torch.LongTensor(ind2))
+
+    def forward(self, quadrupoles):
+        return quadrupoles[:, self.ind1, self.ind2]
+
+
+class QuadUnpack(torch.nn.Module):
+    """
+    Converts quadrupoles from packed triangular form to flattened molecule form.
+    Packed form: (molecule)   XX, YY, ZZ, XY, XZ, YZ
+    Index                      0,  1,  2,  3,  4,  5
+    Unpacked form: (molecule) XX, XY, XZ, YX, YY, YZ , ZX, ZY, ZZ
+    Index                      0,  3,  4,  3,  1,  5,  4,  5,  2
+    """
+    def __init__(self):
+        super().__init__()
+        indices = [0, 3, 4, 3, 1, 5, 4, 5, 2]
+        self.register_buffer('index_permutation',torch.LongTensor(indices))
+
+    def forward(self, packed_quadrupoles):
+        return packed_quadrupoles[:, self.index_permutation]
+
+
+class FilterBondsOneway(torch.nn.Module):
+    def forward(self,bonds,pair_first,pair_second):
+        # in seqm, only bonds with index first < second is used
+        cond = pair_first < pair_second
+        return bonds[cond]

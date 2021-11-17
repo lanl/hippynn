@@ -1,0 +1,57 @@
+"""
+Layers for simple operations
+"""
+import torch
+
+
+class LambdaModule(torch.nn.Module):
+    def __init__(self, fn):
+        super().__init__()
+        self.fn = fn
+
+    def extra_repr(self):
+        return self.fn.__name__
+
+    def forward(self, *args, **kwargs):
+        return self.fn(*args, **kwargs)
+
+
+class ListMod(torch.nn.Module):
+    def forward(self, *features):
+        return [x.to(torch.get_default_dtype()) for x in features]
+
+
+class AtLeast2D(torch.nn.Module):
+    def forward(self, item):
+        if item.ndimension() == 1:
+            item = item.unsqueeze(1)
+        return item
+
+
+class ValueMod(torch.nn.Module):
+    def __init__(self, value):
+        super().__init__()
+        if not isinstance(value,torch.Tensor):
+            value = torch.tensor(value, dtype=torch.get_default_dtype())
+
+        self.register_buffer("value", value)
+
+    def extra_repr(self):
+        return str(self.value.data)
+
+    def forward(self):
+        return self.value
+
+
+class Idx(torch.nn.Module):
+    def __init__(self, index, repr_info=None):
+        super().__init__()
+        self.index = index
+        self.repr_info = repr_info
+
+    def extra_repr(self):
+        if self.repr_info is None: return ''
+        return '{parent_name}.{index}'.format(**self.repr_info)
+
+    def forward(self, bundled_inputs):
+        return bundled_inputs[self.index]

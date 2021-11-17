@@ -1,0 +1,294 @@
+"""
+Nodes for finding and manipulating pairs and distances.
+"""
+from .base import AutoNoKw, AutoKw, ExpandParents, SingleNode, MultiNode, find_unique_relative, _BaseNode
+from .indexers import PaddingIndexer, acquire_encoding_padding, OneHotEncoder
+from .tags import Encoder, PairIndexer, AtomIndexer, PairCache
+from .inputs import PositionsNode, CellNode, SpeciesNode
+from ..indextypes import IdxType
+from ...layers import pairs as pairs_modules
+
+
+class OpenPairIndexer(ExpandParents,PairIndexer, MultiNode):
+    _input_names = "coordinates", "nonblank", "real_atoms", "inv_real_atoms"
+    _auto_module_class = pairs_modules.OpenPairIndexer
+
+    @_parent_expander.match(PositionsNode,SpeciesNode)
+    def expand0(self,pos,spec,*,purpose,**kwargs):
+        enc = find_unique_relative(spec, Encoder,why_desc=purpose)
+        padidx = find_unique_relative(spec, PaddingIndexer,why_desc=purpose)
+        return pos,enc,padidx
+
+    @_parent_expander.match(PositionsNode,Encoder,PaddingIndexer)
+    def expand0(self,pos,encode,indexer,**kwargs):
+        return pos, encode.nonblank, indexer.real_atoms, indexer.inv_real_atoms
+
+    _parent_expander.assertlen(4)
+    _parent_expander.get_main_outputs()
+    _parent_expander.require_idx_states(IdxType.MolAtom,None,None,None)
+
+
+    def __init__(self,name,parents,dist_hard_max,module='auto',**kwargs):
+        self.dist_hard_max = dist_hard_max
+        parents = self.expand_parents(parents)
+        super().__init__(name,parents,module=module,**kwargs)
+    def auto_module(self):
+        return self._auto_module_class(self.dist_hard_max)
+
+class PeriodicPairOutputs():
+    _output_names = "pair_dist", "pair_first", "pair_second", "pair_coord", "cell_offsets","offset_index"
+    _output_index_states = (IdxType.Pair,) * len(_output_names)
+
+class PeriodicPairIndexer(ExpandParents,AutoKw,PeriodicPairOutputs,PairIndexer,MultiNode):
+    _input_names = "coordinates", "nonblank", "real_atoms", "inv_real_atoms","cell"
+    _auto_module_class = pairs_modules.PeriodicPairIndexer
+
+    @_parent_expander.match(PositionsNode,SpeciesNode,CellNode)
+    def expand0(self,pos,spec,cell,*,purpose,**kwargs):
+        enc,padidx = acquire_encoding_padding(spec, species_set=None)
+        return pos,enc,padidx,cell
+
+    @_parent_expander.match(PositionsNode,Encoder,PaddingIndexer,CellNode)
+    def expand1(self,pos,encode,indexer,cell,**kwargs):
+        return pos, encode.nonblank, indexer.real_atoms, indexer.inv_real_atoms,cell
+
+    _parent_expander.assertlen(5)
+    _parent_expander.get_main_outputs()
+
+    def __init__(self, name, parents, dist_hard_max, module='auto', module_kwargs=None, **kwargs):
+        if module_kwargs is None:
+            module_kwargs ={}
+        self.module_kwargs={'hard_dist_cutoff':dist_hard_max,**module_kwargs}
+        self.dist_hard_max = self.module_kwargs['hard_dist_cutoff']
+
+        parents = self.expand_parents(parents)
+        super().__init__(name, parents, module=module, **kwargs)
+
+
+class ExternalNeighborIndexer(ExpandParents, PairIndexer, AutoKw, MultiNode):
+    _input_names = "coordinates", "real_atoms", "shifts", "cell", "ext_pair_first", "ext_pair_second"
+    _auto_module_class = pairs_modules.ExternalNeighbors
+
+    _parent_expander.get_main_outputs()
+    _parent_expander.assertlen(len(_input_names))
+    _parent_expander.require_idx_states(IdxType.MolAtom, IdxType.MolAtom, None, None, None, None)
+
+    def __init__(self, name, parents, hard_dist_cutoff, module='auto', **kwargs):
+        self.module_kwargs = {"hard_dist_cutoff": hard_dist_cutoff}
+        super().__init__(name, parents, module=module, **kwargs)
+
+
+
+# Pair reindexer to re-use existing pairs
+class PairReIndexer(ExpandParents, AutoNoKw, SingleNode):
+    """
+    For re-using index information to convert
+    from IdxType.MolAtomAtom -> IdxType.Pairs
+    """
+    _input_names = "pair_features", "molecule_index", "atom_index", "pair_first", "pair_second"
+    _auto_module_class = pairs_modules.PairReIndexer
+    _index_state = IdxType.Pair
+
+    @_parent_expander.match(_BaseNode)
+    def expand0(self,pair_features):
+        pad_idx = find_unique_relative(pair_features,PaddingIndexer)
+        pair_idx = find_unique_relative(pair_features, PairIndexer)
+        return pair_features,pad_idx,pair_idx
+
+    @_parent_expander.match(_BaseNode, PaddingIndexer, PairIndexer)
+    def expand1(self,pair_features,pad_idx,pair_idx):
+        return pair_features.main_output,pad_idx.molecule_index,pad_idx.atom_index,pair_idx.pair_first,pair_idx.pair_second
+
+    _parent_expander.assertlen(5)
+    _parent_expander.get_main_outputs()
+
+    def __init__(self,name,parents,module='auto',**kwargs):
+        super().__init__(name,parents,module=module,**kwargs)
+
+#Pair deindexer to convert pair features back to padded form
+
+class PairDeIndexer(ExpandParents, AutoNoKw, SingleNode):
+    """
+    For converting from IdxType.Pairs to IdxType.MolAtomAtom
+    (Padded form)
+    """
+    _input_names = "pair_features", "molecule_index", "atom_index","n_molecules","n_atoms_max" "pair_first", "pair_second"
+    _auto_module_class = pairs_modules.PairDeIndexer
+    _index_state = IdxType.MolAtomAtom
+
+    @_parent_expander.match(_BaseNode)
+    def expand0(self, pair_features):
+        pad_idx = find_unique_relative(pair_features, PaddingIndexer)
+        pair_idx = find_unique_relative(pair_features, PairIndexer)
+        return pair_features, pad_idx, pair_idx
+
+    @_parent_expander.match(_BaseNode, PaddingIndexer, PairIndexer)
+    def expand1(self, pair_features, pad_idx, pair_idx):
+        return pair_features.main_output, pad_idx.molecule_index, pad_idx.atom_index,\
+               pad_idx.n_molecules, pad_idx.n_atoms_max, pair_idx.pair_first, pair_idx.pair_second
+
+    def __init__(self, name, parents, module='auto', **kwargs):
+        super().__init__(name, parents, module=module, **kwargs)
+
+
+class PairCacher(ExpandParents, AutoKw,PairCache, SingleNode):
+    _input_names = "pair_first", "pair_second", "cell_offsets", "offset_index",\
+                   "real_atoms", "mol_index", "n_atoms_max", "n_molecules"
+    _auto_module_class = pairs_modules.PairCacher
+    _index_state = IdxType.NotFound
+
+    @_parent_expander.match(PairIndexer)
+    def expand0(self, pair_indexer, *args, purpose, **kwargs):
+        atomidx = find_unique_relative(pair_indexer, AtomIndexer)
+        if 'n_images' not in self.module_kwargs:
+            self.module_kwargs['n_images'] = pair_indexer.torch_module.n_images
+        return pair_indexer, atomidx
+
+    @_parent_expander.match(PairIndexer, AtomIndexer)
+    def expand1(self, pair_indexer, atomidx, *args, purpose, **kwargs):
+        mi = atomidx.mol_index
+        nam = atomidx.n_atoms_max
+        n_molecules = atomidx.n_molecules
+        ra = atomidx.real_atoms
+        pf = pair_indexer.pair_first
+        ps = pair_indexer.pair_second
+        po = pair_indexer.cell_offsets
+        poi = pair_indexer.offset_index
+        return pf, ps, po,poi, ra, mi, n_molecules, nam
+
+    _parent_expander.assertlen(8)
+    _parent_expander.require_idx_states(IdxType.Pair,IdxType.Pair,None,None,None,None,None,None)
+
+    def __init__(self, name, parents, module='auto',module_kwargs=None, **kwargs):
+        self.module_kwargs = module_kwargs or {}
+        parents = self.expand_parents(parents)
+        super().__init__(name, parents, module=module, **kwargs)
+
+
+class PairUncacher(ExpandParents, AutoNoKw, PairIndexer, MultiNode):
+    _input_names = "sparsepairs", "coordinates", "cells","real_atoms", "inv_real_atoms", "n_atoms_max", "n_molecules"
+    _output_names = "pair_dist", "pair_first", "pair_second", "pair_coord", "cell_offsets", "offset_index"
+    _output_index_states = (IdxType.Pair,) * len(_output_names)
+    _auto_module_class = pairs_modules.PairUncacher
+    _index_state = IdxType.NotFound
+
+    @_parent_expander.match(PairCache)
+    def expand0(self, sparse, *args, purpose, **kwargs):
+        pos = find_unique_relative(sparse, PositionsNode)
+        cell = find_unique_relative(sparse, CellNode)
+        atomidx = find_unique_relative(sparse, AtomIndexer)
+        return sparse, pos, cell, atomidx
+
+    @_parent_expander.match(PairCache, PositionsNode, CellNode, AtomIndexer)
+    def expand1(self, sp, r, c, atomidx, *args, purpose, **kwargs):
+        ira = atomidx.inv_real_atoms
+        nam = atomidx.n_atoms_max
+        n_molecules = atomidx.n_molecules
+        ra = atomidx.real_atoms
+        return sp, r, c, ra, ira, nam, n_molecules
+
+    _parent_expander.assertlen(7)
+
+    def __init__(self, name, parents, module='auto',module_kwargs=None,**kwargs):
+        parents = self.expand_parents(parents)
+        super().__init__(name, parents, module=module, **kwargs)
+
+
+class RDFBins(ExpandParents,AutoKw,SingleNode):
+    _input_names = "pair_dists","pair_first","pair_second","one_hot","n_molecules"
+    _index_state = None
+    _auto_module_class = pairs_modules.RDFBins
+
+    @_parent_expander.match(PositionsNode, SpeciesNode, CellNode)
+    def expand0(self, pos, spec, cell, *, purpose, dist_hard_max=None,**kwargs):
+        """
+        Build a default Periodic Pair indexer.
+        """
+        pairs = PeriodicPairIndexer("Period Pairs",(pos,spec,cell),dist_hard_max=dist_hard_max)
+        return pairs
+
+    @_parent_expander.match(PositionsNode, SpeciesNode)
+    def expand1(self, pos, spec, *, purpose, dist_hard_max=None, **kwargs):
+        """
+        Builds an open pair indexer.
+        """
+        pairs = OpenPairIndexer("Period Pairs", (pos, spec), dist_hard_max=dist_hard_max)
+        return pairs
+
+    @_parent_expander.match(PairIndexer)
+    def expand2(self, pairs, *, purpose, **kwargs):
+        """
+        Get the encoding and padding associated with a pair indexer.
+        """
+        enc = find_unique_relative(pairs,OneHotEncoder)
+        pad = find_unique_relative(pairs,PaddingIndexer)
+        return pairs, enc,pad
+
+    @_parent_expander.match(PairIndexer,OneHotEncoder,PaddingIndexer)
+    def expand3(self,pairs,one_hot,pad,*,purpose,**kwargs):
+        """
+        Expanded the needed children of pairs, encoder, and padding indexer.
+        """
+        self.module_kwargs['species_set'] = one_hot.species_set
+        return pairs.pair_dist,pairs.pair_first,pairs.pair_second,one_hot.encoding,pad.n_molecules
+
+    _parent_expander.require_idx_states(IdxType.Pair,IdxType.Pair,IdxType.Pair,IdxType.Atoms,None)
+    _parent_expander.assertlen(5)
+
+
+    def __init__(self,name,parents,module='auto',bins=None,module_kwargs=None,**kwargs):
+        if module_kwargs is None:
+            module_kwargs = {}
+        self.module_kwargs = {'bins':bins,**module_kwargs}
+        parents = self.expand_parents(parents,dist_hard_max=max(bins))
+        super().__init__(name,parents,module=module,**kwargs)
+
+
+class _DispatchNeighbors(ExpandParents, PeriodicPairOutputs, PairIndexer, MultiNode):
+    """
+    Superclass for nodes that compute neighbors for systems one at a time.
+    These should be capable of searching all feasible neighbors (no limit on number of images)
+    """
+    _input_names = "coordinates", "nonblank", "real_atoms", "inv_real_atoms" ,"cell" ,"mol_index" ,"n_molecules" ,"n_atoms_max"
+    # Needs auto_module_class or explicit module
+
+    @_parent_expander.match(PositionsNode,SpeciesNode ,CellNode)
+    def expand0(self ,pos ,spec ,cell ,**kwargs):
+        """
+        Acquire padding and encoding.
+        """
+        enc ,padidx = acquire_encoding_padding(spec, species_set=None)
+        return pos ,enc ,padidx ,cell
+
+    @_parent_expander.match(PositionsNode ,Encoder ,PaddingIndexer ,CellNode)
+    def expand1(self ,pos ,encode ,indexer ,cell ,**kwargs):
+        """
+        Expand needed child nodes of encoder and padding indexer.
+        """
+
+        return pos, encode.nonblank, indexer.real_atoms, indexer.inv_real_atoms, cell,\
+               indexer.mol_index, indexer.n_molecules, indexer.n_atoms_max
+
+    _parent_expander.assertlen(8)
+    _parent_expander.get_main_outputs()
+    _parent_expander.require_idx_states(IdxType.MolAtom,None,None,None,
+                                        None,None,None,None)
+
+
+    def __init__(self ,name, parents, dist_hard_max, module='auto' ,**kwargs):
+        self.dist_hard_max = dist_hard_max
+        parents = self.expand_parents(parents)
+        super().__init__(name ,parents ,module=module ,**kwargs)
+    def auto_module(self):
+        return self._auto_module_class(self.dist_hard_max)
+
+class NumpyDynamicPairs(_DispatchNeighbors):
+    _auto_module_class = pairs_modules.NPNeighbors
+
+class DynamicPeriodicPairs(_DispatchNeighbors):
+    """
+    Node for finding pairs in arbitrary periodic boundary conditions.
+    Note: This will often be slower than PeriodicPairIndexer, but more general.
+    If the speed is a concern, consider precomputing pairs with experiment.assembly.precompute_pairs
+    """
+    _auto_module_class = pairs_modules.TorchNeighbors

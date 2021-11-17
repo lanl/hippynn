@@ -1,0 +1,302 @@
+"""
+Graph Operations ("gops") that process or transform a set of nodes.
+"""
+import copy
+
+from .nodes.base import InputNode, MultiNode
+from .nodes.base.algebra import ValueNode
+from .nodes.base.node_functions import NodeNotFound, NodeOperationError
+from .indextypes import soft_index_type_coercion
+from . import get_connected_nodes, find_unique_relative
+
+
+def get_subgraph(required_nodes):
+    """
+    Get the subgraph associated with some target (required) nodes.
+
+    :param required_nodes: the nodes to compute
+
+    :return: a list of nodes involved in the computation of the required nodes.
+    """
+
+    required_nodes = list(set(required_nodes))
+    subgraph_nodes = required_nodes + [p for node in required_nodes for p in node.get_all_parents()]
+
+    subgraph_nodes = subgraph_nodes + [c for mn in subgraph_nodes if isinstance(mn,MultiNode) for c in mn.children]
+    # ^-- a note on this:
+    # Children are included because bad things happen if a multinode is left without any of its children;
+    # The API using dot syntax will break.
+    # Adding these to a GraphModule is not expensive - it adds a bit of unwrapping time.
+
+    return list(set(subgraph_nodes))
+
+
+def compute_evaluation_order(all_nodes):
+    """
+    Computes the evaluation order for forward computation.
+
+    :param all_nodes: The nodes to compute
+
+    :return:  outputs_list, inputs_list
+        Outputs list is the node to evaluate next, which is fed the inputs in the
+        corresponding entry of inputs_list
+
+    """
+
+    # The strategy here is to emulate trying everything, and record an order that works.
+    # It's computationally inefficient, but it's very easy to implement.
+    # The strategy is greedy and brute-force --  it won't scale to large numbers of nodes."""
+
+    evaluation_inputs_list = []
+    evaluation_outputs_list = []
+    unsatisfied_nodes = all_nodes.copy()
+    satisfied_nodes = set()
+    n = -1
+    while len(unsatisfied_nodes) > 0:
+        n += 1
+
+        # Consider each node we haven't found yet computable
+        for considered_node in unsatisfied_nodes.copy():
+            parents = considered_node.parents
+            uncomputed_parents = [x for x in parents if x not in satisfied_nodes]
+
+            # If that node has zero uncomputed parents, we can add it to the evaluation order.
+            if len(uncomputed_parents) == 0:
+                unsatisfied_nodes.remove(considered_node)
+                satisfied_nodes.add(considered_node)
+                # Input nodes need not be considered; their values are given to `forward()`
+                if not isinstance(considered_node, InputNode):
+                   evaluation_inputs_list.append(parents)
+                   evaluation_outputs_list.append(considered_node)
+                break  # This break is necessary to make the `else` clause work;
+                # if we find a node, we break and the `else` statement won't be hit.
+        else:
+            # For-else structure will land here if no satisfiable nodes are found during the iteration.
+            # If we made it through all the unsatisfied nodes, something must be wrong.
+            raise ValueError("Graph inputs do not seem to specify outputs! Iteration: {}".format(n))
+
+    check_evaluation_order(evaluation_outputs_list, evaluation_inputs_list)
+    return evaluation_outputs_list, evaluation_inputs_list
+
+
+def check_evaluation_order(evaluation_outputs_list,evaluation_inputs_list):
+    """
+    Validate an evaluation order.
+
+    :param evaluation_outputs_list:
+    :param evaluation_inputs_list:
+    :return:
+    """
+    pseudo_evaluated = list()
+    for out_node, inputs_for_node in zip(evaluation_outputs_list, evaluation_inputs_list):
+        for in_node in inputs_for_node:
+            if in_node not in pseudo_evaluated:
+                if not isinstance(in_node, InputNode):
+                    raise AssertionError("Nodes are not ordered correctly.")
+                else:
+                    pseudo_evaluated.append(in_node)
+        pseudo_evaluated.append(out_node)
+
+
+def copy_subgraph(required_nodes, assume_inputed, tag=None):
+    """
+    Copy a subgraph for the required nodes.
+    Doesn't copy the modules.
+    Returns copies of the specified nodes, linked implicitly to copies of their parents.
+
+    If assume_inputted is not empty, this will result in partially disconnected nodes.
+    As such, we recommend running `check_link_consistency` after
+    you have finished your graph-level operations.
+
+    :param required_nodes: output nodes of the computation
+    :param assume_inputed: nodes whose parents we will not include in the copy (these will be left dangling)
+    :param tag: a string to preprend to the resulting node's names.
+    :return: new_required, new_subgraph
+        ``new_required``: a list containing the new copies of ``required_nodes`` in the new subgraph.
+
+        ``new_subgraph``: a list containing new copies of all nodes in the subgraph.
+    """
+    subgraph_nodes = get_subgraph(required_nodes)
+
+    # Maps old nodes to new nodes.
+    node_mapping = {n:copy.copy(n) for n in subgraph_nodes} #Shallow copy is still linked to the same torch modules
+    if tag:
+        for n in node_mapping.values():
+            n.name="({}){}".format(tag,n.name)
+
+    # Set the parents and children of the new nodes to point to the new copies.
+    # Children not used in the subgraph are dropped
+    for n_old,n_new in node_mapping.items():
+        n_new.parents = tuple(node_mapping[p] for p in n_old.parents)
+        n_new.children = tuple(node_mapping[c] for c in n_old.children if c in node_mapping)
+        # print()
+        # print("Old node: ",n_old)
+        # print("\t parents:",n_old.parents)
+        # print("\t children:",n_old.children)
+        # print("New node:",n_new)
+        # print("\t parents:",n_new.parents)
+        # print("\t children:",n_new.children)
+
+    new_subgraph = [node_mapping[n] for n in subgraph_nodes]
+    new_required = [node_mapping[r] for r in required_nodes]
+
+    ### Checks that the operation correctly worked.
+
+    # Graph is complete
+    assert all(x in new_subgraph for x in get_connected_nodes(new_subgraph))
+
+    # Nothing from the old graph is in the new graph
+    assert all(x not in new_subgraph for x in get_connected_nodes(required_nodes))
+    # None of the parents of cut-off nodes
+
+    # For each parent p of the assumed inputted:
+    # If p not a a parent of an unassumed node, then p should not be in the graph.
+    assert all(p not in new_subgraph for ai in assume_inputed for p in ai.parents
+               if all(p not in n.parents for n in new_subgraph if n not in assume_inputed))
+
+    # print(get_connected_nodes(new_required)) # Prior debug... change to logging?
+    return new_required, new_subgraph
+
+
+class GraphInconsistency(NodeOperationError):
+    pass
+
+
+def check_link_consistency(node_set):
+    """
+    Make sure that back-links in the graph are correct.
+    Raises GraphInconsistency if the graph is not consistent.
+    All connected nodes to the node set are analyzed.
+    The links are consistent if each pair of child->parent has
+    a corresponding link parent<-child.
+
+    :param node_set: iterable of nodes to check
+
+    :raises GraphInconsistency: if the graph is not consistent.
+
+    :return: True
+    """
+    node_set = set(node_set)
+    node_set = get_connected_nodes(node_set)
+    forward_links = set((parent,child) for parent in node_set for child in parent.children)
+    back_links = set((parent,child) for child in node_set for parent in child.parents)
+
+    if forward_links == back_links:
+        return True
+
+    broken_forward = forward_links-back_links
+    broken_back = back_links-forward_links
+    raise GraphInconsistency("Graph is inconsistent!\n"
+                             f"Broken forward links:{broken_forward}"
+                             f"Broke back links:{broken_back}")
+
+
+def replace_node(old_node, new_node, disconnect_old=False):
+    """
+    :param old_node: Node to replace
+    :param new_node: Node to insert
+    :param disconnect_old: If True, remove the old node connections from the graph.
+
+    Replaces the children of old node with new node. Effectively,
+    this just means going to the children and swapping out their parents to point to
+    the new node. Ignores the children of old node that are parents of the new node
+    in order to prevent cycles in the graph.
+
+    If disconnect_old, remove references to the old node -- it will become unusable.
+
+    .. Warning::
+       This function changes the graph structure in-place.
+       As such, if this function raises an error, it may result in a corrupted graph state.
+
+    .. Warning::
+       This function will try to coerce index states where possible. If the index types
+       of the nodes are not listed, the index state will not be modified. If they are incompatible,
+       this means that the graph will not function correctly.
+
+    :return: None
+    """
+
+    new_node_requires = set(new_node.get_all_parents())
+
+    if disconnect_old:
+        if old_node in new_node_requires:
+            raise NodeOperationError("Cannot replace this node and remove the old one, because the"
+                                     f"new node {new_node} depends on the old node {old_node}.")
+
+    if isinstance(old_node, MultiNode):
+        if not isinstance(new_node, MultiNode):
+            raise TypeError("MultiNodes cannot be replaced with single nodes.")
+        # Multi-nodes should always keep their children. To replace a multinode with
+        # another one, we attempt to match their children with each other and perform
+        # the replacement operation on the children.
+
+        for c, cprime in _determine_multinode_child_match(old_node, new_node).items():
+            replace_node(c, cprime, disconnect_old=False)
+
+        if disconnect_old:
+            old_node.disconnect()
+
+    else:
+        # If new node is a multinode, this will ensure we swap the main output in
+        new_node = new_node.main_output
+        # Convert index state if possible.
+        new_node = soft_index_type_coercion(new_node, old_node._index_state)
+
+        # Find children that need replacing
+        swap_children = set(old_node.children) - set(new_node_requires)
+        # Actually replace them
+        for c in swap_children:
+            c.swap_parent(old_node, new_node)
+
+        if disconnect_old:
+            old_node.disconnect()
+
+
+def _determine_multinode_child_match(old_node: MultiNode, new_node: MultiNode):
+    """
+    Try to determine match between multinode children for `replace_node` on multinodes.
+    :param old_node:
+    :param new_node:
+    :return:
+    """
+
+    try:
+        # Try name-based matching first.
+        matches = {getattr(old_node, name):getattr(new_node, name) for name in new_node._output_names}
+    except AttributeError:
+        # If name-based matching does not work, just match by order.
+        matches = {co:cn for co,cn in zip(old_node.children,new_node.children)}
+        # Raise an error if this match would leave a residual child used on the old node.
+
+    # Raise error if there are children of the old node which do not match,
+    # but are still needed for a computation.
+    if any(node not in matches and len(node.children) > 0 for node in old_node.children):
+        raise NodeOperationError(f"A match cannot be made between {old_node} and {new_node} children.")
+
+    return matches
+
+
+def replace_node_with_constant(node,value,name=None):
+    vnode = ValueNode(value)
+    vnode.name = name
+    replace_node(node, vnode)
+
+
+def search_by_name(nodes,name_or_dbname):
+    """
+    Look for a unique related node with a given db_name or name.
+    The db_name will be given higher precedence.
+
+    :param nodes: starting point for search 
+    :param name_or_dbname: name or dbname for node search
+    :return: node that matches criterion
+
+    Raises NodeAmbiguityError if more than one node found
+    Raises NotNotFoundError if no nodes found
+
+    """
+    try:
+        return find_unique_relative(nodes,lambda n: n.db_name == name_or_dbname)
+    except NodeNotFound:
+        return find_unique_relative(nodes,lambda n: n.name == name_or_dbname)
+
