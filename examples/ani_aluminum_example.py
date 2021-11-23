@@ -22,10 +22,12 @@ with custom kernels -off-.
 """
 
 import sys
-sys.path.append('../../datasets/ani-al/readers/lib/')
+
+sys.path.append("../../datasets/ani-al/readers/lib/")
 import pyanitools  # Check if pyanitools is found early
 
 import torch
+
 torch.set_default_dtype(torch.float32)
 
 import hippynn
@@ -46,19 +48,19 @@ else:
     # Approximate timing 10s/epoch
 
 with hippynn.tools.active_directory(netname):
-    with hippynn.tools.log_terminal("training_log.txt", 'wt'):
+    with hippynn.tools.log_terminal("training_log.txt", "wt"):
 
         # Hyperparameters for the network
         network_params = {
             "possible_species": [0, 13],
-            'n_features': 10,
+            "n_features": 10,
             "n_sensitivities": 20,
             "dist_soft_min": 1.25,
             "dist_soft_max": 7,
             "dist_hard_max": 7.5,
             "n_interaction_layers": 1,
             "n_atom_layers": 3,
-            "sensitivity_type": 'inverse',
+            "sensitivity_type": "inverse",
             "resnet": True,
         }
         print("Network hyperparameters:")
@@ -70,13 +72,13 @@ with hippynn.tools.active_directory(netname):
         positions = inputs.PositionsNode(db_name="coordinates")
         cell = inputs.CellNode(db_name="cell")
 
-        network = networks.Hipnn("HIPNN",(species,positions,cell),module_kwargs=network_params,periodic=True)
+        network = networks.Hipnn("HIPNN", (species, positions, cell), module_kwargs=network_params, periodic=True)
 
-        henergy = targets.HEnergyNode("HEnergy",network)
+        henergy = targets.HEnergyNode("HEnergy", network)
         sys_energy = henergy.mol_energy
-        sys_energy.db_name = 'energy'
+        sys_energy.db_name = "energy"
         hierarchicality = henergy.hierarchicality
-        hierarchicality = physics.PerAtom('RperAtom', hierarchicality)
+        hierarchicality = physics.PerAtom("RperAtom", hierarchicality)
         force = physics.GradientNode("force", (sys_energy, positions), sign=1)
         force.db_name = "force"
 
@@ -100,17 +102,17 @@ with hippynn.tools.active_directory(netname):
         train_loss = loss_error + loss_regularization
 
         validation_losses = {
-            "TpA-RMSE"    : rmse_energy,
-            "TpA-MAE"     : mae_energy,
-            "TpA-RSQ"     : rsq_energy,
-            "ForceRMSE"   : force_rmse,
-            "ForceMAE"    : force_mae,
-            "ForceRsq"    : force_rsq,
-            "T-Hier"      : rbar,
-            "L2Reg"       : l2_reg,
-            "Loss-Err"    : loss_error,
-            "Loss-Reg"    : loss_regularization,
-            "Loss"        : train_loss,
+            "TpA-RMSE": rmse_energy,
+            "TpA-MAE": mae_energy,
+            "TpA-RSQ": rsq_energy,
+            "ForceRMSE": force_rmse,
+            "ForceMAE": force_mae,
+            "ForceRsq": force_rsq,
+            "T-Hier": rbar,
+            "L2Reg": l2_reg,
+            "Loss-Err": loss_error,
+            "Loss-Reg": loss_regularization,
+            "Loss": train_loss,
         }
         early_stopping_key = "Loss-Err"
 
@@ -119,26 +121,25 @@ with hippynn.tools.active_directory(netname):
         plot_maker = plotting.PlotMaker(
             plotting.Hist2D.compare(sys_energy, saved=True),
             plotting.Hist2D.compare(en_peratom, saved=True),
-            plotting.Hist2D.compare(force,saved=True),
+            plotting.Hist2D.compare(force, saved=True),
             plotting.SensitivityPlot(network.torch_module.sensitivity_layers[0], saved="sense_0.pdf"),
             plot_every=plot_every,
         )
 
         from hippynn.experiment.assembly import assemble_for_training
 
-        training_modules, db_info = \
-            assemble_for_training(train_loss, validation_losses, plot_maker=plot_maker)
+        training_modules, db_info = assemble_for_training(train_loss, validation_losses, plot_maker=plot_maker)
 
         model, loss_module, model_evaluator = training_modules
-
 
         #### Pre-processing of numpy arrays
         # Should be done with care, e.g. to avoid unit mismatches
 
         from hippynn.databases.h5_pyanitools import PyAniDirectoryDB
+
         torch.set_default_dtype(torch.float64)  # Temporary for data pre-processing
         database = PyAniDirectoryDB(
-            directory='../../../datasets/ani-al/data/',
+            directory="../../../datasets/ani-al/data/",
             seed=1001,  # Random seed for splitting data
             quiet=False,
             allow_unfound=True,  # allows post-loading preprocessing of arrays
@@ -147,18 +148,20 @@ with hippynn.tools.active_directory(netname):
         )
 
         import ase
+
         energy_shift = 72  # eV
         arrays = database.arr_dict
         import numpy as np
-        n_atoms = arrays['species'].astype(bool).astype(int).sum(axis=1)
-        arrays['force'] = arrays['force'] * (ase.units.Hartree/ase.units.eV)
-        arrays['energy'] = arrays['energy'] * (ase.units.Hartree/ase.units.eV)
-        arrays['energy'] = arrays['energy'] + energy_shift * n_atoms
-        arrays["energyperatom"] = arrays["energy"]/n_atoms
+
+        n_atoms = arrays["species"].astype(bool).astype(int).sum(axis=1)
+        arrays["force"] = arrays["force"] * (ase.units.Hartree / ase.units.eV)
+        arrays["energy"] = arrays["energy"] * (ase.units.Hartree / ase.units.eV)
+        arrays["energy"] = arrays["energy"] + energy_shift * n_atoms
+        arrays["energyperatom"] = arrays["energy"] / n_atoms
 
         # Adds the inputs and targets db_names from the model as things to load
-        database.inputs = db_info['inputs']
-        database.targets = db_info['targets']
+        database.inputs = db_info["inputs"]
+        database.targets = db_info["targets"]
 
         # Set dtypes back
         torch.set_default_dtype(torch.float32)
@@ -166,7 +169,7 @@ with hippynn.tools.active_directory(netname):
             if v.dtype == np.float64:
                 arrays[k] = v.astype(np.float32)
 
-        database.make_trainvalidtest_split(test_size=test_size,valid_size=valid_size)
+        database.make_trainvalidtest_split(test_size=test_size, valid_size=valid_size)
 
         # For datasets that fit in device memory, we can store
         # it on the device to avoid worry about the time to move data
@@ -177,6 +180,7 @@ with hippynn.tools.active_directory(netname):
         # Now that we have a database and a model, we can
         # Fit the non-interacting energies by examining the database.
         from hippynn.pretraining import set_e0_values
+
         set_e0_values(henergy, database, peratom=True, energy_name="energyperatom", decay_factor=1e-2)
 
         from hippynn.experiment.controllers import RaiseBatchSizeOnPlateau, PatienceController
@@ -188,7 +192,7 @@ with hippynn.tools.active_directory(netname):
             max_batch_size=64,
             patience=25,
             factor=0.5,
-            )
+        )
 
         controller = PatienceController(
             optimizer=optimizer,
@@ -198,7 +202,7 @@ with hippynn.tools.active_directory(netname):
             max_epochs=500,
             termination_patience=50,
             stopping_key=early_stopping_key,
-            )
+        )
 
         from hippynn.experiment import SetupParams, setup_and_train
 
@@ -213,4 +217,4 @@ with hippynn.tools.active_directory(netname):
             training_modules=training_modules,
             database=database,
             setup_params=experiment_params,
-            )
+        )

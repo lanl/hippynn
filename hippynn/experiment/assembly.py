@@ -17,6 +17,7 @@ TrainingModules = collections.namedtuple("TrainingModules", ("model", "loss", "e
 :param evaluator: assembled evaluator for validation losses
 """
 
+
 def gemerate_database_info(inputs, targets, allow_unfound=False):
     """
     Construct db info from input nodes and target nodes.
@@ -30,8 +31,8 @@ def gemerate_database_info(inputs, targets, allow_unfound=False):
     :return:
     """
     db_info = {
-        'inputs': [i.db_name for i in inputs],
-        'targets': [i.db_name for i in targets],
+        "inputs": [i.db_name for i in inputs],
+        "targets": [i.db_name for i in targets],
     }
 
     # Allows `None` to pass through.
@@ -44,8 +45,8 @@ def gemerate_database_info(inputs, targets, allow_unfound=False):
 
     # Else, we need to raise an error.
 
-    missing_inputs = [i for i, idb in zip(inputs, db_info['inputs']) if idb is None]
-    missing_targets = [i for i, idb in zip(targets, db_info['targets']) if idb is None]
+    missing_inputs = [i for i, idb in zip(inputs, db_info["inputs"]) if idb is None]
+    missing_targets = [i for i, idb in zip(targets, db_info["targets"]) if idb is None]
 
     msg = ""
     if missing_inputs:
@@ -78,9 +79,10 @@ def determine_out_in_targ(*nodes_required_for_loss):
 
     required_inputs = {x for x in nodes_required_for_loss if isinstance(x, InputNode)}
 
-    assert all(isinstance(x, LossInputNode) for x in required_inputs), \
-        "Losses should not contain plain InputNode objects; only LossPredNode and LossTrueNode objects" \
+    assert all(isinstance(x, LossInputNode) for x in required_inputs), (
+        "Losses should not contain plain InputNode objects; only LossPredNode and LossTrueNode objects"
         "Bad nodes: {} ".format([x for x in required_inputs if not isinstance(x, LossInputNode)])
+    )
 
     outputs = [x.origin_node for x in required_inputs if isinstance(x, LossPredNode)]
     targets = [x.origin_node for x in required_inputs if isinstance(x, LossTrueNode)]
@@ -130,8 +132,9 @@ def assemble_for_training(train_loss, validation_losses, validation_names=None, 
         else:
             validation_names = [n.name for n in validation_losses]
     else:
-        assert not isinstance(validation_losses, dict), \
-            "Validation loss names cannot be supplied if validation_losses is a dictionary"
+        assert not isinstance(
+            validation_losses, dict
+        ), "Validation loss names cannot be supplied if validation_losses is a dictionary"
 
     if not all(isinstance(key, str) for key in validation_names):
         raise ValueError("Validation names must be strings.")
@@ -156,18 +159,19 @@ def assemble_for_training(train_loss, validation_losses, validation_names=None, 
 
     db_info = gemerate_database_info(inputs, targets)
 
-    evaluator = Evaluator(model, validation_lossfns, validation_names,
-                          plot_maker=plot_maker, db_info=db_info)
+    evaluator = Evaluator(model, validation_lossfns, validation_names, plot_maker=plot_maker, db_info=db_info)
 
     return TrainingModules(model, loss_assembled, evaluator), db_info
 
 
 _PAIRCACHE_DB_NAME = "AutoPrecomputedPairs"
-from ..graphs.nodes import pairs,indexers,base
-from ..graphs import Predictor, gops,inputs
+from ..graphs.nodes import pairs, indexers, base
+from ..graphs import Predictor, gops, inputs
+
 _PAIRCACHE_COMPATIBLE_COMPUTERS = {pairs.NumpyDynamicPairs, pairs.PeriodicPairIndexer, pairs.DynamicPeriodicPairs}
 
-def precompute_pairs(model, database, batch_size=10, device=None,make_dense=False,n_images=1):
+
+def precompute_pairs(model, database, batch_size=10, device=None, make_dense=False, n_images=1):
     """
 
     :param model: Assembled GraphModule involving a PairIndexer
@@ -190,10 +194,11 @@ def precompute_pairs(model, database, batch_size=10, device=None,make_dense=Fals
 
     # nodes_to_compute,all_copies = gops.copy_subgraph(model.nodes_to_compute,assume_inputed=[])
     nodes_to_compute = model.nodes_to_compute
-    pair_indexer = find_unique_relative(nodes_to_compute,
-                                        lambda node: isinstance(node,tuple(_PAIRCACHE_COMPATIBLE_COMPUTERS)))
+    pair_indexer = find_unique_relative(
+        nodes_to_compute, lambda node: isinstance(node, tuple(_PAIRCACHE_COMPATIBLE_COMPUTERS))
+    )
 
-    cacher = pairs.PairCacher('PairCacher', pair_indexer,module_kwargs=dict(n_images=n_images))
+    cacher = pairs.PairCacher("PairCacher", pair_indexer, module_kwargs=dict(n_images=n_images))
 
     input_nodes = set([x for x in cacher.get_all_parents() if isinstance(x, base.InputNode)])
     pred = Predictor(input_nodes, [cacher], model_device=device)
@@ -224,6 +229,7 @@ def precompute_pairs(model, database, batch_size=10, device=None,make_dense=Fals
     gops.replace_node(pair_indexer, uncacher, disconnect_old=True)
 
     return
+
 
 # def reassemble(training_modules):
 #     raise ValueError("Broken because of copying of loss graph for evaluator!")

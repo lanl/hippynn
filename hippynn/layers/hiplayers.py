@@ -10,60 +10,62 @@ from .. import settings
 
 
 def warn_if_under(distance, threshold):
-    if len(distance) == 0: # no pairs
+    if len(distance) == 0:  # no pairs
         return
     dmin = distance.min()
     if dmin < threshold:
         d_count = distance < threshold
         d_frac = d_count.to(distance.dtype).mean()
-        warnings.warn(f"Provided distances are underneath sensitivity range!\n"
-                      f"Minimum distance in current batch: {dmin}\n"
-                      f"Threshold distance for warning: {threshold}.\n"
-                      f"Fraction of pairs under the threshold: {d_frac}")
+        warnings.warn(
+            f"Provided distances are underneath sensitivity range!\n"
+            f"Minimum distance in current batch: {dmin}\n"
+            f"Threshold distance for warning: {threshold}.\n"
+            f"Fraction of pairs under the threshold: {d_frac}"
+        )
 
 
 class CosCutoff(torch.nn.Module):
-    def __init__(self,hard_max_dist):
+    def __init__(self, hard_max_dist):
         super().__init__()
         self.hard_max_dist = hard_max_dist
 
-    def forward(self,dist_tensor):
-        cutoff_sense = torch.cos(np.pi / 2 * dist_tensor / self.hard_max_dist )**2
+    def forward(self, dist_tensor):
+        cutoff_sense = torch.cos(np.pi / 2 * dist_tensor / self.hard_max_dist) ** 2
         cutoff_sense = cutoff_sense * (dist_tensor <= self.hard_max_dist).to(cutoff_sense.dtype)
         return cutoff_sense
 
 
 class SensitivityModule(torch.nn.Module):
-    def __init__(self,hard_max_dist,cutoff_type):
+    def __init__(self, hard_max_dist, cutoff_type):
         super().__init__()
         self.cutoff = cutoff_type(hard_max_dist)
         self.hard_max_dist = hard_max_dist
 
 
 class GaussianSensitivityModule(SensitivityModule):
-    def __init__(self, n_dist, min_dist_soft, max_dist_soft, hard_max_dist,cutoff_type=CosCutoff):
+    def __init__(self, n_dist, min_dist_soft, max_dist_soft, hard_max_dist, cutoff_type=CosCutoff):
 
-        super().__init__(hard_max_dist,cutoff_type)
-        init_mu = 1./torch.linspace(1./max_dist_soft ,1./min_dist_soft, n_dist)
+        super().__init__(hard_max_dist, cutoff_type)
+        init_mu = 1.0 / torch.linspace(1.0 / max_dist_soft, 1.0 / min_dist_soft, n_dist)
         self.mu = torch.nn.Parameter(init_mu.unsqueeze(0))
 
         self.sigma = torch.nn.Parameter(torch.Tensor(n_dist).unsqueeze(0))
-        init_sigma = min_dist_soft * 2 *n_dist  # pulled from theano code
+        init_sigma = min_dist_soft * 2 * n_dist  # pulled from theano code
         self.sigma.data.fill_(init_sigma)
 
     def forward(self, distflat):
         if settings.WARN_LOW_DISTANCES:
             with torch.no_grad():
-                mu,argmin = self.mu.min(dim=1)
-                sig = self.sigma[:,argmin]
+                mu, argmin = self.mu.min(dim=1)
+                sig = self.sigma[:, argmin]
                 # Warn if distance is less than the -inside- edge of the shortest sensitivity function
                 thresh = mu + sig
-                warn_if_under(distflat,thresh)
+                warn_if_under(distflat, thresh)
         distflat_ds = distflat.unsqueeze(1)
         mu_ds = self.mu
         sig_ds = self.sigma
 
-        nondim = (distflat_ds**-1 - mu_ds**-1 )** 2 /(sig_ds**-2)
+        nondim = (distflat_ds ** -1 - mu_ds ** -1) ** 2 / (sig_ds ** -2)
         base_sense = torch.exp(-0.5 * nondim)
 
         total_sense = base_sense * self.cutoff(distflat).unsqueeze(1)
@@ -71,10 +73,10 @@ class GaussianSensitivityModule(SensitivityModule):
 
 
 class InverseSensitivityModule(SensitivityModule):
-    def __init__(self, n_dist, min_dist_soft, max_dist_soft, hard_max_dist,cutoff_type=CosCutoff):
+    def __init__(self, n_dist, min_dist_soft, max_dist_soft, hard_max_dist, cutoff_type=CosCutoff):
 
-        super().__init__(hard_max_dist,cutoff_type)
-        init_mu = torch.Tensor(1./torch.linspace(1./max_dist_soft ,1./min_dist_soft, n_dist))
+        super().__init__(hard_max_dist, cutoff_type)
+        init_mu = torch.Tensor(1.0 / torch.linspace(1.0 / max_dist_soft, 1.0 / min_dist_soft, n_dist))
         self.mu = torch.nn.Parameter(init_mu.unsqueeze(0))
         self.sigma = torch.nn.Parameter(torch.Tensor(n_dist).unsqueeze(0))
         init_sigma = min_dist_soft * 2 * n_dist
@@ -84,14 +86,14 @@ class InverseSensitivityModule(SensitivityModule):
         if settings.WARN_LOW_DISTANCES:
             with torch.no_grad():
                 # Warn if distance is less than the -inside- edge of the shortest sensitivity function
-                mu,argmin = self.mu.min(dim=1)
-                sig = self.sigma[:,argmin]
-                thresh = (mu**-1 - sig**-1)**-1
+                mu, argmin = self.mu.min(dim=1)
+                sig = self.sigma[:, argmin]
+                thresh = (mu ** -1 - sig ** -1) ** -1
 
-                warn_if_under(distflat,thresh)
+                warn_if_under(distflat, thresh)
         distflat_ds = distflat.unsqueeze(1)
 
-        nondim = (distflat_ds**-1 - self.mu**-1 )** 2 /(self.sigma **-2)
+        nondim = (distflat_ds ** -1 - self.mu ** -1) ** 2 / (self.sigma ** -2)
         base_sense = torch.exp(-0.5 * nondim)
 
         total_sense = base_sense * self.cutoff(distflat).unsqueeze(1)
@@ -100,17 +102,26 @@ class InverseSensitivityModule(SensitivityModule):
 
 
 class SensitivityBottleneck(torch.nn.Module):
-    def __init__(self,n_dist,min_soft_dist,max_dist_soft,hard_max_dist,n_dist_bare,cutoff_type=CosCutoff,base_sense=InverseSensitivityModule):
+    def __init__(
+        self,
+        n_dist,
+        min_soft_dist,
+        max_dist_soft,
+        hard_max_dist,
+        n_dist_bare,
+        cutoff_type=CosCutoff,
+        base_sense=InverseSensitivityModule,
+    ):
         super().__init__()
         self.hard_max_dist = hard_max_dist
 
-        self.base_sense = base_sense(n_dist_bare,min_soft_dist,max_dist_soft,hard_max_dist,cutoff_type)
-        self.matching = torch.nn.Parameter(torch.Tensor(n_dist_bare,n_dist))
+        self.base_sense = base_sense(n_dist_bare, min_soft_dist, max_dist_soft, hard_max_dist, cutoff_type)
+        self.matching = torch.nn.Parameter(torch.Tensor(n_dist_bare, n_dist))
         torch.nn.init.orthogonal_(self.matching.data)
 
-    def forward(self,distflat):
+    def forward(self, distflat):
         base_sense = self.base_sense(distflat)
-        reduced_sense = torch.mm(base_sense,self.matching)
+        reduced_sense = torch.mm(base_sense, self.matching)
         return reduced_sense
 
 
@@ -118,6 +129,7 @@ class InteractLayer(torch.nn.Module):
     """
     Hipnn's interaction layer
     """
+
     def __init__(self, nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module):
         """
         Constructor
@@ -140,8 +152,7 @@ class InteractLayer(torch.nn.Module):
         self.sensitivity = sensitivity_module(n_dist, mind_soft, maxd_soft, hard_cutoff)
 
         # Interaction weights
-        self.int_weights = torch.nn.Parameter(torch.Tensor(n_dist, nf_out,
-                                                           nf_in))
+        self.int_weights = torch.nn.Parameter(torch.Tensor(n_dist, nf_out, nf_in))
         torch.nn.init.xavier_normal_(self.int_weights.data)
 
         # Self-term and bias
@@ -149,7 +160,7 @@ class InteractLayer(torch.nn.Module):
         torch.nn.init.xavier_normal_(self.selfint.weight.data)
 
     def regularization_params(self):
-        return [self.int_weights,self.selfint.weight]
+        return [self.int_weights, self.selfint.weight]
 
     def forward(self, in_features, pair_first, pair_second, dist_pairs):
         """
@@ -189,9 +200,10 @@ class InteractLayer(torch.nn.Module):
 
         return features_out_total
 
+
 class InteractLayerVec(InteractLayer):
     def __init__(self, nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module):
-        super().__init__(nf_in,nf_out,n_dist,mind_soft,maxd_soft,hard_cutoff,sensitivity_module)
+        super().__init__(nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module)
 
         self.vecscales = torch.nn.Parameter(torch.Tensor(nf_out))
         torch.nn.init.normal_(self.vecscales.data)
@@ -208,10 +220,10 @@ class InteractLayerVec(InteractLayer):
         features_out = torch.mm(env_features, weights_rs)
 
         # Vector part
-        sense_vec = sense_vals.unsqueeze(1)*(coord_pairs/dist_pairs.unsqueeze(1)).unsqueeze(2)
-        sense_vec = sense_vec.reshape(-1,self.n_dist*3)
+        sense_vec = sense_vals.unsqueeze(1) * (coord_pairs / dist_pairs.unsqueeze(1)).unsqueeze(2)
+        sense_vec = sense_vec.reshape(-1, self.n_dist * 3)
         env_features_vec = custom_kernels.envsum(sense_vec, in_features, pair_first, pair_second)
-        env_features_vec = env_features_vec.reshape(n_atoms_real*3, self.n_dist*self.nf_in)
+        env_features_vec = env_features_vec.reshape(n_atoms_real * 3, self.n_dist * self.nf_in)
         features_out_vec = torch.mm(env_features_vec, weights_rs)
         features_out_vec = (features_out_vec.reshape(n_atoms_real, 3, self.nf_out) + 1e-22).norm(dim=1)
         features_out_vec = features_out_vec * self.vecscales.unsqueeze(0)
@@ -244,36 +256,36 @@ class InteractLayerQuad(InteractLayerVec):
 
         # Vector part
         # Sensitivity
-        rhats = coord_pairs/dist_pairs.unsqueeze(1)
-        sense_vec = sense_vals.unsqueeze(1)*rhats.unsqueeze(2)
-        sense_vec = sense_vec.reshape(-1,self.n_dist*3)
+        rhats = coord_pairs / dist_pairs.unsqueeze(1)
+        sense_vec = sense_vals.unsqueeze(1) * rhats.unsqueeze(2)
+        sense_vec = sense_vec.reshape(-1, self.n_dist * 3)
         # Weights
         env_features_vec = custom_kernels.envsum(sense_vec, in_features, pair_first, pair_second)
-        env_features_vec = env_features_vec.reshape(n_atoms_real*3,self.n_dist*self.nf_in)
+        env_features_vec = env_features_vec.reshape(n_atoms_real * 3, self.n_dist * self.nf_in)
         features_out_vec = torch.mm(env_features_vec, weights_rs)
         # Norm and scale
-        features_out_vec = (features_out_vec.reshape(n_atoms_real,3,self.nf_out) + 1e-22).norm(dim=1)
+        features_out_vec = (features_out_vec.reshape(n_atoms_real, 3, self.nf_out) + 1e-22).norm(dim=1)
         features_out_vec = features_out_vec * self.vecscales.unsqueeze(0)
 
         # Quadrupole part
         # Sensitivity
-        rhatsquad = rhats.unsqueeze(1)*rhats.unsqueeze(2)
-        rhatsquad = (rhatsquad+rhatsquad.transpose(1,2))/2
-        tr = torch.diagonal(rhatsquad, dim1=1, dim2=2).sum(dim=1)/3.  # Add divide by 3 early to save flops
-        tr = tr.unsqueeze(1).unsqueeze(2)*torch.eye(3, dtype=tr.dtype, device=tr.device).unsqueeze(0)
-        rhatsquad = rhatsquad-tr
+        rhatsquad = rhats.unsqueeze(1) * rhats.unsqueeze(2)
+        rhatsquad = (rhatsquad + rhatsquad.transpose(1, 2)) / 2
+        tr = torch.diagonal(rhatsquad, dim1=1, dim2=2).sum(dim=1) / 3.0  # Add divide by 3 early to save flops
+        tr = tr.unsqueeze(1).unsqueeze(2) * torch.eye(3, dtype=tr.dtype, device=tr.device).unsqueeze(0)
+        rhatsquad = rhatsquad - tr
         rhatsqflat = rhatsquad.reshape(-1, 9)[:, [0, 1, 2, 4, 5]]  # Upper-diagonal part
-        sense_quad = sense_vals.unsqueeze(1)*rhatsqflat.unsqueeze(2)
+        sense_quad = sense_vals.unsqueeze(1) * rhatsqflat.unsqueeze(2)
         sense_quad = sense_quad.reshape(-1, self.n_dist * 5)
         # Weights
         env_features_quad = custom_kernels.envsum(sense_quad, in_features, pair_first, pair_second)
-        env_features_quad = env_features_quad.reshape(n_atoms_real*5, self.n_dist*self.nf_in)
+        env_features_quad = env_features_quad.reshape(n_atoms_real * 5, self.n_dist * self.nf_in)
         features_out_quad = torch.mm(env_features_quad, weights_rs)  ##sum v b
-        features_out_quad = (features_out_quad.reshape(n_atoms_real, 5, self.nf_out))
+        features_out_quad = features_out_quad.reshape(n_atoms_real, 5, self.nf_out)
         # Norm. (of traceless two-tensor from 5 component representation)
-        quadfirst = torch.einsum('ijk,ijk->ik',features_out_quad, features_out_quad)
+        quadfirst = torch.einsum("ijk,ijk->ik", features_out_quad, features_out_quad)
         quadsecond = features_out_quad[:, 0, :] * features_out_quad[:, 3, :]
-        features_out_quad = 2*(quadfirst + quadsecond)
+        features_out_quad = 2 * (quadfirst + quadsecond)
         features_out_quad = torch.sqrt(features_out_quad + 1e-44)
         # Scales
         features_out_quad = features_out_quad * self.quadscales.unsqueeze(0)

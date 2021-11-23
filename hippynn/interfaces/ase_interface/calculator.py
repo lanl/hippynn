@@ -7,9 +7,7 @@ import torch
 from ase.calculators import interface
 from ase.calculators.calculator import compare_atoms, PropertyNotImplementedError
 
-from hippynn.graphs import find_relatives,find_unique_relative,\
-    get_subgraph, copy_subgraph, replace_node,\
-    GraphModule
+from hippynn.graphs import find_relatives, find_unique_relative, get_subgraph, copy_subgraph, replace_node, GraphModule
 from hippynn.graphs.gops import check_link_consistency
 
 from hippynn.graphs.nodes.base.node_functions import NodeOperationError, NodeNotFound
@@ -26,8 +24,8 @@ import ase.neighborlist
 # TODO: implement neighbors using scipy.spatial.cKDTree?
 # This works for orthorhombic boxes and is much faster than ASE...
 
-def setup_ASE_graph(energy, charges=None,extra_properties=None):
 
+def setup_ASE_graph(energy, charges=None, extra_properties=None):
 
     if charges is None:
         required_nodes = [energy]
@@ -42,27 +40,27 @@ def setup_ASE_graph(energy, charges=None,extra_properties=None):
         del ename
         required_nodes = required_nodes + list(extra_properties.values())
 
-    why= "Generating ASE Calculator interface"
+    why = "Generating ASE Calculator interface"
     subgraph = get_subgraph(required_nodes)
 
     ########################################
-    #TODO: Implement Ewald, Wolf, or similar version of coulomb energy?
+    # TODO: Implement Ewald, Wolf, or similar version of coulomb energy?
     # Better: figure out how to get voltages from external code and pass back as gradients for HIPNN backwards pass.
     if any(isinstance(n, CoulombEnergyNode) for n in subgraph):
         raise NotImplementedError("No support for coulomb energies in ASE interface yet.")
     ########################################
 
-
-
     ###############################################################
     # Get a new supgraph, and find the nodes we need to construct the calculator
-    #Factory for seeking out nodes only in the subgraph and of a specific type
-    search_fn = lambda targ,sg: lambda n: n in sg and isinstance(n,targ)
+    # Factory for seeking out nodes only in the subgraph and of a specific type
+    search_fn = lambda targ, sg: lambda n: n in sg and isinstance(n, targ)
 
     try:
-        pair_indexers = find_relatives(required_nodes, search_fn(PairIndexer,subgraph),why_desc=why)
+        pair_indexers = find_relatives(required_nodes, search_fn(PairIndexer, subgraph), why_desc=why)
     except NodeOperationError as ee:
-        raise ValueError("No Pair indexers found. Why build an ASE interface with no need for neighboring atoms?") from ee
+        raise ValueError(
+            "No Pair indexers found. Why build an ASE interface with no need for neighboring atoms?"
+        ) from ee
 
     # The required nodes passed back are copies of the ones passed in.
     # We use assume_inputed to avoid grabbing pieces of the graph
@@ -71,8 +69,8 @@ def setup_ASE_graph(energy, charges=None,extra_properties=None):
     # We now need access to the copied indexers, rather than the originals
     pair_indexers = find_relatives(new_required, search_fn(PairIndexer, new_subgraph), why_desc=why)
 
-    species = find_unique_relative(new_required, search_fn(SpeciesNode, new_subgraph),why_desc=why)
-    positions = find_unique_relative(new_required,search_fn(PositionsNode, new_subgraph),why_desc=why)
+    species = find_unique_relative(new_required, search_fn(SpeciesNode, new_subgraph), why_desc=why)
+    positions = find_unique_relative(new_required, search_fn(PositionsNode, new_subgraph), why_desc=why)
 
     # TODO: is .clone necessary? Or good? Or torch.as_tensor instead?
     encoder = find_unique_relative(species, search_fn(Encoder, new_subgraph), why_desc=why)
@@ -80,7 +78,6 @@ def setup_ASE_graph(energy, charges=None,extra_properties=None):
     indexer = find_unique_relative(species, search_fn(AtomIndexer, new_subgraph), why_desc=why)
     min_radius = max(p.dist_hard_max for p in pair_indexers)
     ###############################################################
-
 
     ###############################################################
     # Set up graph to accept external pair indices and shifts
@@ -91,9 +88,10 @@ def setup_ASE_graph(energy, charges=None,extra_properties=None):
     in_pair_second = InputNode("(ASE)pair_second")
     external_pairs = ExternalNeighborIndexer(
         "(ASE)EXTERNAL_NEIGHBORS",
-        (positions,indexer.real_atoms,in_shift,in_cell,in_pair_first,in_pair_second),
-        hard_dist_cutoff=min_radius)
-    new_inputs = [species,positions,in_cell,in_pair_first,in_pair_second,in_shift]
+        (positions, indexer.real_atoms, in_shift, in_cell, in_pair_first, in_pair_second),
+        hard_dist_cutoff=min_radius,
+    )
+    new_inputs = [species, positions, in_cell, in_pair_first, in_pair_second, in_shift]
 
     # Replace the existing pair indexers with the new node that accepts external pairs of atoms:
     # (This is the primary reason we needed to copy the subgraph --
@@ -102,7 +100,6 @@ def setup_ASE_graph(energy, charges=None,extra_properties=None):
         replace_node(pi, external_pairs, disconnect_old=True)
     ###############################################################
 
-
     ###############################################################
     # Set up gradient and, if possible, dipole properties.
 
@@ -110,7 +107,7 @@ def setup_ASE_graph(energy, charges=None,extra_properties=None):
 
     cellscaleinducer = StrainInducer("(ASE)Strain_inducer", (positions, in_cell))
     strain = cellscaleinducer.strain
-    derivatives = StressForceNode('(ASE)StressForceCalculator', (energy, strain, positions,in_cell))
+    derivatives = StressForceNode("(ASE)StressForceCalculator", (energy, strain, positions, in_cell))
 
     replace_node(positions, cellscaleinducer.strained_coordinates)
     replace_node(in_cell, cellscaleinducer.strained_cell)
@@ -124,30 +121,31 @@ def setup_ASE_graph(energy, charges=None,extra_properties=None):
         charges, *new_required = new_required
         dipole_moment = DipoleNode("(ASE)DIPOLE", charges)
         implemented_nodes = *implemented_nodes, charges.main_output, dipole_moment
-        implemented_properties = implemented_properties + ["charges","dipole_moment"]
+        implemented_properties = implemented_properties + ["charges", "dipole_moment"]
 
     #### Add other properties here:
     if extra_properties is not None:
-        implemented_nodes = *implemented_nodes,*new_required
+        implemented_nodes = *implemented_nodes, *new_required
         implemented_properties = implemented_properties + extra_names
 
     ###############################################################
 
     # Finally, assemble the graph!
-    check_link_consistency((*new_inputs,*implemented_nodes))
-    mod = GraphModule(new_inputs,implemented_nodes)
+    check_link_consistency((*new_inputs, *implemented_nodes))
+    mod = GraphModule(new_inputs, implemented_nodes)
     mod.eval()
-    return min_radius, species_set,implemented_properties, mod,pbc_handler
+    return min_radius, species_set, implemented_properties, mod, pbc_handler
 
 
-class PBCHandle():
+class PBCHandle:
     def __init__(self, *nodes):
         self.modules = [n.torch_module for n in nodes]
         self._last = None
-    def set(self,value):
 
-        if isinstance(value,np.ndarray):
-            if np.all(np.equal(self._last,value)):
+    def set(self, value):
+
+        if isinstance(value, np.ndarray):
+            if np.all(np.equal(self._last, value)):
                 return
         else:
             if value == self._last:
@@ -167,42 +165,46 @@ class PBCHandle():
             m.pbc = value
 
 
-
 # decorator for generating calculation methods; this code is also run for calls to
 # get_property, but with the key filled in as a closure.
 def _generate_calculation_method(key):
 
     cant_calculate = PropertyNotImplementedError("Property not implemented:'{}'".format(key))
 
-    def method(self,atoms,allow_calculation=True,**kwargs):
+    def method(self, atoms, allow_calculation=True, **kwargs):
 
-        if key not in self.implemented_properties: raise cant_calculate
+        if key not in self.implemented_properties:
+            raise cant_calculate
 
-        if not allow_calculation: return self.results.get(key,None)
+        if not allow_calculation:
+            return self.results.get(key, None)
 
-        if self.calculation_required(atoms, [key]): self.calculate()
+        if self.calculation_required(atoms, [key]):
+            self.calculate()
 
         return self.results[key]
 
     return method
 
+
 # UNUSED, was used for HippynnCaclulator.to()
 # factory for forwarding pytorch methods to the calculator
 def pass_to_pytorch(fn_name):
-    wraps = getattr(torch.nn.Module,fn_name)
+    wraps = getattr(torch.nn.Module, fn_name)
+
     @functools.wraps(wraps)
-    def method(self,*args,**kwargs):
-        getattr(self.module,fn_name)(*args,**kwargs)
+    def method(self, *args, **kwargs):
+        getattr(self.module, fn_name)(*args, **kwargs)
+
     return method
+
 
 class HippynnCalculator(interface.Calculator):
     """
     ASE calculator based on hippynn graphs. Uses ASE neighbor lists. Not suitable for domain decomposition.
     """
-    def __init__(self, energy, charges=None,skin=1.,
-                 extra_properties=None,name=None,
-                 en_unit=None,
-                 dist_unit=None):
+
+    def __init__(self, energy, charges=None, skin=1.0, extra_properties=None, name=None, en_unit=None, dist_unit=None):
         """
         :param energy: Node for energy
         :param charges: Node for charges (optional)
@@ -215,8 +217,9 @@ class HippynnCalculator(interface.Calculator):
             distance unit used in training. If not given, defaults to Angstrom
         """
 
-        self.min_radius, self.species_set, self.implemented_properties, self.module, self.pbc = \
-            setup_ASE_graph(energy, charges=charges, extra_properties=extra_properties)
+        self.min_radius, self.species_set, self.implemented_properties, self.module, self.pbc = setup_ASE_graph(
+            energy, charges=charges, extra_properties=extra_properties
+        )
 
         self.atoms = None
         self._last_properties = None
@@ -224,16 +227,16 @@ class HippynnCalculator(interface.Calculator):
         # get species set to determine length of cutoffs
         if skin < 0:
             raise ValueError("Negative skin radius not allowed.")
-        self._cutoffs = self.min_radius # The -1 is for 'blank atoms', not used in ase.
+        self._cutoffs = self.min_radius  # The -1 is for 'blank atoms', not used in ase.
         self._skin = skin
         self.nl = None
         self.rebuild_neighbors()
 
         self._needs_calculation = True
         self.results = {}
-        self.en_unit = en_unit if en_unit is not None else ase.units.kcal/ase.units.mol
+        self.en_unit = en_unit if en_unit is not None else ase.units.kcal / ase.units.mol
         self.dist_unit = dist_unit if dist_unit is not None else ase.units.Angstrom
-        self.device = torch.device('cpu')
+        self.device = torch.device("cpu")
         self.dtype = torch.get_default_dtype()
         self.name = name if name is not None else "Hippynn calculator"
 
@@ -250,27 +253,33 @@ class HippynnCalculator(interface.Calculator):
     get_stress = make("stress")
     get_stresses = make("stresses")
     get_magmom = make("magmom")
-    get_magmoms = make('magmoms')
+    get_magmoms = make("magmoms")
     del make
 
     def rebuild_neighbors(self):
-        self.nl = ase.neighborlist.NeighborList(self._cutoffs, skin=self._skin, sorted=True, self_interaction=False,
-                 bothways=True,primitive=ase.neighborlist.NewPrimitiveNeighborList)
+        self.nl = ase.neighborlist.NeighborList(
+            self._cutoffs,
+            skin=self._skin,
+            sorted=True,
+            self_interaction=False,
+            bothways=True,
+            primitive=ase.neighborlist.NewPrimitiveNeighborList,
+        )
 
     # Dear ASE: This is not Java....
-    def set_atoms(self,atoms):
-        self.atoms=atoms.copy()
+    def set_atoms(self, atoms):
+        self.atoms = atoms.copy()
         self._needs_calculation = True
 
-    def get_property(self,name,atoms,allow_calculation=True):
-        #`or` defaults to last atoms received
+    def get_property(self, name, atoms, allow_calculation=True):
+        # `or` defaults to last atoms received
         try:
-            return getattr(self,"get_{}".format(name))(atoms or self.atoms, allow_calculation=allow_calculation)
+            return getattr(self, "get_{}".format(name))(atoms or self.atoms, allow_calculation=allow_calculation)
         except AttributeError:
             raise PropertyNotImplementedError("Property not implemented:'{}'".format(name))
 
-    def to(self,*args,**kwargs):
-        self.module.to(*args,**kwargs)
+    def to(self, *args, **kwargs):
+        self.module.to(*args, **kwargs)
 
         # The below section is complicated because the pytorch `to` method does not have a strict signature.
         allargs = *args, *kwargs.values()
@@ -278,11 +287,11 @@ class HippynnCalculator(interface.Calculator):
             # Attempt conversion of strings to dtype or device.
             try:
                 a = torch.device(a)
-            except (RuntimeError,TypeError):
+            except (RuntimeError, TypeError):
                 pass
             try:
                 a = torch.dtype(a)
-            except (RuntimeError,TypeError):
+            except (RuntimeError, TypeError):
                 pass
 
             if isinstance(a, torch.dtype):
@@ -311,9 +320,9 @@ class HippynnCalculator(interface.Calculator):
         # Get variables from atoms. Unsqueeze is to add batch axis.
         positions = torch.as_tensor(self.atoms.positions).unsqueeze(0)
         # Convert from ASE distance (angstrom) to whatever the network uses.
-        positions = positions/self.dist_unit
+        positions = positions / self.dist_unit
         species = torch.as_tensor(self.atoms.numbers).unsqueeze(0)
-        cell = torch.as_tensor(self.atoms.cell)  #Oddity.. try to fix externalneighbors to take same shape as internal
+        cell = torch.as_tensor(self.atoms.cell)  # Oddity.. try to fix externalneighbors to take same shape as internal
 
         # Get pair first and second from neighbors list
 
@@ -324,27 +333,28 @@ class HippynnCalculator(interface.Calculator):
         # This order must be synchronized with function setup_ase_graph above
         inputs = species, positions, cell, pair_first, pair_second, pair_shiftvecs
         # Move to device, and convert to the type of float the model is using
-        inputs = [inp.to(device=self.device, dtype=(self.dtype if torch.is_floating_point(inp) else None))
-                  for inp in inputs]
+        inputs = [
+            inp.to(device=self.device, dtype=(self.dtype if torch.is_floating_point(inp) else None)) for inp in inputs
+        ]
 
         # Run it all through pytorch!
         results = self.module(*inputs)
 
-        self.results = {k: r.detach().cpu().numpy() for k,r in zip(self.implemented_properties,results)}
+        self.results = {k: r.detach().cpu().numpy() for k, r in zip(self.implemented_properties, results)}
 
         # Convert units
-        self.results["potential_energy"] = self.results["potential_energy"][0, 0]*self.en_unit
-        self.results["forces"] = self.results["forces"][0] * (self.en_unit/self.dist_unit)
+        self.results["potential_energy"] = self.results["potential_energy"][0, 0] * self.en_unit
+        self.results["forces"] = self.results["forces"][0] * (self.en_unit / self.dist_unit)
         stress_factor = self.en_unit
         if (len(self.atoms.pbc) and all(self.atoms.pbc)) or self.atoms.pbc:
-            stress_factor = self.en_unit / (self.dist_unit)**3
+            stress_factor = self.en_unit / (self.dist_unit) ** 3
         else:
             stress_factor = self.en_unit
         self.results["stress"] = self.results["stress"][0] * stress_factor
 
         self._needs_calculation = False
 
-    def calculation_required(self, atoms, properties=None,tol=1e-15):
+    def calculation_required(self, atoms, properties=None, tol=1e-15):
         """
         Returns true if:
         1. A property in the list `properties` is not supported.
@@ -359,14 +369,14 @@ class HippynnCalculator(interface.Calculator):
         if any(prop not in self.implemented_properties for prop in properties):
             return True
 
-        if bool(compare_atoms(self.atoms,atoms,tol=tol)):
+        if bool(compare_atoms(self.atoms, atoms, tol=tol)):
             self._needs_calculation = True
             self.atoms = atoms.copy()
 
         return self._needs_calculation
 
 
-def calculator_from_model(model,**kwargs):
+def calculator_from_model(model, **kwargs):
     """
     Attempt to find the energy and charge nodes automatically.
 
@@ -377,11 +387,10 @@ def calculator_from_model(model,**kwargs):
        If your model has an energy node, but that is not the full energy for simulation, don't use this function.
        Similarly for charge.
     """
-    possible_energy = find_relatives(model.nodes_to_compute,Energies)
-    if len(possible_energy)!=1:
+    possible_energy = find_relatives(model.nodes_to_compute, Energies)
+    if len(possible_energy) != 1:
         raise ValueError("More than one energy node present, cannot auto-generate ASE interface")
     energy = possible_energy.pop()
-
 
     try:
         possible_charge = find_relatives(model.nodes_to_compute, Charges)
@@ -395,4 +404,4 @@ def calculator_from_model(model,**kwargs):
         else:
             charges = possible_charge.pop()
 
-    return HippynnCalculator(energy=energy,charges=charges,**kwargs)
+    return HippynnCalculator(energy=energy, charges=charges, **kwargs)

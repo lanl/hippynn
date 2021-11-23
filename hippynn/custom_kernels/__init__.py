@@ -14,6 +14,7 @@ from . import autograd_wrapper, env_pytorch
 
 try:
     import numba
+
     _CUSTOM_KERNELS_AVAILABLE = True
 except ImportError:
     _CUSTOM_KERNELS_AVAILABLE = False
@@ -29,6 +30,7 @@ def _initialize():
     global _INITIALIZED
     import numba.cuda
     import torch
+
     if not numba.cuda.is_available():
         if torch.cuda.is_available():
             warnings.warn("numba.cuda.is_available() returned False: Custom kernels will fail on GPU tensors.")
@@ -43,7 +45,7 @@ def _initialize():
     _INITIALIZED = True
 
 
-def set_custom_kernels(active: bool=True):
+def set_custom_kernels(active: bool = True):
     """
     Activate or deactivate custom kernels for interaction.
 
@@ -59,7 +61,12 @@ def set_custom_kernels(active: bool=True):
             _initialize()
 
         from .env_numba import new_envsum, new_sensesum, new_featsum
-        envsum, sensesum, featsum, = autograd_wrapper.wrap_envops(new_envsum, new_sensesum, new_featsum)
+
+        (
+            envsum,
+            sensesum,
+            featsum,
+        ) = autograd_wrapper.wrap_envops(new_envsum, new_sensesum, new_featsum)
 
     else:
         envsum = env_pytorch.envsum
@@ -68,7 +75,8 @@ def set_custom_kernels(active: bool=True):
 
     _CUSTOM_KERNELS_ACTIVE = active
 
-if settings.USE_CUSTOM_KERNELS=='auto':
+
+if settings.USE_CUSTOM_KERNELS == "auto":
     try_custom_kernels = _CUSTOM_KERNELS_AVAILABLE
 else:
     try_custom_kernels = settings.USE_CUSTOM_KERNELS

@@ -11,4 +11,3 @@ from .multi import MultiNode
 
 # Optional mixins for simplifying the process of defining BaseNode subclasses
 from .definition_helpers import AutoKw, AutoNoKw, ExpandParents
-

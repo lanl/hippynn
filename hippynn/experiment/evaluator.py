@@ -5,10 +5,8 @@ import torch
 from hippynn.tools import device_fallback, progress_bar
 
 
-class Evaluator():
-    def __init__(self, model,
-                 evaluation_loss, evaluation_loss_names,
-                 plot_maker=None, plot_every=1, db_info=None):
+class Evaluator:
+    def __init__(self, model, evaluation_loss, evaluation_loss_names, plot_maker=None, plot_every=1, db_info=None):
         """
 
         :param model: ``GraphModule``. The model to evaluate .
@@ -25,7 +23,7 @@ class Evaluator():
 
         self.n_inputs = len(model.input_nodes)
         self.n_outputs = len(model.nodes_to_compute)
-        self.n_targets = len(evaluation_loss.input_nodes)-self.n_outputs
+        self.n_targets = len(evaluation_loss.input_nodes) - self.n_outputs
 
         self.plot_maker = plot_maker
         self.db_info = db_info
@@ -36,7 +34,6 @@ class Evaluator():
     def var_list(self):
         return self.db_info["inputs"] + self.db_info["targets"]
 
-        
     def evaluate(self, generator, eval_type, when=None):
         """
         Construct metrics and activate plotter on a dataloader.
@@ -55,32 +52,30 @@ class Evaluator():
         target_batch_vals = [[] for _ in range(self.n_targets)]
 
         # Get the batch prediction values
-        for batch in progress_bar(generator,desc=f"Evaluating {eval_type}",unit="batch"):
+        for batch in progress_bar(generator, desc=f"Evaluating {eval_type}", unit="batch"):
             batch = [item.to(device=self.model_device) for item in batch]
-            batch_inputs = batch[:self.n_inputs]
-            batch_targets = batch[-self.n_targets:]
+            batch_inputs = batch[: self.n_inputs]
+            batch_targets = batch[-self.n_targets :]
             batch_predictions = self.model(*batch_inputs)
             # Put predictions and targets on CPU
-            for storage,value in zip(prediction_batch_vals,batch_predictions):
+            for storage, value in zip(prediction_batch_vals, batch_predictions):
                 storage.append(value.detach().cpu())
 
-            for storage,value in zip(target_batch_vals,batch_targets):
+            for storage, value in zip(target_batch_vals, batch_targets):
                 storage.append(value.detach().cpu())
 
         # Put the batches together
-        prediction_all_vals = [torch.cat(x,dim=0) if x[0].shape!=() else x[0] for x in prediction_batch_vals]
-        target_all_vals = [torch.cat(x,dim=0) for x in target_batch_vals]
+        prediction_all_vals = [torch.cat(x, dim=0) if x[0].shape != () else x[0] for x in prediction_batch_vals]
+        target_all_vals = [torch.cat(x, dim=0) for x in target_batch_vals]
 
         # Evaluate the evaluation losses
         # Note: The `mean` here accounts for device-length vectors returned by scalars computed by
         # a DataParallel module.
-        all_losses = [x.mean().item() for x in  self.loss(*prediction_all_vals,*target_all_vals)]
-        loss_dict = {name:value for name,value in zip(self.loss_names,all_losses)}
+        all_losses = [x.mean().item() for x in self.loss(*prediction_all_vals, *target_all_vals)]
+        loss_dict = {name: value for name, value in zip(self.loss_names, all_losses)}
 
         if self.plot_maker:
-            self.plot_maker.plot_phase(prediction_all_vals=prediction_all_vals,
-                            target_all_vals=target_all_vals,
-                            when=when,eval_type=eval_type)
+            self.plot_maker.plot_phase(
+                prediction_all_vals=prediction_all_vals, target_all_vals=target_all_vals, when=when, eval_type=eval_type
+            )
         return loss_dict
-
-

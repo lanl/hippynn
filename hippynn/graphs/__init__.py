@@ -26,5 +26,15 @@ from .graph import GraphModule
 
 from .predictor import Predictor
 
-__all__ = ["get_subgraph","copy_subgraph","replace_node","compute_evaluation_order","find_unique_relative","find_relatives",
-           "get_connected_nodes","GraphModule","Predictor","IdxType"]
+__all__ = [
+    "get_subgraph",
+    "copy_subgraph",
+    "replace_node",
+    "compute_evaluation_order",
+    "find_unique_relative",
+    "find_relatives",
+    "get_connected_nodes",
+    "GraphModule",
+    "Predictor",
+    "IdxType",
+]

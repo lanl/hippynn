@@ -9,6 +9,7 @@ import numpy as np
 # Possible TODO do periodic coordinates ever need to be differentiable with respect to the cell
 # For volume changes?
 
+
 class _PairIndexer(torch.nn.Module):
     def __init__(self, hard_dist_cutoff):
         super().__init__()
@@ -16,7 +17,6 @@ class _PairIndexer(torch.nn.Module):
 
 
 class OpenPairIndexer(_PairIndexer):
-
     def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms):
 
         with torch.no_grad():
@@ -25,8 +25,9 @@ class OpenPairIndexer(_PairIndexer):
             cur_device = coordinates.device
             # Figure out how many molecules and atoms we have
 
-            atom_index = torch.reshape(torch.arange(n_molecules * n_atoms, dtype=torch.long, device=cur_device),
-                                       (n_molecules, n_atoms))
+            atom_index = torch.reshape(
+                torch.arange(n_molecules * n_atoms, dtype=torch.long, device=cur_device), (n_molecules, n_atoms)
+            )
             n_atoms_max_batch = int(nonblank.sum(axis=1).max())
             namax_box = n_atoms_max_batch
 
@@ -42,11 +43,10 @@ class OpenPairIndexer(_PairIndexer):
             # Pairs which are both not blank
             nonblank_pair = nonblank_trimmed.unsqueeze(1) * nonblank_trimmed.unsqueeze(2)
             # Don't connect an atom to itself
-            nonself_atoms = (~torch.eye(namax_box, dtype=nonblank.dtype, device=cur_device)).unsqueeze(
-                0)
+            nonself_atoms = (~torch.eye(namax_box, dtype=nonblank.dtype, device=cur_device)).unsqueeze(0)
             # Only take pairs that are close enough
             if self.hard_dist_cutoff is not None:
-                close_atoms = (pair_dists < self.hard_dist_cutoff)
+                close_atoms = pair_dists < self.hard_dist_cutoff
                 pair_presence = nonblank_pair & nonself_atoms & close_atoms
             else:
                 pair_presence = nonblank_pair & nonself_atoms
@@ -70,13 +70,14 @@ class OpenPairIndexer(_PairIndexer):
 
 
 class PeriodicPairIndexer(_PairIndexer):
-    def __init__(self,*args,n_images=1,**kwargs):
-        super().__init__(*args,**kwargs)
+    def __init__(self, *args, n_images=1, **kwargs):
+        super().__init__(*args, **kwargs)
         import itertools
+
         # shape is (n_images+2)**3 by 3
-        combinator = torch.tensor(list(itertools.product(range(-n_images,n_images+1),repeat=3)))
-        self.n_images=n_images
-        self.register_buffer("combinator",combinator.to(torch.float))
+        combinator = torch.tensor(list(itertools.product(range(-n_images, n_images + 1), repeat=3)))
+        self.n_images = n_images
+        self.register_buffer("combinator", combinator.to(torch.float))
 
     def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cells):
 
@@ -89,8 +90,9 @@ class PeriodicPairIndexer(_PairIndexer):
             n_molecules, n_atoms, _ = coordinates.shape
             n_atoms_max_batch = int(nonblank.sum(axis=1).max())
             # Construct a unique index for each atom (including blanks here)
-            atom_index = torch.reshape(torch.arange(n_molecules * n_atoms,
-                                                    dtype=torch.long, device=cur_device), (n_molecules, n_atoms))
+            atom_index = torch.reshape(
+                torch.arange(n_molecules * n_atoms, dtype=torch.long, device=cur_device), (n_molecules, n_atoms)
+            )
 
             nonblank = nonblank[:, :n_atoms_max_batch]
             coordinates = coordinates[:, :n_atoms_max_batch]
@@ -145,9 +147,10 @@ class ExternalNeighbors(_PairIndexer):
     """
     module for ASE-like neighbors list fed into the graph
     """
+
     def forward(self, coordinates, real_atoms, shifts, cell, pair_first, pair_second):
         n_molecules, n_atoms, _ = coordinates.shape
-        atom_coordinates  = coordinates.reshape(n_molecules * n_atoms, 3)[real_atoms]
+        atom_coordinates = coordinates.reshape(n_molecules * n_atoms, 3)[real_atoms]
         paircoord = atom_coordinates[pair_second] - atom_coordinates[pair_first] + shifts.to(cell.dtype) @ cell
         distflat = paircoord.norm(dim=1)
 
@@ -174,28 +177,28 @@ class PairReIndexer(torch.nn.Module):
 
 
 class PairDeIndexer(torch.nn.Module):
-    def forward(self, features, molecule_index, atom_index, n_molecules,n_atoms_max, pair_first, pair_second):
+    def forward(self, features, molecule_index, atom_index, n_molecules, n_atoms_max, pair_first, pair_second):
         molecule_position = molecule_index[pair_first]
         absolute_first = atom_index[pair_first]
         absolute_second = atom_index[pair_second]
 
-        if features.ndimension()==1:
+        if features.ndimension() == 1:
             features = features.unsqueeze(-1)
         featshape = features.shape[1:]
-        out_shape = (n_molecules, n_atoms_max,n_atoms_max, *featshape)
+        out_shape = (n_molecules, n_atoms_max, n_atoms_max, *featshape)
 
         result = torch.zeros(*out_shape, device=features.device, dtype=features.dtype)
-        result[molecule_position,absolute_first,absolute_second] = features
+        result[molecule_position, absolute_first, absolute_second] = features
         return result
 
 
 class MolPairSummer(torch.nn.Module):
-    def forward(self,pairfeatures, mol_index, n_molecules, pair_first):
+    def forward(self, pairfeatures, mol_index, n_molecules, pair_first):
         pair_mol = mol_index[pair_first]
         feat_shape = (1,) if pairfeatures.ndimension() == 1 else pairfeatures.shape[1:]
-        out_shape = (n_molecules,*feat_shape)
-        result = torch.zeros(out_shape,device=pairfeatures.device,dtype=pairfeatures.dtype)
-        result.index_add_(0,pair_mol,pairfeatures)
+        out_shape = (n_molecules, *feat_shape)
+        result = torch.zeros(out_shape, device=pairfeatures.device, dtype=pairfeatures.dtype)
+        result.index_add_(0, pair_mol, pairfeatures)
         return result
 
 
@@ -204,21 +207,22 @@ class PairCacher(torch.nn.Module):
         super().__init__()
         self.set_images(n_images=n_images)
 
-    def set_images(self,n_images):
+    def set_images(self, n_images):
         self.n_images = n_images
 
-    def forward(self, pair_first, pair_second, cell_offsets, offset_index,
-                real_atoms, mol_index, n_molecules, n_atoms_max):
+    def forward(
+        self, pair_first, pair_second, cell_offsets, offset_index, real_atoms, mol_index, n_molecules, n_atoms_max
+    ):
         # Set up absolute indices
         abs_atoms = real_atoms % n_atoms_max
         pfabs = abs_atoms[pair_first]
         psabs = abs_atoms[pair_second]
         mol = mol_index[pair_first]
 
-        n_offsets = (2*self.n_images+1)**3
+        n_offsets = (2 * self.n_images + 1) ** 3
 
         # Reorder the indices
-        order = offset_index + n_offsets*(psabs + n_atoms_max * (pfabs + n_atoms_max * mol))
+        order = offset_index + n_offsets * (psabs + n_atoms_max * (pfabs + n_atoms_max * mol))
         order = torch.argsort(order)
         mol = mol[order]
         pfabs = pfabs[order]
@@ -229,12 +233,10 @@ class PairCacher(torch.nn.Module):
         # Create sparse tensor
         indices = torch.stack([mol, pfabs, psabs, offset_index], axis=0)
         values = cell_offsets
-        size = (n_molecules, n_atoms_max, n_atoms_max,n_offsets, 3)
-        s = torch.sparse_coo_tensor(indices=indices,
-                                    values=values,
-                                    size=size,
-                                    dtype=torch.int,
-                                    device=pair_first.device)
+        size = (n_molecules, n_atoms_max, n_atoms_max, n_offsets, 3)
+        s = torch.sparse_coo_tensor(
+            indices=indices, values=values, size=size, dtype=torch.int, device=pair_first.device
+        )
         s = s.coalesce()
         return s
 
@@ -244,7 +246,7 @@ class PairUncacher(torch.nn.Module):
         super().__init__()
         self.set_images(n_images=n_images)
 
-    def set_images(self,n_images):
+    def set_images(self, n_images):
         self.n_images = n_images
 
     def forward(self, sparse, coordinates, cell, real_atoms, inv_real_atoms, n_atoms_max, n_molecules):
@@ -266,9 +268,7 @@ class PairUncacher(torch.nn.Module):
         atom_coordinates = coordinates.reshape(n_molecules * n_atoms_max, 3)[real_atoms]
         offsets = torch.bmm(cell_offsets.to(cell.dtype).unsqueeze(1), cell[mol]).squeeze(1)
 
-        paircoord = atom_coordinates[pair_first] \
-                    - atom_coordinates[pair_second] \
-                    + offsets
+        paircoord = atom_coordinates[pair_first] - atom_coordinates[pair_second] + offsets
 
         distflat = paircoord.norm(dim=1)
 
@@ -287,8 +287,8 @@ class RDFBins(torch.nn.Module):
 
     def bin_info(self):
         # Note: widths don't make perfect sense for non-evenly-spaced bins.
-        centers = (self.bins[1:] + self.bins[:-1])/2
-        widths = (self.bins[1:] - self.bins[:-1])
+        centers = (self.bins[1:] + self.bins[:-1]) / 2
+        widths = self.bins[1:] - self.bins[:-1]
         return centers, widths
 
     def forward(self, pair_dist, pair_first, pair_second, one_hot, n_molecules):
@@ -303,11 +303,12 @@ class RDFBins(torch.nn.Module):
                 less = maskpairs.unsqueeze(-1) < self.bins.unsqueeze(0)
                 less_counts = less.sum(dim=0)
                 rdf[i, j] = less_counts[..., 1:] - less_counts[..., :-1]
-        return (rdf/n_molecules).unsqueeze(0)
+        return (rdf / n_molecules).unsqueeze(0)
 
 
 #####
 # Numpy implementation of pair finding
+
 
 def wrap_points_np(coords, cell, inv_cell):
     # cell is (basis,cartesian)
@@ -316,7 +317,7 @@ def wrap_points_np(coords, cell, inv_cell):
     wrapped_offset, fractional_coords = np.divmod(projections, 1)
     # wrapped_coords is (atoms,cartesian)
     wrapped_coords = fractional_coords @ cell
-    return wrapped_coords,wrapped_offset.astype(np.int64)
+    return wrapped_coords, wrapped_offset.astype(np.int64)
 
 
 def neighbor_list_np(cutoff, coords, cell):
@@ -354,7 +355,7 @@ def neighbor_list_np(cutoff, coords, cell):
                 if len(pf) > 0:
                     pi = np.repeat(np.asarray(oi)[np.newaxis, :], repeats=len(pf), axis=0)
                     # pi is wrapped image locations, need to convert back to absolute.
-                    pi = pi - wrap_offset_ij[pf,ps]
+                    pi = pi - wrap_offset_ij[pf, ps]
                     pair_first.append(pf)
                     pair_second.append(ps)
                     pair_image.append(pi)
@@ -365,21 +366,24 @@ def neighbor_list_np(cutoff, coords, cell):
 
     return pair_first, pair_second, pair_image
 
+
 # End Numpy implementation of pair finding
 ####
 
 ####
 # Torch implementation of pair finding
 
+
 def wrap_points_torch(coords, cell, inv_cell):
     # cell is (basis,cartesian)
     # inv is (cartesian,basis)
     projections = coords @ inv_cell
-    fractional_coords = torch.fmod(projections,1)
-    wrapped_offset =  torch.div(projections,1,rounding_mode='floor')
+    fractional_coords = torch.fmod(projections, 1)
+    wrapped_offset = torch.div(projections, 1, rounding_mode="floor")
     # wrapped_coords is (atoms,cartesian)
     wrapped_coords = fractional_coords @ cell
-    return wrapped_coords,wrapped_offset.to(torch.int64)
+    return wrapped_coords, wrapped_offset.to(torch.int64)
+
 
 def neighbor_list_torch(cutoff, coords, cell):
     # cell is (basis,cartesian)
@@ -403,7 +407,7 @@ def neighbor_list_torch(cutoff, coords, cell):
         for i2 in range(-n2, n2 + 1):
             for i3 in range(-n3, n3 + 1):
                 oi = (i1, i2, i3)
-                oi = torch.as_tensor(oi,device=coords.device)
+                oi = torch.as_tensor(oi, device=coords.device)
                 oi_float = oi.to(coords.dtype)
                 offset = oi_float @ cell
                 diff = drij + offset
@@ -416,9 +420,9 @@ def neighbor_list_torch(cutoff, coords, cell):
                     ps = ps[nonself]
 
                 if len(pf) > 0:
-                    pi = oi.unsqueeze(0).expand(pf.shape[0],-1)
+                    pi = oi.unsqueeze(0).expand(pf.shape[0], -1)
                     # pi is wrapped image locations, need to convert back to absolute.
-                    pi = pi - wrap_offset_ij[pf,ps]
+                    pi = pi - wrap_offset_ij[pf, ps]
                     pair_first.append(pf)
                     pair_second.append(ps)
                     pair_image.append(pi)
@@ -429,34 +433,35 @@ def neighbor_list_torch(cutoff, coords, cell):
 
     return pair_first, pair_second, pair_image
 
+
 # End Torch implementation of pair finding
 ####
 
 
 class _DispatchNeighbors(torch.nn.Module):
-    def __init__(self ,dist_hard_max):
+    def __init__(self, dist_hard_max):
         super().__init__()
         self.dist_hard_max = dist_hard_max
 
         self.set_combinator(1)
-        self.n_images =1
+        self.n_images = 1
 
-    def set_combinator(self ,n_images):
+    def set_combinator(self, n_images):
         self.n_images = n_images
 
-    def compute_one(self,r,c):
+    def compute_one(self, r, c):
         return NotImplemented
 
-    def forward(self ,coordinates, nonblank, real_atoms, inv_real_atoms, cell, mol_index, n_molecules, n_atoms_max):
+    def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cell, mol_index, n_molecules, n_atoms_max):
 
         with torch.no_grad():
             dev = coordinates.device  # where to put the results.
 
             cell_list = cell.unbind(0)
-            coord_list = [c[nb] for c ,nb in zip(coordinates.unbind(0) ,nonblank.unbind(0))]
+            coord_list = [c[nb] for c, nb in zip(coordinates.unbind(0), nonblank.unbind(0))]
             nlist_data = []
-            for mol_num ,(r ,c) in enumerate(zip(coord_list ,cell_list)):
-                outs = self.compute_one(r ,c)
+            for mol_num, (r, c) in enumerate(zip(coord_list, cell_list)):
+                outs = self.compute_one(r, c)
                 pf, ps, of = outs
                 if len(pf) == 0:
                     continue
@@ -465,10 +470,10 @@ class _DispatchNeighbors(torch.nn.Module):
                 max_images = of.abs().max()
                 if max_images > self.n_images:
                     self.set_combinator(max_images)
-                nlist_data.append((pf ,ps ,of))
+                nlist_data.append((pf, ps, of))
 
             # transpose
-            pair_first ,pair_second ,offsets = zip(*nlist_data)
+            pair_first, pair_second, offsets = zip(*nlist_data)
 
             # concatenate
             pair_first = inv_real_atoms[torch.cat(pair_first).to(dev)]
@@ -479,11 +484,11 @@ class _DispatchNeighbors(torch.nn.Module):
             # Number the offsets
             n_off = self.n_images * 2 + 1
             o1, o2, o3 = (offsets + self.n_images).unbind(dim=1)
-            offset_index = o3 + n_off *(o2 + n_off *o1)
+            offset_index = o3 + n_off * (o2 + n_off * o1)
 
             pair_mol = mol_index[pair_first]
             pair_cell = cell[pair_mol]
-            pair_offsets = torch.bmm(offsets.unsqueeze(1).to(pair_cell.dtype) ,pair_cell).squeeze(1)
+            pair_offsets = torch.bmm(offsets.unsqueeze(1).to(pair_cell.dtype), pair_cell).squeeze(1)
 
             # now calculate pair_dist, paircoord differentiably
 
@@ -491,11 +496,11 @@ class _DispatchNeighbors(torch.nn.Module):
         paircoord = coordflat[pair_first] - coordflat[pair_second] + pair_offsets
         distflat2 = paircoord.norm(dim=1)
 
-        return distflat2, pair_first, pair_second, paircoord, offsets ,offset_index
+        return distflat2, pair_first, pair_second, paircoord, offsets, offset_index
 
 
 class NPNeighbors(_DispatchNeighbors):
-    def compute_one(self,positions,cell):
+    def compute_one(self, positions, cell):
         positions = positions.detach().cpu().numpy()
         cell = cell.detach().cpu().numpy()
         outputs = neighbor_list_np(self.dist_hard_max, positions, cell)
@@ -503,7 +508,7 @@ class NPNeighbors(_DispatchNeighbors):
 
 
 class TorchNeighbors(_DispatchNeighbors):
-    def compute_one(self,positions,cell):
+    def compute_one(self, positions, cell):
         with torch.no_grad():
-            outputs = neighbor_list_torch(self.dist_hard_max,positions,cell)
+            outputs = neighbor_list_torch(self.dist_hard_max, positions, cell)
         return outputs

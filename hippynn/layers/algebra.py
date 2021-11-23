@@ -31,7 +31,7 @@ class AtLeast2D(torch.nn.Module):
 class ValueMod(torch.nn.Module):
     def __init__(self, value):
         super().__init__()
-        if not isinstance(value,torch.Tensor):
+        if not isinstance(value, torch.Tensor):
             value = torch.tensor(value, dtype=torch.get_default_dtype())
 
         self.register_buffer("value", value)
@@ -50,8 +50,9 @@ class Idx(torch.nn.Module):
         self.repr_info = repr_info
 
     def extra_repr(self):
-        if self.repr_info is None: return ''
-        return '{parent_name}.{index}'.format(**self.repr_info)
+        if self.repr_info is None:
+            return ""
+        return "{parent_name}.{index}".format(**self.repr_info)
 
     def forward(self, bundled_inputs):
         return bundled_inputs[self.index]

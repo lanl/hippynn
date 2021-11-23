@@ -7,6 +7,7 @@ from . import _debprint
 from .registry import _index_dispatch_table, elementwise_compare_rules, _db_index_states, _index_cache
 from .type_def import IdxType
 
+
 def dispatch_indexing(input_is, output_is):
     """
     Acquire the function for converting between two index states.
@@ -19,7 +20,7 @@ def dispatch_indexing(input_is, output_is):
     try:
         func = _index_dispatch_table[input_is, output_is]
     except KeyError as ke:
-        raise ValueError("No index conversion ({})->({}) found.".format(input_is,output_is))
+        raise ValueError("No index conversion ({})->({}) found.".format(input_is, output_is))
     return func
 
 
@@ -50,7 +51,7 @@ def index_type_coercion(node, output_index_state):
 
     if needs_index:
         prior_index_ref = (output_index_state, node)
-        if (output_index_state,node) in _index_cache:
+        if (output_index_state, node) in _index_cache:
             # If this node is linked to a previous index state
             _debprint(f"\t Previous indexed version found for node {node} type {output_index_state}")
             outnode = _index_cache[prior_index_ref]
@@ -65,7 +66,7 @@ def index_type_coercion(node, output_index_state):
     return outnode
 
 
-def soft_index_type_coercion(node,output_index_state):
+def soft_index_type_coercion(node, output_index_state):
     """
     Coerce if information is available.
     :param node:
@@ -73,8 +74,10 @@ def soft_index_type_coercion(node,output_index_state):
     :return:
     """
     if output_index_state == IdxType.NotFound or node._index_state == IdxType.NotFound:
-        _debprint(f"Soft request: Skipping requested conversion of {node} ({node._index_state})to {output_index_state}"
-                 " as information was not available.")
+        _debprint(
+            f"Soft request: Skipping requested conversion of {node} ({node._index_state})to {output_index_state}"
+            " as information was not available."
+        )
         return node
     else:
         return index_type_coercion(node, output_index_state)
@@ -109,13 +112,14 @@ def elementwise_compare_reduce(*nodes_to_reduce):
     :param nodes_to_reduce:
     :return:
     """
-    if len(nodes_to_reduce) ==  0:
+    if len(nodes_to_reduce) == 0:
         _debprint("Compare reduce on nothing, returning nothing")
         return tuple()
     coerced_type = get_reduced_index_state(*nodes_to_reduce)
     coerced_nodes = [index_type_coercion(node, coerced_type) for node in nodes_to_reduce]
     _debprint("Coerced:", [x.name for x in coerced_nodes])
-    if len(coerced_nodes) == 1 : return coerced_nodes[0]
+    if len(coerced_nodes) == 1:
+        return coerced_nodes[0]
     return coerced_nodes
 
 
@@ -124,6 +128,7 @@ def db_state_of(idxt):
         return _db_index_states[idxt]
     except KeyError:
         raise KeyError(f"No index state found for index type '{idxt}'")
+
 
 def db_form(node):
     return index_type_coercion(node, db_state_of(node._index_state))

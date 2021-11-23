@@ -6,24 +6,29 @@ import numpy as np
 import torch
 
 from .restarter import NoRestart
-from ..tools import arrdict_len,device_fallback
+from ..tools import arrdict_len, device_fallback
 
-from torch.utils.data import DataLoader, TensorDataset,Subset
+from torch.utils.data import DataLoader, TensorDataset, Subset
 
 
-class Database():
+class Database:
     """
     Class for holding a pytorch dataset, splitting it, generating dataloaders, etc."
     """
-    def __init__(self,arr_dict,
-                 inputs,targets,
-                 seed,
-                 test_size=None,
-                 valid_size=None,
-                 num_workers=0,
-                 pin_memory=True,
-                 allow_unfound=False,
-                 quiet=False):
+
+    def __init__(
+        self,
+        arr_dict,
+        inputs,
+        targets,
+        seed,
+        test_size=None,
+        valid_size=None,
+        num_workers=0,
+        pin_memory=True,
+        allow_unfound=False,
+        quiet=False,
+    ):
         """
         :param arr_dict: dictionary mapping strings to numpy arrays
         :param inputs:   list of strings for input db_names
@@ -54,10 +59,11 @@ class Database():
 
         if not allow_unfound:
             for k in self.var_list:
-                if k not in arr_dict and k not in ("indicies","split_indices"):
-                    raise KeyError(f"Array dictionary missing required variable:'{k}'."
-                                   "Pass allow_unfound=True to avoid checking of inputs targets.")
-
+                if k not in arr_dict and k not in ("indicies", "split_indices"):
+                    raise KeyError(
+                        f"Array dictionary missing required variable:'{k}'."
+                        "Pass allow_unfound=True to avoid checking of inputs targets."
+                    )
 
         self.arr_dict = arr_dict
         if "indices" not in arr_dict:
@@ -75,8 +81,7 @@ class Database():
             if test_size is None or valid_size is None:
                 raise ValueError("Both test and valid size must be set for auto-splitting")
             else:
-                self.make_trainvalidtest_split(test_size=test_size,valid_size=valid_size)
-
+                self.make_trainvalidtest_split(test_size=test_size, valid_size=valid_size)
 
     def __len__(self):
         return arrdict_len(self.arr_dict)
@@ -89,19 +94,19 @@ class Database():
             raise RuntimeError(f"Database inputs not defined, set {Database}.targets.")
         return self.inputs + self.targets
 
-    def send_to_device(self,device=None):
-        "Send a database to a device "
-        if len(self.splits)==0:
+    def send_to_device(self, device=None):
+        "Send a database to a device"
+        if len(self.splits) == 0:
             raise RuntimeError("Arrays must be split before sending database to device.")
         if device is None:
             device = device_fallback()
         else:
             device = torch.device(device)
-        if device.type!='cpu':
+        if device.type != "cpu":
             if self.pin_memory:
                 warnings.warn("Pin memory was set, but target device requested is not CPU. Setting pin_memory=False.")
                 self.pin_memory = False
-            if self.num_workers!=0:
+            if self.num_workers != 0:
                 warnings.warn("Num workers was set, but target device requested is not CPU. Setting num_workers=0.")
                 self.num_workers = 0
 
@@ -109,7 +114,7 @@ class Database():
             for k in arrdict:
                 arrdict[k] = arrdict[k].to(device)
 
-    def make_random_split(self,evaluation_mode,split_size):
+    def make_random_split(self, evaluation_mode, split_size):
         """
 
         :param evaluation_mode: String naming the split, can be anything, but 'train', 'valid', and 'test' are special.s
@@ -120,17 +125,15 @@ class Database():
             raise RuntimeError("Database already split!")
 
         if split_size < 1:
-            split_size = int(split_size*len(self))
+            split_size = int(split_size * len(self))
 
-        split_indices = self.random_state.choice(self.arr_dict["indices"],
-                                         size=split_size,
-                                         replace=False)
+        split_indices = self.random_state.choice(self.arr_dict["indices"], size=split_size, replace=False)
 
         split_indices.sort()
 
-        return self.make_explicit_split(evaluation_mode,split_indices)
+        return self.make_explicit_split(evaluation_mode, split_indices)
 
-    def make_trainvalidtest_split(self,test_size,valid_size):
+    def make_trainvalidtest_split(self, test_size, valid_size):
         if self.splitting_completed:
             raise RuntimeError("Database already split!")
 
@@ -139,39 +142,39 @@ class Database():
                 raise ValueError("If train or valid size is set as a fraction, then set test_size as a fraction")
             else:
                 if valid_size + test_size > 1:
-                    raise ValueError(f"Test fraction ({test_size}) plus valid fraction "
-                                     f"({valid_size}) are greater than 1!")
-                valid_size /= (1-test_size)
+                    raise ValueError(
+                        f"Test fraction ({test_size}) plus valid fraction " f"({valid_size}) are greater than 1!"
+                    )
+                valid_size /= 1 - test_size
 
-        self.make_random_split("test",test_size)
-        self.make_random_split("valid",valid_size)
+        self.make_random_split("test", test_size)
+        self.make_random_split("valid", valid_size)
         self.split_the_rest("train")
 
-    def make_explicit_split(self,evaluation_mode,split_indices):
+    def make_explicit_split(self, evaluation_mode, split_indices):
         if self.splitting_completed:
             raise RuntimeError("Database already split!")
 
         if len(split_indices) == 0:
             raise ValueError("Cannot make split of size 0.")
         # Compute which indices are not being split off.
-        index_mask = compute_index_mask(split_indices,self.arr_dict["indices"])
+        index_mask = compute_index_mask(split_indices, self.arr_dict["indices"])
 
         complement_mask = ~index_mask
 
         # Split off data, and keep the rest.
-        self.splits[evaluation_mode] = {k:torch.from_numpy(self.arr_dict[k][index_mask]) for k in self.arr_dict}
-        self.splits[evaluation_mode]["split_indices"] = torch.arange(len(split_indices),dtype=torch.int64)
+        self.splits[evaluation_mode] = {k: torch.from_numpy(self.arr_dict[k][index_mask]) for k in self.arr_dict}
+        self.splits[evaluation_mode]["split_indices"] = torch.arange(len(split_indices), dtype=torch.int64)
 
-        for k,v in self.arr_dict.items():
+        for k, v in self.arr_dict.items():
             self.arr_dict[k] = v[complement_mask]
 
         if not self.quiet:
             print(f"Arrays for split: {evaluation_mode}")
             prettyprint_arrays(self.splits[evaluation_mode])
 
-
-    def split_the_rest(self,evaluation_mode):
-        self.make_explicit_split(evaluation_mode,self.arr_dict["indices"])
+    def split_the_rest(self, evaluation_mode):
+        self.make_explicit_split(evaluation_mode, self.arr_dict["indices"])
         self.splitting_completed = True
 
     def make_generator(self, split_type, evaluation_mode, batch_size=None, subsample=False):
@@ -188,16 +191,16 @@ class Database():
         if not self.splitting_completed:
             raise ValueError("Database has not yet been split.")
 
-        if split_type in ('train', 'valid', 'test'):
+        if split_type in ("train", "valid", "test"):
             data = [self.splits[split_type][k] for k in self.var_list]
         else:
             raise ValueError("Datatype {} Invalid. Must be one of 'train','valid','test'".format(split_type))
 
-
         if evaluation_mode == "train":
             if split_type != "train":
-                raise ValueError("evaluation mode 'train' can only be used with training data."
-                                 "(got {})".format(split_type))
+                raise ValueError(
+                    "evaluation mode 'train' can only be used with training data." "(got {})".format(split_type)
+                )
             shuffle = True
         elif evaluation_mode == "eval":
             shuffle = False
@@ -207,20 +210,22 @@ class Database():
         dataset = NamedTensorDataset(self.var_list, *data)
         if subsample:
             n_total = data[0].shape[0]
-            n_selected = int(n_total*subsample)
+            n_selected = int(n_total * subsample)
             sampled_indices = torch.argsort(torch.rand(n_total))[:n_selected]
-            #sampled_indices = torch.rand(data[0].shape[0]) < subsample
-            dataset = Subset(dataset,sampled_indices)
-            #data = [a[sampled_indices] for a in data]
+            # sampled_indices = torch.rand(data[0].shape[0]) < subsample
+            dataset = Subset(dataset, sampled_indices)
+            # data = [a[sampled_indices] for a in data]
 
-        generator = DataLoader(dataset,
-                                          batch_size=batch_size,
-                                          shuffle=shuffle,
-                                          pin_memory=self.pin_memory,
-                                          num_workers=self.num_workers,
-                               )
+        generator = DataLoader(
+            dataset,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            pin_memory=self.pin_memory,
+            num_workers=self.num_workers,
+        )
 
         return generator
+
 
 def compute_index_mask(indices, index_pool):
     if not np.all(np.isin(indices, index_pool)):
@@ -236,7 +241,6 @@ def compute_index_mask(indices, index_pool):
     return index_mask
 
 
-
 def prettyprint_arrays(arr_dict):
     """
     Pretty-print array dictionary
@@ -244,14 +248,18 @@ def prettyprint_arrays(arr_dict):
     """
     column_format = "| {:<18} | {:<18} | {:<40} |"
     ncols = len(column_format.format("", "", ""))
-    def printrow(*args): print(column_format.format(*args))
-    def printline(): print("-"*ncols)
+
+    def printrow(*args):
+        print(column_format.format(*args))
+
+    def printline():
+        print("-" * ncols)
 
     printline()
-    printrow("Name","dtype","shape")
+    printrow("Name", "dtype", "shape")
     printline()
     for key, value in arr_dict.items():
-        printrow(key,repr(value.dtype),repr(value.shape))
+        printrow(key, repr(value.dtype), repr(value.shape))
     printline()
 
 
@@ -259,4 +267,3 @@ class NamedTensorDataset(TensorDataset):
     def __init__(self, tensor_names, *tensors):
         super().__init__(*tensors)
         self.tensor_map = tensor_names
-

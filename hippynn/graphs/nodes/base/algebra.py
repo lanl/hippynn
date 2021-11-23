@@ -81,13 +81,14 @@ class ValueNode(_CombNode):
     def __init__(self, value):
         name = "Value({})".format(str(value))
         self.value = value
-        super().__init__(name, parents=(), module='auto')
+        super().__init__(name, parents=(), module="auto")
 
     def auto_module(self):
         return algebra_mods.ValueMod(self.value)
 
-class _PredefinedOp():
-    def __init_subclass__(cls, *,op=None, **kwargs):
+
+class _PredefinedOp:
+    def __init_subclass__(cls, *, op=None, **kwargs):
         super().__init_subclass__(**kwargs)
         if op is not None:
             cls.torch_module = algebra_mods.LambdaModule(op)
@@ -101,10 +102,12 @@ class UnaryNode(_PredefinedOp, _CombNode):
         self._index_state = in_node._index_state
 
 
-class InvNode(UnaryNode, op=operator.invert): pass
+class InvNode(UnaryNode, op=operator.invert):
+    pass
 
 
-class NegNode(UnaryNode, op=operator.neg): pass
+class NegNode(UnaryNode, op=operator.neg):
+    pass
 
 
 class BinNode(_PredefinedOp, _CombNode):
@@ -119,19 +122,24 @@ class BinNode(_PredefinedOp, _CombNode):
         self._index_state = idxstate
 
 
-class AddNode(BinNode, op=operator.add): pass
+class AddNode(BinNode, op=operator.add):
+    pass
 
 
-class SubNode(BinNode, op=operator.sub): pass
+class SubNode(BinNode, op=operator.sub):
+    pass
 
 
-class MulNode(BinNode, op=operator.mul): pass
+class MulNode(BinNode, op=operator.mul):
+    pass
 
 
-class DivNode(BinNode, op=operator.truediv): pass
+class DivNode(BinNode, op=operator.truediv):
+    pass
 
 
-class PowNode(BinNode, op=operator.pow): pass
+class PowNode(BinNode, op=operator.pow):
+    pass
 
 
 # This Node exists to prevent potential broadcasting problems, for example in the loss.

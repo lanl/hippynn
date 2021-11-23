@@ -7,10 +7,12 @@ import warnings
 try:
     from hippynn.plotting import plot_all_over_time
 except ImportError:
-    plot_all_over_time = lambda *args:\
-        warnings.warn("Could not import plotting module. Make sure matplotlib is installed to enable plotting")
+    plot_all_over_time = lambda *args: warnings.warn(
+        "Could not import plotting module. Make sure matplotlib is installed to enable plotting"
+    )
 
-class MetricTracker():
+
+class MetricTracker:
     """
     MetricTracker instances keep track of metrics and models for an experiment
 
@@ -27,7 +29,8 @@ class MetricTracker():
     :ivar quiet: whether to print the values registered.
 
     """
-    def __init__(self, metric_names,stopping_key,quiet=False,split_names=("train","valid","test")):
+
+    def __init__(self, metric_names, stopping_key, quiet=False, split_names=("train", "valid", "test")):
         """
 
         :param metric_names:
@@ -36,7 +39,7 @@ class MetricTracker():
         :param split_names: splits to track.
         """
         if stopping_key not in metric_names and stopping_key is not None:
-            raise ValueError("Stopping key {} is not in metric names {}".format(stopping_key,metric_names))
+            raise ValueError("Stopping key {} is not in metric names {}".format(stopping_key, metric_names))
         self.metric_names = metric_names
         self.stopping_key = stopping_key
 
@@ -45,9 +48,7 @@ class MetricTracker():
         self.n_metrics = len(metric_names)
 
         # State variables
-        self.best_metric_values = {split:
-                                       {mtype:float('inf') for mtype in self.metric_names}
-                                   for split in split_names}
+        self.best_metric_values = {split: {mtype: float("inf") for mtype in self.metric_names} for split in split_names}
         self.other_metric_values = {}
         self.best_model = None
         self.epoch_times = []
@@ -57,14 +58,14 @@ class MetricTracker():
         self.quiet = quiet
 
     @classmethod
-    def from_evaluator(cls,evaluator):
-        return cls(evaluator.metric_names,evaluator.stopping_key)
+    def from_evaluator(cls, evaluator):
+        return cls(evaluator.metric_names, evaluator.stopping_key)
 
     @property
     def current_epoch(self):
         return len(self.epoch_best_metric_values)
 
-    def register_metrics(self,metric_info,when):
+    def register_metrics(self, metric_info, when):
         """
         :param metric_info: dictionary of metric names: metric values
         :param when: string or integer specifying epoch number.
@@ -74,20 +75,21 @@ class MetricTracker():
         Updates the metrics for this epoch and computers which ones are better.
         
         """
-        better_metrics = {k:{} for k in self.best_metric_values}
-        for split_type,typevals in metric_info.items():
-            for mname,mval in typevals.items():
-                better =  (self.best_metric_values[split_type][mname] > mval)
-                if better: self.best_metric_values[split_type][mname] = mval
+        better_metrics = {k: {} for k in self.best_metric_values}
+        for split_type, typevals in metric_info.items():
+            for mname, mval in typevals.items():
+                better = self.best_metric_values[split_type][mname] > mval
+                if better:
+                    self.best_metric_values[split_type][mname] = mval
                 better_metrics[split_type][mname] = better
-        if isinstance(when,int):
+        if isinstance(when, int):
             self.epoch_metric_values.append(metric_info)
             self.epoch_best_metric_values.append(copy.deepcopy(self.best_metric_values))
         else:
             self.other_metric_values[when] = metric_info
 
         if self.stopping_key:
-            better_model = better_metrics.get("valid",{}).get(self.stopping_key,False)
+            better_model = better_metrics.get("valid", {}).get(self.stopping_key, False)
             stopping_key_metric = metric_info["valid"][self.stopping_key]
         else:
             better_model = None
@@ -95,18 +97,24 @@ class MetricTracker():
 
         return better_metrics, better_model, stopping_key_metric
 
-    def evaluation_print(self,evaluation_dict):
-        if self.quiet: return
+    def evaluation_print(self, evaluation_dict):
+        if self.quiet:
+            return
         table_evaluation_print(evaluation_dict, self.metric_names, self.name_column_width)
 
-    def evaluation_print_better(self,evaluation_dict,better_dict):
-        if self.quiet: return
+    def evaluation_print_better(self, evaluation_dict, better_dict):
+        if self.quiet:
+            return
         table_evaluation_print_better(evaluation_dict, better_dict, self.metric_names, self.name_column_width)
         if self.stopping_key:
-            print("Best {} so far: {:>8.5g}".format(self.stopping_key,self.best_metric_values['valid'][self.stopping_key]))
+            print(
+                "Best {} so far: {:>8.5g}".format(
+                    self.stopping_key, self.best_metric_values["valid"][self.stopping_key]
+                )
+            )
 
     def plot_over_time(self):
-        plot_all_over_time(self.epoch_metric_values,self.epoch_best_metric_values)
+        plot_all_over_time(self.epoch_metric_values, self.epoch_best_metric_values)
 
 
 # Driver for printing evaluation table results, with * for better entries.
@@ -122,12 +130,12 @@ def table_evaluation_print_better(evaluation_dict, better_dict, metric_names, nc
     :return: None
     """
     type_names = evaluation_dict.keys()
-    better_labels = {True:"*",False:" "}
+    better_labels = {True: "*", False: " "}
 
-    transposed_values_better = [[
-        (better_labels[better_dict[tname][mname]],evaluation_dict[tname][mname])
-                                 for tname in type_names]
-                                 for mname in metric_names]
+    transposed_values_better = [
+        [(better_labels[better_dict[tname][mname]], evaluation_dict[tname][mname]) for tname in type_names]
+        for mname in metric_names
+    ]
 
     n_types = len(type_names)
 
@@ -140,9 +148,10 @@ def table_evaluation_print_better(evaluation_dict, better_dict, metric_names, nc
         rowoutput = [k for bv in valsbet for k in bv]
         print(rowstring.format(n, *rowoutput))
 
+
 # Driver for printing evaluation table results.
 # Decoupled from the estate in case we want to more easily change print formatting.
-def table_evaluation_print(evaluation_dict,metric_names,ncs):
+def table_evaluation_print(evaluation_dict, metric_names, ncs):
     """
     Print metric results as a table.
 

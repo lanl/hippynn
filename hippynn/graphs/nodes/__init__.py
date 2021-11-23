@@ -11,10 +11,9 @@ if settings.DEBUG_NODE_CREATION:
 
 def _debprint(*args, **kwargs):
     if settings.DEBUG_NODE_CREATION:
-        print("AutoNode:",*args, **kwargs)
+        print("AutoNode:", *args, **kwargs)
     else:
         pass
 
 
 from . import base, inputs, indexers, networks, targets, physics, loss
-

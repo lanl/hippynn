@@ -17,22 +17,23 @@ from . import _BaseNode
 from ...indextypes import index_type_coercion
 
 
-class AutoNoKw():
+class AutoNoKw:
     _auto_module_class = NotImplemented
 
     def auto_module(self):
         return self._auto_module_class()
 
 
-class AutoKw():
+class AutoKw:
     _auto_module_class = NotImplemented
 
     def auto_module(self):
         kw = self.module_kwargs or {}  # Default to empty dictionary if Falsey
         return self._auto_module_class(**kw)
 
+
 @contextlib.contextmanager
-def temporary_parents(child,parents):
+def temporary_parents(child, parents):
     """
     Context manager for temporarily connecting a node to a set of parents.
     This is used during parent expansion so that `find_relatives` and
@@ -45,10 +46,11 @@ def temporary_parents(child,parents):
     """
     # Raise error if this is called on an already-build child.
     # (This function could be refactored to deal with this case.)
-    assert not(hasattr(child,"parents") or hasattr(child,"children")),\
-        "Temporary connection to node requires that it is not initialized."
+    assert not (
+        hasattr(child, "parents") or hasattr(child, "children")
+    ), "Temporary connection to node requires that it is not initialized."
 
-    parset = set(parents) # In case a node has the same parent twice.
+    parset = set(parents)  # In case a node has the same parent twice.
 
     try:
         for p in parset:
@@ -63,11 +65,11 @@ def temporary_parents(child,parents):
         del child.children
 
 
-
 class TupleTypeMismatch(Exception):
     pass
 
-class AlwaysMatch():
+
+class AlwaysMatch:
     pass
 
 
@@ -79,6 +81,7 @@ def format_form_name(form):
         formname = form.__name__
     return f"({formname})"
 
+
 def _assert_tupleform(input_tuple, type_tuple):
     _debprint("ASSERTING FORM: ", input_tuple, type_tuple)
 
@@ -88,15 +91,17 @@ def _assert_tupleform(input_tuple, type_tuple):
         if type_tuple is AlwaysMatch:
             return True
 
-        if isinstance(input_tuple,type_tuple):
+        if isinstance(input_tuple, type_tuple):
             return True
         else:
             raise TupleTypeMismatch("Parent node did not match required type: {}".format(type_tuple))
 
     # If not, it must at least have the same length
     if not len(input_tuple) == len(type_tuple):
-        raise TupleTypeMismatch("Wrong length.{}!={}".format(len(input_tuple), len(type_tuple)) +
-                                " \nInput: {} \nExpected: {}".format(input_tuple, type_tuple))
+        raise TupleTypeMismatch(
+            "Wrong length.{}!={}".format(len(input_tuple), len(type_tuple))
+            + " \nInput: {} \nExpected: {}".format(input_tuple, type_tuple)
+        )
 
     # If it does, it needs to have the correct type for each entry in the tuple.
     for i, (n, cls) in enumerate(zip(input_tuple, type_tuple)):
@@ -117,11 +122,12 @@ def adds_to_forms(fn):
     return inner
 
 
-class ParentExpander():
+class ParentExpander:
     """
     Manager object to register and implement
     optional steps in building a graph node.
     """
+
     def __init__(self):
         # Matches is a tuple of tuples of (form, matching function)
         self.matches = NotImplemented
@@ -131,21 +137,23 @@ class ParentExpander():
 
     def match(self, *form):
         """Decorator: the applied function will be a generic FormTransformer"""
+
         def inner(matchfn):
             if self.matches is NotImplemented:
                 self.matches = ()  # empty tuple
             self.matches = *self.matches, FormTransformer(form, matchfn)
             return matchfn
+
         return inner
 
-    def matchlen(self,length):
+    def matchlen(self, length):
         """
         Decorator: The decorated function will be applied if the number
         of parents matches the given length.
         :param length:
         :return:
         """
-        return self.match(*((_BaseNode,)*length))
+        return self.match(*((_BaseNode,) * length))
 
     @adds_to_forms
     def assertion(self, *form):
@@ -183,17 +191,17 @@ class ParentExpander():
         return MainOutputTransformer(AlwaysMatch)
 
     @adds_to_forms
-    def matched_idx_coercion(self,form,needed_index_states):
+    def matched_idx_coercion(self, form, needed_index_states):
         """
         Apply coercion to the needed index states if the given form is present.
         :param form:
         :param needed_index_states:
         :return:
         """
-        return IndexFormTransformer(form,needed_index_states)
+        return IndexFormTransformer(form, needed_index_states)
 
     @adds_to_forms
-    def require_idx_states(self,*needed_index_states):
+    def require_idx_states(self, *needed_index_states):
         """
         Always coerce the nodes into a needed index state.
 
@@ -206,7 +214,7 @@ class ParentExpander():
            directly from a satisfactory set of parents that doesn't require
            any expansion.
         """
-        return IndexFormTransformer(AlwaysMatch,needed_index_states)
+        return IndexFormTransformer(AlwaysMatch, needed_index_states)
 
     def _merge(self, *bases):
         """
@@ -218,16 +226,13 @@ class ParentExpander():
 
         *true_bases, cls = reversed(bases)
 
-        relevant_classes = tuple(sup_class
-                             for sup_class in true_bases
-                             if issubclass(sup_class, ExpandParents)
-                             and sup_class is not ExpandParents
-                             )
+        relevant_classes = tuple(
+            sup_class
+            for sup_class in true_bases
+            if issubclass(sup_class, ExpandParents) and sup_class is not ExpandParents
+        )
 
-        base_matches = tuple(form
-                             for sup_class in relevant_classes
-                             for form in sup_class._parent_expander.matches
-                             )
+        base_matches = tuple(form for sup_class in relevant_classes for form in sup_class._parent_expander.matches)
 
         _debprint("Bases found for merging:", relevant_classes)
 
@@ -253,10 +258,10 @@ class ParentExpander():
             _debprint("No matches found for merging!")
 
 
-
-class FormHandler():
+class FormHandler:
     def add_class_doc(self):
         return None
+
     pass
 
 
@@ -266,11 +271,11 @@ def _fn_doc_adjust(form, fn):
         return
     try:
         existing = fn.__doc__ or ""
-        lines = existing.split('\n')
+        lines = existing.split("\n")
         # Count spaces in each non-blank line
-        spaces = [len(l) - len(l.lstrip(' ')) for l in lines if l.strip() != ""]
+        spaces = [len(l) - len(l.lstrip(" ")) for l in lines if l.strip() != ""]
         # Strip those with no spaces
-        spaces = [x for x in spaces if x!=0]
+        spaces = [x for x in spaces if x != 0]
         # Grab the min, if non exist, use 0
         spaces = min(spaces) if spaces else 0
         spaces = " " * spaces
@@ -297,7 +302,6 @@ class FormTransformer(FormHandler):
     def __repr__(self):
         return f"ParentTransformer(sig={format_form_name(self.form)},fn={self.fn})"
 
-
     def __call__(self, node_self, *parents, purpose=None, **kwargs):
         try:
             _assert_tupleform(parents, self.form)
@@ -306,7 +310,7 @@ class FormTransformer(FormHandler):
             _debprint("Match function:", self.fn)
             if purpose is None:
                 purpose = "{}: Expanding parents {} based on form {}".format(type(self), parents, self.form)
-            with temporary_parents(node_self,parents):
+            with temporary_parents(node_self, parents):
                 # We have to pass self here explicitly because the form handler stores unbound functions.
                 new_parents = self.fn(node_self, *parents, purpose=purpose, **kwargs)
             return new_parents
@@ -331,23 +335,24 @@ class IndexFormTransformer(FormTransformer):
     def fn(self, node_self, *parents, **kwargs):
         """Coerces index states for all parents"""
         new_parents = []
-        for node,idxstate in zip(parents,self.idxstates):
+        for node, idxstate in zip(parents, self.idxstates):
             if idxstate is None:
                 new = node
             else:
-                new = index_type_coercion(node,idxstate)
+                new = index_type_coercion(node, idxstate)
             new_parents.append(new)
         return tuple(new_parents)
 
+
 class MainOutputTransformer(FormTransformer):
-    def __init__(self,form):
-        super().__init__(form,self.fn)
+    def __init__(self, form):
+        super().__init__(form, self.fn)
 
     def add_class_doc(self):
         return """Gets main_output of nodes: casts MultiNodes to their main output"""
 
     @staticmethod
-    def fn(node_self,*parents,**kwargs):
+    def fn(node_self, *parents, **kwargs):
         """
         Gets main_output of nodes: casts multinodes to single nodes
         """
@@ -368,8 +373,7 @@ class FormAssertion(FormHandler):
         try:
             _assert_tupleform(parents, self.form)
         except TupleTypeMismatch as ee:
-            raise TypeError( \
-                "Input does not meet required form: \nInput: {} \nForm: {}".format(parents, self)) from ee
+            raise TypeError("Input does not meet required form: \nInput: {} \nForm: {}".format(parents, self)) from ee
         return parents
 
     def __repr__(self):
@@ -410,7 +414,7 @@ def _append_docs(cls):
        This function assumes the class is defined at module-level scope.
        If not the indentation may be funny.
     """
-    new_doc = (cls.__doc__ + '\n') if cls.__doc__ else ""
+    new_doc = (cls.__doc__ + "\n") if cls.__doc__ else ""
     new_doc += """\n    .. Note::\n       This node has parent expansion, following these procedures.\n\n"""
     for form_handler in cls._parent_expander:
         add = form_handler.add_class_doc()
@@ -418,8 +422,9 @@ def _append_docs(cls):
             new_doc += f"       #. {add}\n"
         else:
             raise ValueError("No documentation for transformation!")
-    new_doc += '\n'
+    new_doc += "\n"
     return new_doc
+
 
 class ExpandParents(metaclass=ExpandParentMeta):
     _parent_expander = None
@@ -442,7 +447,7 @@ class ExpandParents(metaclass=ExpandParentMeta):
 
     def expand_parents(self, parents, *, purpose=None, **kwargs):
         if isinstance(parents, _BaseNode):
-            parents = parents,
+            parents = (parents,)
         for form_handler in self._parent_expander:
             _debprint("Processing form:")
             _debprint("\tForm:", form_handler.form)

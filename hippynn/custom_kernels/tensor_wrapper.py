@@ -12,17 +12,19 @@ def via_numpy(func):
     numpy arrays, and then giving the result back to torch.
     A bit of non-riguous testing showed that this adds overhead
     on the order of microseconds."""
+
     @functools.wraps(func)
     def wrapped(*args):
         args = [a.data.numpy() for a in args]
         result = func(*args)
-        if not isinstance(result,(tuple,list)):
+        if not isinstance(result, (tuple, list)):
             return torch.as_tensor(result)
         return tuple(torch.as_tensor(r) for r in result)
+
     return wrapped
 
 
-class NumbaCompatibleTensorFunction():
+class NumbaCompatibleTensorFunction:
     def __init__(self):
         if numba.cuda.is_available():
             self.kernel64 = self.make_kernel(numba.float64)
@@ -33,7 +35,7 @@ class NumbaCompatibleTensorFunction():
         shapes = [x.shape for x in args]
         dev = args[0].device
 
-        if dev.type == 'cpu':
+        if dev.type == "cpu":
             return self.cpu_kernel(*args)
         else:  # GPU
             dtype = args[0].dtype
@@ -57,4 +59,3 @@ class NumbaCompatibleTensorFunction():
 
     def launch_bounds(self, *shapes):
         return NotImplemented
-

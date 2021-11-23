@@ -4,34 +4,34 @@ with open("README.rst", "r") as fh:
     long_description = fh.read()
 
 doc_requirements = [
-    'sphinx',
-    'sphinx_rtd_theme',
-    'ase',
+    "sphinx",
+    "sphinx_rtd_theme",
+    "ase",
 ]
 
 full_requirements = [
-    'ase',
-    'numba',
-    'matplotlib',
-    'tqdm',
-    'graphviz',
-    'h5py',
+    "ase",
+    "numba",
+    "matplotlib",
+    "tqdm",
+    "graphviz",
+    "h5py",
 ]
 
 setuptools.setup(
-    name='hippynn',
-    version='0.0.1a',
+    name="hippynn",
+    version="0.0.1a",
     author="Nicholas Lubbers et al",
     author_email="hippynn [AT] lanl (DOT) gov",
-    python_requires='>3.7',
+    python_requires=">3.7",
     install_requires=[
         "numpy",
         "torch",
     ],
-    extras_require={'docs': doc_requirements, 'full': full_requirements},
+    extras_require={"docs": doc_requirements, "full": full_requirements},
     license="BSD 3-Clause License",
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Science/Research",
         "Programming Language :: Python :: 3",
         "Topic :: Scientific/Engineering :: Physics",

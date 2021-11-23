@@ -7,7 +7,13 @@ import torch
 
 from typing import Union, List
 
-from ..layers.hiplayers import SensitivityModule, InverseSensitivityModule, InteractLayer,InteractLayerVec,InteractLayerQuad
+from ..layers.hiplayers import (
+    SensitivityModule,
+    InverseSensitivityModule,
+    InteractLayer,
+    InteractLayerVec,
+    InteractLayerQuad,
+)
 from ..layers.transform import ResNetWrapper
 
 
@@ -26,8 +32,8 @@ def compute_hipnn_e0(encoder, Z_Data, en_data, peratom=False):
 
     sums = x.sum(dim=1).to(en_data.dtype)
     if peratom:
-        atom_counts = nonblank.sum(dim=1,keepdims=True).to(en_data.dtype)
-        Z_matrix = sums/atom_counts
+        atom_counts = nonblank.sum(dim=1, keepdims=True).to(en_data.dtype)
+        Z_matrix = sums / atom_counts
     else:
         Z_matrix = sums
 
@@ -50,16 +56,24 @@ class Hipnn(torch.nn.Module):
     """
     Hipnn Main Module
     """
+
     _interaction_class = InteractLayer
-    def __init__(self,
-                 n_features,
-                 n_sensitivities, dist_soft_min, dist_soft_max, dist_hard_max,
-                 n_atom_layers,
-                 n_interaction_layers=None,
-                 possible_species=None,
-                 n_input_features=None,
-                 sensitivity_type="inverse", resnet=True,
-                 activation=torch.nn.Softplus):
+
+    def __init__(
+        self,
+        n_features,
+        n_sensitivities,
+        dist_soft_min,
+        dist_soft_max,
+        dist_hard_max,
+        n_atom_layers,
+        n_interaction_layers=None,
+        possible_species=None,
+        n_input_features=None,
+        sensitivity_type="inverse",
+        resnet=True,
+        activation=torch.nn.Softplus,
+    ):
         """
 
         :param n_features: width of each layer
@@ -86,10 +100,10 @@ class Hipnn(torch.nn.Module):
         if possible_species is not None:
             possible_species = torch.as_tensor(possible_species)
             if n_input_features is not None:
-                if len(possible_species)-1 != n_input_features:
+                if len(possible_species) - 1 != n_input_features:
                     raise ValueError("Species and input features are not consistent with each other.")
             else:
-                n_input_features = len(possible_species)-1
+                n_input_features = len(possible_species) - 1
         else:
             if n_input_features is None:
                 raise ValueError("Either n_input_features or possible_species must be set!")
@@ -115,7 +129,7 @@ class Hipnn(torch.nn.Module):
         self.ni = n_interaction_layers
         self.resnet: Union[int, List[int]] = resnet
 
-        if self.resnet not in (True,False):
+        if self.resnet not in (True, False):
             # resnet argument specifies a different size for the internal layers
             if isinstance(self.resnet, int):
                 self.nf_middle = [self.resnet for _ in range(self.ni)]
@@ -132,7 +146,7 @@ class Hipnn(torch.nn.Module):
         self.dist_soft_min = dist_soft_min
         self.dist_hard_max = dist_hard_max
 
-        if not isinstance(activation,torch.nn.Module):
+        if not isinstance(activation, torch.nn.Module):
             activation = activation()
         self.activation = activation
 
@@ -149,16 +163,16 @@ class Hipnn(torch.nn.Module):
         elif callable(sensitivity_type):
             pass
         else:
-            raise TypeError("Invalid sensitivity type:",sensitivity_type)
+            raise TypeError("Invalid sensitivity type:", sensitivity_type)
 
         # Finally, build the network!
-        for in_size, out_size, middle_size in zip(self.feature_sizes[:-1],self.feature_sizes[1:], self.nf_middle):
+        for in_size, out_size, middle_size in zip(self.feature_sizes[:-1], self.feature_sizes[1:], self.nf_middle):
             this_block = torch.nn.ModuleList()
 
             # Add interaction layer
-            lay = self._interaction_class(in_size, middle_size,
-                                          n_sensitivities, dist_soft_min, dist_soft_max, dist_hard_max,
-                                          sensitivity_type)
+            lay = self._interaction_class(
+                in_size, middle_size, n_sensitivities, dist_soft_min, dist_soft_max, dist_hard_max, sensitivity_type
+            )
             if self.resnet:
                 lay = ResNetWrapper(lay, in_size, middle_size, out_size, self.activation)
             this_block.append(lay)
@@ -219,6 +233,7 @@ class HipnnVec(Hipnn):
     """
     HIP-NN-TS with l=1
     """
+
     _interaction_class = InteractLayerVec
 
     def forward(self, features, pair_first, pair_second, pair_dist, pair_coord):
@@ -246,4 +261,5 @@ class HipnnQuad(HipnnVec):
     """
     HIP-NN-TS with l=2
     """
+
     _interaction_class = InteractLayerQuad

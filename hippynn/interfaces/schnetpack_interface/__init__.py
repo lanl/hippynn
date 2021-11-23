@@ -19,7 +19,7 @@ from ...graphs.indextypes import IdxType
 
 
 class SchNetWrapper(torch.nn.Module):
-    def __init__(self,schnet):
+    def __init__(self, schnet):
         super().__init__()
         self.schnet = schnet
         feature_sizes = [x.dense.out_features for x in schnet.interactions]
@@ -42,7 +42,7 @@ class SchNetWrapper(torch.nn.Module):
             outputs = outputs[1]
         else:
             outputs = [outputs]
-        outputs = [x[packed['nonblank']] for x in outputs]
+        outputs = [x[packed["nonblank"]] for x in outputs]
         return outputs
 
 
@@ -51,38 +51,38 @@ class SchNetNode(AutoKw, Network, SingleNode):
     _index_state = IdxType.Atoms
     _auto_module_class = SchNetWrapper
 
-    def __init__(self, name, parents, module='auto', module_kwargs=None):
-        if module == 'auto':
+    def __init__(self, name, parents, module="auto", module_kwargs=None):
+        if module == "auto":
             self.module_kwargs = module_kwargs
             module = self.auto_module()
-        super().__init__(name,parents,module=module)
+        super().__init__(name, parents, module=module)
 
 
 def create_schnetpack_inputs(z_arr, r_arr, nonblank):
 
     dtype = r_arr.dtype
     device = r_arr.device
-    n_atoms_per_mol = (z_arr>0).sum(axis=1)
+    n_atoms_per_mol = (z_arr > 0).sum(axis=1)
 
     n_mols = n_atoms_per_mol.shape[0]
     n_atoms = n_atoms_per_mol.max()
-    z_arr = z_arr[:,:n_atoms]
-    r_arr = r_arr[:,:n_atoms]
-    nonblank=nonblank[:,:n_atoms]
+    z_arr = z_arr[:, :n_atoms]
+    r_arr = r_arr[:, :n_atoms]
+    nonblank = nonblank[:, :n_atoms]
 
-    atom_range = torch.arange(n_atoms).unsqueeze(0).expand(n_mols,-1)
+    atom_range = torch.arange(n_atoms).unsqueeze(0).expand(n_mols, -1)
 
-    atom_mask=torch.zeros(n_mols,n_atoms,dtype=z_arr.dtype,device=device)
-    atom_mask[atom_range<n_atoms_per_mol.unsqueeze(1)]=1
+    atom_mask = torch.zeros(n_mols, n_atoms, dtype=z_arr.dtype, device=device)
+    atom_mask[atom_range < n_atoms_per_mol.unsqueeze(1)] = 1
 
-    neighbor_base = torch.arange(n_atoms - 1,device=device,dtype=dtype).unsqueeze(0).expand(n_mols, n_atoms, -1)
+    neighbor_base = torch.arange(n_atoms - 1, device=device, dtype=dtype).unsqueeze(0).expand(n_mols, n_atoms, -1)
     neighbor_base = neighbor_base + torch.triu(torch.ones_like(neighbor_base), diagonal=0)
 
-    neighbor_mask = atom_mask.unsqueeze(2)*atom_mask.unsqueeze(1)[:,:,1:]
-    neighbors = neighbor_base*neighbor_mask
+    neighbor_mask = atom_mask.unsqueeze(2) * atom_mask.unsqueeze(1)[:, :, 1:]
+    neighbors = neighbor_base * neighbor_mask
 
-    cell = torch.zeros((n_mols,3,3),device=device,dtype=dtype)
-    cell_offset = torch.zeros((n_mols,n_atoms,n_atoms-1,3),device=device,dtype=dtype)
+    cell = torch.zeros((n_mols, 3, 3), device=device, dtype=dtype)
+    cell_offset = torch.zeros((n_mols, n_atoms, n_atoms - 1, 3), device=device, dtype=dtype)
 
     return {
         Properties.atom_mask: atom_mask.to(dtype),

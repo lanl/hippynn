@@ -10,6 +10,7 @@ from ..nodes.inputs import SpeciesNode
 
 # TODO: Rewrite so it can use non-one-hot-encodings?
 
+
 @register_index_transformer(IdxType.MolAtom, IdxType.Atoms)
 def idx_molatom_atom(node):
     purpose = "auto-generating indexing for {}".format(node)
@@ -17,7 +18,7 @@ def idx_molatom_atom(node):
     funrel = find_unique_relative  # Abbreviation because we so many calls in this function.
     if node.origin_node is None:
         # If we are auto-indexing in the model graph, it should be easy.
-        #species = funrel(node, SpeciesNode,
+        # species = funrel(node, SpeciesNode,
         #                 why_desc=purpose)
         pidxer = funrel(node, PaddingIndexer, why_desc=purpose)
         idx_debprint("Using reindexer for ", node)
@@ -33,8 +34,7 @@ def idx_molatom_atom(node):
             idx_debprint("Creating new ENCODER")
             # If this fails, something bad has happened -- the loss graph is trying to do something not defined by the
             # model graph
-            origin_encoder = funrel(species.origin_node, OneHotEncoder,
-                                    why_desc=purpose)
+            origin_encoder = funrel(species.origin_node, OneHotEncoder, why_desc=purpose)
             encoder = OneHotEncoder("Auto(One-hot)", (species,), species_set=origin_encoder.species_set)
             # If we can't find an encoder, let's assume we won't find an indexer
             pidxer = PaddingIndexer("Auto(PaddingIndexer)", encoder)

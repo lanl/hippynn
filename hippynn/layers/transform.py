@@ -10,6 +10,7 @@ class ResNetWrapper(torch.nn.Module):
     """
     Resnet Wrapper Class
     """
+
     def __init__(self, base_layer, nf_in, nf_middle, nf_out, activation=torch.nn.functional.softplus):
         """
         Constructor
@@ -40,7 +41,6 @@ class ResNetWrapper(torch.nn.Module):
         if self.needs_size_adjust:
             params.append(self.adjust_layer.weight)
         return params
-
 
     def forward(self, *input):
         """

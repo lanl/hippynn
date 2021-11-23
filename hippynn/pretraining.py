@@ -8,10 +8,17 @@ from hippynn.graphs.nodes.tags import Encoder
 from .graphs.nodes.inputs import SpeciesNode
 from .networks.hipnn import compute_hipnn_e0
 
-def set_e0_values(energy_module,database,
-                  trainable_after=False,decay_factor=1e-2,
-                  encoder=None,energy_name=None,species_name=None,peratom=False,
-                  ):
+
+def set_e0_values(
+    energy_module,
+    database,
+    trainable_after=False,
+    decay_factor=1e-2,
+    encoder=None,
+    energy_name=None,
+    species_name=None,
+    peratom=False,
+):
     """
     Computes values for the non-interacting energy using the training data.
 
@@ -29,7 +36,7 @@ def set_e0_values(energy_module,database,
         if encoder is None:
             encoder = find_unique_relative(energy_module, Encoder, "Constructing E0 Values")
         if species_name is None:
-            species_name = find_unique_relative(energy_module,SpeciesNode,"Constructing E0 Values").db_name
+            species_name = find_unique_relative(energy_module, SpeciesNode, "Constructing E0 Values").db_name
         if energy_name is None:
             energy_name = energy_module.main_output.db_name
 

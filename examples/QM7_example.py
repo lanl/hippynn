@@ -1,5 +1,3 @@
-
-
 PERFORM_PLOTTING = True  # Make sure you have matplotlib if you want to set this to TRUE
 
 #### Setup pytorch things
@@ -18,21 +16,20 @@ netname = "TEST_MY_FIRST_QM7_MODEL"
 # Log the output of python to `training_log.txt`
 with hippynn.tools.active_directory(netname):
 
-    with hippynn.tools.log_terminal("training_log.txt", 'wt'):
+    with hippynn.tools.log_terminal("training_log.txt", "wt"):
 
         # Hyperparameters for the network
 
         network_params = {
-            "possible_species": [0,1,6,7,8,16],   # Z values of the elements
-            'n_features': 20,                     # Number of neurons at each layer
-            "n_sensitivities": 20,                 # Number of sensitivity functions in an interaction layer
-            "dist_soft_min": 1.6,                 #
-            "dist_soft_max": 10.,
+            "possible_species": [0, 1, 6, 7, 8, 16],  # Z values of the elements
+            "n_features": 20,  # Number of neurons at each layer
+            "n_sensitivities": 20,  # Number of sensitivity functions in an interaction layer
+            "dist_soft_min": 1.6,  #
+            "dist_soft_max": 10.0,
             "dist_hard_max": 12.5,
-            "n_interaction_layers": 2,            # Number of interaction blocks
-            "n_atom_layers": 3,                   # Number of atom layers in an interaction block
+            "n_interaction_layers": 2,  # Number of interaction blocks
+            "n_atom_layers": 3,  # Number of atom layers in an interaction block
         }
-
 
         # Define a model
 
@@ -43,10 +40,10 @@ with hippynn.tools.active_directory(netname):
         positions = inputs.PositionsNode(db_name="R")
 
         # Model computations
-        network = networks.Hipnn("HIPNN", (species, positions), module_kwargs = network_params)
-        henergy = targets.HEnergyNode("HEnergy",network)
+        network = networks.Hipnn("HIPNN", (species, positions), module_kwargs=network_params)
+        henergy = targets.HEnergyNode("HEnergy", network)
         molecule_energy = henergy.mol_energy
-        molecule_energy.db_name="T"
+        molecule_energy.db_name = "T"
         hierarchicality = henergy.hierarchicality
 
         # define loss quantities
@@ -58,17 +55,17 @@ with hippynn.tools.active_directory(netname):
 
         ### More advanced usage of loss graph
 
-        pred_per_atom = physics.PerAtom("PeratomPredicted",(molecule_energy,species)).pred
-        true_per_atom = physics.PerAtom("PeratomTrue",(molecule_energy.true,species.true))
-        mae_per_atom = loss.MAELoss(pred_per_atom,true_per_atom)
+        pred_per_atom = physics.PerAtom("PeratomPredicted", (molecule_energy, species)).pred
+        true_per_atom = physics.PerAtom("PeratomTrue", (molecule_energy.true, species.true))
+        mae_per_atom = loss.MAELoss(pred_per_atom, true_per_atom)
 
         ### End more advanced usage of loss graph
 
-        loss_error = (rmse_energy + mae_energy)
+        loss_error = rmse_energy + mae_energy
 
         rbar = loss.Mean.of_node(hierarchicality)
         l2_reg = loss.l2reg(network)
-        loss_regularization = 1e-6 * l2_reg + rbar    # L2 regularization and hierarchicality regularization
+        loss_regularization = 1e-6 * l2_reg + rbar  # L2 regularization and hierarchicality regularization
 
         train_loss = loss_error + loss_regularization
 
@@ -76,15 +73,15 @@ with hippynn.tools.active_directory(netname):
         # a single loss, but we can check other metrics too to better understand how the model is training.
         # There will also be plots of these things over time when training completes.
         validation_losses = {
-            "T-RMSE"      : rmse_energy,
-            "T-MAE"       : mae_energy,
-            "T-RSQ"       : rsq_energy,
+            "T-RMSE": rmse_energy,
+            "T-MAE": mae_energy,
+            "T-RSQ": rsq_energy,
             "TperAtom MAE": mae_per_atom,
-            "T-Hier"      : rbar,
-            "L2Reg"       : l2_reg,
-            "Loss-Err"    : loss_error,
-            "Loss-Reg"    : loss_regularization,
-            "Loss"        : train_loss,
+            "T-Hier": rbar,
+            "L2Reg": l2_reg,
+            "Loss-Err": loss_error,
+            "Loss-Reg": loss_regularization,
+            "Loss": train_loss,
         }
         early_stopping_key = "Loss-Err"
 
@@ -94,18 +91,19 @@ with hippynn.tools.active_directory(netname):
 
             plot_maker = plotting.PlotMaker(
                 # Simple plots which compare the network to the database
-
                 plotting.Hist2D.compare(molecule_energy, saved=True),
-
                 # Slightly more advanced control of plotting!
-                plotting.Hist2D(true_per_atom,pred_per_atom,
-                                xlabel="True Energy/Atom",ylabel="Predicted Energy/Atom",
-                                saved="PerAtomEn.pdf"),
-
-                plotting.HierarchicalityPlot(hierarchicality.pred,
-                                             molecule_energy.pred - molecule_energy.true,
-                                             saved="HierPlot.pdf"),
-                plot_every=10,   # How often to make plots -- here, epoch 0, 10, 20...
+                plotting.Hist2D(
+                    true_per_atom,
+                    pred_per_atom,
+                    xlabel="True Energy/Atom",
+                    ylabel="Predicted Energy/Atom",
+                    saved="PerAtomEn.pdf",
+                ),
+                plotting.HierarchicalityPlot(
+                    hierarchicality.pred, molecule_energy.pred - molecule_energy.true, saved="HierPlot.pdf"
+                ),
+                plot_every=10,  # How often to make plots -- here, epoch 0, 10, 20...
             )
         else:
             plot_maker = None
@@ -119,14 +117,14 @@ with hippynn.tools.active_directory(netname):
 
         max_batch_size = 12
         database_params = {
-            'name': 'qm7',                            # Prefix for arrays in folder
-            'directory': '../../../datasets/qm7_processed',
-            'quiet': False,
-            'test_size': 0.1,
-            'valid_size': 0.1,
-            'seed': 2001,
-                    # How many samples from the training set to use during evaluation
-            **db_info                 # Adds the inputs and targets names from the model as things to load
+            "name": "qm7",  # Prefix for arrays in folder
+            "directory": "../../../datasets/qm7_processed",
+            "quiet": False,
+            "test_size": 0.1,
+            "valid_size": 0.1,
+            "seed": 2001,
+            # How many samples from the training set to use during evaluation
+            **db_info,  # Adds the inputs and targets names from the model as things to load
         }
 
         from hippynn.databases import DirectoryDatabase
@@ -137,6 +135,7 @@ with hippynn.tools.active_directory(netname):
         # Fit the non-interacting energies by examining the database.
 
         from hippynn.pretraining import set_e0_values
+
         set_e0_values(henergy, database, trainable_after=False)
 
         min_epochs = 50
@@ -147,19 +146,22 @@ with hippynn.tools.active_directory(netname):
 
         optimizer = torch.optim.Adam(training_modules.model.parameters(), lr=1e-3)
 
-        scheduler = RaiseBatchSizeOnPlateau(optimizer=optimizer,
-                                            max_batch_size=80,
-                                            patience=5,)
+        scheduler = RaiseBatchSizeOnPlateau(
+            optimizer=optimizer,
+            max_batch_size=80,
+            patience=5,
+        )
 
-        controller = PatienceController(optimizer=optimizer,
-                                        scheduler=scheduler,
-                                        batch_size=10,
-                                        eval_batch_size=512,
-                                        max_epochs=1000,
-                                        termination_patience=20,
-                                        fraction_train_eval=0.1,
-                                        stopping_key=early_stopping_key,
-                                        )
+        controller = PatienceController(
+            optimizer=optimizer,
+            scheduler=scheduler,
+            batch_size=10,
+            eval_batch_size=512,
+            max_epochs=1000,
+            termination_patience=20,
+            fraction_train_eval=0.1,
+            stopping_key=early_stopping_key,
+        )
 
         experiment_params = hippynn.experiment.SetupParams(
             controller=controller,
@@ -169,10 +171,11 @@ with hippynn.tools.active_directory(netname):
         # Parameters describing the training procedure.
         from hippynn.experiment import setup_and_train
 
-        setup_and_train(training_modules=training_modules,
-                        database=database,
-                        setup_params=experiment_params,
-                        )
+        setup_and_train(
+            training_modules=training_modules,
+            database=database,
+            setup_params=experiment_params,
+        )
 
         # Making predictions on a database using the trained model
 
@@ -182,10 +185,8 @@ with hippynn.tools.active_directory(netname):
         outputs = pred.apply_to_database(database)
 
         # The dictionary for the test split
-        test_outputs = outputs['test']
+        test_outputs = outputs["test"]
 
         # Get outputs from the database.
         test_hier_predicted = test_outputs[hierarchicality]
         test_energy_predicted = test_outputs[molecule_energy]
-
-

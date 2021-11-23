@@ -22,7 +22,7 @@ def get_subgraph(required_nodes):
     required_nodes = list(set(required_nodes))
     subgraph_nodes = required_nodes + [p for node in required_nodes for p in node.get_all_parents()]
 
-    subgraph_nodes = subgraph_nodes + [c for mn in subgraph_nodes if isinstance(mn,MultiNode) for c in mn.children]
+    subgraph_nodes = subgraph_nodes + [c for mn in subgraph_nodes if isinstance(mn, MultiNode) for c in mn.children]
     # ^-- a note on this:
     # Children are included because bad things happen if a multinode is left without any of its children;
     # The API using dot syntax will break.
@@ -66,8 +66,8 @@ def compute_evaluation_order(all_nodes):
                 satisfied_nodes.add(considered_node)
                 # Input nodes need not be considered; their values are given to `forward()`
                 if not isinstance(considered_node, InputNode):
-                   evaluation_inputs_list.append(parents)
-                   evaluation_outputs_list.append(considered_node)
+                    evaluation_inputs_list.append(parents)
+                    evaluation_outputs_list.append(considered_node)
                 break  # This break is necessary to make the `else` clause work;
                 # if we find a node, we break and the `else` statement won't be hit.
         else:
@@ -79,7 +79,7 @@ def compute_evaluation_order(all_nodes):
     return evaluation_outputs_list, evaluation_inputs_list
 
 
-def check_evaluation_order(evaluation_outputs_list,evaluation_inputs_list):
+def check_evaluation_order(evaluation_outputs_list, evaluation_inputs_list):
     """
     Validate an evaluation order.
 
@@ -119,14 +119,14 @@ def copy_subgraph(required_nodes, assume_inputed, tag=None):
     subgraph_nodes = get_subgraph(required_nodes)
 
     # Maps old nodes to new nodes.
-    node_mapping = {n:copy.copy(n) for n in subgraph_nodes} #Shallow copy is still linked to the same torch modules
+    node_mapping = {n: copy.copy(n) for n in subgraph_nodes}  # Shallow copy is still linked to the same torch modules
     if tag:
         for n in node_mapping.values():
-            n.name="({}){}".format(tag,n.name)
+            n.name = "({}){}".format(tag, n.name)
 
     # Set the parents and children of the new nodes to point to the new copies.
     # Children not used in the subgraph are dropped
-    for n_old,n_new in node_mapping.items():
+    for n_old, n_new in node_mapping.items():
         n_new.parents = tuple(node_mapping[p] for p in n_old.parents)
         n_new.children = tuple(node_mapping[c] for c in n_old.children if c in node_mapping)
         # print()
@@ -151,8 +151,12 @@ def copy_subgraph(required_nodes, assume_inputed, tag=None):
 
     # For each parent p of the assumed inputted:
     # If p not a a parent of an unassumed node, then p should not be in the graph.
-    assert all(p not in new_subgraph for ai in assume_inputed for p in ai.parents
-               if all(p not in n.parents for n in new_subgraph if n not in assume_inputed))
+    assert all(
+        p not in new_subgraph
+        for ai in assume_inputed
+        for p in ai.parents
+        if all(p not in n.parents for n in new_subgraph if n not in assume_inputed)
+    )
 
     # print(get_connected_nodes(new_required)) # Prior debug... change to logging?
     return new_required, new_subgraph
@@ -178,17 +182,17 @@ def check_link_consistency(node_set):
     """
     node_set = set(node_set)
     node_set = get_connected_nodes(node_set)
-    forward_links = set((parent,child) for parent in node_set for child in parent.children)
-    back_links = set((parent,child) for child in node_set for parent in child.parents)
+    forward_links = set((parent, child) for parent in node_set for child in parent.children)
+    back_links = set((parent, child) for child in node_set for parent in child.parents)
 
     if forward_links == back_links:
         return True
 
-    broken_forward = forward_links-back_links
-    broken_back = back_links-forward_links
-    raise GraphInconsistency("Graph is inconsistent!\n"
-                             f"Broken forward links:{broken_forward}"
-                             f"Broke back links:{broken_back}")
+    broken_forward = forward_links - back_links
+    broken_back = back_links - forward_links
+    raise GraphInconsistency(
+        "Graph is inconsistent!\n" f"Broken forward links:{broken_forward}" f"Broke back links:{broken_back}"
+    )
 
 
 def replace_node(old_node, new_node, disconnect_old=False):
@@ -220,8 +224,10 @@ def replace_node(old_node, new_node, disconnect_old=False):
 
     if disconnect_old:
         if old_node in new_node_requires:
-            raise NodeOperationError("Cannot replace this node and remove the old one, because the"
-                                     f"new node {new_node} depends on the old node {old_node}.")
+            raise NodeOperationError(
+                "Cannot replace this node and remove the old one, because the"
+                f"new node {new_node} depends on the old node {old_node}."
+            )
 
     if isinstance(old_node, MultiNode):
         if not isinstance(new_node, MultiNode):
@@ -262,10 +268,10 @@ def _determine_multinode_child_match(old_node: MultiNode, new_node: MultiNode):
 
     try:
         # Try name-based matching first.
-        matches = {getattr(old_node, name):getattr(new_node, name) for name in new_node._output_names}
+        matches = {getattr(old_node, name): getattr(new_node, name) for name in new_node._output_names}
     except AttributeError:
         # If name-based matching does not work, just match by order.
-        matches = {co:cn for co,cn in zip(old_node.children,new_node.children)}
+        matches = {co: cn for co, cn in zip(old_node.children, new_node.children)}
         # Raise an error if this match would leave a residual child used on the old node.
 
     # Raise error if there are children of the old node which do not match,
@@ -276,18 +282,18 @@ def _determine_multinode_child_match(old_node: MultiNode, new_node: MultiNode):
     return matches
 
 
-def replace_node_with_constant(node,value,name=None):
+def replace_node_with_constant(node, value, name=None):
     vnode = ValueNode(value)
     vnode.name = name
     replace_node(node, vnode)
 
 
-def search_by_name(nodes,name_or_dbname):
+def search_by_name(nodes, name_or_dbname):
     """
     Look for a unique related node with a given db_name or name.
     The db_name will be given higher precedence.
 
-    :param nodes: starting point for search 
+    :param nodes: starting point for search
     :param name_or_dbname: name or dbname for node search
     :return: node that matches criterion
 
@@ -296,7 +302,6 @@ def search_by_name(nodes,name_or_dbname):
 
     """
     try:
-        return find_unique_relative(nodes,lambda n: n.db_name == name_or_dbname)
+        return find_unique_relative(nodes, lambda n: n.db_name == name_or_dbname)
     except NodeNotFound:
-        return find_unique_relative(nodes,lambda n: n.name == name_or_dbname)
-
+        return find_unique_relative(nodes, lambda n: n.name == name_or_dbname)

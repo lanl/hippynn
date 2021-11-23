@@ -15,7 +15,7 @@ and constructing the checkpoint.
 """
 
 
-class Restarter():
+class Restarter:
     def attempt_reload(self):
         return NotImplemented
 
@@ -35,24 +35,25 @@ class RestartDB(Restarter):
     def __getstate__(self):
         state = self.__dict__.copy()
         cls_spec = (self.cls.__module__, self.cls.__qualname__)
-        state['cls'] = cls_spec
+        state["cls"] = cls_spec
         return state
 
     def __setstate__(self, state):
-        cls_module, cls_name = state['cls']
+        cls_module, cls_name = state["cls"]
         try:
             import importlib
+
             module = importlib.import_module(cls_module)
-            state['cls'] = getattr(module, cls_name)
+            state["cls"] = getattr(module, cls_name)
         except (ImportError, AttributeError) as ee:
             # Save the message, not the full exception object
             # including traceback etc.
-            state['cls'] = ee.msg
+            state["cls"] = ee.msg
         for k, v in state.items():
             setattr(self, k, v)
 
     def attempt_reload(self):
-        print("restarting",self.cls)
+        print("restarting", self.cls)
         if isinstance(self.cls, str):
             raise RuntimeError(f"Not restartable due to error: {self.cls}")
         try:
@@ -62,7 +63,7 @@ class RestartDB(Restarter):
         return db
 
 
-class Restartable():
+class Restartable:
     @classmethod
     def make_restarter(cls, *args, **kwargs):
         return RestartDB(cls, *args, **kwargs)

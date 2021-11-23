@@ -21,6 +21,7 @@ from .. import settings
 # implementation: use swap_parent and generate input nodes with the right index
 # type.
 
+
 class GraphModule(torch.nn.Module):
     def __init__(self, required_inputs, nodes_to_compute):
         """
@@ -109,14 +110,15 @@ class GraphModule(torch.nn.Module):
 
     def extra_repr(self):
         return "Inputs: {} \n Outputs: {}".format(
-            tuple(x.name for x in self.input_nodes),
-            tuple(x.name for x in self.nodes_to_compute)
+            tuple(x.name for x in self.input_nodes), tuple(x.name for x in self.nodes_to_compute)
         )
 
     def forward(self, *input_values):
         # Add gradient computation if needed (e.g. for force computation)
-        computed = {node: value.requires_grad_(value.requires_grad or node.requires_grad)
-                    for node, value in zip(self.input_nodes, input_values)}
+        computed = {
+            node: value.requires_grad_(value.requires_grad or node.requires_grad)
+            for node, value in zip(self.input_nodes, input_values)
+        }
 
         for this_node, inputs_for_this_node in zip(self.forward_output_list, self.forward_inputs_list):
             computed[this_node] = self.get_module(this_node)(*(computed[inkey] for inkey in inputs_for_this_node))
@@ -127,19 +129,24 @@ class GraphModule(torch.nn.Module):
 class _DebugGraphModule(GraphModule):
     def forward(self, *input_values):
         try:
-            computed = {node: value.requires_grad_(value.requires_grad or node.requires_grad)
-                        for node, value in zip(self.input_nodes, input_values)}
+            computed = {
+                node: value.requires_grad_(value.requires_grad or node.requires_grad)
+                for node, value in zip(self.input_nodes, input_values)
+            }
         except Exception as ee:
             for n, v in zip(self.input_nodes, input_values):
-                print("\tNode:", n, )
+                print(
+                    "\tNode:",
+                    n,
+                )
                 print("\t\tValue:", v)
             raise Exception("Something broke loading the values.") from ee
 
         print("INPUTTED:")
         for k, v in computed.items():
-            print('\t', k.name, v.device, v.shape, v)
+            print("\t", k.name, v.device, v.shape, v)
         print("Should be inputted:")
-        print(*(i.name for i in self.input_nodes), sep='\n\t')
+        print(*(i.name for i in self.input_nodes), sep="\n\t")
 
         for this_node, inputs_for_this_node in zip(self.forward_output_list, self.forward_inputs_list):
             print("Computing:", this_node.name)
@@ -177,7 +184,6 @@ class _DebugGraphModule(GraphModule):
                 raise e
 
         return tuple(computed[x] for x in self.nodes_to_compute)
-
 
 
 if settings.DEBUG_GRAPH_EXECUTION:

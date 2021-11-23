@@ -7,7 +7,7 @@ import warnings
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 
-class Controller():
+class Controller:
     """
     Class for controlling the training dynamics.
 
@@ -29,12 +29,28 @@ class Controller():
        found in the optimizer. See ``RaiseBatchSizeOnPlateau`` in this module.
 
     """
-    _state_vars = "boredom", "current_epoch", "batch_size",\
-                  "eval_batch_size", "_max_epochs", "fraction_train_eval", "stopping_key"
 
-    def __init__(self, optimizer, scheduler, batch_size,
-                 max_epochs, stopping_key,
-                 eval_batch_size=None, fraction_train_eval=0.1, quiet=False):
+    _state_vars = (
+        "boredom",
+        "current_epoch",
+        "batch_size",
+        "eval_batch_size",
+        "_max_epochs",
+        "fraction_train_eval",
+        "stopping_key",
+    )
+
+    def __init__(
+        self,
+        optimizer,
+        scheduler,
+        batch_size,
+        max_epochs,
+        stopping_key,
+        eval_batch_size=None,
+        fraction_train_eval=0.1,
+        quiet=False,
+    ):
 
         self.optimizer = optimizer
         self.scheduler = scheduler
@@ -68,7 +84,7 @@ class Controller():
         self.scheduler_list = scheduler
 
     def state_dict(self):
-        state_dict = {k: getattr(self,k) for k in self._state_vars}
+        state_dict = {k: getattr(self, k) for k in self._state_vars}
         state_dict["optimizer"] = self.optimizer.state_dict()
         state_dict["scheduler"] = [sch.state_dict() for sch in self.scheduler_list]
         return state_dict
@@ -87,7 +103,7 @@ class Controller():
     def max_epochs(self):
         return self._max_epochs
 
-    def push_epoch(self,epoch,better_model,metric):
+    def push_epoch(self, epoch, better_model, metric):
         self.current_epoch += 1
 
         if better_model:
@@ -115,7 +131,9 @@ class PatienceController(Controller):
     :ivar patience: How many epochs are allowed without improvement before termination.
     :ivar last_best: The eoch number of the last best epoch encountered.
     """
+
     _state_vars = Controller._state_vars + ("patience", "last_best")
+
     def __init__(self, *args, termination_patience, **kwargs):
         super().__init__(*args, **kwargs)
         self.patience = termination_patience
@@ -134,7 +152,7 @@ class PatienceController(Controller):
         return min(self.last_best + self.patience, self._max_epochs)
 
 
-class RaiseBatchSizeOnPlateau():
+class RaiseBatchSizeOnPlateau:
     """
     Learning rate scheduler compatible with pytorch schedulers.
 
@@ -155,27 +173,33 @@ class RaiseBatchSizeOnPlateau():
        the container which governs the batch size using ``set_controller``.
        The default base hippynn Controller will do this automatically.
     """
-    def __init__(self, optimizer,
-                 max_batch_size,
-                 factor=0.5,
-                 patience=10,
-                 threshold=0.0001,
-                 threshold_mode='rel',
-                 verbose=True,
-                 controller=None,):
 
-        if threshold_mode not in ('abs','rel'):
+    def __init__(
+        self,
+        optimizer,
+        max_batch_size,
+        factor=0.5,
+        patience=10,
+        threshold=0.0001,
+        threshold_mode="rel",
+        verbose=True,
+        controller=None,
+    ):
+
+        if threshold_mode not in ("abs", "rel"):
             raise ValueError("Mode must be 'abs' or 'rel'")
 
-        self.inner = ReduceLROnPlateau(optimizer,
-                                       patience=patience,
-                                       factor=factor,
-                                       threshold=threshold,
-                                       threshold_mode=threshold_mode,
-                                       verbose=verbose)
+        self.inner = ReduceLROnPlateau(
+            optimizer,
+            patience=patience,
+            factor=factor,
+            threshold=threshold,
+            threshold_mode=threshold_mode,
+            verbose=verbose,
+        )
         self.controller = controller
         self.max_batch_size = max_batch_size
-        self.best_metric = float('inf')
+        self.best_metric = float("inf")
         self.boredom = 0
         self.last_epoch = 0
 
@@ -190,7 +214,7 @@ class RaiseBatchSizeOnPlateau():
             "inner": self.inner.state_dict(),
         }
 
-    def set_state_dict(self,state_dict):
+    def set_state_dict(self, state_dict):
         self.boredom = state_dict["boredom"]
         self.best_metric = state_dict["boredom"]
         self.inner.load_state_dict(state_dict["inner"])
@@ -200,8 +224,10 @@ class RaiseBatchSizeOnPlateau():
         self.last_epoch += 1
 
         if self.controller is None:
-            warnings.warn("Batch size controller not specified. "
-                          "Defering to LR Scheduler and batch size will not be controlled.")
+            warnings.warn(
+                "Batch size controller not specified. "
+                "Defering to LR Scheduler and batch size will not be controlled."
+            )
 
             return self.inner.step(metrics)
 
@@ -209,7 +235,7 @@ class RaiseBatchSizeOnPlateau():
             return self.inner.step(metrics)
 
         if self.inner.threshold_mode == "rel":
-            better = self.best_metric * (1-self.inner.threshold) > metrics
+            better = self.best_metric * (1 - self.inner.threshold) > metrics
         elif self.inner.treshold_mode == "abs":
             better = self.best_metric - self.inner.threshold > metrics
 
@@ -221,13 +247,13 @@ class RaiseBatchSizeOnPlateau():
 
         if self.boredom > self.inner.patience:
             new_batch_size = int(self.controller.batch_size / self.inner.factor)
-            new_batch_size = min(new_batch_size,self.max_batch_size)
+            new_batch_size = min(new_batch_size, self.max_batch_size)
             self.controller.batch_size = new_batch_size
             self.boredom = 0
             if self.inner.verbose:
                 print("Raising batch size to", new_batch_size)
             if new_batch_size >= self.max_batch_size:
-                self.inner.last_epoch = self.last_epoch-1
+                self.inner.last_epoch = self.last_epoch - 1
                 if self.inner.verbose:
                     print("Max batch size reached, Lowering learning rate from here.")
 
@@ -253,4 +279,4 @@ def is_scheduler_like(thing):
     """
     # Pytorch doesn't have a unified inheritance class for these things.
     # So we call it a scheduler if it has a "step" attribute that itself is callable
-    return callable(getattr(thing,"step",None))
+    return callable(getattr(thing, "step", None))

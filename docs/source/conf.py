@@ -17,12 +17,12 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'hippynn'
-copyright = '2019, Los Alamos National Laboratory'
-author = 'Nicholas Lubbers'
+project = "hippynn"
+copyright = "2019, Los Alamos National Laboratory"
+author = "Nicholas Lubbers"
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.1a'
+release = "0.0.1a"
 
 
 # -- General configuration ---------------------------------------------------
@@ -30,26 +30,22 @@ release = '0.0.1a'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx_rtd_theme',
-    'sphinx.ext.viewcode'
-]
+extensions = ["sphinx.ext.autodoc", "sphinx_rtd_theme", "sphinx.ext.viewcode"]
 add_module_names = False
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
-autodoc_default_options ={
-    'no-show-inheritance':True,
-    'special-members': '__init__',
+autodoc_default_options = {
+    "no-show-inheritance": True,
+    "special-members": "__init__",
 }
-autodoc_mock_imports = ["pyanitools","seqm","schnetpack"]
+autodoc_mock_imports = ["pyanitools", "seqm", "schnetpack"]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -58,10 +54,11 @@ autodoc_mock_imports = ["pyanitools","seqm","schnetpack"]
 # a list of builtin themes.
 #
 import sphinx_rtd_theme
-html_theme = 'sphinx_rtd_theme'
+
+html_theme = "sphinx_rtd_theme"
 html_theme_options = {
-    'navigation_depth':-1,
-    'prev_next_buttons_location':'both',
+    "navigation_depth": -1,
+    "prev_next_buttons_location": "both",
 }
 
 
@@ -69,5 +66,3 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
-
-

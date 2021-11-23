@@ -1,12 +1,14 @@
 import torch
+
 """
 checkpoint and state generation
 """
 from ..databases.restarter import Restartable
 
-DEFAULT_STRUCTURE_FNAME= 'experiment_structure.pt'
+DEFAULT_STRUCTURE_FNAME = "experiment_structure.pt"
 
-def create_state(model,controller,metric_tracker):
+
+def create_state(model, controller, metric_tracker):
     """
     Create an experiment state dictionary.
 
@@ -17,10 +19,10 @@ def create_state(model,controller,metric_tracker):
     :return: dictionary containing experiment state.
     """
     return {
-        'model': model.state_dict(),
-        'controller': controller.state_dict(),
-        'metric_tracker': metric_tracker,
-        'torch_rng_state':torch.random.get_rng_state(),
+        "model": model.state_dict(),
+        "controller": controller.state_dict(),
+        "metric_tracker": metric_tracker,
+        "torch_rng_state": torch.random.get_rng_state(),
     }
 
 
@@ -36,16 +38,17 @@ def create_structure_file(training_modules, database, controller, fname=DEFAULT_
     :return: Nothing
     """
     structure = {
-        'training_modules': training_modules,
-        'controller': controller,
+        "training_modules": training_modules,
+        "controller": controller,
     }
-    if isinstance(database,Restartable):
-        structure['database'] = database.restarter
+    if isinstance(database, Restartable):
+        structure["database"] = database.restarter
 
-    with open(fname, 'wb') as pfile:
-        torch.save(structure,pfile)
+    with open(fname, "wb") as pfile:
+        torch.save(structure, pfile)
 
-def restore_checkpoint(structure,state,restore_db=True):
+
+def restore_checkpoint(structure, state, restore_db=True):
     """
 
     :param structure: experiment structure object
@@ -55,18 +58,19 @@ def restore_checkpoint(structure,state,restore_db=True):
     :return: experiment structure
     """
 
-    structure['training_modules'][0].load_state_dict(state['model'])
-    structure['controller'].load_state_dict(state['controller'])
+    structure["training_modules"][0].load_state_dict(state["model"])
+    structure["controller"].load_state_dict(state["controller"])
 
-    if 'database' in structure and restore_db:
-        structure['database'] = structure['database'].attempt_reload()
+    if "database" in structure and restore_db:
+        structure["database"] = structure["database"].attempt_reload()
 
-    structure['metric_tracker'] = state['metric_tracker']
-    torch.random.set_rng_state(state['torch_rng_state'])
+    structure["metric_tracker"] = state["metric_tracker"]
+    torch.random.set_rng_state(state["torch_rng_state"])
 
     return structure
 
-def load_checkpoint(structure_fname,state_fname,restore_db=True,**kwargs):
+
+def load_checkpoint(structure_fname, state_fname, restore_db=True, **kwargs):
     """
     Load a checkpoint from filenames. kwargs are passed to torch
 
@@ -79,13 +83,13 @@ def load_checkpoint(structure_fname,state_fname,restore_db=True,**kwargs):
     :return:
     """
 
-    with open(structure_fname,'rb') as pfile:
-        structure = torch.load(pfile,**kwargs)
+    with open(structure_fname, "rb") as pfile:
+        structure = torch.load(pfile, **kwargs)
 
-    with open(state_fname,'rb') as pfile:
-        state = torch.load(pfile,**kwargs)
+    with open(state_fname, "rb") as pfile:
+        state = torch.load(pfile, **kwargs)
 
-    return restore_checkpoint(structure,state,restore_db=restore_db)
+    return restore_checkpoint(structure, state, restore_db=restore_db)
 
 
 def load_checkpoint_from_cwd(**kwargs):
@@ -95,7 +99,7 @@ def load_checkpoint_from_cwd(**kwargs):
 
     :return:
     """
-    return load_checkpoint(DEFAULT_STRUCTURE_FNAME,'best_checkpoint.pt',**kwargs)
+    return load_checkpoint(DEFAULT_STRUCTURE_FNAME, "best_checkpoint.pt", **kwargs)
 
 
 def load_model_from_cwd(**kwargs):
@@ -106,13 +110,13 @@ def load_model_from_cwd(**kwargs):
     :return:
     """
 
-    with open('experiment_structure.pt','rb') as pfile:
-        structure = torch.load(pfile,**kwargs)
+    with open("experiment_structure.pt", "rb") as pfile:
+        structure = torch.load(pfile, **kwargs)
 
-    with open('best_model.pkl','rb') as pfile:
-        state = torch.load(pfile,**kwargs)
+    with open("best_model.pkl", "rb") as pfile:
+        state = torch.load(pfile, **kwargs)
 
-    model = structure['training_modules'].model
+    model = structure["training_modules"].model
     model.load_state_dict(state)
 
     return model

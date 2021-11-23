@@ -11,7 +11,7 @@ import torch
 from . import settings
 
 
-class teed_file_output():
+class teed_file_output:
     def __init__(self, *streams):
         self.streams = streams
 
@@ -23,8 +23,9 @@ class teed_file_output():
         for stream in self.streams:
             stream.flush(*arg, **kwargs)
 
+
 @contextlib.contextmanager
-def log_terminal(file,*args,**kwargs):
+def log_terminal(file, *args, **kwargs):
     """
     :param: file: filename or string
     :param: args:   piped to ``open(file,*args,**kwargs)`` if file is a string
@@ -55,6 +56,7 @@ def log_terminal(file,*args,**kwargs):
                 if close_on_exit:
                     file.close()
 
+
 @contextlib.contextmanager
 def active_directory(dirname, create=None):
     """
@@ -80,11 +82,14 @@ def active_directory(dirname, create=None):
     exists = os.path.exists(dirname)
 
     if create is True and exists:
-        raise FileExistsError(f"Directory '{dirname}' exists already. Pass create=False or create=None to "
-                              "allow switching to an existing directory.")
+        raise FileExistsError(
+            f"Directory '{dirname}' exists already. Pass create=False or create=None to "
+            "allow switching to an existing directory."
+        )
     if create is False and not exists:
-        raise FileNotFoundError(f"Directory '{dirname}' not found. Pass create=True or create=None to allow "
-                                "creation of the directory.")
+        raise FileNotFoundError(
+            f"Directory '{dirname}' not found. Pass create=True or create=None to allow " "creation of the directory."
+        )
     if not exists and create in (None, True):
         os.makedirs(dirname)
 
@@ -113,7 +118,7 @@ def param_print(module):
 
 
 def device_fallback():
-    device =  (torch.cuda.is_available() and torch.device(torch.cuda.current_device())) or torch.device('cpu')
+    device = (torch.cuda.is_available() and torch.device(torch.cuda.current_device())) or torch.device("cpu")
     print("Device was not specified. Attempting to default to device:", device)
     return device
 
@@ -128,22 +133,27 @@ def arrdict_len(array_dictionary):
 
 
 def print_lr(optimizer):
-    for i,param_group in enumerate(optimizer.param_groups):
-        print("Learning rate:{:>10.5g}".format(param_group['lr']))
+    for i, param_group in enumerate(optimizer.param_groups):
+        print("Learning rate:{:>10.5g}".format(param_group["lr"]))
 
 
 def isiterable(obj):
     return isinstance(obj, collections.abc.Iterable)
 
 
-def pad_np_array_to_length_with_zeros(array,length,axis=0):
+def pad_np_array_to_length_with_zeros(array, length, axis=0):
     n = array.shape[axis]
-    m = length-n
+    m = length - n
     if m < 0:
         raise ValueError("Cannot pad array to negative length! Array length: {n}, Total length requested: {length}")
     pad_width = [[0, 0] for _ in array.shape]
     pad_width[axis][1] = m
-    return np.pad(array, pad_width, mode='constant',)
+    return np.pad(
+        array,
+        pad_width,
+        mode="constant",
+    )
+
 
 def np_of_torchdefaultdtype():
     return torch.ones(1, dtype=torch.get_default_dtype()).numpy().dtype

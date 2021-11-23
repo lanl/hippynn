@@ -56,23 +56,22 @@ def visualize_node_set(node_set, compactify, preserve=None):
     else:
         dot_names = starting_dot_names
 
-
     # Create the visible nodes
     for node in dot_names:
         if dot_names[node] == starting_dot_names[node]:
-            node_attr = {'style': 'rounded','shape':'rect'}
+            node_attr = {"style": "rounded", "shape": "rect"}
 
-            if isinstance(node,MultiNode):
-                node_attr['style']='rounded,bold'
+            if isinstance(node, MultiNode):
+                node_attr["style"] = "rounded,bold"
 
             if node.parents == ():
-                node_attr["color"]='green'
+                node_attr["color"] = "green"
             elif preserve and node in preserve:
-                node_attr["color"]='blue'
+                node_attr["color"] = "blue"
             elif all(c not in dot_names for c in node.children):
-                node_attr["color"]='red'
+                node_attr["color"] = "red"
 
-            dn = dot.node(dot_names[node],**node_attr)
+            dn = dot.node(dot_names[node], **node_attr)
 
     # Create the links between nodes:
     for node in node_set:
@@ -104,7 +103,7 @@ def get_viz_node_names(node_set):
     unique_names = {}
     for node in node_set:
         if node.name in nonunique_names:
-            unique_names[node] = "{} (id={})".format(node.name,id(node))
+            unique_names[node] = "{} (id={})".format(node.name, id(node))
         else:
             unique_names[node] = node.name
     return unique_names

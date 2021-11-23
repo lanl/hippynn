@@ -11,6 +11,7 @@ def wrap_envops(envsum_impl, sensesum_impl, featsum_impl):
     :param featsum_impl:  non-autograd implementtation of featsum
     :return:
     """
+
     class AGEnvsum(torch.autograd.Function):
         @staticmethod
         def forward(ctx, sense, feat, pfirst, psecond):
@@ -20,7 +21,12 @@ def wrap_envops(envsum_impl, sensesum_impl, featsum_impl):
 
         @staticmethod
         def backward(ctx, grad_output):
-            sense, feat, pfirst, psecond, = ctx.saved_tensors
+            (
+                sense,
+                feat,
+                pfirst,
+                psecond,
+            ) = ctx.saved_tensors
             need_gradsense, need_gradfeat, *_ = ctx.needs_input_grad
 
             need_gradsense = need_gradsense or None
@@ -29,7 +35,6 @@ def wrap_envops(envsum_impl, sensesum_impl, featsum_impl):
             grad_feat = need_gradfeat and featsum(grad_output, sense, pfirst, psecond)
 
             return grad_sense, grad_feat, None, None
-
 
     class AGSensesum(torch.autograd.Function):
         @staticmethod
@@ -44,10 +49,9 @@ def wrap_envops(envsum_impl, sensesum_impl, featsum_impl):
             needs_gradenv, needs_gradfeat, *_ = ctx.needs_input_grad
             needs_gradenv = needs_gradenv or None
             needs_gradfeat = needs_gradfeat or None
-            gradenv =  needs_gradenv and envsum(grad_output, feat, pfirst, psecond)
+            gradenv = needs_gradenv and envsum(grad_output, feat, pfirst, psecond)
             gradfeat = needs_gradfeat and featsum(env, grad_output, pfirst, psecond)
             return gradenv, gradfeat, None, None
-
 
     class AGFeatsum(torch.autograd.Function):
         @staticmethod

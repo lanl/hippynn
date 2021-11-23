@@ -42,7 +42,7 @@ elementwise_compare_rules = {
 }
 # fmt: on
 
-#Add default rule: (_some_type,scalar) -> _some_type if scalar is not in rule already
+# Add default rule: (_some_type,scalar) -> _some_type if scalar is not in rule already
 for idxset, idxtarget in elementwise_compare_rules.copy():
     if IdxType.Scalar not in idxset:
         idxset = *idxset, IdxType.Scalar
@@ -62,6 +62,7 @@ _index_cache = {}
 # of finding the transformation between index states
 _index_dispatch_table = {}
 
+
 def clear_index_cache():
     global _index_cache
     _index_cache = {}
@@ -71,13 +72,13 @@ def register_index_transformer(input_idxstate, output_idxstate):
     """
     Decorator for registering a transformer from one IdxType to another.
     """
+
     def decorator(f):
         if (input_idxstate, output_idxstate) in _index_dispatch_table:
-            raise ValueError("Index dispatch for ({})->({}) already defined!"\
-                             .format(input_idxstate,output_idxstate))
+            raise ValueError("Index dispatch for ({})->({}) already defined!".format(input_idxstate, output_idxstate))
 
         @functools.wraps(f)
-        def wrapped(node,*args,**kwargs):
+        def wrapped(node, *args, **kwargs):
             idxcache_info = (output_idxstate, node)
             if idxcache_info in _index_cache:
                 output_node = _index_cache[idxcache_info]
@@ -98,22 +99,22 @@ def register_index_transformer(input_idxstate, output_idxstate):
                 _debprint("\tGenerated new indexer: {}".format(output_node.name))
             return output_node
 
-        _index_dispatch_table[input_idxstate,output_idxstate] = wrapped
-        _debprint("Index dispatch for ({})->({}) defined!" \
-                  .format(input_idxstate,output_idxstate))
+        _index_dispatch_table[input_idxstate, output_idxstate] = wrapped
+        _debprint("Index dispatch for ({})->({}) defined!".format(input_idxstate, output_idxstate))
         return wrapped
+
     return decorator
-
-
 
 
 #### Scalars can be viewed as any index type: Allow this ####
 for idxt in IdxType:
-    if idxt is IdxType.Scalar: continue              # No pass-through necessary for scalar-scalar
-    @register_index_transformer(IdxType.Scalar, idxt) #register no-op transformer with debug print
+    if idxt is IdxType.Scalar:
+        continue  # No pass-through necessary for scalar-scalar
+
+    @register_index_transformer(IdxType.Scalar, idxt)  # register no-op transformer with debug print
     def scalar_promote(node):
         _debprint("\t Allowing view of Scalar {} as type {}".format(node, idxt))
         return node
+
+
 del scalar_promote
-
-

@@ -5,10 +5,12 @@ from .. import _debprint
 
 DEFAULT_WHY_DESC = "<purpose not specified>"
 
-class _BaseNode():
+
+class _BaseNode:
     _input_names = NotImplemented
-    _LossPredNode = None # Will be set by this child class when it exists
-    _LossTrueNode = None # Same
+    _LossPredNode = None  # Will be set by this child class when it exists
+    _LossTrueNode = None  # Same
+
     def __init__(self, name, parents, db_name=None, module=None):
         """
 
@@ -22,11 +24,11 @@ class _BaseNode():
 
         assert self not in parents, "Nodes cannot be their own parents."
 
-        if not isinstance(name,str):
+        if not isinstance(name, str):
             raise TypeError("Node names must be strings. Instead got: {}".format(name))
 
         self.db_name = db_name
-        self.origin_node = None       # Loss input nodes set this attribute to find references to the model graph
+        self.origin_node = None  # Loss input nodes set this attribute to find references to the model graph
         self.parents = tuple(parents)
         self.name = name
         self._pred = None
@@ -43,7 +45,7 @@ class _BaseNode():
         if module is not None:
             self.torch_module = module
 
-    def set_dbname(self,db_name):
+    def set_dbname(self, db_name):
         self.db_name = db_name
         if self._pred is not None:
             self._pred.db_name = db_name
@@ -53,22 +55,20 @@ class _BaseNode():
     @property
     def pred(self):
         if self._pred is None:
-            self._pred = self._LossPredNode(self.name+"-pred",origin_node=self,db_name=self.db_name)
+            self._pred = self._LossPredNode(self.name + "-pred", origin_node=self, db_name=self.db_name)
         return self._pred
 
     @property
     def true(self):
         if self._true is None:
-            self._true = self._LossTrueNode(self.name+"-true",origin_node=self,db_name=self.db_name)
+            self._true = self._LossTrueNode(self.name + "-true", origin_node=self, db_name=self.db_name)
         return self._true
 
     def get_all_parents(self):
-        return self.parents + \
-               tuple(pnode for parent in self.parents for pnode in parent.get_all_parents())
+        return self.parents + tuple(pnode for parent in self.parents for pnode in parent.get_all_parents())
 
     def get_all_children(self):
-        return self.children + \
-               tuple(ccnode for child in self.children for ccnode in child.get_all_children())
+        return self.children + tuple(ccnode for child in self.children for ccnode in child.get_all_children())
 
     # Functions that take either a node or a node set can be accessed as attributes.
 
@@ -76,12 +76,12 @@ class _BaseNode():
         return get_connected_nodes({self})
 
     def find_unique_relative(self, constraint, why_desc=DEFAULT_WHY_DESC):
-        return find_unique_relative(self,constraint,why_desc=why_desc)
+        return find_unique_relative(self, constraint, why_desc=why_desc)
 
     def find_relatives(self, constraint, why_desc=DEFAULT_WHY_DESC):
-        return find_relatives(self,constraint,why_desc=why_desc)
+        return find_relatives(self, constraint, why_desc=why_desc)
 
-    def swap_parent(self,old,new):
+    def swap_parent(self, old, new):
         if old not in self.parents:
             raise NodeOperationError(f"Node {old} is not a parent of node {self}")
         old.children = tuple(c for c in old.children if c is not self)
@@ -111,7 +111,7 @@ class _BaseNode():
             c.disconnect_recursive()
 
     def auto_module(self):
-        raise NotImplementedError("Auto module not defined for node {} of type {}".format(self,type(self)))
+        raise NotImplementedError("Auto module not defined for node {} of type {}".format(self, type(self)))
 
     def __dir__(self):
         dir_ = super().__dir__()
@@ -122,27 +122,29 @@ class _BaseNode():
         return dir_
 
     def __getattr__(self, item):
-        if item in ("parents","_input_names"): # Guard against recursion
+        if item in ("parents", "_input_names"):  # Guard against recursion
             raise AttributeError("Attribute {} not yet present".format(item))
         try:
             return self.parents[self._input_names.index(item)]
-        except (AttributeError,ValueError) as ee:
-            raise AttributeError("{} object has no attribute '{}'".format(self.__class__,item))
+        except (AttributeError, ValueError) as ee:
+            raise AttributeError("{} object has no attribute '{}'".format(self.__class__, item))
 
     def __repr__(self):
         try:
-            name=self.name
+            name = self.name
         except AttributeError:
-            name="UNINITIALIZED"
-        return "{}('{}')<{}>".format(self.__class__.__name__,name,hex(id(self)))
+            name = "UNINITIALIZED"
+        return "{}('{}')<{}>".format(self.__class__.__name__, name, hex(id(self)))
 
-    #Overridden by MultiNode, LossInputNode
+    # Overridden by MultiNode, LossInputNode
     @property
     def main_output(self):
         return self
 
+
 class NodeOperationError(Exception):
     pass
+
 
 class NodeNotFound(NodeOperationError):
     pass
@@ -163,9 +165,11 @@ def get_connected_nodes(node_set):
             search_found.add(node)
             search_from.remove(node)
             for node_relative in node.get_all_parents():
-                if node_relative not in search_found: search_from.add(node_relative)
+                if node_relative not in search_found:
+                    search_from.add(node_relative)
             for node_relative in node.get_all_children():
-                if node_relative not in search_found: search_from.add(node_relative)
+                if node_relative not in search_found:
+                    search_from.add(node_relative)
     return search_found
 
 
@@ -186,19 +190,20 @@ def find_relatives(node_or_nodes, constraint_key, why_desc=DEFAULT_WHY_DESC):
 
     if isinstance(constraint_key, type):
         # We must bind the constraint key to a name within the lambda -- search_type
-        constraint_key = lambda node,*,search_type=constraint_key: isinstance(node, search_type)
+        constraint_key = lambda node, *, search_type=constraint_key: isinstance(node, search_type)
     elif callable(constraint_key):
         pass
     else:
         raise ValueError("constraint must be a type or callable filter function")
 
-    if isinstance(node_or_nodes, _BaseNode): # if we search from a node, wrap it as a collection
+    if isinstance(node_or_nodes, _BaseNode):  # if we search from a node, wrap it as a collection
         node_or_nodes = [node_or_nodes]
         _debprint("Starting search from single node")
 
     candidates = {n for n in get_connected_nodes(node_or_nodes) if constraint_key(n)}
 
-    if constraint_key(node_or_nodes): candidates.add(node_or_nodes)
+    if constraint_key(node_or_nodes):
+        candidates.add(node_or_nodes)
 
     if len(candidates) == 0:
         _debprint("Node not found, all relatives:")
@@ -226,7 +231,6 @@ def find_unique_relative(node_or_nodes, constraint, why_desc=DEFAULT_WHY_DESC):
         If more than one node is found, a NodeambiguityError is raised.
     """
 
-
     candidates = find_relatives(node_or_nodes, constraint_key=constraint, why_desc=why_desc)
 
     if len(candidates) > 1:
@@ -235,4 +239,3 @@ def find_unique_relative(node_or_nodes, constraint, why_desc=DEFAULT_WHY_DESC):
     result = candidates.pop()
     _debprint("Found node {} of type {}: {}".format(result, constraint.__name__, why_desc))
     return result
-

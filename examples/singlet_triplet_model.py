@@ -1,5 +1,3 @@
-
-
 import torch
 
 # Setup pytorch things
@@ -20,25 +18,26 @@ db_path = args.directory
 db_name = args.name
 
 import matplotlib
-matplotlib.use('agg')
+
+matplotlib.use("agg")
 
 import hippynn
 
 netname = "TEST_singlet_triplet_model"
 
 with hippynn.tools.active_directory(netname, create=True):
-    with hippynn.tools.log_terminal("training_log.txt", 'wt'):
+    with hippynn.tools.log_terminal("training_log.txt", "wt"):
         # Hyperparameters for the network
         network_params = {
             "possible_species": [0, 1, 6, 7, 8, 16, 17],
-            'n_features': 96,  # was 60
+            "n_features": 96,  # was 60
             "n_sensitivities": 20,  # was 20
-            "dist_soft_min": .8,  # qm7 1.7  qm9 .85  AL100 .85
+            "dist_soft_min": 0.8,  # qm7 1.7  qm9 .85  AL100 .85
             "dist_soft_max": 5.0,  # qm7 10.  qm9 5.   AL100 5.
             "dist_hard_max": 5.5,  # qm7 15.  qm9 7.5  AL100 7.5
             "n_interaction_layers": 2,  # was 2
             "n_atom_layers": 3,  # was 3
-            "sensitivity_type": 'inverse',
+            "sensitivity_type": "inverse",
             "resnet": True,
         }
 
@@ -54,7 +53,7 @@ with hippynn.tools.active_directory(netname, create=True):
         singlet_energy = henergy.mol_energy
         hierarchicality = henergy.hierarchicality
 
-        dscf = targets.LocalEnergyNode("DeltaSCF",network,first_is_interacting=False)
+        dscf = targets.LocalEnergyNode("DeltaSCF", network, first_is_interacting=False)
         excitation_energy = dscf.mol_energy
         excitation_energy.db_name = "excitation_energy"
 
@@ -74,9 +73,8 @@ with hippynn.tools.active_directory(netname, create=True):
         forces_excitation.set_dbname("excitation_Grad")
 
         forces_triplet = forces_singlet + forces_excitation
-        forces_triplet.name= "gradientsT"
+        forces_triplet.name = "gradientsT"
         forces_triplet.set_dbname("triplet_Grad")
-
 
         from hippynn.graphs import loss
 
@@ -112,37 +110,30 @@ with hippynn.tools.active_directory(netname, create=True):
         energy1_error = rmse_singlet + mae_singlet
         energy2_error = rmse_excitation + mae_excitation
 
-        loss_error = (energy1_error + energy2_error)/10 + (force1_error + force2_error)/30
-        loss_regularization = 1e-6 * l2_reg + .1 * rbar1
+        loss_error = (energy1_error + energy2_error) / 10 + (force1_error + force2_error) / 30
+        loss_regularization = 1e-6 * l2_reg + 0.1 * rbar1
         train_loss = loss_error + loss_regularization
 
         validation_losses = {
-
             "S-E-RMSE": rmse_singlet,
             "S-E-MAE": mae_singlet,
             "S-E-RSQ": rsq_singlet,
             "S-E-Hier": rbar1,
-
             "T-E-RMSE": rmse_triplet,
             "T-E-MAE": mae_triplet,
             "T-E-RSQ": rsq_triplet,
-
             "DSCF-E-RMSE": rmse_excitation,
             "DSCF-E-MAE": mae_excitation,
             "DSCF-E-RSQ": rsq_excitation,
-
             "S-GradRMSE": rmse_force_singlet,
             "S-GradMAE": mae_force_singlet,
             "S-GradRsq": rsq_force_singlet,
-
             "T-GradRMSE": rmse_force_triplet,
             "T-GradMAE": mae_force_triplet,
             "T-GradRsq": rsq_force_triplet,
-
             "DSCF-GradRMSE": rmse_force_excitation,
             "DSCF-GradMAE": mae_force_excitation,
             "DSCF-GradRsq": rsq_force_excitation,
-
             "L2Reg": l2_reg,
             "Loss-Err": loss_error,
             "Loss-Reg": loss_regularization,
@@ -158,7 +149,6 @@ with hippynn.tools.active_directory(netname, create=True):
             pred = physics.VecMag(vec_prediction.name + "mag-pred", vec_prediction.pred)
             return plotting.Hist2D(true, pred, xlabel=true.name, ylabel=pred.name, saved=vec_prediction.name + ".pdf")
 
-
         makehist = lambda var: plotting.Hist2D.compare(var, saved=True)
         make_sense = lambda i, layer: plotting.SensitivityPlot(layer, saved="sense_{}.pdf".format(i))
         import itertools
@@ -167,25 +157,25 @@ with hippynn.tools.active_directory(netname, create=True):
             *map(makehist, [singlet_energy, forces_singlet, triplet_energy, forces_excitation]),
             *itertools.starmap(make_sense, enumerate(network.torch_module.sensitivity_layers)),
             *map(maghist, [forces_singlet, forces_excitation]),
-            plotting.HierarchicalityPlot(hierarchicality.pred, singlet_energy.pred - singlet_energy.true,
-                                         saved="HierPlotS.pdf"),
+            plotting.HierarchicalityPlot(
+                hierarchicality.pred, singlet_energy.pred - singlet_energy.true, saved="HierPlotS.pdf"
+            ),
             plot_every=20,
         )
 
         from hippynn.experiment.assembly import assemble_for_training
 
-        training_modules, db_variable_info = \
-            assemble_for_training(train_loss, validation_losses, plot_maker=plot_maker)
+        training_modules, db_variable_info = assemble_for_training(train_loss, validation_losses, plot_maker=plot_maker)
         model, loss_module, model_evaluator = training_modules
 
         db_inputs = {
-            'name': db_name,
-            'directory': db_path,
-            'quiet': False,
-            'split_seed': 8000,
-            'test_size': 0.1,
-            'valid_size': 0.1,
-            **db_variable_info  # adds inputs and targets into database
+            "name": db_name,
+            "directory": db_path,
+            "quiet": False,
+            "split_seed": 8000,
+            "test_size": 0.1,
+            "valid_size": 0.1,
+            **db_variable_info,  # adds inputs and targets into database
         }
 
         from hippynn.databases import DirectoryDatabase
@@ -204,27 +194,26 @@ with hippynn.tools.active_directory(netname, create=True):
         optimizer = torch.optim.Adam(model.parameters())
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.5, patience=patience)
         from hippynn.experiment.controllers import PatienceController
-        controller = PatienceController(optimizer=optimizer,
-                                        scheduler=scheduler,
-                                        batch_size=batch_size,
-                                        eval_batch_size=batch_size,
-                                        max_epochs=500,
-                                        termination_patience=patience * 2,
-                                        fraction_train_eval=0.1,
-                                        stopping_key=early_stopping_key,
-                                        )
+
+        controller = PatienceController(
+            optimizer=optimizer,
+            scheduler=scheduler,
+            batch_size=batch_size,
+            eval_batch_size=batch_size,
+            max_epochs=500,
+            termination_patience=patience * 2,
+            fraction_train_eval=0.1,
+            stopping_key=early_stopping_key,
+        )
 
         from hippynn.experiment import setup_and_train, SetupParams
-        experiment_params = SetupParams(controller=controller,
-                                        device=torch.device('cuda'),
-                                        stopping_key=early_stopping_key)
 
-        experiment_state = setup_and_train(training_modules=training_modules,
-                                           database=database,
-                                           setup_params=experiment_params,
-                                           )
+        experiment_params = SetupParams(
+            controller=controller, device=torch.device("cuda"), stopping_key=early_stopping_key
+        )
 
-
-
-
-
+        experiment_state = setup_and_train(
+            training_modules=training_modules,
+            database=database,
+            setup_params=experiment_params,
+        )

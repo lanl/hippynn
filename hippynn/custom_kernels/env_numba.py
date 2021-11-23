@@ -19,6 +19,7 @@ from .tensor_wrapper import via_numpy, NumbaCompatibleTensorFunction
 # fidx  : index of feature
 # nidx  : index of sensitivity (nu)
 
+
 def get_id_and_starts(key):
     key_ids = torch.unique_consecutive(key)
     n_keys = key_ids.shape[0]
@@ -37,6 +38,7 @@ def resort_pairs(key, others):
     key_ids, key_starts = get_id_and_starts(keysort)
     return key_ids, key_starts, keysort, others
 
+
 # Kernel which sums sensitivities and features to get environment.
 # Numpy core signature: (p,n),(a,f),(p),(p),(a,n,f)
 class WrappedEnvsum(NumbaCompatibleTensorFunction):
@@ -54,7 +56,7 @@ class WrappedEnvsum(NumbaCompatibleTensorFunction):
     def launch_bounds(self, sense_shape, fs, pfs, pss, atom1_ids_shape, *other_shapes):
         n_pairs, n_nu = sense_shape
         n_atom, n_feat = fs
-        n_atoms_interacting, = atom1_ids_shape
+        (n_atoms_interacting,) = atom1_ids_shape
         TPB_MAX = 512
         TPB_X = n_feat
         TPB_Y = TPB_MAX // n_feat
@@ -66,14 +68,17 @@ class WrappedEnvsum(NumbaCompatibleTensorFunction):
 
     @staticmethod
     def make_kernel(KERNEL_DTYPE):
-        sig = 'void({DTYPE}[:,:,],{DTYPE}[:,:],int64[:],int64[:],int64[:],int64[:],{DTYPE}[:,:,:])'.format(
-            DTYPE=KERNEL_DTYPE)
+        sig = "void({DTYPE}[:,:,],{DTYPE}[:,:],int64[:],int64[:],int64[:],int64[:],{DTYPE}[:,:,:])".format(
+            DTYPE=KERNEL_DTYPE
+        )
 
-        @numba.cuda.jit(sig, )
+        @numba.cuda.jit(
+            sig,
+        )
         def kernel(sens, feat, pfirst, psecond, atom1_ids, atom1_starts, env):
             n_pairs, n_nu = sens.shape
             n_atom, n_feat = feat.shape
-            n_atoms_interacting, = atom1_ids.shape
+            (n_atoms_interacting,) = atom1_ids.shape
 
             tx = numba.cuda.threadIdx.x
             sx = numba.cuda.blockDim.x
@@ -89,7 +94,7 @@ class WrappedEnvsum(NumbaCompatibleTensorFunction):
                 pair_end = atom1_starts[i + 1]
                 pfidx = atom1_ids[i]
                 for nidx in range(n_nu):
-                    out = KERNEL_DTYPE(0.)
+                    out = KERNEL_DTYPE(0.0)
                     for pidx in range(pair_start, pair_end):
                         psidx = psecond[pidx]
                         out += sens[pidx, nidx] * feat[psidx, fidx]
@@ -104,7 +109,7 @@ class WrappedEnvsum(NumbaCompatibleTensorFunction):
 
         n_pairs, n_nu = sens.shape
         n_atom, n_feat = feat.shape
-        n_atom_with_pairs, = atom_ids.shape
+        (n_atom_with_pairs,) = atom_ids.shape
 
         env_features = np.zeros((n_atom, n_nu, n_feat), dtype=sens.dtype)
         for i in numba.prange(n_atom_with_pairs):
@@ -127,23 +132,25 @@ class WrappedEnvsum(NumbaCompatibleTensorFunction):
 # Numpy core signature: (a,n,f),(a,f),(p),(p),(p,n),
 class WrappedSensesum(NumbaCompatibleTensorFunction):
     def out_shape(self, env_shape, feat_shape, pfirst_shape, psecond_shape):
-        n_pair, = pfirst_shape
+        (n_pair,) = pfirst_shape
         n_atom, n_nu, n_feat = env_shape
         return n_pair, n_nu
 
     def launch_bounds(self, env_shape, feat_shape, pfirst_shape, psecond_shape):
-        n_pairs, = pfirst_shape
+        (n_pairs,) = pfirst_shape
         TPB = 512
         BPG = (n_pairs + TPB - 1) // TPB
         return BPG, TPB
 
     @staticmethod
     def make_kernel(KERNEL_DTYPE):
-        sig = 'void({DTYPE}[:,:,:],{DTYPE}[:,:],int64[:], int64[:],{DTYPE}[:,:])'.format(DTYPE=KERNEL_DTYPE)
+        sig = "void({DTYPE}[:,:,:],{DTYPE}[:,:],int64[:], int64[:],{DTYPE}[:,:])".format(DTYPE=KERNEL_DTYPE)
 
-        @numba.cuda.jit(sig, )
+        @numba.cuda.jit(
+            sig,
+        )
         def kernel(env, feat, pfirst, psecond, sense):
-            n_pairs, = pfirst.shape
+            (n_pairs,) = pfirst.shape
             n_atom, n_nu, n_feat = env.shape
             pidx, nidx, fidx = numba.cuda.grid(3)
 
@@ -151,7 +158,7 @@ class WrappedSensesum(NumbaCompatibleTensorFunction):
                 pfidx = pfirst[pidx]
                 psidx = psecond[pidx]
                 for nidx in range(n_nu):
-                    tmp = KERNEL_DTYPE(0.)
+                    tmp = KERNEL_DTYPE(0.0)
                     for fidx in range(n_feat):
                         tmp += env[pfidx, nidx, fidx] * feat[psidx, fidx]
                     sense[pidx, nidx] = tmp
@@ -163,7 +170,7 @@ class WrappedSensesum(NumbaCompatibleTensorFunction):
     @numba.jit(parallel=True)
     def cpu_kernel(env, feat, pfirst, psecond):
         n_atom, n_nu, n_feat = env.shape
-        n_pairs, = pfirst.shape
+        (n_pairs,) = pfirst.shape
         sense = np.zeros((n_pairs, n_nu), dtype=env.dtype)
         for pidx in numba.prange(n_pairs):
             pfidx = pfirst[pidx]
@@ -215,14 +222,17 @@ class WrappedFeatsum(NumbaCompatibleTensorFunction):
 
     @staticmethod
     def make_kernel(KERNEL_DTYPE):
-        sig = 'void({DTYPE}[:,:,:],{DTYPE}[:,:],int64[:],int64[:],int64[:],int64[:],{DTYPE}[:,:])'.format(
-            DTYPE=KERNEL_DTYPE)
+        sig = "void({DTYPE}[:,:,:],{DTYPE}[:,:],int64[:],int64[:],int64[:],int64[:],{DTYPE}[:,:])".format(
+            DTYPE=KERNEL_DTYPE
+        )
 
-        @numba.cuda.jit(sig, )
+        @numba.cuda.jit(
+            sig,
+        )
         def kernel(env, sense, pfirst, psecond, atom2_ids, atom2_starts, feat):
             n_pairs, n_nu = sense.shape
             n_atom, n_feat = feat.shape
-            n_atoms_with_pairs, = atom2_ids.shape
+            (n_atoms_with_pairs,) = atom2_ids.shape
 
             tx = numba.cuda.threadIdx.x
             sx = numba.cuda.blockDim.x
@@ -238,7 +248,7 @@ class WrappedFeatsum(NumbaCompatibleTensorFunction):
                 pair_start = atom2_starts[aidx]
                 pair_end = atom2_starts[aidx + 1]
                 psidx = atom2_ids[aidx]
-                tmp = KERNEL_DTYPE(0.)
+                tmp = KERNEL_DTYPE(0.0)
                 for pidx in range(pair_start, pair_end):
                     pfidx = pfirst[pidx]
                     for nidx in range(n_nu):
@@ -251,10 +261,17 @@ class WrappedFeatsum(NumbaCompatibleTensorFunction):
     @staticmethod
     @via_numpy
     @numba.jit(parallel=True)
-    def cpu_kernel(env, sens, pfirst, psecond, atom_ids, atom_starts, ):
+    def cpu_kernel(
+        env,
+        sens,
+        pfirst,
+        psecond,
+        atom_ids,
+        atom_starts,
+    ):
         n_atom, n_nu, n_feat = env.shape
-        n_pairs, = pfirst.shape
-        n_atoms_with_pairs, = atom_ids.shape
+        (n_pairs,) = pfirst.shape
+        (n_atoms_with_pairs,) = atom_ids.shape
         feat = np.zeros((n_atom, n_feat), dtype=sens.dtype)
 
         for i in numba.prange(n_atoms_with_pairs):
