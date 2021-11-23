@@ -11,6 +11,7 @@ import functools
 from . import _debprint
 from .type_def import IdxType
 
+# fmt: off
 _db_index_states = {
 ### TYPE PREDICTED BY MODEL | DEFAULT TYPE OF STORAGE IN DATABASE
     IdxType.Molecules       : IdxType.Molecules,
@@ -39,6 +40,7 @@ elementwise_compare_rules = {
     ((IdxType.MolAtomAtom,)                   ,   IdxType.Pair),
     ((IdxType.NotFound,)                      ,   IdxType.NotFound),
 }
+# fmt: on
 
 #Add default rule: (_some_type,scalar) -> _some_type if scalar is not in rule already
 for idxset, idxtarget in elementwise_compare_rules.copy():

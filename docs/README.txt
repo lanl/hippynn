@@ -6,8 +6,8 @@ Get `sphinx` and `sphinx-rtd-theme` from pip.
 
 Navigate to this directory.
 
-If running for the first time, run `make apidpc` to build the
-sphinx autodoc api documentation source files.
+If running for the first time, run `make apidoc` to build the
+sphinx autodoc api documentation source files. `make cleanapi` will clean them.
 
 Next, use `make` to build the documentation, e.g. `make html` for
 html files.

@@ -1,0 +1,14 @@
+{%- set name = basename.split('.')[-1] %}
+{%- if show_headings %}
+{#-{{- [basename, "module"] | join(' ') | e | heading }}#}
+{#-{{ name | e | heading }}#}
+{{- [name, "module"] | join(' ') | e | heading }}
+{% endif -%}
+
+Documentation for ``{{basename}}`` module.
+
+.. automodule:: {{ qualname }}
+{%- for option in automodule_options %}
+   :{{ option }}:
+{%- endfor %}
+

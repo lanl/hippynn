@@ -3,6 +3,8 @@ Enum for index states.
 """
 import enum
 
+
+# fmt: off
 @enum.unique
 class IdxType(enum.Enum):
     Scalar      = "Scalar"
@@ -14,4 +16,5 @@ class IdxType(enum.Enum):
     QuadMol     = "QuadMol"
     QuadPack    = "QuadPack"      #packed 6-vec of quadrupole upper triangle
     NotFound    = "NOT FOUND"
-    def __repr__(self): return '<%s.%s>' % (self.__class__.__name__, self.name)
+    def __repr__(self): return f"<{self.__class__.__name__}.{self.name}>"
+# fmt: on
