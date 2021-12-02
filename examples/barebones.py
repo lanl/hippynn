@@ -48,7 +48,7 @@ validation_losses = {
 
 # This piece of code glues the stuff together as a pytorch model,
 # dropping things that are irrelevant for the losses defined.
-training_modules, db_info = hippynn.experiment.assemble_for_training(loss, validation_losses)
+training_modules, db_info = hippynn.experiment.assemble_for_training(mse_energy, validation_losses)
 
 # Go to a directory for the model.
 # hippynn will save training files in the current working directory.
