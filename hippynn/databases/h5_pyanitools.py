@@ -144,7 +144,7 @@ class PyAniFileDB(Database, PyAniMethods, Restartable):
         self.inputs = inputs
         self.targets = targets
 
-        arr_dict = self.load_arrays(quiet=quiet)
+        arr_dict = self.load_arrays(quiet=quiet, allow_unfound=allow_unfound)
 
         super().__init__(arr_dict, inputs, targets, *args, **kwargs, quiet=quiet, allow_unfound=allow_unfound)
         self.restarter = self.make_restarter(
