@@ -109,8 +109,6 @@ class NPZDatabase(Database, Restartable):
 
     def load_arrays(self, file, inputs, targets, allow_unfound=False, quiet=False):
 
-        var_list = inputs + targets
-
         arr_dict = np.load(file)
         # Make sure the path actually exists
         if not quiet:

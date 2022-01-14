@@ -64,6 +64,17 @@ _index_dispatch_table = {}
 
 
 def clear_index_cache():
+    """
+    Remove any cached index types for nodes.
+
+    The index cache holds global references to nodes that have been
+    transformed automatically, so these nodes won't be garbage collected
+    automatically. Clearing the cache will free any reference to them.
+
+    If you modify the index dispatch table or type comparison table on the fly,
+    you may want to clear the cache to remove references to nodes created
+    using the old rules.
+    """
     global _index_cache
     _index_cache = {}
 
@@ -71,6 +82,32 @@ def clear_index_cache():
 def register_index_transformer(input_idxstate, output_idxstate):
     """
     Decorator for registering a transformer from one IdxType to another.
+
+    An index transformer should have a signature::
+
+         f(node) -> (parents, child_node_type)
+
+    with types::
+
+        node: Node
+        parents : Tuple[Node]
+        child_node_type : Union[Type[Node],Callable[[str,Tuple[node]],[node]]]
+
+    That is, the child_node_type can be a class of node, or a factory function
+    which acts with the same signature as a node constructor.
+    If f supports additional arguments, they must have default values,
+    as it will be invoked by the automatic index transformation system
+    as f(node).
+
+    The decorator results in a new function of type::
+
+        f(node: Node) -> Node
+
+    which is cached so that the same index transformation may be repeatedly
+    applied to yield the same output node, and registered with the dispatch
+    table for index transformations. No two functions may be registered for the
+    same index type conversion simultaneously.
+
     """
 
     def decorator(f):
@@ -111,10 +148,21 @@ for idxt in IdxType:
     if idxt is IdxType.Scalar:
         continue  # No pass-through necessary for scalar-scalar
 
-    @register_index_transformer(IdxType.Scalar, idxt)  # register no-op transformer with debug print
-    def scalar_promote(node):
-        _debprint("\t Allowing view of Scalar {} as type {}".format(node, idxt))
-        return node
+    # register no-op transformer
+    @register_index_transformer(IdxType.Scalar, idxt)
+    def scalar_promote(node, *, __idxt=idxt):
+        _debprint("\t Allowing view of Scalar {} as type {}".format(node, __idxt))
 
+        # Node index transformers (see #register_index_transformer) return
+        # a set of parents and the node type to create.
+        # So here we'll define a trivial factory function which mimics this
+        # behavior and passes the node through unchanged.
+        parents = node,  # Parents are defined as a tuple
 
-del scalar_promote
+        def passthrough_node_factory(name, parents):
+            (node,) = parents  # Unwrap the tuple
+            return node
+
+        return parents, passthrough_node_factory
+
+del scalar_promote, idxt

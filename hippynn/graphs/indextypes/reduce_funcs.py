@@ -11,9 +11,10 @@ from .type_def import IdxType
 def dispatch_indexing(input_is, output_is):
     """
     Acquire the function for converting between two index states.
-    :param input_is:
-    :param output_is:
-    :return:
+
+    :param input_is: input index state
+    :param output_is: output index state
+    :return: the function
 
     """
     _debprint("dispatching:", input_is, output_is)
@@ -28,14 +29,13 @@ def index_type_coercion(node, output_index_state):
     """
     Attempt to convert a node to a given index state.
 
-    Notes:
-
-    1. Takes the main output of multinodes.
-    2. If there is no IdxType on the node, this function is a no-op, so that if one has not be implemented,
-       No error will be raised.
-    3. If the index type already matches, then this function just returns the input node.
-    4. If the index type doesn't match, an index transformer of the appropriate type will be looked for.
-       If no conversion is found, a ValueError is raised.
+    .. Note::
+       1. If given a MultiNode, this function operates on the node's main_output.
+       2. If there is no IdxType on the node, this function is a no-op, so that if one has not been implemented,
+          no error will be raised.
+       3. If the index type already matches, then this function just returns the input node.
+       4. If the index type doesn't match, an index transformer of the appropriate type will be looked for.
+          If no conversion is found, a ValueError is raised.
 
     :param node:  the node to convert
     :param output_index_state: the index state to convert to.
@@ -69,6 +69,7 @@ def index_type_coercion(node, output_index_state):
 def soft_index_type_coercion(node, output_index_state):
     """
     Coerce if information is available.
+
     :param node:
     :param output_index_state:
     :return:
@@ -89,12 +90,12 @@ def get_reduced_index_state(*nodes_to_reduce):
 
     .. Note::
         This function is unlikely to be directed needed as a user.
-        it's more likely you want to use ``elementwise_compare_reduce``.
+        it's more likely you want to use :func:`elementwise_compare_reduce`.
 
     :param nodes_to_reduce:
     :return:
     """
-    typeset = frozenset(n._index_state for n in nodes_to_reduce)
+    typeset = frozenset(getattr(n,"_index_state",IdxType.NotFound) for n in nodes_to_reduce)
     _debprint("Finding index comparison for for :", [n.name for n in nodes_to_reduce])
     try:
         coerced_type = elementwise_compare_rules[typeset]
@@ -109,8 +110,8 @@ def elementwise_compare_reduce(*nodes_to_reduce):
     """
     Return nodes converted to a mutually compatible index state with no padding.
 
-    :param nodes_to_reduce:
-    :return:
+    :param nodes_to_reduce: nodes to put in a comparable, reduced index state
+    :return: node (if single argument) or tuple(nodes) (if multiple arguments)
     """
     if len(nodes_to_reduce) == 0:
         _debprint("Compare reduce on nothing, returning nothing")
@@ -124,6 +125,13 @@ def elementwise_compare_reduce(*nodes_to_reduce):
 
 
 def db_state_of(idxt):
+    """
+    Return the IdxType expected in the database for a given index type.
+
+    .. Note::
+        This function is unlikely to be directed needed as a user.
+        it's more likely you want to use :func:`db_form`.
+    """
     try:
         return _db_index_states[idxt]
     except KeyError:
@@ -131,4 +139,7 @@ def db_state_of(idxt):
 
 
 def db_form(node):
+    """
+    Return a node converted to the index state of the database.
+    """
     return index_type_coercion(node, db_state_of(node._index_state))
