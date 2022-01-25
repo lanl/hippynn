@@ -28,7 +28,7 @@ def ASE_compute_neighbors(cutoff, positions, cell):
     return tuple(torch.from_numpy(x) for x in [pf, ps, offset])
 
 
-class ASENeighbors(pair_modules._DispatchNeighbors):
+class ASENeighbors(pair_modules.dispatch._DispatchNeighbors):
     def compute_one(self, positions, cell):
         return ASE_compute_neighbors(self.dist_hard_max, positions, cell)
 

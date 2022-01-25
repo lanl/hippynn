@@ -1,6 +1,8 @@
 """
 Nodes for finding and manipulating pairs and distances.
 """
+
+from .base.node_functions import NodeNotFound
 from .base import AutoNoKw, AutoKw, ExpandParents, SingleNode, MultiNode, find_unique_relative, _BaseNode
 from .indexers import PaddingIndexer, acquire_encoding_padding, OneHotEncoder
 from .tags import Encoder, PairIndexer, AtomIndexer, PairCache
@@ -344,3 +346,79 @@ class DynamicPeriodicPairs(_DispatchNeighbors):
     """
 
     _auto_module_class = pairs_modules.TorchNeighbors
+
+
+class PaddedNeighborNode(ExpandParents, AutoNoKw, MultiNode):
+    _input_names = "pair_first", "pair_second", "pair_coord"
+    _output_names = (
+        "j_list",
+        "rij_list",
+    )
+    _output_index_states = IdxType.Atoms, IdxType.Atoms
+    _auto_module_class = pairs_modules.PaddedNeighModule
+
+    @_parent_expander.match(PairIndexer)
+    def expand0(self, pair_finder, **kwargs):
+        try:
+            # Typically, the first atom tensor will come from
+            # the output of the atom indexer, so look for that first.
+            pad = pair_finder.find_unique_relative(AtomIndexer)
+            atom_array = pad.indexed_features
+        except NodeNotFound:
+            # Fall back to finding -any- atom-indexed tensor.
+            atom_arrays = pair_finder.find_relatives(
+                lambda node: hasattr(node, "_index_state") and node._index_state == IdxType.Atoms
+            )
+            atom_array = atom_arrays.pop()
+
+        return pair_finder.pair_first, pair_finder.pair_second, pair_finder.pair_coord, atom_array
+
+    _parent_expander.assertlen(4)
+    _parent_expander.get_main_outputs()
+    _parent_expander.require_idx_states(IdxType.Pair, IdxType.Pair, IdxType.Pair, IdxType.Atoms)
+
+    def __init__(self, name, parents, module="auto", **kwargs):
+        parents = self.expand_parents(parents)
+        super().__init__(name, parents, module=module, **kwargs)
+
+
+class MinDistNode(ExpandParents, AutoNoKw, MultiNode):
+    _input_names = "rij_list", "j_list", "mol_index", "atom_index", "inv_real_atoms", "n_atoms_max", "n_molecules"
+    _output_names = "min_dist_mol", "mol_locs", "min_dist_atom", "atom_pairlocs"
+    _output_index_states = IdxType.Molecules, IdxType.Molecules, IdxType.Atoms, IdxType.Atoms
+    _auto_module_class = pairs_modules.MinDistModule
+
+    @_parent_expander.match(PairIndexer)
+    def expand0(self, pair_finder, **kwargs):
+
+        try:
+            neigh_list = pair_finder.find_unique_relative(PaddedNeighborNode)
+        except NodeNotFound:
+            neigh_list = PaddedNeighborNode("NeighList", pair_finder)
+
+        return (neigh_list,)
+
+    @_parent_expander.match(PaddedNeighborNode)
+    def expand1(self, neigh_list, **kwargs):
+        pad = neigh_list.find_unique_relative(AtomIndexer)
+        return neigh_list, pad
+
+    @_parent_expander.match(PaddedNeighborNode, AtomIndexer)
+    def expand2(self, neigh_list, pad_idxer, **kwargs):
+        return (
+            neigh_list.rij_list,
+            neigh_list.j_list,
+            pad_idxer.mol_index,
+            pad_idxer.atom_index,
+            pad_idxer.inv_real_atoms,
+            pad_idxer.n_atoms_max,
+            pad_idxer.n_molecules,
+        )
+
+    _parent_expander.assertlen(7)
+    _parent_expander.get_main_outputs()
+    _parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, None, None, None, None, None)
+
+    def __init__(self, name, parents, module="auto", **kwargs):
+        parents = self.expand_parents(parents)
+        super().__init__(name, parents, module=module, **kwargs)

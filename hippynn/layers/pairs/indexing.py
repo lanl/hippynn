@@ -3,6 +3,7 @@ Layers for pair finding
 """
 import torch
 
+from ...custom_kernels.utils import get_id_and_starts
 from .open import _PairIndexer
 
 
@@ -136,3 +137,66 @@ class PairUncacher(torch.nn.Module):
         distflat = paircoord.norm(dim=1)
 
         return distflat, pair_first, pair_second, paircoord, cell_offsets, offset_index
+
+
+def padded_neighlist(pair_first, pair_second, pair_coord, atom_array):
+    """
+    Convert from index list pair_first, pair_second
+    to index list of `jlist`
+    where jlist has shape (n_atoms, n_neigh_max).
+    jlists consists of index of atom neighbors for each atom i,
+    and is padded with values of -1.
+    """
+
+    # Scalar sizes required
+    n_atoms = atom_array.shape[0]
+
+    if pair_first.shape[0] == 0:  # empty neighbors list
+        dev = pair_coord.device
+        rijlist_pad = torch.empty((n_atoms, 0, 3), device=dev, dtype=pair_coord.dtype)
+        jlist_pad = torch.empty((n_atoms, 0), device=dev, dtype=torch.int64)
+        return jlist_pad, rijlist_pad
+
+    with torch.no_grad():
+        nneigh_max = torch.unique(pair_first, return_counts=True)[1].max()
+
+        # Sorting pair list
+        # Note, this isn't quite what resort_pairs does,
+        # because resort_pairs only sorts on the first index
+        # Note: The index is given so that the index functions
+        # as a base-n_atoms representation of the pair of indices as a scalar number.
+        # todo: possibly, just ensure a good sorting order for all pair finders.
+        # todo: possibly, include cell offset information.
+        # then this could be used to cache pairs without sparse tensors.
+        ind = n_atoms * pair_first + pair_second
+        sort = torch.argsort(ind)
+        ilist = pair_first[sort]
+        jlist = pair_second[sort]
+        pair_coord = pair_coord[sort]
+
+        #  List of where new i's start
+        i_vals, istart = get_id_and_starts(ilist)
+        istart = istart[:-1]
+
+        # Relative index for j values
+        # When boundaries of i-atoms are not crossed, we increment by 1
+        diffrelj = torch.ones(len(jlist), dtype=jlist.dtype)
+        # When boundaries of i-atoms are crossed, we decrement by the difference
+        # in the i-atom position.
+        diffrelj[istart[1:]] -= torch.diff(istart)
+        # By summing the increments we get the index of j in the padded neighbors list
+        jrellist = torch.cumsum(diffrelj, dim=0) - 1
+
+        # Build Padded neighbor list and padded rij
+        jlist_pad = -torch.ones(n_atoms, nneigh_max, dtype=ilist.dtype, device=ilist.device)
+        jlist_pad[ilist, jrellist] = jlist
+
+    rijlist_pad = torch.zeros(n_atoms, nneigh_max, 3, dtype=pair_coord.dtype, device=pair_coord.device)
+    rijlist_pad[ilist, jrellist] = pair_coord
+
+    return jlist_pad, rijlist_pad
+
+
+class PaddedNeighModule(torch.nn.Module):
+    def forward(self, pair_first, pair_second, pair_coord, atom_array):
+        return padded_neighlist(pair_first, pair_second, pair_coord, atom_array)

@@ -9,8 +9,16 @@ from .open import OpenPairIndexer, _PairIndexer
 
 from .periodic import PeriodicPairIndexer
 
-from .indexing import ExternalNeighbors, PairDeIndexer, PairReIndexer, PairCacher, PairUncacher, MolPairSummer
+from .indexing import (
+    ExternalNeighbors,
+    PairDeIndexer,
+    PairReIndexer,
+    PairCacher,
+    PairUncacher,
+    MolPairSummer,
+    PaddedNeighModule,
+)
 
-from .analysis import RDFBins
+from .analysis import RDFBins, MinDistModule
 
 from .dispatch import NPNeighbors, TorchNeighbors
