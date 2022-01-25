@@ -33,7 +33,9 @@ class PyAniMethods:
 
         for c in progress_bar(x, desc="Data Groups", unit="group", total=x.group_size()):
             batch_dict = {}
-
+            if species_key not in c:
+                raise ValueError(f"Species key '{species_key}' not found' in file {file}!\n"
+                                 f"\tFound keys: {set(c.keys())}")
             for k, v in c.items():
                 # Filter things we don't need
                 if k in self._IGNORE_KEYS:
@@ -44,8 +46,11 @@ class PyAniMethods:
 
                 # Special logic for species
                 if k == species_key:
+                    # Groups have the same species, broad-cast out the batch axis
                     v = np.expand_dims(v, 0)
-                    v = numpy_map_elements(v)
+                    # If given as strings, map to atomic elements
+                    if (not isinstance(v.dtype, type)) and isinstance(v.dtype.type, np.str_):
+                        v = numpy_map_elements(v)
 
                     n_atoms_max = max(n_atoms_max, v.shape[1])
 
@@ -94,7 +99,7 @@ class PyAniMethods:
 
         # Pad the arrays
         padded_batches = []
-        for b in batches:
+        for b in progress_bar(batches, desc="Processing Batches", unit="batch"):
             pb = {}
             for k, v in b.items():
 
@@ -138,39 +143,44 @@ class PyAniMethods:
 
 
 class PyAniFileDB(Database, PyAniMethods, Restartable):
-    def __init__(self, file, inputs, targets, *args, allow_unfound=False, quiet=False, **kwargs):
+    def __init__(self, file, inputs, targets, *args, allow_unfound=False,species_key="species", quiet=False, **kwargs):
 
         self.file = file
         self.inputs = inputs
         self.targets = targets
+        self.species_key = species_key
 
         arr_dict = self.load_arrays(quiet=quiet, allow_unfound=allow_unfound)
 
         super().__init__(arr_dict, inputs, targets, *args, **kwargs, quiet=quiet, allow_unfound=allow_unfound)
         self.restarter = self.make_restarter(
-            file, inputs, targets, *args, **kwargs, quiet=quiet, allow_unfound=allow_unfound
+            file, inputs, targets, *args, **kwargs, quiet=quiet, allow_unfound=allow_unfound,
+            species_key=species_key,
         )
 
     def load_arrays(self, allow_unfound=False, quiet=False):
         if not quiet:
             print("Loading arrays from", self.file)
-        batches, n_atoms_max = self.extract_full_file(self.file)
-        arr_dict = self.process_batches(batches, n_atoms_max)
+        batches, n_atoms_max = self.extract_full_file(self.file,species_key=self.species_key)
+        arr_dict = self.process_batches(batches, n_atoms_max,species_key=self.species_key)
         arr_dict = self.filter_arrays(arr_dict, quiet=quiet, allow_unfound=allow_unfound)
         return arr_dict
 
 
 class PyAniDirectoryDB(Database, PyAniMethods, Restartable):
-    def __init__(self, directory, inputs, targets, *args, files=None, allow_unfound=False, quiet=False, **kwargs):
+    def __init__(self, directory, inputs, targets, *args, files=None, allow_unfound=False,species_key="species",
+                 quiet=False,**kwargs):
 
         self.directory = directory
         self.files = files
         self.inputs = inputs
         self.targets = targets
+        self.species_key = species_key
         arr_dict = self.load_arrays(allow_unfound=allow_unfound)
 
         super().__init__(arr_dict, inputs, targets, *args, **kwargs, quiet=quiet, allow_unfound=allow_unfound)
-        self.restarter = self.make_restarter(directory, inputs, targets, *args, files=files, quiet=quiet, **kwargs)
+        self.restarter = self.make_restarter(directory, inputs, targets, *args, files=files, quiet=quiet,
+                                             species_key=species_key, **kwargs)
 
     def load_arrays(self, allow_unfound=False, quiet=False):
 
@@ -189,13 +199,13 @@ class PyAniDirectoryDB(Database, PyAniMethods, Restartable):
 
         file_batches = []
         for f in progress_bar(files, desc="Data Files", unit="file"):
-            file_batches.append(self.extract_full_file(f))
+            file_batches.append(self.extract_full_file(f,species_key=self.species_key))
 
         data, max_atoms_list = zip(*file_batches)
 
         n_atoms_max = max(max_atoms_list)
         batches = [item for fb in data for item in fb]
 
-        arr_dict = self.process_batches(batches, n_atoms_max)
+        arr_dict = self.process_batches(batches, n_atoms_max,species_key=self.species_key)
         arr_dict = self.filter_arrays(arr_dict, quiet=quiet, allow_unfound=allow_unfound)
         return arr_dict
