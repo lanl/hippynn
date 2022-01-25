@@ -49,7 +49,7 @@ class PyAniMethods:
                     # Groups have the same species, broad-cast out the batch axis
                     v = np.expand_dims(v, 0)
                     # If given as strings, map to atomic elements
-                    if (not isinstance(v.dtype, type)) and isinstance(v.dtype.type, np.str_):
+                    if (not isinstance(v.dtype, type)) and issubclass(v.dtype.type, np.str_):
                         v = numpy_map_elements(v)
 
                     n_atoms_max = max(n_atoms_max, v.shape[1])
