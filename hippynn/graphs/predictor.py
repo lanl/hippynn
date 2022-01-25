@@ -26,7 +26,8 @@ class Predictor:
 
     """
 
-    def __init__(self, inputs, outputs, return_device=torch.device("cpu"), model_device=None, requires_grad=False):
+    def __init__(self, inputs, outputs, return_device=torch.device("cpu"), model_device=None, requires_grad=False,
+                 name=None):
         """
 
         :param inputs: nodes to use as inputs
@@ -35,6 +36,7 @@ class Predictor:
         :param model_device: where the model and input should be placed, does nothing if None
         :param requires_grad: Default false -- detach predicted tensors. If true, do not detach predicted
            tensors -- this may lead to memory leaks if not done carefully.
+        : param name: Optional name for formatting progress bars.
 
         """
 
@@ -57,6 +59,7 @@ class Predictor:
         self.return_device = return_device
         self.model_device = model_device
         self.requires_grad = requires_grad
+        self.name = name or "Predictor"
 
     @classmethod
     def from_graph(cls, graph, additional_outputs=None, **kwargs):
@@ -170,7 +173,7 @@ class Predictor:
         batched_inputs = [{n: t[i] for n, t in node_values.items()} for i in range(n_batches)]
 
         # Predict for each batch
-        batched_outputs = [self.predict_all(b) for b in progress_bar(batched_inputs, desc="Prediction", unit="batch")]
+        batched_outputs = [self.predict_all(b) for b in progress_bar(batched_inputs, desc=self.name, unit="batch")]
 
         # Concatenate the full set of outputs.
         out_keys = batched_outputs[0].keys()

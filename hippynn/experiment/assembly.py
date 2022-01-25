@@ -201,7 +201,7 @@ def precompute_pairs(model, database, batch_size=10, device=None, make_dense=Fal
     cacher = pairs.PairCacher("PairCacher", pair_indexer, module_kwargs=dict(n_images=n_images))
 
     input_nodes = set([x for x in cacher.get_all_parents() if isinstance(x, base.InputNode)])
-    pred = Predictor(input_nodes, [cacher], model_device=device)
+    pred = Predictor(input_nodes, [cacher], model_device=device, name="Pair Precomputer")
 
     try:
         for k, arrdict in database.splits.items():
