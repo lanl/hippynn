@@ -378,7 +378,7 @@ def wrap_points_torch(coords, cell, inv_cell):
     # cell is (basis,cartesian)
     # inv is (cartesian,basis)
     projections = coords @ inv_cell
-    fractional_coords = torch.fmod(projections, 1)
+    fractional_coords = torch.remainder(projections, 1)
     wrapped_offset = torch.div(projections, 1, rounding_mode="floor")
     # wrapped_coords is (atoms,cartesian)
     wrapped_coords = fractional_coords @ cell
@@ -427,9 +427,15 @@ def neighbor_list_torch(cutoff, coords, cell):
                     pair_second.append(ps)
                     pair_image.append(pi)
 
-    pair_first = torch.cat(pair_first)
-    pair_second = torch.cat(pair_second)
-    pair_image = torch.cat(pair_image)
+    try:
+        pair_first = torch.cat(pair_first)
+        pair_second = torch.cat(pair_second)
+        pair_image = torch.cat(pair_image)
+    except NotImplementedError:
+        # Neighbors list was empty for this system!
+        pair_first = torch.empty(0, dtype=torch.int64,device=coords.device)
+        pair_second = torch.empty(0, dtype=torch.int64,device=coords.device)
+        pair_image = torch.empty((0,3), dtype=torch.int64,device=coords.device)
 
     return pair_first, pair_second, pair_image
 
@@ -473,13 +479,20 @@ class _DispatchNeighbors(torch.nn.Module):
                 nlist_data.append((pf, ps, of))
 
             # transpose
-            pair_first, pair_second, offsets = zip(*nlist_data)
+            try:
+                pair_first, pair_second, offsets = zip(*nlist_data)
+                # concatenate. inv_real_atoms maps from system-based indices
+                # to batch-based indices.
+                pair_first = inv_real_atoms[torch.cat(pair_first).to(dev)]
+                pair_second = inv_real_atoms[torch.cat(pair_second).to(dev)]
+                # offset_index = torch.cat(offset_index)
+                offsets = torch.cat(offsets).to(dev)
 
-            # concatenate
-            pair_first = inv_real_atoms[torch.cat(pair_first).to(dev)]
-            pair_second = inv_real_atoms[torch.cat(pair_second).to(dev)]
-            # offset_index = torch.cat(offset_index)
-            offsets = torch.cat(offsets).to(dev)
+            except ValueError:
+                # No neighbors in this whole batch...  very rare?
+                pair_first = torch.empty(0, dtype=torch.int64, device=dev)
+                pair_second = torch.empty(0, dtype=torch.int64, device=dev)
+                offsets = torch.empty((0, 3), dtype=torch.int64, device=dev)
 
             # Number the offsets
             n_off = self.n_images * 2 + 1
