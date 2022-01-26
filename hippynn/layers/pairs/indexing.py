@@ -180,7 +180,7 @@ def padded_neighlist(pair_first, pair_second, pair_coord, atom_array):
 
         # Relative index for j values
         # When boundaries of i-atoms are not crossed, we increment by 1
-        diffrelj = torch.ones(len(jlist), dtype=jlist.dtype)
+        diffrelj = torch.ones(len(jlist), dtype=jlist.dtype, device=jlist.device)
         # When boundaries of i-atoms are crossed, we decrement by the difference
         # in the i-atom position.
         diffrelj[istart[1:]] -= torch.diff(istart)
