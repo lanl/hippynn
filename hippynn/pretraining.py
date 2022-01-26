@@ -74,6 +74,7 @@ def _setup_min_dist_graph(
     species_set,
     cell_name=None,
     pair_finder_class="auto",
+    device=None,
 ):
     species = SpeciesNode(db_name=species_name)
     positions = PositionsNode(db_name=positions_name)
@@ -97,7 +98,7 @@ def _setup_min_dist_graph(
     pair_finder = pair_finder_class("PairFinder", pair_parents, dist_hard_max=dist_hard_max)
 
     min_dist_mol = MinDistNode("MinDists", pair_finder).min_dist_mol
-    pred = Predictor(pair_parents, [min_dist_mol], name="Minimum Distance Calculator")
+    pred = Predictor(pair_parents, [min_dist_mol], model_device=device, name="Minimum Distance Calculator")
 
     return pred, min_dist_mol
 
@@ -108,6 +109,7 @@ def calculate_min_dists(
     positions_name: str,
     dist_hard_max: float,
     cell_name: str = None,
+    device: torch.device = None,
     pair_finder_class: _BaseNode = "auto",
     batch_size: int = 50,
 ):
@@ -136,6 +138,7 @@ def calculate_min_dists(
     :param cell_name: dictionary key for cell (periodic boundary conditions.
      if the cell is not specified, open boundaries are used.
     :param pair_finder_class: if 'auto', choose automatically. elsewise build this kind of pair finder.
+    :param device: Where to perform the computation.
     :param batch_size: batch size to perform evaluation over.
     :return:
     """
@@ -162,6 +165,7 @@ def calculate_min_dists(
         species_set=species_set,
         cell_name=cell_name,
         pair_finder_class=pair_finder_class,
+        device=device,
     )
 
     input_dict = {

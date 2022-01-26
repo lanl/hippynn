@@ -132,6 +132,7 @@ class PyAniMethods:
             if not allow_unfound:
                 if k not in self.inputs and k not in self.targets:
                     del arr_dict[k]
+                    continue
             if v.dtype == "float64":
                 arr_dict[k] = v.astype(floatX)
 
@@ -176,7 +177,7 @@ class PyAniDirectoryDB(Database, PyAniMethods, Restartable):
         self.inputs = inputs
         self.targets = targets
         self.species_key = species_key
-        arr_dict = self.load_arrays(allow_unfound=allow_unfound)
+        arr_dict = self.load_arrays(allow_unfound=allow_unfound,quiet=quiet)
 
         super().__init__(arr_dict, inputs, targets, *args, **kwargs, quiet=quiet, allow_unfound=allow_unfound)
         self.restarter = self.make_restarter(directory, inputs, targets, *args, files=files, quiet=quiet,
