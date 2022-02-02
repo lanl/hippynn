@@ -74,6 +74,7 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
 
     # TODO: is .clone necessary? Or good? Or torch.as_tensor instead?
     encoder = find_unique_relative(species, search_fn(Encoder, new_subgraph), why_desc=why)
+    encoder.species_set = torch.as_tensor(encoder.species_set,dtype=torch.int64)
     species_set = encoder.species_set.clone()
     indexer = find_unique_relative(species, search_fn(AtomIndexer, new_subgraph), why_desc=why)
     min_radius = max(p.dist_hard_max for p in pair_indexers)
