@@ -23,12 +23,21 @@ def via_numpy(func):
 
     return wrapped
 
+def _numba_gpu_not_found(*args,**kwargs):
+    raise RuntimeError("Error: Numba not configured to run on GPU.\n"
+                       "numba.cuda.is_available() returned False; numba was not able to find a GPU.\n"
+                       "Verify that your numba installation is able to find cuda toolkit, as this \n"
+                       "error condition likely indicates that torch can find the GPU, but numba can't.\n"
+                       "Alternatively, disable custom kernels.")
 
 class NumbaCompatibleTensorFunction:
     def __init__(self):
         if numba.cuda.is_available():
             self.kernel64 = self.make_kernel(numba.float64)
             self.kernel32 = self.make_kernel(numba.float32)
+        else:
+            self.kernel64 = _numba_gpu_not_found
+            self.kernel32 = _numba_gpu_not_found
 
     def __call__(self, *args, **kwargs):
 
@@ -58,4 +67,7 @@ class NumbaCompatibleTensorFunction:
         return NotImplemented
 
     def launch_bounds(self, *shapes):
+        return NotImplemented
+
+    def cpu_kernel(self):
         return NotImplemented
