@@ -92,7 +92,7 @@ class Controller:
     def load_state_dict(self, state_dict):
 
         for sch, sdict in zip(self.scheduler_list, state_dict["scheduler"]):
-            sch.set_state_dict(sdict)
+            sch.load_state_dict(sdict)
 
         self.optimizer.load_state_dict(state_dict["optimizer"])
 
@@ -214,7 +214,7 @@ class RaiseBatchSizeOnPlateau:
             "inner": self.inner.state_dict(),
         }
 
-    def set_state_dict(self, state_dict):
+    def load_state_dict(self, state_dict):
         self.boredom = state_dict["boredom"]
         self.best_metric = state_dict["boredom"]
         self.inner.load_state_dict(state_dict["inner"])
