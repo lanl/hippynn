@@ -224,7 +224,8 @@ class PairUncacher(ExpandParents, AutoNoKw, PairIndexer, MultiNode):
 
     _parent_expander.assertlen(7)
 
-    def __init__(self, name, parents, module="auto", module_kwargs=None, **kwargs):
+    def __init__(self, name, parents, dist_hard_max, module="auto", **kwargs):
+        self.dist_hard_max = dist_hard_max
         parents = self.expand_parents(parents)
         super().__init__(name, parents, module=module, **kwargs)
 

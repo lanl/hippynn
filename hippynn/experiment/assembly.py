@@ -197,7 +197,7 @@ def precompute_pairs(model, database, batch_size=10, device=None, make_dense=Fal
     pair_indexer = find_unique_relative(
         nodes_to_compute, lambda node: isinstance(node, tuple(_PAIRCACHE_COMPATIBLE_COMPUTERS))
     )
-
+    dist_hard_max = pair_indexer.dist_hard_max
     cacher = pairs.PairCacher("PairCacher", pair_indexer, module_kwargs=dict(n_images=n_images))
 
     input_nodes = set([x for x in cacher.get_all_parents() if isinstance(x, base.InputNode)])
@@ -225,7 +225,9 @@ def precompute_pairs(model, database, batch_size=10, device=None, make_dense=Fal
     pos = gops.find_unique_relative(pair_indexer, inputs.PositionsNode)
     cell = gops.find_unique_relative(pair_indexer, inputs.CellNode)
     atomidx = gops.find_unique_relative(pair_indexer, indexers.AtomIndexer)
-    uncacher = pairs.PairUncacher("AutoPairUncache", (cacheinput, pos, cell, atomidx))
+    uncacher = pairs.PairUncacher("AutoPairUncache",
+                                  (cacheinput, pos, cell, atomidx),
+                                  dist_hard_max=dist_hard_max)
     gops.replace_node(pair_indexer, uncacher, disconnect_old=True)
 
     return
