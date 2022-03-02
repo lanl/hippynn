@@ -51,7 +51,7 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
     ########################################
 
     ###############################################################
-    # Get a new supgraph, and find the nodes we need to construct the calculator
+    # Get a new subgraph, and find the nodes we need to construct the calculator
     # Factory for seeking out nodes only in the subgraph and of a specific type
     search_fn = lambda targ, sg: lambda n: n in sg and isinstance(n, targ)
 
@@ -74,7 +74,7 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
 
     # TODO: is .clone necessary? Or good? Or torch.as_tensor instead?
     encoder = find_unique_relative(species, search_fn(Encoder, new_subgraph), why_desc=why)
-    species_set = torch.tensor(encoder.species_set).to(torch.int64)  # works with lists or tensors
+    species_set = torch.as_tensor(encoder.species_set).to(torch.int64)  # works with lists or tensors
     indexer = find_unique_relative(species, search_fn(AtomIndexer, new_subgraph), why_desc=why)
     min_radius = max(p.dist_hard_max for p in pair_indexers)
     ###############################################################
@@ -322,8 +322,7 @@ class HippynnCalculator(interface.Calculator):
         # Convert from ASE distance (angstrom) to whatever the network uses.
         positions = positions / self.dist_unit
         species = torch.as_tensor(self.atoms.numbers).unsqueeze(0)
-        cell = torch.as_tensor(self.atoms.cell)  # Oddity.. try to fix externalneighbors to take same shape as internal
-
+        cell = torch.as_tensor(self.atoms.cell.array)  # ExternalNieghbors doesn't take batch index
         # Get pair first and second from neighbors list
 
         pair_first = torch.as_tensor(self.nl.nl.pair_first)

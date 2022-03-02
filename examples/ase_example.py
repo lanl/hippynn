@@ -53,7 +53,7 @@ atoms.calc = calc
 print("Number of atoms:", len(atoms))
 
 atoms.rattle(0.1)
-MaxwellBoltzmannDistribution(atoms, temp=500 * units.kB)
+MaxwellBoltzmannDistribution(atoms, temperature_K=500)
 dyn = VelocityVerlet(atoms, 1 * units.fs)
 
 
