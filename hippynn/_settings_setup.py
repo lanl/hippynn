@@ -57,6 +57,7 @@ def kernel_handler(kernel_string):
 default_settings = {
     "PROGRESS": (TQDM_PROGRESS, progress_handler),
     "DEFAULT_PLOT_FILETYPE": (".pdf", str),
+    "DEBUG_LOSS_BROADCAST": (False, strtobool),
     "DEBUG_GRAPH_EXECUTION": (False, strtobool),
     "DEBUG_NODE_CREATION": (False, strtobool),
     "DEBUG_AUTOINDEXING": (False, strtobool),

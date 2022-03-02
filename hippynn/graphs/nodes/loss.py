@@ -4,13 +4,12 @@ Nodes for constructing loss functions.
 import torch
 import torch.nn.functional
 
+from ... import settings
 from ..indextypes import IdxType, elementwise_compare_reduce
 from .base import SingleNode
 from ...layers.algebra import LambdaModule
 
 from ...layers import regularization as reg_modules
-
-debug_loss_broadcast = False
 
 
 class _DebugBroadCast(torch.nn.Module):
@@ -84,7 +83,7 @@ class _BaseCompareLoss(SingleNode):
     def __init_subclass__(cls, op=None, **kwargs):
         if op is not None:
             cls._classname = op.__name__
-            if debug_loss_broadcast:
+            if settings.DEBUG_LOSS_BROADCAST:
                 cls.torch_module = _DebugBroadCast(op)
             else:
                 # Note: as of now, we need to wrap raw operations as a loss module because
