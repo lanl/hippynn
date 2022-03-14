@@ -344,8 +344,9 @@ class HippynnCalculator(interface.Calculator):
         # Convert units
         self.results["potential_energy"] = self.results["potential_energy"][0, 0] * self.en_unit
         self.results["forces"] = self.results["forces"][0] * (self.en_unit / self.dist_unit)
-        stress_factor = self.en_unit
-        if (len(self.atoms.pbc) and all(self.atoms.pbc)) or self.atoms.pbc:
+        # slightly opaque way to handle if pbc is 3-tuple or boolean.
+        # Note: PBC handler forbids mixed BCs, so this check is enough.
+        if all(self.atoms.pbc) if len(self.atoms.pbc) else self.atoms.pbc:
             stress_factor = self.en_unit / (self.dist_unit) ** 3
         else:
             stress_factor = self.en_unit
