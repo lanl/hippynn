@@ -1,3 +1,42 @@
+0.0.1b1
+=======
+
+New features:
+-------------
+
+- PeriodicPairIndexer can now handle arbitrary cells sizes with
+  arbitrary boundary conditions, and is suitable for use in
+  general training sets. As a result, it is no longer necessary to use
+  DynamicPeriodicPairs, and caching pairs is less likely
+  to bring performance improvements.
+
+Improvements
+------------
+
+- The throughput of DynamicPeriodicPairs has been dramatically increased.
+
+- If numba fails to find a GPU, a better error message is displayed.
+
+- Loss broadcasting debugging can be changed with a new setting variable.
+
+Bug fixes:
+----------
+
+- Fixed a bug where _DispatchNeighbors module incorrectly indexed atoms
+  in the case where blank atoms did not appear after real ones.
+
+- Fixed a bug where an ASE calculator couldn't be created when the
+  training PairFinder is a subclass of _DispatchNeighbors
+
+- Fixed a bug where an ASE calculator couldn't be created when the
+  encoder and species indexer were generated using a python list
+  for species.
+
+- Fixed a bug with the ASE calculator failing in open boundary conditions.
+
+- Fixed an incompatibility between our API and the pytorch API that
+  prevented loading pytorch schedulers from a checkpoint.
+
 0.0.1a2
 =======
 
@@ -12,7 +51,7 @@ New features:
 
 - New function ``calculate_min_dists``, node ``MinDistNode``
     - This node can compute the minimum distance from atoms to other atoms,
-      and aggregate this information over molecules.
+      and aggregate this information over systems.
     - The primary utility is encapsulated in ``hippynn.pretraining.calculate_min_dists``.
       This function computers the minimum distance between any pair of atoms for each
       molecule in the dataset. This information can be useful for identifying
@@ -32,7 +71,7 @@ Bug fixes:
 
 - DynamicPeriodicPairs would find pairs in the wrong images in some cases, fixed.
 
-- Scalar broadcasting of a node with a scalar, e.g. in alebgraic operations, was broken, this is fixed.
+- Scalar broadcasting of a node with a scalar, e.g. in algebraic operations, was broken, this is fixed.
 
 - ``allow_unfound`` argument for databases was not working for some database formats.
 

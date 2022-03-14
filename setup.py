@@ -20,7 +20,7 @@ full_requirements = [
 
 setuptools.setup(
     name="hippynn",
-    version="0.0.1a2",
+    version="0.0.1b1",
     author="Nicholas Lubbers et al",
     author_email="hippynn [AT] lanl (DOT) gov",
     python_requires=">3.7",
