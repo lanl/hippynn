@@ -63,6 +63,7 @@ class PaddingIndexer(torch.nn.Module):
         :param nonblank:
         :return: real atoms, amd inverse atoms mappings
         """
+        dev = features.device
         n_molecules, n_atoms_max = nonblank.shape
         n_fictitious_atoms = nonblank.shape[0] * nonblank.shape[1]
         # Just calculate the total number of atoms in the dataset
@@ -77,10 +78,10 @@ class PaddingIndexer(torch.nn.Module):
         n_real_atoms = real_atoms.shape[0]
         # Count how many real atoms there are
 
-        inv_real_atoms = torch.zeros((n_fictitious_atoms,), dtype=torch.long, device=features.device)
+        inv_real_atoms = torch.zeros((n_fictitious_atoms,), dtype=torch.long, device=dev)
         # Create a vector of 0's
 
-        inv_real_atoms[real_atoms] = torch.arange(n_real_atoms, dtype=torch.long, device=features.device)
+        inv_real_atoms[real_atoms] = torch.arange(n_real_atoms, dtype=torch.long, device=dev)
         # Create the inverse real atom "function" give it an index get an atom back
 
         # Flatten incoming features to atom representation
@@ -90,10 +91,10 @@ class PaddingIndexer(torch.nn.Module):
 
         # Get molecule index for atoms
         mol_index_shaped = (
-            torch.arange(n_molecules, dtype=torch.long, device=features.device).unsqueeze(1).expand(-1, n_atoms_max)
+            torch.arange(n_molecules, dtype=torch.long, device=dev).unsqueeze(1).expand(-1, n_atoms_max)
         )
         atom_index_shaped = (
-            torch.arange(n_atoms_max, dtype=torch.long, device=features.device).unsqueeze(0).expand(n_molecules, -1)
+            torch.arange(n_atoms_max, dtype=torch.long, device=dev).unsqueeze(0).expand(n_molecules, -1)
         )
         atom_index = atom_index_shaped.reshape(n_fictitious_atoms)[real_atoms]
         mol_index = mol_index_shaped.reshape(n_fictitious_atoms)[real_atoms]

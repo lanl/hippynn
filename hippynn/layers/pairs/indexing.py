@@ -95,7 +95,7 @@ class PairCacher(torch.nn.Module):
         cell_offsets = cell_offsets[order]
 
         # Create sparse tensor
-        indices = torch.stack([mol, pfabs, psabs, offset_index], axis=0)
+        indices = torch.stack([mol, pfabs, psabs, offset_index], dim=0)
         values = cell_offsets
         size = (n_molecules, n_atoms_max, n_atoms_max, n_offsets, 3)
         s = torch.sparse_coo_tensor(
