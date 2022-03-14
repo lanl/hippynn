@@ -63,6 +63,7 @@ def neighbor_list_np(cutoff, coords, cell):
     return pair_first, pair_second, pair_image
 
 
+@torch.jit.script
 def wrap_points_torch(coords, cell, inv_cell):
     # cell is (basis,cartesian)
     # inv is (cartesian,basis)
@@ -74,59 +75,62 @@ def wrap_points_torch(coords, cell, inv_cell):
     return wrapped_coords, wrapped_offset.to(torch.int64)
 
 
-def neighbor_list_torch(cutoff, coords, cell):
+@torch.jit.script
+def compute_offset_range(inv_cell, cutoff: float):
+    dev = inv_cell.device
+    eps = 1e-5
+    inv_lengths = torch.linalg.norm(inv_cell, dim=0)
+    n_bounds = (torch.floor(cutoff * inv_lengths + eps) + 1).to(torch.int64)
+    n1, n2, n3 = n_bounds.unbind()
+    n1range = torch.arange(-n1, n1 + 1, device=dev)
+    n2range = torch.arange(-n2, n2 + 1, device=dev)
+    n3range = torch.arange(-n3, n3 + 1, device=dev)
+
+    offset_range = torch.cartesian_prod(n1range, n2range, n3range)
+    # shape: n_permutations, 3 (basis)
+    return offset_range
+
+
+@torch.jit.script
+def neighbor_list_torch(cutoff: float, coords, cell):
     # cell is (basis,cartesian)
     # inv is (cartesian,basis)
     inv_cell = torch.linalg.inv(cell)
     coords, wrapped_offset = wrap_points_torch(coords, cell, inv_cell)
 
-    eps = 1e-5
-    inv_lengths = torch.linalg.norm(inv_cell, axis=0)
-    n_bounds = (torch.floor(cutoff * inv_lengths + eps) + 1).to(torch.int64)
-    n1, n2, n3 = n_bounds.unbind()
+    offset_range = compute_offset_range(inv_cell, cutoff)
+    # shape: n_permutations, 3 (basis)
 
-    drij = coords.unsqueeze(1) - coords.unsqueeze(0)
+    drij = torch.sub(coords.unsqueeze(1), coords.unsqueeze(0))
+    # shape n_atoms, n_atoms, 3
+    wrap_offset_ij = torch.sub(wrapped_offset.unsqueeze(1), wrapped_offset.unsqueeze(0))
 
-    wrap_offset_ij = wrapped_offset.unsqueeze(1) - wrapped_offset.unsqueeze(0)
+    perm_offsets = offset_range.to(cell.dtype) @ cell
+    # shape n_perms, 3 (cartesian)
+    perm_offsets = perm_offsets.unsqueeze(1).unsqueeze(2)
+    # shape n_perms, 1, 1, 3
 
-    pair_first = []
-    pair_second = []
-    pair_image = []
-    for i1 in range(-n1, n1 + 1):
-        for i2 in range(-n2, n2 + 1):
-            for i3 in range(-n3, n3 + 1):
-                oi = (i1, i2, i3)
-                oi = torch.as_tensor(oi, device=coords.device)
-                oi_float = oi.to(coords.dtype)
-                offset = oi_float @ cell
-                diff = drij + offset
-                dist = torch.linalg.norm(diff, axis=2)
-                pf, ps = torch.nonzero(dist < cutoff, as_tuple=True)
+    drij = drij.unsqueeze(0)
+    # shape 1, n_atoms, n_atoms, 3
 
-                if i1 == i2 == i3 == 0:
-                    nonself = pf != ps
-                    pf = pf[nonself]
-                    ps = ps[nonself]
+    diff = torch.add(drij, perm_offsets)
 
-                if len(pf) > 0:
-                    pi = oi.unsqueeze(0).expand(pf.shape[0], -1)
-                    # pi is wrapped image locations, need to convert back to absolute.
-                    pi = pi - wrap_offset_ij[pf, ps]
-                    pair_first.append(pf)
-                    pair_second.append(ps)
-                    pair_image.append(pi)
+    dist = torch.linalg.norm(diff, dim=3)
+    nonz = torch.nonzero(dist < cutoff)
+    po, pf, ps = nonz.unbind(1)
+    pi = offset_range[po]
 
-    try:
-        pair_first = torch.cat(pair_first)
-        pair_second = torch.cat(pair_second)
-        pair_image = torch.cat(pair_image)
-    except NotImplementedError:
-        # Neighbors list was empty for this system!
-        pair_first = torch.empty(0, dtype=torch.int64, device=coords.device)
-        pair_second = torch.empty(0, dtype=torch.int64, device=coords.device)
-        pair_image = torch.empty((0, 3), dtype=torch.int64, device=coords.device)
+    # Remove connections to self.
+    other_image = pi.type(torch.bool).any(dim=1)  # same as (pi != 0).any(dim=1)
+    other_particle = torch.ne(pf, ps)  # same as pf != ps
+    nonself = torch.logical_or(other_particle, other_image)
 
-    return pair_first, pair_second, pair_image
+    pf = pf[nonself]
+    ps = ps[nonself]
+    pi = pi[nonself]
+    # pi is wrapped image locations, need to convert back to absolute.
+    pi = pi - wrap_offset_ij[pf, ps]
+    return pf, ps, pi
 
 
 class _DispatchNeighbors(torch.nn.Module):
@@ -149,32 +153,44 @@ class _DispatchNeighbors(torch.nn.Module):
             dev = coordinates.device  # where to put the results.
 
             cell_list = cell.unbind(0)
-            coord_list = [c[nb] for c, nb in zip(coordinates.unbind(0), nonblank.unbind(0))]
+            coord_list = coordinates.unbind(0)
+            nb_list = nonblank.unbind(0)
+            sys_inv_atoms = inv_real_atoms.reshape(n_molecules, n_atoms_max).unbind(0)
             nlist_data = []
-            for mol_num, (r, c) in enumerate(zip(coord_list, cell_list)):
+
+            for (r, c, nb, sia) in zip(coord_list, cell_list, nb_list, sys_inv_atoms):
+                # r: positions
+                # c: cell
+                # nb: nonblank
+                # sia: system inv atom indices, these map from system atom numbers to batch atom numbers
+
+                # Remove blank atoms from positions and indices of atoms.
+                r = r[nb]
+                sia = sia[nb]
+                # dispatch to implementation
                 outs = self.compute_one(r, c)
                 pf, ps, of = outs
-                if len(pf) == 0:
-                    continue
-                pf += mol_num * n_atoms_max
-                ps += mol_num * n_atoms_max
-                max_images = of.abs().max()
-                if max_images > self.n_images:
-                    self.set_combinator(max_images)
+
+                # convert system-relative atom indices back to whole-batch atom indices
+                pf = sia[pf]
+                ps = sia[ps]
+
+                # store
                 nlist_data.append((pf, ps, of))
 
-            # transpose
+            # transpose lists into tensors for whole batch
             try:
                 pair_first, pair_second, offsets = zip(*nlist_data)
-                # concatenate. inv_real_atoms maps from system-based indices
-                # to batch-based indices.
-                pair_first = inv_real_atoms[torch.cat(pair_first).to(dev)]
-                pair_second = inv_real_atoms[torch.cat(pair_second).to(dev)]
-                # offset_index = torch.cat(offset_index)
+                pair_first = torch.cat(pair_first).to(dev)
+                pair_second = torch.cat(pair_second).to(dev)
                 offsets = torch.cat(offsets).to(dev)
+                max_images = offsets.abs().max()
+                self.set_combinator(max_images)
 
-            except ValueError:
-                # No neighbors in this whole batch...  very rare?
+            # Catch when no neighbors in this whole batch...  very rare?
+            except (ValueError, RuntimeError):
+                if pair_first.shape[0] != 0:
+                    raise
                 pair_first = torch.empty(0, dtype=torch.int64, device=dev)
                 pair_second = torch.empty(0, dtype=torch.int64, device=dev)
                 offsets = torch.empty((0, 3), dtype=torch.int64, device=dev)
@@ -189,7 +205,7 @@ class _DispatchNeighbors(torch.nn.Module):
             pair_offsets = torch.bmm(offsets.unsqueeze(1).to(pair_cell.dtype), pair_cell).squeeze(1)
 
             # now calculate pair_dist, paircoord differentiably
-
+        # print("Pairs found",pair_first.shape)
         coordflat = coordinates.reshape(n_molecules * n_atoms_max, 3)[real_atoms]
         paircoord = coordflat[pair_first] - coordflat[pair_second] + pair_offsets
         distflat2 = paircoord.norm(dim=1)
