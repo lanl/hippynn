@@ -37,6 +37,9 @@ The following settings are available:
      - | Yes, but assign this to a
        | generator-wrapper such as ``tqdm.tqdm``,
        | or with a python ``None`` to disable.
+       | The wrapper must accept ``tqdm`` arguments,
+       | although it technically doesn't have to
+       | do anything with them.
    * - DEFAULT_PLOT_FILETYPE
      - | File type to use for plots when
        | not explicitly specified
@@ -46,9 +49,10 @@ The following settings are available:
      - .pdf
      - Yes
    * - USE_CUSTOM_KERNELS
-     - | Use custom kernels with numba. Auto tries
-       | to detect the installation of numba.
-       | for more info see
+     - | Use custom kernels with numba.
+       | Auto tries to detect the
+       | installation of numba.
+       | for more info see :doc:`/user_guide/ckernels`.
      - auto, true, false
      - auto
      - Not directly, use :func:`~hippynn.custom_kernels.set_custom_kernels`
@@ -59,3 +63,18 @@ The following settings are available:
      - true, false
      - true
      - yes
+   * - DEBUG_LOSS_BROADCAST
+     - | Warn if quantities in the loss
+       | broadcast badly against each
+       | other.
+     - true, false
+     - false
+     - no
+   * - DEBUG_GRAPH_BROADCAST
+     - | Print high verbose information about
+       | the execution of a graph module.
+       | Don't turn this on unless something
+       | is going very wrong.
+     - true, false
+     - false
+     - no

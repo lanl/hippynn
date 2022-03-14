@@ -35,8 +35,8 @@ class Predictor:
         :param return_device: device to place results on; does nothing if None
         :param model_device: where the model and input should be placed, does nothing if None
         :param requires_grad: Default false -- detach predicted tensors. If true, do not detach predicted
-           tensors -- this may lead to memory leaks if not done carefully.
-        : param name: Optional name for formatting progress bars.
+         tensors -- this may lead to memory leaks if not done carefully.
+        :param name: Optional name for formatting progress bars.
 
         """
 
@@ -182,7 +182,7 @@ class Predictor:
 
     def apply_to_database(self, db, **kwargs):
         """
-        Note: kwargs are passed to self.__call__, e.g. `batch_size` parameter.
+        Note: kwargs are passed to self.__call__, e.g. the ``batch_size`` parameter.
         """
         results = {}
         for split_name, split_arrdict in db.splits.items():

@@ -46,12 +46,7 @@ with hippynn.tools.active_directory(netname):
         positions = inputs.PositionsNode(db_name="Positions")
         cell = inputs.CellNode(db_name="Lattice")
 
-        enc, padidxer = indexers.acquire_encoding_padding(species, species_set=network_params["possible_species"])
-
-        pairfinder = pairs.DynamicPeriodicPairs(
-            "PairFinder", (positions, species, cell), dist_hard_max=network_params["dist_hard_max"]
-        )
-        network = networks.Hipnn("HIPNN", (padidxer, pairfinder), periodic=True, module_kwargs=network_params)
+        network = networks.Hipnn("HIPNN", (species, positions, cell), periodic=True, module_kwargs=network_params)
         henergy = targets.HEnergyNode("HEnergy", network)
         sys_energy = henergy.mol_energy
         sys_energy.db_name = "Energy"
