@@ -202,8 +202,9 @@ def find_relatives(node_or_nodes, constraint_key, why_desc=DEFAULT_WHY_DESC):
 
     candidates = {n for n in get_connected_nodes(node_or_nodes) if constraint_key(n)}
 
-    if constraint_key(node_or_nodes):
-        candidates.add(node_or_nodes)
+    for node in node_or_nodes:
+        if constraint_key(node):
+            candidates.add(node)
 
     if len(candidates) == 0:
         _debprint("Node not found, all relatives:")
