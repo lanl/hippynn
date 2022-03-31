@@ -104,7 +104,7 @@ TEST_TINY_PARAMS = dict(n_molecules=2, n_atoms=3, atom_prob=1, n_features=5, n_n
 TEST_SMALL_PARAMS = dict(n_molecules=10, n_atoms=30, atom_prob=0.7, n_features=10, n_nu=20)
 TEST_MEDIUM_PARAMS = dict(n_molecules=100, n_atoms=30, atom_prob=0.7, n_features=20, n_nu=20)
 TEST_LARGE_PARAMS = dict(n_molecules=1000, n_atoms=30, atom_prob=0.7, n_features=80, n_nu=20)
-
+TEST_MEGA_PARAMS = dict(n_molecules=500, n_atoms=30, atom_prob=0.7, n_features=128, n_nu=100)
 
 # reference implementation
 
@@ -357,8 +357,11 @@ def main():
         if use_large_gpu:
             tester.check_correctness(device=torch.device("cuda"))
             print("-" * 80)
+            print("Mega systems:", TEST_MEGA_PARAMS)
+            tester.check_speed(n_repetitions=20,data_size=TEST_MEGA_PARAMS, device=torch.device("cuda"), compare_against="Pytorch")
+            print("-" * 80)
             print("Large systems:", TEST_LARGE_PARAMS)
-            tester.check_speed(n_repetitions=100, device=torch.device("cuda"), compare_against="Pytorch")
+            tester.check_speed(n_repetitions=20, device=torch.device("cuda"), compare_against="Pytorch")
         else:
             print("Numba indicates less than 2GB free GPU memory -- skipping large system test")
             tester.check_correctness(device=torch.device("cuda"), n_large=0)

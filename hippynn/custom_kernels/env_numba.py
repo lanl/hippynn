@@ -5,7 +5,7 @@ import numba
 import numba.cuda
 import numpy as np
 
-from .utils import resort_pairs
+from .utils import resort_pairs_cached
 from .tensor_wrapper import via_numpy, NumbaCompatibleTensorFunction
 
 # Very basic implementation.
@@ -24,7 +24,7 @@ from .tensor_wrapper import via_numpy, NumbaCompatibleTensorFunction
 class WrappedEnvsum(NumbaCompatibleTensorFunction):
     def __call__(self, *args, **kwargs):
         sense, feat, pfirst, psecond = args
-        atom1_ids, atom1_starts, pfirst, (sense, psecond) = resort_pairs(pfirst, [sense, psecond])
+        argsort, atom1_ids, atom1_starts, pfirst, (sense, psecond) = resort_pairs_cached(pfirst, [sense, psecond])
         args = sense, feat, pfirst, psecond, atom1_ids, atom1_starts
         return super().__call__(*args, **kwargs)
 
@@ -118,8 +118,12 @@ class WrappedSensesum(NumbaCompatibleTensorFunction):
 
     def launch_bounds(self, env_shape, feat_shape, pfirst_shape, psecond_shape):
         (n_pairs,) = pfirst_shape
-        TPB = 512
-        BPG = (n_pairs + TPB - 1) // TPB
+        n_atoms, n_nu, n_feat = env_shape
+        TPB_MAX = 512
+        TPB_Y = n_nu
+        TPB_X = TPB_MAX//TPB_Y
+        TPB = (TPB_X,TPB_Y)
+        BPG = (n_pairs + TPB_X -1 )//TPB_X
         return BPG, TPB
 
     @staticmethod
@@ -137,11 +141,10 @@ class WrappedSensesum(NumbaCompatibleTensorFunction):
             if pidx < n_pairs:
                 pfidx = pfirst[pidx]
                 psidx = psecond[pidx]
-                for nidx in range(n_nu):
-                    tmp = KERNEL_DTYPE(0.0)
-                    for fidx in range(n_feat):
-                        tmp += env[pfidx, nidx, fidx] * feat[psidx, fidx]
-                    sense[pidx, nidx] = tmp
+                tmp = KERNEL_DTYPE(0.0)
+                for fidx in range(n_feat):
+                    tmp += env[pfidx, nidx, fidx] * feat[psidx, fidx]
+                sense[pidx, nidx] = tmp
 
         return kernel
 
@@ -168,7 +171,7 @@ class WrappedSensesum(NumbaCompatibleTensorFunction):
 class WrappedFeatsum(NumbaCompatibleTensorFunction):
     def __call__(self, *args, **kwargs):
         env, sense, pfirst, psecond = args
-        atom2_ids, atom2_starts, psecond, (sense, pfirst) = resort_pairs(psecond, [sense, pfirst])
+        argsort, atom2_ids, atom2_starts, psecond, (sense, pfirst) = resort_pairs_cached(psecond, [sense, pfirst])
         args = env, sense, pfirst, psecond, atom2_ids, atom2_starts
         return super().__call__(*args, **kwargs)
 
