@@ -147,12 +147,14 @@ class Envops_tester:
             funcname = func.__qualname__
         try:
             inputs = [x.requires_grad_(True) for x in differentiable_inputs]
-            assert torch.autograd.gradcheck(func, [*inputs, pair_first, pair_second]), "{} failed grad check.".format(
-                funcname
-            )
-            assert torch.autograd.gradgradcheck(
-                func, [*inputs, pair_first, pair_second]
-            ), "{} failed gradgrad check.".format(funcname)
+            try:
+                torch.autograd.gradcheck(func, [*inputs, pair_first, pair_second])
+            except Exception as ee:
+                raise ValueError(f"{funcname} failed grad check.") from ee
+            try:
+                torch.autograd.gradgradcheck(func, [*inputs, pair_first, pair_second])
+            except Exception as ee:
+                raise ValueError(f"{funcname} failed gradgrad check.") from ee
         finally:
             [x.requires_grad_(False) for x in inputs]
 
@@ -251,7 +253,7 @@ class Envops_tester:
             comp_envsum = env_pytorch.envsum
             comp_sensesum = env_pytorch.sensesum
             comp_featsum = env_pytorch.featsum
-        elif compare_against == "Existing":
+        elif compare_against == "Numba":
             comp_envsum = env_numba.new_envsum
             comp_sensesum = env_numba.new_sensesum
             comp_featsum = env_numba.new_featsum
@@ -284,10 +286,10 @@ class Envops_tester:
         for t in [tne, tns, tnf] + [te, ts, tf]:
             print("Mean {} time: {} Median: {}".format(t.name, t.mean_elapsed, t.median_elapsed))
         for tn, t in zip([tne, tns, tnf], [te, ts, tf]):
-            print("{} Speedup: {}".format(t.name, tn.mean_elapsed / t.mean_elapsed))
+            print("{} Speedup: {}".format(t.name, tn.median_elapsed / t.median_elapsed))
 
-        tnsum = sum(x.mean_elapsed for x in [tne, tns, tnf])
-        tsum = sum(x.mean_elapsed for x in [te, ts, tf])
+        tnsum = sum(x.median_elapsed for x in [tne, tns, tnf])
+        tsum = sum(x.median_elapsed for x in [te, ts, tf])
         print("Overall {} time: {}".format(compare_against, tnsum))
         print("Overall time now: {}".format(tsum))
         print("Overall speedup: {}".format(tnsum / tsum))
