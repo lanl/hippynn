@@ -343,11 +343,11 @@ class TimedSnippet:
         return self.end - self.start
 
 
-def main():
+def main(env_impl,sense_impl,feat_impl):
     tester = Envops_tester(
-        env_numba.new_envsum,
-        env_numba.new_sensesum,
-        env_numba.new_featsum,
+        env_impl,
+        sense_impl,
+        feat_impl,
     )
     # % time
 
@@ -355,18 +355,21 @@ def main():
         print("Running GPU tests")
         meminfo = numba.cuda.current_context().get_memory_info()
         use_large_gpu = meminfo.free > 2 ** 31
+        use_verylarge_gpu = meminfo.free > 2**3
 
-        if use_large_gpu:
-            tester.check_correctness(device=torch.device("cuda"))
+        n_large = 3 if use_large_gpu else 0
+        tester.check_correctness(device=torch.device("cuda"),n_large=n_large)
+        if use_verylarge_gpu:
             print("-" * 80)
             print("Mega systems:", TEST_MEGA_PARAMS)
             tester.check_speed(n_repetitions=20,data_size=TEST_MEGA_PARAMS, device=torch.device("cuda"), compare_against="Pytorch")
+        else:
+            print("Numba indicates less than 32GB free GPU memory -- skipping mega system test")
+        if use_large_gpu:
             print("-" * 80)
-            print("Large systems:", TEST_LARGE_PARAMS)
-            tester.check_speed(n_repetitions=20, device=torch.device("cuda"), compare_against="Pytorch")
+            tester.check_speed(n_repetitions=20,data_size=TEST_LARGE_PARAMS, device=torch.device("cuda"), compare_against="Pytorch") 
         else:
             print("Numba indicates less than 2GB free GPU memory -- skipping large system test")
-            tester.check_correctness(device=torch.device("cuda"), n_large=0)
 
         print("-" * 80)
         print("Medium systems:", TEST_MEDIUM_PARAMS)
@@ -396,4 +399,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(env_numba.new_envsum,
+         env_numba.new_sensesum,
+         env_numba.new_featsum,
+    )
