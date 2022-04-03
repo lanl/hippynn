@@ -25,6 +25,7 @@ class WrappedEnvsum(NumbaCompatibleTensorFunction):
     def __call__(self, *args, **kwargs):
         sense, feat, pfirst, psecond = args
         argsort, atom1_ids, atom1_starts, pfirst, (sense, psecond) = resort_pairs_cached(pfirst, [sense, psecond])
+        resort_pairs_cached(psecond, [])
         args = sense, feat, pfirst, psecond, atom1_ids, atom1_starts
         return super().__call__(*args, **kwargs)
 
@@ -172,6 +173,7 @@ class WrappedFeatsum(NumbaCompatibleTensorFunction):
     def __call__(self, *args, **kwargs):
         env, sense, pfirst, psecond = args
         argsort, atom2_ids, atom2_starts, psecond, (sense, pfirst) = resort_pairs_cached(psecond, [sense, pfirst])
+        resort_pairs_cached(pfirst, [])
         args = env, sense, pfirst, psecond, atom2_ids, atom2_starts
         return super().__call__(*args, **kwargs)
 
