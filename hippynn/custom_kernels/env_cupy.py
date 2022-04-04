@@ -150,8 +150,9 @@ class CupyGPUKernel:
 class CupyEnvsum(CupyGPUKernel,WrappedEnvsum):
     _cupy_name = 'cupy_envsum'
     def __call__(self,sense,feat,pfirst,psecond):
+        psecond_hold = psecond
         argsort, atom1_ids, atom1_starts, pfirst, (sense, psecond) = resort_pairs_cached(pfirst, [sense, psecond])
-        resort_pairs_cached(psecond,[])
+        resort_pairs_cached(psecond_hold,[])
         dev = sense.device
         if dev.type == "cpu":
             return self.cpu_kernel(sense, feat, pfirst, psecond, atom1_ids, atom1_starts)
@@ -204,8 +205,9 @@ class CupySensesum(CupyGPUKernel,WrappedSensesum):
 class CupyFeatsum(CupyGPUKernel,WrappedFeatsum):
     _cupy_name = 'cupy_featsum'
     def __call__(self,env,sense,pfirst,psecond):
+        pfirst_hold = pfirst
         argsort, atom2_ids, atom2_starts, psecond, (sense, pfirst) = resort_pairs_cached(psecond, [sense, pfirst])
-        resort_pairs_cached(pfirst,[])
+        resort_pairs_cached(pfirst_hold,[])
         dev = env.device
         if dev.type == "cpu":
             return self.cpu_kernel(env, sense, pfirst, psecond, atom2_ids, atom2_starts)

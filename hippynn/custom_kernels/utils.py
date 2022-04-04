@@ -39,17 +39,36 @@ class _CacheEntry():
         # Explicitly checking that the key is exactly equal
         # is problematic because it requires device synchronization
         # in order to proceed in the interpreter.
-        self.cache_key = key.data_ptr(),key.shape[0],key.device
+        self.cache_key = key.data_ptr(), key.shape[0], key.device
         self.key = key
         self.cache = cache
         self.computed = False
+   
     def __eq__(self,other):
-        return isinstance(other,type(self)) and self.cache_key == other.cache_key
+        if not isinstance(other,type(self)):
+            return False    
+        if self.key is other.key:
+            return True
+        if self.cache_key == other.cache_key:
+            # For now raise an error since this feature is experimental.
+            # Most of the benefits seem to work from the `is` check.
+            if not torch.equal(self.key,other.key):
+                raise RuntimeError("Caching by key does not work! Please raise an issue.")
+            return True 
+        return False
     
     def find(self):
         if self in self.cache:
-            value =  self.cache[self.cache.index(self)]
-            return value
+            other =  self.cache[self.cache.index(self)]
+            return other
+        for other in self.cache:
+            # Expensive, but not as expensive as sorting + nonzero,
+            # which is also a blocking operation.
+            # Note that pytorch is smart enough not to generate 
+            # a blocking call unless the actual memory needs to be
+            # checked, i.e. it will skip if arrays have different sizes.
+            if torch.equal(self.key,other.key):
+                return other
         else:
             return self    
     
@@ -85,7 +104,9 @@ def _make_cache():
 # Dict mapping device to key cache info
 _CACHE_STORE = collections.defaultdict(_make_cache)
 
+CACHE_LOCK_MISSES = 0
 def resort_pairs_cached(key, others):
+    global CACHE_LOCK_MISSES
     deque, lock = _CACHE_STORE[key.device]
     got_lock = lock.acquire(blocking=False)
     if got_lock:
@@ -94,6 +115,6 @@ def resort_pairs_cached(key, others):
             entry.compute_and_store()
         lock.release()
         return entry.retrieve(others)
-    print("lock fallback")
+    CACHE_LOCK_MISSES += 1
     return resort_pairs(key,others)
 
