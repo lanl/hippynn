@@ -13,7 +13,7 @@ the metrics of the experiment so far. This can be seen by breaking down
 :func:`~hippynn.experiment.setup_and_train` into its component steps,
 :func:`~hippynn.experiment.setup_training`, and :func:`~hippynn.experiment.routines.train_model`::
 
-    from hippynn.experiment import setup_training, train_modoel
+    from hippynn.experiment import setup_training, train_model
     training_modules,controller,metrics = setup_training(training_modules=training_modules,
                 setup_params=experiment_params,
                 )
@@ -25,7 +25,7 @@ the metrics of the experiment so far. This can be seen by breaking down
 To restart training later, you can use the following::
 
     from hippynn.experiment.serialziation import load_checkpoint
-    check = load_checkpoint('./experiment_structure.pt','./best_checkpoint.pkl')
+    check = load_checkpoint('./experiment_structure.pt','./best_checkpoint.pt')
     train_model(**check)
 
 If your database is not Restartable, you wil have to explicitly reload it and pass it to ``train_model``, as well.
