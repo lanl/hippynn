@@ -44,7 +44,7 @@ class MLIAPInterface(MLIAPUnified):
         pair_i = torch.from_numpy(data.pair_i).type(torch.int64)
         pair_j = torch.from_numpy(data.pair_j).type(torch.int64)
         rij = torch.from_numpy(data.rij).type(torch.float64)
-        nlocal = torch.tensor(data.nlocal)
+        nlocal = torch.tensor(data.nlistatoms)
 
         # note your sign for rij might need to be +1 or -1, depending on how your implementation works
         inputs = (inp.to(self._model_device) for inp in [z_vals, pair_i, pair_j, -rij, nlocal])
@@ -60,10 +60,6 @@ class MLIAPInterface(MLIAPUnified):
         data.eatoms = atom_energy.squeeze(1).detach().numpy().astype(np.double)
         data.energy = total_energy.item()
 
-    def pickle(self, fname):
-        with open(fname, 'wb') as fp:
-            pickle.dump(self, fp)
-    
     def __getstate__(self):
         self.species_set = self.species_set.to(torch.device("cpu"))
         self.graph.to(torch.device("cpu"))
