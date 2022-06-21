@@ -100,7 +100,7 @@ def get_simulated_data(
     return pair_sense, features, pair_first, pair_second
 
 
-TEST_TINY_PARAMS = dict(n_molecules=2, n_atoms=3, atom_prob=1, n_features=5, n_nu=7)
+TEST_TINY_PARAMS = dict(n_molecules=2, n_atoms=3, atom_prob=1., n_features=5, n_nu=7)
 TEST_SMALL_PARAMS = dict(n_molecules=10, n_atoms=30, atom_prob=0.7, n_features=10, n_nu=20)
 TEST_MEDIUM_PARAMS = dict(n_molecules=100, n_atoms=30, atom_prob=0.7, n_features=20, n_nu=20)
 TEST_LARGE_PARAMS = dict(n_molecules=1000, n_atoms=30, atom_prob=0.7, n_features=80, n_nu=20)
@@ -194,6 +194,20 @@ class Envops_tester:
             if max_deviation > self.suspicious_deviation:
                 print("Closeness check for {} by suspicious amount".format(name), max_deviation)
 
+    def check_empty(self,device=torch.device('cpu')):
+
+        sense, feat, pfirst, psecond = get_simulated_data(**TEST_TINY_PARAMS, dtype=torch.float64, device=device)
+        pfirst = psecond = torch.zeros((0,),dtype=torch.long,device=pfirst.device)    
+        sense = torch.zeros((0,sense.shape[1]),dtype=sense.dtype,device=sense.device)
+        
+        try:
+            env = self.envsum(sense,feat,pfirst,psecond)
+            sense_g = self.sensesum(env,feat,pfirst,psecond)
+            feat_g = self.featsum(env,sense,pfirst,psecond)
+        except Exception as ee:
+            raise ValueError("Failed an operation on data with zero pairs") from ee
+        print("Passed zero-pair check")
+
     def all_close_witherror(self, r1, r2):
         r1 = r1.data.cpu().numpy()
         r2 = r2.data.cpu().numpy()
@@ -235,6 +249,7 @@ class Envops_tester:
                 raise RuntimeError("Failed during iteration {}".format(i)) from ee
 
     def check_correctness(self, n_grad=1, n_small=100, n_large=3, device=torch.device("cpu")):
+        self.check_empty(device=device)
         print("Checking gradients {} times...".format(n_grad))
         self.check_all_grad(repeats=n_grad, device=device)
         print("Passed gradient checks!")
