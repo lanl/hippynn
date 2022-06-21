@@ -71,7 +71,9 @@ class PaddingIndexer(torch.nn.Module):
         flat_nonblank = nonblank.reshape(n_fictitious_atoms)
         # Flatten the nonblank n_mol x n_atoms nonblank matrix
 
-        real_atoms = torch.nonzero(flat_nonblank, as_tuple=False)[:, 0]
+        large_enough = torch.empty(nonblank.shape,device=dev,dtype=torch.int64)
+        large_enough.resize_(0)
+        real_atoms = torch.nonzero(flat_nonblank, as_tuple=False,out=large_enough)[:, 0]
         # print(real_atoms)
         # Grab the indexes of each real atom, give it an atom get an index back
 

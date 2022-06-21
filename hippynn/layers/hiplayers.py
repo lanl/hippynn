@@ -225,7 +225,10 @@ class InteractLayerVec(InteractLayer):
         env_features_vec = custom_kernels.envsum(sense_vec, in_features, pair_first, pair_second)
         env_features_vec = env_features_vec.reshape(n_atoms_real * 3, self.n_dist * self.nf_in)
         features_out_vec = torch.mm(env_features_vec, weights_rs)
-        features_out_vec = (features_out_vec.reshape(n_atoms_real, 3, self.nf_out) + 1e-22).norm(dim=1)
+        features_out_vec = features_out_vec.reshape(n_atoms_real,3,self.nf_out)
+        features_out_vec = torch.square(features_out_vec).sum(dim=1) + 1e-22
+        features_out_vec = torch.sqrt(features_out_vec)
+        #features_out_vec = (features_out_vec.reshape(n_atoms_real, 3, self.nf_out) + 1e-22).norm(dim=1)
         features_out_vec = features_out_vec * self.vecscales.unsqueeze(0)
 
         # Self interaction
@@ -242,6 +245,10 @@ class InteractLayerQuad(InteractLayerVec):
 
         self.quadscales = torch.nn.Parameter(torch.Tensor(nf_out))
         torch.nn.init.normal_(self.quadscales.data)
+        # upper indices of flattened 3x3 array minus the (3,3) component
+        # which is not needed for a traceless tensor
+        upper_ind = torch.as_tensor([0, 1, 2, 4, 5],dtype=torch.int64)
+        self.register_buffer('upper_ind',upper_ind,persistent=False) # Static, not part of module state
 
     def forward(self, in_features, pair_first, pair_second, dist_pairs, coord_pairs):
 
@@ -274,7 +281,7 @@ class InteractLayerQuad(InteractLayerVec):
         tr = torch.diagonal(rhatsquad, dim1=1, dim2=2).sum(dim=1) / 3.0  # Add divide by 3 early to save flops
         tr = tr.unsqueeze(1).unsqueeze(2) * torch.eye(3, dtype=tr.dtype, device=tr.device).unsqueeze(0)
         rhatsquad = rhatsquad - tr
-        rhatsqflat = rhatsquad.reshape(-1, 9)[:, [0, 1, 2, 4, 5]]  # Upper-diagonal part
+        rhatsqflat = rhatsquad.reshape(-1, 9)[:,self.upper_ind]  # Upper-diagonal part
         sense_quad = sense_vals.unsqueeze(1) * rhatsqflat.unsqueeze(2)
         sense_quad = sense_quad.reshape(-1, self.n_dist * 5)
         # Weights
@@ -283,7 +290,7 @@ class InteractLayerQuad(InteractLayerVec):
         features_out_quad = torch.mm(env_features_quad, weights_rs)  ##sum v b
         features_out_quad = features_out_quad.reshape(n_atoms_real, 5, self.nf_out)
         # Norm. (of traceless two-tensor from 5 component representation)
-        quadfirst = torch.einsum("ijk,ijk->ik", features_out_quad, features_out_quad)
+        quadfirst = torch.square(features_out_quad).sum(dim=1)
         quadsecond = features_out_quad[:, 0, :] * features_out_quad[:, 3, :]
         features_out_quad = 2 * (quadfirst + quadsecond)
         features_out_quad = torch.sqrt(features_out_quad + 1e-44)
