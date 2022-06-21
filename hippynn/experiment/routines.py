@@ -459,12 +459,12 @@ def training_loop(
 
         for batch in tools.progress_bar(train_generator, desc="Training Batches", unit="batch"):
 
-            batch = [item.to(device=device) for item in batch]
+            batch = [item.to(device=device,non_blocking=True) for item in batch]
             batch_inputs = batch[:n_inputs]
             batch_targets = batch[-n_targets:]
             batch_targets = [x.requires_grad_(False) for x in batch_targets]
 
-            optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
             batch_model_outputs = model(*batch_inputs)
 
             # The extra .mean call here deals with an edge case for multi-GPU DataParallel with scalar outputs
@@ -476,6 +476,8 @@ def training_loop(
             if batch_callbacks:
                 for cb in batch_callbacks:
                     cb(batch_inputs, batch_model_outputs, batch_targets)
+            # Allow garbage collection of computed values.
+            del batch_model_outputs, batch_train_loss
 
         elapsed_epoch_run_time = timeit.default_timer() - epoch_run_time
         qprint("Training time: ", round(elapsed_epoch_run_time, 2), "s")
