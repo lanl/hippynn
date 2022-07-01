@@ -86,7 +86,7 @@ def setup_LAMMPS_graph(energy):
     species = find_unique_relative(new_required, search_fn(SpeciesNode, new_subgraph),why_desc=why)
 
     encoder = find_unique_relative(species, search_fn(Encoder, new_subgraph), why_desc=why)
-    species_set = encoder.species_set.clone()
+    species_set = torch.as_tensor(encoder.species_set).to(torch.int64)
     min_radius = max(p.dist_hard_max for p in pair_indexers)
 
     ###############################################################
