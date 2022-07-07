@@ -80,7 +80,7 @@ if os.path.exists(rc_name) and os.path.isfile(rc_name):
     config.read(rc_name)
     config_sources["~/.hippynnrc"] = config["GLOBALS"]
 
-hippynn_environment_variables = {k.lstrip("HIPPYNN_"): v for k, v in os.environ.items() if k.startswith("HIPPYNN_")}
+hippynn_environment_variables = {k.replace("HIPPYNN_", ""): v for k, v in os.environ.items() if k.startswith("HIPPYNN_")}
 
 LOCAL_RC_FILE_KEY = "LOCAL_RC_FILE"
 
