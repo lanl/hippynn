@@ -17,6 +17,7 @@ _db_index_states = {
     IdxType.Molecules       : IdxType.Molecules,
     IdxType.Atoms           : IdxType.MolAtom,
     IdxType.MolAtom         : IdxType.MolAtom,
+    IdxType.MolAtomAtom     : IdxType.MolAtomAtom,
     IdxType.QuadMol         : IdxType.QuadPack,
     IdxType.QuadPack        : IdxType.QuadPack,
     IdxType.Pair            : IdxType.MolAtomAtom,
