@@ -59,7 +59,7 @@ class Database:
 
         if not allow_unfound:
             for k in self.var_list:
-                if k not in arr_dict and k not in ("indicies", "split_indices"):
+                if k not in arr_dict and k not in ("indices", "split_indices"):
                     raise KeyError(
                         f"Array dictionary missing required variable:'{k}'."
                         "Pass allow_unfound=True to avoid checking of inputs targets."
