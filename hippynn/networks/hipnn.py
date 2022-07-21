@@ -8,7 +8,7 @@ import torch
 from typing import Union, List
 
 from ..layers.hiplayers import (
-    SensitivityModule,
+    GaussianSensitivityModule,
     InverseSensitivityModule,
     InteractLayer,
     InteractLayerVec,
@@ -159,7 +159,7 @@ class Hipnn(torch.nn.Module):
         if sensitivity_type == "inverse":
             sensitivity_type = InverseSensitivityModule
         elif sensitivity_type == "linear":
-            sensitivity_type = SensitivityModule
+            sensitivity_type = GaussianSensitivityModule
         elif callable(sensitivity_type):
             pass
         else:

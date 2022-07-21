@@ -226,9 +226,8 @@ class InteractLayerVec(InteractLayer):
         env_features_vec = env_features_vec.reshape(n_atoms_real * 3, self.n_dist * self.nf_in)
         features_out_vec = torch.mm(env_features_vec, weights_rs)
         features_out_vec = features_out_vec.reshape(n_atoms_real,3,self.nf_out)
-        features_out_vec = torch.square(features_out_vec).sum(dim=1) + 1e-22
+        features_out_vec = torch.square(features_out_vec).sum(dim=1) + 1e-30
         features_out_vec = torch.sqrt(features_out_vec)
-        #features_out_vec = (features_out_vec.reshape(n_atoms_real, 3, self.nf_out) + 1e-22).norm(dim=1)
         features_out_vec = features_out_vec * self.vecscales.unsqueeze(0)
 
         # Self interaction
@@ -271,7 +270,9 @@ class InteractLayerQuad(InteractLayerVec):
         env_features_vec = env_features_vec.reshape(n_atoms_real * 3, self.n_dist * self.nf_in)
         features_out_vec = torch.mm(env_features_vec, weights_rs)
         # Norm and scale
-        features_out_vec = (features_out_vec.reshape(n_atoms_real, 3, self.nf_out) + 1e-22).norm(dim=1)
+        features_out_vec = features_out_vec.reshape(n_atoms_real,3,self.nf_out)
+        features_out_vec = torch.square(features_out_vec).sum(dim=1) + 1e-30
+        features_out_vec = torch.sqrt(features_out_vec)
         features_out_vec = features_out_vec * self.vecscales.unsqueeze(0)
 
         # Quadrupole part
@@ -293,7 +294,7 @@ class InteractLayerQuad(InteractLayerVec):
         quadfirst = torch.square(features_out_quad).sum(dim=1)
         quadsecond = features_out_quad[:, 0, :] * features_out_quad[:, 3, :]
         features_out_quad = 2 * (quadfirst + quadsecond)
-        features_out_quad = torch.sqrt(features_out_quad + 1e-44)
+        features_out_quad = torch.sqrt(features_out_quad + 1e-30)
         # Scales
         features_out_quad = features_out_quad * self.quadscales.unsqueeze(0)
 
