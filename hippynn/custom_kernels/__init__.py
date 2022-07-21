@@ -1,84 +1,130 @@
 """
 Custom Kernels for hip-nn interaction sum.
 
-This module provides implementations in pytorch and numba.
+This module provides implementations in pytorch, numba, and cupy.
 
 Pytorch implementations take extra memory, but launch faster than numba kernels.
 
 Numba kernels use far less memory, but do come with some launching overhead on GPUs.
+
+Cupy kernels only work on the GPU, but are faster than numba.
+Cupy kernels require numba for CPU operations.
 """
 import warnings
+from typing import Union
 from .. import settings
 
 from . import autograd_wrapper, env_pytorch
 
+CUSTOM_KERNELS_AVAILABLE = []
 try:
     import numba
-
-    _CUSTOM_KERNELS_AVAILABLE = True
+    CUSTOM_KERNELS_AVAILABLE.append('numba')
 except ImportError:
-    _CUSTOM_KERNELS_AVAILABLE = False
+    pass
+
+try:
+    import cupy
+    if "numba" not in CUSTOM_KERNELS_AVAILABLE:
+        warnings.warn("cupy was found, but numba was not. Cupy custom kernels not available.")
+    else:
+        CUSTOM_KERNELS_AVAILABLE.append('cupy')
+except ImportError:
+    pass
+
+if not CUSTOM_KERNELS_AVAILABLE:
     warnings.warn("Numba not available: Custom Kernels will be disabled.")
 
-_CUSTOM_KERNELS_ACTIVE = False
-_INITIALIZED = False
+CUSTOM_KERNELS_ACTIVE = False
 
 envsum, sensesum, featsum = None, None, None
 
-
-def _initialize():
-    global _INITIALIZED
+def _check_numba():
     import numba.cuda
     import torch
-
     if not numba.cuda.is_available():
         if torch.cuda.is_available():
             warnings.warn("numba.cuda.is_available() returned False: Custom kernels will fail on GPU tensors.")
+        return True
     else:
         # atexit.register(numba.cuda.close)
-        # Note: Do not attempt the above `atexit` call!
+        # Dev note for the future: Do not attempt the above `atexit` call!
         # Causes segfault on program exit on some systems.
         # Probably due to both numba and torch trying to finalize the GPU.
         # Leaving this note here in case anyone is tempted to try it in the future.
-        pass
+        # (At one point this was the right strategy...)
+        return False
 
-    _INITIALIZED = True
+def _check_cupy():
+    import cupy
+    import numba
+    import torch
+    if not cupy.cuda.is_available():
+        if torch.cuda.is_available():
+            warnings.warn("cupy.cuda.is_available() returned False: Custom kernels will fail on GPU tensors.")
 
 
-def set_custom_kernels(active: bool = True):
+def set_custom_kernels(active: Union[bool,str] = True):
     """
     Activate or deactivate custom kernels for interaction.
 
-    :param active: If true, set custom kernels on. If False, turn them off and default to pytorch.
+    :param active: If true, set custom kernels to the best available. If False, turn them off and default to pytorch.
+       If "numba" or "cupy", use those implementations explicitly. If "auto", use best available.
     :return: None
     """
-    global envsum, sensesum, featsum, _CUSTOM_KERNELS_ACTIVE
+    global envsum, sensesum, featsum, CUSTOM_KERNELS_ACTIVE
 
-    if active:
-        if not _CUSTOM_KERNELS_AVAILABLE:
-            raise RuntimeError("Numba was not found on module import -- custom kernels are not available.")
-        if not _INITIALIZED:
-            _initialize()
+    if isinstance(active,str):
+        active = active.lower()
 
-        from .env_numba import new_envsum, new_sensesum, new_featsum
+    if active not in [True,False,"numba","cupy","pytorch","auto"]:
+        raise ValueError(f"Unrecognized custom kernel implementation: {active}")
+    
+    active_map = {"auto":True,"pytorch":False }
+    active = active_map.get(active,active)
 
-        (
-            envsum,
-            sensesum,
-            featsum,
-        ) = autograd_wrapper.wrap_envops(new_envsum, new_sensesum, new_featsum)
-
-    else:
+    if not active:
         envsum = env_pytorch.envsum
         sensesum = env_pytorch.sensesum
         featsum = env_pytorch.featsum
+        CUSTOM_KERNELS_ACTIVE = False
+        return
 
-    _CUSTOM_KERNELS_ACTIVE = active
+    if not CUSTOM_KERNELS_AVAILABLE:
+        raise RuntimeError("Numba was not found. Custom kernels are not available.")
+
+    if active is True:
+        if "cupy" in CUSTOM_KERNELS_AVAILABLE:
+            active = "cupy"
+        else:
+            active = "numba"
+    
+    if active not in CUSTOM_KERNELS_AVAILABLE:
+        raise RuntimeError(f"Unavailable custom kernel implementation: {active}")
+
+    if active == 'cupy':
+        _check_numba()
+        _check_cupy()
+        from .env_cupy import cupy_envsum, cupy_sensesum, cupy_featsum
+        envsum, sensesum, featsum = (
+            autograd_wrapper.wrap_envops(cupy_envsum, cupy_sensesum, cupy_featsum)
+        )
+    elif active == "numba":
+        _check_numba()
+        from .env_numba import new_envsum, new_sensesum, new_featsum
+        (envsum, sensesum, featsum,) = (
+                autograd_wrapper.wrap_envops(new_envsum, new_sensesum, new_featsum)
+                )
+    else:
+        # We shouldn't get here except possibly mid-development, but just in case:
+        # if you add a custom kernel implementation remember to add to this
+        # dispatch block.
+        raise ValueError(f"Unknown Implementation: {active}")
+
+    CUSTOM_KERNELS_ACTIVE = active
 
 
-if settings.USE_CUSTOM_KERNELS == "auto":
-    try_custom_kernels = _CUSTOM_KERNELS_AVAILABLE
-else:
-    try_custom_kernels = settings.USE_CUSTOM_KERNELS
-
+try_custom_kernels = settings.USE_CUSTOM_KERNELS
 set_custom_kernels(try_custom_kernels)
+del try_custom_kernels
+

@@ -5,7 +5,7 @@ import functools
 
 import numba
 import torch
-
+from .fast_convert import batch_convert_torch_to_numba
 
 def via_numpy(func):
     """Decorator for piping a function through
@@ -40,7 +40,6 @@ class NumbaCompatibleTensorFunction:
             self.kernel32 = _numba_gpu_not_found
 
     def __call__(self, *args, **kwargs):
-
         shapes = [x.shape for x in args]
         dev = args[0].device
 
@@ -52,12 +51,14 @@ class NumbaCompatibleTensorFunction:
             out = torch.zeros(self.out_shape(*shapes), device=dev, dtype=dtype)
             args = *args, out
             args = [a.detach() for a in args]
-            if dtype == torch.float64:
-                self.kernel64[launch_bounds](*args)
-            elif dtype == torch.float32:
-                self.kernel32[launch_bounds](*args)
-            else:
-                raise ValueError("Bad dtype: {}".format(dtype))
+            with numba.cuda.gpus[dev.index]:
+                numba_args = batch_convert_torch_to_numba(*args)
+                if dtype == torch.float64:
+                    self.kernel64[launch_bounds](*numba_args)
+                elif dtype == torch.float32:
+                    self.kernel32[launch_bounds](*numba_args)
+                else:
+                    raise ValueError("Bad dtype: {}".format(dtype))
         return args[-1]
 
     def make_kernel(self):
