@@ -16,7 +16,7 @@ Let's assume we have a module FooModule that implements some pytorch operations,
 and takes some keyword arguments in constructing that module.
 A simple node could be built as follows::
 
-    from hippynn.graphs.nodes import SingleNode
+    from hippynn.graphs.nodes.base import SingleNode
     from hippynn.graphs import IdxType
     class FooNode(SingleNode):
         _index_state = IdxType.Atom
