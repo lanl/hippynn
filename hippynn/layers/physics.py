@@ -124,7 +124,7 @@ class AlphaScreening(torch.nn.Module):
 class EwaldRealSpaceScreening(AlphaScreening):
     def __init__(self, alpha):
         warnings.warn("Ewald implementation incomplete, does not include k-space contributions.")
-        super.__init__(alpha)
+        super().__init__(alpha)
 
     def forward(self, pair_dist, radius):
         q = pair_dist / radius
@@ -136,7 +136,7 @@ class EwaldRealSpaceScreening(AlphaScreening):
 class WolfScreening(AlphaScreening):
     def __init__(self, alpha):
         warnings.warn("Wolf implemnetation uses exact derivative of the potential.")
-        super.__init__(alpha)
+        super().__init__(alpha)
 
     def forward(self, pair_dist, radius):
         q = pair_dist / radius
