@@ -5,7 +5,7 @@ import warnings
 import torch
 
 from ase.calculators import interface
-from ase.calculators.calculator import compare_atoms, PropertyNotImplementedError
+from ase.calculators.calculator import compare_atoms, PropertyNotImplementedError, Calculator # Calculator is required to allow HIPNN to be used with ASE Mixing Calculators
 
 from hippynn.graphs import find_relatives, find_unique_relative, get_subgraph, copy_subgraph, replace_node, GraphModule
 from hippynn.graphs.gops import check_link_consistency
@@ -199,7 +199,7 @@ def pass_to_pytorch(fn_name):
     return method
 
 
-class HippynnCalculator(interface.Calculator):
+class HippynnCalculator(interface.Calculator, Calculator): # Calculator inheritance required for ASE Mixing Calculator usage
     """
     ASE calculator based on hippynn graphs. Uses ASE neighbor lists. Not suitable for domain decomposition.
     """
@@ -220,6 +220,8 @@ class HippynnCalculator(interface.Calculator):
         self.min_radius, self.species_set, self.implemented_properties, self.module, self.pbc = setup_ASE_graph(
             energy, charges=charges, extra_properties=extra_properties
         )
+        
+        self.implemented_properties.append("energy") # Required for using mixing calculators in ASE
 
         self.atoms = None
         self._last_properties = None
@@ -343,6 +345,7 @@ class HippynnCalculator(interface.Calculator):
 
         # Convert units
         self.results["potential_energy"] = self.results["potential_energy"][0, 0] * self.en_unit
+        self.results["energy"] = self.results["potential_energy"] # Required for using ASE mixing calculators, which assume potential energy is under the property "energy"
         self.results["forces"] = self.results["forces"][0] * (self.en_unit / self.dist_unit)
         # slightly opaque way to handle if pbc is 3-tuple or boolean.
         # Note: PBC handler forbids mixed BCs, so this check is enough.
