@@ -113,7 +113,7 @@ def load_model_from_cwd(**kwargs):
     with open("experiment_structure.pt", "rb") as pfile:
         structure = torch.load(pfile, **kwargs)
 
-    with open("best_model.pkl", "rb") as pfile:
+    with open("best_model.pt", "rb") as pfile:
         state = torch.load(pfile, **kwargs)
 
     model = structure["training_modules"].model
