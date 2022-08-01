@@ -49,11 +49,11 @@ The following settings are available:
      - .pdf
      - Yes
    * - USE_CUSTOM_KERNELS
-     - | Use custom kernels with numba.
+     - | Use custom kernels with numba or cupy.
        | Auto tries to detect the
-       | installation of numba.
+       | installation of numba or cupy.
        | for more info see :doc:`/user_guide/ckernels`.
-     - auto, true, false
+     - auto, true, false, pytorch, numba, cupy
      - auto
      - Not directly, use :func:`~hippynn.custom_kernels.set_custom_kernels`
    * - WARN_LOW_DISTANCES

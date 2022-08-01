@@ -100,11 +100,11 @@ def get_simulated_data(
     return pair_sense, features, pair_first, pair_second
 
 
-TEST_TINY_PARAMS = dict(n_molecules=2, n_atoms=3, atom_prob=1, n_features=5, n_nu=7)
+TEST_TINY_PARAMS = dict(n_molecules=2, n_atoms=3, atom_prob=1., n_features=5, n_nu=7)
 TEST_SMALL_PARAMS = dict(n_molecules=10, n_atoms=30, atom_prob=0.7, n_features=10, n_nu=20)
 TEST_MEDIUM_PARAMS = dict(n_molecules=100, n_atoms=30, atom_prob=0.7, n_features=20, n_nu=20)
 TEST_LARGE_PARAMS = dict(n_molecules=1000, n_atoms=30, atom_prob=0.7, n_features=80, n_nu=20)
-
+TEST_MEGA_PARAMS = dict(n_molecules=500, n_atoms=30, atom_prob=0.7, n_features=128, n_nu=100)
 
 # reference implementation
 
@@ -147,12 +147,14 @@ class Envops_tester:
             funcname = func.__qualname__
         try:
             inputs = [x.requires_grad_(True) for x in differentiable_inputs]
-            assert torch.autograd.gradcheck(func, [*inputs, pair_first, pair_second]), "{} failed grad check.".format(
-                funcname
-            )
-            assert torch.autograd.gradgradcheck(
-                func, [*inputs, pair_first, pair_second]
-            ), "{} failed gradgrad check.".format(funcname)
+            try:
+                torch.autograd.gradcheck(func, [*inputs, pair_first, pair_second])
+            except Exception as ee:
+                raise ValueError(f"{funcname} failed grad check.") from ee
+            try:
+                torch.autograd.gradgradcheck(func, [*inputs, pair_first, pair_second])
+            except Exception as ee:
+                raise ValueError(f"{funcname} failed gradgrad check.") from ee
         finally:
             [x.requires_grad_(False) for x in inputs]
 
@@ -191,6 +193,20 @@ class Envops_tester:
                 raise RuntimeError("Failed during {}".format(name)) from ee
             if max_deviation > self.suspicious_deviation:
                 print("Closeness check for {} by suspicious amount".format(name), max_deviation)
+
+    def check_empty(self,device=torch.device('cpu')):
+
+        sense, feat, pfirst, psecond = get_simulated_data(**TEST_TINY_PARAMS, dtype=torch.float64, device=device)
+        pfirst = psecond = torch.zeros((0,),dtype=torch.long,device=pfirst.device)    
+        sense = torch.zeros((0,sense.shape[1]),dtype=sense.dtype,device=sense.device)
+        
+        try:
+            env = self.envsum(sense,feat,pfirst,psecond)
+            sense_g = self.sensesum(env,feat,pfirst,psecond)
+            feat_g = self.featsum(env,sense,pfirst,psecond)
+        except Exception as ee:
+            raise ValueError("Failed an operation on data with zero pairs") from ee
+        print("Passed zero-pair check")
 
     def all_close_witherror(self, r1, r2):
         r1 = r1.data.cpu().numpy()
@@ -233,6 +249,7 @@ class Envops_tester:
                 raise RuntimeError("Failed during iteration {}".format(i)) from ee
 
     def check_correctness(self, n_grad=1, n_small=100, n_large=3, device=torch.device("cpu")):
+        self.check_empty(device=device)
         print("Checking gradients {} times...".format(n_grad))
         self.check_all_grad(repeats=n_grad, device=device)
         print("Passed gradient checks!")
@@ -251,7 +268,7 @@ class Envops_tester:
             comp_envsum = env_pytorch.envsum
             comp_sensesum = env_pytorch.sensesum
             comp_featsum = env_pytorch.featsum
-        elif compare_against == "Existing":
+        elif compare_against == "Numba":
             comp_envsum = env_numba.new_envsum
             comp_sensesum = env_numba.new_sensesum
             comp_featsum = env_numba.new_featsum
@@ -284,10 +301,10 @@ class Envops_tester:
         for t in [tne, tns, tnf] + [te, ts, tf]:
             print("Mean {} time: {} Median: {}".format(t.name, t.mean_elapsed, t.median_elapsed))
         for tn, t in zip([tne, tns, tnf], [te, ts, tf]):
-            print("{} Speedup: {}".format(t.name, tn.mean_elapsed / t.mean_elapsed))
+            print("{} Speedup: {}".format(t.name, tn.median_elapsed / t.median_elapsed))
 
-        tnsum = sum(x.mean_elapsed for x in [tne, tns, tnf])
-        tsum = sum(x.mean_elapsed for x in [te, ts, tf])
+        tnsum = sum(x.median_elapsed for x in [tne, tns, tnf])
+        tsum = sum(x.median_elapsed for x in [te, ts, tf])
         print("Overall {} time: {}".format(compare_against, tnsum))
         print("Overall time now: {}".format(tsum))
         print("Overall speedup: {}".format(tnsum / tsum))
@@ -341,11 +358,11 @@ class TimedSnippet:
         return self.end - self.start
 
 
-def main():
+def main(env_impl,sense_impl,feat_impl):
     tester = Envops_tester(
-        env_numba.new_envsum,
-        env_numba.new_sensesum,
-        env_numba.new_featsum,
+        env_impl,
+        sense_impl,
+        feat_impl,
     )
     # % time
 
@@ -353,15 +370,21 @@ def main():
         print("Running GPU tests")
         meminfo = numba.cuda.current_context().get_memory_info()
         use_large_gpu = meminfo.free > 2 ** 31
+        use_verylarge_gpu = meminfo.free > 2**3
 
-        if use_large_gpu:
-            tester.check_correctness(device=torch.device("cuda"))
+        n_large = 3 if use_large_gpu else 0
+        tester.check_correctness(device=torch.device("cuda"),n_large=n_large)
+        if use_verylarge_gpu:
             print("-" * 80)
-            print("Large systems:", TEST_LARGE_PARAMS)
-            tester.check_speed(n_repetitions=100, device=torch.device("cuda"), compare_against="Pytorch")
+            print("Mega systems:", TEST_MEGA_PARAMS)
+            tester.check_speed(n_repetitions=20,data_size=TEST_MEGA_PARAMS, device=torch.device("cuda"), compare_against="Pytorch")
+        else:
+            print("Numba indicates less than 32GB free GPU memory -- skipping mega system test")
+        if use_large_gpu:
+            print("-" * 80)
+            tester.check_speed(n_repetitions=20,data_size=TEST_LARGE_PARAMS, device=torch.device("cuda"), compare_against="Pytorch") 
         else:
             print("Numba indicates less than 2GB free GPU memory -- skipping large system test")
-            tester.check_correctness(device=torch.device("cuda"), n_large=0)
 
         print("-" * 80)
         print("Medium systems:", TEST_MEDIUM_PARAMS)
@@ -391,4 +414,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(env_numba.new_envsum,
+         env_numba.new_sensesum,
+         env_numba.new_featsum,
+    )

@@ -74,7 +74,7 @@ Notes
 - Install dependencies with conda from conda_requirements.txt .
 - If you don't want pip to install them, conda install from file before installing ``hippynn``.
   You may want to use -c pytorch for the pytorch channel.
-  For ase, you may want to use -c conda-forge.
+  For ase and cupy, you probably want to use -c conda-forge.
 - Optional dependencies are in optional_dependencies.txt
 
 
