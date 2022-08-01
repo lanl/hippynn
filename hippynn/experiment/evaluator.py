@@ -63,6 +63,7 @@ class Evaluator:
 
             for storage, value in zip(target_batch_vals, batch_targets):
                 storage.append(value.detach().cpu())
+            del batch_predictions #  To allow freeing memory.
 
         # Put the batches together
         prediction_all_vals = [torch.cat(x, dim=0) if x[0].shape != () else x[0] for x in prediction_batch_vals]

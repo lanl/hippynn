@@ -42,15 +42,21 @@ def progress_handler(prog_str):
 
 
 def kernel_handler(kernel_string):
-    if kernel_string.lower() in ["true", "numba"]:
-        kernel = True
-    elif kernel_string.lower() in ["false", "pytorch"]:
-        kernel = False
-    elif kernel_string.lower() == "auto":
+    
+    kernel_string = kernel_string.lower()
+    
+    kernel = {
+        "0":False,
+        "false":False,
+        "pytorch":False,
+        "1":True,
+        "true":True,
+        }.get(kernel_string,kernel_string)
+    
+    if kernel not in [True,False,"auto","cupy","numba"]:
+        warnings.warn(f"Unrecognized custom kernel option: {kernel_string}. Setting custom kernels to 'auto'")
         kernel = "auto"
-    else:
-        warnings.warn(f"Unrecognized custom kernel option: {kernel_string}.")
-        kernel = "auto"
+    
     return kernel
 
 

@@ -76,41 +76,49 @@ class PyAniMethods:
                 msg = "Automatic detection of arrays is only compatible with datasets of at least 6 atoms -- this is not supported."
                 raise ValueError(msg) from re
 
-        # dict of which axes need to be padded; pad if the array size is equal to the number of atoms along a given axis
+        # dict of which axes need to be padded;
+        # pad if the array size is equal to the number of atoms along a given axis
         padding_scheme = {k: [] for k in batch.keys()}
-
+        bsize = 0
+        bkey = None
         for k, v in batch.items():
             for i, l in enumerate(v.shape):
                 if i == 0:
                     continue  # Don't pad the batch index
                 if l == n_atoms:
                     padding_scheme[k].append(i)
-        return padding_scheme
+                    # Use the largest 0th-axis shape that has an atom index
+                    # as the indicator key for the batch size
+                    this_bsize = v.shape[0]
+                    if this_bsize > bsize:
+                        bsize = this_bsize
+                        bkey = k
+
+        padding_scheme['sys_number'] = []
+        return padding_scheme, bkey
 
     def process_batches(self, batches, n_atoms_max, species_key="species"):
 
-        # Get padding info
-        padding_scheme = self.determine_key_structure(batches, species_key=species_key)
-
-        # get any key besides the species
-        data_keys = set(padding_scheme.keys())
-        data_keys.remove(species_key)
-        size_key = data_keys.pop()
+        # Get padding info and batch size key
+        padding_scheme, size_key = self.determine_key_structure(batches, species_key=species_key)
 
         # Pad the arrays
         padded_batches = []
-        for b in progress_bar(batches, desc="Processing Batches", unit="batch"):
+        for i, b in enumerate(progress_bar(batches, desc="Processing Batches", unit="batch")):
             pb = {}
+            b['sys_number'] = np.asarray([i], dtype=np.int64)
             for k, v in b.items():
-
+                bsize = len(b[size_key])
                 # Expand species array to fit batch size
                 if k == species_key:
-                    bsize = len(b[size_key])
+
                     v = np.repeat(v, bsize, axis=0)
 
                 # Perform padding as needed
                 for axis in padding_scheme[k]:
                     v = pad_atoms(v, n_atoms_max, axis=axis)
+                if 0 not in padding_scheme[k] and v.shape[0] == 1:
+                    v = np.broadcast_to(v, (bsize, *v.shape[1:]))
 
                 pb[k] = v
 
@@ -119,7 +127,12 @@ class PyAniMethods:
         arr_dict = {}
 
         for k in b.keys():
-            arr_dict[k] = np.concatenate([pb[k] for pb in padded_batches])
+            try:
+                arr_dict[k] = np.concatenate([pb[k] for pb in padded_batches])
+            except ValueError as ve:
+                print("Error occured:",ve)
+                print("Skipping key:",k)
+                continue
 
         return arr_dict
 

@@ -118,6 +118,8 @@ class NPZDatabase(Database, Restartable):
         if not allow_unfound:
             var_list = inputs + targets
             arr_dict = {k: v for k, v in arr_dict.items() if k in var_list}
+        else:
+            arr_dict = {k: v for k,v, in arr_dict.items()}
 
         # Put float64 data in pytorch default dtype
         floatX = np_of_torchdefaultdtype()
