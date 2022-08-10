@@ -10,17 +10,19 @@ Requirements
     * Python_ >= 3.7
     * pytorch_ >= 1.9
 Optional Dependencies:
-    * numba_ (recommended, for accelerating network performance)
+    * numba_ (recommended, for accelerating performance)
+    * cupy_ (also for accelerating performance)
     * ASE_ (for usage with ase)
     * matplotlib_ (for plotting)
     * tqdm_ (for progress bars)
-    * graphviz_ (for viewing models as graphs)
+    * graphviz_ (for viewing model graphs as figures)
     * h5py_ (for ani-h5 datasets)
     * pyanitools_ (for ani-h5 datasets)
 
 .. _Python: http://www.python.org
 .. _pytorch: http://www.pytorch.org
 .. _numba: https://numba.pydata.org/
+.. _cupy: https://cupy.dev/
 .. _ASE: https://wiki.fysik.dtu.dk/ase/
 .. _tqdm: https://tqdm.github.io/
 .. _matplotlib: https://matplotlib.org

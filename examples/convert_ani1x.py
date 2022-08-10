@@ -2,7 +2,7 @@
 Example script for converting from ANI format to numpy format for training with hippynn.
 
 
-This script was designed for an exteranl dataset available at
+This script was designed for an external dataset available at
 https://doi.org/10.6084/m9.figshare.c.4712477
 pyanitools reader available at
 https://github.com/aiqm/ANI1x_datasets

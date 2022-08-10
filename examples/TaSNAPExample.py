@@ -1,7 +1,7 @@
 """
 Example training to the SNAP database for Tantalum.
 
-This script was designed for an exteranl dataset available at
+This script was designed for an external dataset available at
 https://github.com/FitSNAP/FitSNAP
 
 For info on the dataset, see the following publication:

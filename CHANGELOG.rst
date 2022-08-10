@@ -1,3 +1,56 @@
+0.0.1b4
+=======
+
+Improvements:
+-------------
+
+- Add an example for training to the Ani-1x dataset directly from
+  the h5 file.
+
+- ASE Calculator is now compatible with more ASE functions including
+  mixing with other calculators.
+
+Bug Fixes:
+----------
+
+- fixed a bug which expected files saved in a .pkl format,
+  when in fact they are saved as .pt (pytorch) files.
+
+- fixed a bug in parsing of settings file 
+
+0.0.1b3
+=======
+
+New Features:
+-------------
+
+- Cupy based interaction kernels are now available (GPU only). These
+  kernels are typically higher performance than numba-based kernels,
+  although overall gains will depend on many factors.
+  To activate the kernels, install cupy.
+
+Improvements:
+-------------
+
+- Sorted values of pair-lists handled by custom kernels are now cached.
+  This drastically improves the ease of saturating the GPU by reducing
+  the need for pair synchronization
+
+- Numba GPU kernel overhead has been reduced by speeding up the time
+  to convert between the torch and numba GPU array types.
+
+- Misc. other improvements to reduce CPU/GPU synchronization needs.
+
+- PyAnitools database is now more flexible and can read additional properties,
+  for example parsing the COMP6 test set.
+
+
+Bug Fixes:
+----------
+
+- small bugs in database loading
+
+
 0.0.1b1
 =======
 
