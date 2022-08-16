@@ -13,7 +13,7 @@ if __name__ == "__main__":
         with active_directory("./TEST_ALUMINUM_MODEL_MULTILAYER", create=False):
             bundle = load_checkpoint_from_cwd(map_location="cpu", restore_db=False)
     except FileNotFoundError:
-        raise FileNotFoundError("Model not found, run lammps_example_Al.py first!")
+        raise FileNotFoundError("Model not found, run ani_aluminum_example_multilayer.py first!")
 
     model = bundle["training_modules"].model
     energy_node = model.node_from_name("HEnergy")

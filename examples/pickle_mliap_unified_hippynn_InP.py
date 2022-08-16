@@ -13,7 +13,7 @@ if __name__ == "__main__":
         with active_directory("./TEST_INP_MODEL", create=False):
             bundle = load_checkpoint_from_cwd(map_location="cpu", restore_db=False)
     except FileNotFoundError:
-        raise FileNotFoundError("Model not found, run lammps_example_InP.py first!")
+        raise FileNotFoundError("Model not found, run lammps_train_model_InP.py first!")
 
     model = bundle["training_modules"].model
     energy_node = model.node_from_name("HEnergy")

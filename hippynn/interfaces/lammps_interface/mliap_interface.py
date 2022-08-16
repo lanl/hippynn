@@ -1,3 +1,6 @@
+"""
+Interface for creating LAMMPS MLIAP Unified models.
+"""
 import pickle
 
 import numpy as np
