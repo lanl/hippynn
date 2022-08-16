@@ -19,4 +19,4 @@ if __name__ == "__main__":
     energy_node = model.node_from_name("HEnergy")
 
     unified = MLIAPInterface(energy_node, ["Al"], model_device=torch.device("cuda"))
-    unified.pickle("mliap_unified_hippynn_Al.pkl")
+    torch.save(unified, "mliap_unified_hippynn_Al.pt")
