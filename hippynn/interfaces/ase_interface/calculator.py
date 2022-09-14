@@ -323,13 +323,13 @@ class HippynnCalculator(interface.Calculator, Calculator): # Calculator inherita
         positions = torch.as_tensor(self.atoms.positions).unsqueeze(0)
         # Convert from ASE distance (angstrom) to whatever the network uses.
         positions = positions / self.dist_unit
-        species = torch.as_tensor(self.atoms.numbers).unsqueeze(0)
+        species = torch.as_tensor(self.atoms.numbers,dtype=torch.long).unsqueeze(0)
         cell = torch.as_tensor(self.atoms.cell.array)  # ExternalNieghbors doesn't take batch index
         # Get pair first and second from neighbors list
 
-        pair_first = torch.as_tensor(self.nl.nl.pair_first)
-        pair_second = torch.as_tensor(self.nl.nl.pair_second)
-        pair_shiftvecs = torch.as_tensor(self.nl.nl.offset_vec)
+        pair_first = torch.as_tensor(self.nl.nl.pair_first,dtype=torch.long)
+        pair_second = torch.as_tensor(self.nl.nl.pair_second,dtype=torch.long)
+        pair_shiftvecs = torch.as_tensor(self.nl.nl.offset_vec,dtype=torch.long)
 
         # This order must be synchronized with function setup_ase_graph above
         inputs = species, positions, cell, pair_first, pair_second, pair_shiftvecs
