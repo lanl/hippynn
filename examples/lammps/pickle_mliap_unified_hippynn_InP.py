@@ -10,13 +10,13 @@ from hippynn.interfaces.lammps_interface import MLIAPInterface
 if __name__ == "__main__":
     # Load trained model
     try:
-        with active_directory("./TEST_ALUMINUM_MODEL_MULTILAYER", create=False):
+        with active_directory("../TEST_INP_MODEL", create=False):
             bundle = load_checkpoint_from_cwd(map_location="cpu", restore_db=False)
     except FileNotFoundError:
-        raise FileNotFoundError("Model not found, run ani_aluminum_example_multilayer.py first!")
+        raise FileNotFoundError("Model not found, run lammps_train_model_InP.py first!")
 
     model = bundle["training_modules"].model
     energy_node = model.node_from_name("HEnergy")
 
-    unified = MLIAPInterface(energy_node, ["Al"], model_device=torch.device("cuda"))
-    torch.save(unified, "mliap_unified_hippynn_Al_multilayer.pt")
+    unified = MLIAPInterface(energy_node, ["In", "P"], model_device=torch.device("cuda"))
+    torch.save(unified, "mliap_unified_hippynn_InP.pt")

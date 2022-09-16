@@ -46,16 +46,15 @@ else:
 
 # Build the atoms object
 atoms = FaceCenteredCubic(directions=np.eye(3, dtype=int),
-                          size=(1,1,1), symbol='Al', pbc=(0,0,0))
+                          size=(1,1,1), symbol='Al', pbc=(True,True,True))
 reps = nrep*np.eye(3, dtype=int)
 atoms = ase.build.make_supercell(atoms, reps, wrap=True)
 atoms.calc = calc
-atoms.set_pbc((False, False, False))
 
 print("Number of atoms:", len(atoms))
 
 # atoms.rattle(.1)
-MaxwellBoltzmannDistribution(atoms, temp=300*units.kB)
+MaxwellBoltzmannDistribution(atoms, temperature_K=300)
 dyn = VelocityVerlet(atoms, 0.5*units.fs)
 
 # Simple tracker of the simulation progress, this is not needed to perform MD.
