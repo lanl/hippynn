@@ -20,8 +20,18 @@ from hippynn.graphs.nodes.physics import GradientNode, VecMag
 from hippynn.graphs.nodes.inputs import SpeciesNode
 
 class MLIAPInterface(MLIAPUnified):
+    """
+    Class for creating ML-IAP Unified model based on hippynn graphs.
+    """
     def __init__(self, energy_node, element_types, ndescriptors=1, nparams=None,
                  model_device=torch.device("cpu")):
+        """
+        :param energy_node: Node for energy
+        :param element_types: list of atomic symbols corresponding to element types
+        :param ndescriptors: the number of lammps descriptors
+        :param nparams: the number of lammps parameters
+        :param model_device: the device to send torch data to (cpu or cuda)
+        """
         super().__init__()
         self.element_types = element_types
         self.ndescriptors = ndescriptors
@@ -35,13 +45,25 @@ class MLIAPInterface(MLIAPUnified):
         self.graph.to(torch.float64)
 
     def compute_gradients(self, data):
-        """Test compute_gradients."""
+        """
+        Test compute_gradients.
+        
+        :param data: MLIAPData object (provided internally by lammps)
+        """
     
     def compute_descriptors(self, data):
-        """Test compute_descriptors."""
+        """
+        Test compute_descriptors.
+        
+        :param data: MLIAPData object (provided internally by lammps)
+        """
     
     def compute_forces(self, data):
-        """Test compute_forces."""
+        """
+        Test compute_forces.
+        
+        :param data: MLIAPData object (provided internally by lammps)
+        """
         elems = torch.from_numpy(data.elems).type(torch.int64).reshape(1, data.ntotal)
         z_vals = self.species_set[elems+1]
         pair_i = torch.from_numpy(data.pair_i).type(torch.int64)
