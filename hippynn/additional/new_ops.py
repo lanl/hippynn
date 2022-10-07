@@ -16,7 +16,7 @@ class NACR(torch.nn.Module):
         super().__init__()
 
     def forward(self, charges1, charges2, positions, energy1, energy2):
-        dE = energy1 - energy2
+        dE = energy2 - energy1
         nacr = torch.autograd.grad(
             charges2, [positions], grad_outputs=[charges1, dE], create_graph=True
         )[0]
