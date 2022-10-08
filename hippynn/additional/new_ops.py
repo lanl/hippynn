@@ -3,7 +3,7 @@ Additional nodes and loss functions used for excited states training.
 """
 import torch
 
-from ..graphs.nodes.base import AutoKw, ExpandParents, SingleNode
+from ..graphs.nodes.base import AutoKw, SingleNode
 from ..graphs import loss
 
 
@@ -23,7 +23,7 @@ class NACR(torch.nn.Module):
         return nacr
 
 
-class NACRNode(ExpandParents, AutoKw, SingleNode):
+class NACRNode(AutoKw, SingleNode):
     """
     Compute the non-adiabatic coupling vector multiplied by the energy difference
     between two states. Originally in hippynn.graphs.nodes.physics.
