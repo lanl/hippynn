@@ -65,7 +65,7 @@ def restore_checkpoint(structure, state, restore_db=True):
         structure["database"] = structure["database"].attempt_reload()
 
     structure["metric_tracker"] = state["metric_tracker"]
-    torch.random.set_rng_state(state["torch_rng_state"])
+    torch.random.set_rng_state(state["torch_rng_state"].cpu())
 
     return structure
 
