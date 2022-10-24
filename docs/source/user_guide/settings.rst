@@ -48,6 +48,14 @@ The following settings are available:
        | '.pdf', '.png', '.jpg'
      - .pdf
      - Yes
+   * - TRANSPARENT_PLOT
+     - | Whether to plot the figures
+       | with a background or not.
+       | Note that transparent background
+       | does not work on all file types.
+     - | True, False
+     - False
+     - Yes
    * - USE_CUSTOM_KERNELS
      - | Use custom kernels with numba or cupy.
        | Auto tries to detect the
