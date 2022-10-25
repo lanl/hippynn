@@ -42,27 +42,28 @@ def progress_handler(prog_str):
 
 
 def kernel_handler(kernel_string):
-    
+
     kernel_string = kernel_string.lower()
-    
+
     kernel = {
-        "0":False,
-        "false":False,
-        "pytorch":False,
-        "1":True,
-        "true":True,
-        }.get(kernel_string,kernel_string)
-    
-    if kernel not in [True,False,"auto","cupy","numba"]:
+        "0": False,
+        "false": False,
+        "pytorch": False,
+        "1": True,
+        "true": True,
+    }.get(kernel_string, kernel_string)
+
+    if kernel not in [True, False, "auto", "cupy", "numba"]:
         warnings.warn(f"Unrecognized custom kernel option: {kernel_string}. Setting custom kernels to 'auto'")
         kernel = "auto"
-    
+
     return kernel
 
 
 default_settings = {
     "PROGRESS": (TQDM_PROGRESS, progress_handler),
     "DEFAULT_PLOT_FILETYPE": (".pdf", str),
+    "TRANSPARENT_PLOT": (False, strtobool),
     "DEBUG_LOSS_BROADCAST": (False, strtobool),
     "DEBUG_GRAPH_EXECUTION": (False, strtobool),
     "DEBUG_NODE_CREATION": (False, strtobool),
