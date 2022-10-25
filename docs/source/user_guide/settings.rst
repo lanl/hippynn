@@ -40,13 +40,12 @@ The following settings are available:
      - .pdf
      - Yes
    * - TRANSPARENT_PLOT
-     - Whether to plot the figures with a background or not. Note that transparent background does not work on all file types.
-     - True, False
-     - False
+     - Whether to plot figures with a background or not. Note that transparent background does not work on all file types.
+     - true, false
+     - false
      - Yes
    * - USE_CUSTOM_KERNELS
-     - Use custom kernels with numba or cupy. Auto tries to detect the installation of numba or cupy.
-       for more info see :doc:`/user_guide/ckernels`.
+     - Use custom kernels with numba or cupy. Auto tries to detect the installation of numba or cupy. For more info see :doc:`/user_guide/ckernels`.
      - auto, true, false, pytorch, numba, cupy
      - auto
      - Not directly, use :func:`~hippynn.custom_kernels.set_custom_kernels`
