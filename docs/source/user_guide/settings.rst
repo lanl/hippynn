@@ -21,7 +21,7 @@ If possible, this is indicated in the `dynamic` column in the following table.
 The following settings are available:
 
 .. list-table:: Hippynn Settings Summary
-   :widths: 10 10 10 10 10
+   :widths: 60 100 50 25 60
    :header-rows: 1
 
    * - Variable
@@ -30,51 +30,37 @@ The following settings are available:
      - Default
      - Dynamic
    * - PROGRESS
-     - | Progress bars function during
-       | training, evaluation, and prediction
+     - Progress bars function during training, evaluation, and prediction
      - tqdm, none
      - tqdm
-     - | Yes, but assign this to a
-       | generator-wrapper such as ``tqdm.tqdm``,
-       | or with a python ``None`` to disable.
-       | The wrapper must accept ``tqdm`` arguments,
-       | although it technically doesn't have to
-       | do anything with them.
+     - Yes, but assign this to a generator-wrapper such as ``tqdm.tqdm``, or with a python ``None`` to disable. The wrapper must accept ``tqdm`` arguments, although it technically doesn't have to do anything with them.
    * - DEFAULT_PLOT_FILETYPE
-     - | File type to use for plots when
-       | not explicitly specified
-     - | Filetypes supported
-       | by matplotlib e.g.
-       | '.pdf', '.png', '.jpg'
+     - File type to use for plots when not explicitly specified
+     - Filetypes supported by matplotlib e.g. '.pdf', '.png', '.jpg'
      - .pdf
      - Yes
+   * - TRANSPARENT_PLOT
+     - Whether to plot figures with a background or not. Note that transparent background does not work on all file types.
+     - true, false
+     - false
+     - Yes
    * - USE_CUSTOM_KERNELS
-     - | Use custom kernels with numba or cupy.
-       | Auto tries to detect the
-       | installation of numba or cupy.
-       | for more info see :doc:`/user_guide/ckernels`.
+     - Use custom kernels with numba or cupy. Auto tries to detect the installation of numba or cupy. For more info see :doc:`/user_guide/ckernels`.
      - auto, true, false, pytorch, numba, cupy
      - auto
      - Not directly, use :func:`~hippynn.custom_kernels.set_custom_kernels`
    * - WARN_LOW_DISTANCES
-     - | Warn if atom distances are low
-       | compared to current radial
-       | sensitivity parameters.
+     - Warn if atom distances are low compared to current radial sensitivity parameters.
      - true, false
      - true
      - yes
    * - DEBUG_LOSS_BROADCAST
-     - | Warn if quantities in the loss
-       | broadcast badly against each
-       | other.
+     - Warn if quantities in the loss broadcast badly against each other.
      - true, false
      - false
      - no
    * - DEBUG_GRAPH_BROADCAST
-     - | Print high verbose information about
-       | the execution of a graph module.
-       | Don't turn this on unless something
-       | is going very wrong.
+     - Print high verbose information about the execution of a graph module. Don't turn this on unless something is going very wrong.
      - true, false
      - false
      - no
