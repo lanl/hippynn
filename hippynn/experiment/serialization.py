@@ -4,6 +4,7 @@ import torch
 checkpoint and state generation
 """
 from ..databases.restarter import Restartable
+from ..tools import device_fallback
 
 DEFAULT_STRUCTURE_FNAME = "experiment_structure.pt"
 
@@ -70,17 +71,39 @@ def restore_checkpoint(structure, state, restore_db=True):
     return structure
 
 
-def load_checkpoint(structure_fname, state_fname, restore_db=True, **kwargs):
+def __check_mapping_devices(map_location, model_device):
+    """Check options for restarting across devices
+
+    Args:
+        map_location (Union[int, str, dict, torch.device], optional): device mapping argument for torch.load. Defaults to None.
+        model_device (Union[int, str, torch.device], optional): automatically handle device mapping. Defaults to None.
+
+    Raises:
+        TypeError: if both map_location and model_device are specified
+
+    Returns:
+        tuple: processed map_location and model_device
     """
-    Load a checkpoint from filenames. kwargs are passed to torch
+    # if both are none, no transfer across device happens, directly pass map_location (which is None) to torch.load
+    if model_device is not None:
+        # if both map_location and model_device are given
+        if map_location is not None:
+            raise TypeError("Passing map_location explicitly and the model device are incompatible")
+        if model_device == "auto":
+            model_device = device_fallback()
+        map_location = "cpu"
+    return map_location, model_device
 
-    :param structure_fname:
-    :param state_fname:
-    :param restore_db:
-    :param kwargs: passed to torch.load, i.e. use `map_location` to load the model
-     on a specific device
 
-    :return:
+def __load_saved_tensors(structure_fname, state_fname, **kwargs):
+    """Load torch tensors from file.
+
+    Args:
+        structure_fname (str): name of the structure file
+        state_fname (str): name of the state file
+
+    Returns:
+        dict, dict: loaded dictionaries of checkpoint and model parameters
     """
 
     with open(structure_fname, "rb") as pfile:
@@ -88,8 +111,40 @@ def load_checkpoint(structure_fname, state_fname, restore_db=True, **kwargs):
 
     with open(state_fname, "rb") as pfile:
         state = torch.load(pfile, **kwargs)
+    return structure, state
 
-    return restore_checkpoint(structure, state, restore_db=restore_db)
+
+def load_checkpoint(structure_fname, state_fname, restore_db=True, map_location=None, model_device=None, **kwargs):
+    """Load checkpoint file from given filename
+
+    For details on how to use this function, please check the documentations.
+
+    Args:
+        structure_fname (str): name of the structure file
+        state_fname (str): name of the state file
+        restore_db (bool, optional): restore database or not. Defaults to True.
+        map_location (Union[int, str, dict, torch.device], optional): device mapping argument for torch.load. Defaults to None.
+        model_device (Union[int, str, torch.device], optional): automatically handle device mapping. Defaults to None.
+
+    Returns:
+        dict: experiment structure
+    """
+
+    map_location, model_device = __check_mapping_devices(map_location, model_device)
+    kwargs["map_location"] = map_location
+    structure, state = __load_saved_tensors(structure_fname, state_fname, kwargs)
+
+    # transfer stuff back to model_device
+    structure = restore_checkpoint(structure, state, restore_db=restore_db)
+    # no transfer happens in either case, as the tensors are on the target devices already
+    if model_device == "cpu" or map_location != None:
+        return structure
+    else:
+        structure["training_modules"].model.to(model_device)
+        structure["training_modules"].loss.to(model_device)
+        structure["training_modules"].valuator.model_device = model_device
+        structure["training_modules"].valuator.model = structure["training_modules"].model
+        return structure
 
 
 def load_checkpoint_from_cwd(**kwargs):
@@ -102,21 +157,25 @@ def load_checkpoint_from_cwd(**kwargs):
     return load_checkpoint(DEFAULT_STRUCTURE_FNAME, "best_checkpoint.pt", **kwargs)
 
 
-def load_model_from_cwd(**kwargs):
+def load_model_from_cwd(map_location=None, model_device=None, **kwargs):
+    """Only load model from current working directory.
+
+    Args:
+        map_location (Union[int, str, dict, torch.device], optional): device mapping argument for torch.load. Defaults to None.
+        model_device (Union[int, str, torch.device], optional): automatically handle device mapping. Defaults to None.
+
+    Returns:
+        torch.nn.Module: model with reloaded parameters
     """
-    Loads structure and best model params from cwd, returns model only.
-    :param kwargs: passed to torch.load
 
-    :return:
-    """
-
-    with open("experiment_structure.pt", "rb") as pfile:
-        structure = torch.load(pfile, **kwargs)
-
-    with open("best_model.pt", "rb") as pfile:
-        state = torch.load(pfile, **kwargs)
+    map_location, model_device = __check_mapping_devices(map_location, model_device)
+    kwargs["map_location"] = map_location
+    structure, state = __load_saved_tensors("experiment_structure.pt", "best_model.pt", kwargs)
 
     model = structure["training_modules"].model
     model.load_state_dict(state)
 
-    return model
+    if model_device == "cpu" or map_location != None:
+        return model
+    else:
+        return model.to(model_device)
