@@ -1,7 +1,7 @@
 Library Settings
 ================
 
-``hippynn`` has several settings located as variables stored in :obj:``~hippynn.settings``.
+``hippynn`` has several settings located as variables stored in :obj:`hippynn.settings`.
 
 There are four possible sources for settings.
 
@@ -59,8 +59,8 @@ The following settings are available:
      - true, false
      - false
      - no
-   * - DEBUG_GRAPH_BROADCAST
-     - Print high verbose information about the execution of a graph module. Don't turn this on unless something is going very wrong.
+   * - DEBUG_GRAPH_EXECUTION
+     - Print verbose information about the execution of a graph module. Don't turn this on unless something is going wrong inside of a GraphModule
      - true, false
      - false
      - no
