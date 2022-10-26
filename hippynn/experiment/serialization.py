@@ -71,7 +71,7 @@ def restore_checkpoint(structure, state, restore_db=True):
     return structure
 
 
-def __check_mapping_devices(map_location, model_device):
+def check_mapping_devices(map_location, model_device):
     """Check options for restarting across devices
 
     Args:
@@ -95,7 +95,7 @@ def __check_mapping_devices(map_location, model_device):
     return map_location, model_device
 
 
-def __load_saved_tensors(structure_fname, state_fname, **kwargs):
+def load_saved_tensors(structure_fname, state_fname, **kwargs):
     """Load torch tensors from file.
 
     Args:
@@ -131,9 +131,9 @@ def load_checkpoint(structure_fname, state_fname, restore_db=True, map_location=
     """
 
     # we need keep the original map_location value for the if
-    mapped, model_device = __check_mapping_devices(map_location, model_device)
+    mapped, model_device = check_mapping_devices(map_location, model_device)
     kwargs["map_location"] = mapped
-    structure, state = __load_saved_tensors(structure_fname, state_fname, **kwargs)
+    structure, state = load_saved_tensors(structure_fname, state_fname, **kwargs)
 
     # transfer stuff back to model_device
     structure = restore_checkpoint(structure, state, restore_db=restore_db)
@@ -141,13 +141,13 @@ def load_checkpoint(structure_fname, state_fname, restore_db=True, map_location=
     if model_device == "cpu" or map_location != None:
         return structure
     else:
-        structure["training_modules"].model.to(model_device)
-        structure["training_modules"].loss.to(model_device)
-        structure["training_modules"].evaluator.model_device = model_device
-        structure["training_modules"].evaluator.model = structure["training_modules"].model
-        for _, v in structure["controller"].optimizer.state_dict()["state"].items():
-            v["exp_avg"] = v["exp_avg"].to(model_device)
-            v["exp_avg_sq"] = v["exp_avg_sq"].to(model_device)
+        training_modules = structure["training_modules"]
+        training_modules.model.to(model_device)
+        training_modules.loss.to(model_device)
+        training_modules.evaluator.model_device = model_device
+        training_modules.evaluator.model = structure["training_modules"].model
+        optimizer = structure["controller"].optimizer
+        optimizer.load_state_dict(optimizer.state_dict())
         return structure
 
 
@@ -161,7 +161,7 @@ def load_checkpoint_from_cwd(map_location=None, model_device=None, **kwargs):
     Returns:
         dict: experiment structure
     """
-    return load_checkpoint(DEFAULT_STRUCTURE_FNAME, "best_checkpoint.pt", map_location, model_device, **kwargs)
+    return load_checkpoint(DEFAULT_STRUCTURE_FNAME, "best_checkpoint.pt", map_location=map_location, model_device=model_device, **kwargs)
 
 
 def load_model_from_cwd(map_location=None, model_device=None, **kwargs):
@@ -175,9 +175,9 @@ def load_model_from_cwd(map_location=None, model_device=None, **kwargs):
         torch.nn.Module: model with reloaded parameters
     """
 
-    mapped, model_device = __check_mapping_devices(map_location, model_device)
+    mapped, model_device = check_mapping_devices(map_location, model_device)
     kwargs["map_location"] = mapped
-    structure, state = __load_saved_tensors("experiment_structure.pt", "best_model.pt", **kwargs)
+    structure, state = load_saved_tensors("experiment_structure.pt", "best_model.pt", **kwargs)
 
     model = structure["training_modules"].model
     model.load_state_dict(state)
