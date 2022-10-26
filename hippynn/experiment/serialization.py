@@ -145,6 +145,9 @@ def load_checkpoint(structure_fname, state_fname, restore_db=True, map_location=
         structure["training_modules"].loss.to(model_device)
         structure["training_modules"].evaluator.model_device = model_device
         structure["training_modules"].evaluator.model = structure["training_modules"].model
+        for _, v in structure["controller"].optimizer.state_dict()["state"].items():
+            v["exp_avg"] = v["exp_avg"].to(model_device)
+            v["exp_avg_sq"] = v["exp_avg_sq"].to(model_device)
         return structure
 
 
