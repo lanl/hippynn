@@ -75,7 +75,7 @@ def __check_mapping_devices(map_location, model_device):
     """Check options for restarting across devices
 
     Args:
-        map_location (Union[int, str, dict, torch.device], optional): device mapping argument for torch.load. Defaults to None.
+        map_location (Union[str, dict, torch.device], optional): device mapping argument for torch.load. Defaults to None.
         model_device (Union[int, str, torch.device], optional): automatically handle device mapping. Defaults to None.
 
     Raises:
@@ -123,16 +123,17 @@ def load_checkpoint(structure_fname, state_fname, restore_db=True, map_location=
         structure_fname (str): name of the structure file
         state_fname (str): name of the state file
         restore_db (bool, optional): restore database or not. Defaults to True.
-        map_location (Union[int, str, dict, torch.device], optional): device mapping argument for torch.load. Defaults to None.
+        map_location (Union[tr, dict, torch.device], optional): device mapping argument for torch.load. Defaults to None.
         model_device (Union[int, str, torch.device], optional): automatically handle device mapping. Defaults to None.
 
     Returns:
         dict: experiment structure
     """
 
-    map_location, model_device = __check_mapping_devices(map_location, model_device)
-    kwargs["map_location"] = map_location
-    structure, state = __load_saved_tensors(structure_fname, state_fname, kwargs)
+    # we need keep the original map_location value for the if
+    mapped, model_device = __check_mapping_devices(map_location, model_device)
+    kwargs["map_location"] = mapped
+    structure, state = __load_saved_tensors(structure_fname, state_fname, **kwargs)
 
     # transfer stuff back to model_device
     structure = restore_checkpoint(structure, state, restore_db=restore_db)
@@ -142,8 +143,8 @@ def load_checkpoint(structure_fname, state_fname, restore_db=True, map_location=
     else:
         structure["training_modules"].model.to(model_device)
         structure["training_modules"].loss.to(model_device)
-        structure["training_modules"].valuator.model_device = model_device
-        structure["training_modules"].valuator.model = structure["training_modules"].model
+        structure["training_modules"].evaluator.model_device = model_device
+        structure["training_modules"].evaluator.model = structure["training_modules"].model
         return structure
 
 
@@ -161,16 +162,16 @@ def load_model_from_cwd(map_location=None, model_device=None, **kwargs):
     """Only load model from current working directory.
 
     Args:
-        map_location (Union[int, str, dict, torch.device], optional): device mapping argument for torch.load. Defaults to None.
+        map_location (Union[str, dict, torch.device], optional): device mapping argument for torch.load. Defaults to None.
         model_device (Union[int, str, torch.device], optional): automatically handle device mapping. Defaults to None.
 
     Returns:
         torch.nn.Module: model with reloaded parameters
     """
 
-    map_location, model_device = __check_mapping_devices(map_location, model_device)
-    kwargs["map_location"] = map_location
-    structure, state = __load_saved_tensors("experiment_structure.pt", "best_model.pt", kwargs)
+    mapped, model_device = __check_mapping_devices(map_location, model_device)
+    kwargs["map_location"] = mapped
+    structure, state = __load_saved_tensors("experiment_structure.pt", "best_model.pt", **kwargs)
 
     model = structure["training_modules"].model
     model.load_state_dict(state)
