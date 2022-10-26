@@ -1,23 +1,30 @@
-import torch
-
 """
 checkpoint and state generation
 """
+
+from typing import Tuple, Union
+
+import torch
+
+from ..databases import Database
 from ..databases.restarter import Restartable
+from ..graphs import GraphModule
 from ..tools import device_fallback
+from .assembly import TrainingModules
+from .controllers import PatienceController
+from .metric_tracker import MetricTracker
 
 DEFAULT_STRUCTURE_FNAME = "experiment_structure.pt"
 
 
-def create_state(model, controller, metric_tracker):
-    """
-    Create an experiment state dictionary.
+def create_state(model: GraphModule, controller: PatienceController, metric_tracker: MetricTracker):
+    """Create an experiment state dictionary.
 
-    :param model:
-    :param controller:
-    :param metric_tracker:
-
+    :param model: current model
+    :param controller: patience controller
+    :param metric_tracker: current metrics
     :return: dictionary containing experiment state.
+    :rtype: dict
     """
     return {
         "model": model.state_dict(),
@@ -27,16 +34,18 @@ def create_state(model, controller, metric_tracker):
     }
 
 
-def create_structure_file(training_modules, database, controller, fname=DEFAULT_STRUCTURE_FNAME):
+def create_structure_file(
+    training_modules: TrainingModules, database: Database, controller: PatienceController, fname=DEFAULT_STRUCTURE_FNAME
+):
     """
     Save an experiment structure. (i.e. full model, not just state_dict).
 
-    :param training_modules:
-    :param database:
-    :param controller:
-    :param fname:
+    :param training_modules: contains model, controller, and loss
+    :param database: database for training
+    :param controller: patience controller
+    :param fname: filename to save the checkpoint
 
-    :return: Nothing
+    :return: None
     """
     structure = {
         "training_modules": training_modules,
@@ -49,7 +58,7 @@ def create_structure_file(training_modules, database, controller, fname=DEFAULT_
         torch.save(structure, pfile)
 
 
-def restore_checkpoint(structure, state, restore_db=True):
+def restore_checkpoint(structure: dict, state: dict, restore_db=True):
     """
 
     :param structure: experiment structure object
@@ -57,6 +66,7 @@ def restore_checkpoint(structure, state, restore_db=True):
     :param restore_db: Attempt to restore database (true/false)
 
     :return: experiment structure
+    :rtype: dict
     """
 
     structure["training_modules"][0].load_state_dict(state["model"])
@@ -71,18 +81,18 @@ def restore_checkpoint(structure, state, restore_db=True):
     return structure
 
 
-def check_mapping_devices(map_location, model_device):
+def check_mapping_devices(map_location, model_device) -> Tuple:
     """Check options for restarting across devices
 
     Args:
-        map_location (Union[str, dict, torch.device], optional): device mapping argument for torch.load. Defaults to None.
-        model_device (Union[int, str, torch.device], optional): automatically handle device mapping. Defaults to None.
+        map_location (Union[str, dict, torch.device, callable]): device mapping argument for torch.load. Defaults to None.
+        model_device (Union[int, str, torch.device]): automatically handle device mapping. Defaults to None.
 
     Raises:
         TypeError: if both map_location and model_device are specified
 
     Returns:
-        tuple: processed map_location and model_device
+        Tuple: processed map_location and model_device
     """
     # if both are none, no transfer across device happens, directly pass map_location (which is None) to torch.load
     if model_device is not None:
@@ -95,15 +105,13 @@ def check_mapping_devices(map_location, model_device):
     return map_location, model_device
 
 
-def load_saved_tensors(structure_fname, state_fname, **kwargs):
+def load_saved_tensors(structure_fname: str, state_fname: str, **kwargs) -> Tuple[dict, dict]:
     """Load torch tensors from file.
 
-    Args:
-        structure_fname (str): name of the structure file
-        state_fname (str): name of the state file
-
-    Returns:
-        dict, dict: loaded dictionaries of checkpoint and model parameters
+    :param structure_fname: name of the structure file
+    :param state_fname: name of the state file
+    :return:  loaded dictionaries of checkpoint and model parameters
+    :rtype: Tuple[dict, dict]
     """
 
     with open(structure_fname, "rb") as pfile:
@@ -114,20 +122,21 @@ def load_saved_tensors(structure_fname, state_fname, **kwargs):
     return structure, state
 
 
-def load_checkpoint(structure_fname, state_fname, restore_db=True, map_location=None, model_device=None, **kwargs):
+def load_checkpoint(structure_fname: str, state_fname: str, restore_db=True, map_location=None, model_device=None, **kwargs):
     """Load checkpoint file from given filename
 
     For details on how to use this function, please check the documentations.
 
-    Args:
-        structure_fname (str): name of the structure file
-        state_fname (str): name of the state file
-        restore_db (bool, optional): restore database or not. Defaults to True.
-        map_location (Union[str, dict, torch.device], optional): device mapping argument for torch.load. Defaults to None.
-        model_device (Union[int, str, torch.device], optional): automatically handle device mapping. Defaults to None.
-
-    Returns:
-        dict: experiment structure
+    :param structure_fname: name of the structure file
+    :param state_fname: name of the state file
+    :param restore_db: restore database or not, defaults to True
+    :type restore_db: bool, optional
+    :param map_location: device mapping argument for ``torch.load``, defaults to None
+    :type map_location: Union[str, dict, torch.device, Callable], optional
+    :param model_device: automatically handle device mapping. Defaults to None, defaults to None
+    :type model_device: Union[int, str, torch.device], optional
+    :return: experiment structure
+    :rtype: dict
     """
 
     # we need keep the original map_location value for the if
@@ -147,34 +156,35 @@ def load_checkpoint(structure_fname, state_fname, restore_db=True, map_location=
         training_modules.evaluator.model_device = model_device
         training_modules.evaluator.model = structure["training_modules"].model
         optimizer = structure["controller"].optimizer
+        # this step ensures tensors will have correct devices
+        # otherwise they will all stay on CPU
         optimizer.load_state_dict(optimizer.state_dict())
         return structure
 
 
 def load_checkpoint_from_cwd(map_location=None, model_device=None, **kwargs):
-    """Same as `load_checkpoint`, but using default filenames.
+    """Same as ``load_checkpoint``, but using default filenames.
 
-    Args:
-        map_location (Union[str, dict, torch.device], optional): device mapping argument for torch.load. Defaults to None.
-        model_device (Union[int, str, torch.device], optional): automatically handle device mapping. Defaults to None.
-
-    Returns:
-        dict: experiment structure
+    :param map_location: device mapping argument for ``torch.load``, defaults to None
+    :type map_location: Union[str, dict, torch.device, Callable], optional
+    :param model_device: automatically handle device mapping. Defaults to None, defaults to None
+    :type model_device: Union[int, str, torch.device], optional
+    :return: experiment structure
+    :rtype: dict
     """
     return load_checkpoint(DEFAULT_STRUCTURE_FNAME, "best_checkpoint.pt", map_location=map_location, model_device=model_device, **kwargs)
 
 
-def load_model_from_cwd(map_location=None, model_device=None, **kwargs):
+def load_model_from_cwd(map_location=None, model_device=None, **kwargs) -> GraphModule:
     """Only load model from current working directory.
 
-    Args:
-        map_location (Union[str, dict, torch.device], optional): device mapping argument for torch.load. Defaults to None.
-        model_device (Union[int, str, torch.device], optional): automatically handle device mapping. Defaults to None.
-
-    Returns:
-        torch.nn.Module: model with reloaded parameters
+    :param map_location: device mapping argument for ``torch.load``, defaults to None
+    :type map_location: Union[str, dict, torch.device, Callable], optional
+    :param model_device: automatically handle device mapping. Defaults to None, defaults to None
+    :type model_device: Union[int, str, torch.device], optional
+    :return: model with reloaded parameters
+    :rtype: GraphModule
     """
-
     mapped, model_device = check_mapping_devices(map_location, model_device)
     kwargs["map_location"] = mapped
     structure, state = load_saved_tensors("experiment_structure.pt", "best_model.pt", **kwargs)
