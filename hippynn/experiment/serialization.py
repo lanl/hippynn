@@ -123,7 +123,7 @@ def load_checkpoint(structure_fname, state_fname, restore_db=True, map_location=
         structure_fname (str): name of the structure file
         state_fname (str): name of the state file
         restore_db (bool, optional): restore database or not. Defaults to True.
-        map_location (Union[tr, dict, torch.device], optional): device mapping argument for torch.load. Defaults to None.
+        map_location (Union[str, dict, torch.device], optional): device mapping argument for torch.load. Defaults to None.
         model_device (Union[int, str, torch.device], optional): automatically handle device mapping. Defaults to None.
 
     Returns:
@@ -151,14 +151,17 @@ def load_checkpoint(structure_fname, state_fname, restore_db=True, map_location=
         return structure
 
 
-def load_checkpoint_from_cwd(**kwargs):
-    """
-    See load_checkpoint, but using default filenames.
-    :param kwargs:
+def load_checkpoint_from_cwd(map_location=None, model_device=None, **kwargs):
+    """Same as `load_checkpoint`, but using default filenames.
 
-    :return:
+    Args:
+        map_location (Union[str, dict, torch.device], optional): device mapping argument for torch.load. Defaults to None.
+        model_device (Union[int, str, torch.device], optional): automatically handle device mapping. Defaults to None.
+
+    Returns:
+        dict: experiment structure
     """
-    return load_checkpoint(DEFAULT_STRUCTURE_FNAME, "best_checkpoint.pt", **kwargs)
+    return load_checkpoint(DEFAULT_STRUCTURE_FNAME, "best_checkpoint.pt", map_location, model_device, **kwargs)
 
 
 def load_model_from_cwd(map_location=None, model_device=None, **kwargs):
