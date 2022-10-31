@@ -83,7 +83,7 @@ class SetupParams:
                 classpval = getattr(self.__class__, param_str)
                 if pval is not None and pval is not classpval:
                     print(
-                        f"Warning: When controller is specified, argument "
+                        "Warning: When controller is specified, argument "
                         f"'{param_str}' should be given to the controller. "
                         f"Value ({getattr(self,param_str)}) ignored.",
                         file=sys.stderr,
@@ -120,9 +120,7 @@ def setup_and_train(
     """
     # Set up objects for training.
 
-    training_modules, controller, metric_tracker = setup_training(
-        training_modules=training_modules, setup_params=setup_params
-    )
+    training_modules, controller, metric_tracker = setup_training(training_modules=training_modules, setup_params=setup_params)
 
     # Actually do the training
     return train_model(
@@ -192,6 +190,8 @@ def setup_training(
             stopping_key=setup_params.stopping_key,
             fraction_train_eval=setup_params.fraction_train_eval,
         )
+    else:
+        controller.optimizer.load_state_dict(controller.optimizer.state_dict())
 
     metrics = MetricTracker(evaluator.loss_names, stopping_key=controller.stopping_key)
 
@@ -459,7 +459,7 @@ def training_loop(
 
         for batch in tools.progress_bar(train_generator, desc="Training Batches", unit="batch"):
 
-            batch = [item.to(device=device,non_blocking=True) for item in batch]
+            batch = [item.to(device=device, non_blocking=True) for item in batch]
             batch_inputs = batch[:n_inputs]
             batch_targets = batch[-n_targets:]
             batch_targets = [x.requires_grad_(False) for x in batch_targets]
