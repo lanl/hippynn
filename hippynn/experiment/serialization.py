@@ -12,6 +12,7 @@ from ..graphs import GraphModule
 from ..tools import device_fallback
 from .assembly import TrainingModules
 from .controllers import PatienceController
+from .device import set_devices
 from .metric_tracker import MetricTracker
 
 DEFAULT_STRUCTURE_FNAME = "experiment_structure.pt"
@@ -122,7 +123,9 @@ def load_saved_tensors(structure_fname: str, state_fname: str, **kwargs) -> Tupl
     return structure, state
 
 
-def load_checkpoint(structure_fname: str, state_fname: str, restore_db=True, map_location=None, model_device=None, **kwargs):
+def load_checkpoint(
+    structure_fname: str, state_fname: str, restore_db=True, map_location=None, model_device=None, **kwargs
+):
     """Load checkpoint file from given filename
 
     For details on how to use this function, please check the documentations.
@@ -148,17 +151,13 @@ def load_checkpoint(structure_fname: str, state_fname: str, restore_db=True, map
     structure = restore_checkpoint(structure, state, restore_db=restore_db)
     # no transfer happens in either case, as the tensors are on the target devices already
     if model_device == "cpu" or map_location != None:
+        structure["training_modules"].evaluator.model_device = model_device
         return structure
     else:
         training_modules = structure["training_modules"]
-        training_modules.model.to(model_device)
-        training_modules.loss.to(model_device)
-        training_modules.evaluator.model_device = model_device
-        training_modules.evaluator.model = structure["training_modules"].model
         optimizer = structure["controller"].optimizer
-        # this step ensures tensors will have correct devices
-        # otherwise they will all stay on CPU
-        optimizer.load_state_dict(optimizer.state_dict())
+        model, loss, evaluator = training_modules
+        model, evaluator, optimizer = set_devices(model, loss, evaluator, optimizer, model_device)
         return structure
 
 
@@ -172,7 +171,9 @@ def load_checkpoint_from_cwd(map_location=None, model_device=None, **kwargs):
     :return: experiment structure
     :rtype: dict
     """
-    return load_checkpoint(DEFAULT_STRUCTURE_FNAME, "best_checkpoint.pt", map_location=map_location, model_device=model_device, **kwargs)
+    return load_checkpoint(
+        DEFAULT_STRUCTURE_FNAME, "best_checkpoint.pt", map_location=map_location, model_device=model_device, **kwargs
+    )
 
 
 def load_model_from_cwd(map_location=None, model_device=None, **kwargs) -> GraphModule:

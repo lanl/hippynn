@@ -17,6 +17,7 @@ import pickle
 from . import serialization
 from .metric_tracker import MetricTracker
 from .controllers import Controller, is_scheduler_like
+from .device import set_devices
 from .. import tools
 from .assembly import TrainingModules
 
@@ -83,7 +84,7 @@ class SetupParams:
                 classpval = getattr(self.__class__, param_str)
                 if pval is not None and pval is not classpval:
                     print(
-                        f"Warning: When controller is specified, argument "
+                        "Warning: When controller is specified, argument "
                         f"'{param_str}' should be given to the controller. "
                         f"Value ({getattr(self,param_str)}) ignored.",
                         file=sys.stderr,
@@ -163,8 +164,6 @@ def setup_training(
         setup_params = SetupParams(**setup_params)
 
     model, loss, evaluator = training_modules
-    model, evaluator = set_devices(model, loss, evaluator, setup_params.device or tools.device_fallback())
-    training_modules = TrainingModules(model, loss, evaluator)
 
     controller = setup_params.controller
     if not isinstance(controller, Controller):
@@ -193,35 +192,14 @@ def setup_training(
             fraction_train_eval=setup_params.fraction_train_eval,
         )
 
+    optimizer = controller.optimizer
+    model, evaluator, optimizer = serialization.set_devices(
+        model, loss, evaluator, optimizer, setup_params.device or tools.device_fallback()
+    )
+
     metrics = MetricTracker(evaluator.loss_names, stopping_key=controller.stopping_key)
 
     return training_modules, controller, metrics
-
-
-def set_devices(model, loss, evaluator, device):
-    """
-    :param: model, loss, evaluation_loss : torch.nn.Module objects
-    :param: device: torch.device,compatible string, or tuple/list of devices.
-        If tuple, wrap the model using torch.nn.DataParallel and use the first
-        specified device as the 'primary' one.
-    :return: None
-
-    Sets the model and loss the the specified device. Evaluation loss is performed on CPU.
-    """
-    print("Using device: ", device)
-    if isinstance(device, (tuple, list)):
-        model = torch.nn.DataParallel(model, device_ids=device)
-        print("Using multi GPU compute on devices:", device)
-        device = torch.device(device[0])
-    device = torch.device(device)  # Will throw a more explicit error if the device specification is invalid
-
-    model.to(device)
-    loss.to(device)
-    evaluator.loss.cpu()
-    evaluator.model_device = device
-    evaluator.model = model
-
-    return model, evaluator
 
 
 def train_model(
@@ -459,7 +437,7 @@ def training_loop(
 
         for batch in tools.progress_bar(train_generator, desc="Training Batches", unit="batch"):
 
-            batch = [item.to(device=device,non_blocking=True) for item in batch]
+            batch = [item.to(device=device, non_blocking=True) for item in batch]
             batch_inputs = batch[:n_inputs]
             batch_targets = batch[-n_targets:]
             batch_targets = [x.requires_grad_(False) for x in batch_targets]

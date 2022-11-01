@@ -14,16 +14,25 @@ the metrics of the experiment so far. This can be seen by breaking down
 :func:`~hippynn.experiment.setup_training`, and :func:`~hippynn.experiment.routines.train_model`::
 
     from hippynn.experiment import setup_training, train_model
-    training_modules,controller,metrics = setup_training(training_modules=training_modules,
-                setup_params=experiment_params,
-                )
-    hippynn.experiment.train_model(training_modules,
-                               database,
-                               controller,
-                               metrics)
+    training_modules, controller, metrics = setup_training(
+        training_modules=training_modules,
+        setup_params=experiment_params,
+    )
+    hippynn.experiment.train_model(
+        training_modules,
+        database,
+        controller,
+        metrics,
+        callbacks,
+        batch_callbacks,
+    )
 
 Note that the database is always placed on CPU after restarting. To transfer it
 to GPU, you have to do it explicitly through ``database.send_do_device(desired_device)``.
+
+Also note that it is not possible in general to save callbacks, so when using
+this function, you need reconstruct your previous callbacks manually or set the
+two parameters to ``None``.
 
 There are two types restart,
 
@@ -39,14 +48,14 @@ Simple restart
 To restart training later, you can use the following::
 
     from hippynn.experiment.serialization import load_checkpoint
-    check = load_checkpoint('./experiment_structure.pt','./best_checkpoint.pt')
-    train_model(**check)
+    check = load_checkpoint("./experiment_structure.pt", "./best_checkpoint.pt")
+    train_model(**check, callbacks=None, batch_callbacks=None)
 
-or to use the default filename and load from the current directory::
+or to use the default filenames and load from the current directory::
 
     from hippynn.experiment.serialization import load_checkpoint_from_cwd
     check = load_checkpoint_from_cwd()
-    train_model(**check)
+    train_model(**check, callbacks=None, batch_callbacks=None)
 
 If your database is not :class:`~hippynn.databases.restarter.Restartable`, you
 will have to explicitly reload it and pass it to ``train_model``, as well. The
