@@ -85,15 +85,13 @@ def restore_checkpoint(structure: dict, state: dict, restore_db=True):
 def check_mapping_devices(map_location, model_device) -> Tuple:
     """Check options for restarting across devices
 
-    Args:
-        map_location (Union[str, dict, torch.device, callable]): device mapping argument for torch.load. Defaults to None.
-        model_device (Union[int, str, torch.device]): automatically handle device mapping. Defaults to None.
-
-    Raises:
-        TypeError: if both map_location and model_device are specified
-
-    Returns:
-        Tuple: processed map_location and model_device
+    :param map_location: device mapping argument for torch.load. Defaults to None.
+    :type map_location: Union[str, dict, torch.device, callable]
+    :param model_device: automatically handle device mapping. Defaults to None.
+    :type model_device: Union[int, str, torch.device]
+    :raises TypeError: if both map_location and model_device are specified
+    :return: processed map_location and model_device
+    :rtype: Tuple
     """
     # if both are none, no transfer across device happens, directly pass map_location (which is None) to torch.load
     if model_device is not None:
@@ -111,7 +109,7 @@ def load_saved_tensors(structure_fname: str, state_fname: str, **kwargs) -> Tupl
 
     :param structure_fname: name of the structure file
     :param state_fname: name of the state file
-    :return:  loaded dictionaries of checkpoint and model parameters
+    :return: loaded dictionaries of checkpoint and model parameters
     :rtype: Tuple[dict, dict]
     """
 

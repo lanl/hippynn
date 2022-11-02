@@ -18,7 +18,7 @@ the metrics of the experiment so far. This can be seen by breaking down
         training_modules=training_modules,
         setup_params=experiment_params,
     )
-    hippynn.experiment.train_model(
+    train_model(
         training_modules,
         database,
         controller,
@@ -99,13 +99,14 @@ moment, we provide the following possibilities.
     train_model(**check)
 
    The dictionary is a explicitly mapping for the old device (key) to the new
-   device (value). So if a tensor that is not on the old device will not be
-   transferred. For example, in the above example, tensors on CPU will stay.
+   device (value). So a tensor that is not on the old device will not be
+   transferred. For example, in the above example, tensors on CPU will stay on
+   CPU.
 
    Note that:
 
-   #. As aforementioned, the database (if restarted) will be loaded to CPU. An
-      manual transfer is still needed.
+   #. As aforementioned, the database (if restarted) is always loaded onto CPU.
+      A manual transfer is still needed.
    #. If ``map_location`` is used and the value is anything other than ``None``,
       we will not handle any exception. The argument will directly be passed to
       ``torch.load``. Use this only if you are 100% about the devices.
@@ -147,6 +148,8 @@ moment, we provide the following possibilities.
         - ``model_device``
       * - ``controller.optimizer``
         - Partially to ``model_device``
+      * - ``training_modules.evaluator.loss``
+        - CPU
       * - ``database``
         - CPU
       * - Not mentioned
@@ -155,7 +158,12 @@ moment, we provide the following possibilities.
    Again, if you want to load your database to GPU, a manual transfer is
    necessary.
 
-Warning: please do not use something like ``map_location=torch.device(0)``, as
-this will map all tensors to GPU 0 and breaks the RNG which only supports a CPU
-tensor. Doing so, you will see errors like ``TypeError: RNG state must be a torch.ByteTensor``.
-Obviously, moving everything to CPU with ``map_location="cpu"`` always works.
+Note that if non-None values are assigned to both ``map_location`` and
+``model_device``, a ``TypeError`` will be raised, as both keywords will likely
+conflict with each other.
+
+:red:`Warning`: Please do not directly use something like
+``map_location=torch.device(0)``, as this will map all tensors to GPU 0 and
+breaks the RNG which only supports a CPU tensor. Doing so, you will see errors
+like ``TypeError: RNG state must be a torch.ByteTensor``. Obviously, moving
+everything to CPU with ``map_location="cpu"`` always works.
