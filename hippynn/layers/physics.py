@@ -159,15 +159,10 @@ class LocalDampingCosine(AlphaScreening):
 
     def forward(self, pair_dist, radius):
         """
-        :param pair_dist: torch.tensor, dtype=float64: 'Neighborlist' for coulomb energies.
+        :param pair_dist: torch.tensor, dtype=float64: 'Neighborlist' distances for coulomb energies.
         :param radius: Maximum radius that Screened-Coulomb is evaluated upto. 
         :return screening: Weights for screening for each pair.
         """
-        # Manually fix torch device assignment issues. 
-        # TODO Check why device is not being propagated here as expected?
-        radius = radius.to(device=pair_dist.device)
-        self.alpha = self.alpha.to(device=pair_dist.device)
-
         pi = torch.tensor([3.141592653589793238], device=pair_dist.device)
         q = pair_dist / radius 
         eta =  radius / self.alpha
