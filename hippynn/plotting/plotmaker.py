@@ -4,6 +4,7 @@ import warnings
 from matplotlib import pyplot as plt
 
 from ..graphs import GraphModule
+from .. import settings
 
 
 class PlotMaker:
@@ -45,7 +46,7 @@ class PlotMaker:
                 if plotter.saved:
                     file = os.path.join(location, plotter.saved)
                     print("Saving plot at {}".format(file))
-                    fig.savefig(file)
+                    fig.savefig(file, transparent=settings.TRANSPARENT_PLOT)
                 plt.close(fig)
 
     def make_full_location(self, sub_location):
