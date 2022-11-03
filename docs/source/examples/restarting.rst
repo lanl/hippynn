@@ -6,7 +6,7 @@ You may want to restart training from a previous state, e.g., due to job length
 constraints on HPC systems.
 
 By default, hippynn saves checkpoint information for the best model found
-so far (on validation data).
+so far as measured by validation performance.
 
 The checkpoint contains the training modules, the experiment controller, and
 the metrics of the experiment so far. This can be seen by breaking down
@@ -23,24 +23,10 @@ the metrics of the experiment so far. This can be seen by breaking down
         database,
         controller,
         metrics,
-        callbacks,
-        batch_callbacks,
+        callbacks=None,
+        batch_callbacks=None,
     )
 
-Note that the database is always placed on CPU after restarting. To transfer it
-to GPU, you have to do it explicitly through ``database.send_do_device(desired_device)``.
-
-Also note that it is not possible in general to save callbacks, so when using
-this function, you need reconstruct your previous callbacks manually or set the
-two parameters to ``None``.
-
-There are two types restart,
-
-1. :ref:`A simple restart <simple>`,
-2. :ref:`A cross-device restart <cross>`, where tensors will be mapped to a
-   different device.
-
-.. _simple:
 
 Simple restart
 --------------
@@ -57,82 +43,70 @@ or to use the default filenames and load from the current directory::
     check = load_checkpoint_from_cwd()
     train_model(**check, callbacks=None, batch_callbacks=None)
 
-If your database is not :class:`~hippynn.databases.restarter.Restartable`, you
-will have to explicitly reload it and pass it to ``train_model``, as well. The
-dictionary containing the database information is stored as ``training_modules.evaluator.db_info``,
-so you can use this dictionary to easily reload your database.
-
-The checkpoint file contains and resets the torch RNG state.
-
-Alternatively, it is possible to load the model only::
+If all you want to do is use a previously trained model, here is how to load the model only::
 
     from hippynn.experiment.serialization import load_model_from_cwd
     model = load_model_from_cwd()
 
 The returned ``model`` object will have the original model with the best
-parameters loaded. Of course, to actually use the model, you need create other
-object manually.
-
-.. _cross:
+parameters loaded. This can then be used with, for example, the :doc:`/examples/predictor`.
 
 Cross-device restart
 --------------------
 
-.. role:: red
+If a model was trained on a device that is no longer accessible (due to change
+of configuration or loading on a different computer) you may want to load a checkpoint
+to a different device. The standard pytorch argument ``map_device`` is a bit tricky to
+handle in this case, as not all tensors in the checkpoint still belong on the device.
+If this keyword is specified, ``hippynn`` will attempt to automatically move the correct
+tensors to the correct device. To perform cross-device loading, use the ``model_device``
+argument to :func:`~hippynn.experiment.serialization.load_checkpoint_from_cwd`
+or :func:`~hippynn.experiment.serialization.load_checkpoint`::
 
-**A quick tip**: to avoid cross-device restarts as much as you can, use the
-environment variable ``CUDA_VISIBLE_DEVICES`` from shell or set it before
-importing hippynn (:red:`Important !`), instead of setting devices inside your
-script. In this case, if, for example, only 1 GPU is used, it will always be
-labeled as 0, no matter physically which device is used.
+     from hippynn.experiment.serialization import load_checkpoint_from_cwd
+     check = load_checkpoint_from_cwd(model_device='cuda:0')
+     train_model(**check, callbacks=None, batch_callbacks=None)
 
-#######
+The string 'auto' can be provided to transfer to the default device.
 
-It is a lot trickier to reload a model or checkpoint across devices. At this
-moment, we provide the following possibilities.
+.. note::
+   To avoid cross-device restarts as much as you can, use the
+   environment variable ``CUDA_VISIBLE_DEVICES`` before importing ``hippynn``.
+   In this case, if, for example, only 1 GPU is used, it will always be
+   labeled as 0, no matter physically which device is used.
 
-#. You explicitly know the original and new devices used. For example, to 
-   transfer all tensors that are on GPU 1 to GPU 0::
-   
-    from hippynn.experiment.serialization import load_checkpoint_from_cwd
-    check = load_checkpoint_from_cwd(map_location={"cuda:1": "cuda:0"})
-    train_model(**check)
+Advanced Details
+----------------
 
-   The dictionary is a explicitly mapping for the old device (key) to the new
-   device (value). So a tensor that is not on the old device will not be
-   transferred. For example, in the above example, tensors on CPU will stay on
-   CPU.
+-  The checkpoint file contains the torch RNG state, and restoring a
+   checkpoint resets the torch RNG.
 
-   Note that:
+-  If your database is not :class:`~hippynn.databases.restarter.Restartable`, you
+   will have to explicitly reload it and pass it to ``train_model``, as well.
+   If your database is restartable, any pre-processing of the database is not recorded
+   in the checkpoint file. Thus any pre-processing steps such as moving the database to
+   the GPU need to be performed before activating ``train_model``.
+   The dictionary containing the database information is stored as ``training_modules.evaluator.db_info``,
+   so you can use this dictionary to easily reload your database.
 
-   #. As aforementioned, the database (if restarted) is always loaded onto CPU.
-      A manual transfer is still needed.
-   #. If ``map_location`` is used and the value is anything other than ``None``,
-      we will not handle any exception. The argument will directly be passed to
-      ``torch.load``. Use this only if you are 100% about the devices.
+-  hippynn does not include support for serializing and restarting callback objects; to restart
+   a training that involves callbacks, the callbacks will have to be retrieved using user code.
+
+
+-  It is not a good idea to wholesale transfer tensors in a checkpoint
+   off of the CPU using a keyword such as ``map_location=torch.device(0)``.
+   This will map all tensors to GPU 0, and breaks the RNG which only supports a CPU
+   tensor. Doing so, you will see errors like ``TypeError: RNG state must be a torch.ByteTensor``.
+   Moving everything to CPU with ``map_location="cpu"`` always works.
+   If ``map_location`` is used, and the value is anything other than ``None`` or ``"cpu"``,
+   you are likely to get an error during loading or training.
+   The argument will directly be passed to ``torch.load``.
 
    For more details of this option, check `torch load docs`_. 
 
    .. _torch load docs: https://pytorch.org/docs/stable/generated/torch.load.html
 
-#. Leave the problem to us via the ``model_device`` option. If this option is
-   given, all tensors will first be transferred to CPU and then transferred to
-   ``model_device`` if necessary. Note only some tensors will be transferred to
-   GPU if a GPU is available.
-
-   #. ``model_device="auto"`` :func:`~hippynn.tools.device_fallback` will be
-      used to automatically select the best device. If there is GPU, GPU will be
-      selected. If there are multiple GPUs, GPU 0 will be chosen. Otherwise, we
-      will use CPU.
-
-   #. ``model_device="cpu"`` or ``model_device=0`` or ``model_device="cuda:1"``
-      or ``model_device=torch.device(2)`` Given device will be used as to load
-      tensors. Make sure the target device is available.
-
-   :func:`~hippynn.experiment.serialization.load_model_from_cwd` works exactly
-   the same.
-
-   Here are a list of objects and their final device after loading.
+-  Here are a list of objects and their final device after loading.
 
    .. list-table::
       :widths: 40 30
@@ -144,26 +118,15 @@ moment, we provide the following possibilities.
         - ``model_device``
       * - ``training_modules.loss``
         - ``model_device``
-      * - ``training_modules.evaluator.model``
-        - ``model_device``
-      * - ``controller.optimizer``
-        - Partially to ``model_device``
       * - ``training_modules.evaluator.loss``
         - CPU
+      * - ``controller.optimizer``
+        - Some on ``model_device`` and some on CPU,
+          depending on details of the implementation.
       * - ``database``
         - CPU
       * - Not mentioned
         - CPU
 
-   Again, if you want to load your database to GPU, a manual transfer is
-   necessary.
 
-Note that if non-None values are assigned to both ``map_location`` and
-``model_device``, a ``TypeError`` will be raised, as both keywords will likely
-conflict with each other.
 
-:red:`Warning`: Please do not directly use something like
-``map_location=torch.device(0)``, as this will map all tensors to GPU 0 and
-breaks the RNG which only supports a CPU tensor. Doing so, you will see errors
-like ``TypeError: RNG state must be a torch.ByteTensor``. Obviously, moving
-everything to CPU with ``map_location="cpu"`` always works.
