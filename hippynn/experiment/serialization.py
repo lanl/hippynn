@@ -1,22 +1,35 @@
-import torch
-
 """
 checkpoint and state generation
 """
+
+from typing import Tuple, Union
+
+import torch
+
+from ..databases import Database
 from ..databases.restarter import Restartable
+from ..graphs import GraphModule
+from ..tools import device_fallback
+from .assembly import TrainingModules
+from .controllers import PatienceController
+from .device import set_devices
+from .metric_tracker import MetricTracker
 
 DEFAULT_STRUCTURE_FNAME = "experiment_structure.pt"
 
 
-def create_state(model, controller, metric_tracker):
-    """
-    Create an experiment state dictionary.
+def create_state(
+    model: GraphModule,
+    controller: PatienceController,
+    metric_tracker: MetricTracker,
+) -> dict:
+    """Create an experiment state dictionary.
 
-    :param model:
-    :param controller:
-    :param metric_tracker:
-
+    :param model: current model
+    :param controller: patience controller
+    :param metric_tracker: current metrics
     :return: dictionary containing experiment state.
+    :rtype: dict
     """
     return {
         "model": model.state_dict(),
@@ -26,16 +39,21 @@ def create_state(model, controller, metric_tracker):
     }
 
 
-def create_structure_file(training_modules, database, controller, fname=DEFAULT_STRUCTURE_FNAME):
+def create_structure_file(
+    training_modules: TrainingModules,
+    database: Database,
+    controller: PatienceController,
+    fname=DEFAULT_STRUCTURE_FNAME,
+) -> None:
     """
     Save an experiment structure. (i.e. full model, not just state_dict).
 
-    :param training_modules:
-    :param database:
-    :param controller:
-    :param fname:
+    :param training_modules: contains model, controller, and loss
+    :param database: database for training
+    :param controller: patience controller
+    :param fname: filename to save the checkpoint
 
-    :return: Nothing
+    :return: None
     """
     structure = {
         "training_modules": training_modules,
@@ -48,7 +66,7 @@ def create_structure_file(training_modules, database, controller, fname=DEFAULT_
         torch.save(structure, pfile)
 
 
-def restore_checkpoint(structure, state, restore_db=True):
+def restore_checkpoint(structure: dict, state: dict, restore_db=True) -> dict:
     """
 
     :param structure: experiment structure object
@@ -70,17 +88,32 @@ def restore_checkpoint(structure, state, restore_db=True):
     return structure
 
 
-def load_checkpoint(structure_fname, state_fname, restore_db=True, **kwargs):
+def check_mapping_devices(map_location, model_device):
     """
-    Load a checkpoint from filenames. kwargs are passed to torch
+    Check options for restarting across devices.
 
-    :param structure_fname:
-    :param state_fname:
-    :param restore_db:
-    :param kwargs: passed to torch.load, i.e. use `map_location` to load the model
-     on a specific device
+    :param map_location: device mapping argument for torch.load.
+    :param model_device: automatically handle device mapping.
+    :raises TypeError: if both map_location and model_device are specified
+    :return: processed map_location and model_device
+    """
+    # if both are none, no transfer across device happens, directly pass map_location (which is None) to torch.load
+    if model_device is not None:
+        # if both map_location and model_device are given
+        if map_location is not None:
+            raise TypeError("Passing map_location explicitly and the model device are incompatible")
+        if model_device == "auto":
+            model_device = device_fallback()
+        map_location = "cpu"
+    return map_location, model_device
 
-    :return:
+
+def load_saved_tensors(structure_fname: str, state_fname: str, **kwargs) -> Tuple[dict, dict]:
+    """Load torch tensors from file.
+
+    :param structure_fname: name of the structure file
+    :param state_fname: name of the state file
+    :return: loaded dictionaries of checkpoint and model parameters
     """
 
     with open(structure_fname, "rb") as pfile:
@@ -88,35 +121,79 @@ def load_checkpoint(structure_fname, state_fname, restore_db=True, **kwargs):
 
     with open(state_fname, "rb") as pfile:
         state = torch.load(pfile, **kwargs)
+    return structure, state
 
-    return restore_checkpoint(structure, state, restore_db=restore_db)
 
-
-def load_checkpoint_from_cwd(**kwargs):
+def load_checkpoint(
+    structure_fname: str, state_fname: str, restore_db=True, map_location=None, model_device=None, **kwargs
+) -> dict:
     """
-    See load_checkpoint, but using default filenames.
-    :param kwargs:
+    Load checkpoint file from given filename.
 
-    :return:
-    """
-    return load_checkpoint(DEFAULT_STRUCTURE_FNAME, "best_checkpoint.pt", **kwargs)
+    For details more information on to use this function, see :doc:`/examples/restarting`.
 
-
-def load_model_from_cwd(**kwargs):
-    """
-    Loads structure and best model params from cwd, returns model only.
-    :param kwargs: passed to torch.load
-
-    :return:
+    :param structure_fname: name of the structure file
+    :param state_fname: name of the state file
+    :param restore_db: restore database or not, defaults to True
+    :param map_location: device mapping argument for ``torch.load``, defaults to None
+    :param model_device: automatically handle device mapping. Defaults to None, defaults to None
+    :return: experiment structure
     """
 
-    with open("experiment_structure.pt", "rb") as pfile:
-        structure = torch.load(pfile, **kwargs)
+    # we need keep the original map_location value for the if
+    mapped, model_device = check_mapping_devices(map_location, model_device)
+    kwargs["map_location"] = mapped
+    structure, state = load_saved_tensors(structure_fname, state_fname, **kwargs)
 
-    with open("best_model.pt", "rb") as pfile:
-        state = torch.load(pfile, **kwargs)
+    # transfer stuff back to model_device
+    structure = restore_checkpoint(structure, state, restore_db=restore_db)
+    # no transfer happens in either case, as the tensors are on the target devices already
+    if model_device == "cpu" or map_location != None:
+        structure["training_modules"].evaluator.model_device = model_device
+        return structure
+    else:
+        training_modules = structure["training_modules"]
+        optimizer = structure["controller"].optimizer
+        model, loss, evaluator = training_modules
+        model, evaluator, optimizer = set_devices(model, loss, evaluator, optimizer, model_device)
+        return structure
+
+
+def load_checkpoint_from_cwd(map_location=None, model_device=None, **kwargs) -> dict:
+    """
+    Same as ``load_checkpoint``, but using default filenames.
+
+    :param map_location: device mapping argument for ``torch.load``, defaults to None
+    :type map_location: Union[str, dict, torch.device, Callable], optional
+    :param model_device: automatically handle device mapping. Defaults to None, defaults to None
+    :type model_device: Union[int, str, torch.device], optional
+    :return: experiment structure
+    :rtype: dict
+    """
+    return load_checkpoint(
+        DEFAULT_STRUCTURE_FNAME, "best_checkpoint.pt", map_location=map_location, model_device=model_device, **kwargs
+    )
+
+
+def load_model_from_cwd(map_location=None, model_device=None, **kwargs) -> GraphModule:
+    """
+    Only load model from current working directory.
+
+    :param map_location: device mapping argument for ``torch.load``, defaults to None
+    :type map_location: Union[str, dict, torch.device, Callable], optional
+    :param model_device: automatically handle device mapping. Defaults to None, defaults to None
+    :type model_device: Union[int, str, torch.device], optional
+    :return: model with reloaded parameters
+    :rtype: GraphModule
+    """
+    mapped, model_device = check_mapping_devices(map_location, model_device)
+    kwargs["map_location"] = mapped
+    structure, state = load_saved_tensors("experiment_structure.pt", "best_model.pt", **kwargs)
 
     model = structure["training_modules"].model
     model.load_state_dict(state)
 
-    return model
+    if model_device == "cpu" or map_location != None:
+        return model
+    else:
+        return model.to(model_device)
