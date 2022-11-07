@@ -88,7 +88,7 @@ def active_directory(dirname, create=None):
         )
     if create is False and not exists:
         raise FileNotFoundError(
-            f"Directory '{dirname}' not found. Pass create=True or create=None to allow " "creation of the directory."
+            f"Directory '{dirname}' not found. Pass create=True or create=None to allow creation of the directory."
         )
     if not exists and create in (None, True):
         os.makedirs(dirname)
@@ -145,14 +145,10 @@ def pad_np_array_to_length_with_zeros(array, length, axis=0):
     n = array.shape[axis]
     m = length - n
     if m < 0:
-        raise ValueError("Cannot pad array to negative length! Array length: {n}, Total length requested: {length}")
+        raise ValueError(f"Cannot pad array to negative length! Array length: {n}, Total length requested: {length}")
     pad_width = [[0, 0] for _ in array.shape]
     pad_width[axis][1] = m
-    return np.pad(
-        array,
-        pad_width,
-        mode="constant",
-    )
+    return np.pad(array, pad_width, mode="constant")
 
 
 def np_of_torchdefaultdtype():
