@@ -1,8 +1,18 @@
 0.0.1b4
 =======
 
+New Features:
+-------------
+
+- Added an interface to LAMMPS using the LAMMPS MLIAP UNIFIED pair style.
+  see /examples/lammps/ and the documentation for more information.
+
 Improvements:
 -------------
+
+- Add a setting to create plots with transparent backgrounds
+
+- Improvements to documentation display
 
 - Add an example for training to the Ani-1x dataset directly from
   the h5 file.

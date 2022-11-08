@@ -22,7 +22,7 @@ copyright = "2019, Los Alamos National Laboratory"
 author = "Nicholas Lubbers"
 
 # The full version, including alpha/beta/rc tags
-release = "0.0.1b2"
+release = "0.0.1b4"
 
 
 # -- General configuration ---------------------------------------------------
@@ -45,7 +45,9 @@ autodoc_default_options = {
     "no-show-inheritance": True,
     "special-members": "__init__",
 }
-autodoc_mock_imports = ["pyanitools", "seqm", "schnetpack"]
+
+# The following are highly optional, so we mock them for doc purposes.
+autodoc_mock_imports = ["pyanitools", "seqm", "schnetpack", "cupy", "lammps"]
 
 
 # -- Options for HTML output -------------------------------------------------

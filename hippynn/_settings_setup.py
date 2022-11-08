@@ -31,14 +31,14 @@ except ImportError:
 if TQDM_PROGRESS is not None:
     TQDM_PROGRESS = partial(TQDM_PROGRESS, mininterval=1.0, leave=False)
 
-# DEFAULTS, and types
-
+### Progress handlers
 
 def progress_handler(prog_str):
     if prog_str == "tqdm":
         return TQDM_PROGRESS
     if prog_str.lower() == "none":
         return None
+    warnings.warn(f"Unrecognized progress setting: '{prog_str}'. Setting to none.")
 
 
 def kernel_handler(kernel_string):
@@ -59,7 +59,7 @@ def kernel_handler(kernel_string):
 
     return kernel
 
-
+# keys: defaults, types, and handlers
 default_settings = {
     "PROGRESS": (TQDM_PROGRESS, progress_handler),
     "DEFAULT_PLOT_FILETYPE": (".pdf", str),
@@ -87,7 +87,10 @@ if os.path.exists(rc_name) and os.path.isfile(rc_name):
     config.read(rc_name)
     config_sources["~/.hippynnrc"] = config["GLOBALS"]
 
-hippynn_environment_variables = {k.replace("HIPPYNN_", ""): v for k, v in os.environ.items() if k.startswith("HIPPYNN_")}
+SETTING_PREFIX = "HIPPYNN_"
+hippynn_environment_variables = {
+    k.replace(SETTING_PREFIX, ""): v for k, v in os.environ.items() if k.startswith(SETTING_PREFIX)
+}
 
 LOCAL_RC_FILE_KEY = "LOCAL_RC_FILE"
 

@@ -13,6 +13,7 @@ import hippynn
 from hippynn.graphs import (find_relatives,find_unique_relative,
     get_subgraph, copy_subgraph, replace_node, IdxType,
     GraphModule)
+from hippynn.graphs.indextypes import index_type_coercion
 from hippynn.graphs.gops import check_link_consistency
 from hippynn.graphs.nodes.base import InputNode, MultiNode, AutoNoKw, ExpandParents
 from hippynn.graphs.nodes.tags import Encoder, PairIndexer
@@ -23,46 +24,35 @@ class MLIAPInterface(MLIAPUnified):
     """
     Class for creating ML-IAP Unified model based on hippynn graphs.
     """
-    def __init__(self, energy_node, element_types, ndescriptors=1, nparams=None,
+    def __init__(self, energy_node, element_types, ndescriptors=1,
                  model_device=torch.device("cpu")):
         """
         :param energy_node: Node for energy
         :param element_types: list of atomic symbols corresponding to element types
-        :param ndescriptors: the number of lammps descriptors
-        :param nparams: the number of lammps parameters
+        :param ndescriptors: the number of descriptors to report to LAMMPS
         :param model_device: the device to send torch data to (cpu or cuda)
         """
         super().__init__()
         self.element_types = element_types
         self.ndescriptors = ndescriptors
-        self._model_device = model_device
+        self.model_device = model_device
 
         # Build the calculator
         self.rcutfac, self.species_set, self.graph = setup_LAMMPS_graph(energy_node)
-        if nparams is None:
-            nparams = sum(p.nelement() for p in self.graph.parameters())
-        self.nparams = nparams
+        self.nparams = sum(p.nelement() for p in self.graph.parameters())
         self.graph.to(torch.float64)
 
     def compute_gradients(self, data):
-        """
-        Test compute_gradients.
-        
-        :param data: MLIAPData object (provided internally by lammps)
-        """
+        pass
     
     def compute_descriptors(self, data):
-        """
-        Test compute_descriptors.
-        
-        :param data: MLIAPData object (provided internally by lammps)
-        """
-    
+        pass
+
     def compute_forces(self, data):
         """
-        Test compute_forces.
-        
         :param data: MLIAPData object (provided internally by lammps)
+        :return None
+        This function writes results to the input `data`.
         """
         elems = torch.from_numpy(data.elems).type(torch.int64).reshape(1, data.ntotal)
         z_vals = self.species_set[elems+1]
@@ -72,7 +62,7 @@ class MLIAPInterface(MLIAPUnified):
         nlocal = torch.tensor(data.nlistatoms)
 
         # note your sign for rij might need to be +1 or -1, depending on how your implementation works
-        inputs = (inp.to(self._model_device) for inp in [z_vals, pair_i, pair_j, -rij, nlocal])
+        inputs = (inp.to(self.model_device) for inp in [z_vals, pair_i, pair_j, -rij, nlocal])
 
         f = torch.from_numpy(data.f)
         atom_energy, total_energy, fij = self.graph(*inputs)
@@ -88,15 +78,20 @@ class MLIAPInterface(MLIAPUnified):
     def __getstate__(self):
         self.species_set = self.species_set.to(torch.device("cpu"))
         self.graph.to(torch.device("cpu"))
-        return self.__dict__
+        return self.__dict__.copy()
     
-    def __setstate__(self, d):
-        self.__dict__ = d
-        self.species_set = self.species_set.to(self._model_device)
-        self.graph.to(self._model_device)
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.species_set = self.species_set.to(self.model_device)
+        self.graph.to(self.model_device)
 
 
 def setup_LAMMPS_graph(energy):
+    """
+
+    :param energy: energy node for lammps interface
+    :return: graph for computing from lammps MLIAP unified inputs.
+    """
     required_nodes = [energy]
 
     why = "Generating LAMMPS Calculator interface"
@@ -137,7 +132,21 @@ def setup_LAMMPS_graph(energy):
         pi.disconnect()
 
     energy, *new_required = new_required
-    local_atom_energy = LocalAtomEnergyNode("(LAMMPS)local_atom_energy", (energy.atom_energies, in_nlocal))
+    try:
+        atom_energies = energy.atom_energies
+    except AttributeError:
+        atom_energies = energy
+
+    try:
+        atom_energies = index_type_coercion(atom_energies, IdxType.Atoms)
+    except ValueError:
+        raise RuntimeError(
+            "Could not build LAMMPS interface. Pass an object with index type IdxType.Atoms or "
+            "an object with an `atom_energies` attribute."
+        )
+
+
+    local_atom_energy = LocalAtomEnergyNode("(LAMMPS)local_atom_energy", (atom_energies, in_nlocal))
     grad_rij = GradientNode("(LAMMPS)grad_rij", (local_atom_energy.total_local_energy, in_pair_coord), -1)
 
     implemented_nodes = local_atom_energy.local_atom_energies, local_atom_energy.total_local_energy, grad_rij
