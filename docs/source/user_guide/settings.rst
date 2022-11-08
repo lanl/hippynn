@@ -7,7 +7,7 @@ There are four possible sources for settings.
 
 1. Default values
 2. The file `~/.hippynnrc`, which is a standard python config file which contains
-   variables under the section [GLOBAL].
+   variables under the section [GLOBALS].
 3. A file specified by the environment variable `HIPPYNN_LOCAL_RC_FILE`
    which is treated the same as the user rc file.
 4. Environment variables prefixed by ``HIPPYNN_``, e.g. ``HIPPYNN_DEFAULT_PLOT_FILETYPE``.
