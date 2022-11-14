@@ -33,6 +33,7 @@ if TQDM_PROGRESS is not None:
 
 ### Progress handlers
 
+
 def progress_handler(prog_str):
     if prog_str == "tqdm":
         return TQDM_PROGRESS
@@ -58,6 +59,7 @@ def kernel_handler(kernel_string):
         kernel = "auto"
 
     return kernel
+
 
 # keys: defaults, types, and handlers
 default_settings = {
@@ -98,7 +100,7 @@ if LOCAL_RC_FILE_KEY in hippynn_environment_variables:
     local_rc_fname = hippynn_environment_variables.pop(LOCAL_RC_FILE_KEY)
     if os.path.exists(local_rc_fname) and os.path.isfile(local_rc_fname):
         local_config = configparser.ConfigParser()
-        local_config = local_config.read(local_rc_fname)
+        local_config.read(local_rc_fname)
         config_sources[LOCAL_RC_FILE_KEY] = local_config["GLOBALS"]
     else:
         warnings.warn(f"Local configuration file {local_rc_fname} not found.")
