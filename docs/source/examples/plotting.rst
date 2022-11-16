@@ -4,7 +4,7 @@ Plotting
 
 How to make a plotmaker.
 
-Let's assume you have a `molecule_energy` node that you are training to.
+Let's assume you have a ``molecule_energy`` node that you are training to.
 A simple plot maker would look like this::
 
 

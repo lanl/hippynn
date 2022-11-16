@@ -142,7 +142,8 @@ class SensitivityPlot(Plotter):
         with torch.autograd.no_grad():
             mu = list(self.sensitivity.parameters())[0]
             r_range = torch.linspace(*self.r_params, dtype=mu.dtype, device=mu.device)
-            sense_out = self.sensitivity(r_range).cpu().data.numpy()
+            # allow_warning=False to disable the false low distance warning
+            sense_out = self.sensitivity(r_range, warn_low_distances=False).cpu().data.numpy()
             r_range = r_range.cpu().data.numpy()
         for sense_func in sense_out.transpose():
             plt.plot(r_range, sense_func, c="r")

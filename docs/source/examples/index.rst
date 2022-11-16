@@ -17,4 +17,5 @@ the examples are just snippets. For fully-fledged examples see the
     forces
     restarting
     ase_calculator
+    mliap_unified
 

@@ -2,7 +2,7 @@ import torch
 torch.set_default_dtype(torch.float32)
 
 from hippynn.experiment.serialization import load_checkpoint_from_cwd
-from hippynn.tools import active_directory
+from hippynn.tools import active_directory, device_fallback
 
 from hippynn.interfaces.lammps_interface import MLIAPInterface
 
@@ -18,5 +18,5 @@ if __name__ == "__main__":
     model = bundle["training_modules"].model
     energy_node = model.node_from_name("HEnergy")
 
-    unified = MLIAPInterface(energy_node, ["In", "P"], model_device=torch.device("cuda"))
+    unified = MLIAPInterface(energy_node, ["In", "P"], model_device=device_fallback())
     torch.save(unified, "mliap_unified_hippynn_InP.pt")

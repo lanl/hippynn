@@ -31,7 +31,7 @@ except ImportError:
 if TQDM_PROGRESS is not None:
     TQDM_PROGRESS = partial(TQDM_PROGRESS, mininterval=1.0, leave=False)
 
-# DEFAULTS, and types
+### Progress handlers
 
 
 def progress_handler(prog_str):
@@ -39,30 +39,33 @@ def progress_handler(prog_str):
         return TQDM_PROGRESS
     if prog_str.lower() == "none":
         return None
+    warnings.warn(f"Unrecognized progress setting: '{prog_str}'. Setting to none.")
 
 
 def kernel_handler(kernel_string):
-    
+
     kernel_string = kernel_string.lower()
-    
+
     kernel = {
-        "0":False,
-        "false":False,
-        "pytorch":False,
-        "1":True,
-        "true":True,
-        }.get(kernel_string,kernel_string)
-    
-    if kernel not in [True,False,"auto","cupy","numba"]:
+        "0": False,
+        "false": False,
+        "pytorch": False,
+        "1": True,
+        "true": True,
+    }.get(kernel_string, kernel_string)
+
+    if kernel not in [True, False, "auto", "cupy", "numba"]:
         warnings.warn(f"Unrecognized custom kernel option: {kernel_string}. Setting custom kernels to 'auto'")
         kernel = "auto"
-    
+
     return kernel
 
 
+# keys: defaults, types, and handlers
 default_settings = {
     "PROGRESS": (TQDM_PROGRESS, progress_handler),
     "DEFAULT_PLOT_FILETYPE": (".pdf", str),
+    "TRANSPARENT_PLOT": (False, strtobool),
     "DEBUG_LOSS_BROADCAST": (False, strtobool),
     "DEBUG_GRAPH_EXECUTION": (False, strtobool),
     "DEBUG_NODE_CREATION": (False, strtobool),
@@ -86,7 +89,10 @@ if os.path.exists(rc_name) and os.path.isfile(rc_name):
     config.read(rc_name)
     config_sources["~/.hippynnrc"] = config["GLOBALS"]
 
-hippynn_environment_variables = {k.replace("HIPPYNN_", ""): v for k, v in os.environ.items() if k.startswith("HIPPYNN_")}
+SETTING_PREFIX = "HIPPYNN_"
+hippynn_environment_variables = {
+    k.replace(SETTING_PREFIX, ""): v for k, v in os.environ.items() if k.startswith(SETTING_PREFIX)
+}
 
 LOCAL_RC_FILE_KEY = "LOCAL_RC_FILE"
 
@@ -94,7 +100,7 @@ if LOCAL_RC_FILE_KEY in hippynn_environment_variables:
     local_rc_fname = hippynn_environment_variables.pop(LOCAL_RC_FILE_KEY)
     if os.path.exists(local_rc_fname) and os.path.isfile(local_rc_fname):
         local_config = configparser.ConfigParser()
-        local_config = local_config.read(local_rc_fname)
+        local_config.read(local_rc_fname)
         config_sources[LOCAL_RC_FILE_KEY] = local_config["GLOBALS"]
     else:
         warnings.warn(f"Local configuration file {local_rc_fname} not found.")

@@ -17,7 +17,7 @@ def warn_if_under(distance, threshold):
         d_count = distance < threshold
         d_frac = d_count.to(distance.dtype).mean()
         warnings.warn(
-            f"Provided distances are underneath sensitivity range!\n"
+            "Provided distances are underneath sensitivity range!\n"
             f"Minimum distance in current batch: {dmin}\n"
             f"Threshold distance for warning: {threshold}.\n"
             f"Fraction of pairs under the threshold: {d_frac}"
@@ -53,8 +53,10 @@ class GaussianSensitivityModule(SensitivityModule):
         init_sigma = min_dist_soft * 2 * n_dist  # pulled from theano code
         self.sigma.data.fill_(init_sigma)
 
-    def forward(self, distflat):
-        if settings.WARN_LOW_DISTANCES:
+    def forward(self, distflat, warn_low_distances=None):
+        if warn_low_distances is None:
+            warn_low_distances = settings.WARN_LOW_DISTANCES
+        if warn_low_distances:
             with torch.no_grad():
                 mu, argmin = self.mu.min(dim=1)
                 sig = self.sigma[:, argmin]
@@ -65,7 +67,7 @@ class GaussianSensitivityModule(SensitivityModule):
         mu_ds = self.mu
         sig_ds = self.sigma
 
-        nondim = (distflat_ds ** -1 - mu_ds ** -1) ** 2 / (sig_ds ** -2)
+        nondim = (distflat_ds**-1 - mu_ds**-1) ** 2 / (sig_ds**-2)
         base_sense = torch.exp(-0.5 * nondim)
 
         total_sense = base_sense * self.cutoff(distflat).unsqueeze(1)
@@ -82,18 +84,20 @@ class InverseSensitivityModule(SensitivityModule):
         init_sigma = min_dist_soft * 2 * n_dist
         self.sigma.data.fill_(init_sigma)
 
-    def forward(self, distflat):
-        if settings.WARN_LOW_DISTANCES:
+    def forward(self, distflat, warn_low_distances=None):
+        if warn_low_distances is None:
+            warn_low_distances = settings.WARN_LOW_DISTANCES
+        if warn_low_distances:
             with torch.no_grad():
                 # Warn if distance is less than the -inside- edge of the shortest sensitivity function
                 mu, argmin = self.mu.min(dim=1)
                 sig = self.sigma[:, argmin]
-                thresh = (mu ** -1 - sig ** -1) ** -1
+                thresh = (mu**-1 - sig**-1) ** -1
 
                 warn_if_under(distflat, thresh)
         distflat_ds = distflat.unsqueeze(1)
 
-        nondim = (distflat_ds ** -1 - self.mu ** -1) ** 2 / (self.sigma ** -2)
+        nondim = (distflat_ds**-1 - self.mu**-1) ** 2 / (self.sigma**-2)
         base_sense = torch.exp(-0.5 * nondim)
 
         total_sense = base_sense * self.cutoff(distflat).unsqueeze(1)
@@ -225,7 +229,7 @@ class InteractLayerVec(InteractLayer):
         env_features_vec = custom_kernels.envsum(sense_vec, in_features, pair_first, pair_second)
         env_features_vec = env_features_vec.reshape(n_atoms_real * 3, self.n_dist * self.nf_in)
         features_out_vec = torch.mm(env_features_vec, weights_rs)
-        features_out_vec = features_out_vec.reshape(n_atoms_real,3,self.nf_out)
+        features_out_vec = features_out_vec.reshape(n_atoms_real, 3, self.nf_out)
         features_out_vec = torch.square(features_out_vec).sum(dim=1) + 1e-30
         features_out_vec = torch.sqrt(features_out_vec)
         features_out_vec = features_out_vec * self.vecscales.unsqueeze(0)
@@ -246,8 +250,8 @@ class InteractLayerQuad(InteractLayerVec):
         torch.nn.init.normal_(self.quadscales.data)
         # upper indices of flattened 3x3 array minus the (3,3) component
         # which is not needed for a traceless tensor
-        upper_ind = torch.as_tensor([0, 1, 2, 4, 5],dtype=torch.int64)
-        self.register_buffer('upper_ind',upper_ind,persistent=False) # Static, not part of module state
+        upper_ind = torch.as_tensor([0, 1, 2, 4, 5], dtype=torch.int64)
+        self.register_buffer("upper_ind", upper_ind, persistent=False)  # Static, not part of module state
 
     def forward(self, in_features, pair_first, pair_second, dist_pairs, coord_pairs):
 
@@ -270,7 +274,7 @@ class InteractLayerQuad(InteractLayerVec):
         env_features_vec = env_features_vec.reshape(n_atoms_real * 3, self.n_dist * self.nf_in)
         features_out_vec = torch.mm(env_features_vec, weights_rs)
         # Norm and scale
-        features_out_vec = features_out_vec.reshape(n_atoms_real,3,self.nf_out)
+        features_out_vec = features_out_vec.reshape(n_atoms_real, 3, self.nf_out)
         features_out_vec = torch.square(features_out_vec).sum(dim=1) + 1e-30
         features_out_vec = torch.sqrt(features_out_vec)
         features_out_vec = features_out_vec * self.vecscales.unsqueeze(0)
@@ -282,7 +286,7 @@ class InteractLayerQuad(InteractLayerVec):
         tr = torch.diagonal(rhatsquad, dim1=1, dim2=2).sum(dim=1) / 3.0  # Add divide by 3 early to save flops
         tr = tr.unsqueeze(1).unsqueeze(2) * torch.eye(3, dtype=tr.dtype, device=tr.device).unsqueeze(0)
         rhatsquad = rhatsquad - tr
-        rhatsqflat = rhatsquad.reshape(-1, 9)[:,self.upper_ind]  # Upper-diagonal part
+        rhatsqflat = rhatsquad.reshape(-1, 9)[:, self.upper_ind]  # Upper-diagonal part
         sense_quad = sense_vals.unsqueeze(1) * rhatsqflat.unsqueeze(2)
         sense_quad = sense_quad.reshape(-1, self.n_dist * 5)
         # Weights

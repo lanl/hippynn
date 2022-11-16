@@ -27,7 +27,9 @@ whereas the memory footprint of the custom kernels is approximately
     O(N_\mathrm{pairs}N_\mathrm{sensitivities} +
       N_\mathrm{atoms}N_\mathrm{features}N_\mathrm{sensitivities}).
 
-However, there are certain overheads in using ``numba`` to implement them.
+The custom kernels are implemented using ``numba`` and/or ``cupy``, depending
+on what is installed in your python environment.
+However, there are certain overheads in using them.
 In particular, if you are using a GPU and your batch size is small,
 the pytorch implementations may actually be faster, because they launch more quickly.
 This is especially true if you use a shallower model (one interaction layer) with

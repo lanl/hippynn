@@ -210,8 +210,10 @@ class Hipnn(torch.nn.Module):
 
     def forward(self, features, pair_first, pair_second, pair_dist):
         features = features.to(pair_dist.dtype)  # Convert one-hot features to floating point features.
-        if pair_dist.size()[-1] == 1:
-            pair_dist = pair_dist.squeeze(1)  # Lingering extra dimension may appear, must be squeezed
+
+        if pair_dist.ndim == 2:
+            pair_dist = pair_dist.squeeze(dim=1)
+
         output_features = [features]
 
         for block in self.blocks:
@@ -239,6 +241,12 @@ class HipnnVec(Hipnn):
 
     def forward(self, features, pair_first, pair_second, pair_dist, pair_coord):
         features = features.to(pair_dist.dtype)  # Convert one-hot features to floating point features.
+
+        if pair_dist.ndim == 2:
+            pair_dist = pair_dist.squeeze(dim=1)
+
+        if pair_coord.ndim == 3:
+            pair_coord = pair_coord.squeeze(dim=2)
 
         output_features = [features]
 

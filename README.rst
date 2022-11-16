@@ -4,7 +4,7 @@ The hippynn python package - a modular library for atomistic machine learning wi
 We aim to provide a powerful library for the training of atomistic
 (or physical point-cloud) machine learning.
 We want entry-level users to be able to efficiently train models
-to millions of datapoints, and a modular structure for extension or contribution.
+to millions of datapoints, and a modular structure for extensions and contribution.
 
 While hippynn's development so-far has centered around the HIP-NN architecture, don't let that
 discourage you if you are performing research with another model.
@@ -47,25 +47,32 @@ Training & Experiment API
 Custom Kernels for fast execution
 ----------------------------------------------------------
 - Certain operations are not efficiently written in pure pytorch, we provide
-  alternative implementations with ``numba``
+  alternative implementations with ``numba`` and ``cupy``
 - These are directly linked in with pytorch Autograd -- use them like native pytorch functions.
 - These provide advantages in memory footprint and speed
 - Includes CPU and GPU execution for custom kernels
 
-Interfaces
+Interfaces to other codes
 ----------------------------------------------------------
 - ASE: Define ``ASE`` calculators based on the graph-level API.
 - PYSEQM: Use ``PYSEQM`` calculations as nodes in a graph.
+- LAMMPS: Use models from ``hippynn`` in LAMMPS via the MLIAP Unified interface.
 
 Installation
 ============
 
 - Clone this repository and navigate into it.
+
+Dependencies using conda:
+-------------------------
+
+- Run ``conda install -c pytorch -c conda-forge --file conda_requirements.txt``
+
+Dependencies using pip:
+-----------------------
 - Run ``pip install .``
-
-If you fee like tinkering, do an editable install: ``pip install -e .``
-
-You can install using all optional dependencies from pip with: ``pip install -e .[full]``
+- If you fee like tinkering, do an editable install: ``pip install -e .``
+- You can install using all optional dependencies from pip with: ``pip install -e .[full]``
 
 Notes
 -----
@@ -77,6 +84,8 @@ Notes
   For ase and cupy, you probably want to use -c conda-forge.
 - Optional dependencies are in optional_dependencies.txt
 
+Other things
+============
 
 We are currently under development. At the moment you should be prepared for breaking changes -- keep track
 of what version you are using if you need to maintain consistency.

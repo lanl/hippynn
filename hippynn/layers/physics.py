@@ -144,6 +144,36 @@ class WolfScreening(AlphaScreening):
         return torch.erfc(eta * q) - q * torch.erfc(eta)
 
 
+class LocalDampingCosine(AlphaScreening):
+    """ Local damping using complement of the hipnn cutoff function. ('glue-on' method)
+    g =     1 if pair_dist > R_cutoff
+            1 - [cos(\pi/2 * dist * R_cutoff)]^2  otherwise
+    """
+    def __init__(self, alpha): 
+        """ 
+        :param alpha: R_cutoff for glue-on function to ensure 
+            smooth crossover from hipnn energy to long-range coulomb energy.  
+        """
+        super().__init__(alpha) 
+
+
+    def forward(self, pair_dist, radius):
+        """
+        :param pair_dist: torch.tensor, dtype=float64: 'Neighborlist' distances for coulomb energies.
+        :param radius: Maximum radius that Screened-Coulomb is evaluated upto. 
+        :return screening: Weights for screening for each pair.
+        """
+        pi = torch.tensor([3.141592653589793238], device=pair_dist.device)
+        q = pair_dist / radius 
+        eta =  radius / self.alpha
+        screening = torch.subtract(torch.tensor([1.0], device=pair_dist.device), torch.square(torch.cos(0.5*pi*q*eta)))
+        
+        # pair_dist greater than cut-off; no local-damping. 
+        screening = torch.where((pair_dist<self.alpha), screening, torch.ones_like(screening))
+        
+        return screening
+
+
 class QScreening(torch.nn.Module):
     def __init__(self, p_value):
         super().__init__()

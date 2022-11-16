@@ -1,8 +1,18 @@
 0.0.1b4
 =======
 
+New Features:
+-------------
+
+- Added an interface to LAMMPS using the LAMMPS MLIAP UNIFIED pair style.
+  see /examples/lammps/ and the documentation for more information.
+
 Improvements:
 -------------
+
+- Add a setting to create plots with transparent backgrounds
+
+- Improvements to documentation display
 
 - Add an example for training to the Ani-1x dataset directly from
   the h5 file.
@@ -10,13 +20,21 @@ Improvements:
 - ASE Calculator is now compatible with more ASE functions including
   mixing with other calculators.
 
+- Cross-device restarting is now properly handled. Corresponding documentation
+  has been added.
+
 Bug Fixes:
 ----------
 
-- fixed a bug which expected files saved in a .pkl format,
+- Fixed a bug which expected files saved in a .pkl format,
   when in fact they are saved as .pt (pytorch) files.
 
-- fixed a bug in parsing of settings file 
+- Fixed a bug in parsing of local settings file.
+
+- Fixed a bug in parsing of settings through environmental variables.
+
+- Fixed a false low distance warning when sensitivity functions are plotted.
+
 
 0.0.1b3
 =======

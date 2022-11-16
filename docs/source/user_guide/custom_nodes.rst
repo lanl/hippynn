@@ -36,7 +36,7 @@ module that outputs several outputs. Specify the names of the outputs in the
 ``_output_names`` attribute as a tuple of strings. Additionally, you can
 specify the ``IdxType`` of the outputs so that other nodes can recognize
 what type of information is provided. Here is a stripped-down version of the
-hierarchical energy regression target :class:`~hippynn.graphs.nodes.targets.HEnergyNode`:::
+hierarchical energy regression target :class:`~hippynn.graphs.nodes.targets.HEnergyNode`::
 
     import hippynn.layers.targets as target_modules
     from hippynn.graphs.nodes import MultiNode

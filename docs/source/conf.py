@@ -22,7 +22,7 @@ copyright = "2019, Los Alamos National Laboratory"
 author = "Nicholas Lubbers"
 
 # The full version, including alpha/beta/rc tags
-release = "0.0.1b2"
+release = "0.0.1b4"
 
 
 # -- General configuration ---------------------------------------------------
@@ -45,7 +45,9 @@ autodoc_default_options = {
     "no-show-inheritance": True,
     "special-members": "__init__",
 }
-autodoc_mock_imports = ["pyanitools", "seqm", "schnetpack"]
+
+# The following are highly optional, so we mock them for doc purposes.
+autodoc_mock_imports = ["pyanitools", "seqm", "schnetpack", "cupy", "lammps"]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -59,10 +61,19 @@ html_theme = "sphinx_rtd_theme"
 html_theme_options = {
     "navigation_depth": -1,
     "prev_next_buttons_location": "both",
+    "navigation_with_keys": True,
 }
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = []
+html_static_path = ["_static"]
+
+# These paths are either relative to html_static_path
+# or fully qualified paths (eg. https://...)
+html_css_files = [
+    "css/custom.css",
+]
+
+# html_logo = "_static/logo.svg"
