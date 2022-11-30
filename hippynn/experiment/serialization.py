@@ -149,14 +149,17 @@ def load_checkpoint(
     structure = restore_checkpoint(structure, state, restore_db=restore_db)
     # no transfer happens in either case, as the tensors are on the target devices already
     if model_device == "cpu" or map_location != None:
-        structure["training_modules"].evaluator.model_device = model_device
-        return structure
-    else:
+        evaluator = structure["training_modules"].evaluator
+        # model_device can be None, so we have to determine the device for a tensor
+        evaluator.model_device = next(evaluator.model.parameters()).device
+    # if map_location is not set and model_device is set
+    elif model_device != None:
         training_modules = structure["training_modules"]
         optimizer = structure["controller"].optimizer
         model, loss, evaluator = training_modules
         model, evaluator, optimizer = set_devices(model, loss, evaluator, optimizer, model_device)
-        return structure
+    # if neither map_location nor model_device is set, directly return
+    return structure
 
 
 def load_checkpoint_from_cwd(map_location=None, model_device=None, **kwargs) -> dict:
@@ -192,8 +195,6 @@ def load_model_from_cwd(map_location=None, model_device=None, **kwargs) -> Graph
 
     model = structure["training_modules"].model
     model.load_state_dict(state)
-
-    if model_device == "cpu" or map_location != None:
-        return model
-    else:
-        return model.to(model_device)
+    if map_location == None and model_device != None and model_device != "cpu":
+        model = model.to(model_device)
+    return model
