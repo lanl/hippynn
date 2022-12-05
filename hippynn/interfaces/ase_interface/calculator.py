@@ -222,7 +222,7 @@ class HippynnCalculator(interface.Calculator, Calculator): # Calculator inherita
         )
         
         self.implemented_properties.append("energy") # Required for using mixing calculators in ASE
-
+        
         self.atoms = None
         self._last_properties = None
 
@@ -241,6 +241,7 @@ class HippynnCalculator(interface.Calculator, Calculator): # Calculator inherita
         self.device = torch.device("cpu")
         self.dtype = torch.get_default_dtype()
         self.name = name if name is not None else "Hippynn calculator"
+        self.parameters = {} #Hack to work with ASE trajectory printing
 
     make = _generate_calculation_method
     get_potential_energy = make("potential_energy")

@@ -102,7 +102,7 @@ class DirectoryDatabase(Database, Restartable):
 class NPZDatabase(Database, Restartable):
     def __init__(self, file, inputs, targets, *args, allow_unfound=False, quiet=False, **kwargs):
         arr_dict = self.load_arrays(file, inputs, targets, quiet=quiet, allow_unfound=allow_unfound)
-        super().__init__(arr_dict, inputs, targets, *args, **kwargs, quiet=quiet)
+        super().__init__(arr_dict, inputs, targets, *args, **kwargs, quiet=quiet,allow_unfound=allow_unfound)
         self.restarter = self.make_restarter(
             file, inputs, targets, *args, **kwargs, quiet=quiet, allow_unfound=allow_unfound
         )
