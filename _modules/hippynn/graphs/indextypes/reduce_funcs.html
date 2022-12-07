@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.graphs.indextypes.reduce_funcs &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.graphs.indextypes.reduce_funcs</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.graphs.indextypes.reduce_funcs</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Functions for changing index states.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_debprint</span>
+<span class="kn">from</span> <span class="nn">.registry</span> <span class="kn">import</span> <span class="n">_index_dispatch_table</span><span class="p">,</span> <span class="n">elementwise_compare_rules</span><span class="p">,</span> <span class="n">_db_index_states</span><span class="p">,</span> <span class="n">_index_cache</span>
+<span class="kn">from</span> <span class="nn">.type_def</span> <span class="kn">import</span> <span class="n">IdxType</span>
+
+
+<div class="viewcode-block" id="dispatch_indexing"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.reduce_funcs.html#hippynn.graphs.indextypes.dispatch_indexing">[docs]</a><span class="k">def</span> <span class="nf">dispatch_indexing</span><span class="p">(</span><span class="n">input_is</span><span class="p">,</span> <span class="n">output_is</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Acquire the function for converting between two index states.</span>
+
+<span class="sd">    :param input_is: input index state</span>
+<span class="sd">    :param output_is: output index state</span>
+<span class="sd">    :return: the function</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;dispatching:&quot;</span><span class="p">,</span> <span class="n">input_is</span><span class="p">,</span> <span class="n">output_is</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">_index_dispatch_table</span><span class="p">[</span><span class="n">input_is</span><span class="p">,</span> <span class="n">output_is</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">ke</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No index conversion (</span><span class="si">{}</span><span class="s2">)-&gt;(</span><span class="si">{}</span><span class="s2">) found.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_is</span><span class="p">,</span> <span class="n">output_is</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="index_type_coercion"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.reduce_funcs.html#hippynn.graphs.indextypes.index_type_coercion">[docs]</a><span class="k">def</span> <span class="nf">index_type_coercion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">output_index_state</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Attempt to convert a node to a given index state.</span>
+
+<span class="sd">    .. Note::</span>
+<span class="sd">       1. If given a MultiNode, this function operates on the node&#39;s main_output.</span>
+<span class="sd">       2. If there is no IdxType on the node, this function is a no-op, so that if one has not been implemented,</span>
+<span class="sd">          no error will be raised.</span>
+<span class="sd">       3. If the index type already matches, then this function just returns the input node.</span>
+<span class="sd">       4. If the index type doesn&#39;t match, an index transformer of the appropriate type will be looked for.</span>
+<span class="sd">          If no conversion is found, a ValueError is raised.</span>
+
+<span class="sd">    :param node:  the node to convert</span>
+<span class="sd">    :param output_index_state: the index state to convert to.</span>
+<span class="sd">    :return: a node in the requested index state</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Requesting transformation : </span><span class="si">{}</span><span class="s2"> -&gt; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">output_index_state</span><span class="p">))</span>
+    <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main_output</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">needs_index</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">!=</span> <span class="n">output_index_state</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> Indexing information not found! Something is likely to fail.&quot;</span><span class="p">)</span>
+        <span class="n">needs_index</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">needs_index</span><span class="p">:</span>
+        <span class="n">prior_index_ref</span> <span class="o">=</span> <span class="p">(</span><span class="n">output_index_state</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">output_index_state</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_index_cache</span><span class="p">:</span>
+            <span class="c1"># If this node is linked to a previous index state</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> Previous indexed version found for node </span><span class="si">{</span><span class="n">node</span><span class="si">}</span><span class="s2"> type </span><span class="si">{</span><span class="n">output_index_state</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">outnode</span> <span class="o">=</span> <span class="n">_index_cache</span><span class="p">[</span><span class="n">prior_index_ref</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> No index version found for node </span><span class="si">{</span><span class="n">node</span><span class="si">}</span><span class="s2"> type </span><span class="si">{</span><span class="n">output_index_state</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">outnode</span> <span class="o">=</span> <span class="n">dispatch_indexing</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">_index_state</span><span class="p">,</span> <span class="n">output_index_state</span><span class="p">)(</span><span class="n">node</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">outnode</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> -&gt; Autoindex unnecessary; index form correct.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">outnode</span></div>
+
+
+<div class="viewcode-block" id="soft_index_type_coercion"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.reduce_funcs.html#hippynn.graphs.indextypes.soft_index_type_coercion">[docs]</a><span class="k">def</span> <span class="nf">soft_index_type_coercion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">output_index_state</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Coerce if information is available.</span>
+
+<span class="sd">    :param node:</span>
+<span class="sd">    :param output_index_state:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">output_index_state</span> <span class="o">==</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">NotFound</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">==</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">NotFound</span><span class="p">:</span>
+        <span class="n">_debprint</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Soft request: Skipping requested conversion of </span><span class="si">{</span><span class="n">node</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">_index_state</span><span class="si">}</span><span class="s2">)to </span><span class="si">{</span><span class="n">output_index_state</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="s2">&quot; as information was not available.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">node</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">index_type_coercion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">output_index_state</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_reduced_index_state"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.reduce_funcs.html#hippynn.graphs.indextypes.get_reduced_index_state">[docs]</a><span class="k">def</span> <span class="nf">get_reduced_index_state</span><span class="p">(</span><span class="o">*</span><span class="n">nodes_to_reduce</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find the index state for comparison between values in a loss function or plot.</span>
+
+<span class="sd">    .. Note::</span>
+<span class="sd">        This function is unlikely to be directed needed as a user.</span>
+<span class="sd">        it&#39;s more likely you want to use :func:`elementwise_compare_reduce`.</span>
+
+<span class="sd">    :param nodes_to_reduce:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">typeset</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="s2">&quot;_index_state&quot;</span><span class="p">,</span><span class="n">IdxType</span><span class="o">.</span><span class="n">NotFound</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes_to_reduce</span><span class="p">)</span>
+    <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Finding index comparison for for :&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">n</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes_to_reduce</span><span class="p">])</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">coerced_type</span> <span class="o">=</span> <span class="n">elementwise_compare_rules</span><span class="p">[</span><span class="n">typeset</span><span class="p">]</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Coerced type found: </span><span class="si">{}</span><span class="s2">-&gt;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">typeset</span><span class="p">),</span> <span class="n">coerced_type</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">oke</span><span class="p">:</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;index rules:&quot;</span><span class="p">,</span> <span class="n">elementwise_compare_rules</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;index rule not found for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">typeset</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">oke</span>
+    <span class="k">return</span> <span class="n">coerced_type</span></div>
+
+
+<div class="viewcode-block" id="elementwise_compare_reduce"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.reduce_funcs.html#hippynn.graphs.indextypes.elementwise_compare_reduce">[docs]</a><span class="k">def</span> <span class="nf">elementwise_compare_reduce</span><span class="p">(</span><span class="o">*</span><span class="n">nodes_to_reduce</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return nodes converted to a mutually compatible index state with no padding.</span>
+
+<span class="sd">    :param nodes_to_reduce: nodes to put in a comparable, reduced index state</span>
+<span class="sd">    :return: node (if single argument) or tuple(nodes) (if multiple arguments)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes_to_reduce</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Compare reduce on nothing, returning nothing&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">()</span>
+    <span class="n">coerced_type</span> <span class="o">=</span> <span class="n">get_reduced_index_state</span><span class="p">(</span><span class="o">*</span><span class="n">nodes_to_reduce</span><span class="p">)</span>
+    <span class="n">coerced_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">index_type_coercion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">coerced_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes_to_reduce</span><span class="p">]</span>
+    <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Coerced:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">coerced_nodes</span><span class="p">])</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coerced_nodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">coerced_nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">coerced_nodes</span></div>
+
+
+<div class="viewcode-block" id="db_state_of"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.reduce_funcs.html#hippynn.graphs.indextypes.db_state_of">[docs]</a><span class="k">def</span> <span class="nf">db_state_of</span><span class="p">(</span><span class="n">idxt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the IdxType expected in the database for a given index type.</span>
+
+<span class="sd">    .. Note::</span>
+<span class="sd">        This function is unlikely to be directed needed as a user.</span>
+<span class="sd">        it&#39;s more likely you want to use :func:`db_form`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_db_index_states</span><span class="p">[</span><span class="n">idxt</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No index state found for index type &#39;</span><span class="si">{</span><span class="n">idxt</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="db_form"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.reduce_funcs.html#hippynn.graphs.indextypes.db_form">[docs]</a><span class="k">def</span> <span class="nf">db_form</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a node converted to the index state of the database.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">index_type_coercion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">db_state_of</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">_index_state</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

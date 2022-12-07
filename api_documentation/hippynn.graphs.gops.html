@@ -49,10 +49,31 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.databases.html">databases package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.experiment.html">experiment package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.graphs.html">graphs package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.GraphModule"><code class="docutils literal notranslate"><span class="pre">GraphModule</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.IdxType"><code class="docutils literal notranslate"><span class="pre">IdxType</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.Predictor"><code class="docutils literal notranslate"><span class="pre">Predictor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.compute_evaluation_order"><code class="docutils literal notranslate"><span class="pre">compute_evaluation_order()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.copy_subgraph"><code class="docutils literal notranslate"><span class="pre">copy_subgraph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.find_relatives"><code class="docutils literal notranslate"><span class="pre">find_relatives()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.find_unique_relative"><code class="docutils literal notranslate"><span class="pre">find_unique_relative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.get_connected_nodes"><code class="docutils literal notranslate"><span class="pre">get_connected_nodes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.get_subgraph"><code class="docutils literal notranslate"><span class="pre">get_subgraph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.replace_node"><code class="docutils literal notranslate"><span class="pre">replace_node()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.indextransformers.html">indextransformers package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.indextypes.html">indextypes package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.nodes.html">nodes package</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">gops module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">gops module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.GraphInconsistency"><code class="docutils literal notranslate"><span class="pre">GraphInconsistency</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.check_evaluation_order"><code class="docutils literal notranslate"><span class="pre">check_evaluation_order()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.check_link_consistency"><code class="docutils literal notranslate"><span class="pre">check_link_consistency()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.compute_evaluation_order"><code class="docutils literal notranslate"><span class="pre">compute_evaluation_order()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.copy_subgraph"><code class="docutils literal notranslate"><span class="pre">copy_subgraph()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.get_subgraph"><code class="docutils literal notranslate"><span class="pre">get_subgraph()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.replace_node"><code class="docutils literal notranslate"><span class="pre">replace_node()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.replace_node_with_constant"><code class="docutils literal notranslate"><span class="pre">replace_node_with_constant()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.search_by_name"><code class="docutils literal notranslate"><span class="pre">search_by_name()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.graph.html">graph module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.predictor.html">predictor module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.viz.html">viz module</a></li>
@@ -101,6 +122,167 @@
   <div class="section" id="gops-module">
 <h1>gops module<a class="headerlink" href="#gops-module" title="Permalink to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.graphs.gops</span></code> module.</p>
+<span class="target" id="module-hippynn.graphs.gops"></span><p>Graph Operations (“gops”) that process or transform a set of nodes.</p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="hippynn.graphs.gops.GraphInconsistency">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GraphInconsistency</span></span><a class="reference internal" href="../_modules/hippynn/graphs/gops.html#GraphInconsistency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.gops.GraphInconsistency" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.base.node_functions.html#hippynn.graphs.nodes.base.node_functions.NodeOperationError" title="hippynn.graphs.nodes.base.node_functions.NodeOperationError"><code class="xref py py-class docutils literal notranslate"><span class="pre">NodeOperationError</span></code></a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.graphs.gops.check_evaluation_order">
+<span class="sig-name descname"><span class="pre">check_evaluation_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evaluation_outputs_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_inputs_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/gops.html#check_evaluation_order"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.gops.check_evaluation_order" title="Permalink to this definition"></a></dt>
+<dd><p>Validate an evaluation order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>evaluation_outputs_list</strong> – </p></li>
+<li><p><strong>evaluation_inputs_list</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.graphs.gops.check_link_consistency">
+<span class="sig-name descname"><span class="pre">check_link_consistency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/gops.html#check_link_consistency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.gops.check_link_consistency" title="Permalink to this definition"></a></dt>
+<dd><p>Make sure that back-links in the graph are correct.
+Raises GraphInconsistency if the graph is not consistent.
+All connected nodes to the node set are analyzed.
+The links are consistent if each pair of child-&gt;parent has
+a corresponding link parent&lt;-child.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>node_set</strong> – iterable of nodes to check</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="#hippynn.graphs.gops.GraphInconsistency" title="hippynn.graphs.gops.GraphInconsistency"><strong>GraphInconsistency</strong></a> – if the graph is not consistent.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.graphs.gops.compute_evaluation_order">
+<span class="sig-name descname"><span class="pre">compute_evaluation_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">all_nodes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/gops.html#compute_evaluation_order"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.gops.compute_evaluation_order" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the evaluation order for forward computation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>all_nodes</strong> – The nodes to compute</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>outputs_list, inputs_list
+Outputs list is the node to evaluate next, which is fed the inputs in the
+corresponding entry of inputs_list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.graphs.gops.copy_subgraph">
+<span class="sig-name descname"><span class="pre">copy_subgraph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">required_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assume_inputed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/gops.html#copy_subgraph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.gops.copy_subgraph" title="Permalink to this definition"></a></dt>
+<dd><p>Copy a subgraph for the required nodes.
+Doesn’t copy the modules.
+Returns copies of the specified nodes, linked implicitly to copies of their parents.</p>
+<p>If assume_inputted is not empty, this will result in partially disconnected nodes.
+As such, we recommend running <cite>check_link_consistency</cite> after
+you have finished your graph-level operations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>required_nodes</strong> – output nodes of the computation</p></li>
+<li><p><strong>assume_inputed</strong> – nodes whose parents we will not include in the copy (these will be left dangling)</p></li>
+<li><p><strong>tag</strong> – a string to preprend to the resulting node’s names.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>new_required, new_subgraph
+<code class="docutils literal notranslate"><span class="pre">new_required</span></code>: a list containing the new copies of <code class="docutils literal notranslate"><span class="pre">required_nodes</span></code> in the new subgraph.</p>
+<p><code class="docutils literal notranslate"><span class="pre">new_subgraph</span></code>: a list containing new copies of all nodes in the subgraph.</p>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.graphs.gops.get_subgraph">
+<span class="sig-name descname"><span class="pre">get_subgraph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">required_nodes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/gops.html#get_subgraph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.gops.get_subgraph" title="Permalink to this definition"></a></dt>
+<dd><p>Get the subgraph associated with some target (required) nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>required_nodes</strong> – the nodes to compute</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a list of nodes involved in the computation of the required nodes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.graphs.gops.replace_node">
+<span class="sig-name descname"><span class="pre">replace_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disconnect_old</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/gops.html#replace_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.gops.replace_node" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>old_node</strong> – Node to replace</p></li>
+<li><p><strong>new_node</strong> – Node to insert</p></li>
+<li><p><strong>disconnect_old</strong> – If True, remove the old node connections from the graph.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Replaces the children of old node with new node. Effectively,
+this just means going to the children and swapping out their parents to point to
+the new node. Ignores the children of old node that are parents of the new node
+in order to prevent cycles in the graph.</p>
+<p>If disconnect_old, remove references to the old node – it will become unusable.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This function changes the graph structure in-place.
+As such, if this function raises an error, it may result in a corrupted graph state.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This function will try to coerce index states where possible. If the index types
+of the nodes are not listed, the index state will not be modified. If they are incompatible,
+this means that the graph will not function correctly.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.graphs.gops.replace_node_with_constant">
+<span class="sig-name descname"><span class="pre">replace_node_with_constant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/gops.html#replace_node_with_constant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.gops.replace_node_with_constant" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.graphs.gops.search_by_name">
+<span class="sig-name descname"><span class="pre">search_by_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_or_dbname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/gops.html#search_by_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.gops.search_by_name" title="Permalink to this definition"></a></dt>
+<dd><p>Look for a unique related node with a given db_name or name.
+The db_name will be given higher precedence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nodes</strong> – starting point for search</p></li>
+<li><p><strong>name_or_dbname</strong> – name or dbname for node search</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>node that matches criterion</p>
+</dd>
+</dl>
+<p>Raises NodeAmbiguityError if more than one node found
+Raises NotNotFoundError if no nodes found</p>
+</dd></dl>
+
 </div>
 
 

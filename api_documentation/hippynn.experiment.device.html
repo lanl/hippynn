@@ -48,9 +48,18 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.html">custom_kernels package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.databases.html">databases package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.experiment.html">experiment package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.SetupParams"><code class="docutils literal notranslate"><span class="pre">SetupParams</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.assemble_for_training"><code class="docutils literal notranslate"><span class="pre">assemble_for_training()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.setup_and_train"><code class="docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.setup_training"><code class="docutils literal notranslate"><span class="pre">setup_training()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.test_model"><code class="docutils literal notranslate"><span class="pre">test_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.train_model"><code class="docutils literal notranslate"><span class="pre">train_model()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.assembly.html">assembly module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.controllers.html">controllers module</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">device module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">device module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.device.set_devices"><code class="docutils literal notranslate"><span class="pre">set_devices()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.evaluator.html">evaluator module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.metric_tracker.html">metric_tracker module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.routines.html">routines module</a></li>
@@ -101,6 +110,35 @@
   <div class="section" id="device-module">
 <h1>device module<a class="headerlink" href="#device-module" title="Permalink to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.experiment.device</span></code> module.</p>
+<span class="target" id="module-hippynn.experiment.device"></span><p>This file is used to host the function <cite>set_devices</cite>, as it is needed by both
+serialization and routines. We may find a better place for this function in the
+future.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.experiment.device.set_devices">
+<span class="sig-name descname"><span class="pre">set_devices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.graphs.graph.html#hippynn.graphs.graph.GraphModule" title="hippynn.graphs.graph.GraphModule"><span class="pre">GraphModule</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.graphs.graph.html#hippynn.graphs.graph.GraphModule" title="hippynn.graphs.graph.GraphModule"><span class="pre">GraphModule</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.experiment.evaluator.html#hippynn.experiment.evaluator.Evaluator" title="hippynn.experiment.evaluator.Evaluator"><span class="pre">Evaluator</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span></span></span><a class="reference internal" href="../_modules/hippynn/experiment/device.html#set_devices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.device.set_devices" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the model, loss, and optimizer to the specified device if necessary.
+Evaluation loss is performed on CPU.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.GraphModule" title="hippynn.graphs.GraphModule"><em>GraphModule</em></a>) – current model on CPU</p></li>
+<li><p><strong>loss</strong> (<a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.GraphModule" title="hippynn.graphs.GraphModule"><em>GraphModule</em></a>) – current loss module on CPU</p></li>
+<li><p><strong>evaluator</strong> (<a class="reference internal" href="hippynn.experiment.evaluator.html#hippynn.experiment.evaluator.Evaluator" title="hippynn.experiment.evaluator.Evaluator"><em>Evaluator</em></a>) – evaluator</p></li>
+<li><p><strong>optimizer</strong> (<em>torch.optim.Optimizer</em>) – optimizer with state dictionary on CPU</p></li>
+<li><p><strong>device</strong> (<em>Union</em><em>[</em><em>torch.devices</em><em>, </em><em>string</em><em>, </em><em>tuple</em><em>, </em><em>list</em><em>]</em>) – target device for training. If device is a tuple or list, wrap
+the model using torch.nn.DataParallel and use the first specified device
+as the “primary: one.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>model, evaluator, optimizer</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 

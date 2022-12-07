@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.graphs.predictor &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.graphs.predictor</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.graphs.predictor</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Predictor object which builds a graph for predictions with</span>
+<span class="sd">a simple user interface.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">from</span> <span class="nn">..tools</span> <span class="kn">import</span> <span class="n">arrdict_len</span><span class="p">,</span> <span class="n">progress_bar</span>
+
+<span class="kn">from</span> <span class="nn">.graph</span> <span class="kn">import</span> <span class="n">GraphModule</span>
+<span class="kn">from</span> <span class="nn">.gops</span> <span class="kn">import</span> <span class="n">search_by_name</span>
+<span class="kn">from</span> <span class="nn">.indextypes</span> <span class="kn">import</span> <span class="n">IdxType</span><span class="p">,</span> <span class="n">db_form</span>
+
+<span class="c1"># TODO: batched prediction for scalars</span>
+<span class="c1"># It doesn&#39;t work for scalars! Right now they are just filtered out.</span>
+
+
+<div class="viewcode-block" id="Predictor"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.predictor.html#hippynn.graphs.Predictor">[docs]</a><span class="k">class</span> <span class="nc">Predictor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The predictor is a dressed-up GraphModule which gives access</span>
+<span class="sd">    to the outputs of individual nodes.</span>
+
+<span class="sd">    In many cases you may simply want to use the ``from_graph`` method to generate a predictor.</span>
+
+<span class="sd">    The predictor will take the model graph, convert the output nodes into</span>
+<span class="sd">    a padded index state, and build a new graph for these operations.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Predictor.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.predictor.html#hippynn.graphs.Predictor.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">return_device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">),</span> <span class="n">model_device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param inputs: nodes to use as inputs</span>
+<span class="sd">        :param outputs: nodes to use as outputs</span>
+<span class="sd">        :param return_device: device to place results on; does nothing if None</span>
+<span class="sd">        :param model_device: where the model and input should be placed, does nothing if None</span>
+<span class="sd">        :param requires_grad: Default false -- detach predicted tensors. If true, do not detach predicted</span>
+<span class="sd">         tensors -- this may lead to memory leaks if not done carefully.</span>
+<span class="sd">        :param name: Optional name for formatting progress bars.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">search_by_name</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">o</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]</span>
+
+        <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">outputs</span> <span class="k">if</span> <span class="n">o</span><span class="o">.</span><span class="n">_index_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_dbnames</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">db_name</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]</span>
+
+        <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">db_form</span><span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="n">GraphModule</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span>
+
+        <span class="c1"># User can supply kwargs using the node&#39;s name or db_name, the latter takes priority</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">argmap</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="o">**</span><span class="p">{</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">},</span>
+            <span class="o">**</span><span class="p">{</span><span class="n">node</span><span class="o">.</span><span class="n">db_name</span><span class="p">:</span> <span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">},</span>
+        <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_device</span> <span class="o">=</span> <span class="n">return_device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_device</span> <span class="o">=</span> <span class="n">model_device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="n">requires_grad</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="s2">&quot;Predictor&quot;</span></div>
+
+<div class="viewcode-block" id="Predictor.from_graph"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.predictor.html#hippynn.graphs.Predictor.from_graph">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_graph</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">additional_outputs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct a new predictor from an existing GraphModule.</span>
+
+<span class="sd">        :param graph:  graph to create predictor for. The predictor makes a shallow copy of this graph. e.g. it may move</span>
+<span class="sd">           parameters from that graph to the model_device.</span>
+<span class="sd">        :param additional_outputs: List of additional nodes to include in outputs</span>
+<span class="sd">        :param kwargs: passed to ``__init__``</span>
+
+<span class="sd">        :return: predictor instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">input_nodes</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">nodes_to_compute</span>
+        <span class="k">if</span> <span class="n">additional_outputs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">additional_outputs</span><span class="p">)</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">outputs</span><span class="p">))</span>  <span class="c1"># Remove any redundancies -- they will screw up the output name map.</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Predictor.to"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.predictor.html#hippynn.graphs.Predictor.to">[docs]</a>    <span class="k">def</span> <span class="nf">to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">input_nodes</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes_to_compute</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">model_device</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_device</span>
+
+    <span class="nd">@model_device</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">model_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model_device</span> <span class="o">=</span> <span class="n">device</span>
+
+<div class="viewcode-block" id="Predictor.add_output"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.predictor.html#hippynn.graphs.Predictor.add_output">[docs]</a>    <span class="k">def</span> <span class="nf">add_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">node_from_name</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+        <span class="n">source</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">db_form</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">forward_output_list</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Node </span><span class="si">{}</span><span class="s2"> is not computed in graph. We suggest you make a &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s2">&quot;new predictor with this node in the additional_outputs list.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_dbnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">bname</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Predictor.wrap_outputs"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.predictor.html#hippynn.graphs.Predictor.wrap_outputs">[docs]</a>    <span class="k">def</span> <span class="nf">wrap_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out_dict</span><span class="p">):</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">tensor</span><span class="p">),</span> <span class="n">dbname</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">out_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_dbnames</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_names</span><span class="p">):</span>
+            <span class="n">out_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">tensor</span>
+            <span class="n">out_dict</span><span class="p">[</span><span class="n">dbname</span><span class="p">]</span> <span class="o">=</span> <span class="n">tensor</span>
+        <span class="k">return</span> <span class="n">out_dict</span></div>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">node_values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">single_prediction</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param node_values: dict[node-&gt;tensor]</span>
+<span class="sd">        :param single_prediction: (default false) if True, wrap a batch axis onto the input and off of the output</span>
+<span class="sd">        :param batch_size: batch over groups of examples by splitting the inputs along the batch axis.</span>
+<span class="sd">                           does all computation as one batch if batch_size=None</span>
+<span class="sd">        :param kwargs: values for arguments, using either the input&#39;s name or dbname attribute</span>
+<span class="sd">        :return: dictionary of output values. Contains db_name:value, name:value, and node:value pairs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">node_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot call Predictor with both node_values and kwargs&quot;</span><span class="p">)</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">node_values</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">argmap</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_values</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Wrong number of node inputs. </span><span class="si">{}</span><span class="s2"> distinct inputs supplied, &quot;</span>
+                <span class="s2">&quot; </span><span class="si">{}</span><span class="s2"> inputs required&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">node_values</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">))</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">single_prediction</span><span class="p">:</span>
+            <span class="n">node_values</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">node_values</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="k">if</span> <span class="n">batch_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_batched</span><span class="p">(</span><span class="n">node_values</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_all</span><span class="p">(</span><span class="n">node_values</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">single_prediction</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_outputs</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+<div class="viewcode-block" id="Predictor.predict_batched"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.predictor.html#hippynn.graphs.Predictor.predict_batched">[docs]</a>    <span class="k">def</span> <span class="nf">predict_batched</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_values</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
+
+        <span class="c1"># Split the input into batches</span>
+        <span class="n">node_values</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">node_values</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="n">n_batches</span> <span class="o">=</span> <span class="n">arrdict_len</span><span class="p">(</span><span class="n">node_values</span><span class="p">)</span>
+
+        <span class="c1"># Make a dictionary for each batch</span>
+        <span class="n">batched_inputs</span> <span class="o">=</span> <span class="p">[{</span><span class="n">n</span><span class="p">:</span> <span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">node_values</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_batches</span><span class="p">)]</span>
+
+        <span class="c1"># Predict for each batch</span>
+        <span class="n">batched_outputs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">predict_all</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">progress_bar</span><span class="p">(</span><span class="n">batched_inputs</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;batch&quot;</span><span class="p">)]</span>
+
+        <span class="c1"># Concatenate the full set of outputs.</span>
+        <span class="n">out_keys</span> <span class="o">=</span> <span class="n">batched_outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">full_outputs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">batched_outputs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_batches</span><span class="p">)])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">out_keys</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">full_outputs</span></div>
+
+<div class="viewcode-block" id="Predictor.apply_to_database"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.predictor.html#hippynn.graphs.Predictor.apply_to_database">[docs]</a>    <span class="k">def</span> <span class="nf">apply_to_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Note: kwargs are passed to self.__call__, e.g. the ``batch_size`` parameter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">split_name</span><span class="p">,</span> <span class="n">split_arrdict</span> <span class="ow">in</span> <span class="n">db</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">input_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">db_name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">]</span>
+            <span class="n">dict_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">split_arrdict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">input_names</span><span class="p">}</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">split_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="o">**</span><span class="n">dict_inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">results</span></div>
+
+<div class="viewcode-block" id="Predictor.predict_all"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.predictor.html#hippynn.graphs.Predictor.predict_all">[docs]</a>    <span class="k">def</span> <span class="nf">predict_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_values</span><span class="p">):</span>
+
+        <span class="n">input_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_values</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_device</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">input_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">inp</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_device</span><span class="p">)</span> <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">input_values</span><span class="p">]</span>
+
+        <span class="n">out_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="o">*</span><span class="n">input_values</span><span class="p">)</span>
+
+        <span class="n">out_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">,</span> <span class="n">out_values</span><span class="p">)}</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">:</span>
+            <span class="n">out_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">out_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_device</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">return_device</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">out_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="k">return</span> <span class="n">out_dict</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

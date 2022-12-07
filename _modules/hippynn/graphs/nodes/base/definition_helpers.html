@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.graphs.nodes.base.definition_helpers &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.graphs.nodes.base.definition_helpers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.graphs.nodes.base.definition_helpers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Tools for organizing node definitions.</span>
+
+<span class="sd">Usage of these tools is optional; they support node definitions</span>
+<span class="sd">but are not required.</span>
+
+<span class="sd">.. Note::</span>
+<span class="sd">   The functions in this module are intended purely for defining new types</span>
+<span class="sd">   of nodes. They are not strictly necessary; they only aid in defining more</span>
+<span class="sd">   complex node behavior in a simple fashion.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">contextlib</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">_debprint</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_BaseNode</span>
+<span class="kn">from</span> <span class="nn">...indextypes</span> <span class="kn">import</span> <span class="n">index_type_coercion</span>
+
+
+<div class="viewcode-block" id="AutoNoKw"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoNoKw">[docs]</a><span class="k">class</span> <span class="nc">AutoNoKw</span><span class="p">:</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+
+<div class="viewcode-block" id="AutoNoKw.auto_module"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoNoKw.auto_module">[docs]</a>    <span class="k">def</span> <span class="nf">auto_module</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auto_module_class</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="AutoKw"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoKw">[docs]</a><span class="k">class</span> <span class="nc">AutoKw</span><span class="p">:</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+
+<div class="viewcode-block" id="AutoKw.auto_module"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoKw.auto_module">[docs]</a>    <span class="k">def</span> <span class="nf">auto_module</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">kw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>  <span class="c1"># Default to empty dictionary if Falsey</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auto_module_class</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="temporary_parents"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.temporary_parents">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span> <span class="nf">temporary_parents</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">parents</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Context manager for temporarily connecting a node to a set of parents.</span>
+<span class="sd">    This is used during parent expansion so that `find_relatives` and</span>
+<span class="sd">    `find_unique_relatives` can treat the nodes as connected even though</span>
+<span class="sd">    they they are not fully formed.</span>
+
+<span class="sd">    :param child:</span>
+<span class="sd">    :param parents:</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Raise error if this is called on an already-build child.</span>
+    <span class="c1"># (This function could be refactored to deal with this case.)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span>
+        <span class="nb">hasattr</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="s2">&quot;parents&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="s2">&quot;children&quot;</span><span class="p">)</span>
+    <span class="p">),</span> <span class="s2">&quot;Temporary connection to node requires that it is not initialized.&quot;</span>
+
+    <span class="n">parset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>  <span class="c1"># In case a node has the same parent twice.</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parset</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">p</span><span class="o">.</span><span class="n">children</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span>
+        <span class="n">child</span><span class="o">.</span><span class="n">parents</span> <span class="o">=</span> <span class="n">parents</span>
+        <span class="n">child</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="k">yield</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parset</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">children</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">child</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">child</span><span class="o">.</span><span class="n">parents</span>
+        <span class="k">del</span> <span class="n">child</span><span class="o">.</span><span class="n">children</span></div>
+
+
+<div class="viewcode-block" id="TupleTypeMismatch"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.TupleTypeMismatch">[docs]</a><span class="k">class</span> <span class="nc">TupleTypeMismatch</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AlwaysMatch"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AlwaysMatch">[docs]</a><span class="k">class</span> <span class="nc">AlwaysMatch</span><span class="p">:</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="format_form_name"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.format_form_name">[docs]</a><span class="k">def</span> <span class="nf">format_form_name</span><span class="p">(</span><span class="n">form</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">iter</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+        <span class="n">formname</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">form</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="n">formname</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="vm">__name__</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">formname</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+
+
+<span class="k">def</span> <span class="nf">_assert_tupleform</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">,</span> <span class="n">type_tuple</span><span class="p">):</span>
+    <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;ASSERTING FORM: &quot;</span><span class="p">,</span> <span class="n">input_tuple</span><span class="p">,</span> <span class="n">type_tuple</span><span class="p">)</span>
+
+    <span class="c1"># If it is a type of base node: return if it is the right type, or error.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_tuple</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">type_tuple</span> <span class="ow">is</span> <span class="n">AlwaysMatch</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">,</span> <span class="n">type_tuple</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TupleTypeMismatch</span><span class="p">(</span><span class="s2">&quot;Parent node did not match required type: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">type_tuple</span><span class="p">))</span>
+
+    <span class="c1"># If not, it must at least have the same length</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_tuple</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">TupleTypeMismatch</span><span class="p">(</span>
+            <span class="s2">&quot;Wrong length.</span><span class="si">{}</span><span class="s2">!=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_tuple</span><span class="p">))</span>
+            <span class="o">+</span> <span class="s2">&quot; </span><span class="se">\n</span><span class="s2">Input: </span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">Expected: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">,</span> <span class="n">type_tuple</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="c1"># If it does, it needs to have the correct type for each entry in the tuple.</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">,</span> <span class="n">type_tuple</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">TupleTypeMismatch</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">type_tuple</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;: wrong type at index </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<span class="c1"># method wrapper for form storage</span>
+<div class="viewcode-block" id="adds_to_forms"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.adds_to_forms">[docs]</a><span class="k">def</span> <span class="nf">adds_to_forms</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">matches</span> <span class="ow">is</span> <span class="bp">NotImplemented</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matches</span> <span class="o">=</span> <span class="p">()</span>  <span class="c1"># empty tuple</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matches</span> <span class="o">=</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">matches</span><span class="p">,</span> <span class="n">form</span>
+
+    <span class="k">return</span> <span class="n">inner</span></div>
+
+
+<div class="viewcode-block" id="ParentExpander"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander">[docs]</a><span class="k">class</span> <span class="nc">ParentExpander</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Manager object to register and implement</span>
+<span class="sd">    optional steps in building a graph node.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ParentExpander.__init__"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Matches is a tuple of tuples of (form, matching function)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matches</span> <span class="o">=</span> <span class="bp">NotImplemented</span></div>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matches</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ParentExpander.match"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander.match">[docs]</a>    <span class="k">def</span> <span class="nf">match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Decorator: the applied function will be a generic FormTransformer&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">matchfn</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">matches</span> <span class="ow">is</span> <span class="bp">NotImplemented</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">matches</span> <span class="o">=</span> <span class="p">()</span>  <span class="c1"># empty tuple</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">matches</span> <span class="o">=</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">matches</span><span class="p">,</span> <span class="n">FormTransformer</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">matchfn</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">matchfn</span>
+
+        <span class="k">return</span> <span class="n">inner</span></div>
+
+<div class="viewcode-block" id="ParentExpander.matchlen"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander.matchlen">[docs]</a>    <span class="k">def</span> <span class="nf">matchlen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Decorator: The decorated function will be applied if the number</span>
+<span class="sd">        of parents matches the given length.</span>
+<span class="sd">        :param length:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="o">*</span><span class="p">((</span><span class="n">_BaseNode</span><span class="p">,)</span> <span class="o">*</span> <span class="n">length</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ParentExpander.assertion"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander.assertion">[docs]</a>    <span class="nd">@adds_to_forms</span>
+    <span class="k">def</span> <span class="nf">assertion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assert that the parents match a given form.</span>
+
+<span class="sd">        :param form:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">FormAssertion</span><span class="p">(</span><span class="n">form</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ParentExpander.assertlen"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander.assertlen">[docs]</a>    <span class="nd">@adds_to_forms</span>
+    <span class="k">def</span> <span class="nf">assertlen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assert that there are a given number of parents.</span>
+
+<span class="sd">        :param length:</span>
+<span class="sd">        :return:</span>
+
+<span class="sd">        .. Note::</span>
+<span class="sd">           It is recommended only to use this function once as the final stage</span>
+<span class="sd">           of expanding a node&#39;s parents, to ensure that a node can be constructed</span>
+<span class="sd">           directly from a satisfactory set of parents that doesn&#39;t require</span>
+<span class="sd">           any expansion.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">FormAssertLength</span><span class="p">(</span><span class="n">length</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ParentExpander.get_main_outputs"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander.get_main_outputs">[docs]</a>    <span class="nd">@adds_to_forms</span>
+    <span class="k">def</span> <span class="nf">get_main_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the main outputs for any multinodes in the parents.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MainOutputTransformer</span><span class="p">(</span><span class="n">AlwaysMatch</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ParentExpander.matched_idx_coercion"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander.matched_idx_coercion">[docs]</a>    <span class="nd">@adds_to_forms</span>
+    <span class="k">def</span> <span class="nf">matched_idx_coercion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">needed_index_states</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply coercion to the needed index states if the given form is present.</span>
+<span class="sd">        :param form:</span>
+<span class="sd">        :param needed_index_states:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">IndexFormTransformer</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">needed_index_states</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ParentExpander.require_idx_states"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander.require_idx_states">[docs]</a>    <span class="nd">@adds_to_forms</span>
+    <span class="k">def</span> <span class="nf">require_idx_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">needed_index_states</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Always coerce the nodes into a needed index state.</span>
+
+<span class="sd">        :param needed_index_states:</span>
+<span class="sd">        :return:</span>
+
+<span class="sd">        .. Note::</span>
+<span class="sd">           It is recommended only to use this function once as the final stage</span>
+<span class="sd">           of expanding a node&#39;s parents, to ensure that a node can be constructed</span>
+<span class="sd">           directly from a satisfactory set of parents that doesn&#39;t require</span>
+<span class="sd">           any expansion.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">IndexFormTransformer</span><span class="p">(</span><span class="n">AlwaysMatch</span><span class="p">,</span> <span class="n">needed_index_states</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">bases</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used for merging</span>
+
+<span class="sd">        :param bases: base classes to merge with (from MRO)</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="o">*</span><span class="n">true_bases</span><span class="p">,</span> <span class="bp">cls</span> <span class="o">=</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">bases</span><span class="p">)</span>
+
+        <span class="n">relevant_classes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">sup_class</span>
+            <span class="k">for</span> <span class="n">sup_class</span> <span class="ow">in</span> <span class="n">true_bases</span>
+            <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">sup_class</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sup_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">ExpandParents</span>
+        <span class="p">)</span>
+
+        <span class="n">base_matches</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">form</span> <span class="k">for</span> <span class="n">sup_class</span> <span class="ow">in</span> <span class="n">relevant_classes</span> <span class="k">for</span> <span class="n">form</span> <span class="ow">in</span> <span class="n">sup_class</span><span class="o">.</span><span class="n">_parent_expander</span><span class="o">.</span><span class="n">matches</span><span class="p">)</span>
+
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Bases found for merging:&quot;</span><span class="p">,</span> <span class="n">relevant_classes</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">base_matches</span><span class="p">):</span>
+            <span class="c1"># Filter only to contain the earliest copy of each form.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">matches</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">NotImplemented</span><span class="p">:</span>
+                <span class="n">base_matches</span> <span class="o">=</span> <span class="o">*</span><span class="n">base_matches</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">matches</span>
+            <span class="n">base_form_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="n">base_match_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">base_matches</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">match</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">base_form_set</span><span class="p">:</span>
+                    <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Adding&quot;</span><span class="p">,</span> <span class="n">match</span><span class="p">)</span>
+                    <span class="n">base_form_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
+                    <span class="n">base_match_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Already applied&quot;</span><span class="p">,</span> <span class="n">match</span><span class="p">)</span>
+            <span class="n">base_matches</span> <span class="o">=</span> <span class="n">base_match_list</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Forms found for merging:&quot;</span><span class="p">,</span> <span class="n">base_matches</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">matches</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">base_matches</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;No matches found for merging!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FormHandler"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.FormHandler">[docs]</a><span class="k">class</span> <span class="nc">FormHandler</span><span class="p">:</span>
+<div class="viewcode-block" id="FormHandler.add_class_doc"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.FormHandler.add_class_doc">[docs]</a>    <span class="k">def</span> <span class="nf">add_class_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+    <span class="k">pass</span></div>
+
+
+<span class="k">def</span> <span class="nf">_fn_doc_adjust</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">fn</span><span class="o">.</span><span class="vm">__module__</span> <span class="ow">is</span> <span class="vm">__name__</span><span class="p">:</span>
+        <span class="c1"># Don&#39;t document functions that live here, they are used many many times.</span>
+        <span class="k">return</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="vm">__doc__</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">existing</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># Count spaces in each non-blank line</span>
+        <span class="n">spaces</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">))</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
+        <span class="c1"># Strip those with no spaces</span>
+        <span class="n">spaces</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">spaces</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Grab the min, if non exist, use 0</span>
+        <span class="n">spaces</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">spaces</span><span class="p">)</span> <span class="k">if</span> <span class="n">spaces</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">spaces</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="n">spaces</span>
+        <span class="n">formname</span> <span class="o">=</span> <span class="n">format_form_name</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+        <span class="n">fn</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">existing</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">spaces</span><span class="si">}</span><span class="s2">Used for creation from parents with signature </span><span class="si">{</span><span class="n">formname</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">spaces</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="c1"># Can&#39;t modify doc of a method dynamically.</span>
+        <span class="c1"># This occurs when calling one of the explicit form handlers such as</span>
+        <span class="c1"># AssertTypes or AssertLen</span>
+        <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="FormTransformer"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.FormTransformer">[docs]</a><span class="k">class</span> <span class="nc">FormTransformer</span><span class="p">(</span><span class="n">FormHandler</span><span class="p">):</span>
+<div class="viewcode-block" id="FormTransformer.__init__"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.FormTransformer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">=</span> <span class="n">form</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fn</span> <span class="o">=</span> <span class="n">fn</span>
+        <span class="n">_fn_doc_adjust</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FormTransformer.add_class_doc"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.FormTransformer.add_class_doc">[docs]</a>    <span class="k">def</span> <span class="nf">add_class_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">form_name</span> <span class="o">=</span> <span class="n">format_form_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;If matching </span><span class="si">{</span><span class="n">form_name</span><span class="si">}</span><span class="s2">, then apply &quot;</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;ParentTransformer(sig=</span><span class="si">{</span><span class="n">format_form_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span><span class="si">}</span><span class="s2">,fn=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_self</span><span class="p">,</span> <span class="o">*</span><span class="n">parents</span><span class="p">,</span> <span class="n">purpose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">_assert_tupleform</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Expanding form&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Input parents:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Match function:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">purpose</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: Expanding parents </span><span class="si">{}</span><span class="s2"> based on form </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">parents</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">temporary_parents</span><span class="p">(</span><span class="n">node_self</span><span class="p">,</span> <span class="n">parents</span><span class="p">):</span>
+                <span class="c1"># We have to pass self here explicitly because the form handler stores unbound functions.</span>
+                <span class="n">new_parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="n">node_self</span><span class="p">,</span> <span class="o">*</span><span class="n">parents</span><span class="p">,</span> <span class="n">purpose</span><span class="o">=</span><span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">new_parents</span>
+        <span class="k">except</span> <span class="n">TupleTypeMismatch</span><span class="p">:</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Didn&#39;t pass form!&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">parents</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Error while transforming </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="o">.</span><span class="vm">__qualname__</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">ee</span></div>
+
+
+<div class="viewcode-block" id="IndexFormTransformer"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.IndexFormTransformer">[docs]</a><span class="k">class</span> <span class="nc">IndexFormTransformer</span><span class="p">(</span><span class="n">FormTransformer</span><span class="p">):</span>
+<div class="viewcode-block" id="IndexFormTransformer.__init__"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.IndexFormTransformer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">idxstates</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">idxstates</span> <span class="o">=</span> <span class="n">idxstates</span></div>
+
+<div class="viewcode-block" id="IndexFormTransformer.add_class_doc"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.IndexFormTransformer.add_class_doc">[docs]</a>    <span class="k">def</span> <span class="nf">add_class_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Transforms the parents to have index states </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">idxstates</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;IndexTransformer from </span><span class="si">{</span><span class="n">format_form_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">idxstates</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<div class="viewcode-block" id="IndexFormTransformer.fn"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.IndexFormTransformer.fn">[docs]</a>    <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_self</span><span class="p">,</span> <span class="o">*</span><span class="n">parents</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Coerces index states for all parents&quot;&quot;&quot;</span>
+        <span class="n">new_parents</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">idxstate</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">idxstates</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">idxstate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">new</span> <span class="o">=</span> <span class="n">node</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new</span> <span class="o">=</span> <span class="n">index_type_coercion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">idxstate</span><span class="p">)</span>
+            <span class="n">new_parents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">new_parents</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="MainOutputTransformer"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.MainOutputTransformer">[docs]</a><span class="k">class</span> <span class="nc">MainOutputTransformer</span><span class="p">(</span><span class="n">FormTransformer</span><span class="p">):</span>
+<div class="viewcode-block" id="MainOutputTransformer.__init__"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.MainOutputTransformer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainOutputTransformer.add_class_doc"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.MainOutputTransformer.add_class_doc">[docs]</a>    <span class="k">def</span> <span class="nf">add_class_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;Gets main_output of nodes: casts MultiNodes to their main output&quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="MainOutputTransformer.fn"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.MainOutputTransformer.fn">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">node_self</span><span class="p">,</span> <span class="o">*</span><span class="n">parents</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets main_output of nodes: casts multinodes to single nodes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">main_output</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parents</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="FormAssertion"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.FormAssertion">[docs]</a><span class="k">class</span> <span class="nc">FormAssertion</span><span class="p">(</span><span class="n">FormHandler</span><span class="p">):</span>
+<div class="viewcode-block" id="FormAssertion.__init__"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.FormAssertion.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">=</span> <span class="n">form</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Assertion created:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FormAssertion.add_class_doc"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.FormAssertion.add_class_doc">[docs]</a>    <span class="k">def</span> <span class="nf">add_class_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">form_name</span> <span class="o">=</span> <span class="n">format_form_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Asserts that the parents have the form </span><span class="si">{</span><span class="n">form_name</span><span class="si">}</span><span class="s2">.&quot;</span></div>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">self_cls</span><span class="p">,</span> <span class="o">*</span><span class="n">parents</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Attempting Assertion&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">_assert_tupleform</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">TupleTypeMismatch</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input does not meet required form: </span><span class="se">\n</span><span class="s2">Input: </span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">Form: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">ee</span>
+        <span class="k">return</span> <span class="n">parents</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FormAssertLength"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.FormAssertLength">[docs]</a><span class="k">class</span> <span class="nc">FormAssertLength</span><span class="p">(</span><span class="n">FormAssertion</span><span class="p">):</span>
+<div class="viewcode-block" id="FormAssertLength.__init__"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.FormAssertLength.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">length</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">((</span><span class="n">_BaseNode</span><span class="p">,)</span> <span class="o">*</span> <span class="n">length</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FormAssertLength.add_class_doc"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.FormAssertLength.add_class_doc">[docs]</a>    <span class="k">def</span> <span class="nf">add_class_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Asserts that the number of parents is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;FormLengthAssertion(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
+
+
+<span class="c1"># This metaclass inserts the _parent_expander attribute into</span>
+<span class="c1"># any class that has this metaclass.</span>
+<span class="c1"># Note for developers: The metaclass is needed because</span>
+<span class="c1"># the class must be modified before the class definition</span>
+<span class="c1"># is executed; __init_subclass__ is run /after/ the class</span>
+<span class="c1"># definition is executed.</span>
+<div class="viewcode-block" id="ExpandParentMeta"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ExpandParentMeta">[docs]</a><span class="k">class</span> <span class="nc">ExpandParentMeta</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="fm">__prepare__</span><span class="p">(</span><span class="n">mcl</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">cls_dict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ExpandParentMeta</span><span class="p">,</span> <span class="n">mcl</span><span class="p">)</span><span class="o">.</span><span class="fm">__prepare__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">cls_dict</span><span class="p">[</span><span class="s2">&quot;_parent_expander&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ParentExpander</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">cls_dict</span></div>
+
+
+<span class="k">def</span> <span class="nf">_append_docs</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add a note to documentation on parent expansion process.</span>
+
+<span class="sd">    .. Note::</span>
+<span class="sd">       This function assumes the class is defined at module-level scope.</span>
+<span class="sd">       If not the indentation may be funny.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">new_doc</span> <span class="o">=</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">new_doc</span> <span class="o">+=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\n</span><span class="s2">    .. Note::</span><span class="se">\n</span><span class="s2">       This node has parent expansion, following these procedures.</span><span class="se">\n\n</span><span class="s2">&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">form_handler</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_parent_expander</span><span class="p">:</span>
+        <span class="n">add</span> <span class="o">=</span> <span class="n">form_handler</span><span class="o">.</span><span class="n">add_class_doc</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">add</span><span class="p">:</span>
+            <span class="n">new_doc</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;       #. </span><span class="si">{</span><span class="n">add</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No documentation for transformation!&quot;</span><span class="p">)</span>
+    <span class="n">new_doc</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="k">return</span> <span class="n">new_doc</span>
+
+
+<div class="viewcode-block" id="ExpandParents"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ExpandParents">[docs]</a><span class="k">class</span> <span class="nc">ExpandParents</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">ExpandParentMeta</span><span class="p">):</span>
+    <span class="n">_parent_expander</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes care of parent expansion setup and documentation for expansion of parents.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Constructing parent expansion for &quot;</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span>
+        <span class="c1">#  Note: Forms are applied in opposite order to MRO.</span>
+        <span class="c1">#  This makes sense because initialization typically</span>
+        <span class="c1">#  begins with the base class and then is customized or added to</span>
+        <span class="c1">#  by a derived class.</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_parent_expander</span><span class="o">.</span><span class="n">_merge</span><span class="p">(</span><span class="o">*</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__mro__</span><span class="p">)</span>
+
+        <span class="c1"># If no documentation, do not apply any decorating to the documentation</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">_append_docs</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ExpandParents.expand_parents"><a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ExpandParents.expand_parents">[docs]</a>    <span class="k">def</span> <span class="nf">expand_parents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="n">_BaseNode</span><span class="p">):</span>
+            <span class="n">parents</span> <span class="o">=</span> <span class="p">(</span><span class="n">parents</span><span class="p">,)</span>
+        <span class="k">for</span> <span class="n">form_handler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent_expander</span><span class="p">:</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Processing form:&quot;</span><span class="p">)</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Form:&quot;</span><span class="p">,</span> <span class="n">form_handler</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">args:&quot;</span><span class="p">,</span> <span class="n">parents</span><span class="p">)</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">kwargs:&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># We have to pass self here explicitly because the form handler stores unbound functions,</span>
+                <span class="c1"># rather than bound methods.</span>
+                <span class="n">parents</span> <span class="o">=</span> <span class="n">form_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">parents</span><span class="p">,</span> <span class="n">purpose</span><span class="o">=</span><span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Couldn&#39;t build </span><span class="si">{}</span><span class="s2"> automatically&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span> <span class="kn">from</span> <span class="nn">ee</span>
+        <span class="k">return</span> <span class="n">parents</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

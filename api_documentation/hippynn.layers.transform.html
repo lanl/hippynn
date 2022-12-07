@@ -58,7 +58,16 @@
 <li class="toctree-l3"><a class="reference internal" href="hippynn.layers.physics.html">physics module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.layers.regularization.html">regularization module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.layers.targets.html">targets module</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">transform module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">transform module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.transform.ResNetWrapper"><code class="docutils literal notranslate"><span class="pre">ResNetWrapper</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.transform.ResNetWrapper.__init__"><code class="docutils literal notranslate"><span class="pre">ResNetWrapper.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.transform.ResNetWrapper.forward"><code class="docutils literal notranslate"><span class="pre">ResNetWrapper.forward()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.transform.ResNetWrapper.regularization_params"><code class="docutils literal notranslate"><span class="pre">ResNetWrapper.regularization_params()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.transform.ResNetWrapper.training"><code class="docutils literal notranslate"><span class="pre">ResNetWrapper.training</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.networks.html">networks package</a></li>
@@ -102,6 +111,54 @@
   <div class="section" id="transform-module">
 <h1>transform module<a class="headerlink" href="#transform-module" title="Permalink to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.layers.transform</span></code> module.</p>
+<span class="target" id="module-hippynn.layers.transform"></span><p>Layers that wrap other layers.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.transform.ResNetWrapper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResNetWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_middle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation=&lt;built-in</span> <span class="pre">function</span> <span class="pre">softplus&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/transform.html#ResNetWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.transform.ResNetWrapper" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Resnet Wrapper Class</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.transform.ResNetWrapper.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_middle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation=&lt;built-in</span> <span class="pre">function</span> <span class="pre">softplus&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/transform.html#ResNetWrapper.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.transform.ResNetWrapper.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_layer</strong> – The ResLayer pytorch module</p></li>
+<li><p><strong>nf_in</strong> – Input dimensions</p></li>
+<li><p><strong>nf_out</strong> – Output dimensions</p></li>
+<li><p><strong>activation</strong> – a nonlinearity function</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.transform.ResNetWrapper.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/transform.html#ResNetWrapper.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.transform.ResNetWrapper.forward" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>input</strong> – list of inputs for the layer;
+the first one is taken to be the features which will be computed as a residual</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Pytorch module output</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.transform.ResNetWrapper.regularization_params">
+<span class="sig-name descname"><span class="pre">regularization_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/transform.html#ResNetWrapper.regularization_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.transform.ResNetWrapper.regularization_params" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.layers.transform.ResNetWrapper.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#hippynn.layers.transform.ResNetWrapper.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 
 

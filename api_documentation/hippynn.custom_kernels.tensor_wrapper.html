@@ -46,12 +46,27 @@
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="hippynn.html">hippynn API documentation</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.custom_kernels.html">custom_kernels package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.html#hippynn.custom_kernels.envsum"><code class="docutils literal notranslate"><span class="pre">envsum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.html#hippynn.custom_kernels.featsum"><code class="docutils literal notranslate"><span class="pre">featsum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.html#hippynn.custom_kernels.sensesum"><code class="docutils literal notranslate"><span class="pre">sensesum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.html#hippynn.custom_kernels.set_custom_kernels"><code class="docutils literal notranslate"><span class="pre">set_custom_kernels()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.autograd_wrapper.html">autograd_wrapper module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_cupy.html">env_cupy module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html">env_numba module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_pytorch.html">env_pytorch module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.fast_convert.html">fast_convert module</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">tensor_wrapper module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">tensor_wrapper module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction"><code class="docutils literal notranslate"><span class="pre">NumbaCompatibleTensorFunction</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.__init__"><code class="docutils literal notranslate"><span class="pre">NumbaCompatibleTensorFunction.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.cpu_kernel"><code class="docutils literal notranslate"><span class="pre">NumbaCompatibleTensorFunction.cpu_kernel()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.launch_bounds"><code class="docutils literal notranslate"><span class="pre">NumbaCompatibleTensorFunction.launch_bounds()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.make_kernel"><code class="docutils literal notranslate"><span class="pre">NumbaCompatibleTensorFunction.make_kernel()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.out_shape"><code class="docutils literal notranslate"><span class="pre">NumbaCompatibleTensorFunction.out_shape()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.custom_kernels.tensor_wrapper.via_numpy"><code class="docutils literal notranslate"><span class="pre">via_numpy()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_cupy.html">test_env_cupy module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html">test_env_numba module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.utils.html">utils module</a></li>
@@ -103,6 +118,47 @@
   <div class="section" id="tensor-wrapper-module">
 <h1>tensor_wrapper module<a class="headerlink" href="#tensor-wrapper-module" title="Permalink to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.custom_kernels.tensor_wrapper</span></code> module.</p>
+<span class="target" id="module-hippynn.custom_kernels.tensor_wrapper"></span><p>Tools for converting between torch and numba-compatible arrays</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NumbaCompatibleTensorFunction</span></span><a class="reference internal" href="../_modules/hippynn/custom_kernels/tensor_wrapper.html#NumbaCompatibleTensorFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels/tensor_wrapper.html#NumbaCompatibleTensorFunction.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.cpu_kernel">
+<span class="sig-name descname"><span class="pre">cpu_kernel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels/tensor_wrapper.html#NumbaCompatibleTensorFunction.cpu_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.cpu_kernel" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.launch_bounds">
+<span class="sig-name descname"><span class="pre">launch_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">shapes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels/tensor_wrapper.html#NumbaCompatibleTensorFunction.launch_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.launch_bounds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.make_kernel">
+<span class="sig-name descname"><span class="pre">make_kernel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels/tensor_wrapper.html#NumbaCompatibleTensorFunction.make_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.make_kernel" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.out_shape">
+<span class="sig-name descname"><span class="pre">out_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">shapes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels/tensor_wrapper.html#NumbaCompatibleTensorFunction.out_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.out_shape" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.custom_kernels.tensor_wrapper.via_numpy">
+<span class="sig-name descname"><span class="pre">via_numpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels/tensor_wrapper.html#via_numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.tensor_wrapper.via_numpy" title="Permalink to this definition"></a></dt>
+<dd><p>Decorator for piping a function through
+numpy arrays, and then giving the result back to torch.
+A bit of non-riguous testing showed that this adds overhead
+on the order of microseconds.</p>
+</dd></dl>
+
 </div>
 
 

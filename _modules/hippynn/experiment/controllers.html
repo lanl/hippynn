@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.experiment.controllers &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.experiment.controllers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.experiment.controllers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Managing optimizer, scheduler, and end of training</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">torch.optim.lr_scheduler</span> <span class="kn">import</span> <span class="n">ReduceLROnPlateau</span>
+
+
+<div class="viewcode-block" id="Controller"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.Controller">[docs]</a><span class="k">class</span> <span class="nc">Controller</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for controlling the training dynamics.</span>
+
+<span class="sd">    :param optimizer: pytorch optimizer (or compatible)</span>
+<span class="sd">    :param scheduler: pytorch scheduler (or compatible)</span>
+<span class="sd">        Pass None to use no schedulers. May pass a list of schedulers to use them all in sequence.</span>
+<span class="sd">    :param scheduler_list: list of schedulers (may be empty).</span>
+<span class="sd">    :param stopping_key: str of name for best metric.</span>
+<span class="sd">    :param batch_size: batch size for training</span>
+<span class="sd">    :param eval_batch_size: batch size during evaluation</span>
+<span class="sd">    :param fraction_train_eval: the random fraction of the training set to use during evaluation.</span>
+<span class="sd">    :param quiet: If true, suppress printing.</span>
+
+<span class="sd">    :param max_epochs: maximum amount of epochs currently allowed based on training so far.</span>
+
+<span class="sd">    .. Note::</span>
+<span class="sd">       If a scheduler defines a ``set_controller`` method, this will be run on the Controller instance.</span>
+<span class="sd">       This allows a scheduler to modify other aspects of training besides the conventional ones</span>
+<span class="sd">       found in the optimizer. See ``RaiseBatchSizeOnPlateau`` in this module.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_state_vars</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;boredom&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;current_epoch&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;batch_size&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;eval_batch_size&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;_max_epochs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fraction_train_eval&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;stopping_key&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="Controller.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.Controller.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="p">,</span>
+        <span class="n">scheduler</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="p">,</span>
+        <span class="n">max_epochs</span><span class="p">,</span>
+        <span class="n">stopping_key</span><span class="p">,</span>
+        <span class="n">eval_batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fraction_train_eval</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">scheduler</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopping_key</span> <span class="o">=</span> <span class="n">stopping_key</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_batch_size</span> <span class="o">=</span> <span class="n">eval_batch_size</span> <span class="ow">or</span> <span class="n">batch_size</span>
+        <span class="k">if</span> <span class="n">max_epochs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Max epochs set to None. Model may train in an infinite loop.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_epochs</span> <span class="o">=</span> <span class="n">max_epochs</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span> <span class="o">=</span> <span class="n">quiet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fraction_train_eval</span> <span class="o">=</span> <span class="n">fraction_train_eval</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">iter</span><span class="p">(</span><span class="n">scheduler</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">scheduler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">scheduler</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">scheduler</span> <span class="o">=</span> <span class="p">[</span><span class="n">scheduler</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">sch</span> <span class="ow">in</span> <span class="n">scheduler</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sch</span><span class="p">,</span> <span class="s2">&quot;set_controller&quot;</span><span class="p">):</span>
+                <span class="n">sch</span><span class="o">.</span><span class="n">set_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">scheduler_list</span> <span class="o">=</span> <span class="n">scheduler</span></div>
+
+<div class="viewcode-block" id="Controller.state_dict"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.Controller.state_dict">[docs]</a>    <span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_vars</span><span class="p">}</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;scheduler&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">sch</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">sch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler_list</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">state_dict</span></div>
+
+<div class="viewcode-block" id="Controller.load_state_dict"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.Controller.load_state_dict">[docs]</a>    <span class="k">def</span> <span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">sch</span><span class="p">,</span> <span class="n">sdict</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scheduler_list</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;scheduler&quot;</span><span class="p">]):</span>
+            <span class="n">sch</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">sdict</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_vars</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">[</span><span class="n">k</span><span class="p">])</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_epochs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_epochs</span>
+
+<div class="viewcode-block" id="Controller.push_epoch"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.Controller.push_epoch">[docs]</a>    <span class="k">def</span> <span class="nf">push_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">better_model</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">sch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">accepts_metrics</span><span class="p">(</span><span class="n">sch</span><span class="p">):</span>
+                <span class="n">sch</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">metrics</span><span class="o">=</span><span class="n">metric</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sch</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Epochs since last best:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Current max epochs:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_epochs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_epochs</span></div></div>
+
+
+<div class="viewcode-block" id="PatienceController"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.PatienceController">[docs]</a><span class="k">class</span> <span class="nc">PatienceController</span><span class="p">(</span><span class="n">Controller</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A subclass of Controller that terminates if training has not improved for a given number</span>
+<span class="sd">    of epochs.</span>
+
+<span class="sd">    :ivar patience: How many epochs are allowed without improvement before termination.</span>
+<span class="sd">    :ivar last_best: The eoch number of the last best epoch encountered.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_state_vars</span> <span class="o">=</span> <span class="n">Controller</span><span class="o">.</span><span class="n">_state_vars</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;patience&quot;</span><span class="p">,</span> <span class="s2">&quot;last_best&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PatienceController.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.PatienceController.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">termination_patience</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patience</span> <span class="o">=</span> <span class="n">termination_patience</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_best</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="PatienceController.push_epoch"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.PatienceController.push_epoch">[docs]</a>    <span class="k">def</span> <span class="nf">push_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">better_model</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Patience for training restored.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_best</span> <span class="o">=</span> <span class="n">epoch</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">push_epoch</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">max_epochs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_best</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">patience</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_epochs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RaiseBatchSizeOnPlateau"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau">[docs]</a><span class="k">class</span> <span class="nc">RaiseBatchSizeOnPlateau</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Learning rate scheduler compatible with pytorch schedulers.</span>
+
+<span class="sd">    This roughly implements the scheme outlined in the following paper:</span>
+
+<span class="sd">    .. code-block:: none</span>
+
+<span class="sd">        &quot;Don&#39;t Decay the Learning Rate, Increase the Batch Size&quot;</span>
+<span class="sd">        Samuel L. Smith et al., 2018.</span>
+<span class="sd">        arXiv:1711.00489</span>
+<span class="sd">        Published as a conference paper at ICLR 2018.</span>
+
+<span class="sd">    Until max_batch_size has been reached. After that,</span>
+<span class="sd">    the learning rate is decayed.</span>
+
+<span class="sd">    .. Note::</span>
+<span class="sd">       To use this scheduler, build it, then link it to</span>
+<span class="sd">       the container which governs the batch size using ``set_controller``.</span>
+<span class="sd">       The default base hippynn Controller will do this automatically.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="RaiseBatchSizeOnPlateau.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="p">,</span>
+        <span class="n">max_batch_size</span><span class="p">,</span>
+        <span class="n">factor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">patience</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span>
+        <span class="n">threshold_mode</span><span class="o">=</span><span class="s2">&quot;rel&quot;</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">controller</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">threshold_mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;abs&quot;</span><span class="p">,</span> <span class="s2">&quot;rel&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Mode must be &#39;abs&#39; or &#39;rel&#39;&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inner</span> <span class="o">=</span> <span class="n">ReduceLROnPlateau</span><span class="p">(</span>
+            <span class="n">optimizer</span><span class="p">,</span>
+            <span class="n">patience</span><span class="o">=</span><span class="n">patience</span><span class="p">,</span>
+            <span class="n">factor</span><span class="o">=</span><span class="n">factor</span><span class="p">,</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+            <span class="n">threshold_mode</span><span class="o">=</span><span class="n">threshold_mode</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span> <span class="o">=</span> <span class="n">controller</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_batch_size</span> <span class="o">=</span> <span class="n">max_batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_metric</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="RaiseBatchSizeOnPlateau.set_controller"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.set_controller">[docs]</a>    <span class="k">def</span> <span class="nf">set_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span> <span class="o">=</span> <span class="n">box</span></div>
+
+<div class="viewcode-block" id="RaiseBatchSizeOnPlateau.state_dict"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.state_dict">[docs]</a>    <span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;boredom&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span><span class="p">,</span>
+            <span class="s2">&quot;best_metric&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_metric</span><span class="p">,</span>
+            <span class="s2">&quot;last_epoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span><span class="p">,</span>
+            <span class="s2">&quot;inner&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="RaiseBatchSizeOnPlateau.load_state_dict"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.load_state_dict">[docs]</a>    <span class="k">def</span> <span class="nf">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;boredom&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_metric</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;boredom&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;inner&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;last_epoch&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="RaiseBatchSizeOnPlateau.step"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Batch size controller not specified. &quot;</span>
+                <span class="s2">&quot;Defering to LR Scheduler and batch size will not be controlled.&quot;</span>
+            <span class="p">)</span>
+
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_batch_size</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">threshold_mode</span> <span class="o">==</span> <span class="s2">&quot;rel&quot;</span><span class="p">:</span>
+            <span class="n">better</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_metric</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">threshold</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">metrics</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">treshold_mode</span> <span class="o">==</span> <span class="s2">&quot;abs&quot;</span><span class="p">:</span>
+            <span class="n">better</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_metric</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">threshold</span> <span class="o">&gt;</span> <span class="n">metrics</span>
+
+        <span class="k">if</span> <span class="n">better</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_metric</span> <span class="o">=</span> <span class="n">metrics</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">patience</span><span class="p">:</span>
+            <span class="n">new_batch_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">factor</span><span class="p">)</span>
+            <span class="n">new_batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">new_batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_batch_size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">new_batch_size</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Raising batch size to&quot;</span><span class="p">,</span> <span class="n">new_batch_size</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">new_batch_size</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_batch_size</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Max batch size reached, Lowering learning rate from here.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">accepts_metrics</span><span class="p">(</span><span class="n">sch</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return if a scheduler accepts the validation metric.</span>
+
+<span class="sd">    :meta private:</span>
+<span class="sd">    :param sch:</span>
+<span class="sd">    :return: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">sch</span><span class="o">.</span><span class="n">step</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;metrics&quot;</span> <span class="ow">in</span> <span class="n">signature</span><span class="o">.</span><span class="n">parameters</span>
+
+
+<div class="viewcode-block" id="is_scheduler_like"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.is_scheduler_like">[docs]</a><span class="k">def</span> <span class="nf">is_scheduler_like</span><span class="p">(</span><span class="n">thing</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test if an object can be used as a scheduler.</span>
+<span class="sd">    :meta private:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Pytorch doesn&#39;t have a unified inheritance class for these things.</span>
+    <span class="c1"># So we call it a scheduler if it has a &quot;step&quot; attribute that itself is callable</span>
+    <span class="k">return</span> <span class="n">callable</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="s2">&quot;step&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

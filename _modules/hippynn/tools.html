@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.tools &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.tools</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.tools</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Misc helpful functions which are not part of the library organization per se.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">contextlib</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">settings</span>
+
+
+<div class="viewcode-block" id="teed_file_output"><a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.teed_file_output">[docs]</a><span class="k">class</span> <span class="nc">teed_file_output</span><span class="p">:</span>
+<div class="viewcode-block" id="teed_file_output.__init__"><a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.teed_file_output.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">streams</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">streams</span> <span class="o">=</span> <span class="n">streams</span></div>
+
+<div class="viewcode-block" id="teed_file_output.write"><a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.teed_file_output.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">stream</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">streams</span><span class="p">:</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="teed_file_output.flush"><a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.teed_file_output.flush">[docs]</a>    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">stream</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">streams</span><span class="p">:</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">flush</span><span class="p">(</span><span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="log_terminal"><a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.log_terminal">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span> <span class="nf">log_terminal</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param: file: filename or string</span>
+<span class="sd">    :param: args:   piped to ``open(file,*args,**kwargs)`` if file is a string</span>
+<span class="sd">    :param: kwargs: piped to ``open(file,*args,**kwargs)`` if file is a string</span>
+
+<span class="sd">    Context manager where stdout and stderr are redirected to the specified file</span>
+<span class="sd">    in addition to the usual stdout and stderr.</span>
+<span class="sd">    The manager yields the file. Writes to the opened file object with</span>
+<span class="sd">    &quot;with log_terminal(...) as &lt;file&gt;&quot; will not automatically</span>
+<span class="sd">    be piped into the terminal.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;write&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">close_on_exit</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">close_on_exit</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">teed_stderr</span> <span class="o">=</span> <span class="n">teed_file_output</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="n">teed_stdout</span> <span class="o">=</span> <span class="n">teed_file_output</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">redirect_stderr</span><span class="p">(</span><span class="n">teed_stderr</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">redirect_stdout</span><span class="p">(</span><span class="n">teed_stdout</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">file</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Uncaught exception, logging interrupted.&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">teed_stderr</span><span class="p">)</span>
+                <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">)</span>
+                <span class="k">raise</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">close_on_exit</span><span class="p">:</span>
+                    <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="active_directory"><a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.active_directory">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span> <span class="nf">active_directory</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Context manager for temporarily switching the current working directory.</span>
+
+<span class="sd">    If create is None, always succeed.</span>
+<span class="sd">    If create is True, only succeed if the directory does not exist, and create one.</span>
+<span class="sd">    If create is False, only succeed if the directory does exist, and switch to it.</span>
+
+<span class="sd">    In other words, use create=True if you want to force that it&#39;s a new directory.</span>
+<span class="sd">    Use create=False if you want to switch to an existing directory.</span>
+<span class="sd">    Use create=None create a directory if you are okay with either alternative.</span>
+
+<span class="sd">    :param dirname: directory to enter</span>
+<span class="sd">    :param create: (None,True,False)</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    :raises: If directory status not compatible with `create` constraints.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">create</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Argument &#39;create&#39; must be one of None, True, or False&quot;</span><span class="p">)</span>
+
+    <span class="n">exists</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">create</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">exists</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Directory &#39;</span><span class="si">{</span><span class="n">dirname</span><span class="si">}</span><span class="s2">&#39; exists already. Pass create=False or create=None to &quot;</span>
+            <span class="s2">&quot;allow switching to an existing directory.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">create</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Directory &#39;</span><span class="si">{</span><span class="n">dirname</span><span class="si">}</span><span class="s2">&#39; not found. Pass create=True or create=None to allow creation of the directory.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span> <span class="ow">and</span> <span class="n">create</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+
+    <span class="n">return_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">return_dir</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="progress_bar"><a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.progress_bar">[docs]</a><span class="k">def</span> <span class="nf">progress_bar</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PROGRESS</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">iterable</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">settings</span><span class="o">.</span><span class="n">PROGRESS</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="param_print"><a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.param_print">[docs]</a><span class="k">def</span> <span class="nf">param_print</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">named_parameters</span><span class="p">():</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="n">p</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span>
+        <span class="n">req_grad</span> <span class="o">=</span> <span class="s2">&quot;Learned&quot;</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">requires_grad</span> <span class="k">else</span> <span class="s2">&quot;Fixed&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">req_grad</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">pname</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Total Count:&quot;</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="device_fallback"><a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.device_fallback">[docs]</a><span class="k">def</span> <span class="nf">device_fallback</span><span class="p">():</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="ow">and</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_device</span><span class="p">()))</span> <span class="ow">or</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Device was not specified. Attempting to default to device:&quot;</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">device</span></div>
+
+
+<div class="viewcode-block" id="arrdict_len"><a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.arrdict_len">[docs]</a><span class="k">def</span> <span class="nf">arrdict_len</span><span class="p">(</span><span class="n">array_dictionary</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the length of one of the arrays in a dictionary. Under the assumption that they are all the same.</span>
+<span class="sd">    :param array_dictionary:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">array_dictionary</span><span class="o">.</span><span class="n">values</span><span class="p">())))</span></div>
+
+
+<div class="viewcode-block" id="print_lr"><a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.print_lr">[docs]</a><span class="k">def</span> <span class="nf">print_lr</span><span class="p">(</span><span class="n">optimizer</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">param_group</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">optimizer</span><span class="o">.</span><span class="n">param_groups</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Learning rate:</span><span class="si">{:&gt;10.5g}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">param_group</span><span class="p">[</span><span class="s2">&quot;lr&quot;</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="isiterable"><a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.isiterable">[docs]</a><span class="k">def</span> <span class="nf">isiterable</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="pad_np_array_to_length_with_zeros"><a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.pad_np_array_to_length_with_zeros">[docs]</a><span class="k">def</span> <span class="nf">pad_np_array_to_length_with_zeros</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">length</span> <span class="o">-</span> <span class="n">n</span>
+    <span class="k">if</span> <span class="n">m</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot pad array to negative length! Array length: </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">, Total length requested: </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">pad_width</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span>
+    <span class="n">pad_width</span><span class="p">[</span><span class="n">axis</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">pad_width</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="np_of_torchdefaultdtype"><a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.np_of_torchdefaultdtype">[docs]</a><span class="k">def</span> <span class="nf">np_of_torchdefaultdtype</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">())</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">dtype</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

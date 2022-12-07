@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.layers.pairs.periodic &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.layers.pairs.periodic</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.layers.pairs.periodic</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">from</span> <span class="nn">.open</span> <span class="kn">import</span> <span class="n">_PairIndexer</span>
+
+<span class="c1"># Deprecated?</span>
+<div class="viewcode-block" id="StaticImagePeriodicPairIndexer"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.periodic.html#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer">[docs]</a><span class="k">class</span> <span class="nc">StaticImagePeriodicPairIndexer</span><span class="p">(</span><span class="n">_PairIndexer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Finds Pairs within a given number of images&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="StaticImagePeriodicPairIndexer.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.periodic.html#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">n_images</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="kn">import</span> <span class="nn">itertools</span>
+
+        <span class="c1"># shape is (n_images+2)**3 by 3</span>
+        <span class="n">combinator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">n_images</span><span class="p">,</span> <span class="n">n_images</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">3</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_images</span> <span class="o">=</span> <span class="n">n_images</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;combinator&quot;</span><span class="p">,</span> <span class="n">combinator</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="StaticImagePeriodicPairIndexer.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.periodic.html#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">nonblank</span><span class="p">,</span> <span class="n">real_atoms</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">,</span> <span class="n">cells</span><span class="p">):</span>
+
+        <span class="n">original_coordinates</span> <span class="o">=</span> <span class="n">coordinates</span>
+
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">cur_device</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">device</span>
+
+            <span class="c1"># Figure out how many molecules and atoms we have</span>
+            <span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">n_atoms_max_batch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nonblank</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+            <span class="c1"># Construct a unique index for each atom (including blanks here)</span>
+            <span class="n">atom_index</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_molecules</span> <span class="o">*</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cur_device</span><span class="p">),</span> <span class="p">(</span><span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">nonblank</span> <span class="o">=</span> <span class="n">nonblank</span><span class="p">[:,</span> <span class="p">:</span><span class="n">n_atoms_max_batch</span><span class="p">]</span>
+            <span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[:,</span> <span class="p">:</span><span class="n">n_atoms_max_batch</span><span class="p">]</span>
+            <span class="n">atom_index</span> <span class="o">=</span> <span class="n">atom_index</span><span class="p">[:,</span> <span class="p">:</span><span class="n">n_atoms_max_batch</span><span class="p">]</span>
+
+            <span class="c1"># Eliminate blank atom pairs, construct indices for them</span>
+            <span class="n">nonblank_pair</span> <span class="o">=</span> <span class="n">nonblank</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">nonblank</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">nb_b</span><span class="p">,</span> <span class="n">nb_a1</span><span class="p">,</span> <span class="n">nb_a2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">nonblank_pair</span><span class="p">,</span> <span class="n">as_tuple</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># Get the indices of non-blank atoms</span>
+            <span class="n">pair_first</span> <span class="o">=</span> <span class="n">atom_index</span><span class="p">[</span><span class="n">nb_b</span><span class="p">,</span> <span class="n">nb_a1</span><span class="p">]</span>
+            <span class="n">pair_second</span> <span class="o">=</span> <span class="n">atom_index</span><span class="p">[</span><span class="n">nb_b</span><span class="p">,</span> <span class="n">nb_a2</span><span class="p">]</span>
+            <span class="c1"># shape pair</span>
+
+            <span class="n">pair_diffcoords</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="n">nb_b</span><span class="p">,</span> <span class="n">nb_a1</span><span class="p">]</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">[</span><span class="n">nb_b</span><span class="p">,</span> <span class="n">nb_a2</span><span class="p">]</span>
+
+            <span class="c1"># Begin periodic part: find offsets for all images of cells.</span>
+            <span class="c1"># Shape: n_shifts, n_batch, 3</span>
+            <span class="n">cell_shifts</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">combinator</span><span class="p">,</span> <span class="n">cells</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">((</span><span class="mi">1</span><span class="p">,),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)))</span>
+            <span class="c1"># Shape n_shifts,n_atoms,3</span>
+            <span class="n">offsets</span> <span class="o">=</span> <span class="n">cell_shifts</span><span class="p">[:,</span> <span class="n">nb_b</span><span class="p">]</span>
+
+            <span class="c1"># Find pairs/images close enough to be within the cutoff</span>
+            <span class="c1"># shape n_shifts, pair</span>
+            <span class="n">pair_dist</span> <span class="o">=</span> <span class="p">(</span><span class="n">pair_diffcoords</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">offsets</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">close_pairs</span> <span class="o">=</span> <span class="p">(</span><span class="n">pair_dist</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">hard_dist_cutoff</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pair_dist</span> <span class="o">&gt;</span> <span class="mf">1e-5</span><span class="p">)</span>  <span class="c1"># get rid of self-pairs</span>
+            <span class="n">cp_offset</span><span class="p">,</span> <span class="n">cp_pair</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">close_pairs</span><span class="p">,</span> <span class="n">as_tuple</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="c1"># cp_pair holds the indices of pairs</span>
+            <span class="c1"># cp_offset holds the indices of the offsets</span>
+
+            <span class="c1"># Extract the pairs within the cutoff</span>
+            <span class="n">pair_first</span> <span class="o">=</span> <span class="n">pair_first</span><span class="p">[</span><span class="n">cp_pair</span><span class="p">]</span>
+            <span class="n">pair_second</span> <span class="o">=</span> <span class="n">pair_second</span><span class="p">[</span><span class="n">cp_pair</span><span class="p">]</span>
+            <span class="n">pair_offsets</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[</span><span class="n">cp_offset</span><span class="p">,</span> <span class="n">cp_pair</span><span class="p">]</span>
+            <span class="n">cell_offsets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">combinator</span><span class="p">[</span><span class="n">cp_offset</span><span class="p">]</span>
+
+            <span class="c1"># This converts the atom index from an index that counts blank atoms to one that doesn&#39;t;</span>
+            <span class="c1"># Afterwards it indexes the flat array of atoms in the batch.</span>
+            <span class="n">pair_first</span> <span class="o">=</span> <span class="n">inv_real_atoms</span><span class="p">[</span><span class="n">pair_first</span><span class="p">]</span>
+            <span class="n">pair_second</span> <span class="o">=</span> <span class="n">inv_real_atoms</span><span class="p">[</span><span class="n">pair_second</span><span class="p">]</span>
+
+            <span class="k">del</span> <span class="n">nb_b</span><span class="p">,</span> <span class="n">nb_a1</span><span class="p">,</span> <span class="n">nb_a2</span><span class="p">,</span> <span class="n">cp_pair</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">pair_diffcoords</span><span class="p">,</span> <span class="n">nonblank_pair</span><span class="p">,</span> <span class="n">atom_index</span>
+
+        <span class="n">coordflat</span> <span class="o">=</span> <span class="n">original_coordinates</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_molecules</span> <span class="o">*</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">)[</span><span class="n">real_atoms</span><span class="p">]</span>
+        <span class="n">paircoord</span> <span class="o">=</span> <span class="n">coordflat</span><span class="p">[</span><span class="n">pair_first</span><span class="p">]</span> <span class="o">-</span> <span class="n">coordflat</span><span class="p">[</span><span class="n">pair_second</span><span class="p">]</span> <span class="o">+</span> <span class="n">pair_offsets</span>
+        <span class="n">distflat2</span> <span class="o">=</span> <span class="n">paircoord</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">distflat2</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">paircoord</span><span class="p">,</span> <span class="n">cell_offsets</span><span class="p">,</span> <span class="n">cp_offset</span></div></div>
+
+
+<span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
+<span class="k">def</span> <span class="nf">tracebatch</span><span class="p">(</span><span class="n">mat</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Trace of  of batch of matrices.</span>
+<span class="sd">    Defaults to last two dimensions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">dim1</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># For some reason torch.linalg on GPU tends to</span>
+<span class="c1"># spend a lot of time allocating memory, especialyl</span>
+<span class="c1"># when it is given a large batch of matrices.</span>
+<span class="c1"># So we use the Cayley-Hamilton version of a matrix inverse</span>
+<span class="c1"># Without calling any linalg functions.</span>
+<span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
+<span class="k">def</span> <span class="nf">cayley_inv</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inverse of a batch of 3x3 matrices.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Uses A^-1 = 1/det(A) ([tr(A)**2-tr(A**2)]I/2 - Atr(A) + A**2)</span>
+    <span class="k">assert</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span>
+    <span class="k">assert</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span>
+
+    <span class="n">trA</span> <span class="o">=</span> <span class="n">tracebatch</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+    <span class="n">Asq</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">bmm</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
+    <span class="n">trAsq</span> <span class="o">=</span> <span class="n">tracebatch</span><span class="p">(</span><span class="n">Asq</span><span class="p">)</span>
+    <span class="n">eye</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">A</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">A</span><span class="o">.</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">broadcast_to</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">eyeterm</span> <span class="o">=</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">trA</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">trAsq</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">eye</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">Ainvunscale</span> <span class="o">=</span> <span class="n">eyeterm</span> <span class="o">-</span> <span class="n">A</span> <span class="o">*</span> <span class="p">(</span><span class="n">trA</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="n">Asq</span>
+    <span class="n">det</span> <span class="o">=</span> <span class="n">tracebatch</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">bmm</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">Ainvunscale</span><span class="p">))</span> <span class="o">/</span> <span class="mf">3.</span>
+
+    <span class="k">return</span> <span class="n">Ainvunscale</span> <span class="o">/</span> <span class="n">det</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
+<span class="k">def</span> <span class="nf">wrap_systems_torch</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wraps coordinates to within the unit cell.</span>
+
+<span class="sd">    Returns Inverse cells of shape (n_systems, 3 [cartesian], 3 [basis])</span>
+<span class="sd">    Wrapped coords in same shape of coords</span>
+<span class="sd">    Wrapped offset in shape (n_systems,n_atoms,3 [basis])</span>
+<span class="sd">    and n_bounds in shape (n_systems,3) in terms of the number of image cells</span>
+<span class="sd">    to search for each basis vector (radius).</span>
+
+<span class="sd">    :param coords: coordinates of shape (n_systems,n_atoms,3)</span>
+<span class="sd">    :param cell: cells of shape (n_systems, 3 [basis], 3 [cartesian])</span>
+<span class="sd">    :param cutoff: cutoff radius to search.</span>
+<span class="sd">    :return: inv_cells, wrapped_coords, wrapped_offset, n_bounds</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># cell is (sys,basis,cartesian)</span>
+
+    <span class="c1"># This is faster than calling the torch.linalg.inv directly as of torch 1.10</span>
+    <span class="n">inv_cell</span> <span class="o">=</span> <span class="n">cayley_inv</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+    <span class="c1"># inv is (sys,cartesian,basis)</span>
+    <span class="n">projections</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">bmm</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">inv_cell</span><span class="p">)</span>
+    <span class="n">fractional_coords</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">projections</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">wrapped_offset</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="n">projections</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">rounding_mode</span><span class="o">=</span><span class="s2">&quot;floor&quot;</span><span class="p">)</span>
+    <span class="n">wrapped_coords</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">bmm</span><span class="p">(</span><span class="n">fractional_coords</span><span class="p">,</span> <span class="n">cell</span><span class="p">)</span>
+    <span class="c1"># wrapped_coords is (system,atoms,cartesian)</span>
+
+    <span class="c1"># Compute number images to search in each basis direction</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-5</span>
+    <span class="n">inv_lengths</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">inv_cell</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">n_bounds</span> <span class="o">=</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">cutoff</span> <span class="o">*</span> <span class="n">inv_lengths</span> <span class="o">+</span> <span class="n">eps</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inv_cell</span><span class="p">,</span> <span class="n">wrapped_coords</span><span class="p">,</span> <span class="n">wrapped_offset</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span> <span class="n">n_bounds</span>
+
+
+<div class="viewcode-block" id="PeriodicPairIndexer"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.periodic.html#hippynn.layers.pairs.periodic.PeriodicPairIndexer">[docs]</a><span class="k">class</span> <span class="nc">PeriodicPairIndexer</span><span class="p">(</span><span class="n">_PairIndexer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds pairs in general periodic conditions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PeriodicPairIndexer.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.periodic.html#hippynn.layers.pairs.periodic.PeriodicPairIndexer.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">nonblank</span><span class="p">,</span> <span class="n">real_atoms</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">,</span> <span class="n">cells</span><span class="p">):</span>
+
+        <span class="n">original_coordinates</span> <span class="o">=</span> <span class="n">coordinates</span>
+
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">cur_device</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">device</span>
+
+            <span class="c1"># Figure out how many molecules and atoms we have</span>
+            <span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">n_atoms_max_batch</span> <span class="o">=</span> <span class="n">nonblank</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+            <span class="c1"># Construct a unique index for each atom (including blanks here)</span>
+            <span class="n">atom_index</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_molecules</span> <span class="o">*</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cur_device</span><span class="p">)</span>
+            <span class="n">atom_index</span> <span class="o">=</span> <span class="n">atom_index</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">)</span>
+
+            <span class="c1"># Trim padding in this batch to minimal level</span>
+            <span class="n">nonblank</span> <span class="o">=</span> <span class="n">nonblank</span><span class="p">[:,</span> <span class="p">:</span><span class="n">n_atoms_max_batch</span><span class="p">]</span>
+            <span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[:,</span> <span class="p">:</span><span class="n">n_atoms_max_batch</span><span class="p">]</span>
+            <span class="n">atom_index</span> <span class="o">=</span> <span class="n">atom_index</span><span class="p">[:,</span> <span class="p">:</span><span class="n">n_atoms_max_batch</span><span class="p">]</span>
+
+            <span class="n">inv_cell</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">wrapped_offsets</span><span class="p">,</span> <span class="n">nbounds</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">wrap_systems_torch</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">cells</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hard_dist_cutoff</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="c1"># inv cell: n_sys, n_cartesian, n_basis</span>
+            <span class="c1"># wraped_coords: nsys, n_atoms, 3 (coords)</span>
+            <span class="c1"># wrapped_offsets: nsys, n_atoms, 3 (basis)</span>
+            <span class="c1"># nbounds: (nsys, 3) : number of cells-lengths to search in each direction.</span>
+
+            <span class="c1"># ## make combinator of images ## #</span>
+            <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span> <span class="o">=</span> <span class="n">nbounds</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unbind</span><span class="p">()</span>
+            <span class="n">a1</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">a1</span><span class="p">,</span> <span class="n">a1</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cur_device</span><span class="p">)</span>
+            <span class="n">a2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">a2</span><span class="p">,</span> <span class="n">a2</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cur_device</span><span class="p">)</span>
+            <span class="n">a3</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">a3</span><span class="p">,</span> <span class="n">a3</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cur_device</span><span class="p">)</span>
+            <span class="n">combinator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cartesian_prod</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">)</span>
+            <span class="c1"># ## end make combinator ## #</span>
+
+            <span class="c1"># Find images valid for each system</span>
+            <span class="n">inrange_images</span> <span class="o">=</span> <span class="p">(</span><span class="n">combinator</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">nbounds</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">combinator</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">nbounds</span><span class="p">)</span>
+            <span class="n">inrange_images</span> <span class="o">=</span> <span class="n">inrange_images</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># shape (n_sys, n_perm)</span>
+
+            <span class="c1"># Eliminate blank atom pairs, construct indices for them</span>
+            <span class="n">nonblank_pair</span> <span class="o">=</span> <span class="n">nonblank</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">nonblank</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="c1"># ## Begin expensive part. ## #</span>
+            <span class="c1"># In this zone we aggressively `del` things we don&#39;t need anymore</span>
+            <span class="c1"># to allow pytorch to free memory. Delete anything that looks proportional</span>
+            <span class="c1"># to the number of pairs. Many variables are proportional to the number of</span>
+            <span class="c1"># &#39;possible&#39; pairs, and all_sparse is proportional to an</span>
+            <span class="c1"># even larger number of (# sys)*(# atoms)^2*(# possible images)</span>
+
+            <span class="c1"># Start search space here.</span>
+            <span class="c1"># Compute indices of all images for systems and nonblank atoms of those systems</span>
+            <span class="n">all_sparse</span> <span class="o">=</span> <span class="p">(</span><span class="n">inrange_images</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">nonblank_pair</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+            <span class="n">nb_sys</span><span class="p">,</span> <span class="n">nb_p1</span><span class="p">,</span> <span class="n">nb_p2</span><span class="p">,</span> <span class="n">nb_image</span> <span class="o">=</span> <span class="n">all_sparse</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">as_tuple</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">all_sparse</span>
+
+            <span class="c1"># pair displacements without shifts</span>
+            <span class="n">pair_diffcoords</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="n">nb_sys</span><span class="p">,</span> <span class="n">nb_p1</span><span class="p">]</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">[</span><span class="n">nb_sys</span><span class="p">,</span> <span class="n">nb_p2</span><span class="p">]</span>
+
+            <span class="c1"># Find displacements offsets due to images.</span>
+            <span class="n">cell_shifts</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">combinator</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">cells</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">cells</span><span class="p">)</span>
+            <span class="c1"># cell_shifts is  n_sys, n_perm, 3 (cartesian)</span>
+            <span class="n">dist_offsets</span> <span class="o">=</span> <span class="n">cell_shifts</span><span class="p">[</span><span class="n">nb_sys</span><span class="p">,</span> <span class="n">nb_image</span><span class="p">]</span>
+            <span class="c1"># Find pairs/images close enough to be within the cutoff</span>
+            <span class="n">pair_dist</span> <span class="o">=</span> <span class="p">(</span><span class="n">pair_diffcoords</span> <span class="o">+</span> <span class="n">dist_offsets</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">dist_offsets</span><span class="p">,</span> <span class="n">pair_diffcoords</span>
+
+            <span class="c1"># Calculate mask of pairs that map to same atom.</span>
+            <span class="n">int_offsets</span> <span class="o">=</span> <span class="n">combinator</span><span class="p">[</span><span class="n">nb_image</span><span class="p">]</span>
+            <span class="n">nonself_pairs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">int_offsets</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">ne</span><span class="p">(</span><span class="n">nb_p1</span><span class="p">,</span> <span class="n">nb_p2</span><span class="p">))</span>
+
+            <span class="c1"># Compute indices of considered pairs relative to MolAtom format.</span>
+            <span class="n">pair_first</span> <span class="o">=</span> <span class="n">atom_index</span><span class="p">[</span><span class="n">nb_sys</span><span class="p">,</span> <span class="n">nb_p1</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">nb_p1</span>
+            <span class="n">pair_second</span> <span class="o">=</span> <span class="n">atom_index</span><span class="p">[</span><span class="n">nb_sys</span><span class="p">,</span> <span class="n">nb_p2</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">nb_p2</span>
+
+            <span class="c1"># Compute close pairs.</span>
+            <span class="n">close_pairs</span> <span class="o">=</span> <span class="p">(</span><span class="n">pair_dist</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">hard_dist_cutoff</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">nonself_pairs</span>  <span class="c1"># get rid of self-pairs</span>
+            <span class="k">del</span> <span class="n">nonself_pairs</span><span class="p">,</span> <span class="n">pair_dist</span>
+            <span class="n">close_pairs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">close_pairs</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># close_pairs holds the indices of pairs</span>
+
+            <span class="c1"># Extract the needed data within the cutoff.</span>
+            <span class="n">pair_mol</span> <span class="o">=</span> <span class="n">nb_sys</span><span class="p">[</span><span class="n">close_pairs</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">nb_sys</span>
+            <span class="n">pair_first</span> <span class="o">=</span> <span class="n">pair_first</span><span class="p">[</span><span class="n">close_pairs</span><span class="p">]</span>
+            <span class="n">pair_second</span> <span class="o">=</span> <span class="n">pair_second</span><span class="p">[</span><span class="n">close_pairs</span><span class="p">]</span>
+            <span class="n">cell_only_offsets</span> <span class="o">=</span> <span class="n">int_offsets</span><span class="p">[</span><span class="n">close_pairs</span><span class="p">]</span>  <span class="c1"># Offset due to cell images only.</span>
+            <span class="n">offset_num</span> <span class="o">=</span> <span class="n">nb_image</span><span class="p">[</span><span class="n">close_pairs</span><span class="p">]</span>  <span class="c1"># index of where to store cell_offset values if caching pairs.</span>
+            <span class="k">del</span> <span class="n">int_offsets</span><span class="p">,</span> <span class="n">close_pairs</span>
+            <span class="c1"># ## End expensive part ## #</span>
+
+            <span class="c1"># This converts the atom index from an index that counts blank atoms (MolAtom) to one that doesn&#39;t;</span>
+            <span class="c1"># Afterwards it indexes the flat array of atoms in the batch. (Atoms format)</span>
+            <span class="n">pair_first</span> <span class="o">=</span> <span class="n">inv_real_atoms</span><span class="p">[</span><span class="n">pair_first</span><span class="p">]</span>
+            <span class="n">pair_second</span> <span class="o">=</span> <span class="n">inv_real_atoms</span><span class="p">[</span><span class="n">pair_second</span><span class="p">]</span>
+
+            <span class="c1"># Add back in offsets due to atom wrapping.</span>
+            <span class="n">atom_wrap_offsets</span> <span class="o">=</span> <span class="n">wrapped_offsets</span><span class="p">[</span><span class="n">nonblank</span><span class="p">]</span>
+            <span class="n">pf_shift</span> <span class="o">=</span> <span class="n">atom_wrap_offsets</span><span class="p">[</span><span class="n">pair_first</span><span class="p">]</span>  <span class="c1"># Offset of wrapping of first atom</span>
+            <span class="n">ps_shift</span> <span class="o">=</span> <span class="n">atom_wrap_offsets</span><span class="p">[</span><span class="n">pair_second</span><span class="p">]</span>  <span class="c1"># Offset of wrapping of second atom</span>
+
+            <span class="n">cell_offsets</span> <span class="o">=</span> <span class="n">cell_only_offsets</span> <span class="o">-</span> <span class="p">(</span><span class="n">pf_shift</span> <span class="o">-</span> <span class="n">ps_shift</span><span class="p">)</span>  <span class="c1"># Total image offset of pairs.</span>
+            <span class="k">del</span> <span class="n">cell_only_offsets</span><span class="p">,</span> <span class="n">pf_shift</span><span class="p">,</span> <span class="n">ps_shift</span>
+
+        <span class="c1"># Compute distance differentiably from total image offsets and pair indices</span>
+        <span class="n">pair_shifts</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">cell_offsets</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">cells</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span> <span class="n">cells</span><span class="p">[</span><span class="n">pair_mol</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">coordflat</span> <span class="o">=</span> <span class="n">original_coordinates</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_molecules</span> <span class="o">*</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">)[</span><span class="n">real_atoms</span><span class="p">]</span>
+        <span class="n">paircoord</span> <span class="o">=</span> <span class="n">coordflat</span><span class="p">[</span><span class="n">pair_first</span><span class="p">]</span> <span class="o">-</span> <span class="n">coordflat</span><span class="p">[</span><span class="n">pair_second</span><span class="p">]</span> <span class="o">+</span> <span class="n">pair_shifts</span>
+        <span class="n">distflat2</span> <span class="o">=</span> <span class="n">paircoord</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">distflat2</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">paircoord</span><span class="p">,</span> <span class="n">cell_offsets</span><span class="p">,</span> <span class="n">offset_num</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

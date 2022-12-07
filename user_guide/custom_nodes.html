@@ -126,7 +126,7 @@ module that outputs several outputs. Specify the names of the outputs in the
 <code class="docutils literal notranslate"><span class="pre">_output_names</span></code> attribute as a tuple of strings. Additionally, you can
 specify the <code class="docutils literal notranslate"><span class="pre">IdxType</span></code> of the outputs so that other nodes can recognize
 what type of information is provided. Here is a stripped-down version of the
-hierarchical energy regression target <code class="xref py py-class docutils literal notranslate"><span class="pre">HEnergyNode</span></code>:</p>
+hierarchical energy regression target <a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HEnergyNode" title="hippynn.graphs.nodes.targets.HEnergyNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">HEnergyNode</span></code></a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">hippynn.layers.targets</span> <span class="k">as</span> <span class="nn">target_modules</span>
 <span class="kn">from</span> <span class="nn">hippynn.graphs.nodes</span> <span class="kn">import</span> <span class="n">MultiNode</span>
 <span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.base.definition_helpers</span> <span class="kn">import</span> <span class="n">AutoKw</span>
@@ -158,7 +158,7 @@ required to run the underlying torch module.</p>
 <p>The features will usually come from a network, and the molecule index and number of molecules
 in a batch are processed by the padding indexer. We can use the <code class="docutils literal notranslate"><span class="pre">ExpandParents</span></code> class
 to make invoking this node easier.</p>
-<p>Let’s take a look  at the full definition of <code class="xref py py-class docutils literal notranslate"><span class="pre">HEnergyNode</span></code>:</p>
+<p>Let’s take a look  at the full definition of <a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HEnergyNode" title="hippynn.graphs.nodes.targets.HEnergyNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">HEnergyNode</span></code></a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">HEnergyNode</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Predict a system-level scalar such as energy from a sum over local components.</span>
@@ -208,7 +208,7 @@ parents of the node, <code class="docutils literal notranslate"><span class="pre
 <h2>Adding constraints to possible parents<a class="headerlink" href="#adding-constraints-to-possible-parents" title="Permalink to this heading"></a></h2>
 <p>Finally, it is possible to add additional information to the parent expander
 to ensure that the final form of the parents is suitable for computation.</p>
-<p>Let’s take a look at the code for <code class="xref py py-class docutils literal notranslate"><span class="pre">ChargeMomentNode</span></code>:</p>
+<p>Let’s take a look at the code for <a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.ChargeMomentNode" title="hippynn.graphs.nodes.physics.ChargeMomentNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChargeMomentNode</span></code></a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ChargeMomentNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
     <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;charges&quot;</span><span class="p">,</span> <span class="s2">&quot;positions&quot;</span><span class="p">,</span> <span class="s2">&quot;mol_index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_molecules&quot;</span>
 
@@ -245,10 +245,10 @@ replace them with their main outputs.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">_parent_expander.require_idx_states()</span></code>: Throw an error if the index states of the parents
 do not match a specific form. Additionally, if the current index state can be converted to
 the needed index state, this conversion will automatically be applied using
-<code class="xref py py-func docutils literal notranslate"><span class="pre">index_type_coercion()</span></code>.</p></li>
+<a class="reference internal" href="../api_documentation/hippynn.graphs.indextypes.html#hippynn.graphs.indextypes.index_type_coercion" title="hippynn.graphs.indextypes.index_type_coercion"><code class="xref py py-func docutils literal notranslate"><span class="pre">index_type_coercion()</span></code></a>.</p></li>
 </ol>
 <p>A full list of available methods is  at the API documentation for the
-<code class="xref py py-func docutils literal notranslate"><span class="pre">ParentExpander()</span></code>.
+<a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander" title="hippynn.graphs.nodes.base.definition_helpers.ParentExpander"><code class="xref py py-func docutils literal notranslate"><span class="pre">ParentExpander()</span></code></a>.
 These directives are executed when the node’s <code class="docutils literal notranslate"><span class="pre">expand_parents</span></code> method is run, which
 should be performed <em>before</em> calling to the <code class="docutils literal notranslate"><span class="pre">super().__init__()</span></code> method.
 In combination, these directives allow for a powerful flexibility in building graphs

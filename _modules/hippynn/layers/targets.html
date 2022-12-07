@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.layers.targets &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.layers.targets</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.layers.targets</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Layers for target prediction such as Energy and Charge</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">indexers</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">hiplayers</span>
+
+
+<div class="viewcode-block" id="HEnergy"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.HEnergy">[docs]</a><span class="k">class</span> <span class="nc">HEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Predict a system-level scalar such as energy from a sum over local components.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="HEnergy.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.HEnergy.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_sizes</span><span class="p">,</span> <span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_target</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">first_is_interacting</span> <span class="o">=</span> <span class="n">first_is_interacting</span>
+        <span class="k">if</span> <span class="n">first_is_interacting</span><span class="p">:</span>
+            <span class="n">feature_sizes</span> <span class="o">=</span> <span class="n">feature_sizes</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_sizes</span> <span class="o">=</span> <span class="n">feature_sizes</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">summer</span> <span class="o">=</span> <span class="n">indexers</span><span class="o">.</span><span class="n">MolSummer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_terms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_sizes</span><span class="p">)</span>
+        <span class="n">biases</span> <span class="o">=</span> <span class="p">(</span><span class="n">first_is_interacting</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="kc">True</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_terms</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="n">n_target</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">bias</span><span class="p">)</span> <span class="k">for</span> <span class="n">nf</span><span class="p">,</span> <span class="n">bias</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">feature_sizes</span><span class="p">,</span> <span class="n">biases</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="HEnergy.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.HEnergy.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_features</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pytorch Enforced Forward function</span>
+
+<span class="sd">        :param: all_features a list of feature tensors:</span>
+<span class="sd">        :param: mol_index the molecular index for atoms in the batch</span>
+<span class="sd">        :param: total number of molecules in the batch</span>
+<span class="sd">        :return: Total Energy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_is_interacting</span><span class="p">:</span>
+            <span class="n">all_features</span> <span class="o">=</span> <span class="n">all_features</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="n">partial_energies</span> <span class="o">=</span> <span class="p">[</span><span class="n">lay</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">lay</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)]</span>
+        <span class="n">partial_terms</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">partial_energies</span><span class="p">]</span>
+        <span class="n">partial_sums</span> <span class="o">=</span> <span class="p">[</span><span class="n">partial_terms</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">partial_terms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">partial_terms</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">z</span>
+            <span class="n">partial_sums</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+
+        <span class="n">total_atomen</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">partial_energies</span><span class="p">)</span>
+        <span class="n">total_energies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">total_atomen</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_terms</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">partial_esq</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">partial_energies</span><span class="p">]</span>
+            <span class="n">partial_atom_hier</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">partial_esq</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">partial_esq</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+            <span class="n">total_atom_hier</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">partial_atom_hier</span><span class="p">)</span>
+            <span class="n">total_hier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">total_atom_hier</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">total_hier</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">total_energies</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">total_energies</span><span class="p">,</span> <span class="n">total_atomen</span><span class="p">,</span> <span class="n">partial_sums</span><span class="p">,</span> <span class="n">total_hier</span></div></div>
+
+
+<div class="viewcode-block" id="HCharge"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.HCharge">[docs]</a><span class="k">class</span> <span class="nc">HCharge</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Predict an atom-level scalar such as charge from local features.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="HCharge.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.HCharge.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_sizes</span><span class="p">,</span> <span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_target</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_sizes</span> <span class="o">=</span> <span class="n">feature_sizes</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_terms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_sizes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span> <span class="o">=</span> <span class="n">n_target</span>
+        <span class="n">biases</span> <span class="o">=</span> <span class="p">(</span><span class="n">first_is_interacting</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="kc">True</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_terms</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="n">n_target</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">bias</span><span class="p">)</span> <span class="k">for</span> <span class="n">nf</span><span class="p">,</span> <span class="n">bias</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">feature_sizes</span><span class="p">,</span> <span class="n">biases</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="HCharge.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.HCharge.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_features</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param all_features a list of feature tensors:</span>
+<span class="sd">        :return: charges, predicted charges summed at each layer, and charge hierarchcality</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">partial_charges</span> <span class="o">=</span> <span class="p">[</span><span class="n">lay</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">lay</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)]</span>
+        <span class="n">partial_sums</span> <span class="o">=</span> <span class="p">[</span><span class="n">partial_charges</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">partial_charges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">partial_charges</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">z</span>
+            <span class="n">partial_sums</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+
+        <span class="n">total_charges</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">partial_charges</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_terms</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">partial_esq</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">partial_charges</span><span class="p">]</span>
+            <span class="n">partial_atom_hier</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">partial_esq</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">partial_esq</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+            <span class="n">charge_hier</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">partial_atom_hier</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">charge_hier</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">total_charges</span><span class="p">,</span> <span class="n">partial_sums</span><span class="p">,</span> <span class="n">charge_hier</span></div></div>
+
+
+<div class="viewcode-block" id="LocalChargeEnergy"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.LocalChargeEnergy">[docs]</a><span class="k">class</span> <span class="nc">LocalChargeEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="LocalChargeEnergy.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.LocalChargeEnergy.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_sizes</span><span class="p">,</span> <span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_sizes</span> <span class="o">=</span> <span class="n">feature_sizes</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_terms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_sizes</span><span class="p">)</span>
+        <span class="n">bias_state</span> <span class="o">=</span> <span class="p">(</span><span class="n">first_is_interacting</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="kc">True</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_terms</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers_lin</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">bias</span><span class="p">)</span> <span class="k">for</span> <span class="n">nf</span><span class="p">,</span> <span class="n">bias</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">feature_sizes</span><span class="p">,</span> <span class="n">bias_state</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers_quad</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">bias</span><span class="p">)</span> <span class="k">for</span> <span class="n">nf</span><span class="p">,</span> <span class="n">bias</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">feature_sizes</span><span class="p">,</span> <span class="n">bias_state</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">summer</span> <span class="o">=</span> <span class="n">indexers</span><span class="o">.</span><span class="n">MolSummer</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="LocalChargeEnergy.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.LocalChargeEnergy.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">all_features</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
+
+        <span class="n">partial_lin_terms</span> <span class="o">=</span> <span class="p">[</span><span class="n">lay</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">lay</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers_lin</span><span class="p">)]</span>
+        <span class="n">partial_quad_terms</span> <span class="o">=</span> <span class="p">[</span><span class="n">lay</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">lay</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers_lin</span><span class="p">)]</span>
+
+        <span class="n">total_lin</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">partial_lin_terms</span><span class="p">)</span>
+        <span class="n">total_quad</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">partial_quad_terms</span><span class="p">)</span>
+
+        <span class="n">atom_charge_energy</span> <span class="o">=</span> <span class="p">(</span><span class="n">total_quad</span> <span class="o">*</span> <span class="n">charges</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">total_lin</span>
+        <span class="n">molecule_charge_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">atom_charge_energy</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">molecule_charge_energy</span><span class="p">,</span> <span class="n">atom_charge_energy</span></div></div>
+
+
+<div class="viewcode-block" id="HBondSymmetric"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.HBondSymmetric">[docs]</a><span class="k">class</span> <span class="nc">HBondSymmetric</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="HBondSymmetric.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.HBondSymmetric.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">feature_sizes</span><span class="p">,</span>
+        <span class="n">n_dist</span><span class="p">,</span>
+        <span class="n">dist_soft_min</span><span class="p">,</span>
+        <span class="n">dist_soft_max</span><span class="p">,</span>
+        <span class="n">dist_hard_max</span><span class="p">,</span>
+        <span class="n">positive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">symmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">antisymmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">sensitivity_type</span><span class="o">=</span><span class="n">hiplayers</span><span class="o">.</span><span class="n">InverseSensitivityModule</span><span class="p">,</span>
+        <span class="n">n_target</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">all_pairs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">symmetric</span> <span class="ow">and</span> <span class="n">antisymmetric</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Bond-like prediction cannot be both symmetric and antisymmetric!&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">antisymmetric</span> <span class="ow">and</span> <span class="n">positive</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Bond-like prediction cannot be antisymmetric and positive!&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sensitivity</span> <span class="o">=</span> <span class="n">sensitivity_type</span><span class="p">(</span><span class="n">n_dist</span><span class="p">,</span> <span class="n">dist_soft_min</span><span class="p">,</span> <span class="n">dist_soft_max</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_sizes</span> <span class="o">=</span> <span class="n">feature_sizes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_terms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_sizes</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">symmetric</span> <span class="o">=</span> <span class="n">symmetric</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">antisymmetric</span> <span class="o">=</span> <span class="n">antisymmetric</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">positive</span> <span class="o">=</span> <span class="n">positive</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span> <span class="o">=</span> <span class="n">n_target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">=</span> <span class="n">n_dist</span>
+        <span class="k">if</span> <span class="n">positive</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">biases</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ParameterList</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_target</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">feature_sizes</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">biases</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ParameterList</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_dist</span><span class="p">,</span> <span class="n">n_target</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">nf</span><span class="p">))</span> <span class="k">for</span> <span class="n">nf</span> <span class="ow">in</span> <span class="n">feature_sizes</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">:</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">xavier_normal_</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HBondSymmetric.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.HBondSymmetric.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">):</span>
+
+        <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">symmetric</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span> <span class="o">+</span> <span class="n">w</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">weights</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">antisymmetric</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span> <span class="o">-</span> <span class="n">w</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">weights</span><span class="p">]</span>
+
+        <span class="n">sense_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensitivity</span><span class="p">(</span><span class="n">pair_dist</span><span class="p">)</span>
+
+        <span class="n">n_d</span><span class="p">,</span> <span class="n">n_t</span><span class="p">,</span> <span class="n">n_f</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+        <span class="c1"># These are the contributions for each bond at a given sensitivity distance</span>
+        <span class="c1"># bilinear takes shape (pair,feature1),(pair,feature2),(ndist*n_target,feature1,feature2)</span>
+        <span class="c1"># and sums to pair,(ndist*n_target), which is reshaped.</span>
+        <span class="n">partial_bond_dists</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">bilinear</span><span class="p">(</span>
+                <span class="n">f</span><span class="p">[</span><span class="n">pair_first</span><span class="p">],</span>
+                <span class="n">f</span><span class="p">[</span><span class="n">pair_second</span><span class="p">],</span>
+                <span class="n">w</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+                <span class="n">bias</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_features</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="c1"># These are the contributions for each bond</span>
+        <span class="c1"># multiply pair,ndist by pair,ndist,n_targets</span>
+        <span class="n">partial_bonds</span> <span class="o">=</span> <span class="p">[(</span><span class="n">pbd</span> <span class="o">*</span> <span class="n">sense_vals</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">pbd</span> <span class="ow">in</span> <span class="n">partial_bond_dists</span><span class="p">]</span>
+        <span class="c1"># NOTE:</span>
+        <span class="c1"># Einsum implementation of combined partial_bond_dists and partial_bond operations, seems to be slower.</span>
+        <span class="c1"># But leaving this comment here for readability.</span>
+        <span class="c1"># partial_bonds = [</span>
+        <span class="c1">#     torch.einsum(&quot;bf,bg,bs,stfg-&gt;bt&quot;,f[pair_first],f[pair_second],sense_vals,w)</span>
+        <span class="c1">#     for f,w in zip(all_features,weights)</span>
+        <span class="c1"># ]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">positive</span><span class="p">:</span>
+            <span class="n">partial_bonds</span> <span class="o">=</span> <span class="p">[</span><span class="n">pb</span> <span class="o">+</span> <span class="n">b</span> <span class="k">for</span> <span class="n">pb</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">partial_bonds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">biases</span><span class="p">)]</span>
+
+        <span class="n">total_bonds</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">partial_bonds</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">positive</span><span class="p">:</span>
+            <span class="n">total_bonds</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">total_bonds</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_terms</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">partial_bsq</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">partial_bonds</span><span class="p">]</span>
+            <span class="n">partial_hier</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">partial_bsq</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">partial_bsq</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+            <span class="n">bond_hier</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">partial_hier</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bond_hier</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">total_bonds</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">total_bonds</span><span class="p">,</span> <span class="n">bond_hier</span></div></div>
+
+
+<div class="viewcode-block" id="LocalEnergy"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.LocalEnergy">[docs]</a><span class="k">class</span> <span class="nc">LocalEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="LocalEnergy.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.LocalEnergy.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_sizes</span><span class="p">,</span> <span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">first_is_interacting</span> <span class="o">=</span> <span class="n">first_is_interacting</span>
+        <span class="k">if</span> <span class="n">first_is_interacting</span><span class="p">:</span>
+            <span class="n">feature_sizes</span> <span class="o">=</span> <span class="n">feature_sizes</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_sizes</span> <span class="o">=</span> <span class="n">feature_sizes</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">summer</span> <span class="o">=</span> <span class="n">indexers</span><span class="o">.</span><span class="n">MolSummer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_terms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_sizes</span><span class="p">)</span>
+        <span class="n">biases</span> <span class="o">=</span> <span class="p">(</span><span class="n">first_is_interacting</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="kc">True</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_terms</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">bias</span><span class="p">)</span> <span class="k">for</span> <span class="n">nf</span><span class="p">,</span> <span class="n">bias</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">feature_sizes</span><span class="p">,</span> <span class="n">biases</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">players</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">nf</span> <span class="ow">in</span> <span class="n">feature_sizes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ninf</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LocalEnergy.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.LocalEnergy.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_features</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param all_features: list of feature tensors</span>
+<span class="sd">        :param mol_index: which molecule is the atom</span>
+<span class="sd">        :param atom_index: which atom in the molecule is that atom</span>
+<span class="sd">        :param n_molecules: total number of molecules in the batch</span>
+<span class="sd">        :param n_atoms_max: maximum number of atoms in the batch</span>
+<span class="sd">        :return: contributed_energy, atom_energy, atom_preenergy, prob, propensity</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_is_interacting</span><span class="p">:</span>
+            <span class="n">all_features</span> <span class="o">=</span> <span class="n">all_features</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="n">partial_preenergy</span> <span class="o">=</span> <span class="p">[</span><span class="n">lay</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">lay</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)]</span>
+        <span class="n">atom_preenergy</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">partial_preenergy</span><span class="p">)</span>
+        <span class="n">partial_potentials</span> <span class="o">=</span> <span class="p">[</span><span class="n">lay</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">lay</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">)]</span>
+        <span class="n">propensity</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">partial_potentials</span><span class="p">)</span>  <span class="c1"># Keep in mind that this has shape (natoms,1)</span>
+
+        <span class="c1"># This segment does not need gradients, we are constructing the subtraction parameters for softmax</span>
+        <span class="c1"># which results in a calculation that does not under or overflow; the result is most accurate this way</span>
+        <span class="c1"># But actually invariant to the subtraction used, so it does not require a grad.</span>
+        <span class="c1"># It&#39;s a standard SoftMax technique, however, the implementation is not built into pytorch for</span>
+        <span class="c1"># the molecule/atom framework.</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">propensity_molatom</span> <span class="o">=</span> <span class="n">all_features</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">new_full</span><span class="p">((</span><span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">ninf</span><span class="p">)</span>
+            <span class="n">propensity_molatom</span><span class="p">[</span><span class="n">mol_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">propensity</span>
+            <span class="n">propensity_norms</span> <span class="o">=</span> <span class="n">propensity_molatom</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># first element is max vals, 2nd is max position</span>
+            <span class="n">propensity_norm_atoms</span> <span class="o">=</span> <span class="n">propensity_norms</span><span class="p">[</span><span class="n">mol_index</span><span class="p">]</span>
+
+        <span class="n">propensity_normed</span> <span class="o">=</span> <span class="n">propensity</span> <span class="o">-</span> <span class="n">propensity_norm_atoms</span>
+
+        <span class="c1"># Calculate probabilities with molecule version of softmax</span>
+        <span class="n">relative_prob</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">propensity_normed</span><span class="p">)</span>
+        <span class="n">z_factor_permol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">relative_prob</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
+        <span class="n">atom_zfactor</span> <span class="o">=</span> <span class="n">z_factor_permol</span><span class="p">[</span><span class="n">mol_index</span><span class="p">]</span>
+        <span class="n">prob</span> <span class="o">=</span> <span class="n">relative_prob</span> <span class="o">/</span> <span class="n">atom_zfactor</span>
+
+        <span class="c1"># Find molecular sum</span>
+        <span class="n">atom_energy</span> <span class="o">=</span> <span class="n">prob</span> <span class="o">*</span> <span class="n">atom_preenergy</span>
+        <span class="n">contributed_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">atom_energy</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">contributed_energy</span><span class="p">,</span> <span class="n">atom_energy</span><span class="p">,</span> <span class="n">atom_preenergy</span><span class="p">,</span> <span class="n">prob</span><span class="p">,</span> <span class="n">propensity</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -49,12 +49,38 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.databases.html">databases package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.experiment.html">experiment package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.graphs.html">graphs package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.GraphModule"><code class="docutils literal notranslate"><span class="pre">GraphModule</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.IdxType"><code class="docutils literal notranslate"><span class="pre">IdxType</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.Predictor"><code class="docutils literal notranslate"><span class="pre">Predictor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.compute_evaluation_order"><code class="docutils literal notranslate"><span class="pre">compute_evaluation_order()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.copy_subgraph"><code class="docutils literal notranslate"><span class="pre">copy_subgraph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.find_relatives"><code class="docutils literal notranslate"><span class="pre">find_relatives()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.find_unique_relative"><code class="docutils literal notranslate"><span class="pre">find_unique_relative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.get_connected_nodes"><code class="docutils literal notranslate"><span class="pre">get_connected_nodes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.get_subgraph"><code class="docutils literal notranslate"><span class="pre">get_subgraph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.replace_node"><code class="docutils literal notranslate"><span class="pre">replace_node()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.indextransformers.html">indextransformers package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.indextypes.html">indextypes package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.nodes.html">nodes package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.gops.html">gops module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.graph.html">graph module</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">predictor module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">predictor module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.predictor.Predictor"><code class="docutils literal notranslate"><span class="pre">Predictor</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.predictor.Predictor.__init__"><code class="docutils literal notranslate"><span class="pre">Predictor.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.predictor.Predictor.add_output"><code class="docutils literal notranslate"><span class="pre">Predictor.add_output()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.predictor.Predictor.apply_to_database"><code class="docutils literal notranslate"><span class="pre">Predictor.apply_to_database()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.predictor.Predictor.from_graph"><code class="docutils literal notranslate"><span class="pre">Predictor.from_graph()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.predictor.Predictor.inputs"><code class="docutils literal notranslate"><span class="pre">Predictor.inputs</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.predictor.Predictor.model_device"><code class="docutils literal notranslate"><span class="pre">Predictor.model_device</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.predictor.Predictor.outputs"><code class="docutils literal notranslate"><span class="pre">Predictor.outputs</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.predictor.Predictor.predict_all"><code class="docutils literal notranslate"><span class="pre">Predictor.predict_all()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.predictor.Predictor.predict_batched"><code class="docutils literal notranslate"><span class="pre">Predictor.predict_batched()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.predictor.Predictor.to"><code class="docutils literal notranslate"><span class="pre">Predictor.to()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.predictor.Predictor.wrap_outputs"><code class="docutils literal notranslate"><span class="pre">Predictor.wrap_outputs()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.viz.html">viz module</a></li>
 </ul>
 </li>
@@ -101,6 +127,102 @@
   <div class="section" id="predictor-module">
 <h1>predictor module<a class="headerlink" href="#predictor-module" title="Permalink to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.graphs.predictor</span></code> module.</p>
+<span class="target" id="module-hippynn.graphs.predictor"></span><p>Predictor object which builds a graph for predictions with
+a simple user interface.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.predictor.Predictor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Predictor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">device(type='cpu')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">requires_grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/predictor.html#Predictor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.predictor.Predictor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The predictor is a dressed-up GraphModule which gives access
+to the outputs of individual nodes.</p>
+<p>In many cases you may simply want to use the <code class="docutils literal notranslate"><span class="pre">from_graph</span></code> method to generate a predictor.</p>
+<p>The predictor will take the model graph, convert the output nodes into
+a padded index state, and build a new graph for these operations.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.predictor.Predictor.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">device(type='cpu')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">requires_grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/predictor.html#Predictor.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.predictor.Predictor.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs</strong> – nodes to use as inputs</p></li>
+<li><p><strong>outputs</strong> – nodes to use as outputs</p></li>
+<li><p><strong>return_device</strong> – device to place results on; does nothing if None</p></li>
+<li><p><strong>model_device</strong> – where the model and input should be placed, does nothing if None</p></li>
+<li><p><strong>requires_grad</strong> – Default false – detach predicted tensors. If true, do not detach predicted
+tensors – this may lead to memory leaks if not done carefully.</p></li>
+<li><p><strong>name</strong> – Optional name for formatting progress bars.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.predictor.Predictor.add_output">
+<span class="sig-name descname"><span class="pre">add_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/predictor.html#Predictor.add_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.predictor.Predictor.add_output" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.predictor.Predictor.apply_to_database">
+<span class="sig-name descname"><span class="pre">apply_to_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/predictor.html#Predictor.apply_to_database"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.predictor.Predictor.apply_to_database" title="Permalink to this definition"></a></dt>
+<dd><p>Note: kwargs are passed to self.__call__, e.g. the <code class="docutils literal notranslate"><span class="pre">batch_size</span></code> parameter.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.predictor.Predictor.from_graph">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_outputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/predictor.html#Predictor.from_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.predictor.Predictor.from_graph" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a new predictor from an existing GraphModule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>graph</strong> – graph to create predictor for. The predictor makes a shallow copy of this graph. e.g. it may move
+parameters from that graph to the model_device.</p></li>
+<li><p><strong>additional_outputs</strong> – List of additional nodes to include in outputs</p></li>
+<li><p><strong>kwargs</strong> – passed to <code class="docutils literal notranslate"><span class="pre">__init__</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>predictor instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hippynn.graphs.predictor.Predictor.inputs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">inputs</span></span><a class="headerlink" href="#hippynn.graphs.predictor.Predictor.inputs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hippynn.graphs.predictor.Predictor.model_device">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model_device</span></span><a class="headerlink" href="#hippynn.graphs.predictor.Predictor.model_device" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hippynn.graphs.predictor.Predictor.outputs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">outputs</span></span><a class="headerlink" href="#hippynn.graphs.predictor.Predictor.outputs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.predictor.Predictor.predict_all">
+<span class="sig-name descname"><span class="pre">predict_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/predictor.html#Predictor.predict_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.predictor.Predictor.predict_all" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.predictor.Predictor.predict_batched">
+<span class="sig-name descname"><span class="pre">predict_batched</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/predictor.html#Predictor.predict_batched"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.predictor.Predictor.predict_batched" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.predictor.Predictor.to">
+<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/predictor.html#Predictor.to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.predictor.Predictor.to" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.predictor.Predictor.wrap_outputs">
+<span class="sig-name descname"><span class="pre">wrap_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/predictor.html#Predictor.wrap_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.predictor.Predictor.wrap_outputs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 
 

@@ -47,8 +47,31 @@
 <li class="toctree-l1 current"><a class="reference internal" href="hippynn.html">hippynn API documentation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.html">custom_kernels package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.databases.html">databases package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.html#hippynn.databases.Database"><code class="docutils literal notranslate"><span class="pre">Database</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.html#hippynn.databases.DirectoryDatabase"><code class="docutils literal notranslate"><span class="pre">DirectoryDatabase</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.html#hippynn.databases.NPZDatabase"><code class="docutils literal notranslate"><span class="pre">NPZDatabase</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.SNAPJson.html">SNAPJson module</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">database module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">database module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.database.Database"><code class="docutils literal notranslate"><span class="pre">Database</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.databases.database.Database.__init__"><code class="docutils literal notranslate"><span class="pre">Database.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.databases.database.Database.make_explicit_split"><code class="docutils literal notranslate"><span class="pre">Database.make_explicit_split()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.databases.database.Database.make_generator"><code class="docutils literal notranslate"><span class="pre">Database.make_generator()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.databases.database.Database.make_random_split"><code class="docutils literal notranslate"><span class="pre">Database.make_random_split()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.databases.database.Database.make_trainvalidtest_split"><code class="docutils literal notranslate"><span class="pre">Database.make_trainvalidtest_split()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.databases.database.Database.send_to_device"><code class="docutils literal notranslate"><span class="pre">Database.send_to_device()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.databases.database.Database.split_the_rest"><code class="docutils literal notranslate"><span class="pre">Database.split_the_rest()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.databases.database.Database.var_list"><code class="docutils literal notranslate"><span class="pre">Database.var_list</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.database.NamedTensorDataset"><code class="docutils literal notranslate"><span class="pre">NamedTensorDataset</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.databases.database.NamedTensorDataset.__init__"><code class="docutils literal notranslate"><span class="pre">NamedTensorDataset.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.databases.database.NamedTensorDataset.tensors"><code class="docutils literal notranslate"><span class="pre">NamedTensorDataset.tensors</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.database.compute_index_mask"><code class="docutils literal notranslate"><span class="pre">compute_index_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.database.prettyprint_arrays"><code class="docutils literal notranslate"><span class="pre">prettyprint_arrays()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html">h5_pyanitools module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.ondisk.html">ondisk module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.restarter.html">restarter module</a></li>
@@ -99,6 +122,125 @@
   <div class="section" id="database-module">
 <h1>database module<a class="headerlink" href="#database-module" title="Permalink to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.databases.database</span></code> module.</p>
+<span class="target" id="module-hippynn.databases.database"></span><p>Base database functionality from dictionary of numpy arrays</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.databases.database.Database">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pin_memory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_unfound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#Database"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.database.Database" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for holding a pytorch dataset, splitting it, generating dataloaders, etc.”</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.databases.database.Database.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pin_memory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_unfound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#Database.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.database.Database.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arr_dict</strong> – dictionary mapping strings to numpy arrays</p></li>
+<li><p><strong>inputs</strong> – list of strings for input db_names</p></li>
+<li><p><strong>targets</strong> – list of strings for output db_namees</p></li>
+<li><p><strong>seed</strong> – int, for random splitting</p></li>
+<li><p><strong>test_size</strong> – fraction of data to use in test spli</p></li>
+<li><p><strong>valid_size</strong> – fraction oof data to use in train split</p></li>
+<li><p><strong>num_workers</strong> – passed to pytorch dataloaders</p></li>
+<li><p><strong>pin_memory</strong> – passed to pytorch dataloaders</p></li>
+<li><p><strong>allow_unfound</strong> – If true, skip checking if the needed inputs and targets are found.
+This allows setting inputs=None and/or targets=None.</p></li>
+<li><p><strong>quiet</strong> – If True, print little or nothing while loading.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.databases.database.Database.make_explicit_split">
+<span class="sig-name descname"><span class="pre">make_explicit_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evaluation_mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_indices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#Database.make_explicit_split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.database.Database.make_explicit_split" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.databases.database.Database.make_generator">
+<span class="sig-name descname"><span class="pre">make_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subsample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#Database.make_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.database.Database.make_generator" title="Permalink to this definition"></a></dt>
+<dd><p>Makes a dataloader for the given type of split and evaluation mode of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>split_type</strong> – str; “train”, “valid”, or “test” ; selects data to use</p></li>
+<li><p><strong>evaluation_mode</strong> – str; “train” or “eval”. Used for whether to shuffle.</p></li>
+<li><p><strong>batch_size</strong> – passed to pytorch</p></li>
+<li><p><strong>subsample</strong> – fraction to subsample</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dataloader containing relevant data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.databases.database.Database.make_random_split">
+<span class="sig-name descname"><span class="pre">make_random_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evaluation_mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#Database.make_random_split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.database.Database.make_random_split" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>evaluation_mode</strong> – String naming the split, can be anything, but ‘train’, ‘valid’, and ‘test’ are special.s</p></li>
+<li><p><strong>split_size</strong> – int (number of items) or float&lt;1, fraction of samples.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.databases.database.Database.make_trainvalidtest_split">
+<span class="sig-name descname"><span class="pre">make_trainvalidtest_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#Database.make_trainvalidtest_split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.database.Database.make_trainvalidtest_split" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.databases.database.Database.send_to_device">
+<span class="sig-name descname"><span class="pre">send_to_device</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#Database.send_to_device"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.database.Database.send_to_device" title="Permalink to this definition"></a></dt>
+<dd><p>Send a database to a device</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.databases.database.Database.split_the_rest">
+<span class="sig-name descname"><span class="pre">split_the_rest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evaluation_mode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#Database.split_the_rest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.database.Database.split_the_rest" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hippynn.databases.database.Database.var_list">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">var_list</span></span><a class="headerlink" href="#hippynn.databases.database.Database.var_list" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.databases.database.NamedTensorDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NamedTensorDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor_names</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">tensors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#NamedTensorDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.database.NamedTensorDataset" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TensorDataset</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.databases.database.NamedTensorDataset.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor_names</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">tensors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#NamedTensorDataset.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.database.NamedTensorDataset.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.databases.database.NamedTensorDataset.tensors">
+<span class="sig-name descname"><span class="pre">tensors</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#hippynn.databases.database.NamedTensorDataset.tensors" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.databases.database.compute_index_mask">
+<span class="sig-name descname"><span class="pre">compute_index_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_pool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#compute_index_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.database.compute_index_mask" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.databases.database.prettyprint_arrays">
+<span class="sig-name descname"><span class="pre">prettyprint_arrays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#prettyprint_arrays"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.database.prettyprint_arrays" title="Permalink to this definition"></a></dt>
+<dd><p>Pretty-print array dictionary
+:return: None</p>
+</dd></dl>
+
 </div>
 
 

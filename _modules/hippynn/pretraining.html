@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.pretraining &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.pretraining</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.pretraining</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Things to do before training, i.e. initialization of network and diagnostics.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">from</span> <span class="nn">.graphs</span> <span class="kn">import</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">Predictor</span>
+<span class="kn">from</span> <span class="nn">.graphs.nodes.base</span> <span class="kn">import</span> <span class="n">_BaseNode</span>
+<span class="kn">from</span> <span class="nn">.graphs.nodes.tags</span> <span class="kn">import</span> <span class="n">Encoder</span>
+<span class="kn">from</span> <span class="nn">.graphs.nodes.inputs</span> <span class="kn">import</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">CellNode</span>
+<span class="kn">from</span> <span class="nn">.graphs.nodes.pairs</span> <span class="kn">import</span> <span class="n">OpenPairIndexer</span><span class="p">,</span> <span class="n">DynamicPeriodicPairs</span><span class="p">,</span> <span class="n">MinDistNode</span>
+<span class="kn">from</span> <span class="nn">.graphs.nodes.indexers</span> <span class="kn">import</span> <span class="n">acquire_encoding_padding</span>
+<span class="kn">from</span> <span class="nn">.networks.hipnn</span> <span class="kn">import</span> <span class="n">compute_hipnn_e0</span>
+
+
+<div class="viewcode-block" id="set_e0_values"><a class="viewcode-back" href="../../api_documentation/hippynn.pretraining.html#hippynn.pretraining.set_e0_values">[docs]</a><span class="k">def</span> <span class="nf">set_e0_values</span><span class="p">(</span>
+    <span class="n">energy_module</span><span class="p">,</span>
+    <span class="n">database</span><span class="p">,</span>
+    <span class="n">trainable_after</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">decay_factor</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
+    <span class="n">encoder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">energy_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">species_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">peratom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes values for the non-interacting energy using the training data.</span>
+
+<span class="sd">    :param energy_module:   HEnergyNode or torch module for energy prediction</span>
+<span class="sd">    :param database:        InterfaceDB object to get training data</span>
+<span class="sd">    :param trainable_after: Determines if it should change .requires_grad attribute for the E0 parameters.</span>
+<span class="sd">    :param decay_factor:    change initialized weights of further energy layers by ``df**N`` for layer N</span>
+<span class="sd">    :param network_module:  network for running the species encoding. Can be auto-identified from energy node</span>
+<span class="sd">    :param energy_name:     name for the energy variable, can be auto-identified from energy node</span>
+<span class="sd">    :param species_name:    name for the species variable, can be auto-identified from energy node</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy_module</span><span class="p">,</span> <span class="n">_BaseNode</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">encoder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">energy_module</span><span class="p">,</span> <span class="n">Encoder</span><span class="p">,</span> <span class="s2">&quot;Constructing E0 Values&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">species_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">species_name</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">energy_module</span><span class="p">,</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="s2">&quot;Constructing E0 Values&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">db_name</span>
+        <span class="k">if</span> <span class="n">energy_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">energy_name</span> <span class="o">=</span> <span class="n">energy_module</span><span class="o">.</span><span class="n">main_output</span><span class="o">.</span><span class="n">db_name</span>
+
+        <span class="n">energy_module</span> <span class="o">=</span> <span class="n">energy_module</span><span class="o">.</span><span class="n">torch_module</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">_BaseNode</span><span class="p">):</span>
+        <span class="n">encoder</span> <span class="o">=</span> <span class="n">encoder</span><span class="o">.</span><span class="n">torch_module</span>
+
+    <span class="n">train_data</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
+
+    <span class="n">z_vals</span> <span class="o">=</span> <span class="n">train_data</span><span class="p">[</span><span class="n">species_name</span><span class="p">]</span>
+    <span class="n">t_vals</span> <span class="o">=</span> <span class="n">train_data</span><span class="p">[</span><span class="n">energy_name</span><span class="p">]</span>
+
+    <span class="n">eovals</span> <span class="o">=</span> <span class="n">compute_hipnn_e0</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">z_vals</span><span class="p">,</span> <span class="n">t_vals</span><span class="p">,</span> <span class="n">peratom</span><span class="o">=</span><span class="n">peratom</span><span class="p">)</span>
+    <span class="n">eo_layer</span> <span class="o">=</span> <span class="n">energy_module</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computed E0 energies:&quot;</span><span class="p">,</span> <span class="n">eovals</span><span class="p">)</span>
+    <span class="n">eo_layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">eovals</span><span class="o">.</span><span class="n">expand_as</span><span class="p">(</span><span class="n">eo_layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">eo_layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="n">trainable_after</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">energy_module</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span> <span class="o">*=</span> <span class="n">decay_factor</span>
+        <span class="n">layer</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">data</span> <span class="o">*=</span> <span class="n">decay_factor</span>
+        <span class="n">decay_factor</span> <span class="o">*=</span> <span class="n">decay_factor</span></div>
+
+
+<span class="k">def</span> <span class="nf">_setup_min_dist_graph</span><span class="p">(</span>
+    <span class="n">species_name</span><span class="p">,</span>
+    <span class="n">positions_name</span><span class="p">,</span>
+    <span class="n">dist_hard_max</span><span class="p">,</span>
+    <span class="n">species_set</span><span class="p">,</span>
+    <span class="n">cell_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">pair_finder_class</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">species</span> <span class="o">=</span> <span class="n">SpeciesNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="n">species_name</span><span class="p">)</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">PositionsNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="n">positions_name</span><span class="p">)</span>
+
+    <span class="c1"># Species set required to build encoder and atom indexer.</span>
+    <span class="n">acquire_encoding_padding</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">species_set</span><span class="o">=</span><span class="n">species_set</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cell_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="n">cell</span> <span class="o">=</span> <span class="n">CellNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="n">cell_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pair_finder_class</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="n">pair_finder_class</span> <span class="o">=</span> <span class="n">DynamicPeriodicPairs</span>
+        <span class="n">pair_parents</span> <span class="o">=</span> <span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">cell</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pair_finder_class</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="n">pair_finder_class</span> <span class="o">=</span> <span class="n">OpenPairIndexer</span>
+        <span class="n">pair_parents</span> <span class="o">=</span> <span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">species</span><span class="p">)</span>
+
+    <span class="n">pair_finder</span> <span class="o">=</span> <span class="n">pair_finder_class</span><span class="p">(</span><span class="s2">&quot;PairFinder&quot;</span><span class="p">,</span> <span class="n">pair_parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">dist_hard_max</span><span class="p">)</span>
+
+    <span class="n">min_dist_mol</span> <span class="o">=</span> <span class="n">MinDistNode</span><span class="p">(</span><span class="s2">&quot;MinDists&quot;</span><span class="p">,</span> <span class="n">pair_finder</span><span class="p">)</span><span class="o">.</span><span class="n">min_dist_mol</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="n">Predictor</span><span class="p">(</span><span class="n">pair_parents</span><span class="p">,</span> <span class="p">[</span><span class="n">min_dist_mol</span><span class="p">],</span> <span class="n">model_device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Minimum Distance Calculator&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pred</span><span class="p">,</span> <span class="n">min_dist_mol</span>
+
+
+<div class="viewcode-block" id="calculate_min_dists"><a class="viewcode-back" href="../../api_documentation/hippynn.pretraining.html#hippynn.pretraining.calculate_min_dists">[docs]</a><span class="k">def</span> <span class="nf">calculate_min_dists</span><span class="p">(</span>
+    <span class="n">array_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">species_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">positions_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">dist_hard_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">cell_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">pair_finder_class</span><span class="p">:</span> <span class="n">_BaseNode</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the minimum distance found in each system in ``array_dict``.</span>
+
+<span class="sd">    Example usage for unsplit data::</span>
+
+<span class="sd">    &gt;&gt;&gt; db = Database(...)</span>
+<span class="sd">    &gt;&gt;&gt; min_dists = calculate_min_dists(db.arr_dict,&quot;Z&quot;,&quot;R&quot;,5.0)</span>
+
+<span class="sd">    If the database has been split::</span>
+
+<span class="sd">    &gt;&gt;&gt; min_dists_train = calculate_min_dists(db.splits[&#39;train&#39;],&quot;Z&quot;,&quot;R&quot;,5.0)</span>
+
+<span class="sd">    .. Note::</span>
+<span class="sd">       The cutoff radius ``dist_hard_max`` should be set large enough such that each atom is expected</span>
+<span class="sd">       to have at least one neighbor. If an atom has no neighbors, its min_dist will be set to the</span>
+<span class="sd">       largest distance found in the current *batch*.</span>
+<span class="sd">       If an entire system has no neighbors, the minimum distance will be set to zero.</span>
+
+<span class="sd">    :param array_dict: dictionary mapping strings to tensors/numpy arrays</span>
+<span class="sd">    :param species_name: dictionary key for species</span>
+<span class="sd">    :param positions_name: dictionary key for positions</span>
+<span class="sd">    :param dist_hard_max: maximum distance to search</span>
+<span class="sd">    :param cell_name: dictionary key for cell (periodic boundary conditions.</span>
+<span class="sd">     if the cell is not specified, open boundaries are used.</span>
+<span class="sd">    :param pair_finder_class: if &#39;auto&#39;, choose automatically. elsewise build this kind of pair finder.</span>
+<span class="sd">    :param device: Where to perform the computation.</span>
+<span class="sd">    :param batch_size: batch size to perform evaluation over.</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check for required info before proceeding to more expensive stuff.</span>
+    <span class="k">if</span> <span class="n">species_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">array_dict</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Species key </span><span class="si">{</span><span class="n">species_name</span><span class="si">}</span><span class="s2"> not in dictionary.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">positions_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">array_dict</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Positions key </span><span class="si">{</span><span class="n">positions_name</span><span class="si">}</span><span class="s2"> not in dictionary.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cell_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cell_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">array_dict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cell key </span><span class="si">{</span><span class="n">cell_name</span><span class="si">}</span><span class="s2"> not in dictionary.&quot;</span><span class="p">)</span>
+
+    <span class="n">species_set</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">array_dict</span><span class="p">[</span><span class="n">species_name</span><span class="p">]))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">species_set</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">(</span><span class="n">species_set</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="mi">0</span><span class="p">}:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Species set empty!&quot;</span><span class="p">)</span>
+
+    <span class="n">pred</span><span class="p">,</span> <span class="n">node_key</span> <span class="o">=</span> <span class="n">_setup_min_dist_graph</span><span class="p">(</span>
+        <span class="n">species_name</span><span class="o">=</span><span class="n">species_name</span><span class="p">,</span>
+        <span class="n">positions_name</span><span class="o">=</span><span class="n">positions_name</span><span class="p">,</span>
+        <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">dist_hard_max</span><span class="p">,</span>
+        <span class="n">species_set</span><span class="o">=</span><span class="n">species_set</span><span class="p">,</span>
+        <span class="n">cell_name</span><span class="o">=</span><span class="n">cell_name</span><span class="p">,</span>
+        <span class="n">pair_finder_class</span><span class="o">=</span><span class="n">pair_finder_class</span><span class="p">,</span>
+        <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">input_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">species_name</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">array_dict</span><span class="p">[</span><span class="n">species_name</span><span class="p">]),</span>
+        <span class="n">positions_name</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">array_dict</span><span class="p">[</span><span class="n">positions_name</span><span class="p">]),</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">cell_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">input_dict</span><span class="p">[</span><span class="n">cell_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">array_dict</span><span class="p">[</span><span class="n">cell_name</span><span class="p">])</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="n">pred</span><span class="p">(</span><span class="o">**</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)[</span><span class="n">node_key</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">results</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

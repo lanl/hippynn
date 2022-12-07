@@ -49,10 +49,32 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.databases.html">databases package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.experiment.html">experiment package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.graphs.html">graphs package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.GraphModule"><code class="docutils literal notranslate"><span class="pre">GraphModule</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.IdxType"><code class="docutils literal notranslate"><span class="pre">IdxType</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.Predictor"><code class="docutils literal notranslate"><span class="pre">Predictor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.compute_evaluation_order"><code class="docutils literal notranslate"><span class="pre">compute_evaluation_order()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.copy_subgraph"><code class="docutils literal notranslate"><span class="pre">copy_subgraph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.find_relatives"><code class="docutils literal notranslate"><span class="pre">find_relatives()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.find_unique_relative"><code class="docutils literal notranslate"><span class="pre">find_unique_relative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.get_connected_nodes"><code class="docutils literal notranslate"><span class="pre">get_connected_nodes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.get_subgraph"><code class="docutils literal notranslate"><span class="pre">get_subgraph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.replace_node"><code class="docutils literal notranslate"><span class="pre">replace_node()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.indextransformers.html">indextransformers package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="hippynn.graphs.indextypes.html">indextypes package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.indextypes.html#hippynn.graphs.indextypes.IdxType"><code class="docutils literal notranslate"><span class="pre">IdxType</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.indextypes.html#hippynn.graphs.indextypes.clear_index_cache"><code class="docutils literal notranslate"><span class="pre">clear_index_cache()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.indextypes.html#hippynn.graphs.indextypes.db_form"><code class="docutils literal notranslate"><span class="pre">db_form()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.indextypes.html#hippynn.graphs.indextypes.elementwise_compare_reduce"><code class="docutils literal notranslate"><span class="pre">elementwise_compare_reduce()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.indextypes.html#hippynn.graphs.indextypes.get_reduced_index_state"><code class="docutils literal notranslate"><span class="pre">get_reduced_index_state()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.indextypes.html#hippynn.graphs.indextypes.index_type_coercion"><code class="docutils literal notranslate"><span class="pre">index_type_coercion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.indextypes.html#hippynn.graphs.indextypes.register_index_transformer"><code class="docutils literal notranslate"><span class="pre">register_index_transformer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.indextypes.html#hippynn.graphs.indextypes.soft_index_type_coercion"><code class="docutils literal notranslate"><span class="pre">soft_index_type_coercion()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.indextypes.reduce_funcs.html">reduce_funcs module</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">registry module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">registry module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.indextypes.registry.clear_index_cache"><code class="docutils literal notranslate"><span class="pre">clear_index_cache()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.indextypes.registry.register_index_transformer"><code class="docutils literal notranslate"><span class="pre">register_index_transformer()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.indextypes.type_def.html">type_def module</a></li>
 </ul>
 </li>
@@ -107,6 +129,53 @@
   <div class="section" id="registry-module">
 <h1>registry module<a class="headerlink" href="#registry-module" title="Permalink to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.graphs.indextypes.registry</span></code> module.</p>
+<span class="target" id="module-hippynn.graphs.indextypes.registry"></span><p>Storage for the logical relationships between index states,
+and a cache reduce redundant computations. Also includes
+the indextransformer decorator which registers computations
+that change index states.
+The index transformers do not live here because they are themselves
+nodes, and this package should be minimally dependent on the nodes themselves.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.graphs.indextypes.registry.clear_index_cache">
+<span class="sig-name descname"><span class="pre">clear_index_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/indextypes/registry.html#clear_index_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.indextypes.registry.clear_index_cache" title="Permalink to this definition"></a></dt>
+<dd><p>Remove any cached index types for nodes.</p>
+<p>The index cache holds global references to nodes that have been
+transformed automatically, so these nodes won’t be garbage collected
+automatically. Clearing the cache will free any reference to them.</p>
+<p>If you modify the index dispatch table or type comparison table on the fly,
+you may want to clear the cache to remove references to nodes created
+using the old rules.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.graphs.indextypes.registry.register_index_transformer">
+<span class="sig-name descname"><span class="pre">register_index_transformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_idxstate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_idxstate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/indextypes/registry.html#register_index_transformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.indextypes.registry.register_index_transformer" title="Permalink to this definition"></a></dt>
+<dd><p>Decorator for registering a transformer from one IdxType to another.</p>
+<p>An index transformer should have a signature:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="n">child_node_type</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>with types:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">node</span><span class="p">:</span> <span class="n">Node</span>
+<span class="n">parents</span> <span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Node</span><span class="p">]</span>
+<span class="n">child_node_type</span> <span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Node</span><span class="p">],</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span><span class="n">Tuple</span><span class="p">[</span><span class="n">node</span><span class="p">]],[</span><span class="n">node</span><span class="p">]]]</span>
+</pre></div>
+</div>
+<p>That is, the child_node_type can be a class of node, or a factory function
+which acts with the same signature as a node constructor.
+If f supports additional arguments, they must have default values,
+as it will be invoked by the automatic index transformation system
+as f(node).</p>
+<p>The decorator results in a new function of type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span>
+</pre></div>
+</div>
+<p>which is cached so that the same index transformation may be repeatedly
+applied to yield the same output node, and registered with the dispatch
+table for index transformations. No two functions may be registered for the
+same index type conversion simultaneously.</p>
+</dd></dl>
+
 </div>
 
 

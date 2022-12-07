@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.interfaces.ase_interface.calculator &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.interfaces.ase_interface.calculator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.interfaces.ase_interface.calculator</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">functools</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">from</span> <span class="nn">ase.calculators</span> <span class="kn">import</span> <span class="n">interface</span>
+<span class="kn">from</span> <span class="nn">ase.calculators.calculator</span> <span class="kn">import</span> <span class="n">compare_atoms</span><span class="p">,</span> <span class="n">PropertyNotImplementedError</span><span class="p">,</span> <span class="n">Calculator</span> <span class="c1"># Calculator is required to allow HIPNN to be used with ASE Mixing Calculators</span>
+
+<span class="kn">from</span> <span class="nn">hippynn.graphs</span> <span class="kn">import</span> <span class="n">find_relatives</span><span class="p">,</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">get_subgraph</span><span class="p">,</span> <span class="n">copy_subgraph</span><span class="p">,</span> <span class="n">replace_node</span><span class="p">,</span> <span class="n">GraphModule</span>
+<span class="kn">from</span> <span class="nn">hippynn.graphs.gops</span> <span class="kn">import</span> <span class="n">check_link_consistency</span>
+
+<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.base.node_functions</span> <span class="kn">import</span> <span class="n">NodeOperationError</span><span class="p">,</span> <span class="n">NodeNotFound</span>
+<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.base</span> <span class="kn">import</span> <span class="n">InputNode</span>
+<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.tags</span> <span class="kn">import</span> <span class="n">Encoder</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">Energies</span><span class="p">,</span> <span class="n">Charges</span>
+<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.pairs</span> <span class="kn">import</span> <span class="n">ExternalNeighborIndexer</span>
+<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.misc</span> <span class="kn">import</span> <span class="n">StrainInducer</span>
+<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.physics</span> <span class="kn">import</span> <span class="n">CoulombEnergyNode</span><span class="p">,</span> <span class="n">DipoleNode</span><span class="p">,</span> <span class="n">StressForceNode</span>
+
+<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.inputs</span> <span class="kn">import</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">CellNode</span>
+
+<span class="kn">import</span> <span class="nn">ase.neighborlist</span>
+
+<span class="c1"># TODO: implement neighbors using scipy.spatial.cKDTree?</span>
+<span class="c1"># This works for orthorhombic boxes and is much faster than ASE...</span>
+
+
+<div class="viewcode-block" id="setup_ASE_graph"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.setup_ASE_graph">[docs]</a><span class="k">def</span> <span class="nf">setup_ASE_graph</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">charges</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">charges</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">required_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">energy</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">required_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">energy</span><span class="p">,</span> <span class="n">charges</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">extra_properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">extra_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">extra_properties</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">ename</span> <span class="ow">in</span> <span class="n">extra_names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ename</span><span class="o">.</span><span class="n">isidentifier</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ASE properties must be a valid python identifier. (Got &#39;</span><span class="si">{}</span><span class="s2">&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ename</span><span class="p">))</span>
+        <span class="k">del</span> <span class="n">ename</span>
+        <span class="n">required_nodes</span> <span class="o">=</span> <span class="n">required_nodes</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">extra_properties</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="n">why</span> <span class="o">=</span> <span class="s2">&quot;Generating ASE Calculator interface&quot;</span>
+    <span class="n">subgraph</span> <span class="o">=</span> <span class="n">get_subgraph</span><span class="p">(</span><span class="n">required_nodes</span><span class="p">)</span>
+
+    <span class="c1">########################################</span>
+    <span class="c1"># TODO: Implement Ewald, Wolf, or similar version of coulomb energy?</span>
+    <span class="c1"># Better: figure out how to get voltages from external code and pass back as gradients for HIPNN backwards pass.</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">CoulombEnergyNode</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">subgraph</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;No support for coulomb energies in ASE interface yet.&quot;</span><span class="p">)</span>
+    <span class="c1">########################################</span>
+
+    <span class="c1">###############################################################</span>
+    <span class="c1"># Get a new subgraph, and find the nodes we need to construct the calculator</span>
+    <span class="c1"># Factory for seeking out nodes only in the subgraph and of a specific type</span>
+    <span class="n">search_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">targ</span><span class="p">,</span> <span class="n">sg</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">sg</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">targ</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">pair_indexers</span> <span class="o">=</span> <span class="n">find_relatives</span><span class="p">(</span><span class="n">required_nodes</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">PairIndexer</span><span class="p">,</span> <span class="n">subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">NodeOperationError</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;No Pair indexers found. Why build an ASE interface with no need for neighboring atoms?&quot;</span>
+        <span class="p">)</span> <span class="kn">from</span> <span class="nn">ee</span>
+
+    <span class="c1"># The required nodes passed back are copies of the ones passed in.</span>
+    <span class="c1"># We use assume_inputed to avoid grabbing pieces of the graph</span>
+    <span class="c1"># that are only prerequisites for the pair indexer.</span>
+    <span class="n">new_required</span><span class="p">,</span> <span class="n">new_subgraph</span> <span class="o">=</span> <span class="n">copy_subgraph</span><span class="p">(</span><span class="n">required_nodes</span><span class="p">,</span> <span class="n">assume_inputed</span><span class="o">=</span><span class="n">pair_indexers</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s2">&quot;ASE&quot;</span><span class="p">)</span>
+    <span class="c1"># We now need access to the copied indexers, rather than the originals</span>
+    <span class="n">pair_indexers</span> <span class="o">=</span> <span class="n">find_relatives</span><span class="p">(</span><span class="n">new_required</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">PairIndexer</span><span class="p">,</span> <span class="n">new_subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
+
+    <span class="n">species</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">new_required</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">new_subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">new_required</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">PositionsNode</span><span class="p">,</span> <span class="n">new_subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
+
+    <span class="c1"># TODO: is .clone necessary? Or good? Or torch.as_tensor instead?</span>
+    <span class="n">encoder</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">Encoder</span><span class="p">,</span> <span class="n">new_subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
+    <span class="n">species_set</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">encoder</span><span class="o">.</span><span class="n">species_set</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>  <span class="c1"># works with lists or tensors</span>
+    <span class="n">indexer</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">AtomIndexer</span><span class="p">,</span> <span class="n">new_subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
+    <span class="n">min_radius</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">dist_hard_max</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pair_indexers</span><span class="p">)</span>
+    <span class="c1">###############################################################</span>
+
+    <span class="c1">###############################################################</span>
+    <span class="c1"># Set up graph to accept external pair indices and shifts</span>
+
+    <span class="n">in_shift</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;(ASE)shift_vector&quot;</span><span class="p">)</span>
+    <span class="n">in_cell</span> <span class="o">=</span> <span class="n">CellNode</span><span class="p">(</span><span class="s2">&quot;(ASE)cell&quot;</span><span class="p">)</span>
+    <span class="n">in_pair_first</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;(ASE)pair_first&quot;</span><span class="p">)</span>
+    <span class="n">in_pair_second</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;(ASE)pair_second&quot;</span><span class="p">)</span>
+    <span class="n">external_pairs</span> <span class="o">=</span> <span class="n">ExternalNeighborIndexer</span><span class="p">(</span>
+        <span class="s2">&quot;(ASE)EXTERNAL_NEIGHBORS&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">indexer</span><span class="o">.</span><span class="n">real_atoms</span><span class="p">,</span> <span class="n">in_shift</span><span class="p">,</span> <span class="n">in_cell</span><span class="p">,</span> <span class="n">in_pair_first</span><span class="p">,</span> <span class="n">in_pair_second</span><span class="p">),</span>
+        <span class="n">hard_dist_cutoff</span><span class="o">=</span><span class="n">min_radius</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">new_inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">species</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">in_cell</span><span class="p">,</span> <span class="n">in_pair_first</span><span class="p">,</span> <span class="n">in_pair_second</span><span class="p">,</span> <span class="n">in_shift</span><span class="p">]</span>
+
+    <span class="c1"># Replace the existing pair indexers with the new node that accepts external pairs of atoms:</span>
+    <span class="c1"># (This is the primary reason we needed to copy the subgraph --</span>
+    <span class="c1">#   we don&#39;t want to break the original computation, and `replace_node` mutates graph connectivity</span>
+    <span class="k">for</span> <span class="n">pi</span> <span class="ow">in</span> <span class="n">pair_indexers</span><span class="p">:</span>
+        <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="p">,</span> <span class="n">external_pairs</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1">###############################################################</span>
+
+    <span class="c1">###############################################################</span>
+    <span class="c1"># Set up gradient and, if possible, dipole properties.</span>
+
+    <span class="n">energy</span><span class="p">,</span> <span class="o">*</span><span class="n">new_required</span> <span class="o">=</span> <span class="n">new_required</span>
+
+    <span class="n">cellscaleinducer</span> <span class="o">=</span> <span class="n">StrainInducer</span><span class="p">(</span><span class="s2">&quot;(ASE)Strain_inducer&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">in_cell</span><span class="p">))</span>
+    <span class="n">strain</span> <span class="o">=</span> <span class="n">cellscaleinducer</span><span class="o">.</span><span class="n">strain</span>
+    <span class="n">derivatives</span> <span class="o">=</span> <span class="n">StressForceNode</span><span class="p">(</span><span class="s2">&quot;(ASE)StressForceCalculator&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">strain</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">in_cell</span><span class="p">))</span>
+
+    <span class="n">replace_node</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">cellscaleinducer</span><span class="o">.</span><span class="n">strained_coordinates</span><span class="p">)</span>
+    <span class="n">replace_node</span><span class="p">(</span><span class="n">in_cell</span><span class="p">,</span> <span class="n">cellscaleinducer</span><span class="o">.</span><span class="n">strained_cell</span><span class="p">)</span>
+
+    <span class="n">implemented_nodes</span> <span class="o">=</span> <span class="n">energy</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span> <span class="n">derivatives</span><span class="o">.</span><span class="n">forces</span><span class="p">,</span> <span class="n">derivatives</span><span class="o">.</span><span class="n">stress</span>
+    <span class="n">implemented_properties</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;potential_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;forces&quot;</span><span class="p">,</span> <span class="s2">&quot;stress&quot;</span><span class="p">]</span>
+
+    <span class="n">pbc_handler</span> <span class="o">=</span> <span class="n">PBCHandle</span><span class="p">(</span><span class="n">derivatives</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">charges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">charges</span><span class="p">,</span> <span class="o">*</span><span class="n">new_required</span> <span class="o">=</span> <span class="n">new_required</span>
+        <span class="n">dipole_moment</span> <span class="o">=</span> <span class="n">DipoleNode</span><span class="p">(</span><span class="s2">&quot;(ASE)DIPOLE&quot;</span><span class="p">,</span> <span class="n">charges</span><span class="p">)</span>
+        <span class="n">implemented_nodes</span> <span class="o">=</span> <span class="o">*</span><span class="n">implemented_nodes</span><span class="p">,</span> <span class="n">charges</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span> <span class="n">dipole_moment</span>
+        <span class="n">implemented_properties</span> <span class="o">=</span> <span class="n">implemented_properties</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;charges&quot;</span><span class="p">,</span> <span class="s2">&quot;dipole_moment&quot;</span><span class="p">]</span>
+
+    <span class="c1">#### Add other properties here:</span>
+    <span class="k">if</span> <span class="n">extra_properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">implemented_nodes</span> <span class="o">=</span> <span class="o">*</span><span class="n">implemented_nodes</span><span class="p">,</span> <span class="o">*</span><span class="n">new_required</span>
+        <span class="n">implemented_properties</span> <span class="o">=</span> <span class="n">implemented_properties</span> <span class="o">+</span> <span class="n">extra_names</span>
+
+    <span class="c1">###############################################################</span>
+
+    <span class="c1"># Finally, assemble the graph!</span>
+    <span class="n">check_link_consistency</span><span class="p">((</span><span class="o">*</span><span class="n">new_inputs</span><span class="p">,</span> <span class="o">*</span><span class="n">implemented_nodes</span><span class="p">))</span>
+    <span class="n">mod</span> <span class="o">=</span> <span class="n">GraphModule</span><span class="p">(</span><span class="n">new_inputs</span><span class="p">,</span> <span class="n">implemented_nodes</span><span class="p">)</span>
+    <span class="n">mod</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">min_radius</span><span class="p">,</span> <span class="n">species_set</span><span class="p">,</span> <span class="n">implemented_properties</span><span class="p">,</span> <span class="n">mod</span><span class="p">,</span> <span class="n">pbc_handler</span></div>
+
+
+<div class="viewcode-block" id="PBCHandle"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.PBCHandle">[docs]</a><span class="k">class</span> <span class="nc">PBCHandle</span><span class="p">:</span>
+<div class="viewcode-block" id="PBCHandle.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.PBCHandle.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">nodes</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modules</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span><span class="o">.</span><span class="n">torch_module</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="PBCHandle.set"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.PBCHandle.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_last</span><span class="p">,</span> <span class="n">value</span><span class="p">)):</span>
+                <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last</span><span class="p">:</span>
+                <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="c1"># Convert PBC arrays into simple True/False values (until we have determined how to use mixed PBC)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="o">==</span> <span class="kc">True</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="o">==</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unrecognized PBC condition: </span><span class="si">{}</span><span class="s2">. Mixed PBC not yet supported.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">pbc</span> <span class="o">=</span> <span class="n">value</span></div></div>
+
+
+<span class="c1"># decorator for generating calculation methods; this code is also run for calls to</span>
+<span class="c1"># get_property, but with the key filled in as a closure.</span>
+<span class="k">def</span> <span class="nf">_generate_calculation_method</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+
+    <span class="n">cant_calculate</span> <span class="o">=</span> <span class="n">PropertyNotImplementedError</span><span class="p">(</span><span class="s2">&quot;Property not implemented:&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">allow_calculation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">implemented_properties</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">cant_calculate</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">allow_calculation</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculation_required</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="p">[</span><span class="n">key</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calculate</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">method</span>
+
+
+<span class="c1"># UNUSED, was used for HippynnCaclulator.to()</span>
+<span class="c1"># factory for forwarding pytorch methods to the calculator</span>
+<div class="viewcode-block" id="pass_to_pytorch"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.pass_to_pytorch">[docs]</a><span class="k">def</span> <span class="nf">pass_to_pytorch</span><span class="p">(</span><span class="n">fn_name</span><span class="p">):</span>
+    <span class="n">wraps</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">fn_name</span><span class="p">)</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">wraps</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">fn_name</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">method</span></div>
+
+
+<div class="viewcode-block" id="HippynnCalculator"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator">[docs]</a><span class="k">class</span> <span class="nc">HippynnCalculator</span><span class="p">(</span><span class="n">interface</span><span class="o">.</span><span class="n">Calculator</span><span class="p">,</span> <span class="n">Calculator</span><span class="p">):</span> <span class="c1"># Calculator inheritance required for ASE Mixing Calculator usage</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ASE calculator based on hippynn graphs. Uses ASE neighbor lists. Not suitable for domain decomposition.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="HippynnCalculator.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">charges</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skin</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">extra_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">en_unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dist_unit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param energy: Node for energy</span>
+<span class="sd">        :param charges: Node for charges (optional)</span>
+<span class="sd">        :param skin: Skin for neighbors list</span>
+<span class="sd">        :param extra_properties: dictionary of names to nodes for additional nodes for the calculator to compute.</span>
+<span class="sd">        :param name: identifying string</span>
+<span class="sd">        :param en_unit: unit factor to use for energies -- set it to the same as the energy unit used</span>
+<span class="sd">            in training. If not given, the model is assumed to output in kcal/mol!</span>
+<span class="sd">        :param dist_unit: unit factor to use for distances -- set it to the same as the</span>
+<span class="sd">            distance unit used in training. If not given, defaults to Angstrom</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_radius</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">species_set</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">implemented_properties</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pbc</span> <span class="o">=</span> <span class="n">setup_ASE_graph</span><span class="p">(</span>
+            <span class="n">energy</span><span class="p">,</span> <span class="n">charges</span><span class="o">=</span><span class="n">charges</span><span class="p">,</span> <span class="n">extra_properties</span><span class="o">=</span><span class="n">extra_properties</span>
+        <span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">implemented_properties</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;energy&quot;</span><span class="p">)</span> <span class="c1"># Required for using mixing calculators in ASE</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_properties</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># get species set to determine length of cutoffs</span>
+        <span class="k">if</span> <span class="n">skin</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Negative skin radius not allowed.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cutoffs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_radius</span>  <span class="c1"># The -1 is for &#39;blank atoms&#39;, not used in ase.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_skin</span> <span class="o">=</span> <span class="n">skin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nl</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rebuild_neighbors</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_needs_calculation</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">en_unit</span> <span class="o">=</span> <span class="n">en_unit</span> <span class="k">if</span> <span class="n">en_unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ase</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">kcal</span> <span class="o">/</span> <span class="n">ase</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">mol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_unit</span> <span class="o">=</span> <span class="n">dist_unit</span> <span class="k">if</span> <span class="n">dist_unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ase</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">Angstrom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;Hippynn calculator&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1">#Hack to work with ASE trajectory printing</span></div>
+
+    <span class="n">make</span> <span class="o">=</span> <span class="n">_generate_calculation_method</span>
+    <span class="n">get_potential_energy</span> <span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="s2">&quot;potential_energy&quot;</span><span class="p">)</span>
+    <span class="n">get_energy</span> <span class="o">=</span> <span class="n">get_potential_energy</span>
+    <span class="n">get_potential_energies</span> <span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="s2">&quot;potential_energies&quot;</span><span class="p">)</span>
+    <span class="n">get_energies</span> <span class="o">=</span> <span class="n">get_potential_energies</span>
+    <span class="n">get_free_energy</span> <span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="s2">&quot;free_energy&quot;</span><span class="p">)</span>
+    <span class="n">get_forces</span> <span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="s2">&quot;forces&quot;</span><span class="p">)</span>
+    <span class="n">get_charges</span> <span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="s2">&quot;charges&quot;</span><span class="p">)</span>
+    <span class="n">get_dipole_moment</span> <span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="s2">&quot;dipole_moment&quot;</span><span class="p">)</span>
+    <span class="n">get_dipole</span> <span class="o">=</span> <span class="n">get_dipole_moment</span>
+    <span class="n">get_stress</span> <span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="s2">&quot;stress&quot;</span><span class="p">)</span>
+    <span class="n">get_stresses</span> <span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="s2">&quot;stresses&quot;</span><span class="p">)</span>
+    <span class="n">get_magmom</span> <span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="s2">&quot;magmom&quot;</span><span class="p">)</span>
+    <span class="n">get_magmoms</span> <span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="s2">&quot;magmoms&quot;</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">make</span>
+
+<div class="viewcode-block" id="HippynnCalculator.rebuild_neighbors"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.rebuild_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">rebuild_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nl</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">neighborlist</span><span class="o">.</span><span class="n">NeighborList</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cutoffs</span><span class="p">,</span>
+            <span class="n">skin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_skin</span><span class="p">,</span>
+            <span class="nb">sorted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">self_interaction</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">bothways</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">primitive</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">neighborlist</span><span class="o">.</span><span class="n">NewPrimitiveNeighborList</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+    <span class="c1"># Dear ASE: This is not Java....</span>
+<div class="viewcode-block" id="HippynnCalculator.set_atoms"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.set_atoms">[docs]</a>    <span class="k">def</span> <span class="nf">set_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_needs_calculation</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="HippynnCalculator.get_property"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.get_property">[docs]</a>    <span class="k">def</span> <span class="nf">get_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">allow_calculation</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="c1"># `or` defaults to last atoms received</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;get_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))(</span><span class="n">atoms</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="n">allow_calculation</span><span class="o">=</span><span class="n">allow_calculation</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PropertyNotImplementedError</span><span class="p">(</span><span class="s2">&quot;Property not implemented:&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="HippynnCalculator.to"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.to">[docs]</a>    <span class="k">def</span> <span class="nf">to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># The below section is complicated because the pytorch `to` method does not have a strict signature.</span>
+        <span class="n">allargs</span> <span class="o">=</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">allargs</span><span class="p">:</span>
+            <span class="c1"># Attempt conversion of strings to dtype or device.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">RuntimeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">RuntimeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+                <span class="k">pass</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">a</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="HippynnCalculator.calculate"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">system_changes</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Accepts &#39;properties&#39; and &#39;system changes&#39; but ignores them,</span>
+<span class="sd">        purely for compatibility with ASE base calculator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="k">if</span> <span class="n">atoms</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">atoms</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pbc</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">pbc</span><span class="p">)</span>
+
+        <span class="c1"># Ase neighbor list raises ValueError if passed a new system with a different number of atoms.</span>
+        <span class="c1"># If something like this happens, we just scrap that neighbors list and make a fresh one.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nl</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rebuild_neighbors</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nl</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+
+        <span class="c1"># Get variables from atoms. Unsqueeze is to add batch axis.</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># Convert from ASE distance (angstrom) to whatever the network uses.</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">positions</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_unit</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">cell</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">array</span><span class="p">)</span>  <span class="c1"># ExternalNieghbors doesn&#39;t take batch index</span>
+        <span class="c1"># Get pair first and second from neighbors list</span>
+
+        <span class="n">pair_first</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nl</span><span class="o">.</span><span class="n">nl</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+        <span class="n">pair_second</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nl</span><span class="o">.</span><span class="n">nl</span><span class="o">.</span><span class="n">pair_second</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+        <span class="n">pair_shiftvecs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nl</span><span class="o">.</span><span class="n">nl</span><span class="o">.</span><span class="n">offset_vec</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+
+        <span class="c1"># This order must be synchronized with function setup_ase_graph above</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">species</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_shiftvecs</span>
+        <span class="c1"># Move to device, and convert to the type of float the model is using</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">inp</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">is_floating_point</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))</span> <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">inputs</span>
+        <span class="p">]</span>
+
+        <span class="c1"># Run it all through pytorch!</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">implemented_properties</span><span class="p">,</span> <span class="n">results</span><span class="p">)}</span>
+
+        <span class="c1"># Convert units</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;potential_energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;potential_energy&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">en_unit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;potential_energy&quot;</span><span class="p">]</span> <span class="c1"># Required for using ASE mixing calculators, which assume potential energy is under the property &quot;energy&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">en_unit</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_unit</span><span class="p">)</span>
+        <span class="c1"># slightly opaque way to handle if pbc is 3-tuple or boolean.</span>
+        <span class="c1"># Note: PBC handler forbids mixed BCs, so this check is enough.</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">pbc</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">pbc</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">pbc</span><span class="p">:</span>
+            <span class="n">stress_factor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">en_unit</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_unit</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stress_factor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">en_unit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">stress_factor</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_needs_calculation</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="HippynnCalculator.calculation_required"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.calculation_required">[docs]</a>    <span class="k">def</span> <span class="nf">calculation_required</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns true if:</span>
+<span class="sd">        1. A property in the list `properties` is not supported.</span>
+<span class="sd">        2. Atoms are different from stored atoms. This proceeds by short-circuit:</span>
+<span class="sd">        * if this check is passed, compare using ase `compare_atoms` and tolerance `tol`.</span>
+<span class="sd">        * slight difference from ASE implementation: if `properties` is a string then it is wrapped in a list.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span><span class="n">properties</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">prop</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">implemented_properties</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="n">compare_atoms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_needs_calculation</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_needs_calculation</span></div></div>
+
+
+<div class="viewcode-block" id="calculator_from_model"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.calculator_from_model">[docs]</a><span class="k">def</span> <span class="nf">calculator_from_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Attempt to find the energy and charge nodes automatically.</span>
+
+<span class="sd">    :param model: :class:`GraphModule` for the model.</span>
+<span class="sd">    :param kwargs: passed to :class:`HippynnCalculator`</span>
+
+<span class="sd">    .. Note::</span>
+<span class="sd">       If your model has an energy node, but that is not the full energy for simulation, don&#39;t use this function.</span>
+<span class="sd">       Similarly for charge.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">possible_energy</span> <span class="o">=</span> <span class="n">find_relatives</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">,</span> <span class="n">Energies</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_energy</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;More than one energy node present, cannot auto-generate ASE interface&quot;</span><span class="p">)</span>
+    <span class="n">energy</span> <span class="o">=</span> <span class="n">possible_energy</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">possible_charge</span> <span class="o">=</span> <span class="n">find_relatives</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">,</span> <span class="n">Charges</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">NodeNotFound</span> <span class="k">as</span> <span class="n">nnf</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;No charge node found: ASE interface will not calculate charges or dipole moments.&quot;</span><span class="p">)</span>
+        <span class="n">charges</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_charge</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;More than one charge node present, charges left out of ASE interface&quot;</span><span class="p">)</span>
+            <span class="n">charges</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">charges</span> <span class="o">=</span> <span class="n">possible_charge</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">HippynnCalculator</span><span class="p">(</span><span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span> <span class="n">charges</span><span class="o">=</span><span class="n">charges</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

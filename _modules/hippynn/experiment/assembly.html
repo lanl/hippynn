@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.experiment.assembly &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.experiment.assembly</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.experiment.assembly</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Assembling graphs for a training run</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="kn">from</span> <span class="nn">hippynn.graphs</span> <span class="kn">import</span> <span class="n">GraphModule</span><span class="p">,</span> <span class="n">get_subgraph</span><span class="p">,</span> <span class="n">find_unique_relative</span>
+<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.base</span> <span class="kn">import</span> <span class="n">InputNode</span><span class="p">,</span> <span class="n">LossInputNode</span><span class="p">,</span> <span class="n">LossPredNode</span><span class="p">,</span> <span class="n">LossTrueNode</span>
+
+<span class="kn">from</span> <span class="nn">hippynn.experiment.evaluator</span> <span class="kn">import</span> <span class="n">Evaluator</span>
+
+<span class="n">TrainingModules</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;TrainingModules&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;loss&quot;</span><span class="p">,</span> <span class="s2">&quot;evaluator&quot;</span><span class="p">))</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:param model: assembled torch.nn.Module of the model</span>
+<span class="sd">:param loss: assembled torch.nn.Module for the loss</span>
+<span class="sd">:param evaluator: assembled evaluator for validation losses</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="gemerate_database_info"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.assembly.html#hippynn.experiment.gemerate_database_info">[docs]</a><span class="k">def</span> <span class="nf">gemerate_database_info</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Construct db info from input nodes and target nodes.</span>
+<span class="sd">    :param inputs: list of input nodes</span>
+<span class="sd">    :param targets: list of target nodes</span>
+<span class="sd">    :param allow_unfound: don&#39;t check if names are valid</span>
+
+<span class="sd">    Builds a list of the db names for the nodes.</span>
+<span class="sd">    If</span>
+
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">db_info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;inputs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">db_name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">],</span>
+        <span class="s2">&quot;targets&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">db_name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">],</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Allows `None` to pass through.</span>
+    <span class="k">if</span> <span class="n">allow_unfound</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">db_info</span>
+
+    <span class="c1"># If none of the names was `None`, return.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">db_info</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">row</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">db_info</span>
+
+    <span class="c1"># Else, we need to raise an error.</span>
+
+    <span class="n">missing_inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">idb</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">db_info</span><span class="p">[</span><span class="s2">&quot;inputs&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="n">idb</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">missing_targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">idb</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">db_info</span><span class="p">[</span><span class="s2">&quot;targets&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="n">idb</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">missing_inputs</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Missing inputs: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">missing_inputs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">missing_targets</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Missing targets: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">missing_targets</span><span class="p">)</span>
+
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Required quantities for the graph inputs or targets are not mapped to a db name:</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="build_loss_modules"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.assembly.html#hippynn.experiment.build_loss_modules">[docs]</a><span class="k">def</span> <span class="nf">build_loss_modules</span><span class="p">(</span><span class="n">training_loss</span><span class="p">,</span> <span class="n">validation_losses</span><span class="p">,</span> <span class="n">network_outputs</span><span class="p">,</span> <span class="n">database_inputs</span><span class="p">):</span>
+    <span class="n">network_outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">pred</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">network_outputs</span><span class="p">]</span>
+    <span class="n">database_inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">true</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">database_inputs</span><span class="p">]</span>
+    <span class="n">all_inputs</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">network_outputs</span><span class="p">,</span> <span class="o">*</span><span class="n">database_inputs</span><span class="p">)</span>
+
+    <span class="n">train_loss_module</span> <span class="o">=</span> <span class="n">GraphModule</span><span class="p">(</span><span class="n">all_inputs</span><span class="p">,</span> <span class="p">[</span><span class="n">training_loss</span><span class="p">])</span>
+    <span class="n">valid_loss_module</span> <span class="o">=</span> <span class="n">GraphModule</span><span class="p">(</span><span class="n">all_inputs</span><span class="p">,</span> <span class="n">validation_losses</span><span class="p">)</span>
+    <span class="n">valid_loss_module</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">valid_loss_module</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">train_loss_module</span><span class="p">,</span> <span class="n">valid_loss_module</span></div>
+
+
+<div class="viewcode-block" id="determine_out_in_targ"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.assembly.html#hippynn.experiment.determine_out_in_targ">[docs]</a><span class="k">def</span> <span class="nf">determine_out_in_targ</span><span class="p">(</span><span class="o">*</span><span class="n">nodes_required_for_loss</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param nodes_required_for_loss: train nodes and validation nodes</span>
+<span class="sd">    :return: lists of needed network inputs, network outputs, and database targets</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">nodes_required_for_loss</span> <span class="o">=</span> <span class="n">get_subgraph</span><span class="p">(</span><span class="n">nodes_required_for_loss</span><span class="p">)</span>
+
+    <span class="n">required_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">nodes_required_for_loss</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">InputNode</span><span class="p">)}</span>
+
+    <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">LossInputNode</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">required_inputs</span><span class="p">),</span> <span class="p">(</span>
+        <span class="s2">&quot;Losses should not contain plain InputNode objects; only LossPredNode and LossTrueNode objects&quot;</span>
+        <span class="s2">&quot;Bad nodes: </span><span class="si">{}</span><span class="s2"> &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">required_inputs</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">LossInputNode</span><span class="p">)])</span>
+    <span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">origin_node</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">required_inputs</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">LossPredNode</span><span class="p">)]</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">origin_node</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">required_inputs</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">LossTrueNode</span><span class="p">)]</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">outputs</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">get_all_parents</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">InputNode</span><span class="p">)]</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">inputs</span><span class="p">))</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">outputs</span><span class="p">))</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">targets</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">targets</span></div>
+
+
+<div class="viewcode-block" id="assemble_for_training"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.assembly.html#hippynn.experiment.assemble_for_training">[docs]</a><span class="k">def</span> <span class="nf">assemble_for_training</span><span class="p">(</span><span class="n">train_loss</span><span class="p">,</span> <span class="n">validation_losses</span><span class="p">,</span> <span class="n">validation_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_maker</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param train_loss: LossNode</span>
+<span class="sd">    :param validation_losses: dict of (name:loss_node) or list of LossNodes.</span>
+<span class="sd">                              -if a list of loss nodes, the name of the node will be used for printing the loss,</span>
+<span class="sd">                              -this can be overwritten with a list of validation_names</span>
+<span class="sd">    :param validation_names (optional):  list of names for loss nodes, only if validation_losses is a list.</span>
+<span class="sd">    :param plot_maker:        optional PlotMaker for model evaluation</span>
+<span class="sd">    :return: training_modules, db_info</span>
+<span class="sd">        -db_info: dict of inputs (input to model) and targets (input to loss) in terms of the `db_name`.</span>
+
+<span class="sd">    ``assemble_for_training`` computes:</span>
+
+<span class="sd">    #. what inputs are needed to the model</span>
+<span class="sd">    #. what outputs of the model are needed for the loss</span>
+<span class="sd">    #. what targets are needed from the database for the loss</span>
+
+<span class="sd">    It then uses this info to create ``GraphModule`` s for the model and loss,</span>
+<span class="sd">    and an ``Evaluator`` based on validation loss (&amp; names), early stopping, plot maker.</span>
+
+<span class="sd">    .. Note::</span>
+<span class="sd">        Model and training loss are always evaluated on the active device.</span>
+<span class="sd">        But the validation losses reside by default on the CPU. This helps compute statistics over large datasets.</span>
+<span class="sd">        To accomplish this, the modules associated with the loss are copied in the validation loss.</span>
+<span class="sd">        Thus, after assembling the modules for training, changes to the loss nodes will not affect the model evaluator.</span>
+<span class="sd">        In all likelihood you aren&#39;t planning to do something too fancy like change the loss nodes during training.</span>
+<span class="sd">        But if you do plan to do something like that with callbacks, know that you would probably need to construct a new</span>
+<span class="sd">        evaluator.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">validation_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">validation_losses</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">validation_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">validation_losses</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">validation_losses</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">validation_losses</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">validation_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">validation_losses</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">validation_losses</span><span class="p">,</span> <span class="nb">dict</span>
+        <span class="p">),</span> <span class="s2">&quot;Validation loss names cannot be supplied if validation_losses is a dictionary&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">validation_names</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Validation names must be strings.&quot;</span><span class="p">)</span>
+
+    <span class="n">loss_required_nodes</span> <span class="o">=</span> <span class="p">(</span><span class="n">train_loss</span><span class="p">,</span> <span class="o">*</span><span class="n">validation_losses</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">plot_maker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">loss_required_nodes</span> <span class="o">=</span> <span class="o">*</span><span class="n">loss_required_nodes</span><span class="p">,</span> <span class="o">*</span><span class="n">plot_maker</span><span class="o">.</span><span class="n">required_nodes</span>
+
+    <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="n">determine_out_in_targ</span><span class="p">(</span><span class="o">*</span><span class="n">loss_required_nodes</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Determined Inputs:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Determined Outputs:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Determined Targets:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">])</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">GraphModule</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">loss_assembled</span><span class="p">,</span> <span class="n">validation_lossfns</span> <span class="o">=</span> <span class="n">build_loss_modules</span><span class="p">(</span><span class="n">train_loss</span><span class="p">,</span> <span class="n">validation_losses</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">plot_maker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plot_maker</span><span class="o">.</span><span class="n">assemble_module</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
+    <span class="n">db_info</span> <span class="o">=</span> <span class="n">gemerate_database_info</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
+    <span class="n">evaluator</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">validation_lossfns</span><span class="p">,</span> <span class="n">validation_names</span><span class="p">,</span> <span class="n">plot_maker</span><span class="o">=</span><span class="n">plot_maker</span><span class="p">,</span> <span class="n">db_info</span><span class="o">=</span><span class="n">db_info</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">TrainingModules</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">loss_assembled</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">),</span> <span class="n">db_info</span></div>
+
+
+<span class="n">_PAIRCACHE_DB_NAME</span> <span class="o">=</span> <span class="s2">&quot;AutoPrecomputedPairs&quot;</span>
+<span class="kn">from</span> <span class="nn">..graphs.nodes</span> <span class="kn">import</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">indexers</span><span class="p">,</span> <span class="n">base</span>
+<span class="kn">from</span> <span class="nn">..graphs</span> <span class="kn">import</span> <span class="n">Predictor</span><span class="p">,</span> <span class="n">gops</span><span class="p">,</span> <span class="n">inputs</span>
+
+<span class="n">_PAIRCACHE_COMPATIBLE_COMPUTERS</span> <span class="o">=</span> <span class="p">{</span><span class="n">pairs</span><span class="o">.</span><span class="n">NumpyDynamicPairs</span><span class="p">,</span> <span class="n">pairs</span><span class="o">.</span><span class="n">PeriodicPairIndexer</span><span class="p">,</span> <span class="n">pairs</span><span class="o">.</span><span class="n">DynamicPeriodicPairs</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="precompute_pairs"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.assembly.html#hippynn.experiment.precompute_pairs">[docs]</a><span class="k">def</span> <span class="nf">precompute_pairs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">make_dense</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_images</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param model: Assembled GraphModule involving a PairIndexer</span>
+<span class="sd">    :param database: database that precomputation should be supplied with</span>
+<span class="sd">    :param batch_size: batch size to do pre-computation with</span>
+<span class="sd">    :param device: where to do the precomputation.</span>
+<span class="sd">    :param make_dense: return a dense array of pairs. Warning, this can be memory-expensive. However, it is necessary if you</span>
+<span class="sd">        are going to use num_workers&gt;0 in your dataloaders. If False, the cache is stored as a sparse array.</span>
+<span class="sd">    :param n_images: number of images for cache storage, increase this if it fails.</span>
+<span class="sd">        However, large values can incur a large memory cost if make_dense is True.</span>
+
+<span class="sd">    :return: None-- changes the model graph.</span>
+
+<span class="sd">    Note that the returned model needs to be re-assembled with the new graph for the cache to take effect.</span>
+<span class="sd">    Example usage:</span>
+<span class="sd">    &gt;&gt;&gt; precompute_pairs(training_modules.model,database,device=&#39;cuda&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; training_modules, db_info = assemble_for_training(train_loss, validation_losses)</span>
+<span class="sd">    &gt;&gt;&gt; database.inputs = db_info[&#39;inputs&#39;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># nodes_to_compute,all_copies = gops.copy_subgraph(model.nodes_to_compute,assume_inputed=[])</span>
+    <span class="n">nodes_to_compute</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes_to_compute</span>
+    <span class="n">pair_indexer</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span>
+        <span class="n">nodes_to_compute</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_PAIRCACHE_COMPATIBLE_COMPUTERS</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="n">dist_hard_max</span> <span class="o">=</span> <span class="n">pair_indexer</span><span class="o">.</span><span class="n">dist_hard_max</span>
+    <span class="n">cacher</span> <span class="o">=</span> <span class="n">pairs</span><span class="o">.</span><span class="n">PairCacher</span><span class="p">(</span><span class="s2">&quot;PairCacher&quot;</span><span class="p">,</span> <span class="n">pair_indexer</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">n_images</span><span class="o">=</span><span class="n">n_images</span><span class="p">))</span>
+
+    <span class="n">input_nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cacher</span><span class="o">.</span><span class="n">get_all_parents</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">InputNode</span><span class="p">)])</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="n">Predictor</span><span class="p">(</span><span class="n">input_nodes</span><span class="p">,</span> <span class="p">[</span><span class="n">cacher</span><span class="p">],</span> <span class="n">model_device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Pair Precomputer&quot;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">arrdict</span> <span class="ow">in</span> <span class="n">database</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">input_arrs</span> <span class="o">=</span> <span class="p">{</span><span class="n">node</span><span class="p">:</span> <span class="n">arrdict</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">db_name</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">input_nodes</span><span class="p">}</span>
+
+            <span class="n">outputs</span> <span class="o">=</span> <span class="n">pred</span><span class="p">(</span><span class="n">node_values</span><span class="o">=</span><span class="n">input_arrs</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span>
+            <span class="n">cache</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="n">cacher</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">make_dense</span><span class="p">:</span>
+                <span class="n">cache</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">to_dense</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cache</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">coalesce</span><span class="p">()</span>
+            <span class="n">database</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">_PAIRCACHE_DB_NAME</span><span class="p">]</span> <span class="o">=</span> <span class="n">cache</span>
+    <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">re</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;size is inconsistent with indices&quot;</span> <span class="ow">in</span> <span class="n">msg</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Caching pairs required a larger number of images `n_images`&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">re</span>
+
+    <span class="n">cacheinput</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">PairIndices</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="n">_PAIRCACHE_DB_NAME</span><span class="p">)</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">gops</span><span class="o">.</span><span class="n">find_unique_relative</span><span class="p">(</span><span class="n">pair_indexer</span><span class="p">,</span> <span class="n">inputs</span><span class="o">.</span><span class="n">PositionsNode</span><span class="p">)</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">gops</span><span class="o">.</span><span class="n">find_unique_relative</span><span class="p">(</span><span class="n">pair_indexer</span><span class="p">,</span> <span class="n">inputs</span><span class="o">.</span><span class="n">CellNode</span><span class="p">)</span>
+    <span class="n">atomidx</span> <span class="o">=</span> <span class="n">gops</span><span class="o">.</span><span class="n">find_unique_relative</span><span class="p">(</span><span class="n">pair_indexer</span><span class="p">,</span> <span class="n">indexers</span><span class="o">.</span><span class="n">AtomIndexer</span><span class="p">)</span>
+    <span class="n">uncacher</span> <span class="o">=</span> <span class="n">pairs</span><span class="o">.</span><span class="n">PairUncacher</span><span class="p">(</span><span class="s2">&quot;AutoPairUncache&quot;</span><span class="p">,</span>
+                                  <span class="p">(</span><span class="n">cacheinput</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">atomidx</span><span class="p">),</span>
+                                  <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">dist_hard_max</span><span class="p">)</span>
+    <span class="n">gops</span><span class="o">.</span><span class="n">replace_node</span><span class="p">(</span><span class="n">pair_indexer</span><span class="p">,</span> <span class="n">uncacher</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<span class="c1"># def reassemble(training_modules):</span>
+<span class="c1">#     raise ValueError(&quot;Broken because of copying of loss graph for evaluator!&quot;)</span>
+<span class="c1">#     model, loss_graph, evaluator=training_modules</span>
+<span class="c1">#     train_loss = loss_graph.nodes_to_compute[0]</span>
+<span class="c1">#     validation_losses = evaluator.loss.nodes_to_compute</span>
+<span class="c1">#     validation_names = evaluator.loss_names</span>
+<span class="c1">#     plot_maker = evaluator.plot_maker</span>
+<span class="c1">#</span>
+<span class="c1">#     return assemble_for_training(train_loss=train_loss,</span>
+<span class="c1">#                                  validation_losses=validation_losses,</span>
+<span class="c1">#                                  validation_names=validation_names,</span>
+<span class="c1">#                                  plot_maker=plot_maker)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

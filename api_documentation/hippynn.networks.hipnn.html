@@ -52,7 +52,30 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.interfaces.html">interfaces package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.layers.html">layers package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.networks.html">networks package</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">hipnn module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">hipnn module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.networks.hipnn.Hipnn"><code class="docutils literal notranslate"><span class="pre">Hipnn</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.networks.hipnn.Hipnn.__init__"><code class="docutils literal notranslate"><span class="pre">Hipnn.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.networks.hipnn.Hipnn.forward"><code class="docutils literal notranslate"><span class="pre">Hipnn.forward()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.networks.hipnn.Hipnn.interaction_layers"><code class="docutils literal notranslate"><span class="pre">Hipnn.interaction_layers</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.networks.hipnn.Hipnn.regularization_params"><code class="docutils literal notranslate"><span class="pre">Hipnn.regularization_params()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.networks.hipnn.Hipnn.sensitivity_layers"><code class="docutils literal notranslate"><span class="pre">Hipnn.sensitivity_layers</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.networks.hipnn.Hipnn.training"><code class="docutils literal notranslate"><span class="pre">Hipnn.training</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.networks.hipnn.HipnnQuad"><code class="docutils literal notranslate"><span class="pre">HipnnQuad</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.networks.hipnn.HipnnQuad.resnet"><code class="docutils literal notranslate"><span class="pre">HipnnQuad.resnet</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.networks.hipnn.HipnnQuad.training"><code class="docutils literal notranslate"><span class="pre">HipnnQuad.training</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.networks.hipnn.HipnnVec"><code class="docutils literal notranslate"><span class="pre">HipnnVec</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.networks.hipnn.HipnnVec.forward"><code class="docutils literal notranslate"><span class="pre">HipnnVec.forward()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.networks.hipnn.HipnnVec.resnet"><code class="docutils literal notranslate"><span class="pre">HipnnVec.resnet</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.networks.hipnn.HipnnVec.training"><code class="docutils literal notranslate"><span class="pre">HipnnVec.training</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.networks.hipnn.compute_hipnn_e0"><code class="docutils literal notranslate"><span class="pre">compute_hipnn_e0()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.plotting.html">plotting package</a></li>
@@ -95,6 +118,141 @@
   <div class="section" id="hipnn-module">
 <h1>hipnn module<a class="headerlink" href="#hipnn-module" title="Permalink to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.networks.hipnn</span></code> module.</p>
+<span class="target" id="module-hippynn.networks.hipnn"></span><p>Implementation of HIPNN.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.networks.hipnn.Hipnn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Hipnn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sensitivities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_atom_layers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_interaction_layers=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">possible_species=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_input_features=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_type='inverse'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resnet=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation=&lt;class</span> <span class="pre">'torch.nn.modules.activation.Softplus'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/networks/hipnn.html#Hipnn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.networks.hipnn.Hipnn" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Hipnn Main Module</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.networks.hipnn.Hipnn.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sensitivities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_atom_layers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_interaction_layers=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">possible_species=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_input_features=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_type='inverse'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resnet=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation=&lt;class</span> <span class="pre">'torch.nn.modules.activation.Softplus'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/networks/hipnn.html#Hipnn.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.networks.hipnn.Hipnn.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_features</strong> – width of each layer</p></li>
+<li><p><strong>n_sensitivities</strong> – number of sensitivity functions</p></li>
+<li><p><strong>dist_soft_min</strong> – midpoint of first sensitivity function</p></li>
+<li><p><strong>dist_soft_max</strong> – midpoint of last sensitivity function</p></li>
+<li><p><strong>dist_hard_max</strong> – cutoff for cutoff function.</p></li>
+<li><p><strong>n_interaction_layers</strong> – number of interaction blocks</p></li>
+<li><p><strong>n_atom_layers</strong> – number of atom layers per interaction block.</p></li>
+<li><p><strong>possible_species</strong> – list of species values in database, including 0 for none.
+For example, HCNO would be [0 1 6 7 8]</p></li>
+<li><p><strong>n_input_features</strong> – number of input features to the model</p></li>
+<li><p><strong>sensitivity_type</strong> – str or callable, type of sensitivity, default of
+‘inverse’ is what is in hip-nn original paper.</p></li>
+<li><p><strong>resnet</strong> – bool or int, if int, size of internal resnet width</p></li>
+<li><p><strong>activation</strong> – activation function or subclass of nn.module.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Note: only one of possible_species or n_input_features is needed. If both are supplied,
+they must be consistent with each other.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.networks.hipnn.Hipnn.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_dist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/networks/hipnn.html#Hipnn.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.networks.hipnn.Hipnn.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hippynn.networks.hipnn.Hipnn.interaction_layers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">interaction_layers</span></span><a class="headerlink" href="#hippynn.networks.hipnn.Hipnn.interaction_layers" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.networks.hipnn.Hipnn.regularization_params">
+<span class="sig-name descname"><span class="pre">regularization_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/networks/hipnn.html#Hipnn.regularization_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.networks.hipnn.Hipnn.regularization_params" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hippynn.networks.hipnn.Hipnn.sensitivity_layers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sensitivity_layers</span></span><a class="headerlink" href="#hippynn.networks.hipnn.Hipnn.sensitivity_layers" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.networks.hipnn.Hipnn.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#hippynn.networks.hipnn.Hipnn.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.networks.hipnn.HipnnQuad">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HipnnQuad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sensitivities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_atom_layers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_interaction_layers=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">possible_species=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_input_features=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_type='inverse'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resnet=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation=&lt;class</span> <span class="pre">'torch.nn.modules.activation.Softplus'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/networks/hipnn.html#HipnnQuad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.networks.hipnn.HipnnQuad" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hippynn.networks.hipnn.HipnnVec" title="hippynn.networks.hipnn.HipnnVec"><code class="xref py py-class docutils literal notranslate"><span class="pre">HipnnVec</span></code></a></p>
+<p>HIP-NN-TS with l=2</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.networks.hipnn.HipnnQuad.resnet">
+<span class="sig-name descname"><span class="pre">resnet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#hippynn.networks.hipnn.HipnnQuad.resnet" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.networks.hipnn.HipnnQuad.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#hippynn.networks.hipnn.HipnnQuad.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.networks.hipnn.HipnnVec">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HipnnVec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sensitivities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_atom_layers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_interaction_layers=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">possible_species=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_input_features=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_type='inverse'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resnet=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation=&lt;class</span> <span class="pre">'torch.nn.modules.activation.Softplus'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/networks/hipnn.html#HipnnVec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.networks.hipnn.HipnnVec" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hippynn.networks.hipnn.Hipnn" title="hippynn.networks.hipnn.Hipnn"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hipnn</span></code></a></p>
+<p>HIP-NN-TS with l=1</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.networks.hipnn.HipnnVec.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_coord</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/networks/hipnn.html#HipnnVec.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.networks.hipnn.HipnnVec.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.networks.hipnn.HipnnVec.resnet">
+<span class="sig-name descname"><span class="pre">resnet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#hippynn.networks.hipnn.HipnnVec.resnet" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.networks.hipnn.HipnnVec.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#hippynn.networks.hipnn.HipnnVec.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.networks.hipnn.compute_hipnn_e0">
+<span class="sig-name descname"><span class="pre">compute_hipnn_e0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Z_Data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">en_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peratom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/networks/hipnn.html#compute_hipnn_e0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.networks.hipnn.compute_hipnn_e0" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoder</strong> – encoder of species to features (one-hot representation, probably)</p></li>
+<li><p><strong>Z_Data</strong> – species data</p></li>
+<li><p><strong>en_data</strong> – energy data</p></li>
+<li><p><strong>peratom</strong> – whether energy is per-atom or total</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>energy per species as shape (n_features_encoded, 1)</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 

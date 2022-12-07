@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.custom_kernels.env_numba &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../custom_kernels.html">hippynn.custom_kernels</a></li>
+      <li class="breadcrumb-item active">hippynn.custom_kernels.env_numba</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.custom_kernels.env_numba</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Numba implementation of envsum operations.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numba</span>
+<span class="kn">import</span> <span class="nn">numba.cuda</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">resort_pairs_cached</span>
+<span class="kn">from</span> <span class="nn">.tensor_wrapper</span> <span class="kn">import</span> <span class="n">via_numpy</span><span class="p">,</span> <span class="n">NumbaCompatibleTensorFunction</span>
+
+<span class="c1"># Very basic implementation.</span>
+<span class="c1"># While simple, it beats a set of pytorch operations simply by using far less memory.</span>
+
+<span class="c1"># conventions:</span>
+<span class="c1"># pidx  : index of pair</span>
+<span class="c1"># pfidx : index of first atom in pair (receiver)</span>
+<span class="c1"># psidx : index of second atom in pair (sender)</span>
+<span class="c1"># fidx  : index of feature</span>
+<span class="c1"># nidx  : index of sensitivity (nu)</span>
+
+
+<span class="c1"># Kernel which sums sensitivities and features to get environment.</span>
+<span class="c1"># Numpy core signature: (p,n),(a,f),(p),(p),(a,n,f)</span>
+<div class="viewcode-block" id="WrappedEnvsum"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum">[docs]</a><span class="k">class</span> <span class="nc">WrappedEnvsum</span><span class="p">(</span><span class="n">NumbaCompatibleTensorFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="n">psecond_hold</span> <span class="o">=</span> <span class="n">psecond</span>
+        <span class="n">argsort</span><span class="p">,</span> <span class="n">atom1_ids</span><span class="p">,</span> <span class="n">atom1_starts</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span> <span class="o">=</span> <span class="n">resort_pairs_cached</span><span class="p">(</span><span class="n">pfirst</span><span class="p">,</span> <span class="p">[</span><span class="n">sense</span><span class="p">,</span> <span class="n">psecond</span><span class="p">])</span>
+        <span class="n">resort_pairs_cached</span><span class="p">(</span><span class="n">psecond_hold</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="n">atom1_ids</span><span class="p">,</span> <span class="n">atom1_starts</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WrappedEnvsum.out_shape"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum.out_shape">[docs]</a>    <span class="k">def</span> <span class="nf">out_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sense_shape</span><span class="p">,</span> <span class="n">feat_shape</span><span class="p">,</span> <span class="o">*</span><span class="n">other_shapes</span><span class="p">):</span>
+        <span class="n">n_pair</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sense_shape</span>
+        <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_feature</span> <span class="o">=</span> <span class="n">feat_shape</span>
+        <span class="k">return</span> <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feature</span></div>
+
+<div class="viewcode-block" id="WrappedEnvsum.launch_bounds"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum.launch_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">launch_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sense_shape</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">pfs</span><span class="p">,</span> <span class="n">pss</span><span class="p">,</span> <span class="n">atom1_ids_shape</span><span class="p">,</span> <span class="o">*</span><span class="n">other_shapes</span><span class="p">):</span>
+        <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sense_shape</span>
+        <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">fs</span>
+        <span class="p">(</span><span class="n">n_atoms_interacting</span><span class="p">,)</span> <span class="o">=</span> <span class="n">atom1_ids_shape</span>
+        <span class="n">TPB_MAX</span> <span class="o">=</span> <span class="mi">512</span>
+        <span class="n">TPB_X</span> <span class="o">=</span> <span class="n">n_feat</span>
+        <span class="n">TPB_Y</span> <span class="o">=</span> <span class="n">TPB_MAX</span> <span class="o">//</span> <span class="n">n_feat</span>
+        <span class="n">TPB</span> <span class="o">=</span> <span class="p">(</span><span class="n">TPB_X</span><span class="p">,</span> <span class="n">TPB_Y</span><span class="p">)</span>
+        <span class="n">BPG_X</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_atoms_interacting</span> <span class="o">+</span> <span class="n">TPB_Y</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">TPB_Y</span>
+        <span class="n">BPG_Y</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">BPG</span> <span class="o">=</span> <span class="p">(</span><span class="n">BPG_X</span><span class="p">,</span> <span class="n">BPG_Y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BPG</span><span class="p">,</span> <span class="n">TPB</span></div>
+
+<div class="viewcode-block" id="WrappedEnvsum.make_kernel"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum.make_kernel">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">make_kernel</span><span class="p">(</span><span class="n">KERNEL_DTYPE</span><span class="p">):</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="s2">&quot;void(</span><span class="si">{DTYPE}</span><span class="s2">[:,:,],</span><span class="si">{DTYPE}</span><span class="s2">[:,:],int64[:],int64[:],int64[:],int64[:],</span><span class="si">{DTYPE}</span><span class="s2">[:,:,:])&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">DTYPE</span><span class="o">=</span><span class="n">KERNEL_DTYPE</span>
+        <span class="p">)</span>
+
+        <span class="nd">@numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span>
+            <span class="n">sig</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">def</span> <span class="nf">kernel</span><span class="p">(</span><span class="n">sens</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="n">atom1_ids</span><span class="p">,</span> <span class="n">atom1_starts</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
+            <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sens</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">feat</span><span class="o">.</span><span class="n">shape</span>
+            <span class="p">(</span><span class="n">n_atoms_interacting</span><span class="p">,)</span> <span class="o">=</span> <span class="n">atom1_ids</span><span class="o">.</span><span class="n">shape</span>
+
+            <span class="n">tx</span> <span class="o">=</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">threadIdx</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">sx</span> <span class="o">=</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">blockDim</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">by</span> <span class="o">=</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">blockIdx</span><span class="o">.</span><span class="n">y</span>
+            <span class="n">fidx</span> <span class="o">=</span> <span class="n">by</span> <span class="o">*</span> <span class="n">sx</span> <span class="o">+</span> <span class="n">tx</span>
+
+            <span class="n">ty</span> <span class="o">=</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">threadIdx</span><span class="o">.</span><span class="n">y</span>
+            <span class="n">sy</span> <span class="o">=</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">blockDim</span><span class="o">.</span><span class="n">y</span>
+            <span class="n">bx</span> <span class="o">=</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">blockIdx</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">bx</span> <span class="o">*</span> <span class="n">sy</span> <span class="o">+</span> <span class="n">ty</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n_atoms_interacting</span><span class="p">:</span>
+                <span class="n">pair_start</span> <span class="o">=</span> <span class="n">atom1_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">pair_end</span> <span class="o">=</span> <span class="n">atom1_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">pfidx</span> <span class="o">=</span> <span class="n">atom1_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">nidx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_nu</span><span class="p">):</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="n">KERNEL_DTYPE</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">pidx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pair_start</span><span class="p">,</span> <span class="n">pair_end</span><span class="p">):</span>
+                        <span class="n">psidx</span> <span class="o">=</span> <span class="n">psecond</span><span class="p">[</span><span class="n">pidx</span><span class="p">]</span>
+                        <span class="n">out</span> <span class="o">+=</span> <span class="n">sens</span><span class="p">[</span><span class="n">pidx</span><span class="p">,</span> <span class="n">nidx</span><span class="p">]</span> <span class="o">*</span> <span class="n">feat</span><span class="p">[</span><span class="n">psidx</span><span class="p">,</span> <span class="n">fidx</span><span class="p">]</span>
+                    <span class="n">env</span><span class="p">[</span><span class="n">pfidx</span><span class="p">,</span> <span class="n">nidx</span><span class="p">,</span> <span class="n">fidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span>
+
+        <span class="k">return</span> <span class="n">kernel</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@via_numpy</span>
+    <span class="nd">@numba</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">cpu_kernel</span><span class="p">(</span><span class="n">sens</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="n">atom_ids</span><span class="p">,</span> <span class="n">atom_starts</span><span class="p">):</span>
+
+        <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sens</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">feat</span><span class="o">.</span><span class="n">shape</span>
+        <span class="p">(</span><span class="n">n_atom_with_pairs</span><span class="p">,)</span> <span class="o">=</span> <span class="n">atom_ids</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">env_features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_atom</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">sens</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">numba</span><span class="o">.</span><span class="n">prange</span><span class="p">(</span><span class="n">n_atom_with_pairs</span><span class="p">):</span>
+            <span class="n">pfstart</span> <span class="o">=</span> <span class="n">atom_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">pfend</span> <span class="o">=</span> <span class="n">atom_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">pfidx</span> <span class="o">=</span> <span class="n">atom_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">sens</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">pidx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pfstart</span><span class="p">,</span> <span class="n">pfend</span><span class="p">):</span>
+                <span class="n">psidx</span> <span class="o">=</span> <span class="n">psecond</span><span class="p">[</span><span class="n">pidx</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">nidx</span> <span class="ow">in</span> <span class="n">numba</span><span class="o">.</span><span class="n">prange</span><span class="p">(</span><span class="n">n_nu</span><span class="p">):</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="n">sens</span><span class="p">[</span><span class="n">pidx</span><span class="p">,</span> <span class="n">nidx</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-10</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">fidx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_feat</span><span class="p">):</span>
+                            <span class="n">tmp</span><span class="p">[</span><span class="n">nidx</span><span class="p">,</span> <span class="n">fidx</span><span class="p">]</span> <span class="o">+=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">feat</span><span class="p">[</span><span class="n">psidx</span><span class="p">,</span> <span class="n">fidx</span><span class="p">]</span>
+            <span class="n">env_features</span><span class="p">[</span><span class="n">pfidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span>
+        <span class="k">return</span> <span class="n">env_features</span></div>
+
+
+<span class="c1"># Kernel which sums environment and features to get sensitivity</span>
+<span class="c1"># Numpy core signature: (a,n,f),(a,f),(p),(p),(p,n),</span>
+<div class="viewcode-block" id="WrappedSensesum"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum">[docs]</a><span class="k">class</span> <span class="nc">WrappedSensesum</span><span class="p">(</span><span class="n">NumbaCompatibleTensorFunction</span><span class="p">):</span>
+<div class="viewcode-block" id="WrappedSensesum.out_shape"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum.out_shape">[docs]</a>    <span class="k">def</span> <span class="nf">out_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_shape</span><span class="p">,</span> <span class="n">feat_shape</span><span class="p">,</span> <span class="n">pfirst_shape</span><span class="p">,</span> <span class="n">psecond_shape</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">n_pair</span><span class="p">,)</span> <span class="o">=</span> <span class="n">pfirst_shape</span>
+        <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">env_shape</span>
+        <span class="k">return</span> <span class="n">n_pair</span><span class="p">,</span> <span class="n">n_nu</span></div>
+
+<div class="viewcode-block" id="WrappedSensesum.launch_bounds"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum.launch_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">launch_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_shape</span><span class="p">,</span> <span class="n">feat_shape</span><span class="p">,</span> <span class="n">pfirst_shape</span><span class="p">,</span> <span class="n">psecond_shape</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">n_pairs</span><span class="p">,)</span> <span class="o">=</span> <span class="n">pfirst_shape</span>
+        <span class="n">n_atoms</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">env_shape</span>
+        <span class="n">TPB_MAX</span> <span class="o">=</span> <span class="mi">512</span>
+        <span class="n">TPB_Y</span> <span class="o">=</span> <span class="n">n_nu</span>
+        <span class="n">TPB_X</span> <span class="o">=</span> <span class="n">TPB_MAX</span><span class="o">//</span><span class="n">TPB_Y</span>
+        <span class="n">TPB</span> <span class="o">=</span> <span class="p">(</span><span class="n">TPB_X</span><span class="p">,</span><span class="n">TPB_Y</span><span class="p">)</span>
+        <span class="n">BPG</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_pairs</span> <span class="o">+</span> <span class="n">TPB_X</span> <span class="o">-</span><span class="mi">1</span> <span class="p">)</span><span class="o">//</span><span class="n">TPB_X</span>
+        <span class="k">return</span> <span class="n">BPG</span><span class="p">,</span> <span class="n">TPB</span></div>
+
+<div class="viewcode-block" id="WrappedSensesum.make_kernel"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum.make_kernel">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">make_kernel</span><span class="p">(</span><span class="n">KERNEL_DTYPE</span><span class="p">):</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="s2">&quot;void(</span><span class="si">{DTYPE}</span><span class="s2">[:,:,:],</span><span class="si">{DTYPE}</span><span class="s2">[:,:],int64[:], int64[:],</span><span class="si">{DTYPE}</span><span class="s2">[:,:])&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DTYPE</span><span class="o">=</span><span class="n">KERNEL_DTYPE</span><span class="p">)</span>
+
+        <span class="nd">@numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span>
+            <span class="n">sig</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">def</span> <span class="nf">kernel</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="n">sense</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">n_pairs</span><span class="p">,)</span> <span class="o">=</span> <span class="n">pfirst</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">pidx</span><span class="p">,</span> <span class="n">nidx</span><span class="p">,</span> <span class="n">fidx</span> <span class="o">=</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">pidx</span> <span class="o">&lt;</span> <span class="n">n_pairs</span><span class="p">:</span>
+                <span class="n">pfidx</span> <span class="o">=</span> <span class="n">pfirst</span><span class="p">[</span><span class="n">pidx</span><span class="p">]</span>
+                <span class="n">psidx</span> <span class="o">=</span> <span class="n">psecond</span><span class="p">[</span><span class="n">pidx</span><span class="p">]</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="n">KERNEL_DTYPE</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">fidx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_feat</span><span class="p">):</span>
+                    <span class="n">tmp</span> <span class="o">+=</span> <span class="n">env</span><span class="p">[</span><span class="n">pfidx</span><span class="p">,</span> <span class="n">nidx</span><span class="p">,</span> <span class="n">fidx</span><span class="p">]</span> <span class="o">*</span> <span class="n">feat</span><span class="p">[</span><span class="n">psidx</span><span class="p">,</span> <span class="n">fidx</span><span class="p">]</span>
+                <span class="n">sense</span><span class="p">[</span><span class="n">pidx</span><span class="p">,</span> <span class="n">nidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span>
+
+        <span class="k">return</span> <span class="n">kernel</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@via_numpy</span>
+    <span class="nd">@numba</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">cpu_kernel</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">):</span>
+        <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">shape</span>
+        <span class="p">(</span><span class="n">n_pairs</span><span class="p">,)</span> <span class="o">=</span> <span class="n">pfirst</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">sense</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">pidx</span> <span class="ow">in</span> <span class="n">numba</span><span class="o">.</span><span class="n">prange</span><span class="p">(</span><span class="n">n_pairs</span><span class="p">):</span>
+            <span class="n">pfidx</span> <span class="o">=</span> <span class="n">pfirst</span><span class="p">[</span><span class="n">pidx</span><span class="p">]</span>
+            <span class="n">psidx</span> <span class="o">=</span> <span class="n">psecond</span><span class="p">[</span><span class="n">pidx</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">nidx</span> <span class="ow">in</span> <span class="n">numba</span><span class="o">.</span><span class="n">prange</span><span class="p">(</span><span class="n">n_nu</span><span class="p">):</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">fidx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_feat</span><span class="p">):</span>
+                    <span class="n">tmp</span> <span class="o">+=</span> <span class="n">env</span><span class="p">[</span><span class="n">pfidx</span><span class="p">,</span> <span class="n">nidx</span><span class="p">,</span> <span class="n">fidx</span><span class="p">]</span> <span class="o">*</span> <span class="n">feat</span><span class="p">[</span><span class="n">psidx</span><span class="p">,</span> <span class="n">fidx</span><span class="p">]</span>
+                <span class="n">sense</span><span class="p">[</span><span class="n">pidx</span><span class="p">,</span> <span class="n">nidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span>
+        <span class="k">return</span> <span class="n">sense</span></div>
+
+
+<span class="c1"># Kernel which sums environment and sensitivity to get features</span>
+<span class="c1"># Numpy core signature: (a,n,f),(p,n),(p),(p),(a,f),</span>
+<div class="viewcode-block" id="WrappedFeatsum"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum">[docs]</a><span class="k">class</span> <span class="nc">WrappedFeatsum</span><span class="p">(</span><span class="n">NumbaCompatibleTensorFunction</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="n">pfirst_hold</span> <span class="o">=</span> <span class="n">pfirst</span>
+        <span class="n">argsort</span><span class="p">,</span> <span class="n">atom2_ids</span><span class="p">,</span> <span class="n">atom2_starts</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">)</span> <span class="o">=</span> <span class="n">resort_pairs_cached</span><span class="p">(</span><span class="n">psecond</span><span class="p">,</span> <span class="p">[</span><span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">])</span>
+        <span class="n">resort_pairs_cached</span><span class="p">(</span><span class="n">pfirst_hold</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="n">atom2_ids</span><span class="p">,</span> <span class="n">atom2_starts</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WrappedFeatsum.out_shape"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum.out_shape">[docs]</a>    <span class="k">def</span> <span class="nf">out_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_shape</span><span class="p">,</span> <span class="o">*</span><span class="n">other_shapes</span><span class="p">):</span>
+        <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feature</span> <span class="o">=</span> <span class="n">env_shape</span>
+        <span class="k">return</span> <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_feature</span></div>
+
+<div class="viewcode-block" id="WrappedFeatsum.launch_bounds"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum.launch_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">launch_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_shape</span><span class="p">,</span> <span class="n">sense_shape</span><span class="p">,</span> <span class="n">pfirst_shape</span><span class="p">,</span> <span class="n">psecond_shape</span><span class="p">,</span> <span class="n">atom2_id_shape</span><span class="p">,</span> <span class="n">atom2_startshape</span><span class="p">):</span>
+        <span class="c1"># Note, this kernel has transposed launch bounds:</span>
+        <span class="c1"># The blocks in the x direction go with threads in the</span>
+        <span class="c1"># y direction, and likewise for y blocks-&gt; x threads</span>
+        <span class="c1"># This is done because we want features along the x direction for coherent warps</span>
+        <span class="c1"># But we want atoms along the block x direction to avoid</span>
+        <span class="c1"># problems when reaching too many atoms (can only launch 65k blocks in y direction...)</span>
+        <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sense_shape</span>
+        <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">env_shape</span>
+        <span class="n">TPB_max</span> <span class="o">=</span> <span class="mi">512</span>
+        <span class="k">if</span> <span class="n">n_feat</span> <span class="o">&gt;</span> <span class="mi">32</span><span class="p">:</span>
+            <span class="n">TPB_x</span> <span class="o">=</span> <span class="p">((</span><span class="n">n_feat</span> <span class="o">+</span> <span class="mi">31</span><span class="p">)</span> <span class="o">//</span> <span class="mi">32</span><span class="p">)</span> <span class="o">*</span> <span class="mi">32</span>
+            <span class="n">TPB_y</span> <span class="o">=</span> <span class="n">TPB_max</span> <span class="o">//</span> <span class="n">TPB_x</span>
+            <span class="n">BPG_y</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If there aren&#39;t enough features to really fill a warp, stride them across the blocks instead.</span>
+            <span class="n">TPB_x</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">TPB_y</span> <span class="o">=</span> <span class="n">TPB_max</span>
+            <span class="n">BPG_y</span> <span class="o">=</span> <span class="n">n_feat</span>
+        <span class="n">TPB</span> <span class="o">=</span> <span class="p">(</span><span class="n">TPB_x</span><span class="p">,</span> <span class="n">TPB_y</span><span class="p">)</span>
+        <span class="n">BPG_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_atom</span> <span class="o">+</span> <span class="n">TPB_y</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">TPB_y</span>
+        <span class="n">BPG</span> <span class="o">=</span> <span class="p">(</span><span class="n">BPG_x</span><span class="p">,</span> <span class="n">BPG_y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">BPG</span><span class="p">,</span> <span class="n">TPB</span></div>
+
+<div class="viewcode-block" id="WrappedFeatsum.make_kernel"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum.make_kernel">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">make_kernel</span><span class="p">(</span><span class="n">KERNEL_DTYPE</span><span class="p">):</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="s2">&quot;void(</span><span class="si">{DTYPE}</span><span class="s2">[:,:,:],</span><span class="si">{DTYPE}</span><span class="s2">[:,:],int64[:],int64[:],int64[:],int64[:],</span><span class="si">{DTYPE}</span><span class="s2">[:,:])&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">DTYPE</span><span class="o">=</span><span class="n">KERNEL_DTYPE</span>
+        <span class="p">)</span>
+
+        <span class="nd">@numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span>
+            <span class="n">sig</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">def</span> <span class="nf">kernel</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="n">atom2_ids</span><span class="p">,</span> <span class="n">atom2_starts</span><span class="p">,</span> <span class="n">feat</span><span class="p">):</span>
+            <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sense</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">feat</span><span class="o">.</span><span class="n">shape</span>
+            <span class="p">(</span><span class="n">n_atoms_with_pairs</span><span class="p">,)</span> <span class="o">=</span> <span class="n">atom2_ids</span><span class="o">.</span><span class="n">shape</span>
+
+            <span class="n">tx</span> <span class="o">=</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">threadIdx</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">sx</span> <span class="o">=</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">blockDim</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">by</span> <span class="o">=</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">blockIdx</span><span class="o">.</span><span class="n">y</span>
+            <span class="n">fidx</span> <span class="o">=</span> <span class="n">by</span> <span class="o">*</span> <span class="n">sx</span> <span class="o">+</span> <span class="n">tx</span>
+
+            <span class="n">ty</span> <span class="o">=</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">threadIdx</span><span class="o">.</span><span class="n">y</span>
+            <span class="n">sy</span> <span class="o">=</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">blockDim</span><span class="o">.</span><span class="n">y</span>
+            <span class="n">bx</span> <span class="o">=</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">blockIdx</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">aidx</span> <span class="o">=</span> <span class="n">bx</span> <span class="o">*</span> <span class="n">sy</span> <span class="o">+</span> <span class="n">ty</span>
+
+            <span class="k">if</span> <span class="n">aidx</span> <span class="o">&lt;</span> <span class="n">n_atoms_with_pairs</span> <span class="ow">and</span> <span class="n">fidx</span> <span class="o">&lt;</span> <span class="n">n_feat</span><span class="p">:</span>
+                <span class="n">pair_start</span> <span class="o">=</span> <span class="n">atom2_starts</span><span class="p">[</span><span class="n">aidx</span><span class="p">]</span>
+                <span class="n">pair_end</span> <span class="o">=</span> <span class="n">atom2_starts</span><span class="p">[</span><span class="n">aidx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">psidx</span> <span class="o">=</span> <span class="n">atom2_ids</span><span class="p">[</span><span class="n">aidx</span><span class="p">]</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="n">KERNEL_DTYPE</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">pidx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">pair_start</span><span class="p">,</span> <span class="n">pair_end</span><span class="p">):</span>
+                    <span class="n">pfidx</span> <span class="o">=</span> <span class="n">pfirst</span><span class="p">[</span><span class="n">pidx</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">nidx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_nu</span><span class="p">):</span>
+                        <span class="c1"># env call coalesces across the warp, sense call broadcasts across warp</span>
+                        <span class="n">tmp</span> <span class="o">+=</span> <span class="n">env</span><span class="p">[</span><span class="n">pfidx</span><span class="p">,</span> <span class="n">nidx</span><span class="p">,</span> <span class="n">fidx</span><span class="p">]</span> <span class="o">*</span> <span class="n">sense</span><span class="p">[</span><span class="n">pidx</span><span class="p">,</span> <span class="n">nidx</span><span class="p">]</span>
+                <span class="n">feat</span><span class="p">[</span><span class="n">psidx</span><span class="p">,</span> <span class="n">fidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span>
+
+        <span class="k">return</span> <span class="n">kernel</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@via_numpy</span>
+    <span class="nd">@numba</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">cpu_kernel</span><span class="p">(</span>
+        <span class="n">env</span><span class="p">,</span>
+        <span class="n">sens</span><span class="p">,</span>
+        <span class="n">pfirst</span><span class="p">,</span>
+        <span class="n">psecond</span><span class="p">,</span>
+        <span class="n">atom_ids</span><span class="p">,</span>
+        <span class="n">atom_starts</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">shape</span>
+        <span class="p">(</span><span class="n">n_pairs</span><span class="p">,)</span> <span class="o">=</span> <span class="n">pfirst</span><span class="o">.</span><span class="n">shape</span>
+        <span class="p">(</span><span class="n">n_atoms_with_pairs</span><span class="p">,)</span> <span class="o">=</span> <span class="n">atom_ids</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">feat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_atom</span><span class="p">,</span> <span class="n">n_feat</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">sens</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">numba</span><span class="o">.</span><span class="n">prange</span><span class="p">(</span><span class="n">n_atoms_with_pairs</span><span class="p">):</span>
+            <span class="n">psstart</span> <span class="o">=</span> <span class="n">atom_starts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">psend</span> <span class="o">=</span> <span class="n">atom_starts</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">psidx</span> <span class="o">=</span> <span class="n">atom_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_feat</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">sens</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">pidx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">psstart</span><span class="p">,</span> <span class="n">psend</span><span class="p">):</span>
+                <span class="n">pfidx</span> <span class="o">=</span> <span class="n">pfirst</span><span class="p">[</span><span class="n">pidx</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">nidx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_nu</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">fidx</span> <span class="ow">in</span> <span class="n">numba</span><span class="o">.</span><span class="n">prange</span><span class="p">(</span><span class="n">n_feat</span><span class="p">):</span>
+                        <span class="n">tmp</span><span class="p">[</span><span class="n">fidx</span><span class="p">]</span> <span class="o">+=</span> <span class="n">env</span><span class="p">[</span><span class="n">pfidx</span><span class="p">,</span> <span class="n">nidx</span><span class="p">,</span> <span class="n">fidx</span><span class="p">]</span> <span class="o">*</span> <span class="n">sens</span><span class="p">[</span><span class="n">pidx</span><span class="p">,</span> <span class="n">nidx</span><span class="p">]</span>
+            <span class="n">feat</span><span class="p">[</span><span class="n">psidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span>
+        <span class="k">return</span> <span class="n">feat</span></div>
+
+
+<span class="n">new_envsum</span> <span class="o">=</span> <span class="n">WrappedEnvsum</span><span class="p">()</span>
+<span class="n">new_sensesum</span> <span class="o">=</span> <span class="n">WrappedSensesum</span><span class="p">()</span>
+<span class="n">new_featsum</span> <span class="o">=</span> <span class="n">WrappedFeatsum</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

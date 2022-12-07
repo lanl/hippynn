@@ -48,10 +48,24 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.html">custom_kernels package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.databases.html">databases package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.experiment.html">experiment package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.SetupParams"><code class="docutils literal notranslate"><span class="pre">SetupParams</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.assemble_for_training"><code class="docutils literal notranslate"><span class="pre">assemble_for_training()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.setup_and_train"><code class="docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.setup_training"><code class="docutils literal notranslate"><span class="pre">setup_training()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.test_model"><code class="docutils literal notranslate"><span class="pre">test_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.train_model"><code class="docutils literal notranslate"><span class="pre">train_model()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.assembly.html">assembly module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.controllers.html">controllers module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.device.html">device module</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">evaluator module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">evaluator module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.evaluator.Evaluator"><code class="docutils literal notranslate"><span class="pre">Evaluator</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.experiment.evaluator.Evaluator.__init__"><code class="docutils literal notranslate"><span class="pre">Evaluator.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.experiment.evaluator.Evaluator.evaluate"><code class="docutils literal notranslate"><span class="pre">Evaluator.evaluate()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.experiment.evaluator.Evaluator.var_list"><code class="docutils literal notranslate"><span class="pre">Evaluator.var_list</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.metric_tracker.html">metric_tracker module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.routines.html">routines module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.serialization.html">serialization module</a></li>
@@ -101,6 +115,49 @@
   <div class="section" id="evaluator-module">
 <h1>evaluator module<a class="headerlink" href="#evaluator-module" title="Permalink to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.experiment.evaluator</span></code> module.</p>
+<span class="target" id="module-hippynn.experiment.evaluator"></span><p>Evaluating network performance over a dataset</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.experiment.evaluator.Evaluator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Evaluator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_loss_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_maker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_every</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/evaluator.html#Evaluator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.evaluator.Evaluator" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.evaluator.Evaluator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_loss_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_maker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_every</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/evaluator.html#Evaluator.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.evaluator.Evaluator.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – <code class="docutils literal notranslate"><span class="pre">GraphModule</span></code>. The model to evaluate .</p></li>
+<li><p><strong>evaluation_loss</strong> – <code class="docutils literal notranslate"><span class="pre">GraphModule</span></code>. The losses to evaluate.</p></li>
+<li><p><strong>evaluation_loss_names</strong> – The names of the losses in the evaluation_loss</p></li>
+<li><p><strong>plot_maker</strong> – An optional plot maker to run.</p></li>
+<li><p><strong>plot_every</strong> – How often to make plots.</p></li>
+<li><p><strong>db_info</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.evaluator.Evaluator.evaluate">
+<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">when</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/evaluator.html#Evaluator.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.evaluator.Evaluator.evaluate" title="Permalink to this definition"></a></dt>
+<dd><p>Construct metrics and activate plotter on a dataloader.
+Note: the model is performed on whatever device it resides on.
+The validation loss is expected to be on the CPU – this is not too slow,
+and allows for us to evaluate on large datasets whose results would take too much memory
+for the GPU.
+:param generator: the dataset loader
+:param eval_type: str describing dataset, such as ‘train’, ‘valid’, ‘test’
+:param when: int (epoch #) or str describing when the evaluation is performed
+:return: loss_dict – dictionary mapping loss names to loss values for this generator</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hippynn.experiment.evaluator.Evaluator.var_list">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">var_list</span></span><a class="headerlink" href="#hippynn.experiment.evaluator.Evaluator.var_list" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 
 

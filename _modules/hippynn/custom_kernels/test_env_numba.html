@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.custom_kernels.test_env_numba &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../custom_kernels.html">hippynn.custom_kernels</a></li>
+      <li class="breadcrumb-item active">hippynn.custom_kernels.test_env_numba</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.custom_kernels.test_env_numba</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Test module for verifying implementation correctness against pytorch.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numba</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_pytorch</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">autograd_wrapper</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_numba</span>
+
+
+<div class="viewcode-block" id="get_simulated_data"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.get_simulated_data">[docs]</a><span class="k">def</span> <span class="nf">get_simulated_data</span><span class="p">(</span>
+    <span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">atom_prob</span><span class="p">,</span> <span class="n">n_features</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">printinfo</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get semi-realistic test data for hipnn.</span>
+<span class="sd">    n_molecules : number of molecules in the batch</span>
+<span class="sd">    n_atoms     : number of atoms in each molecule</span>
+<span class="sd">    atom_prob   : probability that an atom is real (not a padding)</span>
+<span class="sd">    n_features  : number of features on e</span>
+<span class="sd">    ach atom</span>
+<span class="sd">    n_nu        : number of sensitivity functions</span>
+
+<span class="sd">    Differences from real data:</span>
+<span class="sd">        1)  Occupied atoms are (usually) first in the real arrays.</span>
+<span class="sd">            This shouldn&#39;t matter because raw arrays are not output.</span>
+
+<span class="sd">        2)  Sensitivity functions are randomly sparse with an</span>
+<span class="sd">            average of 1 sensitivity non-zero per pair. Their amplitude is random.</span>
+<span class="sd">            In real data, they are sparse, but 2 or 3 sequential ones will be on.</span>
+<span class="sd">            Amplitudes have a concrete form based on distances</span>
+<span class="sd">            Note: Sensitivities are not sparse here. There could be some use for</span>
+<span class="sd">            representing them in a sparse way, though. I don&#39;t know how fast</span>
+<span class="sd">            it would be to construct a sparse representation of sensitivities.</span>
+
+<span class="sd">        3)  Sensitivity functions are not symmetric between pairs</span>
+<span class="sd">            This necessitates summing over a pair (i,j) and (j, i) separately;</span>
+<span class="sd">            certain recalculations are performed. I prefer code which works</span>
+<span class="sd">            properly in the case of symmetric or non-symmetric sensitivities;</span>
+<span class="sd">            we have some a case for asymmetric sensitivities (such as xACA),</span>
+<span class="sd">            and in the future we may find use of nonsymmetric sensitivities.</span>
+
+<span class="sd">        4)  Note that pairs never consist of the same atom repeatedly, that is,</span>
+<span class="sd">            for all atoms i, (i,i) is not a pair.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">()</span>
+    <span class="n">np_fdtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">())</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">dtype</span>
+    <span class="n">molatom_shp</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">)</span>
+    <span class="n">molatom_presence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="n">atom_prob</span><span class="p">,</span> <span class="n">atom_prob</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">molatom_shp</span><span class="p">)</span>
+    <span class="n">atom_presence</span> <span class="o">=</span> <span class="n">molatom_presence</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms</span> <span class="o">*</span> <span class="n">n_molecules</span><span class="p">)</span>
+
+    <span class="n">mol_features</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">n_features</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np_fdtype</span><span class="p">)</span>
+    <span class="n">mol_features</span><span class="p">[</span><span class="o">~</span><span class="n">molatom_presence</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">atom_features</span> <span class="o">=</span> <span class="n">mol_features</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_molecules</span> <span class="o">*</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">n_features</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np_fdtype</span><span class="p">)[</span><span class="n">atom_presence</span><span class="p">]</span>
+    <span class="n">n_real</span> <span class="o">=</span> <span class="n">molatom_presence</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">real_atoms_arange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_real</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">inv_real_atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_molecules</span> <span class="o">*</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">inv_real_atoms</span><span class="p">[</span><span class="n">atom_presence</span><span class="p">]</span> <span class="o">=</span> <span class="n">real_atoms_arange</span>
+    <span class="c1"># atom_index = np.arange(n_molecules*n_atoms).reshape(molatom_shp)</span>
+    <span class="c1"># mol_index = np.repeat(np.arange(n_molecules)[:,np.newaxis],n_atoms,axis=1)</span>
+
+    <span class="c1"># pair_dists = np.sqrt(((coords[:,:,np.newaxis] - coords[:,np.newaxis,:])**2).sum(axis=3))</span>
+    <span class="n">pair_presence</span> <span class="o">=</span> <span class="p">(</span><span class="n">molatom_presence</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">molatom_presence</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span>
+        <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+    <span class="p">)</span>
+
+    <span class="n">atom_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_molecules</span> <span class="o">*</span> <span class="n">n_atoms</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">molatom_shp</span><span class="p">)</span>
+
+    <span class="c1"># We&#39;ll just do fully connected molecules.</span>
+    <span class="n">pair_first_pre</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">atom_index</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">pair_presence</span><span class="p">)]</span>
+    <span class="n">pair_second_pre</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">atom_index</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:],</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">pair_presence</span><span class="p">)]</span>
+
+    <span class="n">pair_first</span> <span class="o">=</span> <span class="n">inv_real_atoms</span><span class="p">[</span><span class="n">pair_first_pre</span><span class="p">]</span>
+    <span class="n">pair_second</span> <span class="o">=</span> <span class="n">inv_real_atoms</span><span class="p">[</span><span class="n">pair_second_pre</span><span class="p">]</span>
+    <span class="n">n_pairs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pair_first</span><span class="p">)</span>
+
+    <span class="c1"># NOTE: These fake sensitivities are NONSYMMETRIC.</span>
+    <span class="c1"># Current HIPNN does not do that, but a future one could.</span>
+    <span class="n">on_sensitivites</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span> <span class="o">/</span> <span class="n">n_nu</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">/</span> <span class="n">n_nu</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">))</span>
+    <span class="n">pair_sensitivites</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">))</span> <span class="o">*</span> <span class="n">on_sensitivites</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">pair_first</span> <span class="o">==</span> <span class="n">pair_second</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">printinfo</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of molecules:&quot;</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of atoms per molecule:&quot;</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fraction of real atoms:&quot;</span><span class="p">,</span> <span class="n">atom_prob</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of features:&quot;</span><span class="p">,</span> <span class="n">n_features</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of sensitivities:&quot;</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Total atoms:&quot;</span><span class="p">,</span> <span class="n">n_real</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Total pairs:&quot;</span><span class="p">,</span> <span class="n">n_pairs</span><span class="p">)</span>
+        <span class="c1"># print(&quot;Total (any) atom pairs:&quot;,n_atoms**2*n_molecules)</span>
+        <span class="c1"># print(&quot;Total (nonblank) atom pairs:&quot;,(molatom_presence[:,np.newaxis,:]*molatom_presence[:,:,np.newaxis]).sum())</span>
+    <span class="n">pair_sense</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">pair_sensitivites</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">atom_features</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">pair_first</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">pair_first</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">pair_second</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">pair_second</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pair_sense</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span></div>
+
+
+<span class="n">TEST_TINY_PARAMS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">n_molecules</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">atom_prob</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_nu</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">TEST_SMALL_PARAMS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">n_molecules</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">atom_prob</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_nu</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">TEST_MEDIUM_PARAMS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">n_molecules</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">atom_prob</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">n_nu</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">TEST_LARGE_PARAMS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">n_molecules</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">atom_prob</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">n_nu</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">TEST_MEGA_PARAMS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">n_molecules</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">atom_prob</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">n_nu</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="c1"># reference implementation</span>
+
+
+<span class="k">def</span> <span class="nf">test_pytorch_reference</span><span class="p">():</span>
+    <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">get_simulated_data</span><span class="p">(</span><span class="o">**</span><span class="n">TEST_TINY_PARAMS</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">sense</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">feat</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">envsum</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+    <span class="n">pt_gradsense</span><span class="p">,</span> <span class="n">pt_gradfeat</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="p">[</span><span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">])</span>
+    <span class="n">sense</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">feat</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">ref_gradsense</span> <span class="o">=</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">sensesum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">env</span><span class="p">),</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+    <span class="n">ref_gradfeat</span> <span class="o">=</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">featsum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">env</span><span class="p">),</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">pt_gradsense</span><span class="p">,</span> <span class="n">ref_gradsense</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">pt_gradfeat</span><span class="p">,</span> <span class="n">ref_gradfeat</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">pt_gradsense</span> <span class="o">==</span> <span class="n">ref_gradsense</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">pt_gradfeat</span> <span class="o">==</span> <span class="n">ref_gradfeat</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+
+<span class="n">test_pytorch_reference</span><span class="p">()</span>
+<span class="k">del</span> <span class="n">test_pytorch_reference</span>
+
+
+<span class="c1"># A class for testing the correctness of the kernels functions.</span>
+
+
+<div class="viewcode-block" id="Envops_tester"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester">[docs]</a><span class="k">class</span> <span class="nc">Envops_tester</span><span class="p">:</span>
+<div class="viewcode-block" id="Envops_tester.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">envsum_raw</span><span class="p">,</span> <span class="n">sensesum_raw</span><span class="p">,</span> <span class="n">featsum_raw</span><span class="p">,</span> <span class="n">suspicious_deviation</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">envsum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensesum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">featsum</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">autograd_wrapper</span><span class="o">.</span><span class="n">wrap_envops</span><span class="p">(</span>
+            <span class="n">envsum_impl</span><span class="o">=</span><span class="n">envsum_raw</span><span class="p">,</span> <span class="n">sensesum_impl</span><span class="o">=</span><span class="n">sensesum_raw</span><span class="p">,</span> <span class="n">featsum_impl</span><span class="o">=</span><span class="n">featsum_raw</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tol_f64</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tol_f32</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>  <span class="c1"># Absolute tolerance a bit fuzzier for float32.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">suspicious_deviation</span> <span class="o">=</span> <span class="n">suspicious_deviation</span></div>
+
+<div class="viewcode-block" id="Envops_tester.check_grad_and_gradgrad"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_grad_and_gradgrad">[docs]</a>    <span class="k">def</span> <span class="nf">check_grad_and_gradgrad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">differentiable_inputs</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">funcname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">funcname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">funcname</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__qualname__</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">differentiable_inputs</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">gradcheck</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="o">*</span><span class="n">inputs</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">funcname</span><span class="si">}</span><span class="s2"> failed grad check.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ee</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">gradgradcheck</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="p">[</span><span class="o">*</span><span class="n">inputs</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">funcname</span><span class="si">}</span><span class="s2"> failed gradgrad check.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ee</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Envops_tester.check_all_grad_once"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_all_grad_once">[docs]</a>    <span class="k">def</span> <span class="nf">check_all_grad_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
+        <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">get_simulated_data</span><span class="p">(</span><span class="o">**</span><span class="n">TEST_TINY_PARAMS</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">n_atoms</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="n">feat</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sense</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_features</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">sense</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_grad_and_gradgrad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">envsum</span><span class="p">,</span> <span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">),</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="n">funcname</span><span class="o">=</span><span class="s2">&quot;envsum&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_grad_and_gradgrad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sensesum</span><span class="p">,</span> <span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">),</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="n">funcname</span><span class="o">=</span><span class="s2">&quot;sensesum&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_grad_and_gradgrad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">featsum</span><span class="p">,</span> <span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">),</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="n">funcname</span><span class="o">=</span><span class="s2">&quot;featsum&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Envops_tester.check_all_grad"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_all_grad">[docs]</a>    <span class="k">def</span> <span class="nf">check_all_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeats</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">check_all_grad_once</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Envops_tester.check_allclose_once"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_allclose_once">[docs]</a>    <span class="k">def</span> <span class="nf">check_allclose_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_large</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">use_large</span><span class="p">:</span>
+            <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">get_simulated_data</span><span class="p">(</span><span class="o">**</span><span class="n">TEST_LARGE_PARAMS</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">get_simulated_data</span><span class="p">(</span><span class="o">**</span><span class="n">TEST_TINY_PARAMS</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="n">n_atoms</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="n">feat</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sense</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_features</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">sense</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">pythfn</span><span class="p">,</span> <span class="n">in1</span><span class="p">,</span> <span class="n">in2</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;envsum&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">envsum</span><span class="p">,</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">envsum</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;sensesum&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensesum</span><span class="p">,</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">sensesum</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;featsum&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">featsum</span><span class="p">,</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">featsum</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="n">in1</span><span class="p">,</span> <span class="n">in2</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">max_deviation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_close_witherror</span><span class="p">(</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">),</span> <span class="n">pythfn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Failed during </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">ee</span>
+            <span class="k">if</span> <span class="n">max_deviation</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">suspicious_deviation</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Closeness check for </span><span class="si">{}</span><span class="s2"> by suspicious amount&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">max_deviation</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Envops_tester.check_empty"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_empty">[docs]</a>    <span class="k">def</span> <span class="nf">check_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)):</span>
+
+        <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">get_simulated_data</span><span class="p">(</span><span class="o">**</span><span class="n">TEST_TINY_PARAMS</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">pfirst</span> <span class="o">=</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,),</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span><span class="n">device</span><span class="o">=</span><span class="n">pfirst</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>    
+        <span class="n">sense</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="n">sense</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="n">dtype</span><span class="o">=</span><span class="n">sense</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span><span class="n">device</span><span class="o">=</span><span class="n">sense</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">envsum</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span><span class="n">feat</span><span class="p">,</span><span class="n">pfirst</span><span class="p">,</span><span class="n">psecond</span><span class="p">)</span>
+            <span class="n">sense_g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensesum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span><span class="n">feat</span><span class="p">,</span><span class="n">pfirst</span><span class="p">,</span><span class="n">psecond</span><span class="p">)</span>
+            <span class="n">feat_g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">featsum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span><span class="n">sense</span><span class="p">,</span><span class="n">pfirst</span><span class="p">,</span><span class="n">psecond</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Failed an operation on data with zero pairs&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ee</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Passed zero-pair check&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Envops_tester.all_close_witherror"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.all_close_witherror">[docs]</a>    <span class="k">def</span> <span class="nf">all_close_witherror</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">):</span>
+        <span class="n">r1</span> <span class="o">=</span> <span class="n">r1</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="n">r2</span> <span class="o">=</span> <span class="n">r2</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">r1</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">:</span>  <span class="c1"># Get tolerance</span>
+            <span class="n">tol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol_f32</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol_f64</span>
+        <span class="n">where</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="o">**</span><span class="n">tol</span><span class="p">)</span>
+        <span class="c1"># np check formula: absolute(a - b) &lt;= (atol + rtol * absolute(b))</span>
+        <span class="n">tol_arr</span> <span class="o">=</span> <span class="n">tol</span><span class="p">[</span><span class="s2">&quot;atol&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">tol</span><span class="p">[</span><span class="s2">&quot;rtol&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">r2</span><span class="p">)</span>
+        <span class="n">diff_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">r1</span> <span class="o">-</span> <span class="n">r2</span><span class="p">)</span>
+        <span class="n">violation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">diff_arr</span><span class="p">[</span><span class="n">where</span><span class="p">]</span> <span class="o">/</span> <span class="n">tol_arr</span><span class="p">[</span><span class="n">where</span><span class="p">])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="o">**</span><span class="n">tol</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">aee</span><span class="p">:</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> bad tolerances (of </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">where</span><span class="p">),</span> <span class="n">where</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Allowed tolerance:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">tol_arr</span><span class="p">[</span><span class="n">where</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Observed deviations:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">diff_arr</span><span class="p">[</span><span class="n">where</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ratio:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">diff_arr</span><span class="p">[</span><span class="n">where</span><span class="p">]</span> <span class="o">/</span> <span class="n">tol_arr</span><span class="p">[</span><span class="n">where</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Desired result:&quot;</span><span class="p">,</span> <span class="n">r2</span><span class="p">[</span><span class="n">where</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Observed result:&quot;</span><span class="p">,</span> <span class="n">r1</span><span class="p">[</span><span class="n">where</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">r2</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">r1</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">r1</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">r2</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">r1</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">r2</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Locations:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">where</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Violation stats: median: </span><span class="si">{}</span><span class="s2">, max: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">violation</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">violation</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="n">aee</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">diff_arr</span> <span class="o">/</span> <span class="n">tol_arr</span><span class="p">))</span>  <span class="c1"># max violation of bounds</span></div>
+
+<div class="viewcode-block" id="Envops_tester.check_allclose"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_allclose">[docs]</a>    <span class="k">def</span> <span class="nf">check_allclose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">use_large</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeats</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">check_allclose_once</span><span class="p">(</span><span class="n">use_large</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Failed during iteration </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">ee</span></div>
+
+<div class="viewcode-block" id="Envops_tester.check_correctness"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_correctness">[docs]</a>    <span class="k">def</span> <span class="nf">check_correctness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_grad</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_small</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_large</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_empty</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Checking gradients </span><span class="si">{}</span><span class="s2"> times...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_grad</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_all_grad</span><span class="p">(</span><span class="n">repeats</span><span class="o">=</span><span class="n">n_grad</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Passed gradient checks!&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Checking forward methods on small data </span><span class="si">{}</span><span class="s2"> times...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_small</span><span class="p">),</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_allclose</span><span class="p">(</span><span class="n">repeats</span><span class="o">=</span><span class="n">n_small</span><span class="p">,</span> <span class="n">use_large</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Passed small tensor forward checks!&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Checking forward methods on large data </span><span class="si">{}</span><span class="s2"> times...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_large</span><span class="p">),</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_allclose</span><span class="p">(</span><span class="n">repeats</span><span class="o">=</span><span class="n">n_large</span><span class="p">,</span> <span class="n">use_large</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Passed large tensor forward checks!&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Envops_tester.check_speed"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_speed">[docs]</a>    <span class="k">def</span> <span class="nf">check_speed</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">n_repetitions</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">),</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_LARGE_PARAMS</span><span class="p">,</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span>
+    <span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">compare_against</span> <span class="o">==</span> <span class="s2">&quot;Pytorch&quot;</span><span class="p">:</span>
+            <span class="n">comp_envsum</span> <span class="o">=</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">envsum</span>
+            <span class="n">comp_sensesum</span> <span class="o">=</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">sensesum</span>
+            <span class="n">comp_featsum</span> <span class="o">=</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">featsum</span>
+        <span class="k">elif</span> <span class="n">compare_against</span> <span class="o">==</span> <span class="s2">&quot;Numba&quot;</span><span class="p">:</span>
+            <span class="n">comp_envsum</span> <span class="o">=</span> <span class="n">env_numba</span><span class="o">.</span><span class="n">new_envsum</span>
+            <span class="n">comp_sensesum</span> <span class="o">=</span> <span class="n">env_numba</span><span class="o">.</span><span class="n">new_sensesum</span>
+            <span class="n">comp_featsum</span> <span class="o">=</span> <span class="n">env_numba</span><span class="o">.</span><span class="n">new_featsum</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown implementation to comapre against:&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">compare_against</span><span class="p">))</span>
+
+        <span class="n">te</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">tf</span> <span class="o">=</span> <span class="p">(</span><span class="n">TimerHolder</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;Envsum&quot;</span><span class="p">,</span> <span class="s2">&quot;Sensesum&quot;</span><span class="p">,</span> <span class="s2">&quot;Featsum&quot;</span><span class="p">))</span>
+        <span class="n">tne</span><span class="p">,</span> <span class="n">tns</span><span class="p">,</span> <span class="n">tnf</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">TimerHolder</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">compare_against</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;Envsum&quot;</span><span class="p">,</span> <span class="s2">&quot;Sensesum&quot;</span><span class="p">,</span> <span class="s2">&quot;Featsum&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Repetitions: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_repetitions</span><span class="p">))</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="c1"># with torch.autograd.profiler.profile() as prof:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_repetitions</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">get_simulated_data</span><span class="p">(</span><span class="o">**</span><span class="n">data_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+                <span class="k">with</span> <span class="n">tne</span><span class="o">.</span><span class="n">add</span><span class="p">():</span>
+                    <span class="n">env</span> <span class="o">=</span> <span class="n">comp_envsum</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+                <span class="k">with</span> <span class="n">tns</span><span class="o">.</span><span class="n">add</span><span class="p">():</span>
+                    <span class="n">comp_sensesum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+                <span class="k">with</span> <span class="n">tnf</span><span class="o">.</span><span class="n">add</span><span class="p">():</span>
+                    <span class="n">comp_featsum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+                <span class="k">with</span> <span class="n">te</span><span class="o">.</span><span class="n">add</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">envsum</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+                <span class="k">with</span> <span class="n">ts</span><span class="o">.</span><span class="n">add</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sensesum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+                <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">add</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">featsum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>  <span class="c1"># Newline to terminate the ... printing</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">[</span><span class="n">tne</span><span class="p">,</span> <span class="n">tns</span><span class="p">,</span> <span class="n">tnf</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">te</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">tf</span><span class="p">]:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mean </span><span class="si">{}</span><span class="s2"> time: </span><span class="si">{}</span><span class="s2"> Median: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">mean_elapsed</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">median_elapsed</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">tn</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">tne</span><span class="p">,</span> <span class="n">tns</span><span class="p">,</span> <span class="n">tnf</span><span class="p">],</span> <span class="p">[</span><span class="n">te</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">tf</span><span class="p">]):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> Speedup: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">tn</span><span class="o">.</span><span class="n">median_elapsed</span> <span class="o">/</span> <span class="n">t</span><span class="o">.</span><span class="n">median_elapsed</span><span class="p">))</span>
+
+        <span class="n">tnsum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">median_elapsed</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">tne</span><span class="p">,</span> <span class="n">tns</span><span class="p">,</span> <span class="n">tnf</span><span class="p">])</span>
+        <span class="n">tsum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">median_elapsed</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">te</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">tf</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Overall </span><span class="si">{}</span><span class="s2"> time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">compare_against</span><span class="p">,</span> <span class="n">tnsum</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Overall time now: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tsum</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Overall speedup: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tnsum</span> <span class="o">/</span> <span class="n">tsum</span><span class="p">))</span>
+        <span class="k">return</span>  <span class="c1"># prof</span></div></div>
+
+
+<span class="kn">import</span> <span class="nn">time</span>
+
+
+<div class="viewcode-block" id="TimerHolder"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimerHolder">[docs]</a><span class="k">class</span> <span class="nc">TimerHolder</span><span class="p">:</span>
+<div class="viewcode-block" id="TimerHolder.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimerHolder.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snippets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span></div>
+
+<div class="viewcode-block" id="TimerHolder.add"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimerHolder.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">TimedSnippet</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snippets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">t</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">elapsed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">elapsed</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">snippets</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mean_elapsed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">elapsed</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snippets</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">median_elapsed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">([</span><span class="n">t</span><span class="o">.</span><span class="n">elapsed</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">snippets</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="TimedSnippet"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimedSnippet">[docs]</a><span class="k">class</span> <span class="nc">TimedSnippet</span><span class="p">:</span>
+<div class="viewcode-block" id="TimedSnippet.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimedSnippet.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+            <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+            <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">elapsed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">env_impl</span><span class="p">,</span><span class="n">sense_impl</span><span class="p">,</span><span class="n">feat_impl</span><span class="p">):</span>
+    <span class="n">tester</span> <span class="o">=</span> <span class="n">Envops_tester</span><span class="p">(</span>
+        <span class="n">env_impl</span><span class="p">,</span>
+        <span class="n">sense_impl</span><span class="p">,</span>
+        <span class="n">feat_impl</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># % time</span>
+
+    <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running GPU tests&quot;</span><span class="p">)</span>
+        <span class="n">meminfo</span> <span class="o">=</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_context</span><span class="p">()</span><span class="o">.</span><span class="n">get_memory_info</span><span class="p">()</span>
+        <span class="n">use_large_gpu</span> <span class="o">=</span> <span class="n">meminfo</span><span class="o">.</span><span class="n">free</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">31</span>
+        <span class="n">use_verylarge_gpu</span> <span class="o">=</span> <span class="n">meminfo</span><span class="o">.</span><span class="n">free</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="o">**</span><span class="mi">3</span>
+
+        <span class="n">n_large</span> <span class="o">=</span> <span class="mi">3</span> <span class="k">if</span> <span class="n">use_large_gpu</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">tester</span><span class="o">.</span><span class="n">check_correctness</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span><span class="n">n_large</span><span class="o">=</span><span class="n">n_large</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">use_verylarge_gpu</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mega systems:&quot;</span><span class="p">,</span> <span class="n">TEST_MEGA_PARAMS</span><span class="p">)</span>
+            <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span><span class="n">data_size</span><span class="o">=</span><span class="n">TEST_MEGA_PARAMS</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Numba indicates less than 32GB free GPU memory -- skipping mega system test&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">use_large_gpu</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+            <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span><span class="n">data_size</span><span class="o">=</span><span class="n">TEST_LARGE_PARAMS</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span><span class="p">)</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Numba indicates less than 2GB free GPU memory -- skipping large system test&quot;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Medium systems:&quot;</span><span class="p">,</span> <span class="n">TEST_MEDIUM_PARAMS</span><span class="p">)</span>
+        <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span>
+            <span class="n">n_repetitions</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_MEDIUM_PARAMS</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Small systems:&quot;</span><span class="p">,</span> <span class="n">TEST_SMALL_PARAMS</span><span class="p">)</span>
+        <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span>
+            <span class="n">n_repetitions</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_SMALL_PARAMS</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cuda not available, not running GPU tests.&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running CPU tests&quot;</span><span class="p">)</span>
+    <span class="n">tester</span><span class="o">.</span><span class="n">check_correctness</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Large systems:&quot;</span><span class="p">,</span> <span class="n">TEST_LARGE_PARAMS</span><span class="p">)</span>
+    <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Medium systems:&quot;</span><span class="p">,</span> <span class="n">TEST_MEDIUM_PARAMS</span><span class="p">)</span>
+    <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_MEDIUM_PARAMS</span><span class="p">,</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Small systems:&quot;</span><span class="p">,</span> <span class="n">TEST_SMALL_PARAMS</span><span class="p">)</span>
+    <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span><span class="p">,</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_SMALL_PARAMS</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">(</span><span class="n">env_numba</span><span class="o">.</span><span class="n">new_envsum</span><span class="p">,</span>
+         <span class="n">env_numba</span><span class="o">.</span><span class="n">new_sensesum</span><span class="p">,</span>
+         <span class="n">env_numba</span><span class="o">.</span><span class="n">new_featsum</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

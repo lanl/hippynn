@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.interfaces.pyseqm_interface.seqm_modules &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.interfaces.pyseqm_interface.seqm_modules</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.interfaces.pyseqm_interface.seqm_modules</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">seqm.basics</span> <span class="kn">import</span> <span class="n">Energy</span>
+<span class="kn">from</span> <span class="nn">seqm.seqm_functions.constants</span> <span class="kn">import</span> <span class="n">Constants</span>
+<span class="kn">from</span> <span class="nn">seqm.seqm_functions.parameters</span> <span class="kn">import</span> <span class="n">params</span>
+<span class="kn">from</span> <span class="nn">seqm.seqm_functions.energy</span> <span class="kn">import</span> <span class="n">elec_energy_isolated_atom</span>
+
+<span class="kn">from</span> <span class="nn">.check</span> <span class="kn">import</span> <span class="n">check</span><span class="p">,</span> <span class="n">check_dist</span>
+
+
+<div class="viewcode-block" id="Scale"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.Scale">[docs]</a><span class="k">class</span> <span class="nc">Scale</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="Scale.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.Scale.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">func</span></div>
+
+<div class="viewcode-block" id="Scale.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.Scale.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notconverged</span><span class="p">):</span>
+        <span class="n">frac</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">notconverged</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">double</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">notconverged</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">frac</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span></div></div>
+
+
+<div class="viewcode-block" id="SEQM_MolMask"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_MolMask">[docs]</a><span class="k">class</span> <span class="nc">SEQM_MolMask</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="SEQM_MolMask.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_MolMask.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SEQM_MolMask.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_MolMask.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notconverged</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">notconverged</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">mask</span></div></div>
+
+
+<div class="viewcode-block" id="AtomMask"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.AtomMask">[docs]</a><span class="k">class</span> <span class="nc">AtomMask</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="AtomMask.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.AtomMask.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="AtomMask.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.AtomMask.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">species</span> <span class="o">&gt;</span> <span class="mi">0</span></div></div>
+
+
+<div class="viewcode-block" id="num_orb"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.num_orb">[docs]</a><span class="k">def</span> <span class="nf">num_orb</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">target_method</span><span class="o">=</span><span class="s2">&quot;wB97X&quot;</span><span class="p">):</span>
+    <span class="n">tore</span> <span class="o">=</span> <span class="n">Constants</span><span class="p">()</span><span class="o">.</span><span class="n">tore</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">species</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">nHeavy</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">species</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">nHydro</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">species</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># MNDO information</span>
+    <span class="n">nocc</span> <span class="o">=</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">tore</span><span class="p">[</span><span class="n">species</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="n">norb</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">nHeavy</span> <span class="o">+</span> <span class="n">nHydro</span>
+    <span class="c1"># nvirt = norb-nocc</span>
+
+    <span class="k">if</span> <span class="n">target_method</span> <span class="o">==</span> <span class="s2">&quot;wB97X&quot;</span><span class="p">:</span>
+        <span class="c1"># wB97X information</span>
+        <span class="c1"># nocc0 = (torch.sum(species,dim=1)/2.0).type(torch.int64)</span>
+        <span class="c1"># norb0 = torch.sum(species&gt;0,dim=1)*4</span>
+        <span class="n">nvirt0</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">species</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">-</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">norb</span><span class="p">,</span> <span class="n">nocc</span> <span class="o">+</span> <span class="n">nvirt0</span><span class="p">),</span> <span class="n">nocc</span>
+    <span class="k">elif</span> <span class="n">target_method</span> <span class="o">==</span> <span class="s2">&quot;gaussian&quot;</span><span class="p">:</span>
+        <span class="n">nvirt0</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">species</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">15</span>
+            <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">species</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+            <span class="o">-</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">norb</span><span class="p">,</span> <span class="n">nocc</span> <span class="o">+</span> <span class="n">nvirt0</span><span class="p">),</span> <span class="n">nocc</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+            <span class="s2">&quot;Computing orbital number </span><span class="se">\</span>
+<span class="s2">                        information is not implemented yet for &quot;</span><span class="p">,</span>
+            <span class="n">target_method</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">assume the target dataset is preprocessed such that</span>
+<span class="sd">the data there has same number of occupied orbitals and at most the number of virtual orbitals</span>
+<span class="sd">from SEQM.</span>
+<span class="sd">as for certain molecules like O3, SEQM may have more virtual orbitals than from wB97X</span>
+<span class="sd">For this case, the code here will trim the virtual orbitals from SEQM to match</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="SEQM_OrbitalMask"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_OrbitalMask">[docs]</a><span class="k">class</span> <span class="nc">SEQM_OrbitalMask</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="SEQM_OrbitalMask.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_OrbitalMask.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_method</span><span class="p">,</span> <span class="n">nOccVirt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        nOccVirt : if None, choose all the orbitals which MNDO and target methods share</span>
+<span class="sd">                   else [NOCC, NVIRT], i.e. choose highest NOCC occupied orbtials (HOMO-NOCC+1, HOMO-NOCC+2, ..., HOMO)</span>
+<span class="sd">                                            and lowest NVIRT virtual orbitals (LUMO, LUMO+1, ..., LUMO+NVIRT-1)</span>
+<span class="sd">                        if there are not sufficient number of virtual/occupied orbitals, just choose whatever they have</span>
+<span class="sd">                        i.e. NOCC &lt;= nocc, NVIRT &lt;= norb - nocc</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_method</span> <span class="o">=</span> <span class="n">target_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nOccVirt</span> <span class="o">=</span> <span class="n">nOccVirt</span></div>
+
+<div class="viewcode-block" id="SEQM_OrbitalMask.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_OrbitalMask.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">):</span>
+        <span class="n">norb</span><span class="p">,</span> <span class="n">nocc</span> <span class="o">=</span> <span class="n">num_orb</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_method</span><span class="p">)</span>
+        <span class="n">nmol</span><span class="p">,</span> <span class="n">molsize</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">molsize</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">species</span><span class="o">.</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">nmol</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">molsize</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nOccVirt</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">NOCC</span><span class="p">,</span> <span class="n">NVIRT</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nOccVirt</span>
+            <span class="n">nindx1</span> <span class="o">=</span> <span class="n">nocc</span> <span class="o">-</span> <span class="n">NOCC</span>
+            <span class="n">nindx1</span><span class="p">[</span><span class="n">nindx1</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">nindx2</span> <span class="o">=</span> <span class="n">nocc</span> <span class="o">+</span> <span class="n">NVIRT</span>
+            <span class="n">nindx2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">norb</span><span class="p">,</span> <span class="n">nindx2</span><span class="p">)</span>
+
+            <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp</span> <span class="o">&gt;=</span> <span class="n">nindx1</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">tmp</span> <span class="o">&lt;</span> <span class="n">nindx2</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">tmp</span> <span class="o">&lt;</span> <span class="n">norb</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">mask</span></div></div>
+
+
+<div class="viewcode-block" id="SEQM_MaskOnMol"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_MaskOnMol">[docs]</a><span class="k">class</span> <span class="nc">SEQM_MaskOnMol</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="SEQM_MaskOnMol.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_MaskOnMol.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SEQM_MaskOnMol.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_MaskOnMol.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">mol_mask</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">var</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="n">mol_mask</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">var</span><span class="p">[</span><span class="n">mol_mask</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span></div></div>
+
+
+<div class="viewcode-block" id="SEQM_MaskOnMolAtom"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_MaskOnMolAtom">[docs]</a><span class="k">class</span> <span class="nc">SEQM_MaskOnMolAtom</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="SEQM_MaskOnMolAtom.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_MaskOnMolAtom.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SEQM_MaskOnMolAtom.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_MaskOnMolAtom.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">mol_mask</span><span class="p">,</span> <span class="n">atom_mask</span><span class="p">):</span>
+        <span class="c1"># mol_mask shape : (mol, 1)</span>
+        <span class="c1"># atom_mask shape : (mol, atom)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">mol_mask</span> <span class="o">*</span> <span class="n">atom_mask</span>
+        <span class="k">return</span> <span class="n">var</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="SEQM_MaskOnMolOrbital"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_MaskOnMolOrbital">[docs]</a><span class="k">class</span> <span class="nc">SEQM_MaskOnMolOrbital</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="SEQM_MaskOnMolOrbital.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_MaskOnMolOrbital.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SEQM_MaskOnMolOrbital.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_MaskOnMolOrbital.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">mol_mask</span><span class="p">,</span> <span class="n">orbital_mask</span><span class="p">):</span>
+        <span class="c1"># mol_mask shape : (mol, 1)</span>
+        <span class="c1"># orbital_mask shape : (mol, orbital)</span>
+        <span class="c1"># var shape : (mol, orbital)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">mol_mask</span> <span class="o">*</span> <span class="n">orbital_mask</span>
+        <span class="k">return</span> <span class="n">var</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="SEQM_MaskOnMolOrbitalAtom"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_MaskOnMolOrbitalAtom">[docs]</a><span class="k">class</span> <span class="nc">SEQM_MaskOnMolOrbitalAtom</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="SEQM_MaskOnMolOrbitalAtom.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_MaskOnMolOrbitalAtom.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SEQM_MaskOnMolOrbitalAtom.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_MaskOnMolOrbitalAtom.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">mol_mask</span><span class="p">,</span> <span class="n">orbital_mask</span><span class="p">,</span> <span class="n">atom_mask</span><span class="p">):</span>
+        <span class="c1"># mol_mask shape : (mol, 1)</span>
+        <span class="c1"># orbital_mask shape : (mol, orbital)</span>
+        <span class="c1"># atom_mask shape : (mol, atom)</span>
+        <span class="c1"># var shape : (mol, orbital, atom)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">mol_mask</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">orbital_mask</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">atom_mask</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">var</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="pack_par"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.pack_par">[docs]</a><span class="k">def</span> <span class="nf">pack_par</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">par_atom</span><span class="p">,</span> <span class="n">par_bond</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="n">learned_parameters</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="mf">1.0e-2</span>
+    <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="n">par_bond</span><span class="p">):</span>
+        <span class="n">learned_parameters</span><span class="p">[</span><span class="s2">&quot;Kbeta&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">par_bond</span> <span class="o">+</span> <span class="mf">1.0</span>
+
+    <span class="n">cond</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="n">cond</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">n_output_parameters</span><span class="p">):</span>
+        <span class="c1"># learned_parameters[obj.learned[i]] = par_atom[cond,i]*obj.weight[i]+obj.p[Z,i]</span>
+        <span class="n">learned_parameters</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">learned</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">par_atom</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">obj</span><span class="o">.</span><span class="n">weight</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">obj</span><span class="o">.</span><span class="n">p</span><span class="p">[</span><span class="n">Z</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;zeta_s&quot;</span><span class="p">,</span> <span class="s2">&quot;zeta_p&quot;</span><span class="p">,</span> <span class="s2">&quot;g_ss&quot;</span><span class="p">,</span> <span class="s2">&quot;h_sp&quot;</span><span class="p">,</span> <span class="s2">&quot;alpha&quot;</span><span class="p">,</span> <span class="s2">&quot;Gaussian1_L&quot;</span><span class="p">,</span> <span class="s2">&quot;Gaussian2_L&quot;</span><span class="p">,</span> <span class="s2">&quot;Gaussian3_L&quot;</span><span class="p">,</span> <span class="s2">&quot;Gaussian4_L&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">learned</span><span class="p">:</span>
+            <span class="n">learned_parameters</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">learned_parameters</span><span class="p">[</span><span class="n">x</span><span class="p">])</span> <span class="o">+</span> <span class="n">eps</span>
+
+    <span class="k">assert</span> <span class="p">(</span><span class="s2">&quot;g_pp&quot;</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">learned</span> <span class="ow">and</span> <span class="s2">&quot;g_p2&quot;</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">learned</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="s2">&quot;g_pp&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">learned</span> <span class="ow">and</span> <span class="s2">&quot;g_p2&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">learned</span>
+    <span class="p">),</span> <span class="s2">&quot;For convinience, both of g_pp and g_p2 should be provided from HIPNN or use constant ones&quot;</span>
+
+    <span class="c1"># hpp = 0.5*(gpp-gp2)&gt;0</span>
+    <span class="k">if</span> <span class="s2">&quot;g_pp&quot;</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">learned</span> <span class="ow">and</span> <span class="s2">&quot;g_p2&quot;</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">learned</span><span class="p">:</span>
+        <span class="n">learned_parameters</span><span class="p">[</span><span class="s2">&quot;g_pp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">learned_parameters</span><span class="p">[</span><span class="s2">&quot;g_pp&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">learned_parameters</span><span class="p">[</span><span class="s2">&quot;g_p2&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="n">learned_parameters</span><span class="p">[</span><span class="s2">&quot;g_p2&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">eps</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">not_learned</span><span class="p">:</span>
+        <span class="c1"># not_learned is a dict, e.g. : {1:[&#39;U_pp&#39;,&#39;h_sp&#39;]}, means use constant parameters for Hydrogen in U_pp and h_sp</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">not_learned</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">not_learned</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">learned</span><span class="p">:</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">learned</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                    <span class="n">learned_parameters</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">Z</span> <span class="o">==</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">p</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">learned_parameters</span></div>
+
+
+<div class="viewcode-block" id="SEQM_Energy"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_Energy">[docs]</a><span class="k">class</span> <span class="nc">SEQM_Energy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="SEQM_Energy.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_Energy.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seqm_parameters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="c1"># ignore gradient on density matrix, based on Hellmann-Feynman Theorm</span>
+        <span class="c1"># only works if targets are total energy or heat of formation</span>
+        <span class="c1"># ?? for heat of formation, Hf = Etot - Eiso + Eexp</span>
+        <span class="c1"># Eiso depends on parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hartree_eV</span> <span class="o">=</span> <span class="mf">27.2113834</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">learned</span> <span class="o">=</span> <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;learned&quot;</span><span class="p">]</span>  <span class="c1"># parameters for each real atom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_output_parameters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">learned</span><span class="p">)</span>
+        <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;eig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># don&#39;t need orbital energy</span>
+        <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;scf_backward&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># ignore gradient on density matrix ``</span>
+        <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;Hf_flag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># true: Hf, false: Etot-Eiso</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">Energy</span><span class="p">(</span><span class="n">seqm_parameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">const</span> <span class="o">=</span> <span class="n">Constants</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;elements&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;method&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filedir</span> <span class="o">=</span> <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;parameter_file_dir&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">params</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span> <span class="n">root_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filedir</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">learned</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">softplus</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Softplus</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">learned</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;zeta&quot;</span> <span class="ow">in</span> <span class="n">term</span> <span class="ow">or</span> <span class="s2">&quot;alpha&quot;</span> <span class="ow">in</span> <span class="n">term</span> <span class="ow">or</span> <span class="s2">&quot;Gaussian&quot;</span> <span class="ow">in</span> <span class="n">term</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hartree_eV</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">not_learned</span> <span class="o">=</span> <span class="n">seqm_parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;not_learned&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SEQM_Energy.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_Energy.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par_atom</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">species</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        get the energy terms</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">learned_parameters</span> <span class="o">=</span> <span class="n">pack_par</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">par_atom</span><span class="p">)</span>
+
+        <span class="n">Etot_m_Eiso</span><span class="p">,</span> <span class="n">Etot</span><span class="p">,</span> <span class="n">Eelec</span><span class="p">,</span> <span class="n">Enuc</span><span class="p">,</span> <span class="n">Eiso</span><span class="p">,</span> <span class="n">EnucAB</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">charge</span><span class="p">,</span> <span class="n">notconverged</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">const</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">learned_parameters</span><span class="o">=</span><span class="n">learned_parameters</span><span class="p">,</span> <span class="n">all_terms</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Etot</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Etot_m_Eiso</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">notconverged</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="SEQM_All"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_All">[docs]</a><span class="k">class</span> <span class="nc">SEQM_All</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="SEQM_All.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_All.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seqm_parameters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hartree_eV</span> <span class="o">=</span> <span class="mf">27.2113834</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">learned</span> <span class="o">=</span> <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;learned&quot;</span><span class="p">]</span>  <span class="c1"># parameters for each real atom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_output_parameters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">learned</span><span class="p">)</span>
+        <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;eig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># don&#39;t need orbital energy</span>
+        <span class="k">if</span> <span class="s2">&quot;scf_backward&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seqm_parameters</span><span class="p">:</span>
+            <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;scf_backward&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># ignore gradient on density matrix ``</span>
+        <span class="k">elif</span> <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;scf_backward&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;scf_backward must be 1 or 2 for training with gradient on density matrix&quot;</span><span class="p">)</span>
+        <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;Hf_flag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># true: Hf, false: Etot-Eiso</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">Energy</span><span class="p">(</span><span class="n">seqm_parameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">const</span> <span class="o">=</span> <span class="n">Constants</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;elements&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;method&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filedir</span> <span class="o">=</span> <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;parameter_file_dir&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">params</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span> <span class="n">root_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filedir</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">learned</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">softplus</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Softplus</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">learned</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;zeta&quot;</span> <span class="ow">in</span> <span class="n">term</span> <span class="ow">or</span> <span class="s2">&quot;alpha&quot;</span> <span class="ow">in</span> <span class="n">term</span> <span class="ow">or</span> <span class="s2">&quot;Gaussian&quot;</span> <span class="ow">in</span> <span class="n">term</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hartree_eV</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">not_learned</span> <span class="o">=</span> <span class="n">seqm_parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;not_learned&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SEQM_All.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_modules.html#hippynn.interfaces.pyseqm_interface.seqm_modules.SEQM_All.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par_atom</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">species</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        get the energy terms</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">learned_parameters</span> <span class="o">=</span> <span class="n">pack_par</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">par_atom</span><span class="p">)</span>
+
+        <span class="n">Etot_m_Eiso</span><span class="p">,</span> <span class="n">Etot</span><span class="p">,</span> <span class="n">Eelec</span><span class="p">,</span> <span class="n">Enuc</span><span class="p">,</span> <span class="n">Eiso</span><span class="p">,</span> <span class="n">EnucAB</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">charge</span><span class="p">,</span> <span class="n">notconverged</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">const</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">learned_parameters</span><span class="o">=</span><span class="n">learned_parameters</span><span class="p">,</span> <span class="n">all_terms</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="n">n_molecule</span><span class="p">,</span> <span class="n">n_atom</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">atomic_charge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">const</span><span class="o">.</span><span class="n">tore</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">-</span> <span class="n">P</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">dim1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_molecule</span><span class="p">,</span> <span class="n">n_atom</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">Etot</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">Etot_m_Eiso</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">e</span><span class="p">,</span>
+            <span class="n">P</span><span class="p">,</span>
+            <span class="n">Eelec</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">Enuc</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">Eiso</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">charge</span><span class="p">,</span>
+            <span class="n">notconverged</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">atomic_charge</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.graphs.indextypes.registry &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.graphs.indextypes.registry</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.graphs.indextypes.registry</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Storage for the logical relationships between index states,</span>
+<span class="sd">and a cache reduce redundant computations. Also includes</span>
+<span class="sd">the indextransformer decorator which registers computations</span>
+<span class="sd">that change index states.</span>
+<span class="sd">The index transformers do not live here because they are themselves</span>
+<span class="sd">nodes, and this package should be minimally dependent on the nodes themselves.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_debprint</span>
+<span class="kn">from</span> <span class="nn">.type_def</span> <span class="kn">import</span> <span class="n">IdxType</span>
+
+<span class="c1"># fmt: off</span>
+<span class="n">_db_index_states</span> <span class="o">=</span> <span class="p">{</span>
+<span class="c1">### TYPE PREDICTED BY MODEL | DEFAULT TYPE OF STORAGE IN DATABASE</span>
+    <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>       <span class="p">:</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,</span>
+    <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>           <span class="p">:</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">,</span>
+    <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span>         <span class="p">:</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">,</span>
+    <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtomAtom</span>     <span class="p">:</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtomAtom</span><span class="p">,</span>
+    <span class="n">IdxType</span><span class="o">.</span><span class="n">QuadMol</span>         <span class="p">:</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">QuadPack</span><span class="p">,</span>
+    <span class="n">IdxType</span><span class="o">.</span><span class="n">QuadPack</span>        <span class="p">:</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">QuadPack</span><span class="p">,</span>
+    <span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span>            <span class="p">:</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtomAtom</span><span class="p">,</span>
+    <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>          <span class="p">:</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span>
+    <span class="n">IdxType</span><span class="o">.</span><span class="n">NotFound</span>        <span class="p">:</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">NotFound</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="n">elementwise_compare_rules</span> <span class="o">=</span> <span class="p">{</span>
+<span class="c1">#### TYPES OF ARGUMENTS TO REDUCE             |   TYPE OF OUTPUTS</span>
+    <span class="p">((</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,)</span>                        <span class="p">,</span>   <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span><span class="p">),</span>
+    <span class="p">((</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,)</span>                     <span class="p">,</span>   <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">),</span>
+    <span class="p">((</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,)</span>                         <span class="p">,</span>   <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">),</span>
+    <span class="p">((</span><span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">,)</span>                       <span class="p">,</span>   <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">),</span>
+    <span class="p">((</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">,)</span>        <span class="p">,</span>   <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">),</span>
+    <span class="p">((</span><span class="n">IdxType</span><span class="o">.</span><span class="n">QuadMol</span><span class="p">,)</span>                       <span class="p">,</span>   <span class="n">IdxType</span><span class="o">.</span><span class="n">QuadMol</span><span class="p">),</span>
+    <span class="p">((</span><span class="n">IdxType</span><span class="o">.</span><span class="n">QuadPack</span><span class="p">,)</span>                      <span class="p">,</span>   <span class="n">IdxType</span><span class="o">.</span><span class="n">QuadMol</span><span class="p">),</span>
+    <span class="p">((</span><span class="n">IdxType</span><span class="o">.</span><span class="n">QuadMol</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">QuadPack</span><span class="p">)</span>      <span class="p">,</span>   <span class="n">IdxType</span><span class="o">.</span><span class="n">QuadMol</span><span class="p">),</span>
+    <span class="p">((</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span><span class="p">,)</span>                          <span class="p">,</span>   <span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span><span class="p">),</span>
+    <span class="p">((</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtomAtom</span><span class="p">)</span>      <span class="p">,</span>   <span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span><span class="p">),</span>
+    <span class="p">((</span><span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtomAtom</span><span class="p">,)</span>                   <span class="p">,</span>   <span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span><span class="p">),</span>
+    <span class="p">((</span><span class="n">IdxType</span><span class="o">.</span><span class="n">NotFound</span><span class="p">,)</span>                      <span class="p">,</span>   <span class="n">IdxType</span><span class="o">.</span><span class="n">NotFound</span><span class="p">),</span>
+<span class="p">}</span>
+<span class="c1"># fmt: on</span>
+
+<span class="c1"># Add default rule: (_some_type,scalar) -&gt; _some_type if scalar is not in rule already</span>
+<span class="k">for</span> <span class="n">idxset</span><span class="p">,</span> <span class="n">idxtarget</span> <span class="ow">in</span> <span class="n">elementwise_compare_rules</span><span class="o">.</span><span class="n">copy</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">idxset</span><span class="p">:</span>
+        <span class="n">idxset</span> <span class="o">=</span> <span class="o">*</span><span class="n">idxset</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
+        <span class="n">elementwise_compare_rules</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">idxset</span><span class="p">,</span> <span class="n">idxtarget</span><span class="p">))</span>
+<span class="k">del</span> <span class="n">idxset</span><span class="p">,</span> <span class="n">idxtarget</span>
+
+<span class="c1"># Assemble rules</span>
+<span class="n">elementwise_compare_rules</span> <span class="o">=</span> <span class="p">{</span><span class="nb">frozenset</span><span class="p">(</span><span class="n">in_types</span><span class="p">):</span> <span class="n">out_type</span> <span class="k">for</span> <span class="n">in_types</span><span class="p">,</span> <span class="n">out_type</span> <span class="ow">in</span> <span class="n">elementwise_compare_rules</span><span class="p">}</span>
+
+<span class="c1"># The index cache holds information about previously indexed nodes.</span>
+<span class="c1"># This information comes in two types</span>
+<span class="c1"># 1) (parent, node_type, name) -&gt; An generated index from an index transformer</span>
+<span class="c1"># 2) (index_type, node) -&gt; new_node a cache of `node` in index state `index_state`</span>
+<span class="n">_index_cache</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="c1"># The index dispatch table holds the transformer functions which are capable</span>
+<span class="c1"># of finding the transformation between index states</span>
+<span class="n">_index_dispatch_table</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<div class="viewcode-block" id="clear_index_cache"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.registry.html#hippynn.graphs.indextypes.clear_index_cache">[docs]</a><span class="k">def</span> <span class="nf">clear_index_cache</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove any cached index types for nodes.</span>
+
+<span class="sd">    The index cache holds global references to nodes that have been</span>
+<span class="sd">    transformed automatically, so these nodes won&#39;t be garbage collected</span>
+<span class="sd">    automatically. Clearing the cache will free any reference to them.</span>
+
+<span class="sd">    If you modify the index dispatch table or type comparison table on the fly,</span>
+<span class="sd">    you may want to clear the cache to remove references to nodes created</span>
+<span class="sd">    using the old rules.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_index_cache</span>
+    <span class="n">_index_cache</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+
+<div class="viewcode-block" id="register_index_transformer"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.registry.html#hippynn.graphs.indextypes.register_index_transformer">[docs]</a><span class="k">def</span> <span class="nf">register_index_transformer</span><span class="p">(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorator for registering a transformer from one IdxType to another.</span>
+
+<span class="sd">    An index transformer should have a signature::</span>
+
+<span class="sd">         f(node) -&gt; (parents, child_node_type)</span>
+
+<span class="sd">    with types::</span>
+
+<span class="sd">        node: Node</span>
+<span class="sd">        parents : Tuple[Node]</span>
+<span class="sd">        child_node_type : Union[Type[Node],Callable[[str,Tuple[node]],[node]]]</span>
+
+<span class="sd">    That is, the child_node_type can be a class of node, or a factory function</span>
+<span class="sd">    which acts with the same signature as a node constructor.</span>
+<span class="sd">    If f supports additional arguments, they must have default values,</span>
+<span class="sd">    as it will be invoked by the automatic index transformation system</span>
+<span class="sd">    as f(node).</span>
+
+<span class="sd">    The decorator results in a new function of type::</span>
+
+<span class="sd">        f(node: Node) -&gt; Node</span>
+
+<span class="sd">    which is cached so that the same index transformation may be repeatedly</span>
+<span class="sd">    applied to yield the same output node, and registered with the dispatch</span>
+<span class="sd">    table for index transformations. No two functions may be registered for the</span>
+<span class="sd">    same index type conversion simultaneously.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_index_dispatch_table</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Index dispatch for (</span><span class="si">{}</span><span class="s2">)-&gt;(</span><span class="si">{}</span><span class="s2">) already defined!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">))</span>
+
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapped</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">idxcache_info</span> <span class="o">=</span> <span class="p">(</span><span class="n">output_idxstate</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">idxcache_info</span> <span class="ow">in</span> <span class="n">_index_cache</span><span class="p">:</span>
+                <span class="n">output_node</span> <span class="o">=</span> <span class="n">_index_cache</span><span class="p">[</span><span class="n">idxcache_info</span><span class="p">]</span>
+                <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Found in node cache: </span><span class="si">{}</span><span class="s2"> : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output_node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">output_node</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">parents</span><span class="p">,</span> <span class="n">indexer_nodetype</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">output_idxstate</span><span class="si">}</span><span class="s2">]&quot;</span>
+                <span class="n">output_node</span> <span class="o">=</span> <span class="n">indexer_nodetype</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">)</span>
+
+                <span class="c1"># Forward-link this new node so we can avoid creating</span>
+                <span class="c1"># redundant nodes.</span>
+                <span class="n">_index_cache</span><span class="p">[</span><span class="n">idxcache_info</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_node</span>
+                <span class="c1"># Back-link this new node to the old node&#39;s index state,</span>
+                <span class="c1"># so if we end up with the reverse index transformation we</span>
+                <span class="c1"># can just substitute the original node.</span>
+                <span class="n">_index_cache</span><span class="p">[(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_node</span><span class="p">)]</span> <span class="o">=</span> <span class="n">node</span>
+
+                <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Generated new indexer: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output_node</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">output_node</span>
+
+        <span class="n">_index_dispatch_table</span><span class="p">[</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">]</span> <span class="o">=</span> <span class="n">wrapped</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Index dispatch for (</span><span class="si">{}</span><span class="s2">)-&gt;(</span><span class="si">{}</span><span class="s2">) defined!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">wrapped</span>
+
+    <span class="k">return</span> <span class="n">decorator</span></div>
+
+
+<span class="c1">#### Scalars can be viewed as any index type: Allow this ####</span>
+<span class="k">for</span> <span class="n">idxt</span> <span class="ow">in</span> <span class="n">IdxType</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">idxt</span> <span class="ow">is</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span><span class="p">:</span>
+        <span class="k">continue</span>  <span class="c1"># No pass-through necessary for scalar-scalar</span>
+
+    <span class="c1"># register no-op transformer</span>
+    <span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span> <span class="n">idxt</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">scalar_promote</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">__idxt</span><span class="o">=</span><span class="n">idxt</span><span class="p">):</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> Allowing view of Scalar </span><span class="si">{}</span><span class="s2"> as type </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">__idxt</span><span class="p">))</span>
+
+        <span class="c1"># Node index transformers (see #register_index_transformer) return</span>
+        <span class="c1"># a set of parents and the node type to create.</span>
+        <span class="c1"># So here we&#39;ll define a trivial factory function which mimics this</span>
+        <span class="c1"># behavior and passes the node through unchanged.</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="n">node</span><span class="p">,</span>  <span class="c1"># Parents are defined as a tuple</span>
+
+        <span class="k">def</span> <span class="nf">passthrough_node_factory</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">node</span><span class="p">,)</span> <span class="o">=</span> <span class="n">parents</span>  <span class="c1"># Unwrap the tuple</span>
+            <span class="k">return</span> <span class="n">node</span>
+
+        <span class="k">return</span> <span class="n">parents</span><span class="p">,</span> <span class="n">passthrough_node_factory</span>
+
+<span class="k">del</span> <span class="n">scalar_promote</span><span class="p">,</span> <span class="n">idxt</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

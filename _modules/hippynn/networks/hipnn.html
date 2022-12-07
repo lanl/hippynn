@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.networks.hipnn &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.networks.hipnn</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.networks.hipnn</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Implementation of HIPNN.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">from</span> <span class="nn">..layers.hiplayers</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GaussianSensitivityModule</span><span class="p">,</span>
+    <span class="n">InverseSensitivityModule</span><span class="p">,</span>
+    <span class="n">InteractLayer</span><span class="p">,</span>
+    <span class="n">InteractLayerVec</span><span class="p">,</span>
+    <span class="n">InteractLayerQuad</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..layers.transform</span> <span class="kn">import</span> <span class="n">ResNetWrapper</span>
+
+
+<span class="c1"># computes E0 for the energy layer.</span>
+<div class="viewcode-block" id="compute_hipnn_e0"><a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.compute_hipnn_e0">[docs]</a><span class="k">def</span> <span class="nf">compute_hipnn_e0</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">Z_Data</span><span class="p">,</span> <span class="n">en_data</span><span class="p">,</span> <span class="n">peratom</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param encoder: encoder of species to features (one-hot representation, probably)</span>
+<span class="sd">    :param Z_Data: species data</span>
+<span class="sd">    :param en_data: energy data</span>
+<span class="sd">    :param peratom: whether energy is per-atom or total</span>
+<span class="sd">    :return: energy per species as shape (n_features_encoded, 1)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">nonblank</span> <span class="o">=</span> <span class="n">encoder</span><span class="p">(</span><span class="n">Z_Data</span><span class="p">)</span>
+
+    <span class="n">sums</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">en_data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">peratom</span><span class="p">:</span>
+        <span class="n">atom_counts</span> <span class="o">=</span> <span class="n">nonblank</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">en_data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">Z_matrix</span> <span class="o">=</span> <span class="n">sums</span> <span class="o">/</span> <span class="n">atom_counts</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Z_matrix</span> <span class="o">=</span> <span class="n">sums</span>
+
+    <span class="c1"># Want to solve Z e = E  where Z is a composition matrix</span>
+    <span class="c1"># Z^T Z e  = Z^T E is lower dimensional</span>
+    <span class="c1"># e = (Z^T Z)^-1 Z^T E</span>
+    <span class="c1"># shape n_species, n_species</span>
+    <span class="n">ZTZ</span> <span class="o">=</span> <span class="n">Z_matrix</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Z_matrix</span>
+    <span class="n">ZTZ_inv</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">pinverse</span><span class="p">(</span><span class="n">ZTZ</span><span class="p">)</span>
+    <span class="c1"># shape n_species, n_examples</span>
+    <span class="n">ZTZ_inv_Z</span> <span class="o">=</span> <span class="n">ZTZ_inv</span> <span class="o">@</span> <span class="n">Z_matrix</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># shape (1, n_species)</span>
+    <span class="n">e_per_species</span> <span class="o">=</span> <span class="p">(</span><span class="n">ZTZ_inv_Z</span> <span class="o">@</span> <span class="n">en_data</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="k">return</span> <span class="n">e_per_species</span></div>
+
+
+<div class="viewcode-block" id="Hipnn"><a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.Hipnn">[docs]</a><span class="k">class</span> <span class="nc">Hipnn</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Hipnn Main Module</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_interaction_class</span> <span class="o">=</span> <span class="n">InteractLayer</span>
+
+<div class="viewcode-block" id="Hipnn.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.Hipnn.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">n_features</span><span class="p">,</span>
+        <span class="n">n_sensitivities</span><span class="p">,</span>
+        <span class="n">dist_soft_min</span><span class="p">,</span>
+        <span class="n">dist_soft_max</span><span class="p">,</span>
+        <span class="n">dist_hard_max</span><span class="p">,</span>
+        <span class="n">n_atom_layers</span><span class="p">,</span>
+        <span class="n">n_interaction_layers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">possible_species</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_input_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">sensitivity_type</span><span class="o">=</span><span class="s2">&quot;inverse&quot;</span><span class="p">,</span>
+        <span class="n">resnet</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Softplus</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param n_features: width of each layer</span>
+<span class="sd">        :param n_sensitivities: number of sensitivity functions</span>
+<span class="sd">        :param dist_soft_min: midpoint of first sensitivity function</span>
+<span class="sd">        :param dist_soft_max: midpoint of last sensitivity function</span>
+<span class="sd">        :param dist_hard_max: cutoff for cutoff function.</span>
+<span class="sd">        :param n_interaction_layers: number of interaction blocks</span>
+<span class="sd">        :param n_atom_layers: number of atom layers per interaction block.</span>
+<span class="sd">        :param possible_species: list of species values in database, including 0 for none.</span>
+<span class="sd">            For example, HCNO would be [0 1 6 7 8]</span>
+<span class="sd">        :param n_input_features: number of input features to the model</span>
+<span class="sd">        :param sensitivity_type: str or callable, type of sensitivity, default of</span>
+<span class="sd">           &#39;inverse&#39; is what is in hip-nn original paper.</span>
+<span class="sd">        :param resnet: bool or int, if int, size of internal resnet width</span>
+<span class="sd">        :param activation: activation function or subclass of nn.module.</span>
+
+<span class="sd">        Note: only one of possible_species or n_input_features is needed. If both are supplied,</span>
+<span class="sd">        they must be consistent with each other.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">possible_species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">possible_species</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">possible_species</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">n_input_features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_species</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">!=</span> <span class="n">n_input_features</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Species and input features are not consistent with each other.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">n_input_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_species</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">n_input_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either n_input_features or possible_species must be set!&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">species_set</span> <span class="o">=</span> <span class="n">possible_species</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_layers_per_block</span> <span class="o">=</span> <span class="n">n_atom_layers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nf</span> <span class="o">=</span> <span class="n">n_features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span> <span class="o">=</span> <span class="n">n_input_features</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nf</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">n_interaction_layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Must provide n_interaction layers if n_features is a single integer.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_sizes</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nf</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_interaction_layers</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">n_interaction_layers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nf</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n_interaction_layers</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of interaction layers conflicts with feature sizes&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">n_interaction_layers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nf</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_sizes</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">nf</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ni</span> <span class="o">=</span> <span class="n">n_interaction_layers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resnet</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="n">resnet</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">resnet</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="c1"># resnet argument specifies a different size for the internal layers</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resnet</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nf_middle</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">resnet</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ni</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resnet</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ni</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of interaction layers conflicts with resnet size&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nf_middle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resnet</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nf_middle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_sizes</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_sensitivities</span> <span class="o">=</span> <span class="n">n_sensitivities</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_soft_max</span> <span class="o">=</span> <span class="n">dist_soft_max</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_soft_min</span> <span class="o">=</span> <span class="n">dist_soft_min</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_hard_max</span> <span class="o">=</span> <span class="n">dist_hard_max</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">activation</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+            <span class="n">activation</span> <span class="o">=</span> <span class="n">activation</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="n">activation</span>
+
+        <span class="c1"># Containers for main layers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomlayers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interactlayers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">()</span>
+
+        <span class="c1"># determine sensitivity layer</span>
+        <span class="k">if</span> <span class="n">sensitivity_type</span> <span class="o">==</span> <span class="s2">&quot;inverse&quot;</span><span class="p">:</span>
+            <span class="n">sensitivity_type</span> <span class="o">=</span> <span class="n">InverseSensitivityModule</span>
+        <span class="k">elif</span> <span class="n">sensitivity_type</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
+            <span class="n">sensitivity_type</span> <span class="o">=</span> <span class="n">GaussianSensitivityModule</span>
+        <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="n">sensitivity_type</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Invalid sensitivity type:&quot;</span><span class="p">,</span> <span class="n">sensitivity_type</span><span class="p">)</span>
+
+        <span class="c1"># Finally, build the network!</span>
+        <span class="k">for</span> <span class="n">in_size</span><span class="p">,</span> <span class="n">out_size</span><span class="p">,</span> <span class="n">middle_size</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_sizes</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_sizes</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_middle</span><span class="p">):</span>
+            <span class="n">this_block</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">()</span>
+
+            <span class="c1"># Add interaction layer</span>
+            <span class="n">lay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interaction_class</span><span class="p">(</span>
+                <span class="n">in_size</span><span class="p">,</span> <span class="n">middle_size</span><span class="p">,</span> <span class="n">n_sensitivities</span><span class="p">,</span> <span class="n">dist_soft_min</span><span class="p">,</span> <span class="n">dist_soft_max</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">sensitivity_type</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">resnet</span><span class="p">:</span>
+                <span class="n">lay</span> <span class="o">=</span> <span class="n">ResNetWrapper</span><span class="p">(</span><span class="n">lay</span><span class="p">,</span> <span class="n">in_size</span><span class="p">,</span> <span class="n">middle_size</span><span class="p">,</span> <span class="n">out_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">)</span>
+            <span class="n">this_block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lay</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_atom_layers</span><span class="p">):</span>
+                <span class="c1"># Add subsequent atom layers</span>
+                <span class="n">lay</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">out_size</span><span class="p">,</span> <span class="n">middle_size</span><span class="p">)</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">xavier_normal_</span><span class="p">(</span><span class="n">lay</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">resnet</span><span class="p">:</span>
+                    <span class="n">lay</span> <span class="o">=</span> <span class="n">ResNetWrapper</span><span class="p">(</span><span class="n">lay</span><span class="p">,</span> <span class="n">out_size</span><span class="p">,</span> <span class="n">middle_size</span><span class="p">,</span> <span class="n">out_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">)</span>
+                <span class="n">this_block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lay</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">this_block</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">interaction_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sensitivity_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">resnet</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">il</span><span class="o">.</span><span class="n">base_layer</span><span class="o">.</span><span class="n">sensitivity</span> <span class="k">for</span> <span class="n">il</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interaction_layers</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">il</span><span class="o">.</span><span class="n">sensitivity</span> <span class="k">for</span> <span class="n">il</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interaction_layers</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Hipnn.regularization_params"><a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.Hipnn.regularization_params">[docs]</a>    <span class="k">def</span> <span class="nf">regularization_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">lay</span> <span class="ow">in</span> <span class="n">block</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">lay</span><span class="p">,</span> <span class="s2">&quot;regularization_params&quot;</span><span class="p">):</span>
+                    <span class="n">params</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">lay</span><span class="o">.</span><span class="n">regularization_params</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lay</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">params</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">params</span></div>
+
+<div class="viewcode-block" id="Hipnn.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.Hipnn.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">):</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">pair_dist</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>  <span class="c1"># Convert one-hot features to floating point features.</span>
+
+        <span class="k">if</span> <span class="n">pair_dist</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">pair_dist</span> <span class="o">=</span> <span class="n">pair_dist</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">output_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">features</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
+            <span class="n">int_layer</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">atom_layers</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+            <span class="n">features</span> <span class="o">=</span> <span class="n">int_layer</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">resnet</span><span class="p">:</span>
+                <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">lay</span> <span class="ow">in</span> <span class="n">atom_layers</span><span class="p">:</span>
+                <span class="n">features</span> <span class="o">=</span> <span class="n">lay</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">resnet</span><span class="p">:</span>
+                    <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+            <span class="n">output_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">output_features</span></div></div>
+
+
+<div class="viewcode-block" id="HipnnVec"><a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.HipnnVec">[docs]</a><span class="k">class</span> <span class="nc">HipnnVec</span><span class="p">(</span><span class="n">Hipnn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    HIP-NN-TS with l=1</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_interaction_class</span> <span class="o">=</span> <span class="n">InteractLayerVec</span>
+
+<div class="viewcode-block" id="HipnnVec.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.HipnnVec.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">pair_coord</span><span class="p">):</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">pair_dist</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>  <span class="c1"># Convert one-hot features to floating point features.</span>
+
+        <span class="k">if</span> <span class="n">pair_dist</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">pair_dist</span> <span class="o">=</span> <span class="n">pair_dist</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pair_coord</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">pair_coord</span> <span class="o">=</span> <span class="n">pair_coord</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">output_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">features</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
+            <span class="n">int_layer</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">atom_layers</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+            <span class="n">features</span> <span class="o">=</span> <span class="n">int_layer</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">pair_coord</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">resnet</span><span class="p">:</span>
+                <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">lay</span> <span class="ow">in</span> <span class="n">atom_layers</span><span class="p">:</span>
+                <span class="n">features</span> <span class="o">=</span> <span class="n">lay</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">resnet</span><span class="p">:</span>
+                    <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+            <span class="n">output_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">output_features</span></div></div>
+
+
+<div class="viewcode-block" id="HipnnQuad"><a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.HipnnQuad">[docs]</a><span class="k">class</span> <span class="nc">HipnnQuad</span><span class="p">(</span><span class="n">HipnnVec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    HIP-NN-TS with l=2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_interaction_class</span> <span class="o">=</span> <span class="n">InteractLayerQuad</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

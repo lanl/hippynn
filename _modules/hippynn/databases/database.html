@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.databases.database &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.databases.database</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.databases.database</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Base database functionality from dictionary of numpy arrays</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">from</span> <span class="nn">.restarter</span> <span class="kn">import</span> <span class="n">NoRestart</span>
+<span class="kn">from</span> <span class="nn">..tools</span> <span class="kn">import</span> <span class="n">arrdict_len</span><span class="p">,</span> <span class="n">device_fallback</span>
+
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">TensorDataset</span><span class="p">,</span> <span class="n">Subset</span>
+
+
+<div class="viewcode-block" id="Database"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database">[docs]</a><span class="k">class</span> <span class="nc">Database</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for holding a pytorch dataset, splitting it, generating dataloaders, etc.&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Database.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">arr_dict</span><span class="p">,</span>
+        <span class="n">inputs</span><span class="p">,</span>
+        <span class="n">targets</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">,</span>
+        <span class="n">test_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">valid_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_workers</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">pin_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param arr_dict: dictionary mapping strings to numpy arrays</span>
+<span class="sd">        :param inputs:   list of strings for input db_names</span>
+<span class="sd">        :param targets:  list of strings for output db_namees</span>
+<span class="sd">        :param seed:     int, for random splitting</span>
+<span class="sd">        :param test_size: fraction of data to use in test spli</span>
+<span class="sd">        :param valid_size: fraction oof data to use in train split</span>
+<span class="sd">        :param num_workers: passed to pytorch dataloaders</span>
+<span class="sd">        :param pin_memory: passed to pytorch dataloaders</span>
+<span class="sd">        :param allow_unfound: If true, skip checking if the needed inputs and targets are found.</span>
+<span class="sd">           This allows setting inputs=None and/or targets=None.</span>
+<span class="sd">        :param quiet: If True, print little or nothing while loading.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Restartable Children of this class should change this after super().__init__ .</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restarter</span> <span class="o">=</span> <span class="n">NoRestart</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="n">targets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span> <span class="o">=</span> <span class="n">quiet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitting_completed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="n">num_workers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pin_memory</span> <span class="o">=</span> <span class="n">pin_memory</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All arrays:&quot;</span><span class="p">)</span>
+            <span class="n">prettyprint_arrays</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">allow_unfound</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">arr_dict</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;indices&quot;</span><span class="p">,</span> <span class="s2">&quot;split_indices&quot;</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Array dictionary missing required variable:&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+                        <span class="s2">&quot;Pass allow_unfound=True to avoid checking of inputs targets.&quot;</span>
+                    <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span> <span class="o">=</span> <span class="n">arr_dict</span>
+        <span class="k">if</span> <span class="s2">&quot;indices&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">arr_dict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Database: Using auto-generated data indices&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Database: Using pre-specified data indices.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">splits</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">test_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">valid_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">test_size</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">valid_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Both test and valid size must be set for auto-splitting&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">make_trainvalidtest_split</span><span class="p">(</span><span class="n">test_size</span><span class="o">=</span><span class="n">test_size</span><span class="p">,</span> <span class="n">valid_size</span><span class="o">=</span><span class="n">valid_size</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">arrdict_len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">var_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Database inputs not defined, set </span><span class="si">{</span><span class="n">Database</span><span class="si">}</span><span class="s2">.inputs.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Database inputs not defined, set </span><span class="si">{</span><span class="n">Database</span><span class="si">}</span><span class="s2">.targets.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span>
+
+<div class="viewcode-block" id="Database.send_to_device"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.send_to_device">[docs]</a>    <span class="k">def</span> <span class="nf">send_to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="s2">&quot;Send a database to a device&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Arrays must be split before sending database to device.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">device</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">device</span> <span class="o">=</span> <span class="n">device_fallback</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="s2">&quot;cpu&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pin_memory</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Pin memory was set, but target device requested is not CPU. Setting pin_memory=False.&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pin_memory</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Num workers was set, but target device requested is not CPU. Setting num_workers=0.&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">split</span><span class="p">,</span> <span class="n">arrdict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">arrdict</span><span class="p">:</span>
+                <span class="n">arrdict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">arrdict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Database.make_random_split"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_random_split">[docs]</a>    <span class="k">def</span> <span class="nf">make_random_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">split_size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param evaluation_mode: String naming the split, can be anything, but &#39;train&#39;, &#39;valid&#39;, and &#39;test&#39; are special.s</span>
+<span class="sd">        :param split_size: int (number of items) or float&lt;1, fraction of samples.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitting_completed</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Database already split!&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">split_size</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">split_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">split_size</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+        <span class="n">split_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">split_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">split_indices</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_explicit_split</span><span class="p">(</span><span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">split_indices</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Database.make_trainvalidtest_split"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_trainvalidtest_split">[docs]</a>    <span class="k">def</span> <span class="nf">make_trainvalidtest_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">,</span> <span class="n">valid_size</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitting_completed</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Database already split!&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">valid_size</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">test_size</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If train or valid size is set as a fraction, then set test_size as a fraction&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">valid_size</span> <span class="o">+</span> <span class="n">test_size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Test fraction (</span><span class="si">{</span><span class="n">test_size</span><span class="si">}</span><span class="s2">) plus valid fraction &quot;</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">valid_size</span><span class="si">}</span><span class="s2">) are greater than 1!&quot;</span>
+                    <span class="p">)</span>
+                <span class="n">valid_size</span> <span class="o">/=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">test_size</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_random_split</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">test_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_random_split</span><span class="p">(</span><span class="s2">&quot;valid&quot;</span><span class="p">,</span> <span class="n">valid_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">split_the_rest</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Database.make_explicit_split"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_explicit_split">[docs]</a>    <span class="k">def</span> <span class="nf">make_explicit_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">split_indices</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitting_completed</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Database already split!&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">split_indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot make split of size 0.&quot;</span><span class="p">)</span>
+        <span class="c1"># Compute which indices are not being split off.</span>
+        <span class="n">index_mask</span> <span class="o">=</span> <span class="n">compute_index_mask</span><span class="p">(</span><span class="n">split_indices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">])</span>
+
+        <span class="n">complement_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">index_mask</span>
+
+        <span class="c1"># Split off data, and keep the rest.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">evaluation_mode</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">index_mask</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">evaluation_mode</span><span class="p">][</span><span class="s2">&quot;split_indices&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">split_indices</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">complement_mask</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Arrays for split: </span><span class="si">{</span><span class="n">evaluation_mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">prettyprint_arrays</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">evaluation_mode</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Database.split_the_rest"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.split_the_rest">[docs]</a>    <span class="k">def</span> <span class="nf">split_the_rest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_explicit_split</span><span class="p">(</span><span class="n">evaluation_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitting_completed</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Database.make_generator"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_generator">[docs]</a>    <span class="k">def</span> <span class="nf">make_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_type</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subsample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes a dataloader for the given type of split and evaluation mode of the model.</span>
+
+<span class="sd">        :param split_type: str; &quot;train&quot;, &quot;valid&quot;, or &quot;test&quot; ; selects data to use</span>
+<span class="sd">        :param evaluation_mode: str; &quot;train&quot; or &quot;eval&quot;. Used for whether to shuffle.</span>
+<span class="sd">        :param batch_size: passed to pytorch</span>
+<span class="sd">        :param subsample: fraction to subsample</span>
+<span class="sd">        :return: dataloader containing relevant data</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitting_completed</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Database has not yet been split.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">split_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;valid&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">split_type</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_list</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Datatype </span><span class="si">{}</span><span class="s2"> Invalid. Must be one of &#39;train&#39;,&#39;valid&#39;,&#39;test&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split_type</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">evaluation_mode</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">split_type</span> <span class="o">!=</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;evaluation mode &#39;train&#39; can only be used with training data.&quot;</span> <span class="s2">&quot;(got </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split_type</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">shuffle</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">evaluation_mode</span> <span class="o">==</span> <span class="s2">&quot;eval&quot;</span><span class="p">:</span>
+            <span class="n">shuffle</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Evaluation_mode (</span><span class="si">{}</span><span class="s2">) must be one of &#39;train&#39; or &#39;eval&#39;&quot;</span><span class="p">)</span>
+
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">NamedTensorDataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">var_list</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">subsample</span><span class="p">:</span>
+            <span class="n">n_total</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">n_selected</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_total</span> <span class="o">*</span> <span class="n">subsample</span><span class="p">)</span>
+            <span class="n">sampled_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n_total</span><span class="p">))[:</span><span class="n">n_selected</span><span class="p">]</span>
+            <span class="c1"># sampled_indices = torch.rand(data[0].shape[0]) &lt; subsample</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="n">Subset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">sampled_indices</span><span class="p">)</span>
+            <span class="c1"># data = [a[sampled_indices] for a in data]</span>
+
+        <span class="n">generator</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+            <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span>
+            <span class="n">pin_memory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pin_memory</span><span class="p">,</span>
+            <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">generator</span></div></div>
+
+
+<div class="viewcode-block" id="compute_index_mask"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.compute_index_mask">[docs]</a><span class="k">def</span> <span class="nf">compute_index_mask</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">index_pool</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">index_pool</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provided indices not in database&quot;</span><span class="p">)</span>
+
+    <span class="n">uniques</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uniques</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Split indices not unique&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">counts</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Split indices have duplicates.&quot;</span><span class="p">)</span>
+
+    <span class="n">index_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">index_pool</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">index_mask</span></div>
+
+
+<div class="viewcode-block" id="prettyprint_arrays"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.prettyprint_arrays">[docs]</a><span class="k">def</span> <span class="nf">prettyprint_arrays</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Pretty-print array dictionary</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">column_format</span> <span class="o">=</span> <span class="s2">&quot;| </span><span class="si">{:&lt;18}</span><span class="s2"> | </span><span class="si">{:&lt;18}</span><span class="s2"> | </span><span class="si">{:&lt;40}</span><span class="s2"> |&quot;</span>
+    <span class="n">ncols</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">column_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">printrow</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">column_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">printline</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="n">ncols</span><span class="p">)</span>
+
+    <span class="n">printline</span><span class="p">()</span>
+    <span class="n">printrow</span><span class="p">(</span><span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">)</span>
+    <span class="n">printline</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">arr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">printrow</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+    <span class="n">printline</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="NamedTensorDataset"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.NamedTensorDataset">[docs]</a><span class="k">class</span> <span class="nc">NamedTensorDataset</span><span class="p">(</span><span class="n">TensorDataset</span><span class="p">):</span>
+<div class="viewcode-block" id="NamedTensorDataset.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.NamedTensorDataset.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor_names</span><span class="p">,</span> <span class="o">*</span><span class="n">tensors</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">tensors</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tensor_map</span> <span class="o">=</span> <span class="n">tensor_names</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

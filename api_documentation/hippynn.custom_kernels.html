@@ -46,6 +46,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="hippynn.html">hippynn API documentation</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">custom_kernels package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.custom_kernels.envsum"><code class="docutils literal notranslate"><span class="pre">envsum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.custom_kernels.featsum"><code class="docutils literal notranslate"><span class="pre">featsum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.custom_kernels.sensesum"><code class="docutils literal notranslate"><span class="pre">sensesum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.custom_kernels.set_custom_kernels"><code class="docutils literal notranslate"><span class="pre">set_custom_kernels()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.autograd_wrapper.html">autograd_wrapper module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_cupy.html">env_cupy module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html">env_numba module</a></li>
@@ -102,6 +106,42 @@
   <div class="section" id="custom-kernels-package">
 <h1>custom_kernels package<a class="headerlink" href="#custom-kernels-package" title="Permalink to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.custom_kernels</span></code> package.</p>
+<span class="target" id="module-hippynn.custom_kernels"></span><p>Custom Kernels for hip-nn interaction sum.</p>
+<p>This module provides implementations in pytorch, numba, and cupy.</p>
+<p>Pytorch implementations take extra memory, but launch faster than numba kernels.</p>
+<p>Numba kernels use far less memory, but do come with some launching overhead on GPUs.</p>
+<p>Cupy kernels only work on the GPU, but are faster than numba.
+Cupy kernels require numba for CPU operations.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.custom_kernels.envsum">
+<span class="sig-name descname"><span class="pre">envsum</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hippynn.custom_kernels.envsum" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.custom_kernels.featsum">
+<span class="sig-name descname"><span class="pre">featsum</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hippynn.custom_kernels.featsum" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.custom_kernels.sensesum">
+<span class="sig-name descname"><span class="pre">sensesum</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hippynn.custom_kernels.sensesum" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.custom_kernels.set_custom_kernels">
+<span class="sig-name descname"><span class="pre">set_custom_kernels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels.html#set_custom_kernels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.set_custom_kernels" title="Permalink to this definition"></a></dt>
+<dd><p>Activate or deactivate custom kernels for interaction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>active</strong> – If true, set custom kernels to the best available. If False, turn them off and default to pytorch.
+If “numba” or “cupy”, use those implementations explicitly. If “auto”, use best available.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 <p>Submodules</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -109,19 +149,98 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.autograd_wrapper.html#hippynn.custom_kernels.autograd_wrapper.wrap_envops"><code class="docutils literal notranslate"><span class="pre">wrap_envops()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.env_cupy.html">env_cupy module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html">env_numba module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.env_cupy.html">env_cupy module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.env_cupy.html#hippynn.custom_kernels.env_cupy.CupyEnvsum"><code class="docutils literal notranslate"><span class="pre">CupyEnvsum</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.env_cupy.html#hippynn.custom_kernels.env_cupy.CupyFeatsum"><code class="docutils literal notranslate"><span class="pre">CupyFeatsum</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.env_cupy.html#hippynn.custom_kernels.env_cupy.CupyGPUKernel"><code class="docutils literal notranslate"><span class="pre">CupyGPUKernel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_cupy.html#hippynn.custom_kernels.env_cupy.CupyGPUKernel.__init__"><code class="docutils literal notranslate"><span class="pre">CupyGPUKernel.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.env_cupy.html#hippynn.custom_kernels.env_cupy.CupySensesum"><code class="docutils literal notranslate"><span class="pre">CupySensesum</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html">env_numba module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum"><code class="docutils literal notranslate"><span class="pre">WrappedEnvsum</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum.cpu_kernel"><code class="docutils literal notranslate"><span class="pre">WrappedEnvsum.cpu_kernel</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum.launch_bounds"><code class="docutils literal notranslate"><span class="pre">WrappedEnvsum.launch_bounds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum.make_kernel"><code class="docutils literal notranslate"><span class="pre">WrappedEnvsum.make_kernel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum.out_shape"><code class="docutils literal notranslate"><span class="pre">WrappedEnvsum.out_shape()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum"><code class="docutils literal notranslate"><span class="pre">WrappedFeatsum</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum.cpu_kernel"><code class="docutils literal notranslate"><span class="pre">WrappedFeatsum.cpu_kernel</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum.launch_bounds"><code class="docutils literal notranslate"><span class="pre">WrappedFeatsum.launch_bounds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum.make_kernel"><code class="docutils literal notranslate"><span class="pre">WrappedFeatsum.make_kernel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum.out_shape"><code class="docutils literal notranslate"><span class="pre">WrappedFeatsum.out_shape()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum"><code class="docutils literal notranslate"><span class="pre">WrappedSensesum</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum.cpu_kernel"><code class="docutils literal notranslate"><span class="pre">WrappedSensesum.cpu_kernel</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum.launch_bounds"><code class="docutils literal notranslate"><span class="pre">WrappedSensesum.launch_bounds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum.make_kernel"><code class="docutils literal notranslate"><span class="pre">WrappedSensesum.make_kernel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum.out_shape"><code class="docutils literal notranslate"><span class="pre">WrappedSensesum.out_shape()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.env_pytorch.html">env_pytorch module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.env_pytorch.html#hippynn.custom_kernels.env_pytorch.envsum"><code class="docutils literal notranslate"><span class="pre">envsum()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.env_pytorch.html#hippynn.custom_kernels.env_pytorch.featsum"><code class="docutils literal notranslate"><span class="pre">featsum()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.env_pytorch.html#hippynn.custom_kernels.env_pytorch.sensesum"><code class="docutils literal notranslate"><span class="pre">sensesum()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.fast_convert.html">fast_convert module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html">tensor_wrapper module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.fast_convert.html">fast_convert module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.fast_convert.html#hippynn.custom_kernels.fast_convert.batch_convert_torch_to_numba"><code class="docutils literal notranslate"><span class="pre">batch_convert_torch_to_numba()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html">tensor_wrapper module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction"><code class="docutils literal notranslate"><span class="pre">NumbaCompatibleTensorFunction</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.__init__"><code class="docutils literal notranslate"><span class="pre">NumbaCompatibleTensorFunction.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.cpu_kernel"><code class="docutils literal notranslate"><span class="pre">NumbaCompatibleTensorFunction.cpu_kernel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.launch_bounds"><code class="docutils literal notranslate"><span class="pre">NumbaCompatibleTensorFunction.launch_bounds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.make_kernel"><code class="docutils literal notranslate"><span class="pre">NumbaCompatibleTensorFunction.make_kernel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html#hippynn.custom_kernels.tensor_wrapper.NumbaCompatibleTensorFunction.out_shape"><code class="docutils literal notranslate"><span class="pre">NumbaCompatibleTensorFunction.out_shape()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html#hippynn.custom_kernels.tensor_wrapper.via_numpy"><code class="docutils literal notranslate"><span class="pre">via_numpy()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.test_env_cupy.html">test_env_cupy module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html">test_env_numba module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.utils.html">utils module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html">test_env_numba module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester"><code class="docutils literal notranslate"><span class="pre">Envops_tester</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.__init__"><code class="docutils literal notranslate"><span class="pre">Envops_tester.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.all_close_witherror"><code class="docutils literal notranslate"><span class="pre">Envops_tester.all_close_witherror()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_all_grad"><code class="docutils literal notranslate"><span class="pre">Envops_tester.check_all_grad()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_all_grad_once"><code class="docutils literal notranslate"><span class="pre">Envops_tester.check_all_grad_once()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_allclose"><code class="docutils literal notranslate"><span class="pre">Envops_tester.check_allclose()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_allclose_once"><code class="docutils literal notranslate"><span class="pre">Envops_tester.check_allclose_once()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_correctness"><code class="docutils literal notranslate"><span class="pre">Envops_tester.check_correctness()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_empty"><code class="docutils literal notranslate"><span class="pre">Envops_tester.check_empty()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_grad_and_gradgrad"><code class="docutils literal notranslate"><span class="pre">Envops_tester.check_grad_and_gradgrad()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_speed"><code class="docutils literal notranslate"><span class="pre">Envops_tester.check_speed()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimedSnippet"><code class="docutils literal notranslate"><span class="pre">TimedSnippet</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimedSnippet.__init__"><code class="docutils literal notranslate"><span class="pre">TimedSnippet.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimedSnippet.elapsed"><code class="docutils literal notranslate"><span class="pre">TimedSnippet.elapsed</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimerHolder"><code class="docutils literal notranslate"><span class="pre">TimerHolder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimerHolder.__init__"><code class="docutils literal notranslate"><span class="pre">TimerHolder.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimerHolder.add"><code class="docutils literal notranslate"><span class="pre">TimerHolder.add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimerHolder.elapsed"><code class="docutils literal notranslate"><span class="pre">TimerHolder.elapsed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimerHolder.mean_elapsed"><code class="docutils literal notranslate"><span class="pre">TimerHolder.mean_elapsed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimerHolder.median_elapsed"><code class="docutils literal notranslate"><span class="pre">TimerHolder.median_elapsed</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.get_simulated_data"><code class="docutils literal notranslate"><span class="pre">get_simulated_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.utils.html">utils module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.utils.html#hippynn.custom_kernels.utils.resort_pairs_cached"><code class="docutils literal notranslate"><span class="pre">resort_pairs_cached()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>

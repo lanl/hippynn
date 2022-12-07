@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.graphs.nodes.physics &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.graphs.nodes.physics</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.graphs.nodes.physics</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Nodes for physics transformations</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">_BaseNode</span>
+<span class="kn">from</span> <span class="nn">.base.node_functions</span> <span class="kn">import</span> <span class="n">NodeNotFound</span>
+<span class="kn">from</span> <span class="nn">.indexers</span> <span class="kn">import</span> <span class="n">AtomIndexer</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">acquire_encoding_padding</span>
+<span class="kn">from</span> <span class="nn">.pairs</span> <span class="kn">import</span> <span class="n">OpenPairIndexer</span>
+<span class="kn">from</span> <span class="nn">.tags</span> <span class="kn">import</span> <span class="n">Encoder</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">Charges</span>
+<span class="kn">from</span> <span class="nn">.inputs</span> <span class="kn">import</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">SpeciesNode</span>
+
+<span class="kn">from</span> <span class="nn">..indextypes</span> <span class="kn">import</span> <span class="n">IdxType</span><span class="p">,</span> <span class="n">index_type_coercion</span><span class="p">,</span> <span class="n">elementwise_compare_reduce</span>
+<span class="kn">from</span> <span class="nn">...layers</span> <span class="kn">import</span> <span class="n">indexers</span> <span class="k">as</span> <span class="n">index_layers</span>
+<span class="kn">from</span> <span class="nn">...layers</span> <span class="kn">import</span> <span class="n">physics</span> <span class="k">as</span> <span class="n">physics_layers</span>
+<span class="kn">from</span> <span class="nn">...layers</span> <span class="kn">import</span> <span class="n">pairs</span> <span class="k">as</span> <span class="n">pair_layers</span>
+
+
+<div class="viewcode-block" id="GradientNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.GradientNode">[docs]</a><span class="k">class</span> <span class="nc">GradientNode</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the gradient of a quantity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;energy&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">Gradient</span>
+
+<div class="viewcode-block" id="GradientNode.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.GradientNode.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;sign&quot;</span><span class="p">:</span> <span class="n">sign</span><span class="p">}</span>
+        <span class="n">energy</span><span class="p">,</span> <span class="n">position</span> <span class="o">=</span> <span class="n">parents</span>
+        <span class="n">position</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="n">energy</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span> <span class="n">position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sign</span> <span class="o">=</span> <span class="n">sign</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">position</span><span class="o">.</span><span class="n">_index_state</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="StressForceNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.StressForceNode">[docs]</a><span class="k">class</span> <span class="nc">StressForceNode</span><span class="p">(</span><span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;energy&quot;</span><span class="p">,</span> <span class="s2">&quot;strain&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;cell&quot;</span>
+    <span class="n">_output_names</span> <span class="o">=</span> <span class="s2">&quot;forces&quot;</span><span class="p">,</span> <span class="s2">&quot;stress&quot;</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">StressForce</span>
+
+<div class="viewcode-block" id="StressForceNode.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.StressForceNode.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">energy</span><span class="p">,</span> <span class="n">strain</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">cell</span> <span class="o">=</span> <span class="n">parents</span>
+        <span class="n">coordinates</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="n">energy</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span> <span class="n">strain</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">cell</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_index_states</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">_index_state</span><span class="p">,</span> <span class="n">strain</span><span class="o">.</span><span class="n">_index_state</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ChargeMomentNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.ChargeMomentNode">[docs]</a><span class="k">class</span> <span class="nc">ChargeMomentNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
+    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;charges&quot;</span><span class="p">,</span> <span class="s2">&quot;positions&quot;</span><span class="p">,</span> <span class="s2">&quot;mol_index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_molecules&quot;</span>
+
+<div class="viewcode-block" id="ChargeMomentNode.expansion0"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.ChargeMomentNode.expansion0">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">matchlen</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expansion0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">charges</span><span class="p">,</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">charges</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ChargeMomentNode.expansion1"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.ChargeMomentNode.expansion1">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Charges</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expansion1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">enc</span><span class="p">,</span> <span class="n">pidxer</span> <span class="o">=</span> <span class="n">acquire_encoding_padding</span><span class="p">((</span><span class="n">charges</span><span class="p">,</span> <span class="n">positions</span><span class="p">),</span> <span class="n">species_set</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">purpose</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">charges</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">pidxer</span></div>
+
+<div class="viewcode-block" id="ChargeMomentNode.expansion2"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.ChargeMomentNode.expansion2">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Charges</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expansion2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">pdxer</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">charges</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">pdxer</span><span class="o">.</span><span class="n">mol_index</span><span class="p">,</span> <span class="n">pdxer</span><span class="o">.</span><span class="n">n_molecules</span></div>
+
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ChargeMomentNode.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.ChargeMomentNode.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="DipoleNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.DipoleNode">[docs]</a><span class="k">class</span> <span class="nc">DipoleNode</span><span class="p">(</span><span class="n">ChargeMomentNode</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the dipole of point charges.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">Dipole</span>
+    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span></div>
+
+
+<div class="viewcode-block" id="QuadrupoleNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.QuadrupoleNode">[docs]</a><span class="k">class</span> <span class="nc">QuadrupoleNode</span><span class="p">(</span><span class="n">ChargeMomentNode</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the traceless quadrupole of point charges.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">Quadrupole</span>
+    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">QuadMol</span></div>
+
+
+<span class="c1"># Setup for Coulomb Energy and Screened Coulomb Energy is nearly the same, up to validating the pair finder.</span>
+<div class="viewcode-block" id="ChargePairSetup"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.ChargePairSetup">[docs]</a><span class="k">class</span> <span class="nc">ChargePairSetup</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">):</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_validate_pairfinder</span><span class="p">(</span><span class="n">pairfinder</span><span class="p">,</span> <span class="n">cutoff_distance</span><span class="p">):</span>
+        <span class="c1"># This method required by this ExpandParents setup.</span>
+        <span class="c1"># Raises an error if the pairfinder is not satisfactory.</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+<div class="viewcode-block" id="ChargePairSetup.expansion0"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.ChargePairSetup.expansion0">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Charges</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expansion0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">pos_or_pair</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">charges</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">NodeNotFound</span><span class="p">:</span>
+            <span class="n">pos_or_pair</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">charges</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">charges</span><span class="p">,</span> <span class="n">pos_or_pair</span></div>
+
+    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Charges</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">)</span>
+    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Charges</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expansion1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">pos_or_pair</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">((</span><span class="n">pos_or_pair</span><span class="p">,</span> <span class="n">charges</span><span class="p">),</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">charges</span><span class="p">,</span> <span class="n">pos_or_pair</span><span class="p">,</span> <span class="n">species</span>
+
+<div class="viewcode-block" id="ChargePairSetup.expansion1"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.ChargePairSetup.expansion1">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Charges</span><span class="p">,</span> <span class="n">SpeciesNode</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expansion1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">((</span><span class="n">charges</span><span class="p">,</span> <span class="n">species</span><span class="p">),</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">charges</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">species</span></div>
+
+<div class="viewcode-block" id="ChargePairSetup.expansion2"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.ChargePairSetup.expansion2">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Charges</span><span class="p">,</span> <span class="n">_BaseNode</span><span class="p">,</span> <span class="n">SpeciesNode</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expansion2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">pos_or_pair</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">encoder</span><span class="p">,</span> <span class="n">pidxer</span> <span class="o">=</span> <span class="n">acquire_encoding_padding</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">species_set</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">purpose</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">charges</span><span class="p">,</span> <span class="n">pos_or_pair</span><span class="p">,</span> <span class="n">encoder</span><span class="p">,</span> <span class="n">pidxer</span></div>
+
+<div class="viewcode-block" id="ChargePairSetup.expansion3"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.ChargePairSetup.expansion3">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Charges</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">Encoder</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expansion3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">encoder</span><span class="p">,</span> <span class="n">pidxer</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">cutoff_distance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">pairfinder</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">((</span><span class="n">charges</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">encoder</span><span class="p">,</span> <span class="n">pidxer</span><span class="p">),</span> <span class="n">PairIndexer</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">NodeNotFound</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Boundary conditions not specified, Building open boundary conditions.&quot;</span><span class="p">)</span>
+            <span class="n">pairfinder</span> <span class="o">=</span> <span class="n">OpenPairIndexer</span><span class="p">(</span><span class="s2">&quot;PairIndexer&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">encoder</span><span class="p">,</span> <span class="n">pidxer</span><span class="p">),</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">cutoff_distance</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">charges</span><span class="p">,</span> <span class="n">pairfinder</span><span class="p">,</span> <span class="n">pidxer</span></div>
+
+<div class="viewcode-block" id="ChargePairSetup.expansion4"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.ChargePairSetup.expansion4">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Charges</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expansion4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">pairfinder</span><span class="p">,</span> <span class="n">pidxer</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_pairfinder</span><span class="p">(</span><span class="n">pairfinder</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">pf</span> <span class="o">=</span> <span class="n">pairfinder</span>
+        <span class="k">return</span> <span class="n">charges</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">pf</span><span class="o">.</span><span class="n">pair_second</span><span class="p">,</span> <span class="n">pidxer</span><span class="o">.</span><span class="n">mol_index</span><span class="p">,</span> <span class="n">pidxer</span><span class="o">.</span><span class="n">n_molecules</span></div>
+
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="kc">None</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">5</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CoulombEnergyNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.CoulombEnergyNode">[docs]</a><span class="k">class</span> <span class="nc">CoulombEnergyNode</span><span class="p">(</span><span class="n">ChargePairSetup</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;charges&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_dist&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="s2">&quot;mol_index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_molecules&quot;</span>
+    <span class="n">_output_names</span> <span class="o">=</span> <span class="s2">&quot;mol_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_voltages&quot;</span>
+    <span class="n">_output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
+    <span class="n">_main_output</span> <span class="o">=</span> <span class="s2">&quot;mol_energies&quot;</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">CoulombEnergy</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_validate_pairfinder</span><span class="p">(</span><span class="n">pairfinder</span><span class="p">,</span> <span class="n">cutoff_distance</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pairfinder</span><span class="p">,</span> <span class="n">OpenPairIndexer</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;Closed boundary conditions detected.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;Coulomb energy module is not compatible with open boundary conditions.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">hard_dist_cutoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;dist_hard_max is set to a finite value,</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;coulomb energy requires summing over the entire set of pairs&quot;</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="CoulombEnergyNode.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.CoulombEnergyNode.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">energy_conversion</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Besides the normal &#39;name&#39; and &#39;parents&#39; arguments, this node requires an `energy_conversion` parameter.</span>
+<span class="sd">        This corresponds to coulomb&#39;s constant k in the equation E = kqq/r.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;energy_conversion_factor&quot;</span><span class="p">:</span> <span class="n">energy_conversion</span><span class="p">}</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="n">cutoff_distance</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_conversion</span> <span class="o">=</span> <span class="n">energy_conversion</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ScreenedCoulombEnergyNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.ScreenedCoulombEnergyNode">[docs]</a><span class="k">class</span> <span class="nc">ScreenedCoulombEnergyNode</span><span class="p">(</span><span class="n">ChargePairSetup</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
+    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;charges&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_dist&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="s2">&quot;mol_index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_molecules&quot;</span>
+    <span class="n">_output_names</span> <span class="o">=</span> <span class="s2">&quot;mol_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_voltages&quot;</span>
+    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">ScreenedCoulombEnergy</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_validate_pairfinder</span><span class="p">(</span><span class="n">pairfinder</span><span class="p">,</span> <span class="n">cutoff_distance</span><span class="p">):</span>
+        <span class="n">existing_cutoff</span> <span class="o">=</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">hard_dist_cutoff</span>
+        <span class="k">if</span> <span class="n">existing_cutoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">existing_cutoff</span> <span class="o">&lt;</span> <span class="n">cutoff_distance</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Distance cutoff (</span><span class="si">{</span><span class="n">existing_cutoff</span><span class="si">}</span><span class="s2">) is set to less than</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; pair finder distance (</span><span class="si">{</span><span class="n">cutoff_distance</span><span class="si">}</span><span class="s2">). Increase the cutoff distance</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; for the pair_finder (named: </span><span class="si">{</span><span class="n">pairfinder</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="ScreenedCoulombEnergyNode.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.ScreenedCoulombEnergyNode.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">energy_conversion</span><span class="p">,</span> <span class="n">cutoff_distance</span><span class="p">,</span> <span class="n">screening</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Besides the normal &#39;name&#39; and &#39;parents&#39; arguments, this node requires an `energy_conversion` parameter.</span>
+<span class="sd">        This corresponds to coulomb&#39;s constant k in the equation E = kqq/r.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">screening</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;To build this module automatically a screening module must</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;be provided (e.g. layers.physiscs.QScreening(p_value=4))&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;energy_conversion_factor&quot;</span><span class="p">:</span> <span class="n">energy_conversion</span><span class="p">,</span>
+            <span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="n">cutoff_distance</span><span class="p">,</span>
+            <span class="s2">&quot;screening&quot;</span><span class="p">:</span> <span class="n">screening</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span>
+            <span class="n">parents</span><span class="p">,</span>
+            <span class="n">cutoff_distance</span><span class="o">=</span><span class="n">cutoff_distance</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_conversion</span> <span class="o">=</span> <span class="n">energy_conversion</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="VecMag"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.VecMag">[docs]</a><span class="k">class</span> <span class="nc">VecMag</span><span class="p">(</span><span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
+    <span class="n">_input_names</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;vector&quot;</span><span class="p">,)</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">VecMag</span>
+    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">NotFound</span>
+
+<div class="viewcode-block" id="VecMag.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.VecMag.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">parents</span><span class="o">.</span><span class="n">main_output</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">elementwise_compare_reduce</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+            <span class="n">parents</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span><span class="p">,)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_index_state</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Improper number of parents for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="AtomToMolSummer"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.AtomToMolSummer">[docs]</a><span class="k">class</span> <span class="nc">AtomToMolSummer</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
+    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;features&quot;</span><span class="p">,</span> <span class="s2">&quot;mol_index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_molecules&quot;</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">index_layers</span><span class="o">.</span><span class="n">MolSummer</span>
+    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>
+
+<div class="viewcode-block" id="AtomToMolSummer.expansion0"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.AtomToMolSummer.expansion0">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_BaseNode</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expansion0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">pdxer</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="s2">&quot;Generating Molecular summer&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">features</span><span class="p">,</span> <span class="n">pdxer</span></div>
+
+<div class="viewcode-block" id="AtomToMolSummer.expansion1"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.AtomToMolSummer.expansion1">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_BaseNode</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expansion1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pdxer</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">features</span><span class="p">,</span> <span class="n">pdxer</span><span class="o">.</span><span class="n">mol_index</span><span class="p">,</span> <span class="n">pdxer</span><span class="o">.</span><span class="n">n_molecules</span></div>
+
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AtomToMolSummer.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.AtomToMolSummer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
+
+<span class="c1"># TODO: This seems broken for parent expanders, check the signature of the layer.</span>
+<div class="viewcode-block" id="BondToMolSummmer"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.BondToMolSummmer">[docs]</a><span class="k">class</span> <span class="nc">BondToMolSummmer</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
+
+    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;pairfeatures&quot;</span><span class="p">,</span> <span class="s2">&quot;mol_index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_molecules&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">pair_layers</span><span class="o">.</span><span class="n">MolPairSummer</span>
+    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>
+
+<div class="viewcode-block" id="BondToMolSummmer.expansion0"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.BondToMolSummmer.expansion0">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_BaseNode</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expansion0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">pdxer</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="n">pair_idxer</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">features</span><span class="p">,</span> <span class="n">pdxer</span><span class="p">,</span> <span class="n">pair_idxer</span></div>
+
+<div class="viewcode-block" id="BondToMolSummmer.expansion1"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.BondToMolSummmer.expansion1">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_BaseNode</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expansion1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pdxer</span><span class="p">,</span> <span class="n">pair_idxer</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">features</span><span class="p">,</span> <span class="n">pdxer</span><span class="o">.</span><span class="n">mol_index</span><span class="p">,</span> <span class="n">pdxer</span><span class="o">.</span><span class="n">n_molecules</span><span class="p">,</span> <span class="n">pair_idxer</span><span class="o">.</span><span class="n">pair_first</span></div>
+
+<div class="viewcode-block" id="BondToMolSummmer.expansion2"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.BondToMolSummmer.expansion2">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_BaseNode</span><span class="p">,</span> <span class="n">_BaseNode</span><span class="p">,</span> <span class="n">_BaseNode</span><span class="p">,</span> <span class="n">_BaseNode</span><span class="p">,</span> <span class="n">_BaseNode</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expansion2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">index_type_coercion</span><span class="p">(</span><span class="n">features</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span><span class="p">),</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span></div>
+
+<div class="viewcode-block" id="BondToMolSummmer.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.BondToMolSummmer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="PerAtom"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.PerAtom">[docs]</a><span class="k">class</span> <span class="nc">PerAtom</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
+    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;features&quot;</span><span class="p">,</span> <span class="s2">&quot;species&quot;</span>
+    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">PerAtom</span>
+
+<div class="viewcode-block" id="PerAtom.expansion0"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.PerAtom.expansion0">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_BaseNode</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expansion0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">features</span><span class="p">,</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">purpose</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PerAtom.expansion1"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.PerAtom.expansion1">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_BaseNode</span><span class="p">,</span> <span class="n">_BaseNode</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expansion1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">main_output</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">features</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">==</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>
+        <span class="p">),</span> <span class="s2">&quot;Can only calculate Per Atom averages on Molecular quantities&quot;</span>
+        <span class="k">return</span> <span class="n">features</span><span class="p">,</span> <span class="n">species</span></div>
+
+<div class="viewcode-block" id="PerAtom.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.PerAtom.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

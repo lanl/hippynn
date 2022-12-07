@@ -53,7 +53,20 @@
 <li class="toctree-l3"><a class="reference internal" href="hippynn.interfaces.ase_interface.html">ase_interface package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.interfaces.lammps_interface.html">lammps_interface package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.interfaces.pyseqm_interface.html">pyseqm_interface package</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">schnetpack_interface package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">schnetpack_interface package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.interfaces.schnetpack_interface.SchNetNode"><code class="docutils literal notranslate"><span class="pre">SchNetNode</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.interfaces.schnetpack_interface.SchNetNode.__init__"><code class="docutils literal notranslate"><span class="pre">SchNetNode.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.interfaces.schnetpack_interface.SchNetWrapper"><code class="docutils literal notranslate"><span class="pre">SchNetWrapper</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.interfaces.schnetpack_interface.SchNetWrapper.__init__"><code class="docutils literal notranslate"><span class="pre">SchNetWrapper.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.interfaces.schnetpack_interface.SchNetWrapper.forward"><code class="docutils literal notranslate"><span class="pre">SchNetWrapper.forward()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.interfaces.schnetpack_interface.SchNetWrapper.training"><code class="docutils literal notranslate"><span class="pre">SchNetWrapper.training</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.interfaces.schnetpack_interface.create_schnetpack_inputs"><code class="docutils literal notranslate"><span class="pre">create_schnetpack_inputs()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.layers.html">layers package</a></li>
@@ -98,6 +111,52 @@
   <div class="section" id="schnetpack-interface-package">
 <h1>schnetpack_interface package<a class="headerlink" href="#schnetpack-interface-package" title="Permalink to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.interfaces.schnetpack_interface</span></code> package.</p>
+<span class="target" id="module-hippynn.interfaces.schnetpack_interface"></span><p>Interface to use schnetpack networks with hippynn.</p>
+<p>Note: Only open boundary conditions are supported for now.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.interfaces.schnetpack_interface.SchNetNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SchNetNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/schnetpack_interface.html#SchNetNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.schnetpack_interface.SchNetNode" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoKw" title="hippynn.graphs.nodes.base.definition_helpers.AutoKw"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoKw</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.tags.html#hippynn.graphs.nodes.tags.Network" title="hippynn.graphs.nodes.tags.Network"><code class="xref py py-class docutils literal notranslate"><span class="pre">Network</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.SingleNode" title="hippynn.graphs.nodes.base.base.SingleNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">SingleNode</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.interfaces.schnetpack_interface.SchNetNode.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/schnetpack_interface.html#SchNetNode.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.schnetpack_interface.SchNetNode.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.interfaces.schnetpack_interface.SchNetWrapper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SchNetWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schnet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/schnetpack_interface.html#SchNetWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.schnetpack_interface.SchNetWrapper" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.interfaces.schnetpack_interface.SchNetWrapper.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schnet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/schnetpack_interface.html#SchNetWrapper.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.schnetpack_interface.SchNetWrapper.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.interfaces.schnetpack_interface.SchNetWrapper.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonblank</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/schnetpack_interface.html#SchNetWrapper.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.schnetpack_interface.SchNetWrapper.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Wrap a call into the underlying schnet, which uses
+dictionaries.
+:param z_arr:
+:param r_arr:
+:param nonblank:
+:return:</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.interfaces.schnetpack_interface.SchNetWrapper.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#hippynn.interfaces.schnetpack_interface.SchNetWrapper.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.interfaces.schnetpack_interface.create_schnetpack_inputs">
+<span class="sig-name descname"><span class="pre">create_schnetpack_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonblank</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/schnetpack_interface.html#create_schnetpack_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.schnetpack_interface.create_schnetpack_inputs" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </div>
 
 

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.interfaces.pyseqm_interface.seqm_one &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.interfaces.pyseqm_interface.seqm_one</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.interfaces.pyseqm_interface.seqm_one</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">seqm</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">seqm.seqm_functions.fock</span> <span class="kn">import</span> <span class="n">fock</span>
+<span class="kn">from</span> <span class="nn">seqm.seqm_functions.hcore</span> <span class="kn">import</span> <span class="n">hcore</span>
+<span class="kn">from</span> <span class="nn">seqm.seqm_functions.diag</span> <span class="kn">import</span> <span class="n">sym_eig_trunc1</span>
+<span class="kn">from</span> <span class="nn">seqm.basics</span> <span class="kn">import</span> <span class="n">Hamiltonian</span><span class="p">,</span> <span class="n">Energy</span>
+
+
+<div class="viewcode-block" id="Hamiltonian_One"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.Hamiltonian_One">[docs]</a><span class="k">class</span> <span class="nc">Hamiltonian_One</span><span class="p">(</span><span class="n">Hamiltonian</span><span class="p">):</span>
+<div class="viewcode-block" id="Hamiltonian_One.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.Hamiltonian_One.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seqm_parameters</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">seqm_parameters</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Hamiltonian_One.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.Hamiltonian_One.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">const</span><span class="p">,</span>
+        <span class="n">molsize</span><span class="p">,</span>
+        <span class="n">nHeavy</span><span class="p">,</span>
+        <span class="n">nHydro</span><span class="p">,</span>
+        <span class="n">nOccMO</span><span class="p">,</span>
+        <span class="n">Z</span><span class="p">,</span>
+        <span class="n">maskd</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">,</span>
+        <span class="n">atom_molid</span><span class="p">,</span>
+        <span class="n">pair_molid</span><span class="p">,</span>
+        <span class="n">idxi</span><span class="p">,</span>
+        <span class="n">idxj</span><span class="p">,</span>
+        <span class="n">ni</span><span class="p">,</span>
+        <span class="n">nj</span><span class="p">,</span>
+        <span class="n">xij</span><span class="p">,</span>
+        <span class="n">rij</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">,</span>
+        <span class="n">P0</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;beta_s&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;beta_p&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">nmol</span> <span class="o">=</span> <span class="n">nOccMO</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">zetas</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;zeta_s&quot;</span><span class="p">]</span>
+        <span class="n">zetap</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;zeta_p&quot;</span><span class="p">]</span>
+        <span class="n">uss</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;U_ss&quot;</span><span class="p">]</span>
+        <span class="n">upp</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;U_pp&quot;</span><span class="p">]</span>
+        <span class="n">gss</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;g_ss&quot;</span><span class="p">]</span>
+        <span class="n">gsp</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;g_sp&quot;</span><span class="p">]</span>
+        <span class="n">gpp</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;g_pp&quot;</span><span class="p">]</span>
+        <span class="n">gp2</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;g_p2&quot;</span><span class="p">]</span>
+        <span class="n">hsp</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;h_sp&quot;</span><span class="p">]</span>
+        <span class="n">M</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">hcore</span><span class="p">(</span>
+            <span class="n">const</span><span class="p">,</span>
+            <span class="n">nmol</span><span class="p">,</span>
+            <span class="n">molsize</span><span class="p">,</span>
+            <span class="n">maskd</span><span class="p">,</span>
+            <span class="n">mask</span><span class="p">,</span>
+            <span class="n">idxi</span><span class="p">,</span>
+            <span class="n">idxj</span><span class="p">,</span>
+            <span class="n">ni</span><span class="p">,</span>
+            <span class="n">nj</span><span class="p">,</span>
+            <span class="n">xij</span><span class="p">,</span>
+            <span class="n">rij</span><span class="p">,</span>
+            <span class="n">Z</span><span class="p">,</span>
+            <span class="n">zetas</span><span class="p">,</span>
+            <span class="n">zetap</span><span class="p">,</span>
+            <span class="n">uss</span><span class="p">,</span>
+            <span class="n">upp</span><span class="p">,</span>
+            <span class="n">gss</span><span class="p">,</span>
+            <span class="n">gpp</span><span class="p">,</span>
+            <span class="n">gp2</span><span class="p">,</span>
+            <span class="n">hsp</span><span class="p">,</span>
+            <span class="n">beta</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">fock</span><span class="p">(</span><span class="n">nmol</span><span class="p">,</span> <span class="n">molsize</span><span class="p">,</span> <span class="n">P0</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">maskd</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">idxi</span><span class="p">,</span> <span class="n">idxj</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">gss</span><span class="p">,</span> <span class="n">gpp</span><span class="p">,</span> <span class="n">gsp</span><span class="p">,</span> <span class="n">gp2</span><span class="p">,</span> <span class="n">hsp</span><span class="p">)</span>
+        <span class="n">Hcore</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nmol</span><span class="p">,</span> <span class="n">molsize</span><span class="p">,</span> <span class="n">molsize</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nmol</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">molsize</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">molsize</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eig</span><span class="p">:</span>
+            <span class="n">e</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">sym_eig_trunc1</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">nHeavy</span><span class="p">,</span> <span class="n">nHydro</span><span class="p">,</span> <span class="n">nOccMO</span><span class="p">,</span> <span class="n">eig_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">F</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">P0</span><span class="p">,</span> <span class="n">Hcore</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">F</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">P0</span><span class="p">,</span> <span class="n">Hcore</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div></div>
+
+
+<div class="viewcode-block" id="Energy_One"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.Energy_One">[docs]</a><span class="k">class</span> <span class="nc">Energy_One</span><span class="p">(</span><span class="n">Energy</span><span class="p">):</span>
+<div class="viewcode-block" id="Energy_One.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.Energy_One.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seqm_parameters</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">seqm_parameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hamiltonian</span> <span class="o">=</span> <span class="n">Hamiltonian_One</span><span class="p">(</span><span class="n">seqm_parameters</span><span class="p">)</span></div></div>
+
+
+<span class="kn">from</span> <span class="nn">hippynn.interfaces.pyseqm_interface.seqm_modules</span> <span class="kn">import</span> <span class="n">SEQM_Energy</span><span class="p">,</span> <span class="n">SEQM_All</span><span class="p">,</span> <span class="n">pack_par</span>
+
+
+<div class="viewcode-block" id="SEQM_One_Energy"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.SEQM_One_Energy">[docs]</a><span class="k">class</span> <span class="nc">SEQM_One_Energy</span><span class="p">(</span><span class="n">SEQM_Energy</span><span class="p">):</span>
+<div class="viewcode-block" id="SEQM_One_Energy.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.SEQM_One_Energy.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seqm_parameters</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">seqm_parameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">Energy_One</span><span class="p">(</span><span class="n">seqm_parameters</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SEQM_One_Energy.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.SEQM_One_Energy.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par_atom</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">single_particle_density_matrix</span><span class="p">):</span>
+        <span class="n">learned_parameters</span> <span class="o">=</span> <span class="n">pack_par</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">par_atom</span><span class="p">)</span>
+
+        <span class="n">Etot_m_Eiso</span><span class="p">,</span> <span class="n">Etot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">const</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="p">,</span>
+            <span class="n">species</span><span class="p">,</span>
+            <span class="n">learned_parameters</span><span class="o">=</span><span class="n">learned_parameters</span><span class="p">,</span>
+            <span class="n">all_terms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">P0</span><span class="o">=</span><span class="n">single_particle_density_matrix</span><span class="p">,</span>
+        <span class="p">)[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">Etot</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Etot_m_Eiso</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="SEQM_One_All"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.SEQM_One_All">[docs]</a><span class="k">class</span> <span class="nc">SEQM_One_All</span><span class="p">(</span><span class="n">SEQM_All</span><span class="p">):</span>
+<div class="viewcode-block" id="SEQM_One_All.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.SEQM_One_All.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seqm_parameters</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">seqm_parameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">Energy_One</span><span class="p">(</span><span class="n">seqm_parameters</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SEQM_One_All.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.SEQM_One_All.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par_atom</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">single_particle_density_matrix</span><span class="p">):</span>
+        <span class="n">learned_parameters</span> <span class="o">=</span> <span class="n">pack_par</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">par_atom</span><span class="p">)</span>
+
+        <span class="n">Etot_m_Eiso</span><span class="p">,</span> <span class="n">Etot</span><span class="p">,</span> <span class="n">Eelec</span><span class="p">,</span> <span class="n">Enuc</span><span class="p">,</span> <span class="n">Eiso</span><span class="p">,</span> <span class="n">EnucAB</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">charge</span><span class="p">,</span> <span class="n">notconverged</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">const</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="p">,</span>
+            <span class="n">species</span><span class="p">,</span>
+            <span class="n">learned_parameters</span><span class="o">=</span><span class="n">learned_parameters</span><span class="p">,</span>
+            <span class="n">all_terms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">P0</span><span class="o">=</span><span class="n">single_particle_density_matrix</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">n_molecule</span><span class="p">,</span> <span class="n">n_atom</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">atomic_charge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">const</span><span class="o">.</span><span class="n">tore</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">-</span> <span class="n">P</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">dim1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_molecule</span><span class="p">,</span> <span class="n">n_atom</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">Etot</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">Etot_m_Eiso</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">e</span><span class="p">,</span>
+            <span class="n">Eelec</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">Enuc</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">Eiso</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">atomic_charge</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
+
+
+<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.networks</span> <span class="kn">import</span> <span class="n">Network</span>
+<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.targets</span> <span class="kn">import</span> <span class="n">HChargeNode</span>  <span class="c1"># , HBondNode</span>
+<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.inputs</span> <span class="kn">import</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">SpeciesNode</span>
+<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.base</span> <span class="kn">import</span> <span class="n">InputNode</span>
+<span class="kn">from</span> <span class="nn">hippynn.graphs.indextypes</span> <span class="kn">import</span> <span class="n">IdxType</span>
+<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.base</span> <span class="kn">import</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">SingleNode</span>
+
+
+<div class="viewcode-block" id="NotConvergedNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.NotConvergedNode">[docs]</a><span class="k">class</span> <span class="nc">NotConvergedNode</span><span class="p">(</span><span class="n">InputNode</span><span class="p">):</span>
+    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>
+    <span class="n">input_type_str</span> <span class="o">=</span> <span class="s2">&quot;notconverged&quot;</span></div>
+
+
+<div class="viewcode-block" id="DensityMatrixNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.DensityMatrixNode">[docs]</a><span class="k">class</span> <span class="nc">DensityMatrixNode</span><span class="p">(</span><span class="n">InputNode</span><span class="p">):</span>
+    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>
+    <span class="n">input_type_str</span> <span class="o">=</span> <span class="s2">&quot;single_particle_density_matrix&quot;</span></div>
+
+
+<div class="viewcode-block" id="SEQM_One_EnergyNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.SEQM_One_EnergyNode">[docs]</a><span class="k">class</span> <span class="nc">SEQM_One_EnergyNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;par_atom&quot;</span><span class="p">,</span> <span class="s2">&quot;Positions&quot;</span><span class="p">,</span> <span class="s2">&quot;Species&quot;</span><span class="p">,</span> <span class="s2">&quot;single_particle_density_matrix&quot;</span>
+    <span class="n">_output_names</span> <span class="o">=</span> <span class="s2">&quot;mol_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;Etot_m_Eiso&quot;</span>
+    <span class="n">_main_output</span> <span class="o">=</span> <span class="s2">&quot;Etot_m_Eiso&quot;</span>
+    <span class="n">_output_index_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">_output_names</span><span class="p">)</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">SEQM_One_Energy</span>
+
+<div class="viewcode-block" id="SEQM_One_EnergyNode.expand0"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.SEQM_One_EnergyNode.expand0">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="n">DensityMatrixNode</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expand0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">single_particle_density_matrix</span><span class="p">,</span> <span class="n">seqm_parameters</span><span class="p">,</span> <span class="n">decay_factor</span><span class="o">=</span><span class="mf">1.0e-2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">n_target_peratom</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;learned&quot;</span><span class="p">])</span>
+
+        <span class="n">par_atom</span> <span class="o">=</span> <span class="n">HChargeNode</span><span class="p">(</span>
+            <span class="s2">&quot;SEQM_Atom_Params&quot;</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">n_target</span><span class="o">=</span><span class="n">n_target_peratom</span><span class="p">,</span> <span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">par_atom</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+                <span class="n">layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span> <span class="o">*=</span> <span class="n">decay_factor</span>
+                <span class="n">layer</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">data</span> <span class="o">*=</span> <span class="n">decay_factor</span>
+
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">)</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">SpeciesNode</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">par_atom</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">single_particle_density_matrix</span></div>
+
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SEQM_One_EnergyNode.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.SEQM_One_EnergyNode.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">seqm_parameters</span><span class="p">,</span> <span class="n">decay_factor</span><span class="o">=</span><span class="mf">1.0e-2</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="n">seqm_parameters</span><span class="o">=</span><span class="n">seqm_parameters</span><span class="p">,</span> <span class="n">decay_factor</span><span class="o">=</span><span class="n">decay_factor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">seqm_parameters</span><span class="o">=</span><span class="n">seqm_parameters</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="SEQM_One_AllNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.SEQM_One_AllNode">[docs]</a><span class="k">class</span> <span class="nc">SEQM_One_AllNode</span><span class="p">(</span><span class="n">SEQM_One_EnergyNode</span><span class="p">):</span>
+    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;par_atom&quot;</span><span class="p">,</span> <span class="s2">&quot;Positions&quot;</span><span class="p">,</span> <span class="s2">&quot;Species&quot;</span><span class="p">,</span> <span class="s2">&quot;single_particle_density_matrix&quot;</span>
+    <span class="n">_output_names</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;mol_energy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Etot_m_Eiso&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;orbital_energies&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;electric_energy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nuclear_energy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;isolated_atom_energy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;atomic_charge&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">_main_output</span> <span class="o">=</span> <span class="s2">&quot;Etot_m_Eiso&quot;</span>
+    <span class="n">_output_index_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">_output_names</span><span class="p">)</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">SEQM_One_All</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

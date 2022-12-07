@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.graphs.viz &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.graphs.viz</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.graphs.viz</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Functions for visualizing nodes and their links with graphviz.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">graphviz</span> <span class="kn">import</span> <span class="n">Digraph</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">get_connected_nodes</span>
+<span class="kn">from</span> <span class="nn">.nodes.base</span> <span class="kn">import</span> <span class="n">MultiNode</span>
+
+
+<div class="viewcode-block" id="visualize_graph_module"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.viz.html#hippynn.graphs.viz.visualize_graph_module">[docs]</a><span class="k">def</span> <span class="nf">visualize_graph_module</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">compactify</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make a dot graph for a GraphModule.</span>
+
+<span class="sd">    :param graph: A GraphModule</span>
+<span class="sd">    :param compactify: see :func:`visualize_node_set`</span>
+
+<span class="sd">    :returns: graphviz.Digraph</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">node_set</span> <span class="o">=</span> <span class="p">{</span><span class="o">*</span><span class="n">graph</span><span class="o">.</span><span class="n">forward_output_list</span><span class="p">,</span> <span class="o">*</span><span class="n">graph</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">}</span>
+    <span class="n">preserve</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">visualize_node_set</span><span class="p">(</span><span class="n">node_set</span><span class="p">,</span> <span class="n">compactify</span><span class="o">=</span><span class="n">compactify</span><span class="p">,</span> <span class="n">preserve</span><span class="o">=</span><span class="n">preserve</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="visualize_connected_nodes"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.viz.html#hippynn.graphs.viz.visualize_connected_nodes">[docs]</a><span class="k">def</span> <span class="nf">visualize_connected_nodes</span><span class="p">(</span><span class="n">node_iterable</span><span class="p">,</span> <span class="n">compactify</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Make a dot graph for a all nodes connected to a group of nodes.</span>
+
+<span class="sd">    :param node_iterable: An iterable (tuple, list, etc)  of nodes.</span>
+<span class="sd">    :param compactify: see :func:`visualize_node_set`</span>
+
+<span class="sd">    :returns: graphviz.DiGraph</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">preserve</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">node_iterable</span><span class="p">)</span>
+    <span class="n">node_set</span> <span class="o">=</span> <span class="n">get_connected_nodes</span><span class="p">(</span><span class="n">preserve</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">visualize_node_set</span><span class="p">(</span><span class="n">node_set</span><span class="p">,</span> <span class="n">preserve</span><span class="o">=</span><span class="n">preserve</span><span class="p">,</span> <span class="n">compactify</span><span class="o">=</span><span class="n">compactify</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="visualize_node_set"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.viz.html#hippynn.graphs.viz.visualize_node_set">[docs]</a><span class="k">def</span> <span class="nf">visualize_node_set</span><span class="p">(</span><span class="n">node_set</span><span class="p">,</span> <span class="n">compactify</span><span class="p">,</span> <span class="n">preserve</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Make a dot graph for a precise set of nodes.</span>
+
+<span class="sd">    :param node_set: The set of nodes to visualize.</span>
+<span class="sd">    :param compactify: If True, do not show the individual outputs of a `MultiNode`. If True, show all nodes.</span>
+<span class="sd">    :param preserve:</span>
+
+<span class="sd">    :returns: graphviz.Digraphs</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dot</span> <span class="o">=</span> <span class="n">Digraph</span><span class="p">()</span>
+    <span class="n">starting_dot_names</span> <span class="o">=</span> <span class="n">get_viz_node_names</span><span class="p">(</span><span class="n">node_set</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">compactify</span><span class="p">:</span>
+        <span class="n">dot_names</span> <span class="o">=</span> <span class="n">compactify_node_names</span><span class="p">(</span><span class="n">starting_dot_names</span><span class="p">,</span> <span class="n">preserve</span><span class="o">=</span><span class="n">preserve</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dot_names</span> <span class="o">=</span> <span class="n">starting_dot_names</span>
+
+    <span class="c1"># Create the visible nodes</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">dot_names</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dot_names</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">==</span> <span class="n">starting_dot_names</span><span class="p">[</span><span class="n">node</span><span class="p">]:</span>
+            <span class="n">node_attr</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;style&quot;</span><span class="p">:</span> <span class="s2">&quot;rounded&quot;</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="s2">&quot;rect&quot;</span><span class="p">}</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+                <span class="n">node_attr</span><span class="p">[</span><span class="s2">&quot;style&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;rounded,bold&quot;</span>
+
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">parents</span> <span class="o">==</span> <span class="p">():</span>
+                <span class="n">node_attr</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;green&quot;</span>
+            <span class="k">elif</span> <span class="n">preserve</span> <span class="ow">and</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">preserve</span><span class="p">:</span>
+                <span class="n">node_attr</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;blue&quot;</span>
+            <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dot_names</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">):</span>
+                <span class="n">node_attr</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;red&quot;</span>
+
+            <span class="n">dn</span> <span class="o">=</span> <span class="n">dot</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">dot_names</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="o">**</span><span class="n">node_attr</span><span class="p">)</span>
+
+    <span class="c1"># Create the links between nodes:</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">node_set</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node_set</span><span class="p">:</span>
+                <span class="n">n1</span> <span class="o">=</span> <span class="n">dot_names</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
+                <span class="n">n2</span> <span class="o">=</span> <span class="n">dot_names</span><span class="p">[</span><span class="n">child</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">n1</span> <span class="o">!=</span> <span class="n">n2</span><span class="p">:</span>  <span class="c1"># supports compactify option</span>
+                    <span class="n">dot</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dot</span></div>
+
+
+<span class="k">def</span> <span class="nf">get_viz_node_names</span><span class="p">(</span><span class="n">node_set</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param node_set:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    :meta private:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">base_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">nonunique_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">node_set</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">base_names</span><span class="p">:</span>
+            <span class="n">nonunique_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">base_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">unique_names</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">node_set</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">nonunique_names</span><span class="p">:</span>
+            <span class="n">unique_names</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> (id=</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">unique_names</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">return</span> <span class="n">unique_names</span>
+
+
+<span class="k">def</span> <span class="nf">compactify_node_names</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">preserve</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :meta private:</span>
+<span class="sd">    Generate a list of node names where multinode outputs</span>
+<span class="sd">    are mapped to the base multinode name, unless that</span>
+<span class="sd">    output is in the ``preserve`` set.</span>
+
+<span class="sd">    :param names: dict mapping nodes to names.</span>
+<span class="sd">    :param preserve: nodes to keep explicit.</span>
+<span class="sd">    :return: new dict of nodes to names.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">copy_names</span> <span class="o">=</span> <span class="n">names</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">preserve</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">preserve</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># Empty; nothing</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">child</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">preserve</span><span class="p">:</span>
+                    <span class="n">copy_names</span><span class="p">[</span><span class="n">child</span><span class="p">]</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">copy_names</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.plotting.plotmaker &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.plotting.plotmaker</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.plotting.plotmaker</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="kn">from</span> <span class="nn">..graphs</span> <span class="kn">import</span> <span class="n">GraphModule</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">settings</span>
+
+
+<div class="viewcode-block" id="PlotMaker"><a class="viewcode-back" href="../../../api_documentation/hippynn.plotting.plotmaker.html#hippynn.plotting.plotmaker.PlotMaker">[docs]</a><span class="k">class</span> <span class="nc">PlotMaker</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The plot maker is responsible for collecting the data for the plotters and executing the plotters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PlotMaker.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.plotting.plotmaker.html#hippynn.plotting.plotmaker.PlotMaker.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">plotters</span><span class="p">,</span> <span class="n">plot_every</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="s2">&quot;plots/&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotters</span> <span class="o">=</span> <span class="n">plotters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_dir</span> <span class="o">=</span> <span class="n">save_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_every</span> <span class="o">=</span> <span class="n">plot_every</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">torch_module</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="PlotMaker.assemble_module"><a class="viewcode-back" href="../../../api_documentation/hippynn.plotting.plotmaker.html#hippynn.plotting.plotmaker.PlotMaker.assemble_module">[docs]</a>    <span class="k">def</span> <span class="nf">assemble_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_outputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
+        <span class="n">model_outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">pred</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">model_outputs</span><span class="p">]</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">true</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">]</span>
+        <span class="n">all_inputs</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">model_outputs</span><span class="p">,</span> <span class="o">*</span><span class="n">targets</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">torch_module</span> <span class="o">=</span> <span class="n">GraphModule</span><span class="p">(</span><span class="n">all_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">required_nodes</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">required_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">plotter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotters</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">plotter</span><span class="o">.</span><span class="n">parents</span><span class="p">]</span>
+
+<div class="viewcode-block" id="PlotMaker.make_plots"><a class="viewcode-back" href="../../../api_documentation/hippynn.plotting.plotmaker.html#hippynn.plotting.plotmaker.PlotMaker.make_plots">[docs]</a>    <span class="k">def</span> <span class="nf">make_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">sub_location</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">computed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">torch_module</span><span class="p">(</span><span class="o">*</span><span class="n">outputs</span><span class="p">,</span> <span class="o">*</span><span class="n">targets</span><span class="p">)</span>
+        <span class="n">remaining_data</span> <span class="o">=</span> <span class="n">computed_data</span>
+
+        <span class="n">location</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_full_location</span><span class="p">(</span><span class="n">sub_location</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Making plots. Saved location: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">location</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">plotter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotters</span><span class="p">:</span>
+            <span class="n">n_args</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">plotter</span><span class="o">.</span><span class="n">parents</span><span class="p">)</span>
+            <span class="n">this_data</span> <span class="o">=</span> <span class="n">remaining_data</span><span class="p">[:</span><span class="n">n_args</span><span class="p">]</span>
+            <span class="n">remaining_data</span> <span class="o">=</span> <span class="n">remaining_data</span><span class="p">[</span><span class="n">n_args</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="n">plotter</span><span class="o">.</span><span class="n">shown</span> <span class="ow">or</span> <span class="n">plotter</span><span class="o">.</span><span class="n">saved</span><span class="p">:</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="n">this_data</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">plotter</span><span class="o">.</span><span class="n">shown</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">plotter</span><span class="o">.</span><span class="n">saved</span><span class="p">:</span>
+                    <span class="n">file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">plotter</span><span class="o">.</span><span class="n">saved</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Saving plot at </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file</span><span class="p">))</span>
+                    <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">TRANSPARENT_PLOT</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PlotMaker.make_full_location"><a class="viewcode-back" href="../../../api_documentation/hippynn.plotting.plotmaker.html#hippynn.plotting.plotmaker.PlotMaker.make_full_location">[docs]</a>    <span class="k">def</span> <span class="nf">make_full_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sub_location</span><span class="p">):</span>
+        <span class="n">sub_location</span> <span class="o">=</span> <span class="n">sub_location</span> <span class="k">if</span> <span class="n">sub_location</span> <span class="k">else</span> <span class="s2">&quot;Unspecified&quot;</span>
+        <span class="n">location</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_dir</span><span class="p">,</span> <span class="n">sub_location</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">location</span><span class="p">):</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;May override plots in </span><span class="si">{}</span><span class="s2"> !&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">location</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">location</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">location</span></div>
+
+<div class="viewcode-block" id="PlotMaker.plot_phase"><a class="viewcode-back" href="../../../api_documentation/hippynn.plotting.plotmaker.html#hippynn.plotting.plotmaker.PlotMaker.plot_phase">[docs]</a>    <span class="k">def</span> <span class="nf">plot_phase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction_all_vals</span><span class="p">,</span> <span class="n">target_all_vals</span><span class="p">,</span> <span class="n">when</span><span class="p">,</span> <span class="n">eval_type</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">when</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># If integer, convert to epoch number string IF it is time to plot.</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">when</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">when</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_every</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">when</span> <span class="o">=</span> <span class="s2">&quot;epochs/epoch</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">when</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span>
+            <span class="c1"># If string, make the plots. Note that this CANNOT become an ELIF, the above will convert when to a str.</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">when</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">location</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">when</span><span class="p">,</span> <span class="n">eval_type</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">make_plots</span><span class="p">(</span><span class="n">prediction_all_vals</span><span class="p">,</span> <span class="n">target_all_vals</span><span class="p">,</span> <span class="n">location</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;Evaluation description was not a string &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;or integer (specifying epoch number): </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">when</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="s2">&quot;Not generating plots.&quot;</span>
+                <span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -52,7 +52,22 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.interfaces.html">interfaces package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.layers.html">layers package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="hippynn.layers.pairs.html">pairs package</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">analysis module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">analysis module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.analysis.MinDistModule"><code class="docutils literal notranslate"><span class="pre">MinDistModule</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.analysis.MinDistModule.forward"><code class="docutils literal notranslate"><span class="pre">MinDistModule.forward()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.analysis.MinDistModule.training"><code class="docutils literal notranslate"><span class="pre">MinDistModule.training</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.analysis.RDFBins"><code class="docutils literal notranslate"><span class="pre">RDFBins</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.analysis.RDFBins.__init__"><code class="docutils literal notranslate"><span class="pre">RDFBins.__init__()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.analysis.RDFBins.bin_info"><code class="docutils literal notranslate"><span class="pre">RDFBins.bin_info()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.analysis.RDFBins.forward"><code class="docutils literal notranslate"><span class="pre">RDFBins.forward()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.analysis.RDFBins.training"><code class="docutils literal notranslate"><span class="pre">RDFBins.training</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.analysis.min_dist_info"><code class="docutils literal notranslate"><span class="pre">min_dist_info()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.dispatch.html">dispatch module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.indexing.html">indexing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.open.html">open module</a></li>
@@ -110,6 +125,73 @@
   <div class="section" id="analysis-module">
 <h1>analysis module<a class="headerlink" href="#analysis-module" title="Permalink to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.layers.pairs.analysis</span></code> module.</p>
+<span class="target" id="module-hippynn.layers.pairs.analysis"></span><p>Modules for analyzing pair-valued data</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.analysis.MinDistModule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MinDistModule</span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/analysis.html#MinDistModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.analysis.MinDistModule" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.analysis.MinDistModule.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rmag_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_real_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_atoms_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_molecules</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/analysis.html#MinDistModule.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.analysis.MinDistModule.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.analysis.MinDistModule.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#hippynn.layers.pairs.analysis.MinDistModule.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.analysis.RDFBins">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RDFBins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/analysis.html#RDFBins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.analysis.RDFBins" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.analysis.RDFBins.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/analysis.html#RDFBins.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.analysis.RDFBins.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.analysis.RDFBins.bin_info">
+<span class="sig-name descname"><span class="pre">bin_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/analysis.html#RDFBins.bin_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.analysis.RDFBins.bin_info" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.analysis.RDFBins.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pair_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_hot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_molecules</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/analysis.html#RDFBins.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.analysis.RDFBins.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.analysis.RDFBins.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#hippynn.layers.pairs.analysis.RDFBins.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.analysis.min_dist_info">
+<span class="sig-name descname"><span class="pre">min_dist_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rij_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_real_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_atoms_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_molecules</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/analysis.html#min_dist_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.analysis.min_dist_info" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </div>
 
 

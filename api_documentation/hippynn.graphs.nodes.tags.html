@@ -49,6 +49,16 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.databases.html">databases package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.experiment.html">experiment package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.graphs.html">graphs package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.GraphModule"><code class="docutils literal notranslate"><span class="pre">GraphModule</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.IdxType"><code class="docutils literal notranslate"><span class="pre">IdxType</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.Predictor"><code class="docutils literal notranslate"><span class="pre">Predictor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.compute_evaluation_order"><code class="docutils literal notranslate"><span class="pre">compute_evaluation_order()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.copy_subgraph"><code class="docutils literal notranslate"><span class="pre">copy_subgraph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.find_relatives"><code class="docutils literal notranslate"><span class="pre">find_relatives()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.find_unique_relative"><code class="docutils literal notranslate"><span class="pre">find_unique_relative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.get_connected_nodes"><code class="docutils literal notranslate"><span class="pre">get_connected_nodes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.get_subgraph"><code class="docutils literal notranslate"><span class="pre">get_subgraph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.replace_node"><code class="docutils literal notranslate"><span class="pre">replace_node()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.indextransformers.html">indextransformers package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.indextypes.html">indextypes package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="hippynn.graphs.nodes.html">nodes package</a><ul class="current">
@@ -60,7 +70,22 @@
 <li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.nodes.networks.html">networks module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.nodes.pairs.html">pairs module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.nodes.physics.html">physics module</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">tags module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">tags module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.tags.AtomIndexer"><code class="docutils literal notranslate"><span class="pre">AtomIndexer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.tags.Charges"><code class="docutils literal notranslate"><span class="pre">Charges</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.tags.Encoder"><code class="docutils literal notranslate"><span class="pre">Encoder</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.tags.Encoder.species_set"><code class="docutils literal notranslate"><span class="pre">Encoder.species_set</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.tags.Energies"><code class="docutils literal notranslate"><span class="pre">Energies</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.tags.HAtomRegressor"><code class="docutils literal notranslate"><span class="pre">HAtomRegressor</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.tags.Network"><code class="docutils literal notranslate"><span class="pre">Network</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.tags.PairCache"><code class="docutils literal notranslate"><span class="pre">PairCache</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.tags.PairIndexer"><code class="docutils literal notranslate"><span class="pre">PairIndexer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.tags.Positions"><code class="docutils literal notranslate"><span class="pre">Positions</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.tags.Species"><code class="docutils literal notranslate"><span class="pre">Species</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.nodes.targets.html">targets module</a></li>
 </ul>
 </li>
@@ -114,6 +139,74 @@
   <div class="section" id="tags-module">
 <h1>tags module<a class="headerlink" href="#tags-module" title="Permalink to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.graphs.nodes.tags</span></code> module.</p>
+<span class="target" id="module-hippynn.graphs.nodes.tags"></span><p>Tags for nodes to inherit from, allowing tagging of different kinds
+of information.
+This file should not depend on any actual nodes.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.tags.AtomIndexer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AtomIndexer</span></span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/tags.html#AtomIndexer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.tags.AtomIndexer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.tags.Charges">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Charges</span></span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/tags.html#Charges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.tags.Charges" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.tags.Encoder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Encoder</span></span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/tags.html#Encoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.tags.Encoder" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.tags.Encoder.species_set">
+<span class="sig-name descname"><span class="pre">species_set</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">NotImplemented</span></em><a class="headerlink" href="#hippynn.graphs.nodes.tags.Encoder.species_set" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.tags.Energies">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Energies</span></span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/tags.html#Energies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.tags.Energies" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.tags.HAtomRegressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HAtomRegressor</span></span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/tags.html#HAtomRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.tags.HAtomRegressor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.tags.Network">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Network</span></span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/tags.html#Network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.tags.Network" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.tags.PairCache">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PairCache</span></span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/tags.html#PairCache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.tags.PairCache" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.tags.PairIndexer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PairIndexer</span></span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/tags.html#PairIndexer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.tags.PairIndexer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.tags.Positions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Positions</span></span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/tags.html#Positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.tags.Positions" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.tags.Species">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Species</span></span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/tags.html#Species"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.tags.Species" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
 </div>
 
 

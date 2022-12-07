@@ -53,7 +53,11 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.layers.html">layers package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.networks.html">networks package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.plotting.html">plotting package</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">pretraining module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pretraining module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.pretraining.calculate_min_dists"><code class="docutils literal notranslate"><span class="pre">calculate_min_dists()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.pretraining.set_e0_values"><code class="docutils literal notranslate"><span class="pre">set_e0_values()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.tools.html">tools module</a></li>
 </ul>
 </li>
@@ -91,6 +95,69 @@
   <div class="section" id="pretraining-module">
 <h1>pretraining module<a class="headerlink" href="#pretraining-module" title="Permalink to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.pretraining</span></code> module.</p>
+<span class="target" id="module-hippynn.pretraining"></span><p>Things to do before training, i.e. initialization of network and diagnostics.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.pretraining.calculate_min_dists">
+<span class="sig-name descname"><span class="pre">calculate_min_dists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">device</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_finder_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_BaseNode</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/pretraining.html#calculate_min_dists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.pretraining.calculate_min_dists" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the minimum distance found in each system in <code class="docutils literal notranslate"><span class="pre">array_dict</span></code>.</p>
+<p>Example usage for unsplit data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">min_dists</span> <span class="o">=</span> <span class="n">calculate_min_dists</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">,</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span><span class="s2">&quot;R&quot;</span><span class="p">,</span><span class="mf">5.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If the database has been split:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">min_dists_train</span> <span class="o">=</span> <span class="n">calculate_min_dists</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">],</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span><span class="s2">&quot;R&quot;</span><span class="p">,</span><span class="mf">5.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The cutoff radius <code class="docutils literal notranslate"><span class="pre">dist_hard_max</span></code> should be set large enough such that each atom is expected
+to have at least one neighbor. If an atom has no neighbors, its min_dist will be set to the
+largest distance found in the current <em>batch</em>.
+If an entire system has no neighbors, the minimum distance will be set to zero.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array_dict</strong> – dictionary mapping strings to tensors/numpy arrays</p></li>
+<li><p><strong>species_name</strong> – dictionary key for species</p></li>
+<li><p><strong>positions_name</strong> – dictionary key for positions</p></li>
+<li><p><strong>dist_hard_max</strong> – maximum distance to search</p></li>
+<li><p><strong>cell_name</strong> – dictionary key for cell (periodic boundary conditions.
+if the cell is not specified, open boundaries are used.</p></li>
+<li><p><strong>pair_finder_class</strong> – if ‘auto’, choose automatically. elsewise build this kind of pair finder.</p></li>
+<li><p><strong>device</strong> – Where to perform the computation.</p></li>
+<li><p><strong>batch_size</strong> – batch size to perform evaluation over.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.pretraining.set_e0_values">
+<span class="sig-name descname"><span class="pre">set_e0_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainable_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peratom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/pretraining.html#set_e0_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.pretraining.set_e0_values" title="Permalink to this definition"></a></dt>
+<dd><p>Computes values for the non-interacting energy using the training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>energy_module</strong> – HEnergyNode or torch module for energy prediction</p></li>
+<li><p><strong>database</strong> – InterfaceDB object to get training data</p></li>
+<li><p><strong>trainable_after</strong> – Determines if it should change .requires_grad attribute for the E0 parameters.</p></li>
+<li><p><strong>decay_factor</strong> – change initialized weights of further energy layers by <code class="docutils literal notranslate"><span class="pre">df**N</span></code> for layer N</p></li>
+<li><p><strong>network_module</strong> – network for running the species encoding. Can be auto-identified from energy node</p></li>
+<li><p><strong>energy_name</strong> – name for the energy variable, can be auto-identified from energy node</p></li>
+<li><p><strong>species_name</strong> – name for the species variable, can be auto-identified from energy node</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.custom_kernels.utils &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../custom_kernels.html">hippynn.custom_kernels</a></li>
+      <li class="breadcrumb-item active">hippynn.custom_kernels.utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.custom_kernels.utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
+<span class="k">def</span> <span class="nf">get_id_and_starts</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+    <span class="n">n_items</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">key_diff</span> <span class="o">=</span> <span class="n">key</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">key_start</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">key_diff</span><span class="p">)[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,),</span><span class="n">device</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">device</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">n_items</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,),</span><span class="n">device</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">device</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+    <span class="n">key_start</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">start</span><span class="p">,</span><span class="n">key_start</span><span class="p">,</span><span class="n">end</span><span class="p">])</span>
+    <span class="n">key_ids</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="n">key_start</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="n">key_ids</span><span class="p">,</span> <span class="n">key_start</span>
+
+<span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
+<span class="k">def</span> <span class="nf">resort_pairs</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">others</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]):</span>
+    <span class="n">keysort</span><span class="p">,</span> <span class="n">argsort</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="n">others</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span><span class="p">[</span><span class="n">argsort</span><span class="p">]</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">others</span><span class="p">]</span>
+    <span class="n">key_ids</span><span class="p">,</span> <span class="n">key_starts</span> <span class="o">=</span> <span class="n">get_id_and_starts</span><span class="p">(</span><span class="n">keysort</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">argsort</span><span class="p">,</span> <span class="n">key_ids</span><span class="p">,</span> <span class="n">key_starts</span><span class="p">,</span> <span class="n">keysort</span><span class="p">,</span> <span class="n">others</span>
+
+<span class="k">class</span> <span class="nc">_CacheEntry</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">cache</span><span class="p">):</span>
+        <span class="c1"># Cache key is stored this way because sometimes </span>
+        <span class="c1"># pytorch &#39;resurrects&#39; a Tensor from C++ to pytorch</span>
+        <span class="c1"># during an autograd calculation as a completely</span>
+        <span class="c1"># new pyobject, so id(key) is not a completely safe way</span>
+        <span class="c1"># to know if it&#39;s the same tensor.</span>
+        <span class="c1"># This effect seems to go away when tensor is cached</span>
+        <span class="c1"># (possibly because the pyobject is not garbage collected)</span>
+        <span class="c1"># But can we do better to ensure we have the exact same data</span>
+        <span class="c1"># as in the previous cache?</span>
+        <span class="c1"># This could pose a problem if, for example,</span>
+        <span class="c1"># we wrote new pairs in-place during MD and there</span>
+        <span class="c1"># happened to be the same number with a different structure.</span>
+        <span class="c1"># Explicitly checking that the key is exactly equal</span>
+        <span class="c1"># is problematic because it requires device synchronization</span>
+        <span class="c1"># in order to proceed in the interpreter.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache_key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">data_ptr</span><span class="p">(),</span> <span class="n">key</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">key</span><span class="o">.</span><span class="n">device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="n">cache</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">computed</span> <span class="o">=</span> <span class="kc">False</span>
+   
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="kc">False</span>    
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="ow">is</span> <span class="n">other</span><span class="o">.</span><span class="n">key</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_key</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">cache_key</span><span class="p">:</span>
+            <span class="c1"># For now raise an error since this feature is experimental.</span>
+            <span class="c1"># Most of the benefits seem to work from the `is` check.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span><span class="n">other</span><span class="o">.</span><span class="n">key</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Caching by key does not work! Please raise an issue.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span> 
+        <span class="k">return</span> <span class="kc">False</span>
+    
+    <span class="k">def</span> <span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
+            <span class="n">other</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)]</span>
+            <span class="k">return</span> <span class="n">other</span>
+        <span class="k">for</span> <span class="n">other</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
+            <span class="c1"># Expensive, but not as expensive as sorting + nonzero,</span>
+            <span class="c1"># which is also a blocking operation.</span>
+            <span class="c1"># Note that pytorch is smart enough not to generate </span>
+            <span class="c1"># a blocking call unless the actual memory needs to be</span>
+            <span class="c1"># checked, i.e. it will skip if arrays have different sizes.</span>
+            <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span><span class="n">other</span><span class="o">.</span><span class="n">key</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">other</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>    
+    
+    <span class="k">def</span> <span class="nf">compute_and_store</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">computed</span><span class="p">:</span>
+            <span class="c1"># This shouldn&#39;t happen! The guard is here because</span>
+            <span class="c1"># this code path could activate if someone calls this class in the</span>
+            <span class="c1"># wrong way from outside the clss.</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;A key that was marked computed was asked to be re-computed.&quot;</span><span class="p">)</span>
+        <span class="n">keysort</span><span class="p">,</span> <span class="n">argsort</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">key_ids</span><span class="p">,</span> <span class="n">key_starts</span> <span class="o">=</span> <span class="n">get_id_and_starts</span><span class="p">(</span><span class="n">keysort</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">argsort</span> <span class="o">=</span> <span class="n">argsort</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key_ids</span> <span class="o">=</span> <span class="n">key_ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key_starts</span> <span class="o">=</span> <span class="n">key_starts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">computed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">others</span><span class="p">):</span>
+        <span class="n">keysort</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">argsort</span><span class="p">]</span>
+        <span class="n">others</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">argsort</span><span class="p">]</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">others</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">argsort</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_ids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_starts</span><span class="p">,</span> <span class="n">keysort</span><span class="p">,</span> <span class="n">others</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">lookup_key</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">cache</span><span class="p">):</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">cache</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">entry</span><span class="o">.</span><span class="n">find</span><span class="p">()</span>
+
+<span class="n">N_CACHED_KEYS_PER_DEVICE</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="k">def</span> <span class="nf">_make_cache</span><span class="p">():</span>
+    <span class="n">deque</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="n">N_CACHED_KEYS_PER_DEVICE</span><span class="p">)</span>
+    <span class="n">lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">deque</span><span class="p">,</span> <span class="n">lock</span>
+<span class="c1"># Dict mapping device to key cache info</span>
+<span class="n">_CACHE_STORE</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="n">_make_cache</span><span class="p">)</span>
+
+<span class="n">CACHE_LOCK_MISSES</span> <span class="o">=</span> <span class="mi">0</span>
+<div class="viewcode-block" id="resort_pairs_cached"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.utils.html#hippynn.custom_kernels.utils.resort_pairs_cached">[docs]</a><span class="k">def</span> <span class="nf">resort_pairs_cached</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">others</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">CACHE_LOCK_MISSES</span>
+    <span class="n">deque</span><span class="p">,</span> <span class="n">lock</span> <span class="o">=</span> <span class="n">_CACHE_STORE</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">device</span><span class="p">]</span>
+    <span class="n">got_lock</span> <span class="o">=</span> <span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">(</span><span class="n">blocking</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">got_lock</span><span class="p">:</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="n">_CacheEntry</span><span class="o">.</span><span class="n">lookup_key</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">deque</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">entry</span><span class="o">.</span><span class="n">computed</span><span class="p">:</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">compute_and_store</span><span class="p">()</span>
+        <span class="n">lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">entry</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">others</span><span class="p">)</span>
+    <span class="n">CACHE_LOCK_MISSES</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">resort_pairs</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">others</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

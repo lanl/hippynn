@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.graphs.indextransformers.pairs &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.graphs.indextransformers.pairs</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.graphs.indextransformers.pairs</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Nodes for pair index state conversion</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">find_unique_relative</span>
+<span class="kn">from</span> <span class="nn">..indextypes</span> <span class="kn">import</span> <span class="n">register_index_transformer</span><span class="p">,</span> <span class="n">IdxType</span><span class="p">,</span> <span class="n">_debprint</span> <span class="k">as</span> <span class="n">idx_debprint</span>
+<span class="kn">from</span> <span class="nn">..nodes.base.node_functions</span> <span class="kn">import</span> <span class="n">NodeOperationError</span>
+<span class="kn">from</span> <span class="nn">..nodes.indexers</span> <span class="kn">import</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">OneHotEncoder</span>
+<span class="kn">from</span> <span class="nn">..nodes.inputs</span> <span class="kn">import</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">PositionsNode</span>
+<span class="kn">from</span> <span class="nn">..nodes.pairs</span> <span class="kn">import</span> <span class="n">PairReIndexer</span><span class="p">,</span> <span class="n">PairDeIndexer</span>
+<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.tags</span> <span class="kn">import</span> <span class="n">PairIndexer</span>
+
+
+<span class="c1"># TODO: Rewrite so it can use non-one-hot-encodings?</span>
+
+
+<div class="viewcode-block" id="idx_molatomatom_pair"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.pairs.html#hippynn.graphs.indextransformers.pairs.idx_molatomatom_pair">[docs]</a><span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtomAtom</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">idx_molatomatom_pair</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+    <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;auto-generating indexing for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+    <span class="n">funrel</span> <span class="o">=</span> <span class="n">find_unique_relative</span>  <span class="c1"># Abbreviation because we so many calls in this function.</span>
+    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">origin_node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># If we are auto-indexing in the model graph, it should be easy.</span>
+        <span class="n">pair_idx</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="n">pidxer</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="n">idx_debprint</span><span class="p">(</span><span class="s2">&quot;Using reindexer for &quot;</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># If we are auto-indexing in the loss graph, it gets a bit complicated.</span>
+
+        <span class="c1"># The species we link to will be the true version of species, that is, the node where</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">origin_node</span><span class="p">,</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span><span class="o">.</span><span class="n">true</span>
+        <span class="n">coordinates</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">origin_node</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span><span class="o">.</span><span class="n">true</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">NodeOperationError</span> <span class="k">as</span> <span class="n">ne</span><span class="p">:</span>
+            <span class="n">idx_debprint</span><span class="p">(</span><span class="s2">&quot;Creating new Padding indexer for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+            <span class="c1"># If this fails, something bad has happened -- the loss graph is trying to do</span>
+            <span class="c1"># something not defined by the model graph</span>
+            <span class="n">origin_encoder</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">species</span><span class="o">.</span><span class="n">origin_node</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="s2">&quot;one-hot&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">species</span><span class="p">,),</span> <span class="n">species_set</span><span class="o">=</span><span class="n">origin_encoder</span><span class="o">.</span><span class="n">species_set</span><span class="p">)</span>
+            <span class="c1"># If we can&#39;t find an encoder, let&#39;s assume we won&#39;t find an indexer</span>
+            <span class="n">pidxer</span> <span class="o">=</span> <span class="n">PaddingIndexer</span><span class="p">(</span><span class="s2">&quot;Auto(PaddingIndexer)&quot;</span><span class="p">,</span> <span class="n">encoder</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If we did find an encoder, look for an indexer and assume it exists</span>
+            <span class="n">pidxer</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">pair_idx</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">NodeOperationError</span> <span class="k">as</span> <span class="n">ne</span><span class="p">:</span>
+            <span class="n">idx_debprint</span><span class="p">(</span><span class="s2">&quot;Creating new Pair indexer for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+            <span class="c1"># If this fails, something bad has happened -- the loss graph is trying to do</span>
+            <span class="c1"># something not defined by the model graph</span>
+            <span class="n">origin_pairs</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">species</span><span class="o">.</span><span class="n">origin_node</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+
+            <span class="n">new_PairType</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">origin_pairs</span><span class="p">)</span>
+
+            <span class="n">pair_parents</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">coordinates</span><span class="p">,</span>
+                <span class="n">pidxer</span><span class="o">.</span><span class="n">nonblank</span><span class="p">,</span>
+                <span class="n">pidxer</span><span class="o">.</span><span class="n">real_atoms</span><span class="p">,</span>
+                <span class="n">pidxer</span><span class="o">.</span><span class="n">inv_real_atoms</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cell</span> <span class="o">=</span> <span class="n">origin_pairs</span><span class="o">.</span><span class="n">cells</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">pass</span>  <span class="c1"># The pair indexer does not use cells</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pair_parents</span> <span class="o">=</span> <span class="n">pair_parents</span><span class="p">,</span> <span class="o">*</span><span class="n">cell</span>
+
+            <span class="n">pair_idx</span> <span class="o">=</span> <span class="n">new_PairType</span><span class="p">(</span><span class="s2">&quot;Pairs&quot;</span><span class="p">,</span> <span class="n">pair_parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">origin_pairs</span><span class="o">.</span><span class="n">dist_hard_max</span><span class="p">)</span>
+
+    <span class="bp">cls</span> <span class="o">=</span> <span class="n">PairReIndexer</span>
+    <span class="n">parents</span> <span class="o">=</span> <span class="n">node</span><span class="p">,</span> <span class="n">pidxer</span><span class="o">.</span><span class="n">mol_index</span><span class="p">,</span> <span class="n">pidxer</span><span class="o">.</span><span class="n">atom_index</span><span class="p">,</span> <span class="n">pair_idx</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_idx</span><span class="o">.</span><span class="n">pair_second</span>
+    <span class="k">return</span> <span class="n">parents</span><span class="p">,</span> <span class="bp">cls</span></div>
+
+
+<div class="viewcode-block" id="idx_pair_molatomatom"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.pairs.html#hippynn.graphs.indextransformers.pairs.idx_pair_molatomatom">[docs]</a><span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtomAtom</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">idx_pair_molatomatom</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+    <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;auto-generating indexing for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">origin_node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pidx</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="n">padidx</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+
+        <span class="n">parents</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">node</span><span class="p">,</span>
+            <span class="n">padidx</span><span class="o">.</span><span class="n">mol_index</span><span class="p">,</span>
+            <span class="n">padidx</span><span class="o">.</span><span class="n">atom_index</span><span class="p">,</span>
+            <span class="n">padidx</span><span class="o">.</span><span class="n">n_molecules</span><span class="p">,</span>
+            <span class="n">padidx</span><span class="o">.</span><span class="n">n_atoms_max</span><span class="p">,</span>
+            <span class="n">pidx</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span>
+            <span class="n">pidx</span><span class="o">.</span><span class="n">pair_second</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">parents</span><span class="p">,</span> <span class="n">PairDeIndexer</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;De-indexing not yet implemented in loss graph&quot;</span><span class="p">)</span></div>
+        <span class="c1"># TODO: refactor out padding indexer creation for loss from the molatom-atom indexer, then re-use it here.</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

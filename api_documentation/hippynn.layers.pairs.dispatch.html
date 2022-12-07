@@ -53,7 +53,21 @@
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.layers.html">layers package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="hippynn.layers.pairs.html">pairs package</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.analysis.html">analysis module</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">dispatch module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">dispatch module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.NPNeighbors"><code class="docutils literal notranslate"><span class="pre">NPNeighbors</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.NPNeighbors.compute_one"><code class="docutils literal notranslate"><span class="pre">NPNeighbors.compute_one()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.NPNeighbors.training"><code class="docutils literal notranslate"><span class="pre">NPNeighbors.training</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.TorchNeighbors"><code class="docutils literal notranslate"><span class="pre">TorchNeighbors</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.TorchNeighbors.compute_one"><code class="docutils literal notranslate"><span class="pre">TorchNeighbors.compute_one()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.TorchNeighbors.training"><code class="docutils literal notranslate"><span class="pre">TorchNeighbors.training</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.neighbor_list_np"><code class="docutils literal notranslate"><span class="pre">neighbor_list_np()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.wrap_points_np"><code class="docutils literal notranslate"><span class="pre">wrap_points_np()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.indexing.html">indexing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.open.html">open module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.periodic.html">periodic module</a></li>
@@ -110,6 +124,49 @@
   <div class="section" id="dispatch-module">
 <h1>dispatch module<a class="headerlink" href="#dispatch-module" title="Permalink to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.layers.pairs.dispatch</span></code> module.</p>
+<span class="target" id="module-hippynn.layers.pairs.dispatch"></span><p>System-by-system pair finders</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.NPNeighbors">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NPNeighbors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#NPNeighbors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.NPNeighbors" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_DispatchNeighbors</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.NPNeighbors.compute_one">
+<span class="sig-name descname"><span class="pre">compute_one</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#NPNeighbors.compute_one"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.NPNeighbors.compute_one" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.NPNeighbors.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#hippynn.layers.pairs.dispatch.NPNeighbors.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.TorchNeighbors">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TorchNeighbors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#TorchNeighbors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.TorchNeighbors" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_DispatchNeighbors</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.TorchNeighbors.compute_one">
+<span class="sig-name descname"><span class="pre">compute_one</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#TorchNeighbors.compute_one"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.TorchNeighbors.compute_one" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.TorchNeighbors.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#hippynn.layers.pairs.dispatch.TorchNeighbors.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.neighbor_list_np">
+<span class="sig-name descname"><span class="pre">neighbor_list_np</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#neighbor_list_np"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.neighbor_list_np" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.wrap_points_np">
+<span class="sig-name descname"><span class="pre">wrap_points_np</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_cell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#wrap_points_np"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.wrap_points_np" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </div>
 
 
