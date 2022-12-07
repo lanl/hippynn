@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Units in hippynn &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Custom Kernels" href="ckernels.html" />
+    <link rel="prev" title="Model and Loss Graphs" href="loss_graph.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">User Guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="features.html">hippynn Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concepts.html">hippynn Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="databases.html">Databases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="loss_graph.html">Model and Loss Graphs</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Units in hippynn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ckernels.html">Custom Kernels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="settings.html">Library Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="custom_nodes.html">Creating Custom Node Types</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">User Guide</a></li>
+      <li class="breadcrumb-item active">Units in hippynn</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/user_guide/units.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="loss_graph.html" class="btn btn-neutral float-left" title="Model and Loss Graphs" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ckernels.html" class="btn btn-neutral float-right" title="Custom Kernels" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="units-in-hippynn">
+<h1>Units in hippynn<a class="headerlink" href="#units-in-hippynn" title="Permalink to this heading"></a></h1>
+<p>For the most part, hippynn is designed to operate <em>transparently</em> with
+respect to units, meaning that values that have units should be specified
+in the units of the dataset that is being examined.</p>
+<p>The primary example of this is the sensitivity functions. Network hyperparameters
+often involve a hard distance cutoff for local interactions. It’s natural to ask:
+what units does that cutoff parameter need to be in? What units should you put
+your data in?</p>
+<p>The philosophy of unit transparency means that the input units in a dataset
+should be the same as the units in the hyperparameters, but which units you
+use are not in themselves important.</p>
+<p>However, there are still effects in training that can be relative to the
+unit system of choice. This is because the value of network outputs
+has an intrinsic scale tied to the choice of weight initialization
+and activation function. For example, if you want to predict a feature whose typical
+values are very small, say on order <span class="math notranslate nohighlight">\(10^{-4}\)</span>, this will likely lead to a need for
+weights that are numerically much smaller than the initial weights in the network.
+This can be alleviated in two ways. One is to just modify the database to work with a
+different unit scale, such that the prediction target is order one. Another is
+to just make a new node which incorporates the effective scale into the prediction:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.graphs</span> <span class="kn">import</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">networks</span><span class="p">,</span> <span class="n">targets</span>
+<span class="n">species</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">SpeciesNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;Z&quot;</span><span class="p">)</span>
+<span class="n">positions</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">PositionsNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;R&quot;</span><span class="p">)</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">networks</span><span class="o">.</span><span class="n">Hipnn</span><span class="p">(</span><span class="s2">&quot;hipnn_model&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">positions</span><span class="p">),</span> <span class="n">module_kwargs</span> <span class="o">=</span> <span class="n">network_params</span><span class="p">)</span>
+<span class="n">hcharge</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">HChargeNode</span><span class="p">(</span><span class="s2">&quot;hcharge&quot;</span><span class="p">,</span><span class="n">network</span><span class="p">)</span>
+<span class="n">scaled_charges</span> <span class="o">=</span> <span class="mf">1e-4</span> <span class="o">*</span> <span class="n">hcharge</span><span class="o">.</span><span class="n">atom_charges</span>
+<span class="n">scaled_charges</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="s2">&quot;charge&quot;</span>
+</pre></div>
+</div>
+<p>This model will thus not need to have very small network weights to make very small
+predictions.</p>
+<p>The other way that units can play a role is in the construction of the loss function.
+For example, with very small target values, it may be possible for
+the Mean Squared Error to be far smaller than a regularization term. As such
+it is called for to weight the various terms going into the loss function so that they
+contribute to the loss in the desired manner; for example, one often wants regularization
+terms to be a small component of the total loss. When training to multiple targets,
+one usually wants them to contribute, in the final trained model, roughly equally
+to the total loss.</p>
+<p>Similar comments, but reversed, play a role if your targets have very large values.</p>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="loss_graph.html" class="btn btn-neutral float-left" title="Model and Loss Graphs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ckernels.html" class="btn btn-neutral float-right" title="Custom Kernels" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

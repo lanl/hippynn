@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Restarting training &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ASE Calculators" href="ase_calculator.html" />
+    <link rel="prev" title="Force Training" href="forces.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="minimal_workflow.html">Minimal Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html">Controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="predictor.html">Predictor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="periodic.html">Periodic Boundary Conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="forces.html">Force Training</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Restarting training</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#simple-restart">Simple restart</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cross-device-restart">Cross-device restart</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#advanced-details">Advanced Details</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ase_calculator.html">ASE Calculators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mliap_unified.html">LAMMPS interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
+      <li class="breadcrumb-item active">Restarting training</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/restarting.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="forces.html" class="btn btn-neutral float-left" title="Force Training" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ase_calculator.html" class="btn btn-neutral float-right" title="ASE Calculators" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="restarting-training">
+<h1>Restarting training<a class="headerlink" href="#restarting-training" title="Permalink to this heading"></a></h1>
+<p>You may want to restart training from a previous state, e.g., due to job length
+constraints on HPC systems.</p>
+<p>By default, hippynn saves checkpoint information for the best model found
+so far as measured by validation performance.</p>
+<p>The checkpoint contains the training modules, the experiment controller, and
+the metrics of the experiment so far. This can be seen by breaking down
+<code class="xref py py-func docutils literal notranslate"><span class="pre">setup_and_train()</span></code> into its component steps,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">setup_training()</span></code>, and <code class="xref py py-func docutils literal notranslate"><span class="pre">train_model()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.experiment</span> <span class="kn">import</span> <span class="n">setup_training</span><span class="p">,</span> <span class="n">train_model</span>
+<span class="n">training_modules</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">=</span> <span class="n">setup_training</span><span class="p">(</span>
+    <span class="n">training_modules</span><span class="o">=</span><span class="n">training_modules</span><span class="p">,</span>
+    <span class="n">setup_params</span><span class="o">=</span><span class="n">experiment_params</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">train_model</span><span class="p">(</span>
+    <span class="n">training_modules</span><span class="p">,</span>
+    <span class="n">database</span><span class="p">,</span>
+    <span class="n">controller</span><span class="p">,</span>
+    <span class="n">metrics</span><span class="p">,</span>
+    <span class="n">callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">batch_callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="simple-restart">
+<h2>Simple restart<a class="headerlink" href="#simple-restart" title="Permalink to this heading"></a></h2>
+<p>To restart training later, you can use the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.experiment.serialization</span> <span class="kn">import</span> <span class="n">load_checkpoint</span>
+<span class="n">check</span> <span class="o">=</span> <span class="n">load_checkpoint</span><span class="p">(</span><span class="s2">&quot;./experiment_structure.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;./best_checkpoint.pt&quot;</span><span class="p">)</span>
+<span class="n">train_model</span><span class="p">(</span><span class="o">**</span><span class="n">check</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or to use the default filenames and load from the current directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.experiment.serialization</span> <span class="kn">import</span> <span class="n">load_checkpoint_from_cwd</span>
+<span class="n">check</span> <span class="o">=</span> <span class="n">load_checkpoint_from_cwd</span><span class="p">()</span>
+<span class="n">train_model</span><span class="p">(</span><span class="o">**</span><span class="n">check</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If all you want to do is use a previously trained model, here is how to load the model only:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.experiment.serialization</span> <span class="kn">import</span> <span class="n">load_model_from_cwd</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">load_model_from_cwd</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The returned <code class="docutils literal notranslate"><span class="pre">model</span></code> object will have the original model with the best
+parameters loaded. This can then be used with, for example, the <a class="reference internal" href="predictor.html"><span class="doc">Predictor</span></a>.</p>
+</div>
+<div class="section" id="cross-device-restart">
+<h2>Cross-device restart<a class="headerlink" href="#cross-device-restart" title="Permalink to this heading"></a></h2>
+<p>If a model was trained on a device that is no longer accessible (due to change
+of configuration or loading on a different computer) you may want to load a checkpoint
+to a different device. The standard pytorch argument <code class="docutils literal notranslate"><span class="pre">map_device</span></code> is a bit tricky to
+handle in this case, as not all tensors in the checkpoint still belong on the device.
+If this keyword is specified, <code class="docutils literal notranslate"><span class="pre">hippynn</span></code> will attempt to automatically move the correct
+tensors to the correct device. To perform cross-device loading, use the <code class="docutils literal notranslate"><span class="pre">model_device</span></code>
+argument to <code class="xref py py-func docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code>
+or <code class="xref py py-func docutils literal notranslate"><span class="pre">load_checkpoint()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.experiment.serialization</span> <span class="kn">import</span> <span class="n">load_checkpoint_from_cwd</span>
+<span class="n">check</span> <span class="o">=</span> <span class="n">load_checkpoint_from_cwd</span><span class="p">(</span><span class="n">model_device</span><span class="o">=</span><span class="s1">&#39;cuda:0&#39;</span><span class="p">)</span>
+<span class="n">train_model</span><span class="p">(</span><span class="o">**</span><span class="n">check</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The string ‘auto’ can be provided to transfer to the default device.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To avoid cross-device restarts as much as you can, use the
+environment variable <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code> before importing <code class="docutils literal notranslate"><span class="pre">hippynn</span></code>.
+In this case, if, for example, only 1 GPU is used, it will always be
+labeled as 0, no matter physically which device is used.</p>
+</div>
+</div>
+<div class="section" id="advanced-details">
+<h2>Advanced Details<a class="headerlink" href="#advanced-details" title="Permalink to this heading"></a></h2>
+<ul>
+<li><p>The checkpoint file contains the torch RNG state, and restoring a
+checkpoint resets the torch RNG.</p></li>
+<li><p>If your database is not <code class="xref py py-class docutils literal notranslate"><span class="pre">Restartable</span></code>, you
+will have to explicitly reload it and pass it to <code class="docutils literal notranslate"><span class="pre">train_model</span></code>, as well.
+If your database is restartable, any pre-processing of the database is not recorded
+in the checkpoint file. Thus any pre-processing steps such as moving the database to
+the GPU need to be performed before activating <code class="docutils literal notranslate"><span class="pre">train_model</span></code>.
+The dictionary containing the database information is stored as <code class="docutils literal notranslate"><span class="pre">training_modules.evaluator.db_info</span></code>,
+so you can use this dictionary to easily reload your database.</p></li>
+<li><p>hippynn does not include support for serializing and restarting callback objects; to restart
+a training that involves callbacks, the callbacks will have to be retrieved using user code.</p></li>
+<li><p>It is not a good idea to wholesale transfer tensors in a checkpoint
+off of the CPU using a keyword such as <code class="docutils literal notranslate"><span class="pre">map_location=torch.device(0)</span></code>.
+This will map all tensors to GPU 0, and breaks the RNG which only supports a CPU
+tensor. Doing so, you will see errors like <code class="docutils literal notranslate"><span class="pre">TypeError:</span> <span class="pre">RNG</span> <span class="pre">state</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">a</span> <span class="pre">torch.ByteTensor</span></code>.
+Moving everything to CPU with <code class="docutils literal notranslate"><span class="pre">map_location=&quot;cpu&quot;</span></code> always works.
+If <code class="docutils literal notranslate"><span class="pre">map_location</span></code> is used, and the value is anything other than <code class="docutils literal notranslate"><span class="pre">None</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;cpu&quot;</span></code>,
+you are likely to get an error during loading or training.
+The argument will directly be passed to <code class="docutils literal notranslate"><span class="pre">torch.load</span></code>.</p>
+<p>For more details of this option, check <a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.load.html">torch load docs</a>.</p>
+</li>
+<li><p>Here are a list of objects and their final device after loading.</p>
+<table class="colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 57%" />
+<col style="width: 43%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Objects</p></th>
+<th class="head"><p>Destinations</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">training_modules.model</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">model_device</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">training_modules.loss</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">model_device</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">training_modules.evaluator.loss</span></code></p></td>
+<td><p>CPU</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">controller.optimizer</span></code></p></td>
+<td><p>Some on <code class="docutils literal notranslate"><span class="pre">model_device</span></code> and some on CPU,
+depending on details of the implementation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">database</span></code></p></td>
+<td><p>CPU</p></td>
+</tr>
+<tr class="row-odd"><td><p>Not mentioned</p></td>
+<td><p>CPU</p></td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="forces.html" class="btn btn-neutral float-left" title="Force Training" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ase_calculator.html" class="btn btn-neutral float-right" title="ASE Calculators" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plotting &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Predictor" href="predictor.html" />
+    <link rel="prev" title="Controller" href="controller.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="minimal_workflow.html">Minimal Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html">Controller</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="predictor.html">Predictor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="periodic.html">Periodic Boundary Conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="forces.html">Force Training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restarting.html">Restarting training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ase_calculator.html">ASE Calculators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mliap_unified.html">LAMMPS interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
+      <li class="breadcrumb-item active">Plotting</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/plotting.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="controller.html" class="btn btn-neutral float-left" title="Controller" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="predictor.html" class="btn btn-neutral float-right" title="Predictor" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="plotting">
+<h1>Plotting<a class="headerlink" href="#plotting" title="Permalink to this heading"></a></h1>
+<p>How to make a plotmaker.</p>
+<p>Let’s assume you have a <code class="docutils literal notranslate"><span class="pre">molecule_energy</span></code> node that you are training to.
+A simple plot maker would look like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn</span> <span class="kn">import</span> <span class="n">plotting</span>
+
+<span class="n">plot_maker</span> <span class="o">=</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">PlotMaker</span><span class="p">(</span>
+    <span class="n">plotting</span><span class="o">.</span><span class="n">Hist2D</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">molecule_energy</span><span class="p">,</span> <span class="n">saved</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">shown</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">plot_every</span><span class="o">=</span><span class="mi">10</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">hippynn.experiment</span> <span class="kn">import</span> <span class="n">assemble_for_training</span>
+
+<span class="n">training_modules</span><span class="p">,</span><span class="n">db_info</span> <span class="o">=</span> <span class="n">assemble_for_training</span><span class="p">(</span><span class="n">train_loss</span><span class="p">,</span> <span class="n">validation_losses</span><span class="p">,</span> <span class="n">plot_maker</span><span class="o">=</span><span class="n">plot_maker</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The plot maker is thus passed to <cite>assemble_for_training</cite> and attached to the model evaluator.</p>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="controller.html" class="btn btn-neutral float-left" title="Controller" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="predictor.html" class="btn btn-neutral float-right" title="Predictor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

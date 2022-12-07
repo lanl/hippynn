@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minimal Workflow &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Controller" href="controller.html" />
+    <link rel="prev" title="Examples" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Minimal Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html">Controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="predictor.html">Predictor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="periodic.html">Periodic Boundary Conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="forces.html">Force Training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restarting.html">Restarting training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ase_calculator.html">ASE Calculators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mliap_unified.html">LAMMPS interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
+      <li class="breadcrumb-item active">Minimal Workflow</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/minimal_workflow.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="index.html" class="btn btn-neutral float-left" title="Examples" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="controller.html" class="btn btn-neutral float-right" title="Controller" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="minimal-workflow">
+<h1>Minimal Workflow<a class="headerlink" href="#minimal-workflow" title="Permalink to this heading"></a></h1>
+<p>Here’s what you need to do to get going.</p>
+<p>First, import the module:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">hippynn</span>
+</pre></div>
+</div>
+<p>Next, let’s put ourselves in a directory for our first experiment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">netname</span> <span class="o">=</span> <span class="s2">&quot;my_first_hippynn_model&quot;</span>
+<span class="n">dirname</span> <span class="o">=</span> <span class="n">netname</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dirname</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, let’s create some nodes. We start with input nodes for the species and positions:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.graphs</span> <span class="kn">import</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">networks</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">physics</span><span class="p">,</span> <span class="n">loss</span>
+
+<span class="n">species</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">SpeciesNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;Z&quot;</span><span class="p">)</span>
+<span class="n">positions</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">PositionsNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;R&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">db_name</span></code> is a key which will be used to find the corresponding information in the database we train or predict on.s</p>
+<p>From here, we want to build a neural network. HIPNN has several hyperparameters that should be defined.</p>
+<p>These include</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>The Z-values of the possible species this network can process.</dt><dd><p>(Note, <cite>0</cite> should be included, but entries with a Z value of 0 are treated as “blank atoms”)s</p>
+</dd>
+</dl>
+</li>
+<li><p>The width of the network, <code class="docutils literal notranslate"><span class="pre">n_features</span></code></p></li>
+<li><p>The number of sensitivities functions <code class="docutils literal notranslate"><span class="pre">n_sensitivities</span></code></p></li>
+<li><p>The distance parameters for the start of the sensitivity peaks, the end, and the hard cutoff function.</p></li>
+<li><p>The number of interaction blocks</p></li>
+<li><p>The number of atom layers in each interaction block</p></li>
+</ul>
+<p>We’ll put them in a dictionary:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;possible_species&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">16</span><span class="p">],</span>
+    <span class="s1">&#39;n_features&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="s2">&quot;n_sensitivities&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="s2">&quot;dist_soft_min&quot;</span><span class="p">:</span> <span class="mf">0.85</span><span class="p">,</span>
+    <span class="s2">&quot;dist_soft_max&quot;</span><span class="p">:</span> <span class="mf">5.</span><span class="p">,</span>
+    <span class="s2">&quot;dist_hard_max&quot;</span><span class="p">:</span> <span class="mf">7.</span><span class="p">,</span>
+    <span class="s2">&quot;n_interaction_layers&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">&quot;n_atom_layers&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>We then create a node for our network. The node takes the species and positions, and calculates features.</p>
+<p>By passing the node module_kwargs, we are sending the network hyperparameters to the underlying pytorch module:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">networks</span><span class="o">.</span><span class="n">Hipnn</span><span class="p">(</span><span class="s2">&quot;hipnn_model&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">positions</span><span class="p">),</span> <span class="n">module_kwargs</span> <span class="o">=</span> <span class="n">network_params</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>From there, we want to define some targets for regression. The <code class="docutils literal notranslate"><span class="pre">HEnergyNode</span></code> takes features on individual atoms,
+uses them to predict a local quantity, and sums them to create a model energy for the whole system:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">henergy</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">HEnergyNode</span><span class="p">(</span><span class="s2">&quot;HEnergy&quot;</span><span class="p">,</span><span class="n">network</span><span class="p">,</span><span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note again that we have specified the db_name. <code class="docutils literal notranslate"><span class="pre">henergy</span></code> is an example of a <code class="docutils literal notranslate"><span class="pre">MultiNode</span></code> that has several output attributes. The main output is the energy,
+but you can access other children, such as the hierarchicality parameter:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hierarchicality</span> <span class="o">=</span> <span class="n">henergy</span><span class="o">.</span><span class="n">hierarchicality</span>
+</pre></div>
+</div>
+<p>Having defined these things, let’s now define a loss function. The simplest way to do so is with the <cite>of_node</cite> method,
+which creates entries for the true and predicted quantities in the database and compares them:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rmse_energy</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">MSELoss</span><span class="o">.</span><span class="n">of_node</span><span class="p">(</span><span class="n">henergy</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">mae_energy</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">MAELoss</span><span class="o">.</span><span class="n">of_node</span><span class="p">(</span><span class="n">henergy</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The hierarchicality is an unsupervised quantity, so a loss term there will only depend on the predicted value:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbar</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">Mean</span><span class="o">.</span><span class="n">of_node</span><span class="p">(</span><span class="n">hierarchicality</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can combine loss nodes using the regular python syntax for algebra:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">loss_error</span> <span class="o">=</span> <span class="p">(</span><span class="n">rmse_energy</span> <span class="o">+</span> <span class="n">mae_energy</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">loss_error</span> <span class="o">+</span> <span class="n">rbar</span>
+</pre></div>
+</div>
+<p>Next we’ll define a set of metrics that are tracked between training epochs, as a dictionary.
+The keys will define the name used when printing the losses, and the values are the nodes we associate to those names:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">validation_losses</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;T-RMSE&quot;</span>      <span class="p">:</span> <span class="n">rmse_energy</span><span class="p">,</span>
+    <span class="s2">&quot;T-MAE&quot;</span>       <span class="p">:</span> <span class="n">mae_energy</span><span class="p">,</span>
+    <span class="s2">&quot;T-Hier&quot;</span>      <span class="p">:</span> <span class="n">rbar</span><span class="p">,</span>
+    <span class="s2">&quot;Error Loss&quot;</span>  <span class="p">:</span> <span class="n">loss_error</span><span class="p">,</span>
+    <span class="s2">&quot;Loss&quot;</span>        <span class="p">:</span> <span class="n">loss</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>You can put as few or as many metrics as you like.</p>
+<p>Having defined a graph structure for the problem, we can tell hippynn to assemble this graph for training:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">training_modules</span><span class="p">,</span> <span class="n">db_info</span> <span class="o">=</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">assemble_for_training</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">validation_losses</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The training modules consist of three things:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>The model, a <code class="docutils literal notranslate"><span class="pre">GraphModule</span></code> that takes the inputs and maps them to predictions</p></li>
+<li><p>The loss, a <code class="docutils literal notranslate"><span class="pre">GraphModule</span></code> for taking predictions and true values and calculating the loss</p></li>
+<li><p>A model evaluator, which computes all of the validation losses, also from the predictions and true values.</p></li>
+</ol>
+</div></blockquote>
+<p>The last thing is the <cite>db_info</cite>, which describes the quantities needed in the database to train to this loss.</p>
+<p>It’s a simple dictionary containing two lists, the inputs to the model and the targets, or inputs to the loss.</p>
+<p>Now we’ll load a database:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">database</span> <span class="o">=</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">databases</span><span class="o">.</span><span class="n">DirectoryDatabase</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=&lt;</span><span class="n">Something</span><span class="o">&gt;</span><span class="p">,</span>     <span class="c1"># Prefix for arrays in the directory.</span>
+    <span class="n">directory</span><span class="o">=&lt;</span><span class="n">Somewhere</span><span class="o">&gt;</span> <span class="c1"># Location where the arrays are stored.</span>
+    <span class="n">test_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># Fraction or number of samples to test on</span>
+    <span class="n">valid_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="c1"># Fraction or number of samples to validate on</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">2001</span><span class="p">,</span>      <span class="c1"># Random seed for spliting data</span>
+    <span class="o">**</span> <span class="n">db_info</span>      <span class="c1"># Adds the inputs and targets db_namesnames from the model as things to load</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Now that we have a database and a model, we can fit the non-interacting energies using the training set in the database:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.pretraining</span> <span class="kn">import</span> <span class="n">set_e0_values</span>
+<span class="n">set_e0_values</span><span class="p">(</span><span class="n">henergy</span><span class="p">,</span><span class="n">database</span><span class="p">,</span><span class="n">trainable_after</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We’re almost there. We specify the training procedure with <code class="docutils literal notranslate"><span class="pre">SetupParams</span></code>. We need to have</p>
+<ul class="simple">
+<li><p>The stopping_key used for early stopping</p></li>
+<li><p>The batch size for training</p></li>
+<li><p>The optimizer to use</p></li>
+<li><p>The learning rate</p></li>
+<li><p>The maximum number of epochs to train.</p></li>
+</ul>
+<p>Putting it together:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Parameters describing the training procedure.</span>
+<span class="kn">from</span> <span class="nn">hippynn.experiment</span> <span class="kn">import</span> <span class="n">SetupParams</span><span class="p">,</span><span class="n">setup_and_train</span>
+
+<span class="n">experiment_params</span> <span class="o">=</span> <span class="n">SetupParams</span><span class="p">(</span>
+    <span class="n">stopping_key</span><span class="o">=</span><span class="s2">&quot;Error Loss&quot;</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+    <span class="n">optimizer</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">,</span>
+    <span class="n">max_epochs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Now that these are defined, we are good to begin training:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">setup_and_train</span><span class="p">(</span><span class="n">training_modules</span><span class="o">=</span><span class="n">training_modules</span><span class="p">,</span>
+                <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
+                <span class="n">setup_params</span><span class="o">=</span><span class="n">experiment_params</span><span class="p">,</span>
+                <span class="p">)</span>
+</pre></div>
+</div>
+<p>When training completes, we can use the model to make predictions.</p>
+<p>The simplest form will be to predict everything that the model needs to
+compute the loss function. To do this we can use the <cite>from_graph</cite> method
+of the predictor, and the <cite>apply_to_db</cite> method to apply it to a database.</p>
+<p>The code looks something like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pred</span> <span class="o">=</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">Predictor</span><span class="o">.</span><span class="n">from_graph</span><span class="p">(</span><span class="n">training_modules</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+<span class="n">outputs</span> <span class="o">=</span> <span class="n">pred</span><span class="o">.</span><span class="n">apply_to_database</span><span class="p">(</span><span class="n">database</span><span class="p">)</span>
+
+<span class="c1"># The dictionary for the test split</span>
+<span class="n">test_outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">]</span>
+
+<span class="c1"># Get outputs for specific nodes:</span>
+<span class="n">test_hier_predicted</span> <span class="o">=</span> <span class="n">test_outputs</span><span class="p">[</span><span class="n">hierarchicality</span><span class="p">]</span>
+<span class="n">test_energy_predicted</span> <span class="o">=</span> <span class="n">test_outputs</span><span class="p">[</span><span class="n">molecule_energy</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Putting this together, we get (more or less) the <code class="docutils literal notranslate"><span class="pre">/examples/barebones.py</span></code> file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="c1"># Setup pytorch things</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">set_default_dtype</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">hippynn</span>
+
+<span class="n">netname</span> <span class="o">=</span> <span class="s2">&quot;TEST_BAREBONES_SCRIPT&quot;</span>
+
+<span class="c1"># Hyperparameters for the network</span>
+<span class="c1"># These are set deliberately small so that you can easily run the example on a laptop or similar.</span>
+<span class="n">network_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;possible_species&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">],</span>  <span class="c1"># Z values of the elements in QM7</span>
+    <span class="s2">&quot;n_features&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>  <span class="c1"># Number of neurons at each layer</span>
+    <span class="s2">&quot;n_sensitivities&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>  <span class="c1"># Number of sensitivity functions in an interaction layer</span>
+    <span class="s2">&quot;dist_soft_min&quot;</span><span class="p">:</span> <span class="mf">1.6</span><span class="p">,</span>  <span class="c1"># qm7 is in Bohr!</span>
+    <span class="s2">&quot;dist_soft_max&quot;</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">,</span>
+    <span class="s2">&quot;dist_hard_max&quot;</span><span class="p">:</span> <span class="mf">12.5</span><span class="p">,</span>
+    <span class="s2">&quot;n_interaction_layers&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># Number of interaction blocks</span>
+    <span class="s2">&quot;n_atom_layers&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>  <span class="c1"># Number of atom layers in an interaction block</span>
+<span class="p">}</span>
+
+<span class="c1"># Define a model</span>
+<span class="kn">from</span> <span class="nn">hippynn.graphs</span> <span class="kn">import</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">networks</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">physics</span>
+
+<span class="n">species</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">SpeciesNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;Z&quot;</span><span class="p">)</span>
+<span class="n">positions</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">PositionsNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;R&quot;</span><span class="p">)</span>
+
+<span class="n">network</span> <span class="o">=</span> <span class="n">networks</span><span class="o">.</span><span class="n">Hipnn</span><span class="p">(</span><span class="s2">&quot;hipnn_model&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">positions</span><span class="p">),</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="n">network_params</span><span class="p">)</span>
+<span class="n">henergy</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">HEnergyNode</span><span class="p">(</span><span class="s2">&quot;HEnergy&quot;</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+<span class="c1"># hierarchicality = henergy.hierarchicality</span>
+
+<span class="c1"># define loss quantities</span>
+<span class="kn">from</span> <span class="nn">hippynn.graphs</span> <span class="kn">import</span> <span class="n">loss</span>
+
+<span class="n">mse_energy</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">MSELoss</span><span class="o">.</span><span class="n">of_node</span><span class="p">(</span><span class="n">henergy</span><span class="p">)</span>
+<span class="n">mae_energy</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">MAELoss</span><span class="o">.</span><span class="n">of_node</span><span class="p">(</span><span class="n">henergy</span><span class="p">)</span>
+<span class="n">rmse_energy</span> <span class="o">=</span> <span class="n">mse_energy</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Validation losses are what we check on the data between epochs -- we can only train to</span>
+<span class="c1"># a single loss, but we can check other metrics too to better understand how the model is training.</span>
+<span class="c1"># There will also be plots of these things over time when training completes.</span>
+<span class="n">validation_losses</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;RMSE&quot;</span><span class="p">:</span> <span class="n">rmse_energy</span><span class="p">,</span>
+    <span class="s2">&quot;MAE&quot;</span><span class="p">:</span> <span class="n">mae_energy</span><span class="p">,</span>
+    <span class="s2">&quot;MSE&quot;</span><span class="p">:</span> <span class="n">mse_energy</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># This piece of code glues the stuff together as a pytorch model,</span>
+<span class="c1"># dropping things that are irrelevant for the losses defined.</span>
+<span class="n">training_modules</span><span class="p">,</span> <span class="n">db_info</span> <span class="o">=</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">assemble_for_training</span><span class="p">(</span><span class="n">mse_energy</span><span class="p">,</span> <span class="n">validation_losses</span><span class="p">)</span>
+
+<span class="c1"># Go to a directory for the model.</span>
+<span class="c1"># hippynn will save training files in the current working directory.</span>
+<span class="k">with</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">active_directory</span><span class="p">(</span><span class="n">netname</span><span class="p">):</span>
+    <span class="c1"># Log the output of python to `training_log.txt`</span>
+    <span class="k">with</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">log_terminal</span><span class="p">(</span><span class="s2">&quot;training_log.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;wt&quot;</span><span class="p">):</span>
+        <span class="n">database</span> <span class="o">=</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">databases</span><span class="o">.</span><span class="n">DirectoryDatabase</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;data-qm7&quot;</span><span class="p">,</span>  <span class="c1"># Prefix for arrays in the directory</span>
+            <span class="n">directory</span><span class="o">=</span><span class="s2">&quot;../../../datasets/qm7_processed&quot;</span><span class="p">,</span>
+            <span class="n">test_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># Fraction or number of samples to test on</span>
+            <span class="n">valid_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># Fraction or number of samples to validate on</span>
+            <span class="n">seed</span><span class="o">=</span><span class="mi">2001</span><span class="p">,</span>  <span class="c1"># Random seed for splitting data</span>
+            <span class="o">**</span><span class="n">db_info</span><span class="p">,</span>  <span class="c1"># Adds the inputs and targets db_names from the model as things to load</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Now that we have a database and a model, we can</span>
+        <span class="c1"># Fit the non-interacting energies by examining the database.</span>
+        <span class="c1"># This tends to stabilize training a lot.</span>
+        <span class="kn">from</span> <span class="nn">hippynn.pretraining</span> <span class="kn">import</span> <span class="n">set_e0_values</span>
+
+        <span class="n">set_e0_values</span><span class="p">(</span><span class="n">henergy</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">trainable_after</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Parameters describing the training procedure.</span>
+        <span class="kn">from</span> <span class="nn">hippynn.experiment</span> <span class="kn">import</span> <span class="n">setup_and_train</span>
+
+        <span class="n">experiment_params</span> <span class="o">=</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">SetupParams</span><span class="p">(</span>
+            <span class="n">stopping_key</span><span class="o">=</span><span class="s2">&quot;MSE&quot;</span><span class="p">,</span>  <span class="c1"># The name in the validation_losses dictionary.</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+            <span class="n">optimizer</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">,</span>
+            <span class="n">max_epochs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+            <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">setup_and_train</span><span class="p">(</span>
+            <span class="n">training_modules</span><span class="o">=</span><span class="n">training_modules</span><span class="p">,</span>
+            <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
+            <span class="n">setup_params</span><span class="o">=</span><span class="n">experiment_params</span><span class="p">,</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="controller.html" class="btn btn-neutral float-right" title="Controller" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

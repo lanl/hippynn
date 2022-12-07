@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Periodic Boundary Conditions &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Force Training" href="forces.html" />
+    <link rel="prev" title="Predictor" href="predictor.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="minimal_workflow.html">Minimal Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html">Controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="predictor.html">Predictor</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Periodic Boundary Conditions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dynamic-pair-finder">Dynamic Pair Finder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#caching-pre-computed-pairs">Caching Pre-computed Pairs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-s-not-yet-supported">What’s not yet supported</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="forces.html">Force Training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restarting.html">Restarting training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ase_calculator.html">ASE Calculators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mliap_unified.html">LAMMPS interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
+      <li class="breadcrumb-item active">Periodic Boundary Conditions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/periodic.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="predictor.html" class="btn btn-neutral float-left" title="Predictor" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="forces.html" class="btn btn-neutral float-right" title="Force Training" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="periodic-boundary-conditions">
+<h1>Periodic Boundary Conditions<a class="headerlink" href="#periodic-boundary-conditions" title="Permalink to this heading"></a></h1>
+<p>Periodic boundary conditions require a cell node. Triclinic cells are fully supported.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">species</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">SpeciesNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">)</span>
+<span class="n">positions</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">PositionsNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;coordinates&quot;</span><span class="p">)</span>
+<span class="n">cell</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">CellNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;cell&quot;</span><span class="p">)</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">networks</span><span class="o">.</span><span class="n">Hipnn</span><span class="p">(</span><span class="s2">&quot;HIPNN&quot;</span><span class="p">,</span>
+                        <span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span><span class="n">cell</span><span class="p">),</span>
+                         <span class="n">periodic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">module_kwargs</span> <span class="o">=</span> <span class="n">network_params</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will Generate a <code class="xref py py-class docutils literal notranslate"><span class="pre">PeriodicPairIndexer</span></code>
+that searches image cells surrounding the data. It includes wrapping of coordinates
+to within the unit cell. Because the nearest images (27 replicates of the cell at
+search radius 1) are numerous, periodic pair finding is noticeably more costly in terms of
+memory and time than open boundary conditions. The less skewed your cells are, as well as
+are the larger cells are compared to the cutoff distance required,
+the fewer images needed to be searched in finding pairs.</p>
+<div class="section" id="dynamic-pair-finder">
+<h2>Dynamic Pair Finder<a class="headerlink" href="#dynamic-pair-finder" title="Permalink to this heading"></a></h2>
+<p>For highly complex datasets, there is a more flexible pairfinder which
+can be built as such:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">enc</span><span class="p">,</span> <span class="n">padidxer</span> <span class="o">=</span> <span class="n">indexers</span><span class="o">.</span><span class="n">acquire_encoding_padding</span><span class="p">(</span>
+                <span class="n">species</span><span class="p">,</span> <span class="n">species_set</span><span class="o">=</span><span class="n">network_params</span><span class="p">[</span><span class="s1">&#39;possible_species&#39;</span><span class="p">])</span>
+
+<span class="n">pairfinder</span> <span class="o">=</span> <span class="n">pairs</span><span class="o">.</span><span class="n">DynamicPeriodicPairs</span><span class="p">(</span><span class="s1">&#39;PairFinder&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">cell</span><span class="p">),</span>
+                                        <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">network_params</span><span class="p">[</span><span class="s1">&#39;dist_hard_max&#39;</span><span class="p">])</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">networks</span><span class="o">.</span><span class="n">Hipnn</span><span class="p">(</span><span class="s2">&quot;HIPNN&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">padidxer</span><span class="p">,</span> <span class="n">pairfinder</span><span class="p">),</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                         <span class="n">module_kwargs</span><span class="o">=</span><span class="n">network_params</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicPeriodicPairs</span></code> object uses an algorithm to
+determine how many image cells need to be searched for each system, and iterates through
+the systems one by one. The upshot of this is that less memory is required.
+However, the cost is that each system is evaluated independently in serial,
+and as such the pair finding can be a rather slow operation. This algorithm is
+more likely to show benefits when the number of atoms in a training system is highly
+variable.</p>
+</div>
+<div class="section" id="caching-pre-computed-pairs">
+<h2>Caching Pre-computed Pairs<a class="headerlink" href="#caching-pre-computed-pairs" title="Permalink to this heading"></a></h2>
+<p>To mitigate the cost of periodic pairfinding (with either of the above methods),
+the pairs for each system in the training database can be cached. To do this,
+first assemble your modules for training. Then run
+<code class="xref py py-func docutils literal notranslate"><span class="pre">precompute_pairs()</span></code> on the training module.
+This produces a cache of the pairs in the database, and replaces the
+pair finder with an input node that gets the information from this cache.
+After that, you’ll have to re-assemble a new model for training,
+and set the database to use these new inputs.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">training_modules</span><span class="p">,</span> <span class="n">db_info</span> <span class="o">=</span> \
+    <span class="n">assemble_for_training</span><span class="p">(</span><span class="n">train_loss</span><span class="p">,</span> <span class="n">validation_losses</span><span class="p">,</span> <span class="n">plot_maker</span><span class="o">=</span><span class="n">plot_maker</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">hippynn.experiment.assembly</span> <span class="kn">import</span> <span class="n">precompute_pairs</span>
+<span class="n">precompute_pairs</span><span class="p">(</span><span class="n">training_modules</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span><span class="n">n_images</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">training_modules</span><span class="p">,</span> <span class="n">db_info</span> <span class="o">=</span> <span class="n">assemble_for_training</span><span class="p">(</span><span class="n">train_loss</span><span class="p">,</span>
+                                                  <span class="n">validation_losses</span><span class="p">,</span><span class="n">plot_maker</span><span class="o">=</span><span class="n">plot_maker</span><span class="p">)</span>
+<span class="n">database</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">db_info</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Caching pairs has several caveats. By default it produces a sparse output,
+this sparse tensor cannot be used with the <code class="docutils literal notranslate"><span class="pre">n_workers</span></code> argument on a dataloader,
+due to current limitations in pytorch. As such we recommend you move the
+dataset to a GPU and use <code class="docutils literal notranslate"><span class="pre">n_workers=None</span></code> when caching pairs.</p>
+</div>
+<div class="section" id="what-s-not-yet-supported">
+<h2>What’s not yet supported<a class="headerlink" href="#what-s-not-yet-supported" title="Permalink to this heading"></a></h2>
+<p>During training, we don’t yet have support for mixed PBCs where
+some directions are periodic and others are open.
+However, the ASE interface can almost (but not quite yet) handle
+simulations for such systems, because in this case ASE handles neighbor finding.</p>
+<p>We also don’t have support for mixed datasets of open and closed boundaries.
+To deal with this, you can embed your open systems in a very large box as
+a pre-processing step.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="predictor.html" class="btn btn-neutral float-left" title="Predictor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="forces.html" class="btn btn-neutral float-right" title="Force Training" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
