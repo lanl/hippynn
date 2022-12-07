@@ -84,6 +84,12 @@ Notes
   For ase and cupy, you probably want to use -c conda-forge.
 - Optional dependencies are in optional_dependencies.txt
 
+Documentation
+=============
+
+Please see https://lanl.github.io/hippynn/ for the latest documentation. You can also build
+the documentation locally, see /docs/README.txt
+
 Other things
 ============
 

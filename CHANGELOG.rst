@@ -1,3 +1,14 @@
+0.0.1
+=====
+
+Improvements:
+-------------
+
+- new "glue-on" method for damping coulomb energies locally
+
+- Improve compatibility with ASE functions such as mixing calculators
+  and trajectory saving.
+
 0.0.1b4
 =======
 
