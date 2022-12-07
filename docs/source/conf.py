@@ -47,7 +47,7 @@ autodoc_default_options = {
 }
 
 # The following are highly optional, so we mock them for doc purposes.
-autodoc_mock_imports = ["pyanitools", "seqm", "schnetpack", "cupy", "lammps"]
+autodoc_mock_imports = ["pyanitools", "seqm", "schnetpack", "cupy", "lammps", "numba"]
 
 
 # -- Options for HTML output -------------------------------------------------
