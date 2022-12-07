@@ -20,9 +20,9 @@ full_requirements = [
 
 setuptools.setup(
     name="hippynn",
-    version="0.0.1b4",
+    version="0.0.1",
     author="Nicholas Lubbers et al",
-    author_email="hippynn [AT] lanl (DOT) gov",
+    author_email="hippynn@lanl.gov",
     python_requires=">3.7",
     install_requires=[
         "numpy",
