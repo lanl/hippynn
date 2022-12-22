@@ -122,6 +122,31 @@ class ScreenedCoulombEnergy(CoulombEnergy):
         return coulomb_molecule
 
 
+class CombineScreenings(torch.nn.Module):
+    """ Returns products of different screenings for Screened Coulomb Interactions. 
+    """
+    def __init__(self, screening_list):
+        super().__init__()
+        self.SL = screening_list
+
+    def forward(self, pair_dist, radius):
+        """ Product of different screenings applied to pair_dist upto radius.
+        
+        :param pair_dist: torch.tensor, dtype=float64: 'Neighborlist' distances for coulomb energies.
+        :param radius: Maximum radius that Screened-Coulomb is evaluated upto. 
+        :return screening: Weights for screening for all pair_dist.
+        """
+        screening = None 
+
+        for s in self.SL:
+            if screening is None:
+                screening = s(pair_dist=pair_dist, radius=radius)
+            else:
+                screening = screening * s(pair_dist=pair_dist, radius=radius)
+
+        return screening
+
+
 class AlphaScreening(torch.nn.Module):
     def __init__(self, alpha):
         super().__init__()
