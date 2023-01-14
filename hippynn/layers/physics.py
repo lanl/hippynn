@@ -127,7 +127,7 @@ class CombineScreenings(torch.nn.Module):
     """
     def __init__(self, screening_list):
         super().__init__()
-        self.SL = screening_list
+        self.SL = torch.nn.ModuleList(screening_list)
 
     def forward(self, pair_dist, radius):
         """ Product of different screenings applied to pair_dist upto radius.
