@@ -423,3 +423,53 @@ class MinDistNode(ExpandParents, AutoNoKw, MultiNode):
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
         super().__init__(name, parents, module=module, **kwargs)
+
+
+# Graph Nodes for Filter Pair Indexer. 
+# OpenFilter should work for the External Neighbor Indexer as well. 
+class OpenFilter(AutoKw, PairIndexer, ExpandParents, MultiNode):
+    _output_names = "pair_dist", "pair_first", "pair_second", "pair_coord"
+    _input_names = "_pair_dist", "_pair_first", "_pair_second", "_pair_coord" 
+    _output_index_states = (IdxType.Pair,) * len(_output_names)
+    _auto_module_class = FilterDistance
+
+    @_parent_expander.match(OpenPairIndexer)
+    def expand0(self, PI, purpose): 
+        return PI.pair_dist, PI.pair_first, PI.pair_second, PI.pair_coord
+
+    @_parent_expander.match(ExternalNeighborIndexer)
+    def expand0(self, PI, purpose):
+        return PI.pair_dist, PI.pair_first, PI.pair_second, PI.pair_coord
+
+
+    _parent_expander.get_main_outputs()
+    _parent_expander.assertlen(len(_input_names))
+    _parent_expander.require_idx_states(IdxType.Pair, IdxType.Pair, IdxType.Pair, IdxType.Pair) 
+    
+    
+    def __init__(self, name, parents, dist_hard_max, module="auto", **kwargs):
+        self.module_kwargs = {"hard_dist_cutoff" : dist_hard_max} # passes to PairIndexer superclass 
+        self.dist_hard_max = dist_hard_max
+        parents = self.expand_parents(parents)
+        super().__init__(name, parents, module=module, **kwargs)
+
+
+class PeriodicFilter(AutoKw, PairIndexer, ExpandParents, MultiNode):
+    _output_names = "pair_dist", "pair_first", "pair_second", "pair_coord", "cell_offsets", "offset_index"
+    _input_names = "_pair_dist", "_pair_first", "_pair_second", "_pair_coord", "_cell_offsets", "_offset_index"
+    _output_index_states = (IdxType.Pair,) * len(_output_names)
+    _auto_module_class = FilterDistance
+
+    @_parent_expander.match(PeriodicPairIndexer)
+    def expand0(self, PI, purpose):
+        return PI.pair_dist, PI.pair_first, PI.pair_second, PI.pair_coord, PI.cell_offsets, PI.offset_index
+
+    _parent_expander.get_main_outputs()
+    _parent_expander.assertlen(len(_input_names))
+    _parent_expander.require_idx_states(IdxType.Pair, IdxType.Pair, IdxType.Pair, IdxType.Pair, IdxType.Pair, IdxType.Pair) 
+    
+    def __init__(self, name, parents, dist_hard_max, module="auto", **kwargs):
+        self.module_kwargs = {"hard_dist_cutoff" : dist_hard_max} # passes to PairIndexer superclass
+        self.dist_hard_max = dist_hard_max
+        parents = self.expand_parents(parents)
+        super().__init__(name, parents, module=module, **kwargs)
