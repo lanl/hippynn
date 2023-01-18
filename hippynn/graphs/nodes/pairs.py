@@ -11,6 +11,7 @@ from ..indextypes import IdxType
 from ...layers import pairs as pairs_modules
 
 
+
 class OpenPairIndexer(ExpandParents, PairIndexer, MultiNode):
     _input_names = "coordinates", "nonblank", "real_atoms", "inv_real_atoms"
     _auto_module_class = pairs_modules.OpenPairIndexer
@@ -431,7 +432,7 @@ class OpenFilter(AutoKw, PairIndexer, ExpandParents, MultiNode):
     _output_names = "pair_dist", "pair_first", "pair_second", "pair_coord"
     _input_names = "_pair_dist", "_pair_first", "_pair_second", "_pair_coord" 
     _output_index_states = (IdxType.Pair,) * len(_output_names)
-    _auto_module_class = FilterDistance
+    _auto_module_class = pairs_modules.FilterDistance
 
     @_parent_expander.match(OpenPairIndexer)
     def expand0(self, PI, purpose): 
@@ -458,7 +459,7 @@ class PeriodicFilter(AutoKw, PairIndexer, ExpandParents, MultiNode):
     _output_names = "pair_dist", "pair_first", "pair_second", "pair_coord", "cell_offsets", "offset_index"
     _input_names = "_pair_dist", "_pair_first", "_pair_second", "_pair_coord", "_cell_offsets", "_offset_index"
     _output_index_states = (IdxType.Pair,) * len(_output_names)
-    _auto_module_class = FilterDistance
+    _auto_module_class = pairs_modules.FilterDistance
 
     @_parent_expander.match(PeriodicPairIndexer)
     def expand0(self, PI, purpose):
