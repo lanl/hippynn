@@ -13,7 +13,7 @@ class FilterDistance(_PairIndexer):
     
     def forward(self, pair_dist, *pair_tensors):
         r_cut = self.hard_dist_cutoff 
-        idx = torch.argwhere(pair_dist <= r_cut)[:,0]
+        idx = torch.argwhere(pair_dist <= r_cut).squeeze(1)
         pair_tensors = pair_dist, *pair_tensors
         return tuple(pl[idx] for pl in pair_tensors)
 
