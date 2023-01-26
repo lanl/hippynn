@@ -16,7 +16,7 @@ from hippynn.graphs.nodes.tags import Encoder, AtomIndexer, PairIndexer, Energie
 from hippynn.graphs.nodes.pairs import ExternalNeighborIndexer
 from hippynn.graphs.nodes.misc import StrainInducer
 from hippynn.graphs.nodes.physics import CoulombEnergyNode, DipoleNode, StressForceNode
-from hippynn.graphs.nodes.pairs import OpenFilter
+from hippynn.graphs.nodes.pairs import PairFilter
 
 from hippynn.graphs.nodes.inputs import SpeciesNode, PositionsNode, CellNode
 
@@ -95,26 +95,23 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
     )
     new_inputs = [species, positions, in_cell, in_pair_first, in_pair_second, in_shift]
 
-    # Construct Filters 
-    external_pairs_filtered = []
+    # Construct Filters
+    # Replace the existing pair indexers with the corresponding new (filtered) node
+    # that accepts external pairs of atoms:
+    # (This is the primary reason we needed to copy the subgraph --)
+    #  we don't want to break the original computation, and `replace_node` mutates graph connectivity
     for pi in pair_indexers:
-        print(pi.dist_hard_max)
         if pi.dist_hard_max == min_radius:
-            external_pairs_filtered.append(external_pairs)
+            mapped_node = external_pairs
         else:
-            external_filter = OpenFilter(
-                "Filter-(ASE)EXTERNAL_NEIGHBORS",
+            mapped_node = PairFilter(
+                "DistanceFilter-(ASE)EXTERNAL_NEIGHBORS",
                 (external_pairs),
                 dist_hard_max=pi.dist_hard_max, 
             )
-            external_pairs_filtered.append(external_filter)
+        replace_node(pi, mapped_node, disconnect_old=True)
 
-    # Replace the existing pair indexers with the corresponding new (filtered) node 
-    # that accepts external pairs of atoms:
-    # (This is the primary reason we needed to copy the subgraph --)
-    #   we don't want to break the original computation, and `replace_node` mutates graph connectivity
-    for (pi,ei) in zip(pair_indexers, external_pairs_filtered):
-        replace_node(pi, ei, disconnect_old=True)
+
     ###############################################################
 
     ###############################################################

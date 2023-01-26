@@ -426,51 +426,32 @@ class MinDistNode(ExpandParents, AutoNoKw, MultiNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-# Graph Nodes for Filter Pair Indexer. 
-# OpenFilter should work for the External Neighbor Indexer as well. 
-class OpenFilter(AutoKw, PairIndexer, ExpandParents, MultiNode):
-    _output_names = "pair_dist", "pair_first", "pair_second", "pair_coord"
-    _input_names = "_pair_dist", "_pair_first", "_pair_second", "_pair_coord" 
-    _output_index_states = (IdxType.Pair,) * len(_output_names)
+# Graph Nodes for Filter Pair Indexer. Works with PeriodicPairs, OpenPairs, External Neighbors.
+class PairFilter(AutoKw, PairIndexer, ExpandParents, MultiNode):
     _auto_module_class = pairs_modules.FilterDistance
 
-    @_parent_expander.match(OpenPairIndexer)
-    def expand0(self, PI, purpose): 
-        return PI.pair_dist, PI.pair_first, PI.pair_second, PI.pair_coord
+    @_parent_expander.match(PairIndexer)
+    def expand0(self, pair_indexer, purpose):
+        parents = pair_indexer.children
 
-    @_parent_expander.match(ExternalNeighborIndexer)
-    def expand0(self, PI, purpose):
-        return PI.pair_dist, PI.pair_first, PI.pair_second, PI.pair_coord
+        # Validate that nothing unexpected has happened.
+        # Hopefully this can't fail, but if we update the pair API or someone customizes this aspect of the
+        # library, this should catch any problems.
+        idx_states = set(c._index_state for c in parents)
+        if len(idx_states) != 1:
+            raise TypeError(f"Input contains mixed index states: {idx_states}. Input states should only consist of index type pair.")
+        idx_state = idx_states.pop()
+        if idx_state != IdxType.Pair:
+            raise TypeError(f"Index state for inputs was {idx_state}, needs to be index type pair.")
+        # Validation complete.
+        self._output_names = tuple(f"out_{name}" for name in pair_indexer._output_names)
+        self._input_names = tuple(f"in_{name}" for name in pair_indexer._output_names)
+        self._output_index_states = (IdxType.Pair,)*len(parents)
 
+        return parents
 
-    _parent_expander.get_main_outputs()
-    _parent_expander.assertlen(len(_input_names))
-    _parent_expander.require_idx_states(IdxType.Pair, IdxType.Pair, IdxType.Pair, IdxType.Pair) 
-    
-    
     def __init__(self, name, parents, dist_hard_max, module="auto", **kwargs):
-        self.module_kwargs = {"hard_dist_cutoff" : dist_hard_max} # passes to PairIndexer superclass 
-        self.dist_hard_max = dist_hard_max
-        parents = self.expand_parents(parents)
-        super().__init__(name, parents, module=module, **kwargs)
-
-
-class PeriodicFilter(AutoKw, PairIndexer, ExpandParents, MultiNode):
-    _output_names = "pair_dist", "pair_first", "pair_second", "pair_coord", "cell_offsets", "offset_index"
-    _input_names = "_pair_dist", "_pair_first", "_pair_second", "_pair_coord", "_cell_offsets", "_offset_index"
-    _output_index_states = (IdxType.Pair,) * len(_output_names)
-    _auto_module_class = pairs_modules.FilterDistance
-
-    @_parent_expander.match(PeriodicPairIndexer)
-    def expand0(self, PI, purpose):
-        return PI.pair_dist, PI.pair_first, PI.pair_second, PI.pair_coord, PI.cell_offsets, PI.offset_index
-
-    _parent_expander.get_main_outputs()
-    _parent_expander.assertlen(len(_input_names))
-    _parent_expander.require_idx_states(IdxType.Pair, IdxType.Pair, IdxType.Pair, IdxType.Pair, IdxType.Pair, IdxType.Pair) 
-    
-    def __init__(self, name, parents, dist_hard_max, module="auto", **kwargs):
-        self.module_kwargs = {"hard_dist_cutoff" : dist_hard_max} # passes to PairIndexer superclass
+        self.module_kwargs = {"hard_dist_cutoff": dist_hard_max}  # passes to PairIndexer superclass
         self.dist_hard_max = dist_hard_max
         parents = self.expand_parents(parents)
         super().__init__(name, parents, module=module, **kwargs)
