@@ -16,8 +16,10 @@ from hippynn.graphs.nodes.tags import Encoder, AtomIndexer, PairIndexer, Energie
 from hippynn.graphs.nodes.pairs import ExternalNeighborIndexer
 from hippynn.graphs.nodes.misc import StrainInducer
 from hippynn.graphs.nodes.physics import CoulombEnergyNode, DipoleNode, StressForceNode
+from hippynn.graphs.nodes.pairs import OpenFilter
 
 from hippynn.graphs.nodes.inputs import SpeciesNode, PositionsNode, CellNode
+
 
 import ase.neighborlist
 
@@ -93,11 +95,28 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
     )
     new_inputs = [species, positions, in_cell, in_pair_first, in_pair_second, in_shift]
 
-    # Replace the existing pair indexers with the new node that accepts external pairs of atoms:
-    # (This is the primary reason we needed to copy the subgraph --
-    #   we don't want to break the original computation, and `replace_node` mutates graph connectivity
+    # Construct Filters 
+    external_pairs_filtered = []
     for pi in pair_indexers:
-        replace_node(pi, external_pairs, disconnect_old=True)
+        print(pi.dist_hard_max)
+        if pi.dist_hard_max == min_radius:
+            external_pairs_filtered.append(external_pairs)
+        else:
+            external_filter = OpenFilter(
+                "Filter-(ASE)EXTERNAL_NEIGHBORS",
+                (external_pairs),
+                dist_hard_max=pi.dist_hard_max, 
+            )
+            external_pairs_filtered.append(external_filter)
+
+    # Replace the existing pair indexers with the corresponding new (filtered) node 
+    # that accepts external pairs of atoms:
+    # (This is the primary reason we needed to copy the subgraph --)
+    #   we don't want to break the original computation, and `replace_node` mutates graph connectivity
+    for (pi,ei) in zip(pair_indexers, external_pairs_filtered):
+        replace_node(pi, ei, disconnect_old=True)
+    # for pi in pair_indexers:
+    #     replace_node(pi, external_pairs, disconnect_old=True)
     ###############################################################
 
     ###############################################################
@@ -134,6 +153,20 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
     check_link_consistency((*new_inputs, *implemented_nodes))
     mod = GraphModule(new_inputs, implemented_nodes)
     mod.eval()
+
+    ### Graph for Debugging (TODO Remove for final PR.)
+    # Create a visualization of the ASE graph.
+    import os
+    from hippynn.graphs.viz import visualize_graph_module, visualize_connected_nodes
+
+    vcn = visualize_connected_nodes([energy])
+    graphviz_name = "vcn.dot"
+    vcn.save(graphviz_name)
+    viz_name="ase_graph"
+    # Bad practise using using os.system(...) here. 
+    os.system("dot -Tpng %s -o %s.png"%(graphviz_name, viz_name))
+    ###
+
     return min_radius, species_set, implemented_properties, mod, pbc_handler
 
 
