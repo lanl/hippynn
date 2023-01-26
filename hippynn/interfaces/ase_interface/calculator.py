@@ -115,8 +115,6 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
     #   we don't want to break the original computation, and `replace_node` mutates graph connectivity
     for (pi,ei) in zip(pair_indexers, external_pairs_filtered):
         replace_node(pi, ei, disconnect_old=True)
-    # for pi in pair_indexers:
-    #     replace_node(pi, external_pairs, disconnect_old=True)
     ###############################################################
 
     ###############################################################
@@ -153,19 +151,6 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
     check_link_consistency((*new_inputs, *implemented_nodes))
     mod = GraphModule(new_inputs, implemented_nodes)
     mod.eval()
-
-    ### Graph for Debugging (TODO Remove for final PR.)
-    # Create a visualization of the ASE graph.
-    import os
-    from hippynn.graphs.viz import visualize_graph_module, visualize_connected_nodes
-
-    vcn = visualize_connected_nodes([energy])
-    graphviz_name = "vcn.dot"
-    vcn.save(graphviz_name)
-    viz_name="ase_graph"
-    # Bad practise using using os.system(...) here. 
-    os.system("dot -Tpng %s -o %s.png"%(graphviz_name, viz_name))
-    ###
 
     return min_radius, species_set, implemented_properties, mod, pbc_handler
 
