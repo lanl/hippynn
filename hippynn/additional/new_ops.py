@@ -29,7 +29,6 @@ class NACR(torch.nn.Module):
         energy2: Tensor,
     ):
         dE = energy2 - energy1
-        # nacr shape: n_molecules, n_atoms * 3
         nacr = torch.autograd.grad(
             charges2, [positions], grad_outputs=[charges1], create_graph=True
         )[0].reshape(len(dE), -1)
@@ -68,10 +67,9 @@ class NACRMultiState(torch.nn.Module):
                 create_graph=True,
             )[0]
             nacr_ij.append(nacr)
-        # nacr shape: n_molecules, n_pairs, n_atoms, 3
+        # nacr shape: n_molecules, n_atoms, 3, n_pairs
         nacr = torch.stack(nacr_ij, dim=1)
         n_molecule, n_pairs, n_atoms, n_dims = nacr.shape
-        # reshape to n_molecules, n_pairs, n_atoms * 3
         nacr = nacr.reshape(n_molecule, n_pairs, n_atoms * n_dims)
         # multiply dE
         return nacr * dE.unsqueeze(2)
@@ -199,25 +197,6 @@ def mae_with_phases(predict: Tensor, true: Tensor):
     return torch.sum(errors) / predict.numel()
 
 
-def rmse_with_phases(predict: Tensor, true: Tensor):
-    """RMSE with phases
-
-    :param predict: predicted values
-    :type predict: torch.Tensor
-    :param true: true values
-    :type true: torch.Tensor
-    :return: RMSE with phases
-    :rtype: torch.Tensor
-    """
-
-    errors = torch.minimum(
-        torch.linalg.norm(true - predict, dim=-1),
-        torch.linalg.norm(true + predict, dim=-1),
-    )
-    # errors = absolute_errors(predict, true) ** 2
-    return torch.sum(errors) / predict.numel() ** 0.5
-
-
 def mse_with_phases(predict: Tensor, true: Tensor):
     """MSE with phases
 
@@ -229,7 +208,12 @@ def mse_with_phases(predict: Tensor, true: Tensor):
     :rtype: torch.Tensor
     """
 
-    return rmse_with_phases(predict, true) ** 2
+    errors = torch.minimum(
+        torch.linalg.norm(true - predict, dim=-1),
+        torch.linalg.norm(true + predict, dim=-1),
+    )
+    # errors = absolute_errors(predict, true) ** 2
+    return torch.sum(errors**2) / predict.numel()
 
 
 class MAEPhaseLoss(loss._BaseCompareLoss, op=mae_with_phases):
@@ -237,8 +221,4 @@ class MAEPhaseLoss(loss._BaseCompareLoss, op=mae_with_phases):
 
 
 class MSEPhaseLoss(loss._BaseCompareLoss, op=mse_with_phases):
-    pass
-
-
-class RMSEPhaseLoss(loss._BaseCompareLoss, op=rmse_with_phases):
     pass
