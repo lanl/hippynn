@@ -11,7 +11,6 @@ from ..indextypes import IdxType
 from ...layers import pairs as pairs_modules
 
 
-
 class OpenPairIndexer(ExpandParents, PairIndexer, MultiNode):
     _input_names = "coordinates", "nonblank", "real_atoms", "inv_real_atoms"
     _auto_module_class = pairs_modules.OpenPairIndexer
@@ -432,12 +431,17 @@ class PairFilter(AutoKw, PairIndexer, ExpandParents, MultiNode):
 
     @_parent_expander.match(PairIndexer)
     def expand0(self, pair_indexer, purpose):
-        parents = pair_indexer.children
+
+        # During graph construction, every node is connected to its current set of parents. 
+        # It is possible that pair_indexer.children can contain itself; an un-initialized PairFilter. 
+        # Only initialized PairIndexers are extracted here. 
+        parents = [c for c in pair_indexer.children if hasattr(c, "_index_state")]
 
         # Validate that nothing unexpected has happened.
         # Hopefully this can't fail, but if we update the pair API or someone customizes this aspect of the
         # library, this should catch any problems.
         idx_states = set(c._index_state for c in parents)
+
         if len(idx_states) != 1:
             raise TypeError(f"Input contains mixed index states: {idx_states}. Input states should only consist of index type pair.")
         idx_state = idx_states.pop()
