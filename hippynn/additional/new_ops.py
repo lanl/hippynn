@@ -9,6 +9,7 @@ from torch.optim.optimizer import Optimizer
 
 from ..graphs import loss
 from ..graphs.nodes.base import AutoKw, SingleNode
+from ..graphs.indextypes import IdxType
 
 
 class NACR(torch.nn.Module):
@@ -19,10 +20,19 @@ class NACR(torch.nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, charges1: Tensor, charges2: Tensor, positions: Tensor, energy1: Tensor, energy2: Tensor):
+    def forward(
+        self,
+        charges1: Tensor,
+        charges2: Tensor,
+        positions: Tensor,
+        energy1: Tensor,
+        energy2: Tensor,
+    ):
         dE = energy2 - energy1
-        nacr = torch.autograd.grad(charges2, [positions], grad_outputs=[charges1], create_graph=True)[0]
-        dE = dE.unsqueeze(1)
+        # nacr shape: n_molecules, n_atoms * 3
+        nacr = torch.autograd.grad(
+            charges2, [positions], grad_outputs=[charges1], create_graph=True
+        )[0].reshape(len(dE), -1)
         return nacr * dE
 
 
@@ -42,7 +52,9 @@ class NACRMultiState(torch.nn.Module):
         # dE shape: n_molecules, n_targets, n_targets
         dE = energies.unsqueeze(1) - energies.unsqueeze(2)
         # take the upper triangle excluding the diagonal
-        indices = torch.triu_indices(self.n_target, self.n_target, offset=1, device=dE.device)
+        indices = torch.triu_indices(
+            self.n_target, self.n_target, offset=1, device=dE.device
+        )
         # dE shape: n_molecules, n_pairs
         # n_pairs = n_targets * (n_targets - 1) / 2
         dE = dE[..., indices[0], indices[1]]
@@ -56,10 +68,13 @@ class NACRMultiState(torch.nn.Module):
                 create_graph=True,
             )[0]
             nacr_ij.append(nacr)
-        # nacr shape: n_molecules, n_atoms, 3, n_pairs
-        nacr = torch.stack(nacr_ij, dim=3)
-        # multiple dE
-        return nacr * dE.unsqueeze(1).unsqueeze(2)
+        # nacr shape: n_molecules, n_pairs, n_atoms, 3
+        nacr = torch.stack(nacr_ij, dim=1)
+        n_molecule, n_pairs, n_atoms, n_dims = nacr.shape
+        # reshape to n_molecules, n_pairs, n_atoms * 3
+        nacr = nacr.reshape(n_molecule, n_pairs, n_atoms * n_dims)
+        # multiply dE
+        return nacr * dE.unsqueeze(2)
 
 
 class NACRNode(AutoKw, SingleNode):
@@ -72,7 +87,9 @@ class NACRNode(AutoKw, SingleNode):
     # _auto_module_class = physics_layers.NACR
     _auto_module_class = NACR
 
-    def __init__(self, name: str, parents: Tuple, module="auto", module_kwargs=None, **kwargs):
+    def __init__(
+        self, name: str, parents: Tuple, module="auto", module_kwargs=None, **kwargs
+    ):
         """Automatically build the node for calculating NACR * ΔE between two states i
         and j.
 
@@ -93,7 +110,8 @@ class NACRNode(AutoKw, SingleNode):
             self.module_kwargs.update(module_kwargs)
         charges1, charges2, positions, energy1, energy2 = parents
         positions.requires_grad = True
-        self._index_state = positions._index_state
+        self._index_state = IdxType.Molecules
+        # self._index_state = positions._index_state
         parents = (
             charges1.main_output,
             charges2.main_output,
@@ -135,7 +153,8 @@ class NACRMultiStateNode(AutoKw, SingleNode):
             self.module_kwargs.update(module_kwargs)
         charges, positions, energies = parents
         positions.requires_grad = True
-        self._index_state = positions._index_state
+        self._index_state = IdxType.Molecules
+        # self._index_state = positions._index_state
         parents = (
             charges.main_output,
             positions,
@@ -172,8 +191,31 @@ def mae_with_phases(predict: Tensor, true: Tensor):
     :rtype: torch.Tensor
     """
 
-    errors = absolute_errors(predict, true)
+    errors = torch.minimum(
+        torch.linalg.norm(true - predict, ord=1, dim=-1),
+        torch.linalg.norm(true + predict, ord=1, dim=-1),
+    )
+    # errors = absolute_errors(predict, true)
     return torch.sum(errors) / predict.numel()
+
+
+def rmse_with_phases(predict: Tensor, true: Tensor):
+    """RMSE with phases
+
+    :param predict: predicted values
+    :type predict: torch.Tensor
+    :param true: true values
+    :type true: torch.Tensor
+    :return: RMSE with phases
+    :rtype: torch.Tensor
+    """
+
+    errors = torch.minimum(
+        torch.linalg.norm(true - predict, dim=-1),
+        torch.linalg.norm(true + predict, dim=-1),
+    )
+    # errors = absolute_errors(predict, true) ** 2
+    return torch.sum(errors) / predict.numel() ** 0.5
 
 
 def mse_with_phases(predict: Tensor, true: Tensor):
@@ -187,8 +229,7 @@ def mse_with_phases(predict: Tensor, true: Tensor):
     :rtype: torch.Tensor
     """
 
-    errors = absolute_errors(predict, true) ** 2
-    return torch.sum(errors) / predict.numel()
+    return rmse_with_phases(predict, true) ** 2
 
 
 class MAEPhaseLoss(loss._BaseCompareLoss, op=mae_with_phases):
@@ -199,23 +240,5 @@ class MSEPhaseLoss(loss._BaseCompareLoss, op=mse_with_phases):
     pass
 
 
-# class BroadcastMolToAtomModule(torch.nn.Module):
-#     def forward(mol_quantity, mol_index):
-#         return mol_quantity[mol_index]
-#
-#
-# class BroadcastMoltoAtom(AutoNoKw, ExpandParents, SingleNode):
-#     _auto_module_class = BroadcastMolToAtomModule
-#     _index_state = IdxType.Atoms
-#     _input_names = "molvar", "molecule_index"
-#
-#     @parent_expander.match(SingleNode)
-#     def expansion0(self, mol_node, **kwargs):
-#         pidx = find_unique_relative(mol_node, AtomIndexer)
-#         return mol_node, pidx.mol_index
-#
-#     @parent_expander.assertlen(2)
-#     @parent_expander.require_idx_types(IdxType.Molecule, None)
-#     def __init__(self, parents, **kwargs):
-#         parents = self.expand_parents(parents)
-#         super().__init__(self, parents, **kwargs)
+class RMSEPhaseLoss(loss._BaseCompareLoss, op=rmse_with_phases):
+    pass
