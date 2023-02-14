@@ -55,6 +55,7 @@ def set_e0_values(
     z_vals = train_data[species_name]
     t_vals = train_data[energy_name]
 
+    encoder.to(t_vals.device)
     eovals = compute_hipnn_e0(encoder, z_vals, t_vals, peratom=peratom)
     eo_layer = energy_module.layers[0]
     print("Computed E0 energies:", eovals)
