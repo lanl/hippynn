@@ -48,8 +48,6 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
     ########################################
     # TODO: Implement Ewald, Wolf, or similar version of coulomb energy?
     # Better: figure out how to get voltages from external code and pass back as gradients for HIPNN backwards pass.
-    if any(isinstance(n, CoulombEnergyNode) for n in subgraph):
-        raise NotImplementedError("No support for coulomb energies in ASE interface yet.")
     ########################################
 
     ###############################################################
@@ -110,8 +108,6 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
                 dist_hard_max=pi.dist_hard_max, 
             )
         replace_node(pi, mapped_node, disconnect_old=True)
-
-
     ###############################################################
 
     ###############################################################
