@@ -199,7 +199,7 @@ def pass_to_pytorch(fn_name):
     return method
 
 
-class HippynnCalculator(interface.Calculator, Calculator): # Calculator inheritance required for ASE Mixing Calculator usage
+class HippynnCalculator(Calculator): # Calculator inheritance required for ASE Mixing Calculator usage
     """
     ASE calculator based on hippynn graphs. Uses ASE neighbor lists. Not suitable for domain decomposition.
     """
@@ -261,7 +261,7 @@ class HippynnCalculator(interface.Calculator, Calculator): # Calculator inherita
 
     def rebuild_neighbors(self):
         self.nl = ase.neighborlist.NeighborList(
-            self._cutoffs,
+            self._cutoffs+self._skin, #ASE neighbor list implementation is only safe up to cutoffs-skin
             skin=self._skin,
             sorted=True,
             self_interaction=False,
