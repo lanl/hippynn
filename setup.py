@@ -1,4 +1,5 @@
 import setuptools
+import versioneer
 
 with open("README.rst", "r") as fh:
     long_description = fh.read()
@@ -20,7 +21,7 @@ full_requirements = [
 
 setuptools.setup(
     name="hippynn",
-    version="0.0.1",
+    version=versioneer.get_version(),
     author="Nicholas Lubbers et al",
     author_email="hippynn@lanl.gov",
     python_requires=">3.7",
@@ -41,4 +42,5 @@ setuptools.setup(
     description="The hippynn python package - a modular library for atomistic machine learning with pytorch",
     long_description=long_description,
     packages=setuptools.find_packages(),
+    cmdclass=versioneer.get_cmdclass(),
 )
