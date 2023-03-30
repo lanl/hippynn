@@ -12,36 +12,40 @@ Cupy kernels require numba for CPU operations.
 """
 import warnings
 from typing import Union
-from .. import settings
 
+from .. import settings
 from . import autograd_wrapper, env_pytorch
 
 CUSTOM_KERNELS_AVAILABLE = []
 try:
     import numba
-    CUSTOM_KERNELS_AVAILABLE.append('numba')
+
+    CUSTOM_KERNELS_AVAILABLE.append("numba")
 except ImportError:
     pass
 
 try:
     import cupy
+
     if "numba" not in CUSTOM_KERNELS_AVAILABLE:
-        warnings.warn("cupy was found, but numba was not. Cupy custom kernels not available.")
+        warnings.warn("Cupy was found, but numba was not. Cupy custom kernels not available.")
     else:
-        CUSTOM_KERNELS_AVAILABLE.append('cupy')
+        CUSTOM_KERNELS_AVAILABLE.append("cupy")
 except ImportError:
     pass
 
 if not CUSTOM_KERNELS_AVAILABLE:
-    warnings.warn("Numba not available: Custom Kernels will be disabled.")
+    warnings.warn("Numba or cupy not available: Custom Kernels will be disabled.")
 
 CUSTOM_KERNELS_ACTIVE = False
 
 envsum, sensesum, featsum = None, None, None
 
+
 def _check_numba():
     import numba.cuda
     import torch
+
     if not numba.cuda.is_available():
         if torch.cuda.is_available():
             warnings.warn("numba.cuda.is_available() returned False: Custom kernels will fail on GPU tensors.")
@@ -55,16 +59,18 @@ def _check_numba():
         # (At one point this was the right strategy...)
         return False
 
+
 def _check_cupy():
     import cupy
     import numba
     import torch
+
     if not cupy.cuda.is_available():
         if torch.cuda.is_available():
             warnings.warn("cupy.cuda.is_available() returned False: Custom kernels will fail on GPU tensors.")
 
 
-def set_custom_kernels(active: Union[bool,str] = True):
+def set_custom_kernels(active: Union[bool, str] = True):
     """
     Activate or deactivate custom kernels for interaction.
 
@@ -74,14 +80,20 @@ def set_custom_kernels(active: Union[bool,str] = True):
     """
     global envsum, sensesum, featsum, CUSTOM_KERNELS_ACTIVE
 
-    if isinstance(active,str):
+    if isinstance(active, str):
         active = active.lower()
 
-    if active not in [True,False,"numba","cupy","pytorch","auto"]:
+    if active not in [True, False, "numba", "cupy", "pytorch", "auto"]:
         raise ValueError(f"Unrecognized custom kernel implementation: {active}")
-    
-    active_map = {"auto":True,"pytorch":False }
-    active = active_map.get(active,active)
+
+    active_map = {"auto": True, "pytorch": False}
+    if not CUSTOM_KERNELS_AVAILABLE:
+        if active == "auto" or active == "pytorch":
+            active = False
+        elif active:
+            raise RuntimeError("Numba or cupy was not found. Custom kernels are not available.")
+    else:
+        active = active_map.get(active, active)
 
     if not active:
         envsum = env_pytorch.envsum
@@ -98,23 +110,22 @@ def set_custom_kernels(active: Union[bool,str] = True):
             active = "cupy"
         else:
             active = "numba"
-    
+
     if active not in CUSTOM_KERNELS_AVAILABLE:
         raise RuntimeError(f"Unavailable custom kernel implementation: {active}")
 
-    if active == 'cupy':
+    if active == "cupy":
         _check_numba()
         _check_cupy()
-        from .env_cupy import cupy_envsum, cupy_sensesum, cupy_featsum
-        envsum, sensesum, featsum = (
-            autograd_wrapper.wrap_envops(cupy_envsum, cupy_sensesum, cupy_featsum)
-        )
+        from .env_cupy import cupy_envsum, cupy_featsum, cupy_sensesum
+
+        envsum, sensesum, featsum = autograd_wrapper.wrap_envops(cupy_envsum, cupy_sensesum, cupy_featsum)
     elif active == "numba":
         _check_numba()
-        from .env_numba import new_envsum, new_sensesum, new_featsum
-        (envsum, sensesum, featsum,) = (
-                autograd_wrapper.wrap_envops(new_envsum, new_sensesum, new_featsum)
-                )
+        from .env_numba import new_envsum, new_featsum, new_sensesum
+
+        envsum, sensesum, featsum = autograd_wrapper.wrap_envops(new_envsum, new_sensesum, new_featsum)
+
     else:
         # We shouldn't get here except possibly mid-development, but just in case:
         # if you add a custom kernel implementation remember to add to this
@@ -127,4 +138,3 @@ def set_custom_kernels(active: Union[bool,str] = True):
 try_custom_kernels = settings.USE_CUSTOM_KERNELS
 set_custom_kernels(try_custom_kernels)
 del try_custom_kernels
-
