@@ -47,6 +47,9 @@ class MLIAPInterface(MLIAPUnified):
     
     def compute_descriptors(self, data):
         pass
+    
+    def as_tensor(self,array):
+        return torch.as_tensor(array,device=self.model_device)
 
     def compute_forces(self, data):
         """
@@ -54,25 +57,38 @@ class MLIAPInterface(MLIAPUnified):
         :return None
         This function writes results to the input `data`.
         """
-        elems = torch.from_numpy(data.elems).type(torch.int64).reshape(1, data.ntotal)
+        elems = self.as_tensor(data.elems).type(torch.int64).reshape(1, data.ntotal)
         z_vals = self.species_set[elems+1]
-        pair_i = torch.from_numpy(data.pair_i).type(torch.int64)
-        pair_j = torch.from_numpy(data.pair_j).type(torch.int64)
-        rij = torch.from_numpy(data.rij).type(torch.float64)
-        nlocal = torch.tensor(data.nlistatoms)
-
+        pair_i = self.as_tensor(data.pair_i).type(torch.int64)
+        pair_j = self.as_tensor(data.pair_j).type(torch.int64)
+        rij = self.as_tensor(data.rij).type(torch.float64)
+        nlocal = self.as_tensor(data.nlistatoms) 
+           
         # note your sign for rij might need to be +1 or -1, depending on how your implementation works
-        inputs = (inp.to(self.model_device) for inp in [z_vals, pair_i, pair_j, -rij, nlocal])
-
-        f = torch.from_numpy(data.f)
+        inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
         atom_energy, total_energy, fij = self.graph(*inputs)
+        
+        # Test if we are using lammps-kokkos or not. Is there a more clear way to do that?
+        if isinstance(data.elems,np.ndarray):
+            return_device = 'cpu'
+        else:
+            # Hope that kokkos device and pytorch device are the same (default cuda)
+            return_device = elems.device
+        
+        atom_energy = atom_energy.squeeze(1).detach().to(return_device)
+        total_energy = total_energy.detach().to(return_device)
 
-        atom_energy = atom_energy.to(torch.device("cpu"))
-        total_energy = total_energy.to(torch.device("cpu"))
-        fij = fij.type(f.dtype).to(torch.device("cpu"))
-
-        data.update_pair_forces(fij.detach().numpy())
-        data.eatoms = atom_energy.squeeze(1).detach().numpy().astype(np.double)
+        f = self.as_tensor(data.f)
+        fij = fij.type(f.dtype).detach().to(return_device)
+        
+        if return_device=="cpu":
+            fij = fij.numpy()
+            data.eatoms = atom_energy.numpy().astype(np.double)
+        else:
+            eatoms = torch.as_tensor(data.eatoms,device=return_device)
+            eatoms.copy_(atom_energy)
+         
+        data.update_pair_forces(fij)
         data.energy = total_energy.item()
 
     def __getstate__(self):
