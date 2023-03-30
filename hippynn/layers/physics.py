@@ -196,11 +196,9 @@ class LocalDampingCosine(AlphaScreening):
         :param radius: Maximum radius that Screened-Coulomb is evaluated upto. 
         :return screening: Weights for screening for each pair.
         """
-        pi = torch.tensor([3.141592653589793238], device=pair_dist.device)
-        q = pair_dist / radius 
-        eta =  radius / self.alpha
-        screening = torch.subtract(torch.tensor([1.0], device=pair_dist.device), torch.square(torch.cos(0.5*pi*q*eta)))
-        
+        pi = torch.tensor([3.141592653589793238], device=pair_dist.device)        
+        screening = torch.subtract(torch.tensor([1.0], device=pair_dist.device), torch.square(torch.cos(0.5*pi*pair_dist/self.alpha)))
+    
         # pair_dist greater than cut-off; no local-damping. 
         screening = torch.where((pair_dist<self.alpha), screening, torch.ones_like(screening))
         
