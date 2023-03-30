@@ -11,10 +11,9 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -27,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> hippynn
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            hippynn
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -59,7 +62,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
       <li class="breadcrumb-item active">hippynn.layers.physics</li>
       <li class="wy-breadcrumbs-aside">
@@ -127,7 +130,7 @@
 
 
 <div class="viewcode-block" id="Quadrupole"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Quadrupole">[docs]</a><span class="k">class</span> <span class="nc">Quadrupole</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Computes quadrupoles as a flattened (n_molecules,9) array.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes quadrupoles as a flattened (n_molecules,9) array.</span>
 <span class="sd">    NOTE: Uses normalization sum_a q_a (r_a,i*r_a,j - 1/3 delta_ij r_a^2)&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Quadrupole.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Quadrupole.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -226,12 +229,12 @@
 
 
 <div class="viewcode-block" id="LocalDampingCosine"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.LocalDampingCosine">[docs]</a><span class="k">class</span> <span class="nc">LocalDampingCosine</span><span class="p">(</span><span class="n">AlphaScreening</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Local damping using complement of the hipnn cutoff function. (&#39;glue-on&#39; method)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Local damping using complement of the hipnn cutoff function. (&#39;glue-on&#39; method)</span>
 <span class="sd">    g =     1 if pair_dist &gt; R_cutoff</span>
 <span class="sd">            1 - [cos(\pi/2 * dist * R_cutoff)]^2  otherwise</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="LocalDampingCosine.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.LocalDampingCosine.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span> 
-        <span class="sd">&quot;&quot;&quot; </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        :param alpha: R_cutoff for glue-on function to ensure </span>
 <span class="sd">            smooth crossover from hipnn energy to long-range coulomb energy.  </span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -239,7 +242,7 @@
 
 
 <div class="viewcode-block" id="LocalDampingCosine.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.LocalDampingCosine.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param pair_dist: torch.tensor, dtype=float64: &#39;Neighborlist&#39; distances for coulomb energies.</span>
 <span class="sd">        :param radius: Maximum radius that Screened-Coulomb is evaluated upto. </span>
 <span class="sd">        :return screening: Weights for screening for each pair.</span>
