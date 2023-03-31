@@ -131,6 +131,29 @@ class MolSummer(torch.nn.Module):
         return result
 
 
+class SysMaxOfAtoms(torch.nn.Module):
+    """
+    Take maximum over atom dimension.
+    """
+    def forward(self, features, mol_index, n_molecules):
+        # Add feature dimension if not found
+        if features.ndim == 1:
+            featshape = (1,)
+            features = features.unsqueeze(1)
+        else:
+            featshape = features.shape[1:]
+        # Allocate result
+        out_shape = (n_molecules, *featshape)
+        result = torch.zeros(*out_shape, device=features.device, dtype=features.dtype)
+
+        # Prepare index shape for scatter operation
+        mi_expand = mol_index.reshape(-1, *(1,) * len(featshape))
+        mi_expand = mi_expand.expand((-1, *featshape))
+
+        # Perform calculation
+        result.scatter_reduce_(0, mi_expand, features, reduce='amax', include_self=False)
+        return result
+
 class AtomDeIndexer(torch.nn.Module):
     def forward(self, features, mol_index, atom_index, n_molecules, n_atoms_max):
         featshape = 1 if features.ndimension() == 1 else features.shape[1:]
