@@ -215,7 +215,7 @@ class HippynnCalculator(Calculator): # Calculator inheritance required for ASE M
     ASE calculator based on hippynn graphs. Uses ASE neighbor lists. Not suitable for domain decomposition.
     """
 
-    def __init__(self, energy, charges=None, skin=1.0, extra_properties=None, name=None, en_unit=None, dist_unit=None):
+    def __init__(self, energy, charges=None, skin=1.0, extra_properties=None, en_unit=None, dist_unit=None):
         """
         :param energy: Node for energy
         :param charges: Node for charges (optional)
@@ -251,7 +251,8 @@ class HippynnCalculator(Calculator): # Calculator inheritance required for ASE M
         self.dist_unit = dist_unit if dist_unit is not None else ase.units.Angstrom
         self.device = torch.device("cpu")
         self.dtype = torch.get_default_dtype()
-        self.name = name if name is not None else "Hippynn calculator"
+        if not hasattr(self, "name"):  # Older versions of ase do not set the name
+            self.name = "Hippynn calculator"
         self.parameters = {} #Hack to work with ASE trajectory printing
 
     make = _generate_calculation_method
