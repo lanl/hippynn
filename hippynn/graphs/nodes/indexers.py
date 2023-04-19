@@ -135,6 +135,29 @@ class FilterBondsOneway(AutoNoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
+class SysMaxOfAtomsNode(ExpandParents, AutoNoKw, SingleNode):
+    _input_names = "var", "mol_index", "n_molecules"
+    _index_state = IdxType.Molecules
+    _auto_module_class = index_modules.SysMaxOfAtoms
+
+    @_parent_expander.match(_BaseNode)
+    def expansion0(self, node, *, purpose, **kwargs):
+        pidxer = find_unique_relative(node, AtomIndexer, why_desc=purpose)
+        return node, pidxer
+
+    @_parent_expander.match(_BaseNode, AtomIndexer)
+    def expansion1(self, node, pidxer, *, purpose, **kwargs):
+        return node, pidxer.mol_index, pidxer.n_molecules
+
+    _parent_expander.assertlen(3)
+    _parent_expander.get_main_outputs()
+    _parent_expander.require_idx_states(IdxType.Atoms, None, None)
+
+    def __init__(self, name, parents, module="auto", **kwargs):
+        parents = self.expand_parents(parents)
+        super().__init__(name, parents, module=module, **kwargs)
+
+
 def acquire_encoding_padding(search_nodes, species_set, purpose=None):
     """
     Automatically finds/builds a one-hot encoder and padding indexer starting from ``search_nodes``.

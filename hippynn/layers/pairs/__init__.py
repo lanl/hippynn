@@ -9,6 +9,8 @@ from .open import OpenPairIndexer, _PairIndexer
 
 from .periodic import PeriodicPairIndexer
 
+from .filters import FilterDistance
+
 from .indexing import (
     ExternalNeighbors,
     PairDeIndexer,

@@ -1,3 +1,13 @@
+
+0.0.2a1
+=======
+
+Improvements
+------------
+
+- Filtering scheme for pairfinders to avoid processing of unneeded data.
+
+
 0.0.1
 =====
 

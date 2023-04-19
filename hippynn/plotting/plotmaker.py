@@ -1,5 +1,6 @@
 import os
 import warnings
+import copy
 
 from matplotlib import pyplot as plt
 
@@ -22,7 +23,10 @@ class PlotMaker:
         model_outputs = [x.pred for x in model_outputs]
         targets = [x.true for x in targets]
         all_inputs = (*model_outputs, *targets)
-        self.torch_module = GraphModule(all_inputs, self.required_nodes)
+        graph = GraphModule(all_inputs, self.required_nodes)
+        # Plot maker runs on CPU
+        self.torch_module = copy.deepcopy(graph)
+        self.torch_module.cpu()
 
     @property
     def required_nodes(self):

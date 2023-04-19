@@ -122,6 +122,31 @@ class ScreenedCoulombEnergy(CoulombEnergy):
         return coulomb_molecule
 
 
+class CombineScreenings(torch.nn.Module):
+    """ Returns products of different screenings for Screened Coulomb Interactions. 
+    """
+    def __init__(self, screening_list):
+        super().__init__()
+        self.SL = torch.nn.ModuleList(screening_list)
+
+    def forward(self, pair_dist, radius):
+        """ Product of different screenings applied to pair_dist upto radius.
+        
+        :param pair_dist: torch.tensor, dtype=float64: 'Neighborlist' distances for coulomb energies.
+        :param radius: Maximum radius that Screened-Coulomb is evaluated upto. 
+        :return screening: Weights for screening for all pair_dist.
+        """
+        screening = None 
+
+        for s in self.SL:
+            if screening is None:
+                screening = s(pair_dist=pair_dist, radius=radius)
+            else:
+                screening = screening * s(pair_dist=pair_dist, radius=radius)
+
+        return screening
+
+
 class AlphaScreening(torch.nn.Module):
     def __init__(self, alpha):
         super().__init__()
@@ -171,11 +196,9 @@ class LocalDampingCosine(AlphaScreening):
         :param radius: Maximum radius that Screened-Coulomb is evaluated upto. 
         :return screening: Weights for screening for each pair.
         """
-        pi = torch.tensor([3.141592653589793238], device=pair_dist.device)
-        q = pair_dist / radius 
-        eta =  radius / self.alpha
-        screening = torch.subtract(torch.tensor([1.0], device=pair_dist.device), torch.square(torch.cos(0.5*pi*q*eta)))
-        
+        pi = torch.tensor([3.141592653589793238], device=pair_dist.device)        
+        screening = torch.subtract(torch.tensor([1.0], device=pair_dist.device), torch.square(torch.cos(0.5*pi*pair_dist/self.alpha)))
+    
         # pair_dist greater than cut-off; no local-damping. 
         screening = torch.where((pair_dist<self.alpha), screening, torch.ones_like(screening))
         

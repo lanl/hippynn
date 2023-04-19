@@ -16,8 +16,10 @@ from hippynn.graphs.nodes.tags import Encoder, AtomIndexer, PairIndexer, Energie
 from hippynn.graphs.nodes.pairs import ExternalNeighborIndexer
 from hippynn.graphs.nodes.misc import StrainInducer
 from hippynn.graphs.nodes.physics import CoulombEnergyNode, DipoleNode, StressForceNode
+from hippynn.graphs.nodes.pairs import PairFilter
 
 from hippynn.graphs.nodes.inputs import SpeciesNode, PositionsNode, CellNode
+
 
 import ase.neighborlist
 
@@ -46,8 +48,6 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
     ########################################
     # TODO: Implement Ewald, Wolf, or similar version of coulomb energy?
     # Better: figure out how to get voltages from external code and pass back as gradients for HIPNN backwards pass.
-    if any(isinstance(n, CoulombEnergyNode) for n in subgraph):
-        raise NotImplementedError("No support for coulomb energies in ASE interface yet.")
     ########################################
 
     ###############################################################
@@ -93,11 +93,21 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
     )
     new_inputs = [species, positions, in_cell, in_pair_first, in_pair_second, in_shift]
 
-    # Replace the existing pair indexers with the new node that accepts external pairs of atoms:
-    # (This is the primary reason we needed to copy the subgraph --
-    #   we don't want to break the original computation, and `replace_node` mutates graph connectivity
+    # Construct Filters
+    # Replace the existing pair indexers with the corresponding new (filtered) node
+    # that accepts external pairs of atoms:
+    # (This is the primary reason we needed to copy the subgraph --)
+    #  we don't want to break the original computation, and `replace_node` mutates graph connectivity
     for pi in pair_indexers:
-        replace_node(pi, external_pairs, disconnect_old=True)
+        if pi.dist_hard_max == min_radius:
+            mapped_node = external_pairs
+        else:
+            mapped_node = PairFilter(
+                "DistanceFilter-(ASE)EXTERNAL_NEIGHBORS",
+                (external_pairs),
+                dist_hard_max=pi.dist_hard_max, 
+            )
+        replace_node(pi, mapped_node, disconnect_old=True)
     ###############################################################
 
     ###############################################################
@@ -134,6 +144,7 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
     check_link_consistency((*new_inputs, *implemented_nodes))
     mod = GraphModule(new_inputs, implemented_nodes)
     mod.eval()
+
     return min_radius, species_set, implemented_properties, mod, pbc_handler
 
 
@@ -199,12 +210,12 @@ def pass_to_pytorch(fn_name):
     return method
 
 
-class HippynnCalculator(interface.Calculator, Calculator): # Calculator inheritance required for ASE Mixing Calculator usage
+class HippynnCalculator(Calculator): # Calculator inheritance required for ASE Mixing Calculator usage
     """
     ASE calculator based on hippynn graphs. Uses ASE neighbor lists. Not suitable for domain decomposition.
     """
 
-    def __init__(self, energy, charges=None, skin=1.0, extra_properties=None, name=None, en_unit=None, dist_unit=None):
+    def __init__(self, energy, charges=None, skin=1.0, extra_properties=None, en_unit=None, dist_unit=None):
         """
         :param energy: Node for energy
         :param charges: Node for charges (optional)
@@ -240,7 +251,8 @@ class HippynnCalculator(interface.Calculator, Calculator): # Calculator inherita
         self.dist_unit = dist_unit if dist_unit is not None else ase.units.Angstrom
         self.device = torch.device("cpu")
         self.dtype = torch.get_default_dtype()
-        self.name = name if name is not None else "Hippynn calculator"
+        if not hasattr(self, "name"):  # Older versions of ase do not set the name
+            self.name = "Hippynn calculator"
         self.parameters = {} #Hack to work with ASE trajectory printing
 
     make = _generate_calculation_method
@@ -261,7 +273,7 @@ class HippynnCalculator(interface.Calculator, Calculator): # Calculator inherita
 
     def rebuild_neighbors(self):
         self.nl = ase.neighborlist.NeighborList(
-            self._cutoffs,
+            self._cutoffs+self._skin, #ASE neighbor list implementation is only safe up to cutoffs-skin
             skin=self._skin,
             sorted=True,
             self_interaction=False,
