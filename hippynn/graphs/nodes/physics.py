@@ -229,7 +229,6 @@ class VecMag(ExpandParents, AutoNoKw, SingleNode):
 
     _parent_expander.assertlen(1)
     _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Atoms)
 
     def __init__(self, name, parents, module="auto", _helper=None, **kwargs):
         parents = self.expand_parents(parents)
