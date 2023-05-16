@@ -12,5 +12,6 @@ Organized datasets for training and prediction.
 from .database import Database
 from .ondisk import DirectoryDatabase, NPZDatabase
 from .ase_db import AseDatabase
+from .ase_xyz_db import AseXYZDatabase
 
-__all__ = ["Database", "DirectoryDatabase", "NPZDatabase", "AseDatabase"]
+__all__ = ["Database", "DirectoryDatabase", "NPZDatabase", "AseDatabase", "AseXYZDatabase"]
