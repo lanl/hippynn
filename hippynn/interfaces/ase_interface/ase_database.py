@@ -1,10 +1,11 @@
 """
-Dataset stored as ase extended-XYZ file (ideally either .extxyz or .xyz)
+Dataset stored as ase database file (ideally either .json or .db, or in .xyz, .extxyz formats)
 
 See: https://databases.fysik.dtu.dk/ase/ase/db/db.html for documentation
 on typical columns present in ase database
 
-Typically used column names in ase db format:
+
+Typically used column names in ase db/xyz format:
 
 positions : x,y,z cartesian positions (Angstrom)
 forces : x,y,z carteisian forces (ev/Angstrom)
@@ -12,33 +13,41 @@ energy : energy (eV)
 cell : x,y,z of cell (3x3) (Angstrom)
 charges : atom-specific charges
 stress: (6,) atomic stresses
-numbers : Z of all atoms
 initial_charges : atom-specific initial charges 
+inital_magmoms :atom-specific initial magnetic moments
+numbers : atom Zs (integer)
+pbc : periodic boundary conditions (bool)
+ctime : computer time (float)
+mtime : time (float)
+dipole : molecular dipole (3) vector
 """
 import os 
 
 import numpy as np
 import torch
+from ase.db import connect
 from ase.io import read
 
-from ..tools import np_of_torchdefaultdtype
-from .database import Database
-from .restarter import Restartable
+from ...tools import np_of_torchdefaultdtype
+from ...databases.database import Database
+from ...databases.restarter import Restartable
 
 
-class AseXYZDatabase(Database, Restartable):
+class AseDatabase(Database, Restartable):
     """
-    Database stored as ase extended-xyz file in a directory.
+    Database stored as ase database file(s) in a directory.
 
-    :param directory: directory path where the ase-xyz-database is stored
-    :param name: name of the ase-xyz (or list of xyzs) to load
+    :param directory: directory path where the ase database(s) is stored
+    :param name: name of the ase database(s) to load
 
-    This function loads an ase xyz file({name}.xyz/.extxyz) variable db_name including all inputs and targets.
+    This function loads an ase database(s) ({name}.json/.db) OR ({{name}.extxyz,.xyz}) 
+    variable db_name including all inputs and targets.
+
 
     Other arguments: See ``Database``.
 
-    See: https://databases.fysik.dtu.dk/ase/ase/atoms.html for documentation
-        on typical columns present in ase atoms object
+    See: https://databases.fysik.dtu.dk/ase/ase/db/db.html for documentation
+        on typical columns present in ase database
     """
 
     def __init__(self, directory, name, inputs, targets, *args, quiet=False, allow_unfound=False, **kwargs):
@@ -62,8 +71,8 @@ class AseXYZDatabase(Database, Restartable):
 
         Parameters
         ----------
-        filename : str (list)
-            filename(s) or path(s) of database(s) to convert
+        filename : str
+            filename or path of database to convert
         prefix : str, optional
             prefix for output numpy arrays, by default None
         return_data : bool, optional
@@ -73,7 +82,7 @@ class AseXYZDatabase(Database, Restartable):
         try:
             if isinstance(filename,str):
                 db = read(directory + filename,index=':')
-            elif isinstance(filename,list):
+            elif isinstance(filename,(list,np.ndarray)):
                 db = []
                 for name in filename:
                     temp_db = read(directory + name,index=':')
@@ -99,6 +108,11 @@ class AseXYZDatabase(Database, Restartable):
             result_dict['cell'] = result_dict['_cellobj'][:]
             del result_dict['_cellobj']
             if result_dict.get('_calc',None) is not None:
+                calc_dict = result_dict.get('_calc').__dict__ 
+                # Overwrite atoms-stored objects with calculator objects.
+                # Helpful for .json/.db files where energy is not stored under 'info' section
+                for k,v in calc_dict['results'].items():
+                    result_dict[k] = v
                 del result_dict['_calc']
             if not allow_unfound:
                 result_dict = {k: v for k,v in result_dict.items() if (k in var_list)}
