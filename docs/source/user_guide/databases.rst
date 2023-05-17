@@ -30,6 +30,6 @@ ASE Objects Database handling
 If your training data is stored as ASE files of any type (.json,.db,.xyz,.traj ... etc.) it can be loaded directly 
 a Database for hippynn.
 
-The ASE database :class:`~hippynn.interface.AseDatabase` can be loaded with ASE installed.
+The ASE database :class:`~hippynn.databases.AseDatabase` can be loaded with ASE installed.
 
-See :ref:`~examples.ase_db_example.py` for a basic example utilzing the class.
+See ~/examples/ase_db_example.py for a basic example utilzing the class.
