@@ -1,3 +1,10 @@
+0.0.2a2
+=======
+
+Improvements
+------------
+
+- ASE database loader added to read any ASE file or list of ASE files.
 
 0.0.2a1
 =======

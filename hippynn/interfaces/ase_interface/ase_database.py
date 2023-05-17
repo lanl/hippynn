@@ -10,6 +10,7 @@ Typically used column names in ase db/xyz format:
 positions : x,y,z cartesian positions (Angstrom)
 forces : x,y,z carteisian forces (ev/Angstrom)
 energy : energy (eV)
+energy_per_atom : energy per atom (eV/atom)
 cell : x,y,z of cell (3x3) (Angstrom)
 charges : atom-specific charges
 stress: (6,) atomic stresses
@@ -115,6 +116,8 @@ class AseDatabase(Database, Restartable):
                     result_dict[k] = v
                 del result_dict['_calc']
             if not allow_unfound:
+                if 'energy_per_atom' in var_list:
+                    var_list += ['energy']
                 result_dict = {k: v for k,v in result_dict.items() if (k in var_list)}
             record_list.append(result_dict)
             if len(result_dict['positions']) > max_n_atom:
@@ -129,6 +132,8 @@ class AseDatabase(Database, Restartable):
             else:
                 if isinstance(val,(float,int)):
                     array_dict[key] = np.zeros([n_record])
+                    if (key == 'energy') and ('energy_per_atom' in var_list):
+                        array_dict['energy_per_atom'] = np.zeros([n_record])
                 else:
                     array_dict[key] = None # Do Not Save
                     delete_cols.append(key)
@@ -154,6 +159,8 @@ class AseDatabase(Database, Restartable):
                         raise ValueError('Shape of Numpy array for key: {} unknown.'.format(k))
                 elif isinstance(array_dict[k],np.ndarray): # Energy, float or integers only
                     array_dict[k][i] = v
+                    if (k == 'energy') and ('energy_per_atom' in var_list): # Add in per-atom-energy
+                        array_dict['energy_per_atom'][i] = v/natom
                 else: # Everything else either list of strings or something else.
                     pass
         
