@@ -132,7 +132,7 @@ class AseDatabase(Database, Restartable):
             else:
                 if isinstance(val,(float,int)):
                     array_dict[key] = np.zeros([n_record])
-                    if (key == 'energy') and ('energy_per_atom' in var_list):
+                    if (key == 'energy') and (('energy_per_atom' in var_list) or (allow_unfound)):
                         array_dict['energy_per_atom'] = np.zeros([n_record])
                 else:
                     array_dict[key] = None # Do Not Save
@@ -159,7 +159,7 @@ class AseDatabase(Database, Restartable):
                         raise ValueError('Shape of Numpy array for key: {} unknown.'.format(k))
                 elif isinstance(array_dict[k],np.ndarray): # Energy, float or integers only
                     array_dict[k][i] = v
-                    if (k == 'energy') and ('energy_per_atom' in var_list): # Add in per-atom-energy
+                    if (k == 'energy') and (('energy_per_atom' in var_list) or (allow_unfound)): # Add in per-atom-energy
                         array_dict['energy_per_atom'][i] = v/natom
                 else: # Everything else either list of strings or something else.
                     pass
