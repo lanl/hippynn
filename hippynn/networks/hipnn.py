@@ -46,8 +46,12 @@ def compute_hipnn_e0(encoder, Z_Data, en_data, peratom=False):
     # shape n_species, n_examples
     ZTZ_inv_Z = ZTZ_inv @ Z_matrix.T
 
-    # shape (1, n_species)
-    e_per_species = (ZTZ_inv_Z @ en_data).T
+    # shape (n_species, n_targets) (n_targets may be omitted)
+    e_per_species = ZTZ_inv_Z @ en_data
+
+    if e_per_species.ndim != 1:
+        # if n_targets is included
+        e_per_species = e_per_species.T
 
     return e_per_species
 

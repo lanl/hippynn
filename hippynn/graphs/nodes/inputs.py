@@ -21,6 +21,10 @@ class CellNode(InputNode):
     _index_state = IdxType.Molecules
     input_type_str = "Cells"
 
+class ForceNode(InputNode):
+    _index_state = IdxType.MolAtom
+    input_type_str = "Force"
+
 
 class InputCharges(Charges, InputNode):
     _index_state = IdxType.MolAtom

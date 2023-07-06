@@ -53,14 +53,23 @@ class HEnergy(torch.nn.Module):
         total_energies = self.summer(total_atomen, mol_index, n_molecules)
 
         if self.n_terms > 1:
-            partial_esq = [x ** 2 for x in partial_energies]
+            partial_esq = [torch.square(x) for x in partial_energies]
             partial_atom_hier = [x / (x + y) for x, y in zip(partial_esq[1:], partial_esq[:-1])]
-            total_atom_hier = sum(x for x in partial_atom_hier)
+            mol_hier = [self.summer(x, mol_index, n_molecules)/self.summer(x+y, mol_index, n_molecules)
+                        for x,y in zip(partial_esq[1:], partial_esq[:-1])]
+            mol_hier = sum(mol_hier)
+            partial_batch_hier = [x.sum() / (x.sum() + y.sum()) for x, y in zip(partial_esq[1:], partial_esq[:-1])]
+            batch_hier = sum(partial_batch_hier)
+            total_atom_hier = sum(partial_atom_hier)
             total_hier = self.summer(total_atom_hier, mol_index, n_molecules)
+
         else:
             total_hier = torch.zeros_like(total_energies)
+            mol_hier = torch.zeros_like(total_energies)
+            total_atom_hier = torch.zeros_like(total_atomen)
+            batch_hier = torch.zeros(1,dtype=total_energies.dtype,device=total_energies.dtype)
 
-        return total_energies, total_atomen, partial_sums, total_hier
+        return total_energies, total_atomen, partial_sums, total_hier, total_atom_hier, mol_hier, batch_hier
 
 
 class HCharge(torch.nn.Module):

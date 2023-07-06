@@ -423,3 +423,39 @@ class MinDistNode(ExpandParents, AutoNoKw, MultiNode):
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
         super().__init__(name, parents, module=module, **kwargs)
+
+
+# Graph Nodes for Filter Pair Indexer. Works with PeriodicPairs, OpenPairs, External Neighbors.
+class PairFilter(AutoKw, PairIndexer, ExpandParents, MultiNode):
+    _auto_module_class = pairs_modules.FilterDistance
+
+    @_parent_expander.match(PairIndexer)
+    def expand0(self, pair_indexer, purpose):
+
+        # During graph construction, every node is connected to its current set of parents. 
+        # It is possible that pair_indexer.children can contain itself; an un-initialized PairFilter. 
+        # Only initialized PairIndexers are extracted here. 
+        parents = [c for c in pair_indexer.children if hasattr(c, "_index_state")]
+
+        # Validate that nothing unexpected has happened.
+        # Hopefully this can't fail, but if we update the pair API or someone customizes this aspect of the
+        # library, this should catch any problems.
+        idx_states = set(c._index_state for c in parents)
+
+        if len(idx_states) != 1:
+            raise TypeError(f"Input contains mixed index states: {idx_states}. Input states should only consist of index type pair.")
+        idx_state = idx_states.pop()
+        if idx_state != IdxType.Pair:
+            raise TypeError(f"Index state for inputs was {idx_state}, needs to be index type pair.")
+        # Validation complete.
+        self._output_names = tuple(f"out_{name}" for name in pair_indexer._output_names)
+        self._input_names = tuple(f"in_{name}" for name in pair_indexer._output_names)
+        self._output_index_states = (IdxType.Pair,)*len(parents)
+
+        return parents
+
+    def __init__(self, name, parents, dist_hard_max, module="auto", **kwargs):
+        self.module_kwargs = {"hard_dist_cutoff": dist_hard_max}  # passes to PairIndexer superclass
+        self.dist_hard_max = dist_hard_max
+        parents = self.expand_parents(parents)
+        super().__init__(name, parents, module=module, **kwargs)

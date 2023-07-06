@@ -191,10 +191,11 @@ class Database:
         if not self.splitting_completed:
             raise ValueError("Database has not yet been split.")
 
-        if split_type in ("train", "valid", "test"):
-            data = [self.splits[split_type][k] for k in self.var_list]
-        else:
-            raise ValueError("Datatype {} Invalid. Must be one of 'train','valid','test'".format(split_type))
+
+        if split_type not in self.splits:
+            raise ValueError(f"Split {split_type} Invalid. Current splits:{list(self.splits.keys())}")
+
+        data = [self.splits[split_type][k] for k in self.var_list]
 
         if evaluation_mode == "train":
             if split_type != "train":
@@ -205,7 +206,7 @@ class Database:
         elif evaluation_mode == "eval":
             shuffle = False
         else:
-            raise ValueError("Evaluation_mode ({}) must be one of 'train' or 'eval'")
+            raise ValueError(f"Evaluation_mode ({evaluation_mode}) must be one of 'train' or 'eval'")
 
         dataset = NamedTensorDataset(self.var_list, *data)
         if subsample:

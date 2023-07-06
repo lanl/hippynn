@@ -215,17 +215,23 @@ class ScreenedCoulombEnergyNode(ChargePairSetup, AutoKw, SingleNode):
         super().__init__(name, parents, module=module)
 
 
-class VecMag(AutoNoKw, SingleNode):
+class VecMag(ExpandParents, AutoNoKw, SingleNode):
     _input_names = ("vector",)
     _auto_module_class = physics_layers.VecMag
     _index_state = IdxType.NotFound
 
-    def __init__(self, name, parents, module="auto", **kwargs):
-        if isinstance(parents, SingleNode):
-            p = parents.main_output
-            p = elementwise_compare_reduce(p)
-            parents = (p,)
+    @_parent_expander.match(_BaseNode, _BaseNode)
+    def expansion2(self, vector, helper, *, purpose, **kwargs):
+        # This somewhat strange construction allows us to
+        # find a padding indexer if the vector is detached from the padding indexer.
+        vector, helper = elementwise_compare_reduce(vector, helper)
+        return (vector,)
 
+    _parent_expander.assertlen(1)
+    _parent_expander.get_main_outputs()
+
+    def __init__(self, name, parents, module="auto", _helper=None, **kwargs):
+        parents = self.expand_parents(parents)
         self._index_state = parents[0]._index_state
         assert len(parents) == 1, "Improper number of parents for {}".format(self.__class__.__name__)
         super().__init__(name, parents, module=module, **kwargs)
