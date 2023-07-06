@@ -129,7 +129,7 @@ class ScreenedCoulombEnergy(CoulombEnergy):
         coulomb_atom = voltage_atom * charges
         coulomb_molecules = 0.5 * self.summer(coulomb_atom, mol_index, n_molecules)
 
-        return coulomb_molecule, 0.5*coulomb_atom
+        return coulomb_molecule, coulomb_atom
 
 
 class CombineScreenings(torch.nn.Module):
