@@ -176,7 +176,8 @@ class CoulombEnergyNode(ChargePairSetup, AutoKw, MultiNode):
 
 class ScreenedCoulombEnergyNode(ChargePairSetup, AutoKw, MultiNode):
     _input_names = "charges", "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules"
-    _output_names = "mol_energies", "atom_voltages"
+    #_output_names = "mol_energies", "atom_voltages"
+    _output_names = "mol_energies", "atom_energies"
     _main_output = "mol_energies"
     _output_index_states = IdxType.Molecules, IdxType.Atoms
     #_index_state = IdxType.Molecules
