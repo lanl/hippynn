@@ -7,6 +7,27 @@ from . import indexers
 from . import hiplayers
 
 
+class CmbEnergy(torch.nn.Module):
+    """
+    Combines Local atom energies and Coulomb atom energies
+    """
+    def __init__(self):
+        super().__init__()
+        self.summer = indexers.MolSummer()
+
+    def forward(self, atom_energy, atom_coulomb, mol_index, n_molecules):
+        """
+        :param: atom_energy per-atom energy prediction.
+        :param: atom_coulomb per atom coulomb energy. 
+        :param: mol_index the molecular index for atoms in the batch
+        :param: total number of molecules in the batch
+        :return: Total Energy
+        """
+        total_atom_energy = atom_energy + 0.5*atom_coulomb
+        mol_energy = self.summer(total_atom_energy, mol_index, n_molecules)
+        return mol_energy, total_atom_energy
+
+
 class HEnergy(torch.nn.Module):
     """
     Predict a system-level scalar such as energy from a sum over local components.

@@ -4,8 +4,36 @@ Nodes for prediction of variables from network features.
 from .base import MultiNode, AutoKw, ExpandParents, find_unique_relative, _BaseNode
 from .indexers import PaddingIndexer
 from .tags import AtomIndexer, Network, PairIndexer, HAtomRegressor, Charges, Energies
+from .physics import ChargePairSetup
 from ..indextypes import IdxType, index_type_coercion
 from ...layers import targets as target_modules
+
+
+class CmbEnergyNode(Energies, AutoKw, ExpandParents, MultiNode):
+    """
+    Combines Local atom energies and Coulomb atom energies
+    TODO Propagate the hierarchicality information for atom energy and atom charges
+        which may be relevant for UQ stuff. 
+    """
+    _input_names = "atom_energy", "atom_coulomb", "mol_index", "n_molecules"
+    _output_names = "mol_energy", "atom_energies"
+    _main_output = "mol_energy"
+    _output_index_states = IdxType.Molecules, IdxType.Atoms,
+    _auto_module_class = target_modules.CmbEnergy
+    
+    @_parent_expander.match(Energies, ChargePairSetup, AtomIndexer)
+    def expansion0(self, energy, c_energy, pdindexer):
+        return energy, chargepair, pdindexer.mol_index, pdindexer.n_molecules
+
+    _parent_expander.assertlen(4)
+    #_parent_expander.get_main_outputs()
+    #_parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms)
+
+    def __init__(self, name, parents, module="auto", module_kwargs=None, **kwargs):
+        self.module_kwargs = {} if module_kwargs is None else module_kwargs
+        parents = self.expand_parents(parents, **kwargs)
+        super().__init__(name, parents=parents, module=module, **kwargs)
+  
 
 
 class HEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
@@ -85,7 +113,7 @@ class HBondNode(ExpandParents, AutoKw, MultiNode):
     _output_index_states = IdxType.Pair, IdxType.Pair
     _input_names = "features", "pair_first", "pair_second", "pair_dist"
     _main_output = "bonds"
-
+ 
     @_parent_expander.matchlen(1)
     def expand0(self, features, *, purpose, **kwargs):
         pairfinder = find_unique_relative(features, PairIndexer, why_desc=purpose)
