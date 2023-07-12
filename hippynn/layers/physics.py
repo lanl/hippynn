@@ -106,30 +106,24 @@ class ScreenedCoulombEnergy(CoulombEnergy):
         self.bond_summer = pairs.MolPairSummer()
 
     def forward(self, charges, pair_dist, pair_first, pair_second, mol_index, n_molecules):
-
-        # Calculation of pair terms
-        base_coulomb = charges[pair_first] * charges[pair_second] / pair_dist.unsqueeze(1)
+        # we can alternatively resolve the pair_dist behavior earlier 
         screening = self.screening(pair_dist, self.radius).unsqueeze(1)
         screening = torch.where((pair_dist < self.radius).unsqueeze(1), screening, torch.zeros_like(screening))
-        coulomb_pairs = base_coulomb * screening
-
-        # Add pair contributions to system
-        coulomb_molecule = self.bond_summer(coulomb_pairs, mol_index, n_molecules, pair_first)
-
-        # Finally, account for symmetry pairs and energy conversion factor.
-        coulomb_molecule = 0.5 * self.energy_conversion_factor * coulomb_molecule
-#        return coulomb_molecules
 
         # Voltage pairs for per-atom energy
-        voltage_pairs = self.energy_conversion_factor * (charges[pair_second] / pair_dist.unsqueeze(1))
-        voltage_pairs = voltage_pairs * screening
+        if (charges[pair_second].shape == pair_dist.shape): 
+            voltage_pairs = self.energy_conversion_factor * (charges[pair_second] / pair_dist) # Lammps
+            voltage_pairs = voltage_pairs * screening.squeeze(2) # lammps
+        else:
+            voltage_pairs = self.energy_conversion_factor * (charges[pair_second] / pair_dist.unsqueeze(1)) # hipnn
+            voltage_pairs = voltage_pairs * screening # hipnn
         n_atoms, _ = charges.shape
         voltage_atom = torch.zeros((n_atoms, 1), device=charges.device, dtype=charges.dtype)
         voltage_atom.index_add_(0, pair_first, voltage_pairs) 
         coulomb_atom = voltage_atom * charges
         coulomb_molecules = 0.5 * self.summer(coulomb_atom, mol_index, n_molecules)
 
-        return coulomb_molecule, coulomb_atom
+        return coulomb_molecules, coulomb_atom
 
 
 class CombineScreenings(torch.nn.Module):
