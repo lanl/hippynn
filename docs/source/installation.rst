@@ -45,7 +45,7 @@ Installation Instructions
 
 Clone the hippynn_ repository and navigate into it, e.g.::
 
-    $ git clone git@github.com:lanl/hippynn.git
+    $ git clone https://github.com/lanl/hippynn.git
     $ cd hippynn
 
 .. _hippynn: https://github.com/lanl/hippynn/
