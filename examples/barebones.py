@@ -1,5 +1,7 @@
-# To obtain the data files needed for this example, use the script process_QM7_data.py, 
-# also located in this folder. The script contains further instructions for use.
+'''
+To obtain the data files needed for this example, use the script process_QM7_data.py, 
+also located in this folder. The script contains further instructions for use.
+'''
 
 import torch
 

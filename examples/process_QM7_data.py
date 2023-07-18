@@ -1,11 +1,13 @@
-# This script extracts data from file the file qm7.mat, which can be 
-# downloaded from http://quantum-machine.org/datasets/, and saves the data
-# to .npy files formatted as Numpy arrays. A few adjustments are made so that
-# the .npy files are ready to be read by the example scripts for hippynn.
+'''
+This script extracts data from file the file qm7.mat, which can be 
+downloaded from http://quantum-machine.org/datasets/, and saves the data
+to .npy files formatted as Numpy arrays. A few adjustments are made so that
+the .npy files are ready to be read by the example scripts for hippynn.
 
-# BEFORE RUNNING: Copy this file to a folder datasets/qm7_processed/, where datasets/ 
-# is at the same level as hippynn/. Ensure that the file qm7.mat is also present in 
-# that folder. Execute this script from that folder. 
+BEFORE RUNNING: Copy this file to a folder datasets/qm7_processed/, where datasets/ 
+is at the same level as hippynn/. Ensure that the file qm7.mat is also present in 
+that folder. Execute this script from that folder. 
+'''
 
 import scipy.io
 import numpy as np
