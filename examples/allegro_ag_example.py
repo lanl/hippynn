@@ -1,10 +1,22 @@
-"""ase_db_example.py
+"""
+allegro_ag_example.py
 
-Script trains a hippynn model based on Ag MD data, and uses the AseDatabase Loader.
+Script trains a hippynn model based on Ag MD data.
 
-Download Ag_warm_nospin.xyz - https://archive.materialscloud.org/record/file?filename=Ag_warm_nospin.xyz&record_id=1387 
+This example uses the AseDatabase Loader and thus requires the `ase` package.
 
-Timing - takes ~60 s/epoch on 4-core intel MacbookPro laptop.
+The database file is:
+ - Ag_warm_nospin.xyz - https://archive.materialscloud.org/record/file?filename=Ag_warm_nospin.xyz&record_id=1387
+
+This file was released in conjunction with
+"Learning local equivariant representations for large-scale atomistic dynamics"
+Musaelian et al. 2023 Nat. Comm.
+https://doi.org/10.1038/s41467-023-36329-y
+
+Timing:
+    ~60 s/epoch@batch_size=128 on 4-core intel MacbookPro laptop.
+    ~4s/epoch@batch_size=128 on M1Max MacbookPro laptop.
+
 """
 import os
 import torch
@@ -18,7 +30,7 @@ from hippynn.databases import AseDatabase
 torch.set_default_dtype(torch.float32)
 hippynn.settings.WARN_LOW_DISTANCES = False
 
-max_epochs=5000
+max_epochs=500
 
 network_params = {
     "possible_species": [0, 47],
@@ -36,7 +48,7 @@ network_params = {
 early_stopping_key = "Loss-Err"
 test_size = 0.1
 valid_size = 0.1
-dbname = 'Ag_warm_nospin.xyz'
+dbname = '../../datasets/Ag_warm_nospin.xyz'
 training_path = os.path.abspath('.') + '/'
 
 def setup_network(network_params):
@@ -113,7 +125,7 @@ def fit_model(training_modules,database):
 
     scheduler = RaiseBatchSizeOnPlateau(
         optimizer=optimizer,
-        max_batch_size=128,
+        max_batch_size=32,
         patience=25,
         factor=0.5,
     )
@@ -121,7 +133,7 @@ def fit_model(training_modules,database):
     controller = PatienceController(
         optimizer=optimizer,
         scheduler=scheduler,
-        batch_size=128,
+        batch_size=4,
         eval_batch_size=128,
         max_epochs=max_epochs,
         termination_patience=50,

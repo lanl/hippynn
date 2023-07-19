@@ -4,7 +4,6 @@ Dataset stored as ase database file (ideally either .json or .db, or in .xyz, .e
 See: https://databases.fysik.dtu.dk/ase/ase/db/db.html for documentation
 on typical columns present in ase database
 
-
 Typically used column names in ase db/xyz format:
 
 positions : x,y,z cartesian positions (Angstrom)
@@ -22,16 +21,16 @@ ctime : computer time (float)
 mtime : time (float)
 dipole : molecular dipole (3) vector
 """
-import os 
+import os
 
 import numpy as np
-import torch
-from ase.db import connect
 from ase.io import read
 
 from ...tools import np_of_torchdefaultdtype
 from ...databases.database import Database
 from ...databases.restarter import Restartable
+from typing import Union
+from typing import List
 
 
 class AseDatabase(Database, Restartable):
@@ -39,10 +38,12 @@ class AseDatabase(Database, Restartable):
     Database stored as ase database file(s) in a directory.
 
     :param directory: directory path where the ase database(s) is stored
-    :param name: name of the ase database(s) to load
+    :param name: name or list of names for files for ase databases.
 
-    This function loads an ase database(s) ({name}.json/.db) OR ({{name}.extxyz,.xyz}) 
+    This function loads an ase database(s) ({name}.json/.db) OR ({{name}.extxyz,.xyz})
     variable db_name including all inputs and targets.
+
+    filenames should end with .json, .db, .extxyz, and .xyz, etc; Anything parsable by ase.io.load
 
 
     Other arguments: See ``Database``.
@@ -51,7 +52,7 @@ class AseDatabase(Database, Restartable):
         on typical columns present in ase database
     """
 
-    def __init__(self, directory, name, inputs, targets, *args, quiet=False, allow_unfound=False, **kwargs):
+    def __init__(self, directory: str, name: Union[str, List[str]], inputs, targets, *args, quiet=False, allow_unfound=False, **kwargs):
 
         arr_dict = self.load_arrays(directory, name, inputs, targets, quiet=quiet, allow_unfound=allow_unfound)
         super().__init__(arr_dict, inputs, targets, *args, **kwargs, quiet=quiet, allow_unfound=allow_unfound)
@@ -64,7 +65,7 @@ class AseDatabase(Database, Restartable):
             *args,
             **kwargs,
             quiet=quiet,
-            allow_unfound = allow_unfound
+            allow_unfound=allow_unfound,
         )
 
     def load_arrays(self, directory, filename, inputs, targets, quiet=False, allow_unfound=False):
@@ -81,18 +82,18 @@ class AseDatabase(Database, Restartable):
         """
         var_list = inputs + targets
         try:
-            if isinstance(filename,str):
-                db = read(directory + filename,index=':')
-            elif isinstance(filename,(list,np.ndarray)):
+            if isinstance(filename, str):
+                db = read(directory + filename, index=":")
+            elif isinstance(filename, (list, np.ndarray)):
                 db = []
                 for name in filename:
-                    temp_db = read(directory + name,index=':')
+                    temp_db = read(directory + name, index=":")
                     db += temp_db
         except FileNotFoundError as fee:
-                    raise FileNotFoundError(
-                        "ERROR: Couldn't find {} ase xyz database."
-                        'A solution is to explicitly specify "path" in database_params '.format(directory+filename)
-                    ) from fee
+            raise FileNotFoundError(
+                "ERROR: Couldn't find {} ase xyz database."
+                'A solution is to explicitly specify "path" in database_params '.format(directory + filename)
+            ) from fee
         if not quiet:
             print("ASE Database found")
         record_list = []
@@ -100,72 +101,72 @@ class AseDatabase(Database, Restartable):
         max_atoms_record = None
         for row in db:
             result_dict = row.__dict__
-            for k,v in result_dict['arrays'].items():
+            for k, v in result_dict["arrays"].items():
                 result_dict[k] = v
-            for k,v in result_dict['info'].items():
+            for k, v in result_dict["info"].items():
                 result_dict[k] = v
-            del result_dict['arrays']
-            del result_dict['info']
-            result_dict['cell'] = result_dict['_cellobj'][:]
-            del result_dict['_cellobj']
-            if result_dict.get('_calc',None) is not None:
-                calc_dict = result_dict.get('_calc').__dict__ 
+            del result_dict["arrays"]
+            del result_dict["info"]
+            result_dict["cell"] = result_dict["_cellobj"][:]
+            del result_dict["_cellobj"]
+            if result_dict.get("_calc", None) is not None:
+                calc_dict = result_dict.get("_calc").__dict__
                 # Overwrite atoms-stored objects with calculator objects.
                 # Helpful for .json/.db files where energy is not stored under 'info' section
-                for k,v in calc_dict['results'].items():
+                for k, v in calc_dict["results"].items():
                     result_dict[k] = v
-                del result_dict['_calc']
+                del result_dict["_calc"]
             if not allow_unfound:
-                if 'energy_per_atom' in var_list:
-                    var_list += ['energy']
-                result_dict = {k: v for k,v in result_dict.items() if (k in var_list)}
+                if "energy_per_atom" in var_list:
+                    var_list += ["energy"]
+                result_dict = {k: v for k, v in result_dict.items() if (k in var_list)}
             record_list.append(result_dict)
-            if len(result_dict['positions']) > max_n_atom:
-                max_n_atom = len(result_dict['positions'])
+            if len(result_dict["positions"]) > max_n_atom:
+                max_n_atom = len(result_dict["positions"])
                 max_atoms_record = result_dict
         n_record = len(record_list)
         array_dict = dict()
         delete_cols = []
-        for key,val in max_atoms_record.items():
-            if isinstance(val,np.ndarray):
-                array_dict[key] = np.zeros([n_record]+[x for x in val.shape])
+        for key, val in max_atoms_record.items():
+            if isinstance(val, np.ndarray):
+                array_dict[key] = np.zeros([n_record] + [x for x in val.shape])
             else:
-                if isinstance(val,(float,int)):
+                if isinstance(val, (float, int)):
                     array_dict[key] = np.zeros([n_record])
-                    if (key == 'energy') and (('energy_per_atom' in var_list) or (allow_unfound)):
-                        array_dict['energy_per_atom'] = np.zeros([n_record])
+                    if (key == "energy") and (("energy_per_atom" in var_list) or (allow_unfound)):
+                        array_dict["energy_per_atom"] = np.zeros([n_record])
                 else:
-                    array_dict[key] = None # Do Not Save
+                    array_dict[key] = None  # Do Not Save
                     delete_cols.append(key)
         # Save the record uid from the ase db object names.
-        record_list.sort(key=lambda rec: len(rec['numbers']))
+        record_list.sort(key=lambda rec: len(rec["numbers"]))
         for i, record in enumerate(record_list):
-            natom = len(record['numbers'])
-            for k,v in record.items():
-                if isinstance(v,np.ndarray):
+            natom = len(record["numbers"])
+            for k, v in record.items():
+                if isinstance(v, np.ndarray):
                     shape = array_dict[k].shape
                     # Note this assumes the maximum number of atoms greater than the length of property of interest
                     # E.g. 3 for dipole (make sure your training set has something with more than 3 atoms)
                     # Or 6 for stress tensor (make sure your training set has something with more than 6 atoms)
-                    if (len(shape) == 2) and (shape[1] < max_n_atom): # 1D array, e.g. dipole, stress tensor
-                        array_dict[k][i,:] = v
-                    elif (len(shape) == 2) and (shape[1] == max_n_atom): # 1D array including maximum number of atoms: e.g. charges
-                        array_dict[k][i,:natom] = v
-                    elif (len(shape) == 3) and (shape[1] <  max_n_atom): # 2D array, e.g. cells
-                        array_dict[k][i,:,:] = v
-                    elif (len(shape) == 3) and (shape[1] ==  max_n_atom): # 2D array, e.g. positions, forces
-                        array_dict[k][i,:natom,:] = v
+                    if (len(shape) == 2) and (shape[1] < max_n_atom):  # 1D array, e.g. dipole, stress tensor
+                        array_dict[k][i, :] = v
+                    elif (len(shape) == 2) and (shape[1] == max_n_atom):  # 1D array including maximum number of atoms: e.g. charges
+                        array_dict[k][i, :natom] = v
+                    elif (len(shape) == 3) and (shape[1] < max_n_atom):  # 2D array, e.g. cells
+                        array_dict[k][i, :, :] = v
+                    elif (len(shape) == 3) and (shape[1] == max_n_atom):  # 2D array, e.g. positions, forces
+                        array_dict[k][i, :natom, :] = v
                     else:
-                        raise ValueError('Shape of Numpy array for key: {} unknown.'.format(k))
-                elif isinstance(array_dict[k],np.ndarray): # Energy, float or integers only
+                        raise ValueError("Shape of Numpy array for key: {} unknown.".format(k))
+                elif isinstance(array_dict[k], np.ndarray):  # Energy, float or integers only
                     array_dict[k][i] = v
-                    if (k == 'energy') and (('energy_per_atom' in var_list) or (allow_unfound)): # Add in per-atom-energy
-                        array_dict['energy_per_atom'][i] = v/natom
-                else: # Everything else either list of strings or something else.
+                    if (k == "energy") and (("energy_per_atom" in var_list) or (allow_unfound)):  # Add in per-atom-energy
+                        array_dict["energy_per_atom"][i] = v / natom
+                else:  # Everything else either list of strings or something else.
                     pass
-        
+
         # Make sure Zs are integers.
-        array_dict['numbers'] = array_dict['numbers'].astype('int')
+        array_dict["numbers"] = array_dict["numbers"].astype("int")
 
         arr_dict = dict()
 
@@ -181,5 +182,5 @@ class AseDatabase(Database, Restartable):
         if not quiet:
             print("Data types:")
             print({k: v.dtype for k, v in arr_dict.items()})
-        
+
         return arr_dict
