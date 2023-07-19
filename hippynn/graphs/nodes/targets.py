@@ -4,6 +4,7 @@ Nodes for prediction of variables from network features.
 from .base import MultiNode, AutoKw, ExpandParents, find_unique_relative, _BaseNode
 from .indexers import PaddingIndexer
 from .tags import AtomIndexer, Network, PairIndexer, HAtomRegressor, Charges, Energies
+from .indexers import PaddingIndexer
 from .physics import ChargePairSetup
 from ..indextypes import IdxType, index_type_coercion
 from ...layers import targets as target_modules
@@ -21,13 +22,11 @@ class CmbEnergyNode(Energies, AutoKw, ExpandParents, MultiNode):
     _output_index_states = IdxType.Molecules, IdxType.Atoms,
     _auto_module_class = target_modules.CmbEnergy
     
-    @_parent_expander.match(Energies, ChargePairSetup, AtomIndexer)
-    def expansion0(self, energy, c_energy, pdindexer):
-        return energy, chargepair, pdindexer.mol_index, pdindexer.n_molecules
+    @_parent_expander.match(Energies, ChargePairSetup, PaddingIndexer)
+    def expansion0(self, energy_sr, energy_coulomb, pdindexer, **kwargs):
+        return energy_sr.atom_energies, energy_coulomb.atom_energies, pdindexer.mol_index, pdindexer.n_molecules
 
     _parent_expander.assertlen(4)
-    #_parent_expander.get_main_outputs()
-    #_parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms)
 
     def __init__(self, name, parents, module="auto", module_kwargs=None, **kwargs):
         self.module_kwargs = {} if module_kwargs is None else module_kwargs
