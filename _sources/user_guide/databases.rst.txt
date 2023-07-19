@@ -24,3 +24,12 @@ Note that input of bond variables for periodic systems can be ill-defined
 if there are multiple bonds between the same pairs of atoms. This is not yet
 supported.
 
+
+ASE Objects Database handling
+----------------------------------------------------------
+If your training data is stored as ASE files of any type (.json,.db,.xyz,.traj ... etc.) it can be loaded directly 
+a Database for hippynn.
+
+The ASE database :class:`~hippynn.databases.AseDatabase` can be loaded with ASE installed.
+
+See ~/examples/ase_db_example.py for a basic example utilzing the class.

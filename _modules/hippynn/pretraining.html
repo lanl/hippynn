@@ -84,9 +84,10 @@
 <span class="kn">from</span> <span class="nn">.graphs</span> <span class="kn">import</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">Predictor</span>
 <span class="kn">from</span> <span class="nn">.graphs.nodes.base</span> <span class="kn">import</span> <span class="n">_BaseNode</span>
 <span class="kn">from</span> <span class="nn">.graphs.nodes.tags</span> <span class="kn">import</span> <span class="n">Encoder</span>
-<span class="kn">from</span> <span class="nn">.graphs.nodes.inputs</span> <span class="kn">import</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">CellNode</span>
+<span class="kn">from</span> <span class="nn">.graphs.nodes.inputs</span> <span class="kn">import</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">CellNode</span><span class="p">,</span> <span class="n">ForceNode</span>
 <span class="kn">from</span> <span class="nn">.graphs.nodes.pairs</span> <span class="kn">import</span> <span class="n">OpenPairIndexer</span><span class="p">,</span> <span class="n">DynamicPeriodicPairs</span><span class="p">,</span> <span class="n">MinDistNode</span>
-<span class="kn">from</span> <span class="nn">.graphs.nodes.indexers</span> <span class="kn">import</span> <span class="n">acquire_encoding_padding</span>
+<span class="kn">from</span> <span class="nn">.graphs.nodes.indexers</span> <span class="kn">import</span> <span class="n">acquire_encoding_padding</span><span class="p">,</span> <span class="n">SysMaxOfAtomsNode</span>
+<span class="kn">from</span> <span class="nn">.graphs.nodes.physics</span> <span class="kn">import</span> <span class="n">VecMag</span>
 <span class="kn">from</span> <span class="nn">.networks.hipnn</span> <span class="kn">import</span> <span class="n">compute_hipnn_e0</span>
 
 
@@ -131,11 +132,20 @@
     <span class="n">z_vals</span> <span class="o">=</span> <span class="n">train_data</span><span class="p">[</span><span class="n">species_name</span><span class="p">]</span>
     <span class="n">t_vals</span> <span class="o">=</span> <span class="n">train_data</span><span class="p">[</span><span class="n">energy_name</span><span class="p">]</span>
 
+    <span class="n">encoder</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">t_vals</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
     <span class="n">eovals</span> <span class="o">=</span> <span class="n">compute_hipnn_e0</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">z_vals</span><span class="p">,</span> <span class="n">t_vals</span><span class="p">,</span> <span class="n">peratom</span><span class="o">=</span><span class="n">peratom</span><span class="p">)</span>
     <span class="n">eo_layer</span> <span class="o">=</span> <span class="n">energy_module</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">eo_layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">eovals</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;The function set_eo_values does not currently work with custom InputNodes.&quot;</span><span class="p">)</span>
+    
+    <span class="n">eo_layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">eovals</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computed E0 energies:&quot;</span><span class="p">,</span> <span class="n">eovals</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computed E0 energies:&quot;</span><span class="p">,</span> <span class="n">eovals</span><span class="p">)</span>
     <span class="n">eo_layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">eovals</span><span class="o">.</span><span class="n">expand_as</span><span class="p">(</span><span class="n">eo_layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computed E0 energies:&quot;</span><span class="p">,</span> <span class="n">eovals</span><span class="p">)</span>   
+    <span class="n">eo_layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">eovals</span><span class="o">.</span><span class="n">expand_as</span><span class="p">(</span><span class="n">eo_layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+    
     <span class="n">eo_layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="n">trainable_after</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">energy_module</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
         <span class="n">layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span> <span class="o">*=</span> <span class="n">decay_factor</span>
@@ -201,6 +211,14 @@
 
 <span class="sd">    &gt;&gt;&gt; min_dists_train = calculate_min_dists(db.splits[&#39;train&#39;],&quot;Z&quot;,&quot;R&quot;,5.0)</span>
 
+<span class="sd">    Example usage to prune out low-distance data::</span>
+
+<span class="sd">    &gt;&gt;&gt; db = Database(...)</span>
+<span class="sd">    &gt;&gt;&gt; dist_threshold = ...</span>
+<span class="sd">    &gt;&gt;&gt; min_dist = calculate_min_dists(db.arr_dict,&quot;Z&quot;,&quot;R&quot;,5.0)</span>
+<span class="sd">    &gt;&gt;&gt; low_distance_system = min_dist &lt; dist_threshold</span>
+<span class="sd">    &gt;&gt;&gt; db.arr_dict = {k:v[~low_distance_system] for k,v in db.arr_dict.items()}</span>
+
 <span class="sd">    .. Note::</span>
 <span class="sd">       The cutoff radius ``dist_hard_max`` should be set large enough such that each atom is expected</span>
 <span class="sd">       to have at least one neighbor. If an atom has no neighbors, its min_dist will be set to the</span>
@@ -231,7 +249,10 @@
 
     <span class="n">species_set</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">array_dict</span><span class="p">[</span><span class="n">species_name</span><span class="p">]))</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">species_set</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">(</span><span class="n">species_set</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="mi">0</span><span class="p">}:</span>
+    <span class="k">if</span> <span class="mi">0</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">species_set</span><span class="p">:</span>
+        <span class="n">species_set</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="n">species_set</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">species_set</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">(</span><span class="n">species_set</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="mi">0</span><span class="p">}:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Species set empty!&quot;</span><span class="p">)</span>
 
     <span class="n">pred</span><span class="p">,</span> <span class="n">node_key</span> <span class="o">=</span> <span class="n">_setup_min_dist_graph</span><span class="p">(</span>
@@ -250,6 +271,89 @@
     <span class="p">}</span>
     <span class="k">if</span> <span class="n">cell_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">input_dict</span><span class="p">[</span><span class="n">cell_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">array_dict</span><span class="p">[</span><span class="n">cell_name</span><span class="p">])</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="n">pred</span><span class="p">(</span><span class="o">**</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)[</span><span class="n">node_key</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+<span class="k">def</span> <span class="nf">_setup_max_force_graph</span><span class="p">(</span>
+    <span class="n">species_name</span><span class="p">,</span>
+    <span class="n">force_name</span><span class="p">,</span>
+    <span class="n">species_set</span><span class="p">,</span>
+    <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">species</span> <span class="o">=</span> <span class="n">SpeciesNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="n">species_name</span><span class="p">)</span>
+    <span class="n">force</span> <span class="o">=</span> <span class="n">ForceNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="n">force_name</span><span class="p">)</span>
+    <span class="c1"># Species set required to build encoder and atom indexer.</span>
+    <span class="n">enc</span><span class="p">,</span> <span class="n">pad</span> <span class="o">=</span> <span class="n">acquire_encoding_padding</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">species_set</span><span class="o">=</span><span class="n">species_set</span><span class="p">)</span>
+    <span class="n">forcemag</span> <span class="o">=</span> <span class="n">VecMag</span><span class="p">(</span><span class="s2">&quot;FMag&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">force</span><span class="p">,</span> <span class="n">species</span><span class="p">))</span>
+    <span class="n">max_force</span> <span class="o">=</span> <span class="n">SysMaxOfAtomsNode</span><span class="p">(</span><span class="s2">&quot;MaxForce&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">forcemag</span><span class="p">,</span> <span class="n">pad</span><span class="p">))</span>
+
+    <span class="n">pred</span> <span class="o">=</span> <span class="n">Predictor</span><span class="p">([</span><span class="n">species</span><span class="p">,</span> <span class="n">force</span><span class="p">],</span> <span class="p">[</span><span class="n">max_force</span><span class="p">],</span> <span class="n">model_device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Max Force Calculator&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pred</span><span class="p">,</span> <span class="n">max_force</span>
+
+
+<div class="viewcode-block" id="calculate_max_system_force"><a class="viewcode-back" href="../../api_documentation/hippynn.pretraining.html#hippynn.pretraining.calculate_max_system_force">[docs]</a><span class="k">def</span> <span class="nf">calculate_max_system_force</span><span class="p">(</span>
+    <span class="n">array_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">species_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">force_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the maximum force magnitude in each system in ``array_dict``.</span>
+
+<span class="sd">    Example usage for unsplit data::</span>
+
+<span class="sd">    &gt;&gt;&gt; db = Database(...)</span>
+<span class="sd">    &gt;&gt;&gt; max_force = calculate_max_system_force(db.arr_dict,&quot;Z&quot;,&quot;F&quot;)</span>
+
+<span class="sd">    If the database has been split::</span>
+
+<span class="sd">    &gt;&gt;&gt; max_force_train = calculate_max_system_force(db.splits[&#39;train&#39;],&quot;Z&quot;,&quot;F&quot;)</span>
+
+<span class="sd">    Example usage to prune out high-force data::</span>
+
+<span class="sd">    &gt;&gt;&gt; db = Database(...)</span>
+<span class="sd">    &gt;&gt;&gt; force_threshold = ...</span>
+<span class="sd">    &gt;&gt;&gt; max_force = calculate_max_system_force(db.arr_dict,&quot;Z&quot;,&quot;F&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; high_force_system = max_force &gt; force_threshold</span>
+<span class="sd">    &gt;&gt;&gt; db.arr_dict = {k:v[~high_force_system] for k,v in db.arr_dict.items()}</span>
+
+<span class="sd">    :param array_dict: dictionary mapping strings to tensors/numpy arrays</span>
+<span class="sd">    :param species_name: dictionary key for species</span>
+<span class="sd">    :param force-name: dictionary key for positions</span>
+<span class="sd">    :param device: Where to perform the computation.</span>
+<span class="sd">    :param batch_size: batch size to perform evaluation over.</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check for required info before proceeding to more expensive stuff.</span>
+    <span class="k">if</span> <span class="n">species_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">array_dict</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Species key </span><span class="si">{</span><span class="n">species_name</span><span class="si">}</span><span class="s2"> not in dictionary.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">force_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">array_dict</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Positions key </span><span class="si">{</span><span class="n">force_name</span><span class="si">}</span><span class="s2"> not in dictionary.&quot;</span><span class="p">)</span>
+
+    <span class="n">species_set</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">array_dict</span><span class="p">[</span><span class="n">species_name</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="mi">0</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">species_set</span><span class="p">:</span>
+        <span class="n">species_set</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="n">species_set</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">species_set</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">(</span><span class="n">species_set</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="mi">0</span><span class="p">}:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Species set empty!&quot;</span><span class="p">)</span>
+
+    <span class="n">pred</span><span class="p">,</span> <span class="n">node_key</span> <span class="o">=</span> <span class="n">_setup_max_force_graph</span><span class="p">(</span>
+        <span class="n">species_name</span><span class="o">=</span><span class="n">species_name</span><span class="p">,</span>
+        <span class="n">force_name</span><span class="o">=</span><span class="n">force_name</span><span class="p">,</span>
+        <span class="n">species_set</span><span class="o">=</span><span class="n">species_set</span><span class="p">,</span>
+        <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">input_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">species_name</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">array_dict</span><span class="p">[</span><span class="n">species_name</span><span class="p">]),</span>
+        <span class="n">force_name</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">array_dict</span><span class="p">[</span><span class="n">force_name</span><span class="p">]),</span>
+    <span class="p">}</span>
 
     <span class="n">results</span> <span class="o">=</span> <span class="n">pred</span><span class="p">(</span><span class="o">**</span><span class="n">input_dict</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)[</span><span class="n">node_key</span><span class="p">]</span>
 

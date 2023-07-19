@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ase_interface package &mdash; hippynn 0.0.1 documentation</title>
@@ -20,7 +20,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="calculator module" href="hippynn.interfaces.ase_interface.calculator.html" />
+    <link rel="next" title="ase_database module" href="hippynn.interfaces.ase_interface.ase_database.html" />
     <link rel="prev" title="interfaces package" href="hippynn.interfaces.html" /> 
 </head>
 
@@ -55,6 +55,11 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.graphs.html">graphs package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.interfaces.html">interfaces package</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">ase_interface package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.interfaces.ase_interface.AseDatabase"><code class="docutils literal notranslate"><span class="pre">AseDatabase</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.interfaces.ase_interface.AseDatabase.__init__"><code class="docutils literal notranslate"><span class="pre">AseDatabase.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.interfaces.ase_interface.AseDatabase.load_arrays"><code class="docutils literal notranslate"><span class="pre">AseDatabase.load_arrays()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.interfaces.ase_interface.HippynnCalculator"><code class="docutils literal notranslate"><span class="pre">HippynnCalculator</span></code></a><ul>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.interfaces.ase_interface.HippynnCalculator.__init__"><code class="docutils literal notranslate"><span class="pre">HippynnCalculator.__init__()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.interfaces.ase_interface.HippynnCalculator.calculate"><code class="docutils literal notranslate"><span class="pre">HippynnCalculator.calculate()</span></code></a></li>
@@ -79,6 +84,8 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.interfaces.ase_interface.calculator_from_model"><code class="docutils literal notranslate"><span class="pre">calculator_from_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.interfaces.ase_interface.ase_database.html">ase_database module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.interfaces.ase_interface.ase_unittests.html">ase_unittests module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.interfaces.ase_interface.calculator.html">calculator module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.interfaces.ase_interface.pairfinder.html">pairfinder module</a></li>
 </ul>
@@ -120,7 +127,7 @@
       </li>
   </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
         <a href="hippynn.interfaces.html" class="btn btn-neutral float-left" title="interfaces package" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="hippynn.interfaces.ase_interface.calculator.html" class="btn btn-neutral float-right" title="calculator module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hippynn.interfaces.ase_interface.ase_database.html" class="btn btn-neutral float-right" title="ase_database module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
   </div>
   <hr/>
 </div>
@@ -132,13 +139,75 @@
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.interfaces.ase_interface</span></code> package.</p>
 <span class="target" id="module-hippynn.interfaces.ase_interface"></span><p>For using hippynn with the Atomic Simulation Environment (ASE)</p>
 <dl class="py class">
+<dt class="sig sig-object py" id="hippynn.interfaces.ase_interface.AseDatabase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AseDatabase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_unfound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/ase_interface/ase_database.html#AseDatabase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.ase_interface.AseDatabase" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.databases.database.html#hippynn.databases.database.Database" title="hippynn.databases.database.Database"><code class="xref py py-class docutils literal notranslate"><span class="pre">Database</span></code></a>, <a class="reference internal" href="hippynn.databases.restarter.html#hippynn.databases.restarter.Restartable" title="hippynn.databases.restarter.Restartable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Restartable</span></code></a></p>
+<p>Database stored as ase database file(s) in a directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> – directory path where the ase database(s) is stored</p></li>
+<li><p><strong>name</strong> – name or list of names for files for ase databases.</p></li>
+</ul>
+</dd>
+</dl>
+<p>This function loads an ase database(s) ({name}.json/.db) OR ({{name}.extxyz,.xyz})
+variable db_name including all inputs and targets.</p>
+<p>filenames should end with .json, .db, .extxyz, and .xyz, etc; Anything parsable by ase.io.load</p>
+<p>Other arguments: See <code class="docutils literal notranslate"><span class="pre">Database</span></code>.</p>
+<dl class="simple">
+<dt>See: <a class="reference external" href="https://databases.fysik.dtu.dk/ase/ase/db/db.html">https://databases.fysik.dtu.dk/ase/ase/db/db.html</a> for documentation</dt><dd><p>on typical columns present in ase database</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.interfaces.ase_interface.AseDatabase.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_unfound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/ase_interface/ase_database.html#AseDatabase.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.ase_interface.AseDatabase.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arr_dict</strong> – dictionary mapping strings to numpy arrays</p></li>
+<li><p><strong>inputs</strong> – list of strings for input db_names</p></li>
+<li><p><strong>targets</strong> – list of strings for output db_namees</p></li>
+<li><p><strong>seed</strong> – int, for random splitting</p></li>
+<li><p><strong>test_size</strong> – fraction of data to use in test spli</p></li>
+<li><p><strong>valid_size</strong> – fraction oof data to use in train split</p></li>
+<li><p><strong>num_workers</strong> – passed to pytorch dataloaders</p></li>
+<li><p><strong>pin_memory</strong> – passed to pytorch dataloaders</p></li>
+<li><p><strong>allow_unfound</strong> – If true, skip checking if the needed inputs and targets are found.
+This allows setting inputs=None and/or targets=None.</p></li>
+<li><p><strong>quiet</strong> – If True, print little or nothing while loading.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.interfaces.ase_interface.AseDatabase.load_arrays">
+<span class="sig-name descname"><span class="pre">load_arrays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_unfound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/ase_interface/ase_database.html#AseDatabase.load_arrays"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.ase_interface.AseDatabase.load_arrays" title="Permalink to this definition"></a></dt>
+<dd><p>load arrays load ase database into hippynn database arrays</p>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h2>
+<dl class="simple">
+<dt>filename<span class="classifier">str</span></dt><dd><p>filename or path of database to convert</p>
+</dd>
+<dt>prefix<span class="classifier">str, optional</span></dt><dd><p>prefix for output numpy arrays, by default None</p>
+</dd>
+<dt>return_data<span class="classifier">bool, optional</span></dt><dd><p>whether or not to return the data or write to files, by default False</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="hippynn.interfaces.ase_interface.HippynnCalculator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HippynnCalculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">en_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/ase_interface/calculator.html#HippynnCalculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.ase_interface.HippynnCalculator" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Calculator</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Calculator</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HippynnCalculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">en_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/ase_interface/calculator.html#HippynnCalculator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.ase_interface.HippynnCalculator" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Calculator</span></code></p>
 <p>ASE calculator based on hippynn graphs. Uses ASE neighbor lists. Not suitable for domain decomposition.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.interfaces.ase_interface.HippynnCalculator.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">en_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/ase_interface/calculator.html#HippynnCalculator.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.ase_interface.HippynnCalculator.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">en_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/ase_interface/calculator.html#HippynnCalculator.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.ase_interface.HippynnCalculator.__init__" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -201,8 +270,7 @@ purely for compatibility with ASE base calculator</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.interfaces.ase_interface.HippynnCalculator.get_forces">
 <span class="sig-name descname"><span class="pre">get_forces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_calculation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hippynn.interfaces.ase_interface.HippynnCalculator.get_forces" title="Permalink to this definition"></a></dt>
-<dd><p>Return the forces.</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.interfaces.ase_interface.HippynnCalculator.get_free_energy">
@@ -227,11 +295,7 @@ purely for compatibility with ASE base calculator</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.interfaces.ase_interface.HippynnCalculator.get_potential_energy">
 <span class="sig-name descname"><span class="pre">get_potential_energy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_calculation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hippynn.interfaces.ase_interface.HippynnCalculator.get_potential_energy" title="Permalink to this definition"></a></dt>
-<dd><p>Return total energy.</p>
-<p>Both the energy extrapolated to zero Kelvin and the energy
-consistent with the forces (the free energy) can be
-returned.</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.interfaces.ase_interface.HippynnCalculator.get_property">
@@ -242,8 +306,7 @@ returned.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.interfaces.ase_interface.HippynnCalculator.get_stress">
 <span class="sig-name descname"><span class="pre">get_stress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_calculation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hippynn.interfaces.ase_interface.HippynnCalculator.get_stress" title="Permalink to this definition"></a></dt>
-<dd><p>Return the stress.</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.interfaces.ase_interface.HippynnCalculator.get_stresses">
@@ -291,6 +354,18 @@ Similarly for charge.</p>
 <p>Submodules</p>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.interfaces.ase_interface.ase_database.html">ase_database module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.interfaces.ase_interface.ase_database.html#hippynn.interfaces.ase_interface.ase_database.AseDatabase"><code class="docutils literal notranslate"><span class="pre">AseDatabase</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.interfaces.ase_interface.ase_database.html#hippynn.interfaces.ase_interface.ase_database.AseDatabase.__init__"><code class="docutils literal notranslate"><span class="pre">AseDatabase.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.interfaces.ase_interface.ase_database.html#hippynn.interfaces.ase_interface.ase_database.AseDatabase.load_arrays"><code class="docutils literal notranslate"><span class="pre">AseDatabase.load_arrays()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.interfaces.ase_interface.ase_unittests.html">ase_unittests module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.interfaces.ase_interface.ase_unittests.html#hippynn.interfaces.ase_interface.ase_unittests.ASE_FilterPair_Coulomb_Construct"><code class="docutils literal notranslate"><span class="pre">ASE_FilterPair_Coulomb_Construct()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.interfaces.ase_interface.calculator.html">calculator module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.calculator.HippynnCalculator"><code class="docutils literal notranslate"><span class="pre">HippynnCalculator</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.calculator.HippynnCalculator.__init__"><code class="docutils literal notranslate"><span class="pre">HippynnCalculator.__init__()</span></code></a></li>
@@ -344,7 +419,7 @@ Similarly for charge.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="hippynn.interfaces.html" class="btn btn-neutral float-left" title="interfaces package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="hippynn.interfaces.ase_interface.calculator.html" class="btn btn-neutral float-right" title="calculator module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hippynn.interfaces.ase_interface.ase_database.html" class="btn btn-neutral float-right" title="ase_database module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

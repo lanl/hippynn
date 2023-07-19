@@ -88,36 +88,40 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">settings</span>
 
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">settings</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">autograd_wrapper</span><span class="p">,</span> <span class="n">env_pytorch</span>
 
 <span class="n">CUSTOM_KERNELS_AVAILABLE</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">numba</span>
-    <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;numba&#39;</span><span class="p">)</span>
+
+    <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;numba&quot;</span><span class="p">)</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">pass</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">cupy</span>
+
     <span class="k">if</span> <span class="s2">&quot;numba&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;cupy was found, but numba was not. Cupy custom kernels not available.&quot;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Cupy was found, but numba was not. Cupy custom kernels not available.&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;cupy&#39;</span><span class="p">)</span>
+        <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;cupy&quot;</span><span class="p">)</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">pass</span>
 
 <span class="k">if</span> <span class="ow">not</span> <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="p">:</span>
-    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Numba not available: Custom Kernels will be disabled.&quot;</span><span class="p">)</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Numba or cupy not available: Custom Kernels will be disabled.&quot;</span><span class="p">)</span>
 
 <span class="n">CUSTOM_KERNELS_ACTIVE</span> <span class="o">=</span> <span class="kc">False</span>
 
 <span class="n">envsum</span><span class="p">,</span> <span class="n">sensesum</span><span class="p">,</span> <span class="n">featsum</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
+
 <span class="k">def</span> <span class="nf">_check_numba</span><span class="p">():</span>
     <span class="kn">import</span> <span class="nn">numba.cuda</span>
     <span class="kn">import</span> <span class="nn">torch</span>
+
     <span class="k">if</span> <span class="ow">not</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;numba.cuda.is_available() returned False: Custom kernels will fail on GPU tensors.&quot;</span><span class="p">)</span>
@@ -131,16 +135,18 @@
         <span class="c1"># (At one point this was the right strategy...)</span>
         <span class="k">return</span> <span class="kc">False</span>
 
+
 <span class="k">def</span> <span class="nf">_check_cupy</span><span class="p">():</span>
     <span class="kn">import</span> <span class="nn">cupy</span>
     <span class="kn">import</span> <span class="nn">numba</span>
     <span class="kn">import</span> <span class="nn">torch</span>
+
     <span class="k">if</span> <span class="ow">not</span> <span class="n">cupy</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;cupy.cuda.is_available() returned False: Custom kernels will fail on GPU tensors.&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="set_custom_kernels"><a class="viewcode-back" href="../../api_documentation/hippynn.custom_kernels.html#hippynn.custom_kernels.set_custom_kernels">[docs]</a><span class="k">def</span> <span class="nf">set_custom_kernels</span><span class="p">(</span><span class="n">active</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="set_custom_kernels"><a class="viewcode-back" href="../../api_documentation/hippynn.custom_kernels.html#hippynn.custom_kernels.set_custom_kernels">[docs]</a><span class="k">def</span> <span class="nf">set_custom_kernels</span><span class="p">(</span><span class="n">active</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Activate or deactivate custom kernels for interaction.</span>
 
@@ -150,14 +156,20 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">envsum</span><span class="p">,</span> <span class="n">sensesum</span><span class="p">,</span> <span class="n">featsum</span><span class="p">,</span> <span class="n">CUSTOM_KERNELS_ACTIVE</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">active</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">active</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">active</span> <span class="o">=</span> <span class="n">active</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">active</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="s2">&quot;numba&quot;</span><span class="p">,</span><span class="s2">&quot;cupy&quot;</span><span class="p">,</span><span class="s2">&quot;pytorch&quot;</span><span class="p">,</span><span class="s2">&quot;auto&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">active</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;numba&quot;</span><span class="p">,</span> <span class="s2">&quot;cupy&quot;</span><span class="p">,</span> <span class="s2">&quot;pytorch&quot;</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unrecognized custom kernel implementation: </span><span class="si">{</span><span class="n">active</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    
-    <span class="n">active_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;auto&quot;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span><span class="s2">&quot;pytorch&quot;</span><span class="p">:</span><span class="kc">False</span> <span class="p">}</span>
-    <span class="n">active</span> <span class="o">=</span> <span class="n">active_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">active</span><span class="p">,</span><span class="n">active</span><span class="p">)</span>
+
+    <span class="n">active_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;auto&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;pytorch&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">active</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span> <span class="ow">or</span> <span class="n">active</span> <span class="o">==</span> <span class="s2">&quot;pytorch&quot;</span><span class="p">:</span>
+            <span class="n">active</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="n">active</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Numba or cupy was not found. Custom kernels are not available.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">active</span> <span class="o">=</span> <span class="n">active_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">active</span><span class="p">,</span> <span class="n">active</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">active</span><span class="p">:</span>
         <span class="n">envsum</span> <span class="o">=</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">envsum</span>
@@ -174,23 +186,22 @@
             <span class="n">active</span> <span class="o">=</span> <span class="s2">&quot;cupy&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">active</span> <span class="o">=</span> <span class="s2">&quot;numba&quot;</span>
-    
+
     <span class="k">if</span> <span class="n">active</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unavailable custom kernel implementation: </span><span class="si">{</span><span class="n">active</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">active</span> <span class="o">==</span> <span class="s1">&#39;cupy&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">active</span> <span class="o">==</span> <span class="s2">&quot;cupy&quot;</span><span class="p">:</span>
         <span class="n">_check_numba</span><span class="p">()</span>
         <span class="n">_check_cupy</span><span class="p">()</span>
-        <span class="kn">from</span> <span class="nn">.env_cupy</span> <span class="kn">import</span> <span class="n">cupy_envsum</span><span class="p">,</span> <span class="n">cupy_sensesum</span><span class="p">,</span> <span class="n">cupy_featsum</span>
-        <span class="n">envsum</span><span class="p">,</span> <span class="n">sensesum</span><span class="p">,</span> <span class="n">featsum</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">autograd_wrapper</span><span class="o">.</span><span class="n">wrap_envops</span><span class="p">(</span><span class="n">cupy_envsum</span><span class="p">,</span> <span class="n">cupy_sensesum</span><span class="p">,</span> <span class="n">cupy_featsum</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">.env_cupy</span> <span class="kn">import</span> <span class="n">cupy_envsum</span><span class="p">,</span> <span class="n">cupy_featsum</span><span class="p">,</span> <span class="n">cupy_sensesum</span>
+
+        <span class="n">envsum</span><span class="p">,</span> <span class="n">sensesum</span><span class="p">,</span> <span class="n">featsum</span> <span class="o">=</span> <span class="n">autograd_wrapper</span><span class="o">.</span><span class="n">wrap_envops</span><span class="p">(</span><span class="n">cupy_envsum</span><span class="p">,</span> <span class="n">cupy_sensesum</span><span class="p">,</span> <span class="n">cupy_featsum</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">active</span> <span class="o">==</span> <span class="s2">&quot;numba&quot;</span><span class="p">:</span>
         <span class="n">_check_numba</span><span class="p">()</span>
-        <span class="kn">from</span> <span class="nn">.env_numba</span> <span class="kn">import</span> <span class="n">new_envsum</span><span class="p">,</span> <span class="n">new_sensesum</span><span class="p">,</span> <span class="n">new_featsum</span>
-        <span class="p">(</span><span class="n">envsum</span><span class="p">,</span> <span class="n">sensesum</span><span class="p">,</span> <span class="n">featsum</span><span class="p">,)</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">autograd_wrapper</span><span class="o">.</span><span class="n">wrap_envops</span><span class="p">(</span><span class="n">new_envsum</span><span class="p">,</span> <span class="n">new_sensesum</span><span class="p">,</span> <span class="n">new_featsum</span><span class="p">)</span>
-                <span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">.env_numba</span> <span class="kn">import</span> <span class="n">new_envsum</span><span class="p">,</span> <span class="n">new_featsum</span><span class="p">,</span> <span class="n">new_sensesum</span>
+
+        <span class="n">envsum</span><span class="p">,</span> <span class="n">sensesum</span><span class="p">,</span> <span class="n">featsum</span> <span class="o">=</span> <span class="n">autograd_wrapper</span><span class="o">.</span><span class="n">wrap_envops</span><span class="p">(</span><span class="n">new_envsum</span><span class="p">,</span> <span class="n">new_sensesum</span><span class="p">,</span> <span class="n">new_featsum</span><span class="p">)</span>
+
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># We shouldn&#39;t get here except possibly mid-development, but just in case:</span>
         <span class="c1"># if you add a custom kernel implementation remember to add to this</span>
@@ -203,7 +214,6 @@
 <span class="n">try_custom_kernels</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">USE_CUSTOM_KERNELS</span>
 <span class="n">set_custom_kernels</span><span class="p">(</span><span class="n">try_custom_kernels</span><span class="p">)</span>
 <span class="k">del</span> <span class="n">try_custom_kernels</span>
-
 </pre></div>
 
            </div>

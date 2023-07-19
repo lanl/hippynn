@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>physics module &mdash; hippynn 0.0.1 documentation</title>
@@ -63,6 +63,12 @@
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.AlphaScreening"><code class="docutils literal notranslate"><span class="pre">AlphaScreening</span></code></a><ul>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.AlphaScreening.__init__"><code class="docutils literal notranslate"><span class="pre">AlphaScreening.__init__()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.AlphaScreening.training"><code class="docutils literal notranslate"><span class="pre">AlphaScreening.training</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.CombineScreenings"><code class="docutils literal notranslate"><span class="pre">CombineScreenings</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.CombineScreenings.__init__"><code class="docutils literal notranslate"><span class="pre">CombineScreenings.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.CombineScreenings.forward"><code class="docutils literal notranslate"><span class="pre">CombineScreenings.forward()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.CombineScreenings.training"><code class="docutils literal notranslate"><span class="pre">CombineScreenings.training</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.CoulombEnergy"><code class="docutils literal notranslate"><span class="pre">CoulombEnergy</span></code></a><ul>
@@ -198,6 +204,41 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="hippynn.layers.physics.AlphaScreening.training">
 <span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#hippynn.layers.physics.AlphaScreening.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.physics.CombineScreenings">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CombineScreenings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">screening_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CombineScreenings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CombineScreenings" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Returns products of different screenings for Screened Coulomb Interactions.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.physics.CombineScreenings.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">screening_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CombineScreenings.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CombineScreenings.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.physics.CombineScreenings.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pair_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CombineScreenings.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CombineScreenings.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Product of different screenings applied to pair_dist upto radius.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pair_dist</strong> – torch.tensor, dtype=float64: ‘Neighborlist’ distances for coulomb energies.</p></li>
+<li><p><strong>radius</strong> – Maximum radius that Screened-Coulomb is evaluated upto.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return screening<span class="colon">:</span></dt>
+<dd class="field-even"><p>Weights for screening for all pair_dist.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.layers.physics.CombineScreenings.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#hippynn.layers.physics.CombineScreenings.training" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

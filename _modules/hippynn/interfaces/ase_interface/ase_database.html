@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.interfaces.ase_interface.ase_database &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.interfaces.ase_interface.ase_database</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.interfaces.ase_interface.ase_database</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Dataset stored as ase database file (ideally either .json or .db, or in .xyz, .extxyz formats)</span>
+
+<span class="sd">See: https://databases.fysik.dtu.dk/ase/ase/db/db.html for documentation</span>
+<span class="sd">on typical columns present in ase database</span>
+
+<span class="sd">Typically used column names in ase db/xyz format:</span>
+
+<span class="sd">positions : x,y,z cartesian positions (Angstrom)</span>
+<span class="sd">forces : x,y,z carteisian forces (ev/Angstrom)</span>
+<span class="sd">energy : energy (eV)</span>
+<span class="sd">energy_per_atom : energy per atom (eV/atom)</span>
+<span class="sd">cell : x,y,z of cell (3x3) (Angstrom)</span>
+<span class="sd">charges : atom-specific charges</span>
+<span class="sd">stress: (6,) atomic stresses</span>
+<span class="sd">initial_charges : atom-specific initial charges </span>
+<span class="sd">inital_magmoms :atom-specific initial magnetic moments</span>
+<span class="sd">numbers : atom Zs (integer)</span>
+<span class="sd">pbc : periodic boundary conditions (bool)</span>
+<span class="sd">ctime : computer time (float)</span>
+<span class="sd">mtime : time (float)</span>
+<span class="sd">dipole : molecular dipole (3) vector</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">ase.io</span> <span class="kn">import</span> <span class="n">read</span>
+
+<span class="kn">from</span> <span class="nn">...tools</span> <span class="kn">import</span> <span class="n">np_of_torchdefaultdtype</span>
+<span class="kn">from</span> <span class="nn">...databases.database</span> <span class="kn">import</span> <span class="n">Database</span>
+<span class="kn">from</span> <span class="nn">...databases.restarter</span> <span class="kn">import</span> <span class="n">Restartable</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+
+<div class="viewcode-block" id="AseDatabase"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.ase_database.html#hippynn.databases.AseDatabase">[docs]</a><span class="k">class</span> <span class="nc">AseDatabase</span><span class="p">(</span><span class="n">Database</span><span class="p">,</span> <span class="n">Restartable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Database stored as ase database file(s) in a directory.</span>
+
+<span class="sd">    :param directory: directory path where the ase database(s) is stored</span>
+<span class="sd">    :param name: name or list of names for files for ase databases.</span>
+
+<span class="sd">    This function loads an ase database(s) ({name}.json/.db) OR ({{name}.extxyz,.xyz})</span>
+<span class="sd">    variable db_name including all inputs and targets.</span>
+
+<span class="sd">    filenames should end with .json, .db, .extxyz, and .xyz, etc; Anything parsable by ase.io.load</span>
+
+
+<span class="sd">    Other arguments: See ``Database``.</span>
+
+<span class="sd">    See: https://databases.fysik.dtu.dk/ase/ase/db/db.html for documentation</span>
+<span class="sd">        on typical columns present in ase database</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="AseDatabase.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.ase_database.html#hippynn.databases.AseDatabase.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_arrays</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">restarter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_restarter</span><span class="p">(</span>
+            <span class="n">directory</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="n">inputs</span><span class="p">,</span>
+            <span class="n">targets</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span>
+            <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="AseDatabase.load_arrays"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.ase_database.html#hippynn.databases.AseDatabase.load_arrays">[docs]</a>    <span class="k">def</span> <span class="nf">load_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;load arrays load ase database into hippynn database arrays</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename : str</span>
+<span class="sd">            filename or path of database to convert</span>
+<span class="sd">        prefix : str, optional</span>
+<span class="sd">            prefix for output numpy arrays, by default None</span>
+<span class="sd">        return_data : bool, optional</span>
+<span class="sd">            whether or not to return the data or write to files, by default False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">var_list</span> <span class="o">=</span> <span class="n">inputs</span> <span class="o">+</span> <span class="n">targets</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">db</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">directory</span> <span class="o">+</span> <span class="n">filename</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+                <span class="n">db</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">filename</span><span class="p">:</span>
+                    <span class="n">temp_db</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">directory</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+                    <span class="n">db</span> <span class="o">+=</span> <span class="n">temp_db</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">fee</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                <span class="s2">&quot;ERROR: Couldn&#39;t find </span><span class="si">{}</span><span class="s2"> ase xyz database.&quot;</span>
+                <span class="s1">&#39;A solution is to explicitly specify &quot;path&quot; in database_params &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">directory</span> <span class="o">+</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="p">)</span> <span class="kn">from</span> <span class="nn">fee</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ASE Database found&quot;</span><span class="p">)</span>
+        <span class="n">record_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">max_n_atom</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">max_atoms_record</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">db</span><span class="p">:</span>
+            <span class="n">result_dict</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="vm">__dict__</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;arrays&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">result_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">result_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="k">del</span> <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;arrays&quot;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span>
+            <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;cell&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;_cellobj&quot;</span><span class="p">][:]</span>
+            <span class="k">del</span> <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;_cellobj&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">result_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_calc&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">calc_dict</span> <span class="o">=</span> <span class="n">result_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_calc&quot;</span><span class="p">)</span><span class="o">.</span><span class="vm">__dict__</span>
+                <span class="c1"># Overwrite atoms-stored objects with calculator objects.</span>
+                <span class="c1"># Helpful for .json/.db files where energy is not stored under &#39;info&#39; section</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">calc_dict</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">result_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+                <span class="k">del</span> <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;_calc&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">allow_unfound</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;energy_per_atom&quot;</span> <span class="ow">in</span> <span class="n">var_list</span><span class="p">:</span>
+                    <span class="n">var_list</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span>
+                <span class="n">result_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">result_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="n">var_list</span><span class="p">)}</span>
+            <span class="n">record_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result_dict</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;positions&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">max_n_atom</span><span class="p">:</span>
+                <span class="n">max_n_atom</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;positions&quot;</span><span class="p">])</span>
+                <span class="n">max_atoms_record</span> <span class="o">=</span> <span class="n">result_dict</span>
+        <span class="n">n_record</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">record_list</span><span class="p">)</span>
+        <span class="n">array_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">delete_cols</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">max_atoms_record</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="n">array_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n_record</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">val</span><span class="o">.</span><span class="n">shape</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+                    <span class="n">array_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n_record</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;energy&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">((</span><span class="s2">&quot;energy_per_atom&quot;</span> <span class="ow">in</span> <span class="n">var_list</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">allow_unfound</span><span class="p">)):</span>
+                        <span class="n">array_dict</span><span class="p">[</span><span class="s2">&quot;energy_per_atom&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n_record</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">array_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Do Not Save</span>
+                    <span class="n">delete_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="c1"># Save the record uid from the ase db object names.</span>
+        <span class="n">record_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">rec</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">rec</span><span class="p">[</span><span class="s2">&quot;numbers&quot;</span><span class="p">]))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">record</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">record_list</span><span class="p">):</span>
+            <span class="n">natom</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;numbers&quot;</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                    <span class="n">shape</span> <span class="o">=</span> <span class="n">array_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+                    <span class="c1"># Note this assumes the maximum number of atoms greater than the length of property of interest</span>
+                    <span class="c1"># E.g. 3 for dipole (make sure your training set has something with more than 3 atoms)</span>
+                    <span class="c1"># Or 6 for stress tensor (make sure your training set has something with more than 6 atoms)</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">max_n_atom</span><span class="p">):</span>  <span class="c1"># 1D array, e.g. dipole, stress tensor</span>
+                        <span class="n">array_dict</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">v</span>
+                    <span class="k">elif</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">max_n_atom</span><span class="p">):</span>  <span class="c1"># 1D array including maximum number of atoms: e.g. charges</span>
+                        <span class="n">array_dict</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span><span class="n">natom</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+                    <span class="k">elif</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">max_n_atom</span><span class="p">):</span>  <span class="c1"># 2D array, e.g. cells</span>
+                        <span class="n">array_dict</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">v</span>
+                    <span class="k">elif</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">max_n_atom</span><span class="p">):</span>  <span class="c1"># 2D array, e.g. positions, forces</span>
+                        <span class="n">array_dict</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span><span class="n">natom</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">v</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Shape of Numpy array for key: </span><span class="si">{}</span><span class="s2"> unknown.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array_dict</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>  <span class="c1"># Energy, float or integers only</span>
+                    <span class="n">array_dict</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;energy&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">((</span><span class="s2">&quot;energy_per_atom&quot;</span> <span class="ow">in</span> <span class="n">var_list</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">allow_unfound</span><span class="p">)):</span>  <span class="c1"># Add in per-atom-energy</span>
+                        <span class="n">array_dict</span><span class="p">[</span><span class="s2">&quot;energy_per_atom&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span> <span class="o">/</span> <span class="n">natom</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># Everything else either list of strings or something else.</span>
+                    <span class="k">pass</span>
+
+        <span class="c1"># Make sure Zs are integers.</span>
+        <span class="n">array_dict</span><span class="p">[</span><span class="s2">&quot;numbers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">array_dict</span><span class="p">[</span><span class="s2">&quot;numbers&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;int&quot;</span><span class="p">)</span>
+
+        <span class="n">arr_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="c1"># Put float64 data in pytorch default dtype</span>
+        <span class="n">floatX</span> <span class="o">=</span> <span class="n">np_of_torchdefaultdtype</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">array_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">delete_cols</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;float64&quot;</span><span class="p">:</span>
+                    <span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">floatX</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data types:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">dtype</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">arr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+
+        <span class="k">return</span> <span class="n">arr_dict</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

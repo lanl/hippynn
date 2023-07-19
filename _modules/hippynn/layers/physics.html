@@ -198,6 +198,31 @@
         <span class="k">return</span> <span class="n">coulomb_molecule</span></div></div>
 
 
+<div class="viewcode-block" id="CombineScreenings"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineScreenings">[docs]</a><span class="k">class</span> <span class="nc">CombineScreenings</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns products of different screenings for Screened Coulomb Interactions. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="CombineScreenings.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineScreenings.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screening_list</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SL</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span><span class="n">screening_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CombineScreenings.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineScreenings.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Product of different screenings applied to pair_dist upto radius.</span>
+<span class="sd">        </span>
+<span class="sd">        :param pair_dist: torch.tensor, dtype=float64: &#39;Neighborlist&#39; distances for coulomb energies.</span>
+<span class="sd">        :param radius: Maximum radius that Screened-Coulomb is evaluated upto. </span>
+<span class="sd">        :return screening: Weights for screening for all pair_dist.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">screening</span> <span class="o">=</span> <span class="kc">None</span> 
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SL</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">screening</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">screening</span> <span class="o">=</span> <span class="n">s</span><span class="p">(</span><span class="n">pair_dist</span><span class="o">=</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">screening</span> <span class="o">=</span> <span class="n">screening</span> <span class="o">*</span> <span class="n">s</span><span class="p">(</span><span class="n">pair_dist</span><span class="o">=</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">screening</span></div></div>
+
+
 <div class="viewcode-block" id="AlphaScreening"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.AlphaScreening">[docs]</a><span class="k">class</span> <span class="nc">AlphaScreening</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <div class="viewcode-block" id="AlphaScreening.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.AlphaScreening.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -247,11 +272,9 @@
 <span class="sd">        :param radius: Maximum radius that Screened-Coulomb is evaluated upto. </span>
 <span class="sd">        :return screening: Weights for screening for each pair.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">pi</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">3.141592653589793238</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">pair_dist</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-        <span class="n">q</span> <span class="o">=</span> <span class="n">pair_dist</span> <span class="o">/</span> <span class="n">radius</span> 
-        <span class="n">eta</span> <span class="o">=</span>  <span class="n">radius</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span>
-        <span class="n">screening</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">pair_dist</span><span class="o">.</span><span class="n">device</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">q</span><span class="o">*</span><span class="n">eta</span><span class="p">)))</span>
-        
+        <span class="n">pi</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">3.141592653589793238</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">pair_dist</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>        
+        <span class="n">screening</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">pair_dist</span><span class="o">.</span><span class="n">device</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">pair_dist</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)))</span>
+    
         <span class="c1"># pair_dist greater than cut-off; no local-damping. </span>
         <span class="n">screening</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">pair_dist</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">),</span> <span class="n">screening</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">screening</span><span class="p">))</span>
         

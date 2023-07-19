@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pretraining module &mdash; hippynn 0.0.1 documentation</title>
@@ -58,6 +58,7 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.networks.html">networks package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.plotting.html">plotting package</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">pretraining module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.pretraining.calculate_max_system_force"><code class="docutils literal notranslate"><span class="pre">calculate_max_system_force()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.pretraining.calculate_min_dists"><code class="docutils literal notranslate"><span class="pre">calculate_min_dists()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.pretraining.set_e0_values"><code class="docutils literal notranslate"><span class="pre">set_e0_values()</span></code></a></li>
 </ul>
@@ -101,6 +102,43 @@
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.pretraining</span></code> module.</p>
 <span class="target" id="module-hippynn.pretraining"></span><p>Things to do before training, i.e. initialization of network and diagnostics.</p>
 <dl class="py function">
+<dt class="sig sig-object py" id="hippynn.pretraining.calculate_max_system_force">
+<span class="sig-name descname"><span class="pre">calculate_max_system_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">device</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/pretraining.html#calculate_max_system_force"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.pretraining.calculate_max_system_force" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the maximum force magnitude in each system in <code class="docutils literal notranslate"><span class="pre">array_dict</span></code>.</p>
+<p>Example usage for unsplit data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">max_force</span> <span class="o">=</span> <span class="n">calculate_max_system_force</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">,</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span><span class="s2">&quot;F&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If the database has been split:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">max_force_train</span> <span class="o">=</span> <span class="n">calculate_max_system_force</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">],</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span><span class="s2">&quot;F&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Example usage to prune out high-force data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">force_threshold</span> <span class="o">=</span> <span class="o">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">max_force</span> <span class="o">=</span> <span class="n">calculate_max_system_force</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">,</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span><span class="s2">&quot;F&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">high_force_system</span> <span class="o">=</span> <span class="n">max_force</span> <span class="o">&gt;</span> <span class="n">force_threshold</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span><span class="o">.</span><span class="n">arr_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">v</span><span class="p">[</span><span class="o">~</span><span class="n">high_force_system</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">db</span><span class="o">.</span><span class="n">arr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array_dict</strong> – dictionary mapping strings to tensors/numpy arrays</p></li>
+<li><p><strong>species_name</strong> – dictionary key for species</p></li>
+<li><p><strong>force-name</strong> – dictionary key for positions</p></li>
+<li><p><strong>device</strong> – Where to perform the computation.</p></li>
+<li><p><strong>batch_size</strong> – batch size to perform evaluation over.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="hippynn.pretraining.calculate_min_dists">
 <span class="sig-name descname"><span class="pre">calculate_min_dists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">device</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_finder_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_BaseNode</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/pretraining.html#calculate_min_dists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.pretraining.calculate_min_dists" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates the minimum distance found in each system in <code class="docutils literal notranslate"><span class="pre">array_dict</span></code>.</p>
@@ -111,6 +149,14 @@
 </div>
 <p>If the database has been split:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">min_dists_train</span> <span class="o">=</span> <span class="n">calculate_min_dists</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">],</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span><span class="s2">&quot;R&quot;</span><span class="p">,</span><span class="mf">5.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Example usage to prune out low-distance data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dist_threshold</span> <span class="o">=</span> <span class="o">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">min_dist</span> <span class="o">=</span> <span class="n">calculate_min_dists</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">,</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span><span class="s2">&quot;R&quot;</span><span class="p">,</span><span class="mf">5.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">low_distance_system</span> <span class="o">=</span> <span class="n">min_dist</span> <span class="o">&lt;</span> <span class="n">dist_threshold</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span><span class="o">.</span><span class="n">arr_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">v</span><span class="p">[</span><span class="o">~</span><span class="n">low_distance_system</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">db</span><span class="o">.</span><span class="n">arr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 </pre></div>
 </div>
 <div class="admonition note">
