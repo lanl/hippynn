@@ -111,12 +111,8 @@ class ScreenedCoulombEnergy(CoulombEnergy):
         screening = torch.where((pair_dist < self.radius).unsqueeze(1), screening, torch.zeros_like(screening))
 
         # Voltage pairs for per-atom energy
-        if (charges[pair_second].shape == pair_dist.shape): 
-            voltage_pairs = self.energy_conversion_factor * (charges[pair_second] / pair_dist) # Lammps
-            voltage_pairs = voltage_pairs * screening.squeeze(2) # lammps
-        else:
-            voltage_pairs = self.energy_conversion_factor * (charges[pair_second] / pair_dist.unsqueeze(1)) # hipnn
-            voltage_pairs = voltage_pairs * screening # hipnn
+        voltage_pairs = self.energy_conversion_factor * (charges[pair_second] / pair_dist.unsqueeze(1)) 
+        voltage_pairs = voltage_pairs * screening 
         n_atoms, _ = charges.shape
         voltage_atom = torch.zeros((n_atoms, 1), device=charges.device, dtype=charges.dtype)
         voltage_atom.index_add_(0, pair_first, voltage_pairs) 
@@ -240,4 +236,4 @@ class PerAtom(torch.nn.Module):
 
 class VecMag(torch.nn.Module):
     def forward(self, vector_feature):
-        return torch.norm(vector_feature, dim=1).unsqueeze(1)
+        return torch.norm(vector_feature, dim=1) 
