@@ -6,4 +6,6 @@ from .calculator import HippynnCalculator, calculator_from_model
 
 from .pairfinder import ASEPairNode
 
-__all__ = ["HippynnCalculator", "calculator_from_model"]
+from .ase_database import AseDatabase
+
+__all__ = ["HippynnCalculator", "calculator_from_model", "AseDatabase"]
