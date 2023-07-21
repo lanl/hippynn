@@ -106,7 +106,6 @@ class ScreenedCoulombEnergy(CoulombEnergy):
         self.bond_summer = pairs.MolPairSummer()
 
     def forward(self, charges, pair_dist, pair_first, pair_second, mol_index, n_molecules):
-        # we can alternatively resolve the pair_dist behavior earlier 
         screening = self.screening(pair_dist, self.radius).unsqueeze(1)
         screening = torch.where((pair_dist < self.radius).unsqueeze(1), screening, torch.zeros_like(screening))
 

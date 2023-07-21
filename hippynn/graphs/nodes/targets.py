@@ -13,8 +13,6 @@ from ...layers import targets as target_modules
 class CmbEnergyNode(Energies, AutoKw, ExpandParents, MultiNode):
     """
     Combines Local atom energies and Coulomb atom energies
-    TODO Propagate the hierarchicality information for atom energy and atom charges
-        which may be relevant for UQ stuff. 
     """
     _input_names = "atom_energy", "atom_coulomb", "mol_index", "n_molecules"
     _output_names = "mol_energy", "atom_energies"
