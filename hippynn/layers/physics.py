@@ -106,24 +106,24 @@ class ScreenedCoulombEnergy(CoulombEnergy):
         self.bond_summer = pairs.MolPairSummer()
 
     def forward(self, charges, pair_dist, pair_first, pair_second, mol_index, n_molecules):
-
-        # Calculation of pair terms
-        base_coulomb = charges[pair_first] * charges[pair_second] / pair_dist.unsqueeze(1)
+        # we can alternatively resolve the pair_dist behavior earlier 
         screening = self.screening(pair_dist, self.radius).unsqueeze(1)
         screening = torch.where((pair_dist < self.radius).unsqueeze(1), screening, torch.zeros_like(screening))
-        coulomb_pairs = base_coulomb * screening
 
-        # Add pair contributions to system
-        coulomb_molecule = self.bond_summer(coulomb_pairs, mol_index, n_molecules, pair_first)
+        # Voltage pairs for per-atom energy
+        voltage_pairs = self.energy_conversion_factor * (charges[pair_second] / pair_dist.unsqueeze(1)) 
+        voltage_pairs = voltage_pairs * screening 
+        n_atoms, _ = charges.shape
+        voltage_atom = torch.zeros((n_atoms, 1), device=charges.device, dtype=charges.dtype)
+        voltage_atom.index_add_(0, pair_first, voltage_pairs) 
+        coulomb_atom = voltage_atom * charges
+        coulomb_molecules = 0.5 * self.summer(coulomb_atom, mol_index, n_molecules)
 
-        # Finally, account for symmetry pairs and energy conversion factor.
-        coulomb_molecule = 0.5 * self.energy_conversion_factor * coulomb_molecule
-
-        return coulomb_molecule
+        return coulomb_molecules, coulomb_atom
 
 
 class CombineScreenings(torch.nn.Module):
-    """ Returns products of different screenings for Screened Coulomb Interactions. 
+    """ Returns products of different screenings for Screened Coulomb Interactions.
     """
     def __init__(self, screening_list):
         super().__init__()
@@ -131,12 +131,12 @@ class CombineScreenings(torch.nn.Module):
 
     def forward(self, pair_dist, radius):
         """ Product of different screenings applied to pair_dist upto radius.
-        
+
         :param pair_dist: torch.tensor, dtype=float64: 'Neighborlist' distances for coulomb energies.
-        :param radius: Maximum radius that Screened-Coulomb is evaluated upto. 
+        :param radius: Maximum radius that Screened-Coulomb is evaluated upto.
         :return screening: Weights for screening for all pair_dist.
         """
-        screening = None 
+        screening = None
 
         for s in self.SL:
             if screening is None:
@@ -236,4 +236,4 @@ class PerAtom(torch.nn.Module):
 
 class VecMag(torch.nn.Module):
     def forward(self, vector_feature):
-        return torch.norm(vector_feature, dim=1).unsqueeze(1)
+        return torch.norm(vector_feature, dim=1) 
