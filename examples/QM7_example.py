@@ -1,3 +1,8 @@
+'''
+To obtain the data files needed for this example, use the script process_QM7_data.py, 
+also located in this folder. The script contains further instructions for use.
+'''
+
 PERFORM_PLOTTING = True  # Make sure you have matplotlib if you want to set this to TRUE
 
 #### Setup pytorch things
