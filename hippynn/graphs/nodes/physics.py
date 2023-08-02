@@ -120,20 +120,21 @@ class ChargePairSetup(ExpandParents):
     @_parent_expander.match(Charges, _BaseNode, SpeciesNode)
     def expansion2(self, charges, pos_or_pair, species, *, purpose, **kwargs):
         encoder, pidxer = acquire_encoding_padding(species, species_set=None, purpose=purpose)
-        return charges, pos_or_pair, encoder, pidxer
+        return charges, pos_or_pair, pidxer
 
-    @_parent_expander.match(Charges, PositionsNode, Encoder, PaddingIndexer)
-    def expansion3(self, charges, positions, encoder, pidxer, *, cutoff_distance, **kwargs):
+    @_parent_expander.match(Charges, PositionsNode, PaddingIndexer)
+    def expansion3(self, charges, positions, pidxer, *, cutoff_distance, **kwargs):
         try:
-            pairfinder = find_unique_relative((charges, positions, encoder, pidxer), PairIndexer)
+            pairfinder = find_unique_relative((charges, positions, pidxer), PairIndexer)
         except NodeNotFound:
             warnings.warn("Boundary conditions not specified, Building open boundary conditions.")
+            encoder = find_unique_relative(pidxer, Encoder)
             pairfinder = OpenPairIndexer("PairIndexer", (positions, encoder, pidxer), dist_hard_max=cutoff_distance)
         return charges, pairfinder, pidxer
 
     @_parent_expander.match(Charges, PairIndexer, AtomIndexer)
-    def expansion4(self, charges, pairfinder, pidxer, **kwargs):
-        self._validate_pairfinder(pairfinder, None)
+    def expansion4(self, charges, pairfinder, pidxer, *, cutoff_distance, **kwargs):
+        self._validate_pairfinder(pairfinder, cutoff_distance)
         pf = pairfinder
         return charges, pf.pair_dist, pf.pair_first, pf.pair_second, pidxer.mol_index, pidxer.n_molecules
 
@@ -159,7 +160,7 @@ class CoulombEnergyNode(ChargePairSetup, Energies, AutoKw, MultiNode):
 
         if pairfinder.torch_module.hard_dist_cutoff is not None:
             raise ValueError(
-                "dist_hard_max is set to a finite value,\n"
+                "hard_dist_cutoff is set to a finite value,\n"
                 "coulomb energy requires summing over the entire set of pairs"
             )
 
@@ -314,23 +315,31 @@ class CombineEnergyNode(Energies, AutoKw, ExpandParents, MultiNode):
     """
     Combines Local atom energies from different Energy Nodes. 
     """
-    _input_names = "atom_energy_1", "atom_energy_2", "mol_index", "n_molecules"
+    _input_names = "input_atom_energy_1", "input_atom_energy_2", "mol_index", "n_molecules"
     _output_names = "mol_energy", "atom_energies"
     _main_output = "mol_energy"
     _output_index_states = IdxType.Molecules, IdxType.Atoms,
     _auto_module_class = physics_layers.CombineEnergy
     
-    @_parent_expander.match(Energies, Energies, PaddingIndexer)
-    def expansion0(self, energy_1, energy_2, pdindexer, **kwargs):
-        return energy_1.atom_energies, energy_2.atom_energies, pdindexer.mol_index, pdindexer.n_molecules
+    @_parent_expander.match(_BaseNode, Energies)
+    def expansion0(self, energy_1, energy_2, **kwargs):
+        return energy_1, energy_2.atom_energies
 
-    @_parent_expander.match(Energies, Energies)
+    @_parent_expander.match(Energies, _BaseNode)
+    def expansion0(self, energy_1, energy_2, **kwargs):
+        return energy_1.atom_energies, energy_2
+
+    @_parent_expander.match(_BaseNode, _BaseNode)
     def expansion1(self, energy_1, energy_2, **kwargs):
-        pdindexer = find_unique_relative(energy_1, AtomIndexer, why_desc="Generating Molecular summer")
-        return energy_1.atom_energies, energy_2.atom_energies, pdindexer.mol_index, pdindexer.n_molecules
-        
+        pdindexer = find_unique_relative([energy_1, energy_2], AtomIndexer, why_desc="Generating CombineEnergies")
+        return energy_1, energy_2, pdindexer
+
+    @_parent_expander.match(_BaseNode, _BaseNode, PaddingIndexer)
+    def expansion2(self, energy_1, energy_2, pdindexer, **kwargs):
+        return energy_1, energy_2, pdindexer.mol_index, pdindexer.n_molecules
 
     _parent_expander.assertlen(4)
+    _parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, None, None)
 
     def __init__(self, name, parents, module="auto", module_kwargs=None, **kwargs):
         self.module_kwargs = {} if module_kwargs is None else module_kwargs
