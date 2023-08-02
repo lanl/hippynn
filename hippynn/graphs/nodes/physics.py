@@ -7,7 +7,7 @@ from .base import SingleNode, MultiNode, AutoNoKw, AutoKw, ExpandParents, find_u
 from .base.node_functions import NodeNotFound
 from .indexers import AtomIndexer, PaddingIndexer, acquire_encoding_padding
 from .pairs import OpenPairIndexer
-from .tags import Encoder, PairIndexer, Charges
+from .tags import Encoder, PairIndexer, Charges, Energies
 from .inputs import PositionsNode, SpeciesNode
 
 from ..indextypes import IdxType, index_type_coercion, elementwise_compare_reduce
@@ -142,10 +142,10 @@ class ChargePairSetup(ExpandParents):
     _parent_expander.require_idx_states(IdxType.Atoms, *(None,) * 5)
 
 
-class CoulombEnergyNode(ChargePairSetup, AutoKw, MultiNode):
+class CoulombEnergyNode(ChargePairSetup, Energies, AutoKw, MultiNode):
     _input_names = "charges", "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules"
-    _output_names = "mol_energies", "atom_voltages"
-    _output_index_states = IdxType.Molecules, IdxType.Atoms
+    _output_names = "mol_energies", "atom_energies", "atom_voltages"
+    _output_index_states = IdxType.Molecules, IdxType.Atoms, IdxType.Atoms
     _main_output = "mol_energies"
     _auto_module_class = physics_layers.CoulombEnergy
 
@@ -174,11 +174,11 @@ class CoulombEnergyNode(ChargePairSetup, AutoKw, MultiNode):
         super().__init__(name, parents, module=module)
 
 
-class ScreenedCoulombEnergyNode(ChargePairSetup, AutoKw, MultiNode):
+class ScreenedCoulombEnergyNode(ChargePairSetup, Energies, AutoKw, MultiNode):
     _input_names = "charges", "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules"
-    _output_names = "mol_energies", "atom_energies"
+    _output_names = "mol_energies", "atom_energies", "atom_voltages"
+    _output_index_states = IdxType.Molecules, IdxType.Atoms, IdxType.Atoms
     _main_output = "mol_energies"
-    _output_index_states = IdxType.Molecules, IdxType.Atoms
     _auto_module_class = physics_layers.ScreenedCoulombEnergy
 
     @staticmethod
@@ -307,3 +307,33 @@ class PerAtom(ExpandParents, AutoNoKw, SingleNode):
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
         super().__init__(name, parents, module=module, **kwargs)
+
+
+
+class CombineEnergyNode(Energies, AutoKw, ExpandParents, MultiNode):
+    """
+    Combines Local atom energies from different Energy Nodes. 
+    """
+    _input_names = "atom_energy_1", "atom_energy_2", "mol_index", "n_molecules"
+    _output_names = "mol_energy", "atom_energies"
+    _main_output = "mol_energy"
+    _output_index_states = IdxType.Molecules, IdxType.Atoms,
+    _auto_module_class = physics_layers.CombineEnergy
+    
+    @_parent_expander.match(Energies, Energies, PaddingIndexer)
+    def expansion0(self, energy_1, energy_2, pdindexer, **kwargs):
+        return energy_1.atom_energies, energy_2.atom_energies, pdindexer.mol_index, pdindexer.n_molecules
+
+    @_parent_expander.match(Energies, Energies)
+    def expansion1(self, energy_1, energy_2, **kwargs):
+        pdindexer = find_unique_relative(energy_1, AtomIndexer, why_desc="Generating Molecular summer")
+        return energy_1.atom_energies, energy_2.atom_energies, pdindexer.mol_index, pdindexer.n_molecules
+        
+
+    _parent_expander.assertlen(4)
+
+    def __init__(self, name, parents, module="auto", module_kwargs=None, **kwargs):
+        self.module_kwargs = {} if module_kwargs is None else module_kwargs
+        parents = self.expand_parents(parents, **kwargs)
+        super().__init__(name, parents=parents, module=module, **kwargs)
+  

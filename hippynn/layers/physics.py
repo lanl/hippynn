@@ -74,6 +74,13 @@ class Quadrupole(torch.nn.Module):
 
 
 class CoulombEnergy(torch.nn.Module):
+    """ Computes the Coulomb Energy of the molecule/configuration. 
+    
+    Coulomb energies is defined for pairs of atoms. Here, we adopt the 
+    convention that the Coulomby energy for a pair of atoms is evenly
+    partitioned to both atoms as the 'per-atom energies'. Therefore, the 
+    atom energies sum to the molecular energy; similar to the HEnergy. 
+    """
     def __init__(self, energy_conversion_factor):
         super().__init__()
         self.register_buffer("energy_conversion_factor", torch.tensor(energy_conversion_factor))
@@ -84,12 +91,18 @@ class CoulombEnergy(torch.nn.Module):
         n_atoms, _ = charges.shape
         voltage_atom = torch.zeros((n_atoms, 1), device=charges.device, dtype=charges.dtype)
         voltage_atom.index_add_(0, pair_first, voltage_pairs)
-        coulomb_atom = voltage_atom * charges
-        coulomb_molecules = 0.5 * self.summer(coulomb_atom, mol_index, n_molecules)
-        return coulomb_molecules, voltage_atom
+        coulomb_atoms = 0.5*voltage_atom * charges
+        coulomb_molecule = self.summer(coulomb_atoms, mol_index, n_molecules)
+        return coulomb_molecule, coulomb_atoms, voltage_atom
 
 
 class ScreenedCoulombEnergy(CoulombEnergy):
+    """ Computes the Coulomb Energy of the molecule/configuration. 
+    
+    The convention for the atom energies is the same as CoulombEnergy
+    and the HEnergy. 
+    """
+    
     def __init__(self, energy_conversion_factor, screening, radius=None):
         super().__init__(energy_conversion_factor)
         if screening is None:
@@ -115,10 +128,10 @@ class ScreenedCoulombEnergy(CoulombEnergy):
         n_atoms, _ = charges.shape
         voltage_atom = torch.zeros((n_atoms, 1), device=charges.device, dtype=charges.dtype)
         voltage_atom.index_add_(0, pair_first, voltage_pairs) 
-        coulomb_atom = voltage_atom * charges
-        coulomb_molecules = 0.5 * self.summer(coulomb_atom, mol_index, n_molecules)
+        coulomb_atoms = 0.5 * voltage_atom * charges
+        coulomb_molecule = self.summer(coulomb_atoms, mol_index, n_molecules)
 
-        return coulomb_molecules, coulomb_atom
+        return coulomb_molecule, coulomb_atoms, voltage_atom
 
 
 class CombineScreenings(torch.nn.Module):
@@ -236,3 +249,28 @@ class PerAtom(torch.nn.Module):
 class VecMag(torch.nn.Module):
     def forward(self, vector_feature):
         return torch.norm(vector_feature, dim=1) 
+
+
+
+
+class CombineEnergy(torch.nn.Module):
+    """
+    Combines the energies (molecular and atom energies) from two different 
+    nodes, e.g. HEnergy, Coulomb, or ScreenedCoulomb Energy Nodes. 
+    """
+    def __init__(self):
+        super().__init__()
+        self.summer = indexers.MolSummer()
+
+    def forward(self, atom_energy_1, atom_energy_2, mol_index, n_molecules):
+        """
+        :param: atom_energy_1 per-atom energy from first node. 
+        :param: atom_energy_2 per atom energy from second node. 
+        :param: mol_index the molecular index for atoms in the batch
+        :param: total number of molecules in the batch
+        :return: Total Energy
+        """
+        total_atom_energy = atom_energy_1 + atom_energy_2
+        mol_energy = self.summer(total_atom_energy, mol_index, n_molecules)
+        
+        return mol_energy, total_atom_energy
