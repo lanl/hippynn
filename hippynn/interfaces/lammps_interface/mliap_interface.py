@@ -19,6 +19,7 @@ from hippynn.graphs.nodes.base import InputNode, MultiNode, AutoNoKw, ExpandPare
 from hippynn.graphs.nodes.tags import Encoder, PairIndexer
 from hippynn.graphs.nodes.physics import GradientNode, VecMag
 from hippynn.graphs.nodes.inputs import SpeciesNode
+from hippynn.graphs.nodes.pairs import PairFilter
 
 class MLIAPInterface(MLIAPUnified):
     """
@@ -125,6 +126,7 @@ def setup_LAMMPS_graph(energy):
     species_set = torch.as_tensor(encoder.species_set).to(torch.int64)
     min_radius = max(p.dist_hard_max for p in pair_indexers)
 
+
     ###############################################################
     # Set up graph to accept external pair indices and shifts
 
@@ -139,13 +141,27 @@ def setup_LAMMPS_graph(energy):
     pair_dist = VecMag("(LAMMPS)pair_dist", in_pair_coord)
 
     new_inputs = [species,in_pair_first,in_pair_second,in_pair_coord,in_nlocal]
-
+    
+    # Construct Filters and replace the existing pair indexers with the 
+    # corresponding new (filtered) node that accepts external pairs of atoms
     for pi in pair_indexers:
-        replace_node(pi.pair_first, in_pair_first, disconnect_old=False)
-        replace_node(pi.pair_second, in_pair_second, disconnect_old=False)
-        replace_node(pi.pair_coord, in_pair_coord, disconnect_old=False)
-        replace_node(pi.pair_dist, pair_dist, disconnect_old=False)
-        pi.disconnect()
+        if pi.dist_hard_max == min_radius:
+            replace_node(pi.pair_first, in_pair_first, disconnect_old=False)
+            replace_node(pi.pair_second, in_pair_second, disconnect_old=False)
+            replace_node(pi.pair_coord, in_pair_coord, disconnect_old=False)
+            replace_node(pi.pair_dist, pair_dist, disconnect_old=False)
+            pi.disconnect()
+        else:
+            mapped_node = PairFilter(
+                "DistanceFilter-LAMMPS",
+                (pair_dist, in_pair_first, in_pair_second, in_pair_coord),
+                dist_hard_max=pi.dist_hard_max, 
+            )
+            replace_node(pi.pair_first, mapped_node.pair_first, disconnect_old=False)
+            replace_node(pi.pair_second, mapped_node.pair_second, disconnect_old=False)
+            replace_node(pi.pair_coord, mapped_node.pair_coord, disconnect_old=False)
+            replace_node(pi.pair_dist, mapped_node.pair_dist, disconnect_old=False)
+            pi.disconnect()
 
     energy, *new_required = new_required
     try:
