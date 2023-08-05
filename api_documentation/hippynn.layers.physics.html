@@ -12,11 +12,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -63,6 +63,12 @@
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.AlphaScreening"><code class="docutils literal notranslate"><span class="pre">AlphaScreening</span></code></a><ul>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.AlphaScreening.__init__"><code class="docutils literal notranslate"><span class="pre">AlphaScreening.__init__()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.AlphaScreening.training"><code class="docutils literal notranslate"><span class="pre">AlphaScreening.training</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.CombineEnergy"><code class="docutils literal notranslate"><span class="pre">CombineEnergy</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.CombineEnergy.__init__"><code class="docutils literal notranslate"><span class="pre">CombineEnergy.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.CombineEnergy.forward"><code class="docutils literal notranslate"><span class="pre">CombineEnergy.forward()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.CombineEnergy.training"><code class="docutils literal notranslate"><span class="pre">CombineEnergy.training</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.CombineScreenings"><code class="docutils literal notranslate"><span class="pre">CombineScreenings</span></code></a><ul>
@@ -209,6 +215,47 @@
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.physics.CombineEnergy">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CombineEnergy</span></span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CombineEnergy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CombineEnergy" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Combines the energies (molecular and atom energies) from two different 
+nodes, e.g. HEnergy, Coulomb, or ScreenedCoulomb Energy Nodes.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.physics.CombineEnergy.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CombineEnergy.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CombineEnergy.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.physics.CombineEnergy.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom_energy_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_energy_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_molecules</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CombineEnergy.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CombineEnergy.forward" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Param<span class="colon">:</span></dt>
+<dd class="field-odd"><p>atom_energy_1 per-atom energy from first node.</p>
+</dd>
+<dt class="field-even">Param<span class="colon">:</span></dt>
+<dd class="field-even"><p>atom_energy_2 per atom energy from second node.</p>
+</dd>
+<dt class="field-odd">Param<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mol_index the molecular index for atoms in the batch</p>
+</dd>
+<dt class="field-even">Param<span class="colon">:</span></dt>
+<dd class="field-even"><p>total number of molecules in the batch</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Total Energy</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.layers.physics.CombineEnergy.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#hippynn.layers.physics.CombineEnergy.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="hippynn.layers.physics.CombineScreenings">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CombineScreenings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">screening_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CombineScreenings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CombineScreenings" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
@@ -247,6 +294,11 @@
 <dt class="sig sig-object py" id="hippynn.layers.physics.CoulombEnergy">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CoulombEnergy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_conversion_factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CoulombEnergy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CoulombEnergy" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Computes the Coulomb Energy of the molecule/configuration.</p>
+<p>Coulomb energies is defined for pairs of atoms. Here, we adopt the 
+convention that the Coulomby energy for a pair of atoms is evenly
+partitioned to both atoms as the ‘per-atom energies’. Therefore, the 
+atom energies sum to the molecular energy; similar to the HEnergy.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.layers.physics.CoulombEnergy.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_conversion_factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CoulombEnergy.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CoulombEnergy.__init__" title="Permalink to this definition"></a></dt>
@@ -508,6 +560,9 @@ registered hooks while the latter silently ignores them.</p>
 <dt class="sig sig-object py" id="hippynn.layers.physics.ScreenedCoulombEnergy">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScreenedCoulombEnergy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_conversion_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screening</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#ScreenedCoulombEnergy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.ScreenedCoulombEnergy" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#hippynn.layers.physics.CoulombEnergy" title="hippynn.layers.physics.CoulombEnergy"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoulombEnergy</span></code></a></p>
+<p>Computes the Coulomb Energy of the molecule/configuration.</p>
+<p>The convention for the atom energies is the same as CoulombEnergy
+and the HEnergy.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.layers.physics.ScreenedCoulombEnergy.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_conversion_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screening</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#ScreenedCoulombEnergy.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.ScreenedCoulombEnergy.__init__" title="Permalink to this definition"></a></dt>

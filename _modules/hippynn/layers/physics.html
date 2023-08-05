@@ -11,11 +11,11 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -150,6 +150,13 @@
 
 
 <div class="viewcode-block" id="CoulombEnergy"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CoulombEnergy">[docs]</a><span class="k">class</span> <span class="nc">CoulombEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Computes the Coulomb Energy of the molecule/configuration. </span>
+<span class="sd">    </span>
+<span class="sd">    Coulomb energies is defined for pairs of atoms. Here, we adopt the </span>
+<span class="sd">    convention that the Coulomby energy for a pair of atoms is evenly</span>
+<span class="sd">    partitioned to both atoms as the &#39;per-atom energies&#39;. Therefore, the </span>
+<span class="sd">    atom energies sum to the molecular energy; similar to the HEnergy. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="CoulombEnergy.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CoulombEnergy.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_conversion_factor</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;energy_conversion_factor&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">energy_conversion_factor</span><span class="p">))</span>
@@ -160,12 +167,18 @@
         <span class="n">n_atoms</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">charges</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">voltage_atom</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_atoms</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">charges</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">charges</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
         <span class="n">voltage_atom</span><span class="o">.</span><span class="n">index_add_</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">voltage_pairs</span><span class="p">)</span>
-        <span class="n">coulomb_atom</span> <span class="o">=</span> <span class="n">voltage_atom</span> <span class="o">*</span> <span class="n">charges</span>
-        <span class="n">coulomb_molecules</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">coulomb_atom</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">coulomb_molecules</span><span class="p">,</span> <span class="n">voltage_atom</span></div></div>
+        <span class="n">coulomb_atoms</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">voltage_atom</span> <span class="o">*</span> <span class="n">charges</span>
+        <span class="n">coulomb_molecule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">coulomb_atoms</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">coulomb_molecule</span><span class="p">,</span> <span class="n">coulomb_atoms</span><span class="p">,</span> <span class="n">voltage_atom</span></div></div>
 
 
 <div class="viewcode-block" id="ScreenedCoulombEnergy"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.ScreenedCoulombEnergy">[docs]</a><span class="k">class</span> <span class="nc">ScreenedCoulombEnergy</span><span class="p">(</span><span class="n">CoulombEnergy</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Computes the Coulomb Energy of the molecule/configuration. </span>
+<span class="sd">    </span>
+<span class="sd">    The convention for the atom energies is the same as CoulombEnergy</span>
+<span class="sd">    and the HEnergy. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
 <div class="viewcode-block" id="ScreenedCoulombEnergy.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.ScreenedCoulombEnergy.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_conversion_factor</span><span class="p">,</span> <span class="n">screening</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">energy_conversion_factor</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">screening</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -182,24 +195,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">bond_summer</span> <span class="o">=</span> <span class="n">pairs</span><span class="o">.</span><span class="n">MolPairSummer</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="ScreenedCoulombEnergy.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.ScreenedCoulombEnergy.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
-
-        <span class="c1"># Calculation of pair terms</span>
-        <span class="n">base_coulomb</span> <span class="o">=</span> <span class="n">charges</span><span class="p">[</span><span class="n">pair_first</span><span class="p">]</span> <span class="o">*</span> <span class="n">charges</span><span class="p">[</span><span class="n">pair_second</span><span class="p">]</span> <span class="o">/</span> <span class="n">pair_dist</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">screening</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">screening</span><span class="p">(</span><span class="n">pair_dist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">screening</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">pair_dist</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">screening</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">screening</span><span class="p">))</span>
-        <span class="n">coulomb_pairs</span> <span class="o">=</span> <span class="n">base_coulomb</span> <span class="o">*</span> <span class="n">screening</span>
 
-        <span class="c1"># Add pair contributions to system</span>
-        <span class="n">coulomb_molecule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bond_summer</span><span class="p">(</span><span class="n">coulomb_pairs</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">)</span>
+        <span class="c1"># Voltage pairs for per-atom energy</span>
+        <span class="n">voltage_pairs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_conversion_factor</span> <span class="o">*</span> <span class="p">(</span><span class="n">charges</span><span class="p">[</span><span class="n">pair_second</span><span class="p">]</span> <span class="o">/</span> <span class="n">pair_dist</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> 
+        <span class="n">voltage_pairs</span> <span class="o">=</span> <span class="n">voltage_pairs</span> <span class="o">*</span> <span class="n">screening</span> 
+        <span class="n">n_atoms</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">charges</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">voltage_atom</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_atoms</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">charges</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">charges</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">voltage_atom</span><span class="o">.</span><span class="n">index_add_</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">voltage_pairs</span><span class="p">)</span> 
+        <span class="n">coulomb_atoms</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">voltage_atom</span> <span class="o">*</span> <span class="n">charges</span>
+        <span class="n">coulomb_molecule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">coulomb_atoms</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
 
-        <span class="c1"># Finally, account for symmetry pairs and energy conversion factor.</span>
-        <span class="n">coulomb_molecule</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_conversion_factor</span> <span class="o">*</span> <span class="n">coulomb_molecule</span>
-
-        <span class="k">return</span> <span class="n">coulomb_molecule</span></div></div>
+        <span class="k">return</span> <span class="n">coulomb_molecule</span><span class="p">,</span> <span class="n">coulomb_atoms</span><span class="p">,</span> <span class="n">voltage_atom</span></div></div>
 
 
 <div class="viewcode-block" id="CombineScreenings"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineScreenings">[docs]</a><span class="k">class</span> <span class="nc">CombineScreenings</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns products of different screenings for Screened Coulomb Interactions. </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns products of different screenings for Screened Coulomb Interactions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="CombineScreenings.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineScreenings.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screening_list</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -207,12 +219,12 @@
 
 <div class="viewcode-block" id="CombineScreenings.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineScreenings.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Product of different screenings applied to pair_dist upto radius.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param pair_dist: torch.tensor, dtype=float64: &#39;Neighborlist&#39; distances for coulomb energies.</span>
-<span class="sd">        :param radius: Maximum radius that Screened-Coulomb is evaluated upto. </span>
+<span class="sd">        :param radius: Maximum radius that Screened-Coulomb is evaluated upto.</span>
 <span class="sd">        :return screening: Weights for screening for all pair_dist.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">screening</span> <span class="o">=</span> <span class="kc">None</span> 
+        <span class="n">screening</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SL</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">screening</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -312,7 +324,32 @@
 
 <div class="viewcode-block" id="VecMag"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.VecMag">[docs]</a><span class="k">class</span> <span class="nc">VecMag</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <div class="viewcode-block" id="VecMag.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.VecMag.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vector_feature</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vector_feature</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vector_feature</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> </div></div>
+
+
+
+
+<div class="viewcode-block" id="CombineEnergy"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineEnergy">[docs]</a><span class="k">class</span> <span class="nc">CombineEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Combines the energies (molecular and atom energies) from two different </span>
+<span class="sd">    nodes, e.g. HEnergy, Coulomb, or ScreenedCoulomb Energy Nodes. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="CombineEnergy.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineEnergy.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">summer</span> <span class="o">=</span> <span class="n">indexers</span><span class="o">.</span><span class="n">MolSummer</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CombineEnergy.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineEnergy.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom_energy_1</span><span class="p">,</span> <span class="n">atom_energy_2</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param: atom_energy_1 per-atom energy from first node. </span>
+<span class="sd">        :param: atom_energy_2 per atom energy from second node. </span>
+<span class="sd">        :param: mol_index the molecular index for atoms in the batch</span>
+<span class="sd">        :param: total number of molecules in the batch</span>
+<span class="sd">        :return: Total Energy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">total_atom_energy</span> <span class="o">=</span> <span class="n">atom_energy_1</span> <span class="o">+</span> <span class="n">atom_energy_2</span>
+        <span class="n">mol_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">total_atom_energy</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">mol_energy</span><span class="p">,</span> <span class="n">total_atom_energy</span></div></div>
 </pre></div>
 
            </div>
