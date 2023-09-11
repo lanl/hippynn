@@ -67,7 +67,7 @@ class HEnergy(torch.nn.Module):
             total_hier = torch.zeros_like(total_energies)
             mol_hier = torch.zeros_like(total_energies)
             total_atom_hier = torch.zeros_like(total_atomen)
-            batch_hier = torch.zeros(1,dtype=total_energies.dtype,device=total_energies.dtype)
+            batch_hier = torch.zeros(1,dtype=total_energies.dtype,device=total_energies.device)
 
         return total_energies, total_atomen, partial_sums, total_hier, total_atom_hier, mol_hier, batch_hier
 
