@@ -134,3 +134,65 @@ def l2reg(network):
 
 def l1reg(network):
     return lpreg(network, p=1)
+
+# For loss functions with phases
+def absolute_errors(predict: torch.Tensor, true: torch.Tensor):
+    """Compute the absolute errors with phases between predicted and true values. In
+    other words, prediction should be close to the absolute value of true, and the sign
+    does not matter.
+
+    :param predict: predicted values
+    :type predict: torch.Tensor
+    :param true: true values
+    :type true: torch.Tensor
+    :return: errors
+    :rtype: torch.Tensor
+    """
+
+    return torch.minimum(torch.abs(true - predict), torch.abs(true + predict))
+
+
+def mae_with_phases(predict: torch.Tensor, true: torch.Tensor):
+    """MAE with phases
+
+    :param predict: predicted values
+    :type predict: torch.Tensor
+    :param true: true values
+    :type true: torch.Tensor
+    :return: MAE with phases
+    :rtype: torch.Tensor
+    """
+
+    errors = torch.minimum(
+        torch.linalg.norm(true - predict, ord=1, dim=-1),
+        torch.linalg.norm(true + predict, ord=1, dim=-1),
+    )
+    # errors = absolute_errors(predict, true)
+    return torch.sum(errors) / predict.numel()
+
+
+def mse_with_phases(predict: torch.Tensor, true: torch.Tensor):
+    """MSE with phases
+
+    :param predict: predicted values
+    :type predict: torch.Tensor
+    :param true: true values
+    :type true: torch.Tensor
+    :return: MSE with phases
+    :rtype: torch.Tensor
+    """
+
+    errors = torch.minimum(
+        torch.linalg.norm(true - predict, dim=-1),
+        torch.linalg.norm(true + predict, dim=-1),
+    )
+    # errors = absolute_errors(predict, true) ** 2
+    return torch.sum(errors**2) / predict.numel()
+
+
+class MAEPhaseLoss(_BaseCompareLoss, op=mae_with_phases):
+    pass
+
+
+class MSEPhaseLoss(_BaseCompareLoss, op=mse_with_phases):
+    pass

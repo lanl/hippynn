@@ -2,18 +2,26 @@
 Nodes for physics transformations
 """
 import warnings
+from typing import List, Optional, Tuple
 
-from .base import SingleNode, MultiNode, AutoNoKw, AutoKw, ExpandParents, find_unique_relative, _BaseNode
+from ...layers import indexers as index_layers
+from ...layers import pairs as pair_layers
+from ...layers import physics as physics_layers
+from ..indextypes import IdxType, elementwise_compare_reduce, index_type_coercion
+from .base import (
+    AutoKw,
+    AutoNoKw,
+    ExpandParents,
+    MultiNode,
+    SingleNode,
+    _BaseNode,
+    find_unique_relative,
+)
 from .base.node_functions import NodeNotFound
 from .indexers import AtomIndexer, PaddingIndexer, acquire_encoding_padding
-from .pairs import OpenPairIndexer
-from .tags import Encoder, PairIndexer, Charges
 from .inputs import PositionsNode, SpeciesNode
-
-from ..indextypes import IdxType, index_type_coercion, elementwise_compare_reduce
-from ...layers import indexers as index_layers
-from ...layers import physics as physics_layers
-from ...layers import pairs as pair_layers
+from .pairs import OpenPairIndexer
+from .tags import Charges, Encoder, PairIndexer
 
 
 class GradientNode(AutoKw, SingleNode):
@@ -159,8 +167,7 @@ class CoulombEnergyNode(ChargePairSetup, AutoKw, MultiNode):
 
         if pairfinder.torch_module.hard_dist_cutoff is not None:
             raise ValueError(
-                "dist_hard_max is set to a finite value,\n"
-                "coulomb energy requires summing over the entire set of pairs"
+                "dist_hard_max is set to a finite value,\ncoulomb energy requires summing over the entire set of pairs"
             )
 
     def __init__(self, name, parents, energy_conversion, module="auto"):
@@ -256,7 +263,6 @@ class AtomToMolSummer(ExpandParents, AutoNoKw, SingleNode):
 
 # TODO: This seems broken for parent expanders, check the signature of the layer.
 class BondToMolSummmer(ExpandParents, AutoNoKw, SingleNode):
-
     _input_names = "pairfeatures", "mol_index", "n_molecules", "pair_first"
     _auto_module_class = pair_layers.MolPairSummer
     _index_state = IdxType.Molecules
@@ -299,4 +305,86 @@ class PerAtom(ExpandParents, AutoNoKw, SingleNode):
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
+        super().__init__(name, parents, module=module, **kwargs)
+
+
+class NACRNode(AutoKw, SingleNode):
+    """
+    Compute the non-adiabatic coupling vector multiplied by the energy difference
+    between two states.
+    """
+
+    _input_names = "charges i", "charges j", "coordinates", "energy i", "energy j"
+    _auto_module_class = physics_layers.NACR
+
+    def __init__(self, name: str, parents: Tuple, module="auto", module_kwargs=None, **kwargs):
+        """Automatically build the node for calculating NACR * ΔE between two states i
+        and j.
+
+        :param name: name of the node
+        :type name: str
+        :param parents: parents of the NACR node in the sequence of (charges i, \
+                charges j, positions, energy i, energy j)
+        :type parents: Tuple
+        :param module: _description_, defaults to "auto"
+        :type module: str, optional
+        :param module_kwargs: keyword arguments passed to the corresponding layer,
+            defaults to None
+        :type module_kwargs: dict, optional
+        """
+
+        self.module_kwargs = {}
+        if module_kwargs is not None:
+            self.module_kwargs.update(module_kwargs)
+        charges1, charges2, positions, energy1, energy2 = parents
+        positions.requires_grad = True
+        self._index_state = IdxType.Molecules
+        # self._index_state = positions._index_state
+        parents = (
+            charges1.main_output,
+            charges2.main_output,
+            positions,
+            energy1.main_output,
+            energy2.main_output,
+        )
+        super().__init__(name, parents, module=module, **kwargs)
+
+
+class NACRMultiStateNode(AutoKw, SingleNode):
+    """
+    Compute the non-adiabatic coupling vector multiplied by the energy difference
+    between all pairs of states.
+    """
+
+    _input_names = "charges", "coordinates", "energies"
+    _auto_module_class = physics_layers.NACRMultiState
+
+    def __init__(self, name, parents, module="auto", module_kwargs=None, **kwargs):
+        """Automatically build the node for calculating NACR * ΔE between all pairs of
+        states.
+
+        :param name: name of the node
+        :type name: str
+        :param parents: parents of the NACR node in the sequence of (charges, \
+                positions, energies)
+        :type parents: Tuple
+        :param module: _description_, defaults to "auto"
+        :type module: str, optional
+        :param module_kwargs: keyword arguments passed to the corresponding layer,
+            defaults to None
+        :type module_kwargs: dict, optional
+        """
+
+        self.module_kwargs = {}
+        if module_kwargs is not None:
+            self.module_kwargs.update(module_kwargs)
+        charges, positions, energies = parents
+        positions.requires_grad = True
+        self._index_state = IdxType.Molecules
+        # self._index_state = positions._index_state
+        parents = (
+            charges.main_output,
+            positions,
+            energies.main_output,
+        )
         super().__init__(name, parents, module=module, **kwargs)
