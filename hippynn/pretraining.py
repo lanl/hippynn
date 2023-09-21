@@ -8,9 +8,10 @@ import torch
 from .graphs import find_unique_relative, Predictor
 from .graphs.nodes.base import _BaseNode
 from .graphs.nodes.tags import Encoder
-from .graphs.nodes.inputs import SpeciesNode, PositionsNode, CellNode
+from .graphs.nodes.inputs import SpeciesNode, PositionsNode, CellNode, ForceNode
 from .graphs.nodes.pairs import OpenPairIndexer, DynamicPeriodicPairs, MinDistNode
-from .graphs.nodes.indexers import acquire_encoding_padding
+from .graphs.nodes.indexers import acquire_encoding_padding, SysMaxOfAtomsNode
+from .graphs.nodes.physics import VecMag
 from .networks.hipnn import compute_hipnn_e0
 
 
@@ -126,6 +127,14 @@ def calculate_min_dists(
 
     >>> min_dists_train = calculate_min_dists(db.splits['train'],"Z","R",5.0)
 
+    Example usage to prune out low-distance data::
+
+    >>> db = Database(...)
+    >>> dist_threshold = ...
+    >>> min_dist = calculate_min_dists(db.arr_dict,"Z","R",5.0)
+    >>> low_distance_system = min_dist < dist_threshold
+    >>> db.arr_dict = {k:v[~low_distance_system] for k,v in db.arr_dict.items()}
+
     .. Note::
        The cutoff radius ``dist_hard_max`` should be set large enough such that each atom is expected
        to have at least one neighbor. If an atom has no neighbors, its min_dist will be set to the
@@ -156,7 +165,10 @@ def calculate_min_dists(
 
     species_set = list(np.unique(array_dict[species_name]))
 
-    if not species_set or set(species_set) == {0}:
+    if 0 not in species_set:
+        species_set = np.concatenate([[0], species_set], axis=0)
+
+    if not len(species_set) or set(species_set) == {0}:
         raise ValueError("Species set empty!")
 
     pred, node_key = _setup_min_dist_graph(
@@ -175,6 +187,89 @@ def calculate_min_dists(
     }
     if cell_name is not None:
         input_dict[cell_name] = torch.as_tensor(array_dict[cell_name])
+
+    results = pred(**input_dict, batch_size=batch_size)[node_key]
+
+    return results
+
+
+def _setup_max_force_graph(
+    species_name,
+    force_name,
+    species_set,
+    device=None,
+):
+    species = SpeciesNode(db_name=species_name)
+    force = ForceNode(db_name=force_name)
+    # Species set required to build encoder and atom indexer.
+    enc, pad = acquire_encoding_padding(species, species_set=species_set)
+    forcemag = VecMag("FMag", (force, species))
+    max_force = SysMaxOfAtomsNode("MaxForce", (forcemag, pad))
+
+    pred = Predictor([species, force], [max_force], model_device=device, name="Max Force Calculator")
+
+    return pred, max_force
+
+
+def calculate_max_system_force(
+    array_dict: dict,
+    species_name: str,
+    force_name: str,
+    device: torch.device = None,
+    batch_size: int = 50,
+):
+    """
+    Calculates the maximum force magnitude in each system in ``array_dict``.
+
+    Example usage for unsplit data::
+
+    >>> db = Database(...)
+    >>> max_force = calculate_max_system_force(db.arr_dict,"Z","F")
+
+    If the database has been split::
+
+    >>> max_force_train = calculate_max_system_force(db.splits['train'],"Z","F")
+
+    Example usage to prune out high-force data::
+
+    >>> db = Database(...)
+    >>> force_threshold = ...
+    >>> max_force = calculate_max_system_force(db.arr_dict,"Z","F")
+    >>> high_force_system = max_force > force_threshold
+    >>> db.arr_dict = {k:v[~high_force_system] for k,v in db.arr_dict.items()}
+
+    :param array_dict: dictionary mapping strings to tensors/numpy arrays
+    :param species_name: dictionary key for species
+    :param force-name: dictionary key for positions
+    :param device: Where to perform the computation.
+    :param batch_size: batch size to perform evaluation over.
+    :return:
+    """
+    # Check for required info before proceeding to more expensive stuff.
+    if species_name not in array_dict:
+        raise KeyError(f"Species key {species_name} not in dictionary.")
+
+    if force_name not in array_dict:
+        raise KeyError(f"Positions key {force_name} not in dictionary.")
+
+    species_set = list(np.unique(array_dict[species_name]))
+    if 0 not in species_set:
+        species_set = np.concatenate([[0], species_set], axis=0)
+
+    if not len(species_set) or set(species_set) == {0}:
+        raise ValueError("Species set empty!")
+
+    pred, node_key = _setup_max_force_graph(
+        species_name=species_name,
+        force_name=force_name,
+        species_set=species_set,
+        device=device,
+    )
+
+    input_dict = {
+        species_name: torch.as_tensor(array_dict[species_name]),
+        force_name: torch.as_tensor(array_dict[force_name]),
+    }
 
     results = pred(**input_dict, batch_size=batch_size)[node_key]
 

@@ -121,6 +121,9 @@ class SensitivityBottleneck(torch.nn.Module):
 
         self.base_sense = base_sense(n_dist_bare, min_soft_dist, max_dist_soft, hard_max_dist, cutoff_type)
         self.matching = torch.nn.Parameter(torch.Tensor(n_dist_bare, n_dist))
+
+        self.cutoff = self.base_sense.cutoff
+
         torch.nn.init.orthogonal_(self.matching.data)
 
     def forward(self, distflat):
