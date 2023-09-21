@@ -59,9 +59,17 @@ def set_e0_values(
     encoder.to(t_vals.device)
     eovals = compute_hipnn_e0(encoder, z_vals, t_vals, peratom=peratom)
     eo_layer = energy_module.layers[0]
+
+    if not eo_layer.weight.data.shape[-1] == eovals.shape[-1]:
+        raise NotImplementedError("The function set_eo_values does not currently work with custom InputNodes.")
+    
+    eo_layer.weight.data = eovals.reshape(1,-1)
+    print("Computed E0 energies:", eovals)
     print("Computed E0 energies:", eovals)
     eo_layer.weight.data = eovals.expand_as(eo_layer.weight.data)
-
+    print("Computed E0 energies:", eovals)   
+    eo_layer.weight.data = eovals.expand_as(eo_layer.weight.data)
+    
     eo_layer.weight.requires_grad_(trainable_after)
     for layer in energy_module.layers[1:]:
         layer.weight.data *= decay_factor

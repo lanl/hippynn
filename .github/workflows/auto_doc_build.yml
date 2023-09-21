@@ -3,7 +3,7 @@ name: Auto build HIPPYNN docs and publish on GitHub Pages
 on:
   push:
     branches:    
-      - main
+      - development
   workflow_dispatch:
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
     # Standard drop-in approach that should work for most people.
     - uses: ammaraskar/sphinx-action@master
       with:
-        # FIXME: hot to build with mocking torch?
+        # FIXME: how to build with mocking torch?
         # use CPU only torch as this action will be likely for doc building only
         pre-build-command: "pip3 install -U sphinx sphinx_rtd_theme graphviz ase torch --extra-index-url https://download.pytorch.org/whl/cpu && pip install ."
         docs-folder: "docs/"

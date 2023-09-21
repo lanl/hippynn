@@ -6,8 +6,7 @@ import warnings
 import torch
 from torch import Tensor
 
-from . import pairs
-from . import indexers
+from . import indexers, pairs
 
 
 class Gradient(torch.nn.Module):
@@ -74,6 +73,13 @@ class Quadrupole(torch.nn.Module):
 
 
 class CoulombEnergy(torch.nn.Module):
+    """ Computes the Coulomb Energy of the molecule/configuration. 
+    
+    Coulomb energies is defined for pairs of atoms. Here, we adopt the 
+    convention that the Coulomby energy for a pair of atoms is evenly
+    partitioned to both atoms as the 'per-atom energies'. Therefore, the 
+    atom energies sum to the molecular energy; similar to the HEnergy. 
+    """
     def __init__(self, energy_conversion_factor):
         super().__init__()
         self.register_buffer("energy_conversion_factor", torch.tensor(energy_conversion_factor))
@@ -84,12 +90,18 @@ class CoulombEnergy(torch.nn.Module):
         n_atoms, _ = charges.shape
         voltage_atom = torch.zeros((n_atoms, 1), device=charges.device, dtype=charges.dtype)
         voltage_atom.index_add_(0, pair_first, voltage_pairs)
-        coulomb_atom = voltage_atom * charges
-        coulomb_molecules = 0.5 * self.summer(coulomb_atom, mol_index, n_molecules)
-        return coulomb_molecules, voltage_atom
+        coulomb_atoms = 0.5*voltage_atom * charges
+        coulomb_molecule = self.summer(coulomb_atoms, mol_index, n_molecules)
+        return coulomb_molecule, coulomb_atoms, voltage_atom
 
 
 class ScreenedCoulombEnergy(CoulombEnergy):
+    """ Computes the Coulomb Energy of the molecule/configuration. 
+    
+    The convention for the atom energies is the same as CoulombEnergy
+    and the HEnergy. 
+    """
+    
     def __init__(self, energy_conversion_factor, screening, radius=None):
         super().__init__(energy_conversion_factor)
         if screening is None:
@@ -106,24 +118,23 @@ class ScreenedCoulombEnergy(CoulombEnergy):
         self.bond_summer = pairs.MolPairSummer()
 
     def forward(self, charges, pair_dist, pair_first, pair_second, mol_index, n_molecules):
-
-        # Calculation of pair terms
-        base_coulomb = charges[pair_first] * charges[pair_second] / pair_dist.unsqueeze(1)
         screening = self.screening(pair_dist, self.radius).unsqueeze(1)
         screening = torch.where((pair_dist < self.radius).unsqueeze(1), screening, torch.zeros_like(screening))
-        coulomb_pairs = base_coulomb * screening
 
-        # Add pair contributions to system
-        coulomb_molecule = self.bond_summer(coulomb_pairs, mol_index, n_molecules, pair_first)
+        # Voltage pairs for per-atom energy
+        voltage_pairs = self.energy_conversion_factor * (charges[pair_second] / pair_dist.unsqueeze(1)) 
+        voltage_pairs = voltage_pairs * screening 
+        n_atoms, _ = charges.shape
+        voltage_atom = torch.zeros((n_atoms, 1), device=charges.device, dtype=charges.dtype)
+        voltage_atom.index_add_(0, pair_first, voltage_pairs) 
+        coulomb_atoms = 0.5 * voltage_atom * charges
+        coulomb_molecule = self.summer(coulomb_atoms, mol_index, n_molecules)
 
-        # Finally, account for symmetry pairs and energy conversion factor.
-        coulomb_molecule = 0.5 * self.energy_conversion_factor * coulomb_molecule
-
-        return coulomb_molecule
+        return coulomb_molecule, coulomb_atoms, voltage_atom
 
 
 class CombineScreenings(torch.nn.Module):
-    """ Returns products of different screenings for Screened Coulomb Interactions. 
+    """ Returns products of different screenings for Screened Coulomb Interactions.
     """
     def __init__(self, screening_list):
         super().__init__()
@@ -131,12 +142,12 @@ class CombineScreenings(torch.nn.Module):
 
     def forward(self, pair_dist, radius):
         """ Product of different screenings applied to pair_dist upto radius.
-        
+
         :param pair_dist: torch.tensor, dtype=float64: 'Neighborlist' distances for coulomb energies.
-        :param radius: Maximum radius that Screened-Coulomb is evaluated upto. 
+        :param radius: Maximum radius that Screened-Coulomb is evaluated upto.
         :return screening: Weights for screening for all pair_dist.
         """
-        screening = None 
+        screening = None
 
         for s in self.SL:
             if screening is None:
@@ -300,3 +311,26 @@ class NACRMultiState(torch.nn.Module):
         nacr = nacr.reshape(n_molecule, n_pairs, n_atoms * n_dims)
         # multiply dE
         return nacr * dE.unsqueeze(2)
+
+
+class CombineEnergy(torch.nn.Module):
+    """
+    Combines the energies (molecular and atom energies) from two different 
+    nodes, e.g. HEnergy, Coulomb, or ScreenedCoulomb Energy Nodes. 
+    """
+    def __init__(self):
+        super().__init__()
+        self.summer = indexers.MolSummer()
+
+    def forward(self, atom_energy_1, atom_energy_2, mol_index, n_molecules):
+        """
+        :param: atom_energy_1 per-atom energy from first node. 
+        :param: atom_energy_2 per atom energy from second node. 
+        :param: mol_index the molecular index for atoms in the batch
+        :param: total number of molecules in the batch
+        :return: Total Energy
+        """
+        total_atom_energy = atom_energy_1 + atom_energy_2
+        mol_energy = self.summer(total_atom_energy, mol_index, n_molecules)
+        
+        return mol_energy, total_atom_energy

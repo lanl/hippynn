@@ -11,5 +11,17 @@ Organized datasets for training and prediction.
 """
 from .database import Database
 from .ondisk import DirectoryDatabase, NPZDatabase
+has_ase = False
+try: 
+    import ase
+    has_ase = True
+except ImportError:
+    pass
 
-__all__ = ["Database", "DirectoryDatabase", "NPZDatabase"]
+if has_ase:
+   from ..interfaces.ase_interface import AseDatabase
+
+all_list = ["Database", "DirectoryDatabase", "NPZDatabase"]
+if has_ase:
+    all_list += ["AseDatabase"]
+__all__ = all_list
