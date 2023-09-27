@@ -1,3 +1,17 @@
+0.0.2a3
+=======
+
+New Features:
+-------------
+
+- Add nodes for non-adiabatic coupling vectors (NACR) and phase-less loss.
+  See /examples/excited_states_azomethane.py.
+
+Improvements
+------------
+
+- Multi-target dipole node now has a shape of (n_molecules, n_targets, 3).
+
 0.0.2a2
 =======
 

@@ -1,3 +1,9 @@
+"""
+Example training script to predicted excited-states energies, transition dipoles, and
+non-adiabatic coupling vectors (NACR)
+
+The dataset used in this example can be found at https://doi.org/10.5281/zenodo.7076420
+"""
 import json
 
 import matplotlib
@@ -44,9 +50,7 @@ with hippynn.tools.log_terminal("training_log.txt", "wt"):
     # build network
     species = inputs.SpeciesNode(db_name="Z")
     positions = inputs.PositionsNode(db_name="R")
-    network = networks.Hipnn(
-        "hipnn_model", (species, positions), module_kwargs=network_params
-    )
+    network = networks.Hipnn("hipnn_model", (species, positions), module_kwargs=network_params)
     # add energy
     energy = targets.HEnergyNode("E", network, module_kwargs={"n_target": n_states + 1})
     mol_energy = energy.mol_energy
@@ -117,9 +121,7 @@ with hippynn.tools.log_terminal("training_log.txt", "wt"):
     # set up the optimizer
     optimizer = torch.optim.AdamW(training_modules.model.parameters(), lr=1e-3)
     # use higher patience for production runs
-    scheduler = RaiseBatchSizeOnPlateau(
-        optimizer=optimizer, max_batch_size=2048, patience=10, factor=0.5
-    )
+    scheduler = RaiseBatchSizeOnPlateau(optimizer=optimizer, max_batch_size=2048, patience=10, factor=0.5)
     controller = PatienceController(
         optimizer=optimizer,
         scheduler=scheduler,
