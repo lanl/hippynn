@@ -62,8 +62,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.Database.make_generator"><code class="docutils literal notranslate"><span class="pre">Database.make_generator()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.Database.make_random_split"><code class="docutils literal notranslate"><span class="pre">Database.make_random_split()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.Database.make_trainvalidtest_split"><code class="docutils literal notranslate"><span class="pre">Database.make_trainvalidtest_split()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.Database.remove_high_property"><code class="docutils literal notranslate"><span class="pre">Database.remove_high_property()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.Database.send_to_device"><code class="docutils literal notranslate"><span class="pre">Database.send_to_device()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.Database.split_the_rest"><code class="docutils literal notranslate"><span class="pre">Database.split_the_rest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.Database.trim_all_arrays"><code class="docutils literal notranslate"><span class="pre">Database.trim_all_arrays()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.Database.var_list"><code class="docutils literal notranslate"><span class="pre">Database.var_list</span></code></a></li>
 </ul>
 </li>
@@ -272,6 +274,17 @@ This allows setting inputs=None and/or targets=None.</p></li>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="hippynn.databases.Database.remove_high_property">
+<span class="sig-name descname"><span class="pre">remove_high_property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perAtom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#Database.remove_high_property"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.Database.remove_high_property" title="Permalink to this definition"></a></dt>
+<dd><p>This function removes outlier data from the dataset
+Must be called before splitting
+“key”: the property key in the dataset to check for high values
+“perAtom”: True if the property is defined per atom in axis 1, otherwise property is treated as full system
+“std_factor”: systems with values larger than this multiplier time the standard deviation of all data will be reomved. None to skip this step
+“cut_factor”: systems with values larger than this number are reomved. None to skip this step. This step is done first.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="hippynn.databases.Database.send_to_device">
 <span class="sig-name descname"><span class="pre">send_to_device</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#Database.send_to_device"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.Database.send_to_device" title="Permalink to this definition"></a></dt>
 <dd><p>Send a database to a device</p>
@@ -281,6 +294,12 @@ This allows setting inputs=None and/or targets=None.</p></li>
 <dt class="sig sig-object py" id="hippynn.databases.Database.split_the_rest">
 <span class="sig-name descname"><span class="pre">split_the_rest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evaluation_mode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#Database.split_the_rest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.Database.split_the_rest" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.databases.Database.trim_all_arrays">
+<span class="sig-name descname"><span class="pre">trim_all_arrays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#Database.trim_all_arrays"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.Database.trim_all_arrays" title="Permalink to this definition"></a></dt>
+<dd><p>To be used in conjuction with remove_high_property</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="hippynn.databases.Database.var_list">
@@ -397,8 +416,10 @@ This allows setting inputs=None and/or targets=None.</p></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.database.html#hippynn.databases.database.Database.make_generator"><code class="docutils literal notranslate"><span class="pre">Database.make_generator()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.database.html#hippynn.databases.database.Database.make_random_split"><code class="docutils literal notranslate"><span class="pre">Database.make_random_split()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.database.html#hippynn.databases.database.Database.make_trainvalidtest_split"><code class="docutils literal notranslate"><span class="pre">Database.make_trainvalidtest_split()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.database.html#hippynn.databases.database.Database.remove_high_property"><code class="docutils literal notranslate"><span class="pre">Database.remove_high_property()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.database.html#hippynn.databases.database.Database.send_to_device"><code class="docutils literal notranslate"><span class="pre">Database.send_to_device()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.database.html#hippynn.databases.database.Database.split_the_rest"><code class="docutils literal notranslate"><span class="pre">Database.split_the_rest()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.database.html#hippynn.databases.database.Database.trim_all_arrays"><code class="docutils literal notranslate"><span class="pre">Database.trim_all_arrays()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.database.html#hippynn.databases.database.Database.var_list"><code class="docutils literal notranslate"><span class="pre">Database.var_list</span></code></a></li>
 </ul>
 </li>
