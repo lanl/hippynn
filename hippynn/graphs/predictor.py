@@ -41,6 +41,7 @@ class Predictor:
         """
 
         outputs = [search_by_name(inputs, o) if isinstance(o, str) else o for o in outputs]
+        outputs = list(set(outputs))  # Remove any redundancies -- they will screw up the output name map.
 
         outputs = [o for o in outputs if o._index_state is not IdxType.Scalar]
 
@@ -77,7 +78,6 @@ class Predictor:
         outputs = graph.nodes_to_compute
         if additional_outputs is not None:
             outputs = outputs + list(additional_outputs)
-            outputs = list(set(outputs))  # Remove any redundancies -- they will screw up the output name map.
 
         return cls(inputs, outputs, **kwargs)
 

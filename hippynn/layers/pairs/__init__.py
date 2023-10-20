@@ -7,7 +7,7 @@ Implementations of pair finding, pair index manipulation, and analysis of pairs
 
 from .open import OpenPairIndexer, _PairIndexer
 
-from .periodic import PeriodicPairIndexer
+from .periodic import PeriodicPairIndexer, PeriodicPairIndexerMemory
 
 from .filters import FilterDistance
 

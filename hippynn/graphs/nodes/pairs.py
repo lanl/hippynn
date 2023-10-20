@@ -68,6 +68,31 @@ class PeriodicPairIndexer(ExpandParents, AutoKw, PeriodicPairOutputs, PairIndexe
         parents = self.expand_parents(parents)
         super().__init__(name, parents, module=module, **kwargs)
 
+class PeriodicPairIndexerMemory(PeriodicPairIndexer):
+    _auto_module_class = pairs_modules.PeriodicPairIndexerMemory
+
+    def __init__(self, name, parents, dist_hard_max, skin, module="auto", module_kwargs=None, **kwargs):
+        if module_kwargs is None:
+            module_kwargs = {}
+        self.module_kwargs = {"skin": skin, "hard_dist_cutoff": dist_hard_max, **module_kwargs}
+
+        super().__init__(name, parents, dist_hard_max, module, module_kwargs=self.module_kwargs, **kwargs)
+
+    @property
+    def skin(self):
+        return self.torch_module.skin
+    
+    @skin.setter
+    def skin(self, skin):
+        self.torch_module.skin = skin
+
+    @property
+    def reuse_percentage(self):
+        return self.torch_module.reuse_percentage
+    
+    def reset_reuse_percentage(self):
+        self.torch_module.reset_reuse_percentage()
+
 
 class ExternalNeighborIndexer(ExpandParents, PairIndexer, AutoKw, MultiNode):
     _input_names = "coordinates", "real_atoms", "shifts", "cell", "ext_pair_first", "ext_pair_second"

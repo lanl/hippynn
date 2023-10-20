@@ -59,7 +59,11 @@ class PairDeIndexer(torch.nn.Module):
 class MolPairSummer(torch.nn.Module):
     def forward(self, pairfeatures, mol_index, n_molecules, pair_first):
         pair_mol = mol_index[pair_first]
-        feat_shape = (1,) if pairfeatures.ndimension() == 1 else pairfeatures.shape[1:]
+        if pairfeatures.shape[0] == 1:
+            feat_shape = (1,)
+            pairfeatures.unsqueeze(-1)
+        else:
+            feat_shape = pairfeatures.shape[1:]
         out_shape = (n_molecules, *feat_shape)
         result = torch.zeros(out_shape, device=pairfeatures.device, dtype=pairfeatures.dtype)
         result.index_add_(0, pair_mol, pairfeatures)

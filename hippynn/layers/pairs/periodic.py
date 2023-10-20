@@ -1,6 +1,7 @@
 import torch
 
 from .open import _PairIndexer
+from torch.profiler import profile, record_function, ProfilerActivity
 
 # Deprecated?
 class StaticImagePeriodicPairIndexer(_PairIndexer):
@@ -150,7 +151,6 @@ class PeriodicPairIndexer(_PairIndexer):
     Finds pairs in general periodic conditions.
     """
     def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cells):
-
         original_coordinates = coordinates
 
         with torch.no_grad():
@@ -261,4 +261,77 @@ class PeriodicPairIndexer(_PairIndexer):
         paircoord = coordflat[pair_first] - coordflat[pair_second] + pair_shifts
         distflat2 = paircoord.norm(dim=1)
 
-        return distflat2, pair_first, pair_second, paircoord, cell_offsets, offset_num
+        return distflat2, pair_first, pair_second, paircoord, cell_offsets, offset_num, pair_mol
+    
+class PeriodicPairIndexerMemory(torch.nn.Module):
+    '''
+    Finds pairs in general periodic conditions. Reuses pairs (still recomputes the pair 
+    distances) if no particle has moved more than skin/2 since last pair calculation.
+    Increasing the value of 'skin' will increase the number of pair distances computed at
+    each step, but decrease the number of times new pairs must be computed, potentially
+    leading to speed improvements.
+    '''
+
+    def __init__(self, skin, hard_dist_cutoff, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.skin = skin
+        self.dist_hard_max = hard_dist_cutoff
+
+        self.pair_indexer = PeriodicPairIndexer(hard_dist_cutoff = self.skin + self.dist_hard_max)
+
+        self.reset_reuse_percentage()
+
+        for name in ["pair_mol", "cell_offsets", "pair_first", "pair_second", "offset_num", "positions", "cells"]:
+            self.register_buffer(name, None, False)
+
+    def recalculation_needed(self, coordinates, cells):
+        if self.positions is None: # ie. forward function has not been called
+            return True
+        if (self.cells != cells).any() or (((self.positions - coordinates)**2).sum(1).max() > (self.skin/2)**2):
+            return True
+        return False
+    
+    def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cells):
+        if self.recalculation_needed(coordinates, cells):
+            self.n_molecules, self.n_atoms, _ = coordinates.shape
+            self.recalculations += 1
+
+            args = (coordinates, nonblank, real_atoms, inv_real_atoms, cells)
+            distflat2, pair_first, pair_second, paircoord, cell_offsets, offset_num, pair_mol = self.pair_indexer(*args)
+
+            for name, var in [
+                ("cell_offsets", cell_offsets),
+                ("pair_first", pair_first),
+                ("pair_second", pair_second),
+                ("offset_num", offset_num),
+                ("positions", coordinates),
+                ("cells", cells),
+                ("pair_mol", pair_mol)
+                ]:
+                self.__setattr__(name, var)
+
+        else:
+            self.reuses += 1
+            pair_shifts = torch.matmul(self.cell_offsets.unsqueeze(1).to(cells.dtype), cells[self.pair_mol]).squeeze(1)
+            coordflat = coordinates.reshape(self.n_molecules * self.n_atoms, 3)[real_atoms]
+            paircoord = coordflat[self.pair_first] - coordflat[self.pair_second] + pair_shifts
+            distflat2 = paircoord.norm(dim=1)
+
+        return distflat2, self.pair_first, self.pair_second, paircoord, self.cell_offsets, self.offset_num
+    
+        
+    @property
+    def reuse_percentage(self):
+        '''
+        Returns None if there are no model calls on record.
+        '''
+        try:
+            return self.reuses / (self.reuses + self.recalculations) * 100
+        except ZeroDivisionError:
+            print("No model calls on record.")
+            return
+
+    def reset_reuse_percentage(self):
+        self.reuses = 0
+        self.recalculations = 0
+
