@@ -1,8 +1,11 @@
-Excited States Training
-==============
+Non-Adiabiatic Excited States
+=============================
 
-hippynn now is able to predict excited-state energies, transition dipoles, and
-the non-adiabatic coupling vectors (NACR) for a given molecule.
+`hippynn` has features for training to excited-state energies, transition dipoles, and
+the non-adiabatic coupling vectors (NACR). These features can be found in
+:mod:`~hippynn.graphs.nodes.excited`.
+
+For a more detailed description, please see the paper [Li2023]_
 
 Multi-targets nodes are recommended due to efficiency and fewer recursive
 layers.
@@ -14,7 +17,7 @@ counterpart::
     mol_energy = energy.mol_energy
     mol_energy.db_name = "E"
 
-Note that a ``multi-target node`` is used here, defined by the keyword
+Note that a `multi-target node` is used here, defined by the keyword
 ``module_kwargs={"n_target": n_states + 1}``. Here, `n_states` is the number of
 states in consideration. The extra state is for the ground state, which is often
 useful. The database name is simply `E` with a shape of ``(n_molecules,
@@ -31,7 +34,7 @@ The database name is `D` with a shape of ``(n_molecules, n_states, 3)``.
 For NACR, to avoid singularity problems, we enforcing the training of NACR*ΔE
 instead::
 
-    nacr = physics.NACRMultiStateNode(
+    nacr = excited.NACRMultiStateNode(
         "ScaledNACR",
         (charge, positions, energy),
         db_name="ScaledNACR",
@@ -57,11 +60,18 @@ Due to the phase problem, when the loss function is constructed, the
 `phase-less` version of MAE or RMSE should be used::
 
     energy_mae = loss.MAELoss.of_node(energy)
-    dipole_mae = loss.MAEPhaseLoss.of_node(dipole)
-    nacr_mae = loss.MAEPhaseLoss.of_node(nacr)
+    dipole_mae = excited.MAEPhaseLoss.of_node(dipole)
+    nacr_mae = excited.MAEPhaseLoss.of_node(nacr)
 
-:func:`~hippynn.graphs.nodes.loss.MAEPhaseLoss` and
-:func:`~hippynn.graphs.nodes.loss.MSEPhaseLoss` are the `phase-less` version MAE
+:class:`~hippynn.graphs.nodes.excited.MAEPhaseLoss` and
+:class:`~hippynn.graphs.nodes.excited.MSEPhaseLoss` are the `phase-less` version MAE
 and MSE, respectively, behaving exactly like the common version.
 
-For a complete script, please take a look at ``examples/excited_states.py``.
+For a complete script, please take a look at ``examples/excited_states_azomethane.py``.
+
+.. rubric:: Footnotes
+
+.. [Li2023] Machine Learning Framework for Modeling
+       Exciton-Polaritons in Molecular Materials.
+       Li et. al, 2023.
+       https://arxiv.org/abs/2306.02523
