@@ -1,8 +1,8 @@
 """
 Nodes for prediction of variables from network features.
 """
+
 from .base import MultiNode, AutoKw, ExpandParents, find_unique_relative, _BaseNode
-from .indexers import PaddingIndexer
 from .tags import AtomIndexer, Network, PairIndexer, HAtomRegressor, Charges, Energies
 from .indexers import PaddingIndexer
 from ..indextypes import IdxType, index_type_coercion
@@ -102,33 +102,3 @@ class HBondNode(ExpandParents, AutoKw, MultiNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class LocalEnergyNode(Energies, ExpandParents, HAtomRegressor, MultiNode):
-    """
-    Predict a localized energy, with contributions from implicitly computed atoms.
-    """
-
-    _input_names = "hier_features", "mol_index", "atom index", "n_molecules", "n_atoms_max"
-    _output_names = "mol_energy", "atom_energy", "atom_preenergy", "atom_probabilities", "atom_propensities"
-    _main_output = "mol_energy"
-    _output_index_states = IdxType.Molecules, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms
-    _auto_module_class = target_modules.LocalEnergy
-
-    @_parent_expander.match(Network)
-    def expansion0(self, net, *, purpose, **kwargs):
-        pdindexer = find_unique_relative(net, AtomIndexer, why_desc=purpose)
-        return net, pdindexer
-
-    @_parent_expander.match(Network, AtomIndexer)
-    def expansion1(self, net, pdindexer, **kwargs):
-        return net, pdindexer.mol_index, pdindexer.atom_index, pdindexer.n_molecules, pdindexer.n_atoms_max
-
-    _parent_expander.assertlen(5)
-
-    def __init__(self, name, parents, first_is_interacting=False, module="auto", **kwargs):
-        parents = self.expand_parents(parents)
-        self.module_kwargs = {"first_is_interacting": first_is_interacting}
-        super().__init__(name, parents, module=module, **kwargs)
-
-    def auto_module(self):
-        network = find_unique_relative(self, Network).torch_module
-        return self._auto_module_class(network.feature_sizes, **self.module_kwargs)

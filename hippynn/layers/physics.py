@@ -250,69 +250,6 @@ class VecMag(torch.nn.Module):
         return torch.norm(vector_feature, dim=1).unsqueeze(1)
 
 
-class NACR(torch.nn.Module):
-    """
-    Compute NAC vector * ΔE. Originally in hippynn.layers.physics.
-    """
-
-    def __init__(self):
-        super().__init__()
-
-    def forward(
-        self,
-        charges1: Tensor,
-        charges2: Tensor,
-        positions: Tensor,
-        energy1: Tensor,
-        energy2: Tensor,
-    ):
-        dE = energy2 - energy1
-        nacr = torch.autograd.grad(
-            charges2, [positions], grad_outputs=[charges1], create_graph=True
-        )[0].reshape(len(dE), -1)
-        return nacr * dE
-
-
-class NACRMultiState(torch.nn.Module):
-    """
-    Compute NAC vector * ΔE for all paris of states. Originally in hippynn.layers.physics.
-    """
-
-    def __init__(self, n_target=1):
-        self.n_target = n_target
-        super().__init__()
-
-    def forward(self, charges: Tensor, positions: Tensor, energies: Tensor):
-        # charges shape: n_molecules, n_atoms, n_targets
-        # positions shape: n_molecules, n_atoms, 3
-        # energies shape: n_molecules, n_targets
-        # dE shape: n_molecules, n_targets, n_targets
-        dE = energies.unsqueeze(1) - energies.unsqueeze(2)
-        # take the upper triangle excluding the diagonal
-        indices = torch.triu_indices(
-            self.n_target, self.n_target, offset=1, device=dE.device
-        )
-        # dE shape: n_molecules, n_pairs
-        # n_pairs = n_targets * (n_targets - 1) / 2
-        dE = dE[..., indices[0], indices[1]]
-        # compute q1 * dq2/dR
-        nacr_ij = []
-        for i, j in zip(*indices):
-            nacr = torch.autograd.grad(
-                charges[..., j],
-                positions,
-                grad_outputs=charges[..., i],
-                create_graph=True,
-            )[0]
-            nacr_ij.append(nacr)
-        # nacr shape: n_molecules, n_atoms, 3, n_pairs
-        nacr = torch.stack(nacr_ij, dim=1)
-        n_molecule, n_pairs, n_atoms, n_dims = nacr.shape
-        nacr = nacr.reshape(n_molecule, n_pairs, n_atoms * n_dims)
-        # multiply dE
-        return nacr * dE.unsqueeze(2)
-
-
 class CombineEnergy(torch.nn.Module):
     """
     Combines the energies (molecular and atom energies) from two different 
