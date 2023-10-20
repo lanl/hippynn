@@ -24,7 +24,7 @@ import hippynn
 from hippynn import plotting
 from hippynn.experiment import setup_training, train_model
 from hippynn.experiment.controllers import PatienceController, RaiseBatchSizeOnPlateau
-from hippynn.graphs import inputs, loss, networks, physics, targets
+from hippynn.graphs import inputs, loss, networks, physics, targets, excited
 
 matplotlib.use("Agg")
 # default types for torch
@@ -72,7 +72,7 @@ with hippynn.tools.active_directory("TEST_AZOMETHANE_MODEL"):
         charge = targets.HChargeNode("Q", network, module_kwargs={"n_target": n_states})
         dipole = physics.DipoleNode("D", (charge, positions), db_name="D")
         # add NACR
-        nacr = physics.NACRMultiStateNode(
+        nacr = excited.NACRMultiStateNode(
             "ScaledNACR",
             (charge, positions, energy),
             db_name="ScaledNACR",
@@ -102,17 +102,17 @@ with hippynn.tools.active_directory("TEST_AZOMETHANE_MODEL"):
         validation_losses["E-Loss"] = energy_loss
         total_loss = energy_loss
         # dipole
-        dipole_rmse = loss.MSEPhaseLoss.of_node(dipole) ** 0.5
+        dipole_rmse = excited.MSEPhaseLoss.of_node(dipole) ** 0.5
         validation_losses["D-RMSE"] = dipole_rmse
-        dipole_mae = loss.MAEPhaseLoss.of_node(dipole)
+        dipole_mae = excited.MAEPhaseLoss.of_node(dipole)
         validation_losses["D-MAE"] = dipole_mae
         dipole_loss = dipole_rmse / np.sqrt(3) + dipole_mae
         validation_losses["D-Loss"] = dipole_loss
         total_loss += dipole_weight * dipole_loss
         # nacr
-        nacr_rmse = loss.MSEPhaseLoss.of_node(nacr) ** 0.5
+        nacr_rmse = excited.MSEPhaseLoss.of_node(nacr) ** 0.5
         validation_losses["NACR-RMSE"] = nacr_rmse
-        nacr_mae = loss.MAEPhaseLoss.of_node(nacr)
+        nacr_mae = excited.MAEPhaseLoss.of_node(nacr)
         validation_losses["NACR-MAE"] = nacr_mae
         nacr_loss = nacr_rmse / np.sqrt(3 * n_atoms) + nacr_mae
         validation_losses["NACR-Loss"] = nacr_loss
