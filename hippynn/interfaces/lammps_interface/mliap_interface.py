@@ -41,7 +41,7 @@ class MLIAPInterface(MLIAPUnified):
         # Build the calculator
         self.rcutfac, self.species_set, self.graph = setup_LAMMPS_graph(energy_node)
         self.nparams = sum(p.nelement() for p in self.graph.parameters())
-        self.graph.to(torch.float64)
+        self.graph.to(torch.float32)
 
     def compute_gradients(self, data):
         pass
@@ -62,7 +62,7 @@ class MLIAPInterface(MLIAPUnified):
         z_vals = self.species_set[elems+1]
         pair_i = self.as_tensor(data.pair_i).type(torch.int64)
         pair_j = self.as_tensor(data.pair_j).type(torch.int64)
-        rij = self.as_tensor(data.rij).type(torch.float64)
+        rij = self.as_tensor(data.rij).type(torch.float32)
         nlocal = self.as_tensor(data.nlistatoms) 
            
         # note your sign for rij might need to be +1 or -1, depending on how your implementation works
