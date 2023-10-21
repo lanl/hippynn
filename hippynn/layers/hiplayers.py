@@ -16,7 +16,7 @@ def warn_if_under(distance, threshold):
     if dmin < threshold:
         d_count = distance < threshold
         d_frac = d_count.to(distance.dtype).mean()
-        d_sum = d_count.to(torch.int).sum()/2
+        d_sum = (d_count.sum()/2).to(torch.int)
         warnings.warn(
             "Provided distances are underneath sensitivity range!\n"
             f"Minimum distance in current batch: {dmin}\n"

@@ -274,20 +274,22 @@ class PeriodicPairIndexerMemory(torch.nn.Module):
 
     def __init__(self, skin, hard_dist_cutoff, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.skin = skin
+        self._skin = skin
         self.dist_hard_max = hard_dist_cutoff
 
-        self.pair_indexer = PeriodicPairIndexer(hard_dist_cutoff = self.skin + self.dist_hard_max)
+        self.pair_indexer = PeriodicPairIndexer(hard_dist_cutoff = self._skin + self.dist_hard_max)
 
         self.reset_reuse_percentage()
-
+        self.initialize_buffers()
+        
+    def initialize_buffers(self):
         for name in ["pair_mol", "cell_offsets", "pair_first", "pair_second", "offset_num", "positions", "cells"]:
             self.register_buffer(name, None, False)
 
     def recalculation_needed(self, coordinates, cells):
         if self.positions is None: # ie. forward function has not been called
             return True
-        if (self.cells != cells).any() or (((self.positions - coordinates)**2).sum(1).max() > (self.skin/2)**2):
+        if (self.cells != cells).any() or (((self.positions - coordinates)**2).sum(1).max() > (self._skin/2)**2):
             return True
         return False
     
@@ -319,6 +321,18 @@ class PeriodicPairIndexerMemory(torch.nn.Module):
 
         return distflat2, self.pair_first, self.pair_second, paircoord, self.cell_offsets, self.offset_num
     
+    @property
+    def skin(self):
+        return self._skin
+    
+    @skin.setter
+    def skin(self, skin):
+        self._skin = skin
+
+        self.pair_indexer = PeriodicPairIndexer(hard_dist_cutoff = self._skin + self.dist_hard_max)
+
+        self.reset_reuse_percentage()
+        self.initialize_buffers()
         
     @property
     def reuse_percentage(self):
