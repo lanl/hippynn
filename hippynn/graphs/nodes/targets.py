@@ -4,6 +4,7 @@ Nodes for prediction of variables from network features.
 from .base import MultiNode, AutoKw, ExpandParents, find_unique_relative, _BaseNode
 from .indexers import PaddingIndexer
 from .tags import AtomIndexer, Network, PairIndexer, HAtomRegressor, Charges, Energies
+from .indexers import PaddingIndexer
 from ..indextypes import IdxType, index_type_coercion
 from ...layers import targets as target_modules
 
@@ -85,7 +86,7 @@ class HBondNode(ExpandParents, AutoKw, MultiNode):
     _output_index_states = IdxType.Pair, IdxType.Pair
     _input_names = "features", "pair_first", "pair_second", "pair_dist"
     _main_output = "bonds"
-
+ 
     @_parent_expander.matchlen(1)
     def expand0(self, features, *, purpose, **kwargs):
         pairfinder = find_unique_relative(features, PairIndexer, why_desc=purpose)
