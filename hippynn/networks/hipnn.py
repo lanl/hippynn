@@ -18,7 +18,7 @@ from ..layers.transform import ResNetWrapper
 
 
 # computes E0 for the energy layer.
-def compute_hipnn_e0(encoder, Z_Data, en_data, peratom=False):
+def compute_hipnn_e0(encoder, Z_Data, en_data, peratom=False, fit_dtype=torch.float64):
     """
 
     :param encoder: encoder of species to features (one-hot representation, probably)
@@ -28,6 +28,8 @@ def compute_hipnn_e0(encoder, Z_Data, en_data, peratom=False):
     :return: energy per species as shape (n_features_encoded, 1)
     """
 
+    original_dtype = en_data.dtype
+    en_data = en_data.to(fit_dtype)
     x, nonblank = encoder(Z_Data)
 
     sums = x.sum(dim=1).to(en_data.dtype)
@@ -53,6 +55,7 @@ def compute_hipnn_e0(encoder, Z_Data, en_data, peratom=False):
         # if n_targets is included
         e_per_species = e_per_species.T
 
+    e_per_species = e_per_species.to(original_dtype)
     return e_per_species
 
 
