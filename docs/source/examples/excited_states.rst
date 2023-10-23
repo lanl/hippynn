@@ -7,8 +7,7 @@ the non-adiabatic coupling vectors (NACR). These features can be found in
 
 For a more detailed description, please see the paper [Li2023]_
 
-Multi-targets nodes are recommended due to efficiency and fewer recursive
-layers.
+Multi-targets nodes are recommended over the usage of one node per target.
 
 For energies, the node can be constructed just like the ground-state
 counterpart::
@@ -19,7 +18,7 @@ counterpart::
 
 Note that a `multi-target node` is used here, defined by the keyword
 ``module_kwargs={"n_target": n_states + 1}``. Here, `n_states` is the number of
-states in consideration. The extra state is for the ground state, which is often
+*excited* states in consideration. The extra state is for the ground state, which is often
 useful. The database name is simply `E` with a shape of ``(n_molecules,
 n_states+1)``.
 
@@ -65,13 +64,9 @@ Due to the phase problem, when the loss function is constructed, the
 
 :class:`~hippynn.graphs.nodes.excited.MAEPhaseLoss` and
 :class:`~hippynn.graphs.nodes.excited.MSEPhaseLoss` are the `phase-less` version MAE
-and MSE, respectively, behaving exactly like the common version.
+and MSE, which take the minimum error over the possible signs of the output.
 
 For a complete script, please take a look at ``examples/excited_states_azomethane.py``.
 
-.. rubric:: Footnotes
-
-.. [Li2023] Machine Learning Framework for Modeling
-       Exciton-Polaritons in Molecular Materials.
-       Li et. al, 2023.
-       https://arxiv.org/abs/2306.02523
+.. [Li2023] | Machine Learning Framework for Modeling Exciton-Polaritons in Molecular Materials.
+            | Li et. al, 2023. https://arxiv.org/abs/2306.02523
