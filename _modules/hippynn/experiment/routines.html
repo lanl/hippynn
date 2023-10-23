@@ -96,6 +96,7 @@
 <span class="kn">from</span> <span class="nn">.device</span> <span class="kn">import</span> <span class="n">set_devices</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">tools</span>
 <span class="kn">from</span> <span class="nn">.assembly</span> <span class="kn">import</span> <span class="n">TrainingModules</span>
+<span class="kn">from</span> <span class="nn">.step_functions</span> <span class="kn">import</span> <span class="n">get_step_function</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">custom_kernels</span>
 
@@ -495,12 +496,13 @@
 
     <span class="n">epoch</span> <span class="o">=</span> <span class="n">metric_tracker</span><span class="o">.</span><span class="n">current_epoch</span>
     <span class="n">device</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">model_device</span>
+    <span class="n">step_function</span> <span class="o">=</span> <span class="n">get_step_function</span><span class="p">(</span><span class="n">controller</span><span class="o">.</span><span class="n">optimizer</span><span class="p">)</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">controller</span><span class="o">.</span><span class="n">optimizer</span>
 
     <span class="n">continue_training</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Assume that nobody ran this function without wanting at least 1 epoch.</span>
 
     <span class="k">while</span> <span class="n">continue_training</span><span class="p">:</span>
 
-        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">controller</span><span class="o">.</span><span class="n">optimizer</span>
         <span class="n">qprint</span><span class="p">(</span><span class="s2">&quot;_&quot;</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
         <span class="n">qprint</span><span class="p">(</span><span class="s2">&quot;Epoch </span><span class="si">{}</span><span class="s2">:&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">epoch</span><span class="p">))</span>
         <span class="n">tools</span><span class="o">.</span><span class="n">print_lr</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
@@ -518,20 +520,13 @@
             <span class="n">batch_targets</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="o">-</span><span class="n">n_targets</span><span class="p">:]</span>
             <span class="n">batch_targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">batch_targets</span><span class="p">]</span>
 
-            <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">(</span><span class="n">set_to_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">batch_model_outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">batch_inputs</span><span class="p">)</span>
-
-            <span class="c1"># The extra .mean call here deals with an edge case for multi-GPU DataParallel with scalar outputs</span>
-            <span class="n">batch_train_loss</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="o">*</span><span class="n">batch_model_outputs</span><span class="p">,</span> <span class="o">*</span><span class="n">batch_targets</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-
-            <span class="n">batch_train_loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-            <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+            <span class="n">batch_model_outputs</span> <span class="o">=</span> <span class="n">step_function</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">batch_inputs</span><span class="p">,</span> <span class="n">batch_targets</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">batch_callbacks</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="n">batch_callbacks</span><span class="p">:</span>
                     <span class="n">cb</span><span class="p">(</span><span class="n">batch_inputs</span><span class="p">,</span> <span class="n">batch_model_outputs</span><span class="p">,</span> <span class="n">batch_targets</span><span class="p">)</span>
             <span class="c1"># Allow garbage collection of computed values.</span>
-            <span class="k">del</span> <span class="n">batch_model_outputs</span><span class="p">,</span> <span class="n">batch_train_loss</span>
+            <span class="k">del</span> <span class="n">batch_model_outputs</span>
 
         <span class="n">elapsed_epoch_run_time</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">default_timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">epoch_run_time</span>
         <span class="n">qprint</span><span class="p">(</span><span class="s2">&quot;Training time: &quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">elapsed_epoch_run_time</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s2">&quot;s&quot;</span><span class="p">)</span>
