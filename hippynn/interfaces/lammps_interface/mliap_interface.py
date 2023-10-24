@@ -15,8 +15,9 @@ from hippynn.graphs import (find_relatives,find_unique_relative,
     GraphModule)
 from hippynn.graphs.indextypes import index_type_coercion
 from hippynn.graphs.gops import check_link_consistency
-from hippynn.graphs.nodes.base import InputNode, MultiNode, AutoNoKw, ExpandParents
+from hippynn.graphs.nodes.base import InputNode, SingleNode, MultiNode, AutoNoKw, ExpandParents
 from hippynn.graphs.nodes.tags import Encoder, PairIndexer
+from hippynn.graphs.nodes.indexers import PaddingIndexer
 from hippynn.graphs.nodes.physics import GradientNode, VecMag
 from hippynn.graphs.nodes.inputs import SpeciesNode
 from hippynn.graphs.nodes.pairs import PairFilter
@@ -50,7 +51,7 @@ class MLIAPInterface(MLIAPUnified):
         pass
     
     def as_tensor(self,array):
-        return torch.as_tensor(array,device=self.model_device)
+        return torch.as_tensor(array, device=self.model_device)
 
     def compute_forces(self, data):
         """
@@ -123,9 +124,11 @@ def setup_LAMMPS_graph(energy):
     species = find_unique_relative(new_required, search_fn(SpeciesNode, new_subgraph),why_desc=why)
 
     encoder = find_unique_relative(species, search_fn(Encoder, new_subgraph), why_desc=why)
+    padding_indexer = find_unique_relative(species, search_fn(PaddingIndexer,new_subgraph), why_desc=why)
+    inv_real_atoms = padding_indexer.inv_real_atoms
+
     species_set = torch.as_tensor(encoder.species_set).to(torch.int64)
     min_radius = max(p.dist_hard_max for p in pair_indexers)
-
 
     ###############################################################
     # Set up graph to accept external pair indices and shifts
@@ -139,6 +142,8 @@ def setup_LAMMPS_graph(energy):
     in_nlocal = InputNode("(LAMMPS)nlocal")
     in_nlocal._index_state = hippynn.graphs.IdxType.Scalar
     pair_dist = VecMag("(LAMMPS)pair_dist", in_pair_coord)
+    mapped_pair_first = ReIndexAtomNode("pair_first_internal",(in_pair_first,inv_real_atoms))
+    mapped_pair_second = ReIndexAtomNode("pair_second_internal",(in_pair_second,inv_real_atoms))
 
     new_inputs = [species,in_pair_first,in_pair_second,in_pair_coord,in_nlocal]
     
@@ -146,8 +151,8 @@ def setup_LAMMPS_graph(energy):
     # corresponding new (filtered) node that accepts external pairs of atoms
     for pi in pair_indexers:
         if pi.dist_hard_max == min_radius:
-            replace_node(pi.pair_first, in_pair_first, disconnect_old=False)
-            replace_node(pi.pair_second, in_pair_second, disconnect_old=False)
+            replace_node(pi.pair_first, mapped_pair_first, disconnect_old=False)
+            replace_node(pi.pair_second, mapped_pair_second, disconnect_old=False)
             replace_node(pi.pair_coord, in_pair_coord, disconnect_old=False)
             replace_node(pi.pair_dist, pair_dist, disconnect_old=False)
             pi.disconnect()
@@ -188,6 +193,20 @@ def setup_LAMMPS_graph(energy):
     mod.eval()
 
     return min_radius / 2, species_set, mod
+
+
+class ReIndexAtomMod(torch.nn.Module):
+    def forward(self, raw_atom_index_array, inverse_real_atoms):
+        return inverse_real_atoms[raw_atom_index_array]
+
+class ReIndexAtomNode(AutoNoKw, SingleNode):
+    _input_names = "raw_atom_index_array", "inverse_real_atoms"
+    _main_output = "total_local_energy"
+    _auto_module_class = ReIndexAtomMod
+
+    def __init__(self, name, parents, module='auto', **kwargs):
+        self._index_state = parents[0]._index_state
+        super().__init__(name, parents, module=module, **kwargs)
 
 
 class LocalAtomsEnergy(torch.nn.Module):
