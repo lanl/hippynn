@@ -54,45 +54,56 @@ class MLIAPInterface(MLIAPUnified):
     def as_tensor(self, array):
         return torch.as_tensor(array, device=self.model_device)
 
+    def empty_tensor(self,dimentions):
+        return torch.empty(dimentions,device=self.model_device)
+
     def compute_forces(self, data):
         """
         :param data: MLIAPData object (provided internally by lammps)
         :return None
         This function writes results to the input `data`.
         """
-        elems = self.as_tensor(data.elems).type(torch.int64).reshape(1, data.ntotal)
-        z_vals = self.species_set[elems + 1]
-        pair_i = self.as_tensor(data.pair_i).type(torch.int64)
-        pair_j = self.as_tensor(data.pair_j).type(torch.int64)
-        rij = self.as_tensor(data.rij).type(self.compute_dtype)
         nlocal = self.as_tensor(data.nlistatoms)
+        if nlocal.item() > 0:
+            #If there are no local atoms, do nothing
+            elems = self.as_tensor(data.elems).type(torch.int64).reshape(1, data.ntotal)
+            z_vals = self.species_set[elems + 1]
+            npairs = data.npairs
+            if npairs > 0:
+                pair_i = self.as_tensor(data.pair_i).type(torch.int64)
+                pair_j = self.as_tensor(data.pair_j).type(torch.int64)
+                rij = self.as_tensor(data.rij).type(self.compute_dtype)
+            else:
+                pair_i = self.empty_tensor(0).type(torch.int64)
+                pair_j = self.empty_tensor(0).type(torch.int64)
+                rij = self.empty_tensor([0,3]).type(self.compute_dtype)
+    
+            # note your sign for rij might need to be +1 or -1, depending on how your implementation works
+            inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
+            atom_energy, total_energy, fij = self.graph(*inputs)
+    
+            # Test if we are using lammps-kokkos or not. Is there a more clear way to do that?
+            if isinstance(data.elems, np.ndarray):
+                return_device = "cpu"
+            else:
+                # Hope that kokkos device and pytorch device are the same (default cuda)
+                return_device = elems.device
+    
+            atom_energy = atom_energy.squeeze(1).detach().to(return_device)
+            total_energy = total_energy.detach().to(return_device)
 
-        # note your sign for rij might need to be +1 or -1, depending on how your implementation works
-        inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
-        atom_energy, total_energy, fij = self.graph(*inputs)
-
-        # Test if we are using lammps-kokkos or not. Is there a more clear way to do that?
-        if isinstance(data.elems, np.ndarray):
-            return_device = "cpu"
-        else:
-            # Hope that kokkos device and pytorch device are the same (default cuda)
-            return_device = elems.device
-
-        atom_energy = atom_energy.squeeze(1).detach().to(return_device)
-        total_energy = total_energy.detach().to(return_device)
-
-        f = self.as_tensor(data.f)
-        fij = fij.type(f.dtype).detach().to(return_device)
-
-        if return_device == "cpu":
-            fij = fij.numpy()
-            data.eatoms = atom_energy.numpy().astype(np.double)
-        else:
-            eatoms = torch.as_tensor(data.eatoms, device=return_device)
-            eatoms.copy_(atom_energy)
-
-        data.update_pair_forces(fij)
-        data.energy = total_energy.item()
+            f = self.as_tensor(data.f)
+            fij = fij.type(f.dtype).detach().to(return_device)
+    
+            if return_device == "cpu":
+                fij = fij.numpy()
+                data.eatoms = atom_energy.numpy().astype(np.double)
+            else:
+                eatoms = torch.as_tensor(data.eatoms, device=return_device)
+                eatoms.copy_(atom_energy)
+            if npairs > 0:
+                data.update_pair_forces(fij)
+            data.energy = total_energy.item()
 
     def __getstate__(self):
         self.species_set = self.species_set.to(torch.device("cpu"))
