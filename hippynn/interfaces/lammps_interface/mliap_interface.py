@@ -2,31 +2,32 @@
 Interface for creating LAMMPS MLIAP Unified models.
 """
 import pickle
+import warnings
 
 import numpy as np
 import torch
-torch.set_default_dtype(torch.float32)
 
 from lammps.mliap.mliap_unified_abc import MLIAPUnified
 
 import hippynn
-from hippynn.graphs import (find_relatives,find_unique_relative,
-    get_subgraph, copy_subgraph, replace_node, IdxType,
-    GraphModule)
+from hippynn.tools import device_fallback
+from hippynn.graphs import find_relatives, find_unique_relative, get_subgraph, copy_subgraph, replace_node, IdxType, GraphModule
 from hippynn.graphs.indextypes import index_type_coercion
 from hippynn.graphs.gops import check_link_consistency
-from hippynn.graphs.nodes.base import InputNode, MultiNode, AutoNoKw, ExpandParents
+from hippynn.graphs.nodes.base import InputNode, SingleNode, MultiNode, AutoNoKw, ExpandParents
 from hippynn.graphs.nodes.tags import Encoder, PairIndexer
+from hippynn.graphs.nodes.indexers import PaddingIndexer
 from hippynn.graphs.nodes.physics import GradientNode, VecMag
 from hippynn.graphs.nodes.inputs import SpeciesNode
 from hippynn.graphs.nodes.pairs import PairFilter
+
 
 class MLIAPInterface(MLIAPUnified):
     """
     Class for creating ML-IAP Unified model based on hippynn graphs.
     """
-    def __init__(self, energy_node, element_types, ndescriptors=1,
-                 model_device=torch.device("cpu")):
+
+    def __init__(self, energy_node, element_types, ndescriptors=1, model_device=torch.device("cpu"), compute_dtype=torch.float32):
         """
         :param energy_node: Node for energy
         :param element_types: list of atomic symbols corresponding to element types
@@ -41,16 +42,20 @@ class MLIAPInterface(MLIAPUnified):
         # Build the calculator
         self.rcutfac, self.species_set, self.graph = setup_LAMMPS_graph(energy_node)
         self.nparams = sum(p.nelement() for p in self.graph.parameters())
-        self.graph.to(torch.float32)
+        self.compute_dtype = compute_dtype
+        self.graph.to(compute_dtype)
 
     def compute_gradients(self, data):
         pass
-    
+
     def compute_descriptors(self, data):
         pass
-    
-    def as_tensor(self,array):
-        return torch.as_tensor(array,device=self.model_device)
+
+    def as_tensor(self, array):
+        return torch.as_tensor(array, device=self.model_device)
+
+    def empty_tensor(self,dimentions):
+        return torch.empty(dimentions,device=self.model_device)
 
     def compute_forces(self, data):
         """
@@ -58,47 +63,62 @@ class MLIAPInterface(MLIAPUnified):
         :return None
         This function writes results to the input `data`.
         """
-        elems = self.as_tensor(data.elems).type(torch.int64).reshape(1, data.ntotal)
-        z_vals = self.species_set[elems+1]
-        pair_i = self.as_tensor(data.pair_i).type(torch.int64)
-        pair_j = self.as_tensor(data.pair_j).type(torch.int64)
-        rij = self.as_tensor(data.rij).type(torch.float32)
-        nlocal = self.as_tensor(data.nlistatoms) 
-           
-        # note your sign for rij might need to be +1 or -1, depending on how your implementation works
-        inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
-        atom_energy, total_energy, fij = self.graph(*inputs)
-        
-        # Test if we are using lammps-kokkos or not. Is there a more clear way to do that?
-        if isinstance(data.elems,np.ndarray):
-            return_device = 'cpu'
-        else:
-            # Hope that kokkos device and pytorch device are the same (default cuda)
-            return_device = elems.device
-        
-        atom_energy = atom_energy.squeeze(1).detach().to(return_device)
-        total_energy = total_energy.detach().to(return_device)
+        nlocal = self.as_tensor(data.nlistatoms)
+        if nlocal.item() > 0:
+            #If there are no local atoms, do nothing
+            elems = self.as_tensor(data.elems).type(torch.int64).reshape(1, data.ntotal)
+            z_vals = self.species_set[elems + 1]
+            npairs = data.npairs
+            if npairs > 0:
+                pair_i = self.as_tensor(data.pair_i).type(torch.int64)
+                pair_j = self.as_tensor(data.pair_j).type(torch.int64)
+                rij = self.as_tensor(data.rij).type(self.compute_dtype)
+            else:
+                pair_i = self.empty_tensor(0).type(torch.int64)
+                pair_j = self.empty_tensor(0).type(torch.int64)
+                rij = self.empty_tensor([0,3]).type(self.compute_dtype)
+    
+            # note your sign for rij might need to be +1 or -1, depending on how your implementation works
+            inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
+            atom_energy, total_energy, fij = self.graph(*inputs)
+    
+            # Test if we are using lammps-kokkos or not. Is there a more clear way to do that?
+            if isinstance(data.elems, np.ndarray):
+                return_device = "cpu"
+            else:
+                # Hope that kokkos device and pytorch device are the same (default cuda)
+                return_device = elems.device
+    
+            atom_energy = atom_energy.squeeze(1).detach().to(return_device)
+            total_energy = total_energy.detach().to(return_device)
 
-        f = self.as_tensor(data.f)
-        fij = fij.type(f.dtype).detach().to(return_device)
-        
-        if return_device=="cpu":
-            fij = fij.numpy()
-            data.eatoms = atom_energy.numpy().astype(np.double)
-        else:
-            eatoms = torch.as_tensor(data.eatoms,device=return_device)
-            eatoms.copy_(atom_energy)
-         
-        data.update_pair_forces(fij)
-        data.energy = total_energy.item()
+            f = self.as_tensor(data.f)
+            fij = fij.type(f.dtype).detach().to(return_device)
+    
+            if return_device == "cpu":
+                fij = fij.numpy()
+                data.eatoms = atom_energy.numpy().astype(np.double)
+            else:
+                eatoms = torch.as_tensor(data.eatoms, device=return_device)
+                eatoms.copy_(atom_energy)
+            if npairs > 0:
+                data.update_pair_forces(fij)
+            data.energy = total_energy.item()
 
     def __getstate__(self):
         self.species_set = self.species_set.to(torch.device("cpu"))
         self.graph.to(torch.device("cpu"))
         return self.__dict__.copy()
-    
+
     def __setstate__(self, state):
         self.__dict__.update(state)
+        try:
+            torch.ones(0).to(self.model_device)
+        except RuntimeError:
+            fallback = device_fallback()
+            warnings.warn(f"Model device ({self.model_device}) not found, falling back to f{fallback}")
+            self.model_device = fallback
+
         self.species_set = self.species_set.to(self.model_device)
         self.graph.to(self.model_device)
 
@@ -114,18 +134,20 @@ def setup_LAMMPS_graph(energy):
     why = "Generating LAMMPS Calculator interface"
     subgraph = get_subgraph(required_nodes)
 
-    search_fn = lambda targ,sg: lambda n: n in sg and isinstance(n,targ)
+    search_fn = lambda targ, sg: lambda n: n in sg and isinstance(n, targ)
     pair_indexers = find_relatives(required_nodes, search_fn(PairIndexer, subgraph), why_desc=why)
 
     new_required, new_subgraph = copy_subgraph(required_nodes, assume_inputed=pair_indexers, tag="LAMMPS")
     pair_indexers = find_relatives(new_required, search_fn(PairIndexer, new_subgraph), why_desc=why)
 
-    species = find_unique_relative(new_required, search_fn(SpeciesNode, new_subgraph),why_desc=why)
+    species = find_unique_relative(new_required, search_fn(SpeciesNode, new_subgraph), why_desc=why)
 
     encoder = find_unique_relative(species, search_fn(Encoder, new_subgraph), why_desc=why)
+    padding_indexer = find_unique_relative(species, search_fn(PaddingIndexer, new_subgraph), why_desc=why)
+    inv_real_atoms = padding_indexer.inv_real_atoms
+
     species_set = torch.as_tensor(encoder.species_set).to(torch.int64)
     min_radius = max(p.dist_hard_max for p in pair_indexers)
-
 
     ###############################################################
     # Set up graph to accept external pair indices and shifts
@@ -139,15 +161,17 @@ def setup_LAMMPS_graph(energy):
     in_nlocal = InputNode("(LAMMPS)nlocal")
     in_nlocal._index_state = hippynn.graphs.IdxType.Scalar
     pair_dist = VecMag("(LAMMPS)pair_dist", in_pair_coord)
+    mapped_pair_first = ReIndexAtomNode("pair_first_internal", (in_pair_first, inv_real_atoms))
+    mapped_pair_second = ReIndexAtomNode("pair_second_internal", (in_pair_second, inv_real_atoms))
 
-    new_inputs = [species,in_pair_first,in_pair_second,in_pair_coord,in_nlocal]
-    
-    # Construct Filters and replace the existing pair indexers with the 
+    new_inputs = [species, in_pair_first, in_pair_second, in_pair_coord, in_nlocal]
+
+    # Construct Filters and replace the existing pair indexers with the
     # corresponding new (filtered) node that accepts external pairs of atoms
     for pi in pair_indexers:
         if pi.dist_hard_max == min_radius:
-            replace_node(pi.pair_first, in_pair_first, disconnect_old=False)
-            replace_node(pi.pair_second, in_pair_second, disconnect_old=False)
+            replace_node(pi.pair_first, mapped_pair_first, disconnect_old=False)
+            replace_node(pi.pair_second, mapped_pair_second, disconnect_old=False)
             replace_node(pi.pair_coord, in_pair_coord, disconnect_old=False)
             replace_node(pi.pair_dist, pair_dist, disconnect_old=False)
             pi.disconnect()
@@ -155,7 +179,7 @@ def setup_LAMMPS_graph(energy):
             mapped_node = PairFilter(
                 "DistanceFilter-LAMMPS",
                 (pair_dist, in_pair_first, in_pair_second, in_pair_coord),
-                dist_hard_max=pi.dist_hard_max, 
+                dist_hard_max=pi.dist_hard_max,
             )
             replace_node(pi.pair_first, mapped_node.pair_first, disconnect_old=False)
             replace_node(pi.pair_second, mapped_node.pair_second, disconnect_old=False)
@@ -177,7 +201,6 @@ def setup_LAMMPS_graph(energy):
             "an object with an `atom_energies` attribute."
         )
 
-
     local_atom_energy = LocalAtomEnergyNode("(LAMMPS)local_atom_energy", (atom_energies, in_nlocal))
     grad_rij = GradientNode("(LAMMPS)grad_rij", (local_atom_energy.total_local_energy, in_pair_coord), -1)
 
@@ -190,10 +213,25 @@ def setup_LAMMPS_graph(energy):
     return min_radius / 2, species_set, mod
 
 
+class ReIndexAtomMod(torch.nn.Module):
+    def forward(self, raw_atom_index_array, inverse_real_atoms):
+        return inverse_real_atoms[raw_atom_index_array]
+
+
+class ReIndexAtomNode(AutoNoKw, SingleNode):
+    _input_names = "raw_atom_index_array", "inverse_real_atoms"
+    _main_output = "total_local_energy"
+    _auto_module_class = ReIndexAtomMod
+
+    def __init__(self, name, parents, module="auto", **kwargs):
+        self._index_state = parents[0]._index_state
+        super().__init__(name, parents, module=module, **kwargs)
+
+
 class LocalAtomsEnergy(torch.nn.Module):
     def __init__(self):
         super().__init__()
-    
+
     def forward(self, all_atom_energies, nlocal):
         local_atom_energies = all_atom_energies[:nlocal]
         total_local_energy = torch.sum(local_atom_energies)
@@ -211,6 +249,6 @@ class LocalAtomEnergyNode(AutoNoKw, ExpandParents, MultiNode):
     _parent_expander.get_main_outputs()
     _parent_expander.require_idx_states(IdxType.Atoms, IdxType.Scalar)
 
-    def __init__(self, name, parents, module='auto', **kwargs):
+    def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
         super().__init__(name, parents, module=module, **kwargs)

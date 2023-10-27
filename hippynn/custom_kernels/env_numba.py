@@ -86,7 +86,7 @@ class WrappedEnvsum(NumbaCompatibleTensorFunction):
 
     @staticmethod
     @via_numpy
-    @numba.jit(parallel=True)
+    @numba.jit(nopython=True, parallel=True)
     def cpu_kernel(sens, feat, pfirst, psecond, atom_ids, atom_starts):
 
         n_pairs, n_nu = sens.shape
@@ -152,7 +152,7 @@ class WrappedSensesum(NumbaCompatibleTensorFunction):
 
     @staticmethod
     @via_numpy
-    @numba.jit(parallel=True)
+    @numba.jit(nopython=True, parallel=True)
     def cpu_kernel(env, feat, pfirst, psecond):
         n_atom, n_nu, n_feat = env.shape
         (n_pairs,) = pfirst.shape
@@ -247,7 +247,7 @@ class WrappedFeatsum(NumbaCompatibleTensorFunction):
 
     @staticmethod
     @via_numpy
-    @numba.jit(parallel=True)
+    @numba.jit(nopython=True, parallel=True)
     def cpu_kernel(
         env,
         sens,
