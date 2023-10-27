@@ -73,6 +73,16 @@
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.compute_descriptors"><code class="docutils literal notranslate"><span class="pre">MLIAPInterface.compute_descriptors()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.compute_forces"><code class="docutils literal notranslate"><span class="pre">MLIAPInterface.compute_forces()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.compute_gradients"><code class="docutils literal notranslate"><span class="pre">MLIAPInterface.compute_gradients()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.empty_tensor"><code class="docutils literal notranslate"><span class="pre">MLIAPInterface.empty_tensor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomMod"><code class="docutils literal notranslate"><span class="pre">ReIndexAtomMod</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomMod.forward"><code class="docutils literal notranslate"><span class="pre">ReIndexAtomMod.forward()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomMod.training"><code class="docutils literal notranslate"><span class="pre">ReIndexAtomMod.training</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomNode"><code class="docutils literal notranslate"><span class="pre">ReIndexAtomNode</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomNode.__init__"><code class="docutils literal notranslate"><span class="pre">ReIndexAtomNode.__init__()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.interfaces.lammps_interface.mliap_interface.setup_LAMMPS_graph"><code class="docutils literal notranslate"><span class="pre">setup_LAMMPS_graph()</span></code></a></li>
@@ -177,7 +187,7 @@ registered hooks while the latter silently ignores them.</p>
 <p>Class for creating ML-IAP Unified model based on hippynn graphs.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_types</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndescriptors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">device(type='cpu')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/lammps_interface/mliap_interface.html#MLIAPInterface.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_types</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndescriptors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">device(type='cpu')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute_dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">torch.float32</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/lammps_interface/mliap_interface.html#MLIAPInterface.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.__init__" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -215,6 +225,47 @@ This function writes results to the input <cite>data</cite>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.compute_gradients">
 <span class="sig-name descname"><span class="pre">compute_gradients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/lammps_interface/mliap_interface.html#MLIAPInterface.compute_gradients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.compute_gradients" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.empty_tensor">
+<span class="sig-name descname"><span class="pre">empty_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimentions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/lammps_interface/mliap_interface.html#MLIAPInterface.empty_tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.empty_tensor" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomMod">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReIndexAtomMod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/lammps_interface/mliap_interface.html#ReIndexAtomMod"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomMod" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomMod.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_atom_index_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse_real_atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/lammps_interface/mliap_interface.html#ReIndexAtomMod.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomMod.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomMod.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomMod.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReIndexAtomNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/lammps_interface/mliap_interface.html#ReIndexAtomNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomNode" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoNoKw" title="hippynn.graphs.nodes.base.definition_helpers.AutoNoKw"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoNoKw</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.SingleNode" title="hippynn.graphs.nodes.base.base.SingleNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">SingleNode</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomNode.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/lammps_interface/mliap_interface.html#ReIndexAtomNode.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomNode.__init__" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
