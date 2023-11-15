@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Non-Adiabiatic Excited States &mdash; hippynn 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="User Guide" href="../user_guide/index.html" />
+    <link rel="prev" title="LAMMPS interface" href="mliap_unified.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="minimal_workflow.html">Minimal Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html">Controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="predictor.html">Predictor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="periodic.html">Periodic Boundary Conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="forces.html">Force Training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restarting.html">Restarting training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ase_calculator.html">ASE Calculators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mliap_unified.html">LAMMPS interface</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Non-Adiabiatic Excited States</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
+      <li class="breadcrumb-item active">Non-Adiabiatic Excited States</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/excited_states.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="mliap_unified.html" class="btn btn-neutral float-left" title="LAMMPS interface" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../user_guide/index.html" class="btn btn-neutral float-right" title="User Guide" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="non-adiabiatic-excited-states">
+<h1>Non-Adiabiatic Excited States<a class="headerlink" href="#non-adiabiatic-excited-states" title="Permalink to this heading"></a></h1>
+<p><cite>hippynn</cite> has features for training to excited-state energies, transition dipoles, and
+the non-adiabatic coupling vectors (NACR). These features can be found in
+<a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.excited.html#module-hippynn.graphs.nodes.excited" title="hippynn.graphs.nodes.excited"><code class="xref py py-mod docutils literal notranslate"><span class="pre">excited</span></code></a>.</p>
+<p>For a more detailed description, please see the paper <a class="reference internal" href="#li2023" id="id1"><span>[Li2023]</span></a></p>
+<p>Multi-targets nodes are recommended over the usage of one node per target.</p>
+<p>For energies, the node can be constructed just like the ground-state
+counterpart:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">energy</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">HEnergyNode</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n_target&quot;</span><span class="p">:</span> <span class="n">n_states</span> <span class="o">+</span> <span class="mi">1</span><span class="p">})</span>
+<span class="n">mol_energy</span> <span class="o">=</span> <span class="n">energy</span><span class="o">.</span><span class="n">mol_energy</span>
+<span class="n">mol_energy</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="s2">&quot;E&quot;</span>
+</pre></div>
+</div>
+<p>Note that a <cite>multi-target node</cite> is used here, defined by the keyword
+<code class="docutils literal notranslate"><span class="pre">module_kwargs={&quot;n_target&quot;:</span> <span class="pre">n_states</span> <span class="pre">+</span> <span class="pre">1}</span></code>. Here, <cite>n_states</cite> is the number of
+<em>excited</em> states in consideration. The extra state is for the ground state, which is often
+useful. The database name is simply <cite>E</cite> with a shape of <code class="docutils literal notranslate"><span class="pre">(n_molecules,</span>
+<span class="pre">n_states+1)</span></code>.</p>
+<p>Predicting the transition dipoles is also similar to the ground-state permanent
+dipole:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">charge</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">HChargeNode</span><span class="p">(</span><span class="s2">&quot;Q&quot;</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n_target&quot;</span><span class="p">:</span> <span class="n">n_states</span><span class="p">})</span>
+<span class="n">dipole</span> <span class="o">=</span> <span class="n">physics</span><span class="o">.</span><span class="n">DipoleNode</span><span class="p">(</span><span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">charge</span><span class="p">,</span> <span class="n">positions</span><span class="p">),</span> <span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;D&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The database name is <cite>D</cite> with a shape of <code class="docutils literal notranslate"><span class="pre">(n_molecules,</span> <span class="pre">n_states,</span> <span class="pre">3)</span></code>.</p>
+<p>For NACR, to avoid singularity problems, we enforcing the training of NACR*ΔE
+instead:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nacr</span> <span class="o">=</span> <span class="n">excited</span><span class="o">.</span><span class="n">NACRMultiStateNode</span><span class="p">(</span>
+    <span class="s2">&quot;ScaledNACR&quot;</span><span class="p">,</span>
+    <span class="p">(</span><span class="n">charge</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">energy</span><span class="p">),</span>
+    <span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;ScaledNACR&quot;</span><span class="p">,</span>
+    <span class="n">module_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n_target&quot;</span><span class="p">:</span> <span class="n">n_states</span><span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>For NACR between state <cite>i</cite> and <cite>j</cite>, <span class="math notranslate nohighlight">\(\boldsymbol{d}_{ij}\)</span>, it is expressed
+in the following way</p>
+<div class="math notranslate nohighlight">
+\[\boldsymbol{d}_{ij}\Delta E_{ij} = \Delta E_{ij}\boldsymbol{q}_i \frac{\partial\boldsymbol{q}_j}{\partial\boldsymbol{R}}\]</div>
+<p><span class="math notranslate nohighlight">\(E_{ij}\)</span> is energy difference between state <cite>i</cite> and <cite>j</cite>, which is
+calculated internally in the NACR node based on the input of the <code class="docutils literal notranslate"><span class="pre">energy</span></code>
+node. <span class="math notranslate nohighlight">\(\boldsymbol{R}\)</span> corresponding the <code class="docutils literal notranslate"><span class="pre">positions</span></code> node in the code.
+<span class="math notranslate nohighlight">\(\boldsymbol{q}_{i}\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{q}_{j}\)</span> are the transition
+atomic charges for state <cite>i</cite> and <cite>j</cite> contained in the <code class="docutils literal notranslate"><span class="pre">charge</span></code> node. This
+charge node can be constructed from scratch or reused from the dipole
+predictions. The database name is <cite>ScaledNACR</cite> with a shape of <code class="docutils literal notranslate"><span class="pre">(n_molecules,</span>
+<span class="pre">n_states*(n_states-1)/2,</span> <span class="pre">3*n_atoms)</span></code>.</p>
+<p>Due to the phase problem, when the loss function is constructed, the
+<cite>phase-less</cite> version of MAE or RMSE should be used:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">energy_mae</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">MAELoss</span><span class="o">.</span><span class="n">of_node</span><span class="p">(</span><span class="n">energy</span><span class="p">)</span>
+<span class="n">dipole_mae</span> <span class="o">=</span> <span class="n">excited</span><span class="o">.</span><span class="n">MAEPhaseLoss</span><span class="o">.</span><span class="n">of_node</span><span class="p">(</span><span class="n">dipole</span><span class="p">)</span>
+<span class="n">nacr_mae</span> <span class="o">=</span> <span class="n">excited</span><span class="o">.</span><span class="n">MAEPhaseLoss</span><span class="o">.</span><span class="n">of_node</span><span class="p">(</span><span class="n">nacr</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.excited.html#hippynn.graphs.nodes.excited.MAEPhaseLoss" title="hippynn.graphs.nodes.excited.MAEPhaseLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">MAEPhaseLoss</span></code></a> and
+<a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.excited.html#hippynn.graphs.nodes.excited.MSEPhaseLoss" title="hippynn.graphs.nodes.excited.MSEPhaseLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">MSEPhaseLoss</span></code></a> are the <cite>phase-less</cite> version MAE
+and MSE, which take the minimum error over the possible signs of the output.</p>
+<p>For a complete script, please take a look at <code class="docutils literal notranslate"><span class="pre">examples/excited_states_azomethane.py</span></code>.</p>
+<div role="list" class="citation-list">
+<div class="citation" id="li2023" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">Li2023</a><span class="fn-bracket">]</span></span>
+<div class="line-block">
+<div class="line">Machine Learning Framework for Modeling Exciton-Polaritons in Molecular Materials.</div>
+<div class="line">Li et. al, 2023. <a class="reference external" href="https://arxiv.org/abs/2306.02523">https://arxiv.org/abs/2306.02523</a></div>
+</div>
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mliap_unified.html" class="btn btn-neutral float-left" title="LAMMPS interface" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../user_guide/index.html" class="btn btn-neutral float-right" title="User Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

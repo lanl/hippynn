@@ -210,6 +210,24 @@
 
 <div class="viewcode-block" id="l1reg"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.l1reg">[docs]</a><span class="k">def</span> <span class="nf">l1reg</span><span class="p">(</span><span class="n">network</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">lpreg</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+<span class="c1"># For loss functions with phases</span>
+<div class="viewcode-block" id="absolute_errors"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.absolute_errors">[docs]</a><span class="k">def</span> <span class="nf">absolute_errors</span><span class="p">(</span><span class="n">predict</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">true</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the absolute errors with phases between predicted and true values. In</span>
+<span class="sd">    other words, prediction should be close to the absolute value of true, and the sign</span>
+<span class="sd">    does not matter.</span>
+
+<span class="sd">    :param predict: predicted values</span>
+<span class="sd">    :type predict: torch.Tensor</span>
+<span class="sd">    :param true: true values</span>
+<span class="sd">    :type true: torch.Tensor</span>
+<span class="sd">    :return: errors</span>
+<span class="sd">    :rtype: torch.Tensor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">true</span> <span class="o">-</span> <span class="n">predict</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">true</span> <span class="o">+</span> <span class="n">predict</span><span class="p">))</span></div>
+
+
 </pre></div>
 
            </div>

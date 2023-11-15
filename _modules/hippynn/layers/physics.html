@@ -82,8 +82,7 @@
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">Tensor</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">pairs</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">indexers</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">indexers</span><span class="p">,</span> <span class="n">pairs</span>
 
 
 <div class="viewcode-block" id="Gradient"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Gradient">[docs]</a><span class="k">class</span> <span class="nc">Gradient</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
@@ -119,8 +118,8 @@
 <div class="viewcode-block" id="Dipole.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Dipole.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">charges</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># charges contain multiple targets, so set up broadcasting</span>
-            <span class="n">charges</span> <span class="o">=</span> <span class="n">charges</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">positions</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">charges</span> <span class="o">=</span> <span class="n">charges</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">positions</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># shape is (n_atoms, 3, n_targets) in multi-target mode</span>
         <span class="c1"># shape is (n_atoms, 3) in single target mode</span>
@@ -324,9 +323,7 @@
 
 <div class="viewcode-block" id="VecMag"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.VecMag">[docs]</a><span class="k">class</span> <span class="nc">VecMag</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <div class="viewcode-block" id="VecMag.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.VecMag.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vector_feature</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vector_feature</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> </div></div>
-
-
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vector_feature</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="CombineEnergy"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineEnergy">[docs]</a><span class="k">class</span> <span class="nc">CombineEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>

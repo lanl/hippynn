@@ -311,66 +311,6 @@
         <span class="k">return</span> <span class="n">total_bonds</span><span class="p">,</span> <span class="n">bond_hier</span></div></div>
 
 
-<div class="viewcode-block" id="LocalEnergy"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.LocalEnergy">[docs]</a><span class="k">class</span> <span class="nc">LocalEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="LocalEnergy.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.LocalEnergy.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_sizes</span><span class="p">,</span> <span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">first_is_interacting</span> <span class="o">=</span> <span class="n">first_is_interacting</span>
-        <span class="k">if</span> <span class="n">first_is_interacting</span><span class="p">:</span>
-            <span class="n">feature_sizes</span> <span class="o">=</span> <span class="n">feature_sizes</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">feature_sizes</span> <span class="o">=</span> <span class="n">feature_sizes</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">summer</span> <span class="o">=</span> <span class="n">indexers</span><span class="o">.</span><span class="n">MolSummer</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_terms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_sizes</span><span class="p">)</span>
-        <span class="n">biases</span> <span class="o">=</span> <span class="p">(</span><span class="n">first_is_interacting</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="kc">True</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_terms</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">bias</span><span class="p">)</span> <span class="k">for</span> <span class="n">nf</span><span class="p">,</span> <span class="n">bias</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">feature_sizes</span><span class="p">,</span> <span class="n">biases</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">players</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">nf</span> <span class="ow">in</span> <span class="n">feature_sizes</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ninf</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="LocalEnergy.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.LocalEnergy.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_features</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :param all_features: list of feature tensors</span>
-<span class="sd">        :param mol_index: which molecule is the atom</span>
-<span class="sd">        :param atom_index: which atom in the molecule is that atom</span>
-<span class="sd">        :param n_molecules: total number of molecules in the batch</span>
-<span class="sd">        :param n_atoms_max: maximum number of atoms in the batch</span>
-<span class="sd">        :return: contributed_energy, atom_energy, atom_preenergy, prob, propensity</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_is_interacting</span><span class="p">:</span>
-            <span class="n">all_features</span> <span class="o">=</span> <span class="n">all_features</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-
-        <span class="n">partial_preenergy</span> <span class="o">=</span> <span class="p">[</span><span class="n">lay</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">lay</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)]</span>
-        <span class="n">atom_preenergy</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">partial_preenergy</span><span class="p">)</span>
-        <span class="n">partial_potentials</span> <span class="o">=</span> <span class="p">[</span><span class="n">lay</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">lay</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">players</span><span class="p">)]</span>
-        <span class="n">propensity</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">partial_potentials</span><span class="p">)</span>  <span class="c1"># Keep in mind that this has shape (natoms,1)</span>
-
-        <span class="c1"># This segment does not need gradients, we are constructing the subtraction parameters for softmax</span>
-        <span class="c1"># which results in a calculation that does not under or overflow; the result is most accurate this way</span>
-        <span class="c1"># But actually invariant to the subtraction used, so it does not require a grad.</span>
-        <span class="c1"># It&#39;s a standard SoftMax technique, however, the implementation is not built into pytorch for</span>
-        <span class="c1"># the molecule/atom framework.</span>
-        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-            <span class="n">propensity_molatom</span> <span class="o">=</span> <span class="n">all_features</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">new_full</span><span class="p">((</span><span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">ninf</span><span class="p">)</span>
-            <span class="n">propensity_molatom</span><span class="p">[</span><span class="n">mol_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">propensity</span>
-            <span class="n">propensity_norms</span> <span class="o">=</span> <span class="n">propensity_molatom</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># first element is max vals, 2nd is max position</span>
-            <span class="n">propensity_norm_atoms</span> <span class="o">=</span> <span class="n">propensity_norms</span><span class="p">[</span><span class="n">mol_index</span><span class="p">]</span>
-
-        <span class="n">propensity_normed</span> <span class="o">=</span> <span class="n">propensity</span> <span class="o">-</span> <span class="n">propensity_norm_atoms</span>
-
-        <span class="c1"># Calculate probabilities with molecule version of softmax</span>
-        <span class="n">relative_prob</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">propensity_normed</span><span class="p">)</span>
-        <span class="n">z_factor_permol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">relative_prob</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
-        <span class="n">atom_zfactor</span> <span class="o">=</span> <span class="n">z_factor_permol</span><span class="p">[</span><span class="n">mol_index</span><span class="p">]</span>
-        <span class="n">prob</span> <span class="o">=</span> <span class="n">relative_prob</span> <span class="o">/</span> <span class="n">atom_zfactor</span>
-
-        <span class="c1"># Find molecular sum</span>
-        <span class="n">atom_energy</span> <span class="o">=</span> <span class="n">prob</span> <span class="o">*</span> <span class="n">atom_preenergy</span>
-        <span class="n">contributed_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">atom_energy</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">contributed_energy</span><span class="p">,</span> <span class="n">atom_energy</span><span class="p">,</span> <span class="n">atom_preenergy</span><span class="p">,</span> <span class="n">prob</span><span class="p">,</span> <span class="n">propensity</span></div></div>
 </pre></div>
 
            </div>

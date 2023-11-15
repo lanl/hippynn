@@ -79,17 +79,24 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
-<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">_BaseNode</span>
+<span class="kn">from</span> <span class="nn">...layers</span> <span class="kn">import</span> <span class="n">indexers</span> <span class="k">as</span> <span class="n">index_layers</span>
+<span class="kn">from</span> <span class="nn">...layers</span> <span class="kn">import</span> <span class="n">pairs</span> <span class="k">as</span> <span class="n">pair_layers</span>
+<span class="kn">from</span> <span class="nn">...layers</span> <span class="kn">import</span> <span class="n">physics</span> <span class="k">as</span> <span class="n">physics_layers</span>
+<span class="kn">from</span> <span class="nn">..indextypes</span> <span class="kn">import</span> <span class="n">IdxType</span><span class="p">,</span> <span class="n">elementwise_compare_reduce</span><span class="p">,</span> <span class="n">index_type_coercion</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AutoKw</span><span class="p">,</span>
+    <span class="n">AutoNoKw</span><span class="p">,</span>
+    <span class="n">ExpandParents</span><span class="p">,</span>
+    <span class="n">MultiNode</span><span class="p">,</span>
+    <span class="n">SingleNode</span><span class="p">,</span>
+    <span class="n">_BaseNode</span><span class="p">,</span>
+    <span class="n">find_unique_relative</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.base.node_functions</span> <span class="kn">import</span> <span class="n">NodeNotFound</span>
 <span class="kn">from</span> <span class="nn">.indexers</span> <span class="kn">import</span> <span class="n">AtomIndexer</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">acquire_encoding_padding</span>
-<span class="kn">from</span> <span class="nn">.pairs</span> <span class="kn">import</span> <span class="n">OpenPairIndexer</span>
-<span class="kn">from</span> <span class="nn">.tags</span> <span class="kn">import</span> <span class="n">Encoder</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">Charges</span><span class="p">,</span> <span class="n">Energies</span>
 <span class="kn">from</span> <span class="nn">.inputs</span> <span class="kn">import</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">SpeciesNode</span>
-
-<span class="kn">from</span> <span class="nn">..indextypes</span> <span class="kn">import</span> <span class="n">IdxType</span><span class="p">,</span> <span class="n">index_type_coercion</span><span class="p">,</span> <span class="n">elementwise_compare_reduce</span>
-<span class="kn">from</span> <span class="nn">...layers</span> <span class="kn">import</span> <span class="n">indexers</span> <span class="k">as</span> <span class="n">index_layers</span>
-<span class="kn">from</span> <span class="nn">...layers</span> <span class="kn">import</span> <span class="n">physics</span> <span class="k">as</span> <span class="n">physics_layers</span>
-<span class="kn">from</span> <span class="nn">...layers</span> <span class="kn">import</span> <span class="n">pairs</span> <span class="k">as</span> <span class="n">pair_layers</span>
+<span class="kn">from</span> <span class="nn">.pairs</span> <span class="kn">import</span> <span class="n">OpenPairIndexer</span>
+<span class="kn">from</span> <span class="nn">.tags</span> <span class="kn">import</span> <span class="n">Charges</span><span class="p">,</span> <span class="n">Encoder</span><span class="p">,</span> <span class="n">Energies</span><span class="p">,</span> <span class="n">PairIndexer</span>
 
 
 <div class="viewcode-block" id="GradientNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.GradientNode">[docs]</a><span class="k">class</span> <span class="nc">GradientNode</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
@@ -340,7 +347,6 @@
 
 <span class="c1"># TODO: This seems broken for parent expanders, check the signature of the layer.</span>
 <div class="viewcode-block" id="BondToMolSummmer"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.BondToMolSummmer">[docs]</a><span class="k">class</span> <span class="nc">BondToMolSummmer</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
-
     <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;pairfeatures&quot;</span><span class="p">,</span> <span class="s2">&quot;mol_index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_molecules&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span>
     <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">pair_layers</span><span class="o">.</span><span class="n">MolPairSummer</span>
     <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>
@@ -386,17 +392,20 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
-
 <div class="viewcode-block" id="CombineEnergyNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.CombineEnergyNode">[docs]</a><span class="k">class</span> <span class="nc">CombineEnergyNode</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Combines Local atom energies from different Energy Nodes. </span>
+<span class="sd">    Combines Local atom energies from different Energy Nodes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;input_atom_energy_1&quot;</span><span class="p">,</span> <span class="s2">&quot;input_atom_energy_2&quot;</span><span class="p">,</span> <span class="s2">&quot;mol_index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_molecules&quot;</span>
     <span class="n">_output_names</span> <span class="o">=</span> <span class="s2">&quot;mol_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_energies&quot;</span>
     <span class="n">_main_output</span> <span class="o">=</span> <span class="s2">&quot;mol_energy&quot;</span>
-    <span class="n">_output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span>
+    <span class="n">_output_index_states</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,</span>
+        <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">CombineEnergy</span>
-    
+
     <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_BaseNode</span><span class="p">,</span> <span class="n">Energies</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">expansion0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_1</span><span class="p">,</span> <span class="n">energy_2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">energy_1</span><span class="p">,</span> <span class="n">energy_2</span><span class="o">.</span><span class="n">atom_energies</span>
@@ -421,7 +430,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">module_kwargs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">module_kwargs</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
-  
 </pre></div>
 
            </div>
