@@ -3,17 +3,24 @@ Nodes for physics transformations
 """
 import warnings
 
-from .base import SingleNode, MultiNode, AutoNoKw, AutoKw, ExpandParents, find_unique_relative, _BaseNode
+from ...layers import indexers as index_layers
+from ...layers import pairs as pair_layers
+from ...layers import physics as physics_layers
+from ..indextypes import IdxType, elementwise_compare_reduce, index_type_coercion
+from .base import (
+    AutoKw,
+    AutoNoKw,
+    ExpandParents,
+    MultiNode,
+    SingleNode,
+    _BaseNode,
+    find_unique_relative,
+)
 from .base.node_functions import NodeNotFound
 from .indexers import AtomIndexer, PaddingIndexer, acquire_encoding_padding
-from .pairs import OpenPairIndexer
-from .tags import Encoder, PairIndexer, Charges, Energies
 from .inputs import PositionsNode, SpeciesNode
-
-from ..indextypes import IdxType, index_type_coercion, elementwise_compare_reduce
-from ...layers import indexers as index_layers
-from ...layers import physics as physics_layers
-from ...layers import pairs as pair_layers
+from .pairs import OpenPairIndexer
+from .tags import Charges, Encoder, Energies, PairIndexer
 
 
 class GradientNode(AutoKw, SingleNode):
@@ -264,7 +271,6 @@ class AtomToMolSummer(ExpandParents, AutoNoKw, SingleNode):
 
 # TODO: This seems broken for parent expanders, check the signature of the layer.
 class BondToMolSummmer(ExpandParents, AutoNoKw, SingleNode):
-
     _input_names = "pairfeatures", "mol_index", "n_molecules", "pair_first"
     _auto_module_class = pair_layers.MolPairSummer
     _index_state = IdxType.Molecules
@@ -310,17 +316,20 @@ class PerAtom(ExpandParents, AutoNoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-
 class CombineEnergyNode(Energies, AutoKw, ExpandParents, MultiNode):
     """
-    Combines Local atom energies from different Energy Nodes. 
+    Combines Local atom energies from different Energy Nodes.
     """
+
     _input_names = "input_atom_energy_1", "input_atom_energy_2", "mol_index", "n_molecules"
     _output_names = "mol_energy", "atom_energies"
     _main_output = "mol_energy"
-    _output_index_states = IdxType.Molecules, IdxType.Atoms,
+    _output_index_states = (
+        IdxType.Molecules,
+        IdxType.Atoms,
+    )
     _auto_module_class = physics_layers.CombineEnergy
-    
+
     @_parent_expander.match(_BaseNode, Energies)
     def expansion0(self, energy_1, energy_2, **kwargs):
         return energy_1, energy_2.atom_energies
@@ -345,4 +354,3 @@ class CombineEnergyNode(Energies, AutoKw, ExpandParents, MultiNode):
         self.module_kwargs = {} if module_kwargs is None else module_kwargs
         parents = self.expand_parents(parents, **kwargs)
         super().__init__(name, parents=parents, module=module, **kwargs)
-  

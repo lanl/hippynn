@@ -6,8 +6,7 @@ import warnings
 import torch
 from torch import Tensor
 
-from . import pairs
-from . import indexers
+from . import indexers, pairs
 
 
 class Gradient(torch.nn.Module):
@@ -43,8 +42,8 @@ class Dipole(torch.nn.Module):
     def forward(self, charges: Tensor, positions: Tensor, mol_index: Tensor, n_molecules: int):
         if charges.shape[1] > 1:
             # charges contain multiple targets, so set up broadcasting
-            charges = charges.unsqueeze(1)
-            positions = positions.unsqueeze(2)
+            charges = charges.unsqueeze(2)
+            positions = positions.unsqueeze(1)
 
         # shape is (n_atoms, 3, n_targets) in multi-target mode
         # shape is (n_atoms, 3) in single target mode
@@ -248,9 +247,7 @@ class PerAtom(torch.nn.Module):
 
 class VecMag(torch.nn.Module):
     def forward(self, vector_feature):
-        return torch.norm(vector_feature, dim=1) 
-
-
+        return torch.norm(vector_feature, dim=1).unsqueeze(1)
 
 
 class CombineEnergy(torch.nn.Module):

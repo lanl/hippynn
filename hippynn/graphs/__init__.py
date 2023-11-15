@@ -11,10 +11,12 @@ which attempt to hide book-keeping from the end-user.
 from . import indextypes
 from .indextypes import clear_index_cache, IdxType
 
-from .nodes import base, inputs, networks, targets, physics, loss
+from .nodes import base, inputs
 from .nodes.base import find_unique_relative, find_relatives, get_connected_nodes
 
 from .gops import get_subgraph, copy_subgraph, replace_node, compute_evaluation_order
+
+from .nodes import networks, targets, physics, loss, excited
 
 # Needed to populate the registry of index transformers.
 # This has to happen before the indextypes package can work,
