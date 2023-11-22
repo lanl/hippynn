@@ -247,7 +247,7 @@ class PerAtom(torch.nn.Module):
 
 class VecMag(torch.nn.Module):
     def forward(self, vector_feature):
-        return torch.norm(vector_feature, dim=1).unsqueeze(1)
+        return torch.norm(vector_feature, dim=1)
 
 
 class CombineEnergy(torch.nn.Module):
