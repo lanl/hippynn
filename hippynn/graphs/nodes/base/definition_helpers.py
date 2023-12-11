@@ -28,7 +28,7 @@ class AutoKw:
     _auto_module_class = NotImplemented
 
     def auto_module(self):
-        kw = self.module_kwargs or {}  # Default to empty dictionary if False
+        kw = self.module_kwargs or {}  # Default to empty dictionary if Falsey
         return self._auto_module_class(**kw)
 
 

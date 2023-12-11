@@ -153,6 +153,7 @@ class PeriodicPairIndexer(_PairIndexer):
     Finds pairs in general periodic conditions.
     """
     def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cells):
+        
         original_coordinates = coordinates
 
         with torch.no_grad():

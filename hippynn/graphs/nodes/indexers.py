@@ -189,7 +189,7 @@ def acquire_encoding_padding(search_nodes, species_set, purpose=None):
 
     return encoder, pidxer
 
-class FuzzyHistogramer(AutoKw, SingleNode):
+class FuzzyHistogrammer(AutoKw, SingleNode):
     """ 
     Node for transforming a scalar feature into a vectorized feature via 
     the fuzzy/soft histogram method.
