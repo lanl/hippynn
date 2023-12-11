@@ -188,3 +188,24 @@ def acquire_encoding_padding(search_nodes, species_set, purpose=None):
         pidxer = PaddingIndexer("PaddingIndexer", (encoder.encoding, encoder.nonblank))
 
     return encoder, pidxer
+
+class FuzzyHistogrammer(AutoKw, SingleNode):
+    """ 
+    Node for transforming a scalar feature into a vectorized feature via 
+    the fuzzy/soft histogram method.
+
+    :param length: length of vectorized feature
+    """
+
+    _input_names = "values"
+    _auto_module_class = index_modules.FuzzyHistogram
+
+    def __init__(self, name, parents, length, vmin, vmax, module="auto", **kwargs):
+        
+        if isinstance(parents, _BaseNode):
+            parents = (parents,)
+
+        self._output_index_state = parents[0]._index_state
+        self.module_kwargs = {"length": length, "vmin": vmin, "vmax": vmax}
+
+        super().__init__(name, parents, module=module, **kwargs)

@@ -18,7 +18,7 @@ TrainingModules = collections.namedtuple("TrainingModules", ("model", "loss", "e
 """
 
 
-def gemerate_database_info(inputs, targets, allow_unfound=False):
+def generate_database_info(inputs, targets, allow_unfound=False):
     """
     Construct db info from input nodes and target nodes.
     :param inputs: list of input nodes
@@ -157,7 +157,7 @@ def assemble_for_training(train_loss, validation_losses, validation_names=None, 
     if plot_maker is not None:
         plot_maker.assemble_module(outputs, targets)
 
-    db_info = gemerate_database_info(inputs, targets)
+    db_info = generate_database_info(inputs, targets)
 
     evaluator = Evaluator(model, validation_lossfns, validation_names, plot_maker=plot_maker, db_info=db_info)
 

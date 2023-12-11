@@ -68,6 +68,28 @@ class PeriodicPairIndexer(ExpandParents, AutoKw, PeriodicPairOutputs, PairIndexe
         parents = self.expand_parents(parents)
         super().__init__(name, parents, module=module, **kwargs)
 
+class PeriodicPairIndexerMemory(PeriodicPairIndexer):
+    '''
+    Implementation of PeriodicPairIndexer with additional memory component.
+
+    Stores current pair indices in memory and reuses them to compute the pair distances if no 
+    particle has moved more than skin/2 since last pair calculation. Otherwise uses the
+    _pair_indexer_class to recompute the pairs.
+
+    Increasing the value of 'skin' will increase the number of pair distances computed at
+    each step, but decrease the number of times new pairs must be computed. Skin should be 
+    set to zero while training for fastest results.
+    '''
+    
+    _auto_module_class = pairs_modules.periodic.PeriodicPairIndexerMemory
+
+    def __init__(self, name, parents, dist_hard_max, skin, module="auto", module_kwargs=None, **kwargs):
+        if module_kwargs is None:
+            module_kwargs = {}
+        module_kwargs = {"skin": skin, **module_kwargs}
+
+        super().__init__(name, parents, dist_hard_max, module=module, module_kwargs=module_kwargs, **kwargs)
+
 
 class ExternalNeighborIndexer(ExpandParents, PairIndexer, AutoKw, MultiNode):
     _input_names = "coordinates", "real_atoms", "shifts", "cell", "ext_pair_first", "ext_pair_second"
@@ -279,7 +301,7 @@ class RDFBins(ExpandParents, AutoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class _DispatchNeighbors(ExpandParents, PeriodicPairOutputs, PairIndexer, MultiNode):
+class _DispatchNeighbors(ExpandParents, AutoKw, PeriodicPairOutputs, PairIndexer, MultiNode):
     """
     Superclass for nodes that compute neighbors for systems one at a time.
     These should be capable of searching all feasible neighbors (no limit on number of images)
@@ -326,13 +348,15 @@ class _DispatchNeighbors(ExpandParents, PeriodicPairOutputs, PairIndexer, MultiN
     _parent_expander.get_main_outputs()
     _parent_expander.require_idx_states(IdxType.MolAtom, None, None, None, None, None, None, None)
 
-    def __init__(self, name, parents, dist_hard_max, module="auto", **kwargs):
+    def __init__(self, name, parents, dist_hard_max, module="auto", module_kwargs=None, **kwargs):
         self.dist_hard_max = dist_hard_max
         parents = self.expand_parents(parents)
-        super().__init__(name, parents, module=module, **kwargs)
 
-    def auto_module(self):
-        return self._auto_module_class(self.dist_hard_max)
+        if module_kwargs is None:
+            module_kwargs = {}
+        self.module_kwargs = {"dist_hard_max": dist_hard_max, **module_kwargs}
+
+        super().__init__(name, parents, module=module, **kwargs)
 
 
 class NumpyDynamicPairs(_DispatchNeighbors):
@@ -348,6 +372,33 @@ class DynamicPeriodicPairs(_DispatchNeighbors):
 
     _auto_module_class = pairs_modules.TorchNeighbors
 
+class KDTreePairs(_DispatchNeighbors):
+    '''
+    Node for finding pairs under periodic boundary conditions using Scipy's KD Tree algorithm. 
+    Cell must be orthorhombic.
+    '''
+    _auto_module_class = pairs_modules.dispatch.KDTreeNeighbors
+
+class KDTreePairsMemory(_DispatchNeighbors):
+    '''
+    Implementation of KDTreePairs with an added memory component.
+
+    Stores current pair indices in memory and reuses them to compute the pair distances if no 
+    particle has moved more than skin/2 since last pair calculation. Otherwise uses the
+    _pair_indexer_class to recompute the pairs.
+
+    Increasing the value of 'skin' will increase the number of pair distances computed at
+    each step, but decrease the number of times new pairs must be computed. Skin should be 
+    set to zero while training for fastest results.
+    '''
+    _auto_module_class = pairs_modules.dispatch.KDTreePairsMemory
+
+    def __init__(self, name, parents, dist_hard_max, skin, module="auto", module_kwargs=None, **kwargs):
+        if module_kwargs is None:
+            module_kwargs = {}
+        module_kwargs = {"skin": skin, **module_kwargs}
+
+        super().__init__(name, parents, dist_hard_max, module=module, module_kwargs=module_kwargs, **kwargs)
 
 class PaddedNeighborNode(ExpandParents, AutoNoKw, MultiNode):
     _input_names = "pair_first", "pair_second", "pair_coord"

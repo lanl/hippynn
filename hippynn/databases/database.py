@@ -34,8 +34,8 @@ class Database:
         :param inputs:   list of strings for input db_names
         :param targets:  list of strings for output db_namees
         :param seed:     int, for random splitting
-        :param test_size: fraction of data to use in test spli
-        :param valid_size: fraction oof data to use in train split
+        :param test_size: fraction of data to use in test split
+        :param valid_size: fraction of data to use in train split
         :param num_workers: passed to pytorch dataloaders
         :param pin_memory: passed to pytorch dataloaders
         :param allow_unfound: If true, skip checking if the needed inputs and targets are found.

@@ -221,3 +221,37 @@ class FilterBondsOneway(torch.nn.Module):
         # in seqm, only bonds with index first < second is used
         cond = pair_first < pair_second
         return bonds[cond]
+
+class FuzzyHistogram(torch.nn.Module):
+    """ 
+    Transforms a scalar feature into a vectorized feature via 
+    the fuzzy/soft histogram method.
+
+    :param length: length of vectorized feature
+
+    :returns FuzzyHistogram
+    """
+
+    def __init__(self, length, vmin, vmax):
+        super().__init__()
+
+        err_msg = "The value of 'length' must be a positive integer."
+        if not isinstance(length, int):
+            raise ValueError(err_msg)
+        if length <= 0:
+            raise ValueError(err_msg)
+
+        if not (isinstance(vmin, (int,float)) and isinstance(vmax, (int,float))):
+            raise ValueError("The values of 'vmin' and 'vmax' must be floating point numbers.")
+        if vmin >= vmax:
+            raise ValueError("The value of 'vmin' must be less than the value of 'vmax.'")
+
+        self.bins = torch.nn.Parameter(torch.linspace(vmin, vmax, length), requires_grad=False)
+        self.sigma = (vmax - vmin) / length
+
+    def forward(self, values):
+        if values.shape[-1] != 1:
+            values = values[...,None]
+        x = values - self.bins
+        histo = torch.exp(-((x / self.sigma) ** 2) / 4)
+        return torch.flatten(histo, end_dim=1)
