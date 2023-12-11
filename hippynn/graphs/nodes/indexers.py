@@ -192,7 +192,7 @@ def acquire_encoding_padding(search_nodes, species_set, purpose=None):
 class FuzzyHistogramer(AutoKw, SingleNode):
     """ 
     Node for transforming a scalar feature into a vectorized feature via 
-    the fuzzy histogram or soft histogram method.
+    the fuzzy/soft histogram method.
 
     :param length: length of vectorized feature
     """
