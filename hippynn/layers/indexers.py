@@ -225,7 +225,7 @@ class FilterBondsOneway(torch.nn.Module):
 class FuzzyHistogram(torch.nn.Module):
     """ 
     Transforms a scalar feature into a vectorized feature via 
-    the fuzzy histogram or soft histogram method.
+    the fuzzy/soft histogram method.
 
     :param length: length of vectorized feature
 
@@ -250,6 +250,8 @@ class FuzzyHistogram(torch.nn.Module):
         self.sigma = (vmax - vmin) / length
 
     def forward(self, values):
-        x = values[...,None] - self.bins
+        if values.shape[-1] != 1:
+            values = values[...,None]
+        x = values - self.bins
         histo = torch.exp(-((x / self.sigma) ** 2) / 4)
         return torch.flatten(histo, end_dim=1)

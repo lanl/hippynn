@@ -1,6 +1,8 @@
 import torch
 
-from .open import _PairIndexer
+from scipy.spatial import KDTree
+
+from .open import _PairIndexer, PairMemory
 from torch.profiler import profile, record_function, ProfilerActivity
 
 # Deprecated?
@@ -88,7 +90,7 @@ def tracebatch(mat):
     return torch.diagonal(mat, dim1=-2, dim2=-1).sum(dim=-1)
 
 # For some reason torch.linalg on GPU tends to
-# spend a lot of time allocating memory, especialyl
+# spend a lot of time allocating memory, especially
 # when it is given a large batch of matrices.
 # So we use the Cayley-Hamilton version of a matrix inverse
 # Without calling any linalg functions.
@@ -263,43 +265,28 @@ class PeriodicPairIndexer(_PairIndexer):
 
         return distflat2, pair_first, pair_second, paircoord, cell_offsets, offset_num, pair_mol
     
-class PeriodicPairIndexerMemory(torch.nn.Module):
+class PeriodicPairIndexerMemory(PairMemory):
     '''
-    Finds pairs in general periodic conditions. Reuses pairs (still recomputes the pair 
-    distances) if no particle has moved more than skin/2 since last pair calculation.
+    Implementation of PeriodicPairIndexer with additional memory component.
+
+    Stores current pair indices in memory and reuses them to compute the pair distances if no 
+    particle has moved more than skin/2 since last pair calculation. Otherwise uses the
+    _pair_indexer_class to recompute the pairs.
+
     Increasing the value of 'skin' will increase the number of pair distances computed at
-    each step, but decrease the number of times new pairs must be computed, potentially
-    leading to speed improvements.
+    each step, but decrease the number of times new pairs must be computed. Skin should be 
+    set to zero while training for fastest results.
     '''
+    _pair_indexer_class = PeriodicPairIndexer
 
-    def __init__(self, skin, hard_dist_cutoff, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._skin = skin
-        self.dist_hard_max = hard_dist_cutoff
-
-        self.pair_indexer = PeriodicPairIndexer(hard_dist_cutoff = self._skin + self.dist_hard_max)
-
-        self.reset_reuse_percentage()
-        self.initialize_buffers()
-        
-    def initialize_buffers(self):
-        for name in ["pair_mol", "cell_offsets", "pair_first", "pair_second", "offset_num", "positions", "cells"]:
-            self.register_buffer(name, None, False)
-
-    def recalculation_needed(self, coordinates, cells):
-        if self.positions is None: # ie. forward function has not been called
-            return True
-        if (self.cells != cells).any() or (((self.positions - coordinates)**2).sum(1).max() > (self._skin/2)**2):
-            return True
-        return False
-    
     def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cells):
         if self.recalculation_needed(coordinates, cells):
             self.n_molecules, self.n_atoms, _ = coordinates.shape
             self.recalculations += 1
 
-            args = (coordinates, nonblank, real_atoms, inv_real_atoms, cells)
-            distflat2, pair_first, pair_second, paircoord, cell_offsets, offset_num, pair_mol = self.pair_indexer(*args)
+            inputs = (coordinates, nonblank, real_atoms, inv_real_atoms, cells)
+            outputs = self._pair_indexer(*inputs)
+            distflat2, pair_first, pair_second, paircoord, cell_offsets, offset_num, pair_mol = outputs
 
             for name, var in [
                 ("cell_offsets", cell_offsets),
@@ -320,32 +307,3 @@ class PeriodicPairIndexerMemory(torch.nn.Module):
             distflat2 = paircoord.norm(dim=1)
 
         return distflat2, self.pair_first, self.pair_second, paircoord, self.cell_offsets, self.offset_num
-    
-    @property
-    def skin(self):
-        return self._skin
-    
-    @skin.setter
-    def skin(self, skin):
-        self._skin = skin
-
-        self.pair_indexer = PeriodicPairIndexer(hard_dist_cutoff = self._skin + self.dist_hard_max)
-
-        self.reset_reuse_percentage()
-        self.initialize_buffers()
-        
-    @property
-    def reuse_percentage(self):
-        '''
-        Returns None if there are no model calls on record.
-        '''
-        try:
-            return self.reuses / (self.reuses + self.recalculations) * 100
-        except ZeroDivisionError:
-            print("No model calls on record.")
-            return
-
-    def reset_reuse_percentage(self):
-        self.reuses = 0
-        self.recalculations = 0
-

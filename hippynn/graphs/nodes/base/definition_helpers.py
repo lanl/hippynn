@@ -99,7 +99,7 @@ def _assert_tupleform(input_tuple, type_tuple):
     # If not, it must at least have the same length
     if not len(input_tuple) == len(type_tuple):
         raise TupleTypeMismatch(
-            "Wrong length.{}!={}".format(len(input_tuple), len(type_tuple))
+            "Wrong length. {}!={}".format(len(input_tuple), len(type_tuple))
             + " \nInput: {} \nExpected: {}".format(input_tuple, type_tuple)
         )
 

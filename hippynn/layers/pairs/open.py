@@ -58,3 +58,78 @@ class OpenPairIndexer(_PairIndexer):
         distflat2 = paircoord.norm(dim=1)
 
         return distflat2, pair_first, pair_second, paircoord
+
+class PairMemory(torch.nn.Module):
+    '''
+    Stores current pair indices and reuses them to compute the pair distances if no 
+    particle has moved more than skin/2 since last pair calculation. Otherwise uses the
+    _pair_indexer_class to recompute the pairs.
+
+    Increasing the value of 'skin' will increase the number of pair distances computed at
+    each step, but decrease the number of times new pairs must be computed. Skin should be 
+    set to zero while training for fastest results.
+    '''
+
+    # ## Subclasses should update the following ## #
+    _pair_indexer_class = NotImplemented
+
+    def forward(*args, **kwargs):
+        return NotImplementedError
+    # ## End ## #
+
+    def __init__(self, skin, dist_hard_max=None, hard_dist_cutoff=None):
+        super().__init__()
+
+        if dist_hard_max is None and hard_dist_cutoff is None:
+            raise ValueError("One of 'dist_hard_max' and 'hard_dist_cutoff' must be specified.")
+        if dist_hard_max is not None and hard_dist_cutoff is not None and dist_hard_max != hard_dist_cutoff:
+            raise ValueError("Must only specify one of 'dist_hard_max' and 'hard_dist_cutoff.'")
+        
+        self.hard_dist_cutoff = (dist_hard_max or hard_dist_cutoff)
+        self.dist_hard_max = (dist_hard_max or hard_dist_cutoff)
+        self.set_skin(skin)
+
+    @property
+    def skin(self):
+        return self._skin
+    
+    def set_skin(self, skin):
+        self._skin = skin
+
+        try:
+            self._pair_indexer = self._pair_indexer_class(hard_dist_cutoff = self._skin + self.hard_dist_cutoff)
+        except TypeError:
+            self._pair_indexer = self._pair_indexer_class(dist_hard_max = self._skin + self.hard_dist_cutoff)
+
+        self.reset_reuse_percentage()
+        self.initialize_buffers()
+
+    @skin.setter
+    def skin(self, skin):
+        self.set_skin(skin)
+        
+    @property
+    def reuse_percentage(self):
+        '''
+        Returns None if there are no model calls on record.
+        '''
+        try:
+            return self.reuses / (self.reuses + self.recalculations) * 100
+        except ZeroDivisionError:
+            print("No model calls on record.")
+            return
+
+    def reset_reuse_percentage(self):
+        self.reuses = 0
+        self.recalculations = 0
+        
+    def initialize_buffers(self):
+        for name in ["pair_mol", "cell_offsets", "pair_first", "pair_second", "offset_num", "positions", "cells"]:
+            self.register_buffer(name=name, tensor=None, persistent=False)
+
+    def recalculation_needed(self, coordinates, cells):
+        if self.positions is None: # ie. forward function has not been called
+            return True
+        if (self.cells != cells).any() or (((self.positions - coordinates)**2).sum(1).max() > (self._skin/2)**2):
+            return True
+        return False
