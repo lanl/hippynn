@@ -81,6 +81,11 @@
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.pairs.ExternalNeighborIndexer.__init__"><code class="docutils literal notranslate"><span class="pre">ExternalNeighborIndexer.__init__()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.pairs.KDTreePairs"><code class="docutils literal notranslate"><span class="pre">KDTreePairs</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.pairs.KDTreePairsMemory"><code class="docutils literal notranslate"><span class="pre">KDTreePairsMemory</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.pairs.KDTreePairsMemory.__init__"><code class="docutils literal notranslate"><span class="pre">KDTreePairsMemory.__init__()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.pairs.MinDistNode"><code class="docutils literal notranslate"><span class="pre">MinDistNode</span></code></a><ul>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.pairs.MinDistNode.__init__"><code class="docutils literal notranslate"><span class="pre">MinDistNode.__init__()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.pairs.MinDistNode.expand0"><code class="docutils literal notranslate"><span class="pre">MinDistNode.expand0()</span></code></a></li>
@@ -133,6 +138,10 @@
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.pairs.PeriodicPairIndexer.__init__"><code class="docutils literal notranslate"><span class="pre">PeriodicPairIndexer.__init__()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.pairs.PeriodicPairIndexer.expand0"><code class="docutils literal notranslate"><span class="pre">PeriodicPairIndexer.expand0()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.pairs.PeriodicPairIndexer.expand1"><code class="docutils literal notranslate"><span class="pre">PeriodicPairIndexer.expand1()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory"><code class="docutils literal notranslate"><span class="pre">PeriodicPairIndexerMemory</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory.__init__"><code class="docutils literal notranslate"><span class="pre">PeriodicPairIndexerMemory.__init__()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.pairs.PeriodicPairOutputs"><code class="docutils literal notranslate"><span class="pre">PeriodicPairOutputs</span></code></a></li>
@@ -204,7 +213,7 @@
 <span class="target" id="module-hippynn.graphs.nodes.pairs"></span><p>Nodes for finding and manipulating pairs and distances.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="hippynn.graphs.nodes.pairs.DynamicPeriodicPairs">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DynamicPeriodicPairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/pairs.html#DynamicPeriodicPairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.pairs.DynamicPeriodicPairs" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DynamicPeriodicPairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/pairs.html#DynamicPeriodicPairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.pairs.DynamicPeriodicPairs" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_DispatchNeighbors</span></code></p>
 <p>Node for finding pairs in arbitrary periodic boundary conditions.
 Note: This will often be slower than PeriodicPairIndexer, but more general.
@@ -229,6 +238,54 @@ If the speed is a concern, consider precomputing pairs with experiment.assembly.
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.graphs.nodes.pairs.ExternalNeighborIndexer.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_dist_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/pairs.html#ExternalNeighborIndexer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.pairs.ExternalNeighborIndexer.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.pairs.KDTreePairs">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">KDTreePairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/pairs.html#KDTreePairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.pairs.KDTreePairs" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_DispatchNeighbors</span></code></p>
+<p>Node for finding pairs under periodic boundary conditions using Scipy’s KD Tree algorithm. 
+Cell must be orthorhombic.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This node has parent expansion, following these procedures.</p>
+<ol class="arabic simple">
+<li><p>If matching (PositionsNode, SpeciesNode, CellNode), then apply expand0</p></li>
+<li><p>If matching (PositionsNode, Encoder, PaddingIndexer, CellNode), then apply expand1</p></li>
+<li><p>Asserts that the number of parents is 8</p></li>
+<li><p>Gets main_output of nodes: casts MultiNodes to their main output</p></li>
+<li><p>Transforms the parents to have index states (&lt;IdxType.MolAtom&gt;, None, None, None, None, None, None, None)</p></li>
+</ol>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.pairs.KDTreePairsMemory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">KDTreePairsMemory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/pairs.html#KDTreePairsMemory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.pairs.KDTreePairsMemory" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_DispatchNeighbors</span></code></p>
+<p>Implementation of KDTreePairs with an added memory component.</p>
+<p>Stores current pair indices in memory and reuses them to compute the pair distances if no 
+particle has moved more than skin/2 since last pair calculation. Otherwise uses the
+_pair_indexer_class to recompute the pairs.</p>
+<p>Increasing the value of ‘skin’ will increase the number of pair distances computed at
+each step, but decrease the number of times new pairs must be computed. Skin should be 
+set to zero while training for fastest results.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This node has parent expansion, following these procedures.</p>
+<ol class="arabic simple">
+<li><p>If matching (PositionsNode, SpeciesNode, CellNode), then apply expand0</p></li>
+<li><p>If matching (PositionsNode, Encoder, PaddingIndexer, CellNode), then apply expand1</p></li>
+<li><p>Asserts that the number of parents is 8</p></li>
+<li><p>Gets main_output of nodes: casts MultiNodes to their main output</p></li>
+<li><p>Transforms the parents to have index states (&lt;IdxType.MolAtom&gt;, None, None, None, None, None, None, None)</p></li>
+</ol>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.pairs.KDTreePairsMemory.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/pairs.html#KDTreePairsMemory.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.pairs.KDTreePairsMemory.__init__" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -264,7 +321,7 @@ If the speed is a concern, consider precomputing pairs with experiment.assembly.
 
 <dl class="py class">
 <dt class="sig sig-object py" id="hippynn.graphs.nodes.pairs.NumpyDynamicPairs">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NumpyDynamicPairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/pairs.html#NumpyDynamicPairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.pairs.NumpyDynamicPairs" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NumpyDynamicPairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/pairs.html#NumpyDynamicPairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.pairs.NumpyDynamicPairs" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_DispatchNeighbors</span></code></p>
 </dd></dl>
 
@@ -458,6 +515,34 @@ from IdxType.MolAtomAtom -&gt; IdxType.Pairs</p>
 <span class="sig-name descname"><span class="pre">expand1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indexer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/pairs.html#PeriodicPairIndexer.expand1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.pairs.PeriodicPairIndexer.expand1" title="Permalink to this definition"></a></dt>
 <dd><p>Used for creation from parents with signature (PositionsNode, Encoder, PaddingIndexer, CellNode)</p>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PeriodicPairIndexerMemory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/pairs.html#PeriodicPairIndexerMemory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hippynn.graphs.nodes.pairs.PeriodicPairIndexer" title="hippynn.graphs.nodes.pairs.PeriodicPairIndexer"><code class="xref py py-class docutils literal notranslate"><span class="pre">PeriodicPairIndexer</span></code></a></p>
+<p>Implementation of PeriodicPairIndexer with additional memory component.</p>
+<p>Stores current pair indices in memory and reuses them to compute the pair distances if no 
+particle has moved more than skin/2 since last pair calculation. Otherwise uses the
+_pair_indexer_class to recompute the pairs.</p>
+<p>Increasing the value of ‘skin’ will increase the number of pair distances computed at
+each step, but decrease the number of times new pairs must be computed. Skin should be 
+set to zero while training for fastest results.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This node has parent expansion, following these procedures.</p>
+<ol class="arabic simple">
+<li><p>If matching (PositionsNode, SpeciesNode, CellNode), then apply expand0</p></li>
+<li><p>If matching (PositionsNode, Encoder, PaddingIndexer, CellNode), then apply expand1</p></li>
+<li><p>Asserts that the number of parents is 5</p></li>
+<li><p>Gets main_output of nodes: casts MultiNodes to their main output</p></li>
+</ol>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/pairs.html#PeriodicPairIndexerMemory.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 

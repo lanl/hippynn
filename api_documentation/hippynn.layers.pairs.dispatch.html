@@ -60,6 +60,16 @@
 <li class="toctree-l3 current"><a class="reference internal" href="hippynn.layers.pairs.html">pairs package</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.analysis.html">analysis module</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">dispatch module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.KDTreeNeighbors"><code class="docutils literal notranslate"><span class="pre">KDTreeNeighbors</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.KDTreeNeighbors.compute_one"><code class="docutils literal notranslate"><span class="pre">KDTreeNeighbors.compute_one()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.KDTreeNeighbors.training"><code class="docutils literal notranslate"><span class="pre">KDTreeNeighbors.training</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.KDTreePairsMemory"><code class="docutils literal notranslate"><span class="pre">KDTreePairsMemory</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.KDTreePairsMemory.forward"><code class="docutils literal notranslate"><span class="pre">KDTreePairsMemory.forward()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.KDTreePairsMemory.training"><code class="docutils literal notranslate"><span class="pre">KDTreePairsMemory.training</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.NPNeighbors"><code class="docutils literal notranslate"><span class="pre">NPNeighbors</span></code></a><ul>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.NPNeighbors.compute_one"><code class="docutils literal notranslate"><span class="pre">NPNeighbors.compute_one()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.NPNeighbors.training"><code class="docutils literal notranslate"><span class="pre">NPNeighbors.training</span></code></a></li>
@@ -70,6 +80,7 @@
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.TorchNeighbors.training"><code class="docutils literal notranslate"><span class="pre">TorchNeighbors.training</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.neighbor_list_kdtree"><code class="docutils literal notranslate"><span class="pre">neighbor_list_kdtree()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.neighbor_list_np"><code class="docutils literal notranslate"><span class="pre">neighbor_list_np()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.dispatch.wrap_points_np"><code class="docutils literal notranslate"><span class="pre">wrap_points_np()</span></code></a></li>
 </ul>
@@ -134,6 +145,56 @@
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.layers.pairs.dispatch</span></code> module.</p>
 <span class="target" id="module-hippynn.layers.pairs.dispatch"></span><p>System-by-system pair finders</p>
 <dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.KDTreeNeighbors">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">KDTreeNeighbors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#KDTreeNeighbors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.KDTreeNeighbors" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_DispatchNeighbors</span></code></p>
+<p>Node for finding pairs under periodic boundary conditions using Scipy’s KD Tree algorithm. 
+Cell must be orthorhombic.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.KDTreeNeighbors.compute_one">
+<span class="sig-name descname"><span class="pre">compute_one</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#KDTreeNeighbors.compute_one"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.KDTreeNeighbors.compute_one" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.KDTreeNeighbors.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#hippynn.layers.pairs.dispatch.KDTreeNeighbors.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.KDTreePairsMemory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">KDTreePairsMemory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_dist_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#KDTreePairsMemory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.KDTreePairsMemory" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.layers.pairs.open.html#hippynn.layers.pairs.open.PairMemory" title="hippynn.layers.pairs.open.PairMemory"><code class="xref py py-class docutils literal notranslate"><span class="pre">PairMemory</span></code></a></p>
+<p>Implementation of KDTreePairs with an added memory component.</p>
+<p>Stores current pair indices in memory and reuses them to compute the pair distances if no 
+particle has moved more than skin/2 since last pair calculation. Otherwise uses the
+_pair_indexer_class to recompute the pairs.</p>
+<p>Increasing the value of ‘skin’ will increase the number of pair distances computed at
+each step, but decrease the number of times new pairs must be computed. Skin should be 
+set to zero while training for fastest results.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.KDTreePairsMemory.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonblank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">real_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_real_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cells</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_molecules</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_atoms_max</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#KDTreePairsMemory.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.KDTreePairsMemory.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.KDTreePairsMemory.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#hippynn.layers.pairs.dispatch.KDTreePairsMemory.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.NPNeighbors">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NPNeighbors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#NPNeighbors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.NPNeighbors" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_DispatchNeighbors</span></code></p>
@@ -163,6 +224,13 @@
 <span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#hippynn.layers.pairs.dispatch.TorchNeighbors.training" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.dispatch.neighbor_list_kdtree">
+<span class="sig-name descname"><span class="pre">neighbor_list_kdtree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/dispatch.html#neighbor_list_kdtree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.dispatch.neighbor_list_kdtree" title="Permalink to this definition"></a></dt>
+<dd><p>Use KD Tree implementation from scipy.spatial to find pairs under periodic boundary conditions 
+with an orthonormal cell.</p>
 </dd></dl>
 
 <dl class="py function">

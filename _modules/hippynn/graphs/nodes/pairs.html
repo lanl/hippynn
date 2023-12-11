@@ -146,6 +146,28 @@
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
+<div class="viewcode-block" id="PeriodicPairIndexerMemory"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory">[docs]</a><span class="k">class</span> <span class="nc">PeriodicPairIndexerMemory</span><span class="p">(</span><span class="n">PeriodicPairIndexer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Implementation of PeriodicPairIndexer with additional memory component.</span>
+
+<span class="sd">    Stores current pair indices in memory and reuses them to compute the pair distances if no </span>
+<span class="sd">    particle has moved more than skin/2 since last pair calculation. Otherwise uses the</span>
+<span class="sd">    _pair_indexer_class to recompute the pairs.</span>
+
+<span class="sd">    Increasing the value of &#39;skin&#39; will increase the number of pair distances computed at</span>
+<span class="sd">    each step, but decrease the number of times new pairs must be computed. Skin should be </span>
+<span class="sd">    set to zero while training for fastest results.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">periodic</span><span class="o">.</span><span class="n">PeriodicPairIndexerMemory</span>
+
+<div class="viewcode-block" id="PeriodicPairIndexerMemory.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">skin</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">module_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;skin&quot;</span><span class="p">:</span> <span class="n">skin</span><span class="p">,</span> <span class="o">**</span><span class="n">module_kwargs</span><span class="p">}</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="n">module_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
 
 <div class="viewcode-block" id="ExternalNeighborIndexer"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.ExternalNeighborIndexer">[docs]</a><span class="k">class</span> <span class="nc">ExternalNeighborIndexer</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
     <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;real_atoms&quot;</span><span class="p">,</span> <span class="s2">&quot;shifts&quot;</span><span class="p">,</span> <span class="s2">&quot;cell&quot;</span><span class="p">,</span> <span class="s2">&quot;ext_pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;ext_pair_second&quot;</span>
@@ -357,7 +379,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
-<span class="k">class</span> <span class="nc">_DispatchNeighbors</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">PeriodicPairOutputs</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">_DispatchNeighbors</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">PeriodicPairOutputs</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Superclass for nodes that compute neighbors for systems one at a time.</span>
 <span class="sd">    These should be capable of searching all feasible neighbors (no limit on number of images)</span>
@@ -404,13 +426,15 @@
     <span class="n">_parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
     <span class="n">_parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dist_hard_max</span> <span class="o">=</span> <span class="n">dist_hard_max</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">auto_module</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auto_module_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dist_hard_max</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">module_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;dist_hard_max&quot;</span><span class="p">:</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="o">**</span><span class="n">module_kwargs</span><span class="p">}</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="NumpyDynamicPairs"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.NumpyDynamicPairs">[docs]</a><span class="k">class</span> <span class="nc">NumpyDynamicPairs</span><span class="p">(</span><span class="n">_DispatchNeighbors</span><span class="p">):</span>
@@ -426,6 +450,33 @@
 
     <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">TorchNeighbors</span></div>
 
+<div class="viewcode-block" id="KDTreePairs"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.KDTreePairs">[docs]</a><span class="k">class</span> <span class="nc">KDTreePairs</span><span class="p">(</span><span class="n">_DispatchNeighbors</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Node for finding pairs under periodic boundary conditions using Scipy&#39;s KD Tree algorithm. </span>
+<span class="sd">    Cell must be orthorhombic.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">dispatch</span><span class="o">.</span><span class="n">KDTreeNeighbors</span></div>
+
+<div class="viewcode-block" id="KDTreePairsMemory"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.KDTreePairsMemory">[docs]</a><span class="k">class</span> <span class="nc">KDTreePairsMemory</span><span class="p">(</span><span class="n">_DispatchNeighbors</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Implementation of KDTreePairs with an added memory component.</span>
+
+<span class="sd">    Stores current pair indices in memory and reuses them to compute the pair distances if no </span>
+<span class="sd">    particle has moved more than skin/2 since last pair calculation. Otherwise uses the</span>
+<span class="sd">    _pair_indexer_class to recompute the pairs.</span>
+
+<span class="sd">    Increasing the value of &#39;skin&#39; will increase the number of pair distances computed at</span>
+<span class="sd">    each step, but decrease the number of times new pairs must be computed. Skin should be </span>
+<span class="sd">    set to zero while training for fastest results.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">dispatch</span><span class="o">.</span><span class="n">KDTreePairsMemory</span>
+
+<div class="viewcode-block" id="KDTreePairsMemory.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.KDTreePairsMemory.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">skin</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">module_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;skin&quot;</span><span class="p">:</span> <span class="n">skin</span><span class="p">,</span> <span class="o">**</span><span class="n">module_kwargs</span><span class="p">}</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="n">module_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 <div class="viewcode-block" id="PaddedNeighborNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.PaddedNeighborNode">[docs]</a><span class="k">class</span> <span class="nc">PaddedNeighborNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
     <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_coord&quot;</span>

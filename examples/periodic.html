@@ -55,6 +55,7 @@
 <li class="toctree-l2"><a class="reference internal" href="predictor.html">Predictor</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Periodic Boundary Conditions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#dynamic-pair-finder">Dynamic Pair Finder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pair-finder-memory">Pair Finder Memory</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#caching-pre-computed-pairs">Caching Pre-computed Pairs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#what-s-not-yet-supported">What’s not yet supported</a></li>
 </ul>
@@ -138,6 +139,21 @@ However, the cost is that each system is evaluated independently in serial,
 and as such the pair finding can be a rather slow operation. This algorithm is
 more likely to show benefits when the number of atoms in a training system is highly
 variable.</p>
+<p>For systems with orthorhombic cells and an interaction radius not greater than any of the
+cell side lengths, the <a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.KDTreePairs" title="hippynn.graphs.nodes.pairs.KDTreePairs"><code class="xref py py-class docutils literal notranslate"><span class="pre">KDTreePairs</span></code></a> can be used
+alternatively. It should exhibit reduced computation times, especially for large systems.</p>
+</section>
+<section id="pair-finder-memory">
+<h2>Pair Finder Memory<a class="headerlink" href="#pair-finder-memory" title="Permalink to this heading"></a></h2>
+<p>When using a trained model to run MD or for any application where atom positions
+change only slightly between subsquent model calls,
+<a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory" title="hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory"><code class="xref py py-class docutils literal notranslate"><span class="pre">PeriodicPairIndexerMemory</span></code></a> and
+<a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.KDTreePairsMemory" title="hippynn.graphs.nodes.pairs.KDTreePairsMemory"><code class="xref py py-class docutils literal notranslate"><span class="pre">KDTreePairsMemory</span></code></a> can be used to reduce run
+time by reusing pair information. Current pair indices are stored in memory and
+reused so long as no atom has moved more than <cite>skin</cite>/2, where <cite>skin</cite> is an additional
+parameter set by the user. Increasing the value of <cite>skin</cite> will increase the number of
+pair distances computed at each step, but decrease the number of times new pairs must
+be computed. Skin should be set to zero while training for fastest results.</p>
 </section>
 <section id="caching-pre-computed-pairs">
 <h2>Caching Pre-computed Pairs<a class="headerlink" href="#caching-pre-computed-pairs" title="Permalink to this heading"></a></h2>

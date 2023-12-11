@@ -94,11 +94,13 @@
     <span class="k">if</span> <span class="n">dmin</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">:</span>
         <span class="n">d_count</span> <span class="o">=</span> <span class="n">distance</span> <span class="o">&lt;</span> <span class="n">threshold</span>
         <span class="n">d_frac</span> <span class="o">=</span> <span class="n">d_count</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">distance</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">d_sum</span> <span class="o">=</span> <span class="p">(</span><span class="n">d_count</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="s2">&quot;Provided distances are underneath sensitivity range!</span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;Minimum distance in current batch: </span><span class="si">{</span><span class="n">dmin</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;Threshold distance for warning: </span><span class="si">{</span><span class="n">threshold</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;Fraction of pairs under the threshold: </span><span class="si">{</span><span class="n">d_frac</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Fraction of pairs under the threshold: </span><span class="si">{</span><span class="n">d_frac</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Number of pairs under the threshold: </span><span class="si">{</span><span class="n">d_sum</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span></div>
 
 

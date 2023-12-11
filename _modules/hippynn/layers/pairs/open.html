@@ -136,6 +136,81 @@
         <span class="n">distflat2</span> <span class="o">=</span> <span class="n">paircoord</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">distflat2</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">paircoord</span></div></div>
+
+<div class="viewcode-block" id="PairMemory"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.open.html#hippynn.layers.pairs.open.PairMemory">[docs]</a><span class="k">class</span> <span class="nc">PairMemory</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Stores current pair indices and reuses them to compute the pair distances if no </span>
+<span class="sd">    particle has moved more than skin/2 since last pair calculation. Otherwise uses the</span>
+<span class="sd">    _pair_indexer_class to recompute the pairs.</span>
+
+<span class="sd">    Increasing the value of &#39;skin&#39; will increase the number of pair distances computed at</span>
+<span class="sd">    each step, but decrease the number of times new pairs must be computed. Skin should be </span>
+<span class="sd">    set to zero while training for fastest results.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c1"># ## Subclasses should update the following ## #</span>
+    <span class="n">_pair_indexer_class</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+
+<div class="viewcode-block" id="PairMemory.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.open.html#hippynn.layers.pairs.open.PairMemory.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ne">NotImplementedError</span></div>
+    <span class="c1"># ## End ## #</span>
+
+<div class="viewcode-block" id="PairMemory.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.open.html#hippynn.layers.pairs.open.PairMemory.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skin</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hard_dist_cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">dist_hard_max</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hard_dist_cutoff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;One of &#39;dist_hard_max&#39; and &#39;hard_dist_cutoff&#39; must be specified.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dist_hard_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hard_dist_cutoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dist_hard_max</span> <span class="o">!=</span> <span class="n">hard_dist_cutoff</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Must only specify one of &#39;dist_hard_max&#39; and &#39;hard_dist_cutoff.&#39;&quot;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">hard_dist_cutoff</span> <span class="o">=</span> <span class="p">(</span><span class="n">dist_hard_max</span> <span class="ow">or</span> <span class="n">hard_dist_cutoff</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_hard_max</span> <span class="o">=</span> <span class="p">(</span><span class="n">dist_hard_max</span> <span class="ow">or</span> <span class="n">hard_dist_cutoff</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_skin</span><span class="p">(</span><span class="n">skin</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">skin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skin</span>
+    
+<div class="viewcode-block" id="PairMemory.set_skin"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.open.html#hippynn.layers.pairs.open.PairMemory.set_skin">[docs]</a>    <span class="k">def</span> <span class="nf">set_skin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skin</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_skin</span> <span class="o">=</span> <span class="n">skin</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pair_indexer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pair_indexer_class</span><span class="p">(</span><span class="n">hard_dist_cutoff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skin</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">hard_dist_cutoff</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pair_indexer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pair_indexer_class</span><span class="p">(</span><span class="n">dist_hard_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skin</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">hard_dist_cutoff</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_reuse_percentage</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_buffers</span><span class="p">()</span></div>
+
+    <span class="nd">@skin</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">skin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skin</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_skin</span><span class="p">(</span><span class="n">skin</span><span class="p">)</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">reuse_percentage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns None if there are no model calls on record.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reuses</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reuses</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">recalculations</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+        <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No model calls on record.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+<div class="viewcode-block" id="PairMemory.reset_reuse_percentage"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.open.html#hippynn.layers.pairs.open.PairMemory.reset_reuse_percentage">[docs]</a>    <span class="k">def</span> <span class="nf">reset_reuse_percentage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reuses</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recalculations</span> <span class="o">=</span> <span class="mi">0</span></div>
+        
+<div class="viewcode-block" id="PairMemory.initialize_buffers"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.open.html#hippynn.layers.pairs.open.PairMemory.initialize_buffers">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_buffers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;pair_mol&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_offsets&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="s2">&quot;offset_num&quot;</span><span class="p">,</span> <span class="s2">&quot;positions&quot;</span><span class="p">,</span> <span class="s2">&quot;cells&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">tensor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">persistent</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PairMemory.recalculation_needed"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.open.html#hippynn.layers.pairs.open.PairMemory.recalculation_needed">[docs]</a>    <span class="k">def</span> <span class="nf">recalculation_needed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">cells</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">positions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># ie. forward function has not been called</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cells</span> <span class="o">!=</span> <span class="n">cells</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">positions</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_skin</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div></div>
 </pre></div>
 
            </div>
