@@ -144,7 +144,10 @@ class AseDatabase(Database, Restartable):
             natom = len(record["numbers"])
             for k, v in record.items():
                 if isinstance(v, np.ndarray):
-                    shape = array_dict[k].shape
+                    if array_dict.get(k,None) is not None:
+                        shape = array_dict[k].shape
+                    else:
+                        shape=[0]
                     # Note this assumes the maximum number of atoms greater than the length of property of interest
                     # E.g. 3 for dipole (make sure your training set has something with more than 3 atoms)
                     # Or 6 for stress tensor (make sure your training set has something with more than 6 atoms)
@@ -156,9 +159,11 @@ class AseDatabase(Database, Restartable):
                         array_dict[k][i, :, :] = v
                     elif (len(shape) == 3) and (shape[1] == max_n_atom):  # 2D array, e.g. positions, forces
                         array_dict[k][i, :natom, :] = v
+                    elif (len(shape) == 1):
+                        print('Skipping {}'.format(k))
                     else:
                         raise ValueError("Shape of Numpy array for key: {} unknown.".format(k))
-                elif isinstance(array_dict[k], np.ndarray):  # Energy, float or integers only
+                elif isinstance(array_dict.get(k,None), np.ndarray):  # Energy, float or integers only
                     array_dict[k][i] = v
                     if (k == "energy") and (("energy_per_atom" in var_list) or (allow_unfound)):  # Add in per-atom-energy
                         array_dict["energy_per_atom"][i] = v / natom
