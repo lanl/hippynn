@@ -32,6 +32,25 @@ class GradientNode(AutoKw, SingleNode):
         self.sign = sign
         self._index_state = position._index_state
         super().__init__(name, parents, module=module, **kwargs)
+        
+class MultiGradientNode(AutoKw, MultiNode):
+    """
+    Compute the gradient of a quantity.
+    """
+
+    _auto_module_class = physics_layers.Gradient
+
+    def __init__(self, name, output, inputs, signs, module="auto", **kwargs):
+        self.module_kwargs = {"sign": signs}
+        for i in inputs:
+            i.requires_grad = True
+        parents = output.main_output, *inputs
+        self.signs = signs
+        self._input_names = tuple((i.main_output if isinstance(i, MultiNode) else i.name) for i in inputs)
+        self._output_names = tuple((name + "_grad" for name in self._input_names))
+        self._input_names = (output.name,) + self._input_names
+        self._output_index_states = tuple(i._index_state for i in inputs)
+        super().__init__(name, parents, module=module, **kwargs)
 
 
 class StressForceNode(AutoNoKw, MultiNode):
