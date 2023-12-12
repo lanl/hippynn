@@ -134,3 +134,21 @@ def l2reg(network):
 
 def l1reg(network):
     return lpreg(network, p=1)
+
+# For loss functions with phases
+def absolute_errors(predict: torch.Tensor, true: torch.Tensor):
+    """Compute the absolute errors with phases between predicted and true values. In
+    other words, prediction should be close to the absolute value of true, and the sign
+    does not matter.
+
+    :param predict: predicted values
+    :type predict: torch.Tensor
+    :param true: true values
+    :type true: torch.Tensor
+    :return: errors
+    :rtype: torch.Tensor
+    """
+
+    return torch.minimum(torch.abs(true - predict), torch.abs(true + predict))
+
+

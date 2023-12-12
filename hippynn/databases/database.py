@@ -191,7 +191,6 @@ class Database:
         if not self.splitting_completed:
             raise ValueError("Database has not yet been split.")
 
-
         if split_type not in self.splits:
             raise ValueError(f"Split {split_type} Invalid. Current splits:{list(self.splits.keys())}")
 
@@ -226,6 +225,51 @@ class Database:
         )
 
         return generator
+        
+    def trim_all_arrays(self,index):
+        """
+        To be used in conjuction with remove_high_property
+        """
+        for key in self.arr_dict:
+            self.arr_dict[key] = self.arr_dict[key][index]
+    
+    def remove_high_property(self,key,perAtom,species_key=None,cut=None,std_factor=10):
+        """
+        This function removes outlier data from the dataset
+        Must be called before splitting
+        "key": the property key in the dataset to check for high values
+        "perAtom": True if the property is defined per atom in axis 1, otherwise property is treated as full system
+        "std_factor": systems with values larger than this multiplier time the standard deviation of all data will be reomved. None to skip this step
+        "cut_factor": systems with values larger than this number are reomved. None to skip this step. This step is done first. 
+        """
+        if perAtom:
+            if species_key==None:
+                raise RuntimeError("species_key must be defined to trim a per atom quantity")
+            atom_ind = self.arr_dict[species_key] > 0
+        ndim = len(self.arr_dict[key].shape)
+        if cut!=None:
+            if perAtom:
+                Kmean = np.mean(self.arr_dict[key][atom_ind])
+            else:
+                Kmean = np.mean(self.arr_dict[key])
+            failArr = np.abs(self.arr_dict[key]-Kmean)>cut
+            #This does nothing with ndim=1
+            trimArr = np.sum(failArr,axis=tuple(range(1,ndim)))==0
+            self.trim_all_arrays(trimArr)
+            
+        if std_factor!=None:
+            if perAtom:
+                atom_ind = self.arr_dict[species_key] > 0
+                Kmean = np.mean(self.arr_dict[key][atom_ind])
+                std_cut = np.std(self.arr_dict[key][atom_ind]) * std_factor
+            else: 
+                Kmean = np.mean(self.arr_dict[key])
+                std_cut = np.std(self.arr_dict[key]) * std_factor
+            failArr = np.abs(self.arr_dict[key]-Kmean)>std_cut
+            #This does nothing with ndim=1
+            trimArr = np.sum(failArr,axis=tuple(range(1,ndim)))==0
+            self.trim_all_arrays(trimArr)
+
 
 
 def compute_index_mask(indices, index_pool):

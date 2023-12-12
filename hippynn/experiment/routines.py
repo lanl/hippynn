@@ -20,6 +20,7 @@ from .controllers import Controller, is_scheduler_like
 from .device import set_devices
 from .. import tools
 from .assembly import TrainingModules
+from .step_functions import get_step_function
 
 from .. import custom_kernels
 
@@ -419,12 +420,13 @@ def training_loop(
 
     epoch = metric_tracker.current_epoch
     device = evaluator.model_device
+    step_function = get_step_function(controller.optimizer)
+    optimizer = controller.optimizer
 
     continue_training = True  # Assume that nobody ran this function without wanting at least 1 epoch.
 
     while continue_training:
 
-        optimizer = controller.optimizer
         qprint("_" * 50)
         qprint("Epoch {}:".format(epoch))
         tools.print_lr(optimizer)
@@ -442,20 +444,13 @@ def training_loop(
             batch_targets = batch[-n_targets:]
             batch_targets = [x.requires_grad_(False) for x in batch_targets]
 
-            optimizer.zero_grad(set_to_none=True)
-            batch_model_outputs = model(*batch_inputs)
-
-            # The extra .mean call here deals with an edge case for multi-GPU DataParallel with scalar outputs
-            batch_train_loss = loss(*batch_model_outputs, *batch_targets)[0].mean()
-
-            batch_train_loss.backward()
-            optimizer.step()
+            batch_model_outputs = step_function(optimizer, model, loss, batch_inputs, batch_targets)
 
             if batch_callbacks:
                 for cb in batch_callbacks:
                     cb(batch_inputs, batch_model_outputs, batch_targets)
             # Allow garbage collection of computed values.
-            del batch_model_outputs, batch_train_loss
+            del batch_model_outputs
 
         elapsed_epoch_run_time = timeit.default_timer() - epoch_run_time
         qprint("Training time: ", round(elapsed_epoch_run_time, 2), "s")

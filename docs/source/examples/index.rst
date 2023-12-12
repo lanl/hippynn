@@ -18,4 +18,5 @@ the examples are just snippets. For fully-fledged examples see the
     restarting
     ase_calculator
     mliap_unified
+    excited_states
 
