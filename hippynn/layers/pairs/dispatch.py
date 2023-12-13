@@ -159,6 +159,8 @@ def neighbor_list_kdtree(cutoff, coords, cell):
         new_cell = cell.clone()
         new_coords = coords.clone()
 
+    new_coords = new_coords % torch.diag(new_cell)  # KD Tree will not work if positions are outside of periodic box
+
     # Find pair indices
     tree = KDTree(
         data=new_coords.detach().cpu().numpy(), 
