@@ -12,23 +12,27 @@ from . import indexers, pairs
 class Gradient(torch.nn.Module):
     def __init__(self, sign):
         super().__init__()
-        if isinstance(sign, int):
-            sign = (sign,)
-        for s in sign:
-            assert s in (-1, 1), "Sign of gradient must be +1 (gradient) or -1 (force)"
+        assert sign in (-1, 1), "Sign of gradient must be +1 (gradient) or -1 (force)"
         self.sign = sign
 
-    def forward(self, molecular_energies, *positions):
-        if isinstance(positions, Tensor):
-            positions = (positions,)
-        assert len(positions) == len(self.sign), f"Number of items to take derivative w.r.t ({len(positions)}) must match number of provided signs ({len(self.sign)})."
-        grads = torch.autograd.grad(molecular_energies.sum(), positions, create_graph=True)
-        signed_grads = tuple((s * grad for s, grad in zip(self.sign, grads)))
-        if len(signed_grads) == 1:
-            return signed_grads[0]
-        else:
-            return signed_grads
+    def forward(self, molecular_energies, positions):
+        return self.sign * torch.autograd.grad(molecular_energies.sum(), positions, create_graph=True)[0]
+        
+class MultiGradient(torch.nn.Module):
+    def __init__(self, signs):
+        super().__init__()
+        if isinstance(signs, int):
+            signs = (signs,)
+        for sign in signs:
+            assert sign in (-1,1), "Sign of gradient must be -1 or +1"
+        self.signs = signs
 
+    def forward(self, molecular_energies: Tensor, *generalized_coordinates: Tensor):
+        if isinstance(generalized_coordinates, Tensor):
+            generalized_coordinates = (generalized_coordinates,)
+        assert len(generalized_coordinates) == len(self.signs), f"Number of items to take derivative w.r.t ({len(generalized_coordinates)}) must match number of provided signs ({len(self.signs)})."
+        grads = torch.autograd.grad(molecular_energies.sum(), generalized_coordinates, create_graph=True)
+        return tuple((sign * grad for sign, grad in zip(self.signs, grads)))
 
 class StressForce(torch.nn.Module):
     def __init__(self, *args, **kwargs):

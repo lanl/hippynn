@@ -263,7 +263,7 @@ class FuzzyHistogram(torch.nn.Module):
                 "Values out of range for FuzzyHistogrammer\n"
                 f"Number of values out of range: {values_out_of_range.sum()}\n"
                 f"Percentage of values out of range: {perc_out_of_range * 100:.2f}%\n"
-                f"Set range for FuzzyHistogrammer: {(self.vmin, self.vmax)}\n"
+                f"Set range for FuzzyHistogrammer: ({self.vmin:.2f}, {self.vmax:.2f})\n"
                 f"Range of values: ({values.min().item():.2f}, {values.max().item():.2f})"
             )
 
