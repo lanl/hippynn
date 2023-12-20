@@ -103,11 +103,17 @@ def setup_and_train(
     training_modules: TrainingModules,
     database,
     setup_params: SetupParams,
+    store_all_better=False,
+    store_best=True,
+    store_every=0
 ):
     """
     :param: training_modules: see :func:`setup_training`
     :param: database: see :func:`train_model`
     :param: setup_params: see :func:`setup_training`
+    :param: store_all_better: Save the state dict for each model doing better than a previous one
+    :param: store_best: Save a checkpoint for the best model
+    :param: store_every: Save a checkpoint for every certain epochs
     :return: See :func:`train_model`
 
     Shortcut for setup_training followed by train_model.
@@ -134,6 +140,9 @@ def setup_and_train(
         metric_tracker=metric_tracker,
         callbacks=None,
         batch_callbacks=None,
+        store_all_better=store_all_better,
+        store_best=store_best,
+        store_every=store_every
     )
 
 
