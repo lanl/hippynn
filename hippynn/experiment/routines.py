@@ -515,7 +515,7 @@ def training_loop(
         if store_every and epoch != 0 and (epoch % store_every) == 0:
             # Save a copy every "store_every" epoch
             with open(f"model_epoch_{epoch}.pt", "wb") as pfile:
-                torch.save(model, pfile)
+                torch.save(model.state_dict(), pfile)
             
             state = serialization.create_state(model, controller, metric_tracker)
 
