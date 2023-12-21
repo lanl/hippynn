@@ -128,7 +128,11 @@ class PairMemory(torch.nn.Module):
             self.register_buffer(name=name, tensor=None, persistent=False)
 
     def recalculation_needed(self, coordinates, cells):
-        if self.positions is None: # ie. forward function has not been called
+        if coordinates.shape[0] != 1:  # does not support batch size larger than 1
+            return True
+        if self.positions is None:  # ie. forward function has not been called
+            return True
+        if self.skin == 0:
             return True
         if (self.cells != cells).any() or (((self.positions - coordinates)**2).sum(1).max() > (self._skin/2)**2):
             return True
