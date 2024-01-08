@@ -298,7 +298,7 @@ def search_by_name(nodes, name_or_dbname):
     :return: node that matches criterion
 
     Raises NodeAmbiguityError if more than one node found
-    Raises NotNotFoundError if no nodes found
+    Raises NodeNotFoundError if no nodes found
 
     """
     try:

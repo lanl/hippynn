@@ -20,7 +20,7 @@ to within the unit cell. Because the nearest images (27 replicates of the cell a
 search radius 1) are numerous, periodic pair finding is noticeably more costly in terms of
 memory and time than open boundary conditions. The less skewed your cells are, as well as
 are the larger cells are compared to the cutoff distance required,
-the fewer images needed to be searched in finding pairs.
+the fewer images needed to be searched in finding pairs. 
 
 
 Dynamic Pair Finder
@@ -42,7 +42,23 @@ the systems one by one. The upshot of this is that less memory is required.
 However, the cost is that each system is evaluated independently in serial,
 and as such the pair finding can be a rather slow operation. This algorithm is
 more likely to show benefits when the number of atoms in a training system is highly
-variable.
+variable. 
+
+For systems with orthorhombic cells and an interaction radius not greater than any of the 
+cell side lengths, the :class:`~hippynn.graphs.nodes.pairs.KDTreePairs` can be used 
+alternatively. It should exhibit reduced computation times, especially for large systems.
+
+Pair Finder Memory
+------------------
+When using a trained model to run MD or for any application where atom positions
+change only slightly between subsquent model calls, 
+:class:`~hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory` and 
+:class:`~hippynn.graphs.nodes.pairs.KDTreePairsMemory` can be used to reduce run
+time by reusing pair information. Current pair indices are stored in memory and 
+reused so long as no atom has moved more than `skin`/2, where `skin` is an additional
+parameter set by the user. Increasing the value of `skin` will increase the number of 
+pair distances computed at each step, but decrease the number of times new pairs must 
+be computed. Skin should be set to zero while training for fastest results.
 
 Caching Pre-computed Pairs
 --------------------------

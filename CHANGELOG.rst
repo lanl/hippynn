@@ -15,10 +15,30 @@ Improvements
 0.0.2a2
 =======
 
+New Features:
+-------------
+
+- New FuzzyHistogrammer node for transforming scalar feature into a fuzzy/soft 
+  histogram array
+
+- New PeriodicPairIndexerMemory node which removes the need to recompute 
+  pairs for each model evaluation in some instances, leading to speed improvements
+
+- New KDTreePairs and KDTreePairsMemory nodes for computing pairs using linearly-
+  scaling KD Tree algorithm. 
+
 Improvements
 ------------
 
 - ASE database loader added to read any ASE file or list of ASE files.
+
+Bug Fixes:
+----------
+- Function 'gemerate_database_info' renamed to 'generate_database_info.'
+
+- Fixed issue with class Predictor arising when multiple names for the same output node are provided.
+
+- Fixed issue with MolPairSummer when the batch size and the feature size are both one.
 
 0.0.2a1
 =======

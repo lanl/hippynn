@@ -2,9 +2,12 @@
 System-by-system pair finders
 """
 
+from itertools import product
 import numpy as np
+from scipy.spatial import KDTree
 import torch
 
+from .open import PairMemory
 
 def wrap_points_np(coords, cell, inv_cell):
     # cell is (basis,cartesian)
@@ -132,6 +135,68 @@ def neighbor_list_torch(cutoff: float, coords, cell):
     pi = pi - wrap_offset_ij[pf, ps]
     return pf, ps, pi
 
+def neighbor_list_kdtree(cutoff, coords, cell):
+    '''
+    Use KD Tree implementation from scipy.spatial to find pairs under periodic boundary conditions 
+    with an orthonormal cell.
+    '''
+    
+    # Verify that cell is orthorhombic
+    cell_prod = cell @ cell.T
+    if torch.count_nonzero(cell_prod - torch.diag(torch.diag(cell_prod))):
+        raise ValueError("KD Tree search only works for orthorhombic cells.")
+    
+    # Verify that the cutoff is less than the side lengths of the cell
+    cell_side_lengths = torch.sqrt(torch.diag(cell_prod))
+    if (cutoff >= cell_side_lengths).any():
+        raise ValueError(f"Cutoff value ({cutoff}) must be less than the cell slide lengths ({cell_side_lengths}).")
+    
+    if torch.count_nonzero(cell - torch.diag(torch.diag(cell))):
+        # Transform via isometry to a basis where cell is a diagonal matrix if it currently is not
+        new_cell = torch.sqrt(cell_prod)
+        new_coords = coords @ torch.linalg.inv(cell) @ new_cell
+    else:
+        new_cell = cell.clone()
+        new_coords = coords.clone()
+
+    # Find pair indices
+    tree = KDTree(
+        data=new_coords.detach().cpu().numpy(), 
+        boxsize=torch.diag(new_cell).detach().cpu().numpy()
+    )
+    
+    pairs = tree.query_pairs(r=cutoff, output_type='ndarray')
+    pairs = torch.as_tensor(pairs, device=coords.device)
+    pair_first, pair_second = torch.unbind(pairs, dim=1)
+
+    # Find difference vector between pairs without considering the MIC
+    pair_diff = torch.sub(coords[pair_first], coords[pair_second])
+
+    # Possible adjacent offset directions for images of the difference vector
+    offset_range = torch.tensor(list(product([-1, 0, 1], repeat=3)), device=coords.device)
+
+    # All adjacent offsets
+    perm_offsets = offset_range.to(cell.dtype) @ cell
+    
+    # All adjacent offset images of the difference vector
+    pair_diff = pair_diff.unsqueeze(1) + perm_offsets.unsqueeze(0)
+    
+    # L2 norm of offset images
+    pair_diff = torch.linalg.norm(pair_diff, dim=2)
+
+    # Index of shortest offset image
+    pair_diff = torch.argmin(pair_diff, dim=1)
+
+    # Offset direction corresponding to shortest offset image
+    pair_image = offset_range[pair_diff]
+
+    # KDTree only returns each pair once (eg. (1,2) but not (2,1))
+    doubled_pair_first = torch.concat((pair_first, pair_second))
+    doubled_pair_second = torch.concat((pair_second, pair_first))
+    doubled_pair_image = torch.concat((pair_image, -pair_image))
+
+    return doubled_pair_first, doubled_pair_second, doubled_pair_image
+
 
 class _DispatchNeighbors(torch.nn.Module):
     def __init__(self, dist_hard_max):
@@ -204,7 +269,7 @@ class _DispatchNeighbors(torch.nn.Module):
             pair_cell = cell[pair_mol]
             pair_offsets = torch.bmm(offsets.unsqueeze(1).to(pair_cell.dtype), pair_cell).squeeze(1)
 
-            # now calculate pair_dist, paircoord differentiably
+        # now calculate pair_dist, paircoord differentiably
         # print("Pairs found",pair_first.shape)
         coordflat = coordinates.reshape(n_molecules * n_atoms_max, 3)[real_atoms]
         paircoord = coordflat[pair_first] - coordflat[pair_second] + pair_offsets
@@ -226,3 +291,64 @@ class TorchNeighbors(_DispatchNeighbors):
         with torch.no_grad():
             outputs = neighbor_list_torch(self.dist_hard_max, positions, cell)
         return outputs
+    
+class KDTreeNeighbors(_DispatchNeighbors):
+    '''
+    Node for finding pairs under periodic boundary conditions using Scipy's KD Tree algorithm. 
+    Cell must be orthorhombic.
+    '''
+
+    def compute_one(self, positions, cell):
+        with torch.no_grad():
+            outputs = neighbor_list_kdtree(self.dist_hard_max, positions, cell)
+        return outputs
+    
+
+class KDTreePairsMemory(PairMemory):
+    '''
+    Implementation of KDTreePairs with an added memory component.
+
+    Stores current pair indices in memory and reuses them to compute the pair distances if no 
+    particle has moved more than skin/2 since last pair calculation. Otherwise uses the
+    _pair_indexer_class to recompute the pairs.
+
+    Increasing the value of 'skin' will increase the number of pair distances computed at
+    each step, but decrease the number of times new pairs must be computed. Skin should be 
+    set to zero while training for fastest results.
+    '''
+
+    _pair_indexer_class = KDTreeNeighbors
+
+    def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cells, mol_index, n_molecules, n_atoms_max):
+        if self.recalculation_needed(coordinates, cells):
+            self.recalculations += 1
+
+            inputs = (coordinates, nonblank, real_atoms, inv_real_atoms, cells, mol_index, n_molecules, n_atoms_max)
+            outputs = self._pair_indexer(*inputs)
+            distflat2, pair_first, pair_second, paircoord, offsets, offset_index = outputs
+
+            with torch.no_grad():
+                pair_mol = mol_index[pair_first]
+                pair_cell = cells[pair_mol]
+                pair_offsets = torch.bmm(offsets.unsqueeze(1).to(pair_cell.dtype), pair_cell).squeeze(1)
+
+            for name, var in [
+                ("pair_first", pair_first),
+                ("pair_second", pair_second),
+                ("offsets", offsets),
+                ("offset_index", offset_index),
+                ("pair_offsets", pair_offsets),
+                ("positions", coordinates),
+                ("cells", cells),
+                ]:
+                self.__setattr__(name, var)
+
+        else:
+            self.reuses += 1
+
+            coordflat = coordinates.reshape(n_molecules * n_atoms_max, 3)[real_atoms]
+            paircoord = coordflat[self.pair_first] - coordflat[self.pair_second] + self.pair_offsets
+            distflat2 = paircoord.norm(dim=1)
+
+        return distflat2, self.pair_first, self.pair_second, paircoord, self.offsets, self.offset_index
+

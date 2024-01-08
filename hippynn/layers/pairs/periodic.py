@@ -1,6 +1,9 @@
 import torch
 
-from .open import _PairIndexer
+from scipy.spatial import KDTree
+
+from .open import _PairIndexer, PairMemory
+from torch.profiler import profile, record_function, ProfilerActivity
 
 # Deprecated?
 class StaticImagePeriodicPairIndexer(_PairIndexer):
@@ -87,7 +90,7 @@ def tracebatch(mat):
     return torch.diagonal(mat, dim1=-2, dim2=-1).sum(dim=-1)
 
 # For some reason torch.linalg on GPU tends to
-# spend a lot of time allocating memory, especialyl
+# spend a lot of time allocating memory, especially
 # when it is given a large batch of matrices.
 # So we use the Cayley-Hamilton version of a matrix inverse
 # Without calling any linalg functions.
@@ -150,7 +153,7 @@ class PeriodicPairIndexer(_PairIndexer):
     Finds pairs in general periodic conditions.
     """
     def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cells):
-
+        
         original_coordinates = coordinates
 
         with torch.no_grad():
@@ -261,4 +264,47 @@ class PeriodicPairIndexer(_PairIndexer):
         paircoord = coordflat[pair_first] - coordflat[pair_second] + pair_shifts
         distflat2 = paircoord.norm(dim=1)
 
-        return distflat2, pair_first, pair_second, paircoord, cell_offsets, offset_num
+        return distflat2, pair_first, pair_second, paircoord, cell_offsets, offset_num, pair_mol
+    
+class PeriodicPairIndexerMemory(PairMemory):
+    '''
+    Implementation of PeriodicPairIndexer with additional memory component.
+
+    Stores current pair indices in memory and reuses them to compute the pair distances if no 
+    particle has moved more than skin/2 since last pair calculation. Otherwise uses the
+    _pair_indexer_class to recompute the pairs.
+
+    Increasing the value of 'skin' will increase the number of pair distances computed at
+    each step, but decrease the number of times new pairs must be computed. Skin should be 
+    set to zero while training for fastest results.
+    '''
+    _pair_indexer_class = PeriodicPairIndexer
+
+    def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cells):
+        if self.recalculation_needed(coordinates, cells):
+            self.n_molecules, self.n_atoms, _ = coordinates.shape
+            self.recalculations += 1
+
+            inputs = (coordinates, nonblank, real_atoms, inv_real_atoms, cells)
+            outputs = self._pair_indexer(*inputs)
+            distflat2, pair_first, pair_second, paircoord, cell_offsets, offset_num, pair_mol = outputs
+
+            for name, var in [
+                ("cell_offsets", cell_offsets),
+                ("pair_first", pair_first),
+                ("pair_second", pair_second),
+                ("offset_num", offset_num),
+                ("positions", coordinates),
+                ("cells", cells),
+                ("pair_mol", pair_mol)
+                ]:
+                self.__setattr__(name, var)
+
+        else:
+            self.reuses += 1
+            pair_shifts = torch.matmul(self.cell_offsets.unsqueeze(1).to(cells.dtype), cells[self.pair_mol]).squeeze(1)
+            coordflat = coordinates.reshape(self.n_molecules * self.n_atoms, 3)[real_atoms]
+            paircoord = coordflat[self.pair_first] - coordflat[self.pair_second] + pair_shifts
+            distflat2 = paircoord.norm(dim=1)
+
+        return distflat2, self.pair_first, self.pair_second, paircoord, self.cell_offsets, self.offset_num

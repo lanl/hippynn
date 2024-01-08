@@ -190,7 +190,7 @@ if __name__=="__main__":
     with hippynn.tools.log_terminal("model_results.txt",'wt'):
         test_model(database, training_modules.evaluator, 128, "Final Training")
     
-    ## Possible to export lammps MLIPInterface for model if lammmps with MLIP Installed!
+    ## Possible to export lammps MLIPInterface for model if Lammps with MLIP Installed!
     # print("Exporting lammps interface")
     # first_frame = ase.io.read(dbname) # Reads in first frame only for saving box
     # ase.io.write('ag_box.data', first_frame, format='lammps-data')
