@@ -161,36 +161,22 @@ def neighbor_list_kdtree(cutoff, coords, cell):
         new_cell = cell.clone()
         new_coords = coords.clone()
 
-    try:
-        # For debugging
-        new_coords_cp = new_coords.clone()
-        new_cell_cp = new_cell.clone()
+    new_coords = new_coords % torch.diag(new_cell)
 
-        new_coords = new_coords % torch.diag(new_cell)
+    # The following three lines are included to prevent an extremely rare but not unseen edge 
+    # case where the modulo operation returns a particle coordinate that is exactly equal to 
+    # the corresponding cell length, causing KDTree to throw an error
+    n_particles = new_coords.shape[0]
+    tiled_cell = torch.tile(torch.diag(new_cell), (n_particles,)).reshape(n_particles, -1)
+    new_coords = torch.where(new_coords == tiled_cell, 0, new_coords)
 
-        # The following three lines are included to prevent an extremely rare but not unseen edge 
-        # case where the modulo operation returns a particle coordinate that is exactly equal to 
-        # the corresponding cell length, causing KDTree to throw an error
-        n_particles = new_coords.shape[0]
-        tiled_cell = torch.tile(torch.diag(new_cell), (n_particles,)).reshape(n_particles, -1)
-        new_coords = torch.where(new_coords == tiled_cell, 0, new_coords)
+    new_coords = new_coords.detach().cpu().numpy()
+    new_cell = torch.diag(new_cell).detach().cpu().numpy()
 
-        new_coords = new_coords.detach().cpu().numpy()
-        new_cell = torch.diag(new_cell).detach().cpu().numpy()
-
-        tree = KDTree(
-            data=new_coords, 
-            boxsize=new_cell,
-        )
-    except ValueError as e:
-        dump_folder = "IT_HAPPENED_YAY/"
-        os.makedirs(dump_folder, exist_ok=True)
-        with open(dump_folder + "log.txt", "w") as f:
-            f.write(f"{datetime.now()}\n")
-            f.write(str(e) + "\n")
-
-        torch.save(new_coords_cp, dump_folder + "new_coords.pt")
-        torch.save(new_cell_cp, dump_folder + "new_cell.pt")
+    tree = KDTree(
+        data=new_coords, 
+        boxsize=new_cell,
+    )
     
     pairs = tree.query_pairs(r=cutoff, output_type='ndarray')
     pairs = torch.as_tensor(pairs, device=coords.device)
