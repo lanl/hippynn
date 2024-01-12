@@ -102,7 +102,7 @@ class PeriodicPairIndexerMemory(PeriodicPairIndexer, Memory):
     def __init__(self, name, parents, dist_hard_max, skin, module="auto", module_kwargs=None, **kwargs):
         if module_kwargs is None:
             module_kwargs = {}
-        self.expand0module_kwargs = {"skin": skin, **module_kwargs}
+        self.module_kwargs = {"skin": skin, **module_kwargs}
 
         super().__init__(name, parents, dist_hard_max, module=module, module_kwargs=self.module_kwargs, **kwargs)
 
