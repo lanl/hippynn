@@ -7,10 +7,27 @@ New Features:
 - Add nodes for non-adiabatic coupling vectors (NACR) and phase-less loss.
   See /examples/excited_states_azomethane.py.
 
-Improvements
-------------
+- New MultiGradient node for computing multiple partial derivatives of 
+  the same node simultaneously.
+
+Improvements:
+-------------
 
 - Multi-target dipole node now has a shape of (n_molecules, n_targets, 3).
+
+- Add out-of-range warning to FuzzyHistogrammer.
+
+- Create Memory parent class to remove redundancy.
+
+Bug Fixes:
+----------
+
+- Fix KDTreePairs issue caused by floating point precision limitations.
+
+- Fix KDTreePairs issue with not moving tensors off GPU.
+
+- Enable PairMemory nodes to handle batch size > 1.
+
 
 0.0.2a2
 =======
@@ -27,8 +44,8 @@ New Features:
 - New KDTreePairs and KDTreePairsMemory nodes for computing pairs using linearly-
   scaling KD Tree algorithm. 
 
-Improvements
-------------
+Improvements:
+-------------
 
 - ASE database loader added to read any ASE file or list of ASE files.
 
