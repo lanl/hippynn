@@ -84,6 +84,8 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">KDTree</span>
 <span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 
 <span class="kn">from</span> <span class="nn">.open</span> <span class="kn">import</span> <span class="n">PairMemory</span>
 
@@ -237,10 +239,21 @@
         <span class="n">new_cell</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
         <span class="n">new_coords</span> <span class="o">=</span> <span class="n">coords</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
 
-    <span class="c1"># Find pair indices</span>
+    <span class="n">new_coords</span> <span class="o">=</span> <span class="n">new_coords</span> <span class="o">%</span> <span class="n">torch</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">new_cell</span><span class="p">)</span>
+
+    <span class="c1"># The following three lines are included to prevent an extremely rare but not unseen edge </span>
+    <span class="c1"># case where the modulo operation returns a particle coordinate that is exactly equal to </span>
+    <span class="c1"># the corresponding cell length, causing KDTree to throw an error</span>
+    <span class="n">n_particles</span> <span class="o">=</span> <span class="n">new_coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">tiled_cell</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">new_cell</span><span class="p">),</span> <span class="p">(</span><span class="n">n_particles</span><span class="p">,))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_particles</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">new_coords</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">new_coords</span> <span class="o">==</span> <span class="n">tiled_cell</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">new_coords</span><span class="p">)</span>
+
+    <span class="n">new_coords</span> <span class="o">=</span> <span class="n">new_coords</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+    <span class="n">new_cell</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">new_cell</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
     <span class="n">tree</span> <span class="o">=</span> <span class="n">KDTree</span><span class="p">(</span>
-        <span class="n">data</span><span class="o">=</span><span class="n">new_coords</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> 
-        <span class="n">boxsize</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">new_cell</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">new_coords</span><span class="p">,</span> 
+        <span class="n">boxsize</span><span class="o">=</span><span class="n">new_cell</span><span class="p">,</span>
     <span class="p">)</span>
     
     <span class="n">pairs</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">query_pairs</span><span class="p">(</span><span class="n">r</span><span class="o">=</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="s1">&#39;ndarray&#39;</span><span class="p">)</span>

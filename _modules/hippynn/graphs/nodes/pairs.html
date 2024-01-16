@@ -146,7 +146,23 @@
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
-<div class="viewcode-block" id="PeriodicPairIndexerMemory"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory">[docs]</a><span class="k">class</span> <span class="nc">PeriodicPairIndexerMemory</span><span class="p">(</span><span class="n">PeriodicPairIndexer</span><span class="p">):</span>
+<div class="viewcode-block" id="Memory"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.Memory">[docs]</a><span class="k">class</span> <span class="nc">Memory</span><span class="p">:</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">skin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">skin</span>
+    
+    <span class="nd">@skin</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">skin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skin</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">skin</span> <span class="o">=</span> <span class="n">skin</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">reuse_percentage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">reuse_percentage</span>
+    
+<div class="viewcode-block" id="Memory.reset_reuse_percentage"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.Memory.reset_reuse_percentage">[docs]</a>    <span class="k">def</span> <span class="nf">reset_reuse_percentage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">reset_reuse_percentage</span><span class="p">()</span></div></div>
+
+<div class="viewcode-block" id="PeriodicPairIndexerMemory"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory">[docs]</a><span class="k">class</span> <span class="nc">PeriodicPairIndexerMemory</span><span class="p">(</span><span class="n">PeriodicPairIndexer</span><span class="p">,</span> <span class="n">Memory</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Implementation of PeriodicPairIndexer with additional memory component.</span>
 
@@ -164,9 +180,9 @@
 <div class="viewcode-block" id="PeriodicPairIndexerMemory.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">skin</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">module_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;skin&quot;</span><span class="p">:</span> <span class="n">skin</span><span class="p">,</span> <span class="o">**</span><span class="n">module_kwargs</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;skin&quot;</span><span class="p">:</span> <span class="n">skin</span><span class="p">,</span> <span class="o">**</span><span class="n">module_kwargs</span><span class="p">}</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="n">module_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ExternalNeighborIndexer"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.ExternalNeighborIndexer">[docs]</a><span class="k">class</span> <span class="nc">ExternalNeighborIndexer</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
@@ -457,7 +473,7 @@
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">dispatch</span><span class="o">.</span><span class="n">KDTreeNeighbors</span></div>
 
-<div class="viewcode-block" id="KDTreePairsMemory"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.KDTreePairsMemory">[docs]</a><span class="k">class</span> <span class="nc">KDTreePairsMemory</span><span class="p">(</span><span class="n">_DispatchNeighbors</span><span class="p">):</span>
+<div class="viewcode-block" id="KDTreePairsMemory"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.KDTreePairsMemory">[docs]</a><span class="k">class</span> <span class="nc">KDTreePairsMemory</span><span class="p">(</span><span class="n">_DispatchNeighbors</span><span class="p">,</span> <span class="n">Memory</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Implementation of KDTreePairs with an added memory component.</span>
 

@@ -107,8 +107,8 @@ constraints on HPC systems.</p>
 so far as measured by validation performance.</p>
 <p>The checkpoint contains the training modules, the experiment controller, and
 the metrics of the experiment so far. This can be seen by breaking down
-<a class="reference internal" href="../api_documentation/hippynn.experiment.html#hippynn.experiment.setup_and_train" title="hippynn.experiment.setup_and_train"><code class="xref py py-func docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a> into its component steps,
-<a class="reference internal" href="../api_documentation/hippynn.experiment.html#hippynn.experiment.setup_training" title="hippynn.experiment.setup_training"><code class="xref py py-func docutils literal notranslate"><span class="pre">setup_training()</span></code></a>, and <a class="reference internal" href="../api_documentation/hippynn.experiment.routines.html#hippynn.experiment.routines.train_model" title="hippynn.experiment.routines.train_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">train_model()</span></code></a>:</p>
+<code class="xref py py-func docutils literal notranslate"><span class="pre">setup_and_train()</span></code> into its component steps,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">setup_training()</span></code>, and <code class="xref py py-func docutils literal notranslate"><span class="pre">train_model()</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.experiment</span> <span class="kn">import</span> <span class="n">setup_training</span><span class="p">,</span> <span class="n">train_model</span>
 <span class="n">training_modules</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">=</span> <span class="n">setup_training</span><span class="p">(</span>
     <span class="n">training_modules</span><span class="o">=</span><span class="n">training_modules</span><span class="p">,</span>
@@ -154,8 +154,8 @@ to a different device. The standard pytorch argument <code class="docutils liter
 handle in this case, as not all tensors in the checkpoint still belong on the device.
 If this keyword is specified, <code class="docutils literal notranslate"><span class="pre">hippynn</span></code> will attempt to automatically move the correct
 tensors to the correct device. To perform cross-device loading, use the <code class="docutils literal notranslate"><span class="pre">model_device</span></code>
-argument to <a class="reference internal" href="../api_documentation/hippynn.experiment.serialization.html#hippynn.experiment.serialization.load_checkpoint_from_cwd" title="hippynn.experiment.serialization.load_checkpoint_from_cwd"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code></a>
-or <a class="reference internal" href="../api_documentation/hippynn.experiment.serialization.html#hippynn.experiment.serialization.load_checkpoint" title="hippynn.experiment.serialization.load_checkpoint"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_checkpoint()</span></code></a>:</p>
+argument to <code class="xref py py-func docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code>
+or <code class="xref py py-func docutils literal notranslate"><span class="pre">load_checkpoint()</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.experiment.serialization</span> <span class="kn">import</span> <span class="n">load_checkpoint_from_cwd</span>
 <span class="n">check</span> <span class="o">=</span> <span class="n">load_checkpoint_from_cwd</span><span class="p">(</span><span class="n">model_device</span><span class="o">=</span><span class="s1">&#39;cuda:0&#39;</span><span class="p">)</span>
 <span class="n">train_model</span><span class="p">(</span><span class="o">**</span><span class="n">check</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
@@ -175,7 +175,7 @@ labeled as 0, no matter physically which device is used.</p>
 <ul>
 <li><p>The checkpoint file contains the torch RNG state, and restoring a
 checkpoint resets the torch RNG.</p></li>
-<li><p>If your database is not <a class="reference internal" href="../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.Restartable" title="hippynn.databases.restarter.Restartable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Restartable</span></code></a>, you
+<li><p>If your database is not <code class="xref py py-class docutils literal notranslate"><span class="pre">Restartable</span></code>, you
 will have to explicitly reload it and pass it to <code class="docutils literal notranslate"><span class="pre">train_model</span></code>, as well.
 If your database is restartable, any pre-processing of the database is not recorded
 in the checkpoint file. Thus any pre-processing steps such as moving the database to
