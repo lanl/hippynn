@@ -68,7 +68,23 @@ class PeriodicPairIndexer(ExpandParents, AutoKw, PeriodicPairOutputs, PairIndexe
         parents = self.expand_parents(parents)
         super().__init__(name, parents, module=module, **kwargs)
 
-class PeriodicPairIndexerMemory(PeriodicPairIndexer):
+class Memory:
+    @property
+    def skin(self):
+        return self.torch_module.skin
+    
+    @skin.setter
+    def skin(self, skin):
+        self.torch_module.skin = skin
+
+    @property
+    def reuse_percentage(self):
+        return self.torch_module.reuse_percentage
+    
+    def reset_reuse_percentage(self):
+        self.torch_module.reset_reuse_percentage()
+
+class PeriodicPairIndexerMemory(PeriodicPairIndexer, Memory):
     '''
     Implementation of PeriodicPairIndexer with additional memory component.
 
@@ -86,9 +102,9 @@ class PeriodicPairIndexerMemory(PeriodicPairIndexer):
     def __init__(self, name, parents, dist_hard_max, skin, module="auto", module_kwargs=None, **kwargs):
         if module_kwargs is None:
             module_kwargs = {}
-        module_kwargs = {"skin": skin, **module_kwargs}
+        self.module_kwargs = {"skin": skin, **module_kwargs}
 
-        super().__init__(name, parents, dist_hard_max, module=module, module_kwargs=module_kwargs, **kwargs)
+        super().__init__(name, parents, dist_hard_max, module=module, module_kwargs=self.module_kwargs, **kwargs)
 
 
 class ExternalNeighborIndexer(ExpandParents, PairIndexer, AutoKw, MultiNode):
@@ -379,7 +395,7 @@ class KDTreePairs(_DispatchNeighbors):
     '''
     _auto_module_class = pairs_modules.dispatch.KDTreeNeighbors
 
-class KDTreePairsMemory(_DispatchNeighbors):
+class KDTreePairsMemory(_DispatchNeighbors, Memory):
     '''
     Implementation of KDTreePairs with an added memory component.
 

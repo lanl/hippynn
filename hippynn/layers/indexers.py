@@ -2,6 +2,7 @@
 Layers for encoding, decoding, index states, besides pairs
 """
 
+import warnings
 import torch
 
 
@@ -249,7 +250,23 @@ class FuzzyHistogram(torch.nn.Module):
         self.bins = torch.nn.Parameter(torch.linspace(vmin, vmax, length), requires_grad=False)
         self.sigma = (vmax - vmin) / length
 
+        self.vmin = vmin
+        self.vmax = vmax
+
     def forward(self, values):
+        # Warn user if provided values lie outside the range of the histogram bins
+        values_out_of_range = (values < self.vmin) + (values > self.vmax)
+
+        if values_out_of_range.sum() > 0:
+            perc_out_of_range = values_out_of_range.float().mean()
+            warnings.warn(
+                "Values out of range for FuzzyHistogrammer\n"
+                f"Number of values out of range: {values_out_of_range.sum()}\n"
+                f"Percentage of values out of range: {perc_out_of_range * 100:.2f}%\n"
+                f"Set range for FuzzyHistogrammer: ({self.vmin:.2f}, {self.vmax:.2f})\n"
+                f"Range of values: ({values.min().item():.2f}, {values.max().item():.2f})"
+            )
+
         if values.shape[-1] != 1:
             values = values[...,None]
         x = values - self.bins

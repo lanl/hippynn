@@ -6,6 +6,8 @@ from itertools import product
 import numpy as np
 from scipy.spatial import KDTree
 import torch
+import os
+from datetime import datetime
 
 from .open import PairMemory
 
@@ -159,10 +161,21 @@ def neighbor_list_kdtree(cutoff, coords, cell):
         new_cell = cell.clone()
         new_coords = coords.clone()
 
-    # Find pair indices
+    new_coords = new_coords % torch.diag(new_cell)
+
+    # The following three lines are included to prevent an extremely rare but not unseen edge 
+    # case where the modulo operation returns a particle coordinate that is exactly equal to 
+    # the corresponding cell length, causing KDTree to throw an error
+    n_particles = new_coords.shape[0]
+    tiled_cell = torch.tile(torch.diag(new_cell), (n_particles,)).reshape(n_particles, -1)
+    new_coords = torch.where(new_coords == tiled_cell, 0, new_coords)
+
+    new_coords = new_coords.detach().cpu().numpy()
+    new_cell = torch.diag(new_cell).detach().cpu().numpy()
+
     tree = KDTree(
-        data=new_coords.detach().cpu().numpy(), 
-        boxsize=torch.diag(new_cell).detach().cpu().numpy()
+        data=new_coords, 
+        boxsize=new_cell,
     )
     
     pairs = tree.query_pairs(r=cutoff, output_type='ndarray')
