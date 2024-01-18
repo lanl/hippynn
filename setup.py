@@ -24,7 +24,7 @@ setuptools.setup(
     version=versioneer.get_version(),
     author="Nicholas Lubbers et al",
     author_email="hippynn@lanl.gov",
-    python_requires=">3.7",
+    python_requires=">=3.9",
     install_requires=[
         "numpy",
         "torch",
