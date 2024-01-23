@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.graphs.nodes.targets &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.graphs.nodes.targets &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -87,7 +87,9 @@
 <span class="kn">from</span> <span class="nn">...layers</span> <span class="kn">import</span> <span class="n">targets</span> <span class="k">as</span> <span class="n">target_modules</span>
 
 
-<div class="viewcode-block" id="HEnergyNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HEnergyNode">[docs]</a><span class="k">class</span> <span class="nc">HEnergyNode</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+<div class="viewcode-block" id="HEnergyNode">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HEnergyNode">[docs]</a>
+<span class="k">class</span> <span class="nc">HEnergyNode</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Predict a system-level scalar such as energy from a sum over local components.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -98,22 +100,31 @@
     <span class="n">_output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
     <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">target_modules</span><span class="o">.</span><span class="n">HEnergy</span>
 
-<div class="viewcode-block" id="HEnergyNode.expansion0"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HEnergyNode.expansion0">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Network</span><span class="p">)</span>
+<div class="viewcode-block" id="HEnergyNode.expansion0">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HEnergyNode.expansion0">[docs]</a>
+    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Network</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">expansion0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="s2">&quot;feature_sizes&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">[</span><span class="s2">&quot;feature_sizes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">feature_sizes</span>
         <span class="n">pdindexer</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">net</span><span class="p">,</span> <span class="n">pdindexer</span><span class="o">.</span><span class="n">mol_index</span><span class="p">,</span> <span class="n">pdindexer</span><span class="o">.</span><span class="n">n_molecules</span></div>
 
-<div class="viewcode-block" id="HEnergyNode.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HEnergyNode.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HEnergyNode.__init__">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HEnergyNode.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;first_is_interacting&quot;</span><span class="p">:</span> <span class="n">first_is_interacting</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">module_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">module_kwargs</span><span class="p">}</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="HChargeNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HChargeNode">[docs]</a><span class="k">class</span> <span class="nc">HChargeNode</span><span class="p">(</span><span class="n">Charges</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HChargeNode">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HChargeNode">[docs]</a>
+<span class="k">class</span> <span class="nc">HChargeNode</span><span class="p">(</span><span class="n">Charges</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Predict an atom-level scalar such as charge from local features.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -124,37 +135,55 @@
     <span class="n">_output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
     <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">target_modules</span><span class="o">.</span><span class="n">HCharge</span>
 
-<div class="viewcode-block" id="HChargeNode.expansion0"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HChargeNode.expansion0">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Network</span><span class="p">)</span>
+<div class="viewcode-block" id="HChargeNode.expansion0">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HChargeNode.expansion0">[docs]</a>
+    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Network</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">expansion0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="s2">&quot;feature_sizes&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">[</span><span class="s2">&quot;feature_sizes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">feature_sizes</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">main_output</span><span class="p">,)</span></div>
 
-<div class="viewcode-block" id="HChargeNode.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HChargeNode.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HChargeNode.__init__">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HChargeNode.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">module_kwargs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">module_kwargs</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="LocalChargeEnergy"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.LocalChargeEnergy">[docs]</a><span class="k">class</span> <span class="nc">LocalChargeEnergy</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+
+<div class="viewcode-block" id="LocalChargeEnergy">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.LocalChargeEnergy">[docs]</a>
+<span class="k">class</span> <span class="nc">LocalChargeEnergy</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
     <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;charges&quot;</span><span class="p">,</span> <span class="s2">&quot;features&quot;</span><span class="p">,</span> <span class="s2">&quot;mol_index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_molecules&quot;</span>
     <span class="n">_output_names</span> <span class="o">=</span> <span class="s2">&quot;molenergies&quot;</span><span class="p">,</span> <span class="s2">&quot;atomenergies&quot;</span>
     <span class="n">_main_output</span> <span class="o">=</span> <span class="s2">&quot;molenergies&quot;</span>
     <span class="n">_output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
     <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">target_modules</span><span class="o">.</span><span class="n">LocalChargeEnergy</span>
 
-<div class="viewcode-block" id="LocalChargeEnergy.expansion0"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.LocalChargeEnergy.expansion0">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_BaseNode</span><span class="p">,</span> <span class="n">Network</span><span class="p">)</span>
+<div class="viewcode-block" id="LocalChargeEnergy.expansion0">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.LocalChargeEnergy.expansion0">[docs]</a>
+    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_BaseNode</span><span class="p">,</span> <span class="n">Network</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">expansion0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charge</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">charge</span> <span class="o">=</span> <span class="n">index_type_coercion</span><span class="p">(</span><span class="n">charge</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">)</span>
         <span class="n">pdxer</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">charge</span><span class="p">,</span> <span class="n">network</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span> <span class="n">pdxer</span><span class="o">.</span><span class="n">mol_index</span><span class="p">,</span> <span class="n">pdxer</span><span class="o">.</span><span class="n">n_molecules</span></div>
 
-<div class="viewcode-block" id="LocalChargeEnergy.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.LocalChargeEnergy.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="LocalChargeEnergy.__init__">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.LocalChargeEnergy.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parents_expand</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="HBondNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HBondNode">[docs]</a><span class="k">class</span> <span class="nc">HBondNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HBondNode">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HBondNode">[docs]</a>
+<span class="k">class</span> <span class="nc">HBondNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Predict an pair-level scalar such as bond order from local features on both atoms</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -165,19 +194,29 @@
     <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;features&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_dist&quot;</span>
     <span class="n">_main_output</span> <span class="o">=</span> <span class="s2">&quot;bonds&quot;</span>
  
-<div class="viewcode-block" id="HBondNode.expand0"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HBondNode.expand0">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">matchlen</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<div class="viewcode-block" id="HBondNode.expand0">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HBondNode.expand0">[docs]</a>
+    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">matchlen</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">expand0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">pairfinder</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">features</span><span class="p">,</span> <span class="n">pairfinder</span></div>
 
-<div class="viewcode-block" id="HBondNode.expand1"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HBondNode.expand1">[docs]</a>    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">matchlen</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<div class="viewcode-block" id="HBondNode.expand1">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HBondNode.expand1">[docs]</a>
+    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">matchlen</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">expand1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pairfinder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">features</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">pair_second</span><span class="p">,</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">pair_dist</span></div>
 
-<div class="viewcode-block" id="HBondNode.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HBondNode.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HBondNode.__init__">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HBondNode.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">module_kwargs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">module_kwargs</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
+
 
 
 </pre></div>

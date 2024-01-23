@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Creating Custom Node Types &mdash; hippynn 0.0.1 documentation</title>
+  <title>Creating Custom Node Types &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
@@ -16,9 +16,9 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -99,7 +99,7 @@
            <div itemprop="articleBody">
              
   <section id="creating-custom-node-types">
-<h1>Creating Custom Node Types<a class="headerlink" href="#creating-custom-node-types" title="Permalink to this heading"></a></h1>
+<h1>Creating Custom Node Types<a class="headerlink" href="#creating-custom-node-types" title="Link to this heading"></a></h1>
 <p>For applications of existing models or methods you shouldn’t need
 to create new <em>types</em> of nodes. However, if you want to extend
 the capabilities of the library for your own application
@@ -107,7 +107,7 @@ the capabilities of the library for your own application
 may find yourself wanting to put a new type of node into
 <code class="docutils literal notranslate"><span class="pre">hippynn</span></code>.</p>
 <section id="the-very-basics">
-<h2>The very basics<a class="headerlink" href="#the-very-basics" title="Permalink to this heading"></a></h2>
+<h2>The very basics<a class="headerlink" href="#the-very-basics" title="Link to this heading"></a></h2>
 <p>The basic operation of creating a new hippynn node is not highly complex.
 Let’s assume we have a module FooModule that implements some pytorch operations,
 and takes some keyword arguments in constructing that module.
@@ -126,7 +126,7 @@ the module itself is not created when building the node, and a suitable pytorch 
 must be passed in.</p>
 </section>
 <section id="a-multinode">
-<h2>A MultiNode<a class="headerlink" href="#a-multinode" title="Permalink to this heading"></a></h2>
+<h2>A MultiNode<a class="headerlink" href="#a-multinode" title="Link to this heading"></a></h2>
 <p>A slightly more complex example would be to use a <code class="docutils literal notranslate"><span class="pre">MultiNode</span></code>, which is a torch
 module that outputs several outputs. Specify the names of the outputs in the
 <code class="docutils literal notranslate"><span class="pre">_output_names</span></code> attribute as a tuple of strings. Additionally, you can
@@ -157,7 +157,7 @@ using keyword arguments. These arguments will be passed to a new instance of the
 <code class="docutils literal notranslate"><span class="pre">auto_module_class</span></code>.</p>
 </section>
 <section id="parent-expansion">
-<h2>Parent expansion<a class="headerlink" href="#parent-expansion" title="Permalink to this heading"></a></h2>
+<h2>Parent expansion<a class="headerlink" href="#parent-expansion" title="Link to this heading"></a></h2>
 <p>The above example works, however, it 1) requires the user to find the appropriate
 input nodes corresponding to <code class="docutils literal notranslate"><span class="pre">hier_features</span></code>, <code class="docutils literal notranslate"><span class="pre">mol_index</span></code>, <code class="docutils literal notranslate"><span class="pre">n_molecules</span></code>, which are
 required to run the underlying torch module.</p>
@@ -211,10 +211,10 @@ to the node can be provided by some other route, we can always pass the fully sp
 parents of the node, <code class="docutils literal notranslate"><span class="pre">hier_features</span></code>, <code class="docutils literal notranslate"><span class="pre">mol_index</span></code>, and <code class="docutils literal notranslate"><span class="pre">n_molecules</span></code>.</p>
 </section>
 <section id="adding-constraints-to-possible-parents">
-<h2>Adding constraints to possible parents<a class="headerlink" href="#adding-constraints-to-possible-parents" title="Permalink to this heading"></a></h2>
+<h2>Adding constraints to possible parents<a class="headerlink" href="#adding-constraints-to-possible-parents" title="Link to this heading"></a></h2>
 <p>Finally, it is possible to add additional information to the parent expander
 to ensure that the final form of the parents is suitable for computation.</p>
-<p>Let’s take a look at the code for <code class="xref py py-class docutils literal notranslate"><span class="pre">ChargeMomentNode</span></code>:</p>
+<p>Let’s take a look at the code for <a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.physics.html#hippynn.graphs.nodes.physics.ChargeMomentNode" title="hippynn.graphs.nodes.physics.ChargeMomentNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChargeMomentNode</span></code></a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ChargeMomentNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
     <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;charges&quot;</span><span class="p">,</span> <span class="s2">&quot;positions&quot;</span><span class="p">,</span> <span class="s2">&quot;mol_index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_molecules&quot;</span>
 

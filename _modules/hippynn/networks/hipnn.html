@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.networks.hipnn &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.networks.hipnn &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -96,7 +96,9 @@
 
 
 <span class="c1"># computes E0 for the energy layer.</span>
-<div class="viewcode-block" id="compute_hipnn_e0"><a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.compute_hipnn_e0">[docs]</a><span class="k">def</span> <span class="nf">compute_hipnn_e0</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">Z_Data</span><span class="p">,</span> <span class="n">en_data</span><span class="p">,</span> <span class="n">peratom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fit_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">):</span>
+<div class="viewcode-block" id="compute_hipnn_e0">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.compute_hipnn_e0">[docs]</a>
+<span class="k">def</span> <span class="nf">compute_hipnn_e0</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">Z_Data</span><span class="p">,</span> <span class="n">en_data</span><span class="p">,</span> <span class="n">peratom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fit_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    :param encoder: encoder of species to features (one-hot representation, probably)</span>
@@ -137,14 +139,19 @@
     <span class="k">return</span> <span class="n">e_per_species</span></div>
 
 
-<div class="viewcode-block" id="Hipnn"><a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.Hipnn">[docs]</a><span class="k">class</span> <span class="nc">Hipnn</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Hipnn">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.Hipnn">[docs]</a>
+<span class="k">class</span> <span class="nc">Hipnn</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hipnn Main Module</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_interaction_class</span> <span class="o">=</span> <span class="n">InteractLayer</span>
 
-<div class="viewcode-block" id="Hipnn.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.Hipnn.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="Hipnn.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.Hipnn.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">n_features</span><span class="p">,</span>
         <span class="n">n_sensitivities</span><span class="p">,</span>
@@ -271,6 +278,7 @@
                 <span class="n">this_block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lay</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">this_block</span><span class="p">)</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">interaction_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">]</span>
@@ -282,7 +290,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">il</span><span class="o">.</span><span class="n">sensitivity</span> <span class="k">for</span> <span class="n">il</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interaction_layers</span><span class="p">]</span>
 
-<div class="viewcode-block" id="Hipnn.regularization_params"><a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.Hipnn.regularization_params">[docs]</a>    <span class="k">def</span> <span class="nf">regularization_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Hipnn.regularization_params">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.Hipnn.regularization_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">regularization_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">lay</span> <span class="ow">in</span> <span class="n">block</span><span class="p">:</span>
@@ -293,7 +303,10 @@
         <span class="n">params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">params</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">params</span></div>
 
-<div class="viewcode-block" id="Hipnn.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.Hipnn.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Hipnn.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.Hipnn.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">):</span>
         <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">pair_dist</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>  <span class="c1"># Convert one-hot features to floating point features.</span>
 
         <span class="k">if</span> <span class="n">pair_dist</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
@@ -314,17 +327,23 @@
                     <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
             <span class="n">output_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">output_features</span></div></div>
+        <span class="k">return</span> <span class="n">output_features</span></div>
+</div>
 
 
-<div class="viewcode-block" id="HipnnVec"><a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.HipnnVec">[docs]</a><span class="k">class</span> <span class="nc">HipnnVec</span><span class="p">(</span><span class="n">Hipnn</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HipnnVec">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.HipnnVec">[docs]</a>
+<span class="k">class</span> <span class="nc">HipnnVec</span><span class="p">(</span><span class="n">Hipnn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    HIP-NN-TS with l=1</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_interaction_class</span> <span class="o">=</span> <span class="n">InteractLayerVec</span>
 
-<div class="viewcode-block" id="HipnnVec.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.HipnnVec.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">pair_coord</span><span class="p">):</span>
+<div class="viewcode-block" id="HipnnVec.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.HipnnVec.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">pair_coord</span><span class="p">):</span>
         <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">pair_dist</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>  <span class="c1"># Convert one-hot features to floating point features.</span>
 
         <span class="k">if</span> <span class="n">pair_dist</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
@@ -348,15 +367,20 @@
                     <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
             <span class="n">output_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">output_features</span></div></div>
+        <span class="k">return</span> <span class="n">output_features</span></div>
+</div>
 
 
-<div class="viewcode-block" id="HipnnQuad"><a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.HipnnQuad">[docs]</a><span class="k">class</span> <span class="nc">HipnnQuad</span><span class="p">(</span><span class="n">HipnnVec</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HipnnQuad">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.HipnnQuad">[docs]</a>
+<span class="k">class</span> <span class="nc">HipnnQuad</span><span class="p">(</span><span class="n">HipnnVec</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    HIP-NN-TS with l=2</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_interaction_class</span> <span class="o">=</span> <span class="n">InteractLayerQuad</span></div>
+
 </pre></div>
 
            </div>

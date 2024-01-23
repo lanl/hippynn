@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.experiment.metric_tracker &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.experiment.metric_tracker &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -90,7 +90,9 @@
     <span class="p">)</span>
 
 
-<div class="viewcode-block" id="MetricTracker"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker">[docs]</a><span class="k">class</span> <span class="nc">MetricTracker</span><span class="p">:</span>
+<div class="viewcode-block" id="MetricTracker">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker">[docs]</a>
+<span class="k">class</span> <span class="nc">MetricTracker</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    MetricTracker instances keep track of metrics and models for an experiment</span>
 
@@ -108,7 +110,9 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="MetricTracker.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_names</span><span class="p">,</span> <span class="n">stopping_key</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_names</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;valid&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">)):</span>
+<div class="viewcode-block" id="MetricTracker.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_names</span><span class="p">,</span> <span class="n">stopping_key</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">split_names</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;valid&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">)):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param metric_names:</span>
@@ -135,15 +139,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">epoch_best_metric_values</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span> <span class="o">=</span> <span class="n">quiet</span></div>
 
-<div class="viewcode-block" id="MetricTracker.from_evaluator"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker.from_evaluator">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="MetricTracker.from_evaluator">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker.from_evaluator">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_evaluator</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metric_names</span><span class="p">,</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">stopping_key</span><span class="p">)</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">current_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch_best_metric_values</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MetricTracker.register_metrics"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker.register_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">register_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_info</span><span class="p">,</span> <span class="n">when</span><span class="p">):</span>
+<div class="viewcode-block" id="MetricTracker.register_metrics">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker.register_metrics">[docs]</a>
+    <span class="k">def</span> <span class="nf">register_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_info</span><span class="p">,</span> <span class="n">when</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param metric_info: dictionary of metric names: metric values</span>
 <span class="sd">        :param when: string or integer specifying epoch number.</span>
@@ -175,12 +185,18 @@
 
         <span class="k">return</span> <span class="n">better_metrics</span><span class="p">,</span> <span class="n">better_model</span><span class="p">,</span> <span class="n">stopping_key_metric</span></div>
 
-<div class="viewcode-block" id="MetricTracker.evaluation_print"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker.evaluation_print">[docs]</a>    <span class="k">def</span> <span class="nf">evaluation_print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_dict</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MetricTracker.evaluation_print">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker.evaluation_print">[docs]</a>
+    <span class="k">def</span> <span class="nf">evaluation_print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_dict</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="n">table_evaluation_print</span><span class="p">(</span><span class="n">evaluation_dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name_column_width</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MetricTracker.evaluation_print_better"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker.evaluation_print_better">[docs]</a>    <span class="k">def</span> <span class="nf">evaluation_print_better</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_dict</span><span class="p">,</span> <span class="n">better_dict</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MetricTracker.evaluation_print_better">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker.evaluation_print_better">[docs]</a>
+    <span class="k">def</span> <span class="nf">evaluation_print_better</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_dict</span><span class="p">,</span> <span class="n">better_dict</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="n">table_evaluation_print_better</span><span class="p">(</span><span class="n">evaluation_dict</span><span class="p">,</span> <span class="n">better_dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name_column_width</span><span class="p">)</span>
@@ -191,13 +207,20 @@
                 <span class="p">)</span>
             <span class="p">)</span></div>
 
-<div class="viewcode-block" id="MetricTracker.plot_over_time"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker.plot_over_time">[docs]</a>    <span class="k">def</span> <span class="nf">plot_over_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">plot_all_over_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch_metric_values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epoch_best_metric_values</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="MetricTracker.plot_over_time">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker.plot_over_time">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_over_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">plot_all_over_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch_metric_values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epoch_best_metric_values</span><span class="p">)</span></div>
+</div>
+
 
 
 <span class="c1"># Driver for printing evaluation table results, with * for better entries.</span>
 <span class="c1"># Decoupled from the estate in case we want to more easily change print formatting.</span>
-<div class="viewcode-block" id="table_evaluation_print_better"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.table_evaluation_print_better">[docs]</a><span class="k">def</span> <span class="nf">table_evaluation_print_better</span><span class="p">(</span><span class="n">evaluation_dict</span><span class="p">,</span> <span class="n">better_dict</span><span class="p">,</span> <span class="n">metric_names</span><span class="p">,</span> <span class="n">ncs</span><span class="p">):</span>
+<div class="viewcode-block" id="table_evaluation_print_better">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.table_evaluation_print_better">[docs]</a>
+<span class="k">def</span> <span class="nf">table_evaluation_print_better</span><span class="p">(</span><span class="n">evaluation_dict</span><span class="p">,</span> <span class="n">better_dict</span><span class="p">,</span> <span class="n">metric_names</span><span class="p">,</span> <span class="n">ncs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Print metric results as a table, add a &#39;*&#39; character for metrics in better_dict.</span>
 
@@ -227,9 +250,12 @@
         <span class="nb">print</span><span class="p">(</span><span class="n">rowstring</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="o">*</span><span class="n">rowoutput</span><span class="p">))</span></div>
 
 
+
 <span class="c1"># Driver for printing evaluation table results.</span>
 <span class="c1"># Decoupled from the estate in case we want to more easily change print formatting.</span>
-<div class="viewcode-block" id="table_evaluation_print"><a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.table_evaluation_print">[docs]</a><span class="k">def</span> <span class="nf">table_evaluation_print</span><span class="p">(</span><span class="n">evaluation_dict</span><span class="p">,</span> <span class="n">metric_names</span><span class="p">,</span> <span class="n">ncs</span><span class="p">):</span>
+<div class="viewcode-block" id="table_evaluation_print">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.table_evaluation_print">[docs]</a>
+<span class="k">def</span> <span class="nf">table_evaluation_print</span><span class="p">(</span><span class="n">evaluation_dict</span><span class="p">,</span> <span class="n">metric_names</span><span class="p">,</span> <span class="n">ncs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Print metric results as a table.</span>
 
@@ -252,6 +278,7 @@
     <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">vals</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">metric_names</span><span class="p">,</span> <span class="n">transposed_values</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">rowstring</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="o">*</span><span class="n">vals</span><span class="p">))</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">))</span></div>
+
 </pre></div>
 
            </div>

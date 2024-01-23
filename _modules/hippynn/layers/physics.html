@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.layers.physics &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.layers.physics &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -87,17 +87,30 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">indexers</span><span class="p">,</span> <span class="n">pairs</span>
 
 
-<div class="viewcode-block" id="Gradient"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Gradient">[docs]</a><span class="k">class</span> <span class="nc">Gradient</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="Gradient.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Gradient.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sign</span><span class="p">):</span>
+<div class="viewcode-block" id="Gradient">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Gradient">[docs]</a>
+<span class="k">class</span> <span class="nc">Gradient</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="Gradient.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Gradient.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sign</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">assert</span> <span class="n">sign</span> <span class="ow">in</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;Sign of gradient must be +1 (gradient) or -1 (force)&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sign</span> <span class="o">=</span> <span class="n">sign</span></div>
 
-<div class="viewcode-block" id="Gradient.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Gradient.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecular_energies</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sign</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">molecular_energies</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">positions</span><span class="p">,</span> <span class="n">create_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div></div>
+
+<div class="viewcode-block" id="Gradient.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Gradient.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecular_energies</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sign</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">molecular_energies</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">positions</span><span class="p">,</span> <span class="n">create_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+</div>
+
         
-<div class="viewcode-block" id="MultiGradient"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.MultiGradient">[docs]</a><span class="k">class</span> <span class="nc">MultiGradient</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="MultiGradient.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.MultiGradient.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signs</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiGradient">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.MultiGradient">[docs]</a>
+<span class="k">class</span> <span class="nc">MultiGradient</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiGradient.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.MultiGradient.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">signs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">signs</span> <span class="o">=</span> <span class="p">(</span><span class="n">signs</span><span class="p">,)</span>
@@ -105,34 +118,55 @@
             <span class="k">assert</span> <span class="n">sign</span> <span class="ow">in</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;Sign of gradient must be -1 or +1&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">signs</span> <span class="o">=</span> <span class="n">signs</span></div>
 
-<div class="viewcode-block" id="MultiGradient.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.MultiGradient.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecular_energies</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="o">*</span><span class="n">generalized_coordinates</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MultiGradient.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.MultiGradient.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecular_energies</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="o">*</span><span class="n">generalized_coordinates</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">generalized_coordinates</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
             <span class="n">generalized_coordinates</span> <span class="o">=</span> <span class="p">(</span><span class="n">generalized_coordinates</span><span class="p">,)</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">generalized_coordinates</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signs</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Number of items to take derivative w.r.t (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">generalized_coordinates</span><span class="p">)</span><span class="si">}</span><span class="s2">) must match number of provided signs (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signs</span><span class="p">)</span><span class="si">}</span><span class="s2">).&quot;</span>
         <span class="n">grads</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">molecular_energies</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">generalized_coordinates</span><span class="p">,</span> <span class="n">create_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">sign</span> <span class="o">*</span> <span class="n">grad</span> <span class="k">for</span> <span class="n">sign</span><span class="p">,</span> <span class="n">grad</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signs</span><span class="p">,</span> <span class="n">grads</span><span class="p">)))</span></div></div>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">sign</span> <span class="o">*</span> <span class="n">grad</span> <span class="k">for</span> <span class="n">sign</span><span class="p">,</span> <span class="n">grad</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signs</span><span class="p">,</span> <span class="n">grads</span><span class="p">)))</span></div>
+</div>
 
-<div class="viewcode-block" id="StressForce"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.StressForce">[docs]</a><span class="k">class</span> <span class="nc">StressForce</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="StressForce.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.StressForce.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="StressForce">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.StressForce">[docs]</a>
+<span class="k">class</span> <span class="nc">StressForce</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="StressForce.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.StressForce.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pbc</span> <span class="o">=</span> <span class="kc">False</span></div>
 
-<div class="viewcode-block" id="StressForce.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.StressForce.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">strain</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">cell</span><span class="p">):</span>
+
+<div class="viewcode-block" id="StressForce.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.StressForce.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">strain</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">cell</span><span class="p">):</span>
         <span class="n">total_energy</span> <span class="o">=</span> <span class="n">energy</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
         <span class="n">straingrad</span><span class="p">,</span> <span class="n">grad</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">total_energy</span><span class="p">,</span> <span class="p">[</span><span class="n">strain</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">],</span> <span class="n">create_graph</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pbc</span><span class="p">:</span>
             <span class="n">stress</span> <span class="o">=</span> <span class="n">straingrad</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">stress</span> <span class="o">=</span> <span class="n">straingrad</span>
-        <span class="k">return</span> <span class="o">-</span><span class="n">grad</span><span class="p">,</span> <span class="n">stress</span></div></div>
+        <span class="k">return</span> <span class="o">-</span><span class="n">grad</span><span class="p">,</span> <span class="n">stress</span></div>
+</div>
 
 
-<div class="viewcode-block" id="Dipole"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Dipole">[docs]</a><span class="k">class</span> <span class="nc">Dipole</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="Dipole.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Dipole.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Dipole">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Dipole">[docs]</a>
+<span class="k">class</span> <span class="nc">Dipole</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="Dipole.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Dipole.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">summer</span> <span class="o">=</span> <span class="n">indexers</span><span class="o">.</span><span class="n">MolSummer</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Dipole.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Dipole.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Dipole.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Dipole.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">charges</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># charges contain multiple targets, so set up broadcasting</span>
             <span class="n">charges</span> <span class="o">=</span> <span class="n">charges</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -142,18 +176,27 @@
         <span class="c1"># shape is (n_atoms, 3) in single target mode</span>
         <span class="n">dipole_elements</span> <span class="o">=</span> <span class="n">charges</span> <span class="o">*</span> <span class="n">positions</span>
         <span class="n">dipoles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">dipole_elements</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">dipoles</span></div></div>
+        <span class="k">return</span> <span class="n">dipoles</span></div>
+</div>
 
 
-<div class="viewcode-block" id="Quadrupole"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Quadrupole">[docs]</a><span class="k">class</span> <span class="nc">Quadrupole</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Quadrupole">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Quadrupole">[docs]</a>
+<span class="k">class</span> <span class="nc">Quadrupole</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes quadrupoles as a flattened (n_molecules,9) array.</span>
 <span class="sd">    NOTE: Uses normalization sum_a q_a (r_a,i*r_a,j - 1/3 delta_ij r_a^2)&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Quadrupole.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Quadrupole.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Quadrupole.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Quadrupole.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">summer</span> <span class="o">=</span> <span class="n">indexers</span><span class="o">.</span><span class="n">MolSummer</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Quadrupole.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Quadrupole.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Quadrupole.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Quadrupole.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
         <span class="c1"># positions shape: (atoms, xyz)</span>
         <span class="c1"># charge shape: (atoms,1)</span>
         <span class="n">ri_rj</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">positions</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -162,10 +205,14 @@
         <span class="n">delta_ij</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">rsq</span><span class="o">.</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># unsqueeze over atom index</span>
         <span class="n">quad_elements</span> <span class="o">=</span> <span class="n">charges</span> <span class="o">*</span> <span class="p">(</span><span class="n">ri_rj_flat</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">rsq</span> <span class="o">*</span> <span class="n">delta_ij</span><span class="p">))</span>
         <span class="n">quadrupoles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">quad_elements</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">quadrupoles</span></div></div>
+        <span class="k">return</span> <span class="n">quadrupoles</span></div>
+</div>
 
 
-<div class="viewcode-block" id="CoulombEnergy"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CoulombEnergy">[docs]</a><span class="k">class</span> <span class="nc">CoulombEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CoulombEnergy">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CoulombEnergy">[docs]</a>
+<span class="k">class</span> <span class="nc">CoulombEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Computes the Coulomb Energy of the molecule/configuration. </span>
 <span class="sd">    </span>
 <span class="sd">    Coulomb energies is defined for pairs of atoms. Here, we adopt the </span>
@@ -173,29 +220,40 @@
 <span class="sd">    partitioned to both atoms as the &#39;per-atom energies&#39;. Therefore, the </span>
 <span class="sd">    atom energies sum to the molecular energy; similar to the HEnergy. </span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="CoulombEnergy.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CoulombEnergy.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_conversion_factor</span><span class="p">):</span>
+<div class="viewcode-block" id="CoulombEnergy.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CoulombEnergy.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_conversion_factor</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;energy_conversion_factor&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">energy_conversion_factor</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">summer</span> <span class="o">=</span> <span class="n">indexers</span><span class="o">.</span><span class="n">MolSummer</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="CoulombEnergy.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CoulombEnergy.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CoulombEnergy.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CoulombEnergy.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
         <span class="n">voltage_pairs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_conversion_factor</span> <span class="o">*</span> <span class="p">(</span><span class="n">charges</span><span class="p">[</span><span class="n">pair_second</span><span class="p">]</span> <span class="o">/</span> <span class="n">pair_dist</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
         <span class="n">n_atoms</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">charges</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">voltage_atom</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_atoms</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">charges</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">charges</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
         <span class="n">voltage_atom</span><span class="o">.</span><span class="n">index_add_</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">voltage_pairs</span><span class="p">)</span>
         <span class="n">coulomb_atoms</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">voltage_atom</span> <span class="o">*</span> <span class="n">charges</span>
         <span class="n">coulomb_molecule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">coulomb_atoms</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">coulomb_molecule</span><span class="p">,</span> <span class="n">coulomb_atoms</span><span class="p">,</span> <span class="n">voltage_atom</span></div></div>
+        <span class="k">return</span> <span class="n">coulomb_molecule</span><span class="p">,</span> <span class="n">coulomb_atoms</span><span class="p">,</span> <span class="n">voltage_atom</span></div>
+</div>
 
 
-<div class="viewcode-block" id="ScreenedCoulombEnergy"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.ScreenedCoulombEnergy">[docs]</a><span class="k">class</span> <span class="nc">ScreenedCoulombEnergy</span><span class="p">(</span><span class="n">CoulombEnergy</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ScreenedCoulombEnergy">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.ScreenedCoulombEnergy">[docs]</a>
+<span class="k">class</span> <span class="nc">ScreenedCoulombEnergy</span><span class="p">(</span><span class="n">CoulombEnergy</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Computes the Coulomb Energy of the molecule/configuration. </span>
 <span class="sd">    </span>
 <span class="sd">    The convention for the atom energies is the same as CoulombEnergy</span>
 <span class="sd">    and the HEnergy. </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-<div class="viewcode-block" id="ScreenedCoulombEnergy.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.ScreenedCoulombEnergy.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_conversion_factor</span><span class="p">,</span> <span class="n">screening</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ScreenedCoulombEnergy.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.ScreenedCoulombEnergy.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_conversion_factor</span><span class="p">,</span> <span class="n">screening</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">energy_conversion_factor</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">screening</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Screened Coulomb requires specification of a screening type.&quot;</span><span class="p">)</span>
@@ -210,7 +268,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">screening</span> <span class="o">=</span> <span class="n">screening</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bond_summer</span> <span class="o">=</span> <span class="n">pairs</span><span class="o">.</span><span class="n">MolPairSummer</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="ScreenedCoulombEnergy.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.ScreenedCoulombEnergy.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ScreenedCoulombEnergy.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.ScreenedCoulombEnergy.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
         <span class="n">screening</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">screening</span><span class="p">(</span><span class="n">pair_dist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">screening</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">pair_dist</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">screening</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">screening</span><span class="p">))</span>
 
@@ -223,17 +284,26 @@
         <span class="n">coulomb_atoms</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">voltage_atom</span> <span class="o">*</span> <span class="n">charges</span>
         <span class="n">coulomb_molecule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">coulomb_atoms</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">coulomb_molecule</span><span class="p">,</span> <span class="n">coulomb_atoms</span><span class="p">,</span> <span class="n">voltage_atom</span></div></div>
+        <span class="k">return</span> <span class="n">coulomb_molecule</span><span class="p">,</span> <span class="n">coulomb_atoms</span><span class="p">,</span> <span class="n">voltage_atom</span></div>
+</div>
 
 
-<div class="viewcode-block" id="CombineScreenings"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineScreenings">[docs]</a><span class="k">class</span> <span class="nc">CombineScreenings</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CombineScreenings">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineScreenings">[docs]</a>
+<span class="k">class</span> <span class="nc">CombineScreenings</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns products of different screenings for Screened Coulomb Interactions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="CombineScreenings.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineScreenings.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screening_list</span><span class="p">):</span>
+<div class="viewcode-block" id="CombineScreenings.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineScreenings.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screening_list</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SL</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span><span class="n">screening_list</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CombineScreenings.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineScreenings.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CombineScreenings.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineScreenings.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Product of different screenings applied to pair_dist upto radius.</span>
 
 <span class="sd">        :param pair_dist: torch.tensor, dtype=float64: &#39;Neighborlist&#39; distances for coulomb energies.</span>
@@ -248,45 +318,75 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">screening</span> <span class="o">=</span> <span class="n">screening</span> <span class="o">*</span> <span class="n">s</span><span class="p">(</span><span class="n">pair_dist</span><span class="o">=</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">screening</span></div></div>
+        <span class="k">return</span> <span class="n">screening</span></div>
+</div>
 
 
-<div class="viewcode-block" id="AlphaScreening"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.AlphaScreening">[docs]</a><span class="k">class</span> <span class="nc">AlphaScreening</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="AlphaScreening.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.AlphaScreening.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+
+<div class="viewcode-block" id="AlphaScreening">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.AlphaScreening">[docs]</a>
+<span class="k">class</span> <span class="nc">AlphaScreening</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="AlphaScreening.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.AlphaScreening.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span></div>
+</div>
+
 
 
 <span class="c1"># Note: This is somewhat incomplete as it does not include a k-space contribution -- more is needed</span>
-<div class="viewcode-block" id="EwaldRealSpaceScreening"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.EwaldRealSpaceScreening">[docs]</a><span class="k">class</span> <span class="nc">EwaldRealSpaceScreening</span><span class="p">(</span><span class="n">AlphaScreening</span><span class="p">):</span>
-<div class="viewcode-block" id="EwaldRealSpaceScreening.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.EwaldRealSpaceScreening.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+<div class="viewcode-block" id="EwaldRealSpaceScreening">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.EwaldRealSpaceScreening">[docs]</a>
+<span class="k">class</span> <span class="nc">EwaldRealSpaceScreening</span><span class="p">(</span><span class="n">AlphaScreening</span><span class="p">):</span>
+<div class="viewcode-block" id="EwaldRealSpaceScreening.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.EwaldRealSpaceScreening.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Ewald implementation incomplete, does not include k-space contributions.&quot;</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="EwaldRealSpaceScreening.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.EwaldRealSpaceScreening.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+
+<div class="viewcode-block" id="EwaldRealSpaceScreening.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.EwaldRealSpaceScreening.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
         <span class="n">q</span> <span class="o">=</span> <span class="n">pair_dist</span> <span class="o">/</span> <span class="n">radius</span>
         <span class="n">eta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">radius</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">erfc</span><span class="p">(</span><span class="n">eta</span> <span class="o">*</span> <span class="n">q</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">erfc</span><span class="p">(</span><span class="n">eta</span> <span class="o">*</span> <span class="n">q</span><span class="p">)</span></div>
+</div>
+
 
 
 <span class="c1"># Note: typically</span>
-<div class="viewcode-block" id="WolfScreening"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.WolfScreening">[docs]</a><span class="k">class</span> <span class="nc">WolfScreening</span><span class="p">(</span><span class="n">AlphaScreening</span><span class="p">):</span>
-<div class="viewcode-block" id="WolfScreening.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.WolfScreening.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+<div class="viewcode-block" id="WolfScreening">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.WolfScreening">[docs]</a>
+<span class="k">class</span> <span class="nc">WolfScreening</span><span class="p">(</span><span class="n">AlphaScreening</span><span class="p">):</span>
+<div class="viewcode-block" id="WolfScreening.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.WolfScreening.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Wolf implemnetation uses exact derivative of the potential.&quot;</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="WolfScreening.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.WolfScreening.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+
+<div class="viewcode-block" id="WolfScreening.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.WolfScreening.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
         <span class="n">q</span> <span class="o">=</span> <span class="n">pair_dist</span> <span class="o">/</span> <span class="n">radius</span>
         <span class="n">eta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">radius</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">erfc</span><span class="p">(</span><span class="n">eta</span> <span class="o">*</span> <span class="n">q</span><span class="p">)</span> <span class="o">-</span> <span class="n">q</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">erfc</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">erfc</span><span class="p">(</span><span class="n">eta</span> <span class="o">*</span> <span class="n">q</span><span class="p">)</span> <span class="o">-</span> <span class="n">q</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">erfc</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="LocalDampingCosine"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.LocalDampingCosine">[docs]</a><span class="k">class</span> <span class="nc">LocalDampingCosine</span><span class="p">(</span><span class="n">AlphaScreening</span><span class="p">):</span>
+
+<div class="viewcode-block" id="LocalDampingCosine">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.LocalDampingCosine">[docs]</a>
+<span class="k">class</span> <span class="nc">LocalDampingCosine</span><span class="p">(</span><span class="n">AlphaScreening</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Local damping using complement of the hipnn cutoff function. (&#39;glue-on&#39; method)</span>
 <span class="sd">    g =     1 if pair_dist &gt; R_cutoff</span>
 <span class="sd">            1 - [cos(\pi/2 * dist * R_cutoff)]^2  otherwise</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="LocalDampingCosine.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.LocalDampingCosine.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span> 
+<div class="viewcode-block" id="LocalDampingCosine.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.LocalDampingCosine.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span> 
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
 <span class="sd">        :param alpha: R_cutoff for glue-on function to ensure </span>
 <span class="sd">            smooth crossover from hipnn energy to long-range coulomb energy.  </span>
@@ -294,7 +394,10 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span> </div>
 
 
-<div class="viewcode-block" id="LocalDampingCosine.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.LocalDampingCosine.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+
+<div class="viewcode-block" id="LocalDampingCosine.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.LocalDampingCosine.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param pair_dist: torch.tensor, dtype=float64: &#39;Neighborlist&#39; distances for coulomb energies.</span>
 <span class="sd">        :param radius: Maximum radius that Screened-Coulomb is evaluated upto. </span>
@@ -306,13 +409,20 @@
         <span class="c1"># pair_dist greater than cut-off; no local-damping. </span>
         <span class="n">screening</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">pair_dist</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">),</span> <span class="n">screening</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">screening</span><span class="p">))</span>
         
-        <span class="k">return</span> <span class="n">screening</span></div></div>
+        <span class="k">return</span> <span class="n">screening</span></div>
+</div>
 
 
-<div class="viewcode-block" id="QScreening"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.QScreening">[docs]</a><span class="k">class</span> <span class="nc">QScreening</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="QScreening.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.QScreening.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_value</span><span class="p">):</span>
+
+<div class="viewcode-block" id="QScreening">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.QScreening">[docs]</a>
+<span class="k">class</span> <span class="nc">QScreening</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="QScreening.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.QScreening.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_value</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">p_value</span> <span class="o">=</span> <span class="n">p_value</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">p_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -325,34 +435,57 @@
         <span class="n">powers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">value</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;powers&quot;</span><span class="p">,</span> <span class="n">powers</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QScreening.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.QScreening.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+<div class="viewcode-block" id="QScreening.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.QScreening.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
         <span class="n">q</span> <span class="o">=</span> <span class="n">pair_dist</span> <span class="o">/</span> <span class="n">radius</span>
         <span class="n">q_factors</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">powers</span><span class="p">)</span>
         <span class="n">product</span> <span class="o">=</span> <span class="n">q_factors</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">product</span></div></div>
+        <span class="k">return</span> <span class="n">product</span></div>
+</div>
 
 
-<div class="viewcode-block" id="PerAtom"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.PerAtom">[docs]</a><span class="k">class</span> <span class="nc">PerAtom</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="PerAtom.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.PerAtom.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">species</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PerAtom">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.PerAtom">[docs]</a>
+<span class="k">class</span> <span class="nc">PerAtom</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="PerAtom.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.PerAtom.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">species</span><span class="p">):</span>
         <span class="n">n_atoms</span> <span class="o">=</span> <span class="p">(</span><span class="n">species</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">features</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">features</span> <span class="o">/</span> <span class="n">n_atoms</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">features</span> <span class="o">/</span> <span class="n">n_atoms</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="VecMag"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.VecMag">[docs]</a><span class="k">class</span> <span class="nc">VecMag</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="VecMag.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.VecMag.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vector_feature</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vector_feature</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="VecMag">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.VecMag">[docs]</a>
+<span class="k">class</span> <span class="nc">VecMag</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="VecMag.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.VecMag.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vector_feature</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vector_feature</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="CombineEnergy"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineEnergy">[docs]</a><span class="k">class</span> <span class="nc">CombineEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CombineEnergy">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineEnergy">[docs]</a>
+<span class="k">class</span> <span class="nc">CombineEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Combines the energies (molecular and atom energies) from two different </span>
 <span class="sd">    nodes, e.g. HEnergy, Coulomb, or ScreenedCoulomb Energy Nodes. </span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="CombineEnergy.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineEnergy.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CombineEnergy.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineEnergy.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">summer</span> <span class="o">=</span> <span class="n">indexers</span><span class="o">.</span><span class="n">MolSummer</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="CombineEnergy.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineEnergy.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom_energy_1</span><span class="p">,</span> <span class="n">atom_energy_2</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CombineEnergy.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.CombineEnergy.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom_energy_1</span><span class="p">,</span> <span class="n">atom_energy_2</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param: atom_energy_1 per-atom energy from first node. </span>
 <span class="sd">        :param: atom_energy_2 per atom energy from second node. </span>
@@ -363,7 +496,9 @@
         <span class="n">total_atom_energy</span> <span class="o">=</span> <span class="n">atom_energy_1</span> <span class="o">+</span> <span class="n">atom_energy_2</span>
         <span class="n">mol_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">total_atom_energy</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
         
-        <span class="k">return</span> <span class="n">mol_energy</span><span class="p">,</span> <span class="n">total_atom_energy</span></div></div>
+        <span class="k">return</span> <span class="n">mol_energy</span><span class="p">,</span> <span class="n">total_atom_energy</span></div>
+</div>
+
 </pre></div>
 
            </div>

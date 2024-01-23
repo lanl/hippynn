@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.interfaces.ase_interface.calculator &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.interfaces.ase_interface.calculator &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -104,7 +104,9 @@
 <span class="c1"># This works for orthorhombic boxes and is much faster than ASE...</span>
 
 
-<div class="viewcode-block" id="setup_ASE_graph"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.setup_ASE_graph">[docs]</a><span class="k">def</span> <span class="nf">setup_ASE_graph</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">charges</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="setup_ASE_graph">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.setup_ASE_graph">[docs]</a>
+<span class="k">def</span> <span class="nf">setup_ASE_graph</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">charges</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">charges</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">required_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">energy</span><span class="p">]</span>
@@ -225,12 +227,20 @@
     <span class="k">return</span> <span class="n">min_radius</span><span class="p">,</span> <span class="n">species_set</span><span class="p">,</span> <span class="n">implemented_properties</span><span class="p">,</span> <span class="n">mod</span><span class="p">,</span> <span class="n">pbc_handler</span></div>
 
 
-<div class="viewcode-block" id="PBCHandle"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.PBCHandle">[docs]</a><span class="k">class</span> <span class="nc">PBCHandle</span><span class="p">:</span>
-<div class="viewcode-block" id="PBCHandle.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.PBCHandle.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">nodes</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PBCHandle">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.PBCHandle">[docs]</a>
+<span class="k">class</span> <span class="nc">PBCHandle</span><span class="p">:</span>
+<div class="viewcode-block" id="PBCHandle.__init__">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.PBCHandle.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">nodes</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">modules</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span><span class="o">.</span><span class="n">torch_module</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_last</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="PBCHandle.set"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.PBCHandle.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PBCHandle.set">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.PBCHandle.set">[docs]</a>
+    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_last</span><span class="p">,</span> <span class="n">value</span><span class="p">)):</span>
@@ -250,7 +260,9 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unrecognized PBC condition: </span><span class="si">{}</span><span class="s2">. Mixed PBC not yet supported.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
-            <span class="n">m</span><span class="o">.</span><span class="n">pbc</span> <span class="o">=</span> <span class="n">value</span></div></div>
+            <span class="n">m</span><span class="o">.</span><span class="n">pbc</span> <span class="o">=</span> <span class="n">value</span></div>
+</div>
+
 
 
 <span class="c1"># decorator for generating calculation methods; this code is also run for calls to</span>
@@ -277,7 +289,9 @@
 
 <span class="c1"># UNUSED, was used for HippynnCaclulator.to()</span>
 <span class="c1"># factory for forwarding pytorch methods to the calculator</span>
-<div class="viewcode-block" id="pass_to_pytorch"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.pass_to_pytorch">[docs]</a><span class="k">def</span> <span class="nf">pass_to_pytorch</span><span class="p">(</span><span class="n">fn_name</span><span class="p">):</span>
+<div class="viewcode-block" id="pass_to_pytorch">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.pass_to_pytorch">[docs]</a>
+<span class="k">def</span> <span class="nf">pass_to_pytorch</span><span class="p">(</span><span class="n">fn_name</span><span class="p">):</span>
     <span class="n">wraps</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">fn_name</span><span class="p">)</span>
 
     <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">wraps</span><span class="p">)</span>
@@ -287,12 +301,17 @@
     <span class="k">return</span> <span class="n">method</span></div>
 
 
-<div class="viewcode-block" id="HippynnCalculator"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator">[docs]</a><span class="k">class</span> <span class="nc">HippynnCalculator</span><span class="p">(</span><span class="n">Calculator</span><span class="p">):</span> <span class="c1"># Calculator inheritance required for ASE Mixing Calculator usage</span>
+
+<div class="viewcode-block" id="HippynnCalculator">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator">[docs]</a>
+<span class="k">class</span> <span class="nc">HippynnCalculator</span><span class="p">(</span><span class="n">Calculator</span><span class="p">):</span> <span class="c1"># Calculator inheritance required for ASE Mixing Calculator usage</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ASE calculator based on hippynn graphs. Uses ASE neighbor lists. Not suitable for domain decomposition.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="HippynnCalculator.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">charges</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skin</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">extra_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">en_unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dist_unit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="HippynnCalculator.__init__">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">charges</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skin</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">extra_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">en_unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dist_unit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param energy: Node for energy</span>
 <span class="sd">        :param charges: Node for charges (optional)</span>
@@ -332,6 +351,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Hippynn calculator&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1">#Hack to work with ASE trajectory printing</span></div>
 
+
     <span class="n">make</span> <span class="o">=</span> <span class="n">_generate_calculation_method</span>
     <span class="n">get_potential_energy</span> <span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="s2">&quot;potential_energy&quot;</span><span class="p">)</span>
     <span class="n">get_energy</span> <span class="o">=</span> <span class="n">get_potential_energy</span>
@@ -348,7 +368,9 @@
     <span class="n">get_magmoms</span> <span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="s2">&quot;magmoms&quot;</span><span class="p">)</span>
     <span class="k">del</span> <span class="n">make</span>
 
-<div class="viewcode-block" id="HippynnCalculator.rebuild_neighbors"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.rebuild_neighbors">[docs]</a>    <span class="k">def</span> <span class="nf">rebuild_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="HippynnCalculator.rebuild_neighbors">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.rebuild_neighbors">[docs]</a>
+    <span class="k">def</span> <span class="nf">rebuild_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nl</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">neighborlist</span><span class="o">.</span><span class="n">NeighborList</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cutoffs</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_skin</span><span class="p">,</span> <span class="c1">#ASE neighbor list implementation is only safe up to cutoffs-skin</span>
             <span class="n">skin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_skin</span><span class="p">,</span>
@@ -358,19 +380,28 @@
             <span class="n">primitive</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">neighborlist</span><span class="o">.</span><span class="n">NewPrimitiveNeighborList</span><span class="p">,</span>
         <span class="p">)</span></div>
 
+
     <span class="c1"># Dear ASE: This is not Java....</span>
-<div class="viewcode-block" id="HippynnCalculator.set_atoms"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.set_atoms">[docs]</a>    <span class="k">def</span> <span class="nf">set_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">):</span>
+<div class="viewcode-block" id="HippynnCalculator.set_atoms">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.set_atoms">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_atoms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_needs_calculation</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="HippynnCalculator.get_property"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.get_property">[docs]</a>    <span class="k">def</span> <span class="nf">get_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">allow_calculation</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HippynnCalculator.get_property">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.get_property">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">allow_calculation</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="c1"># `or` defaults to last atoms received</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;get_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))(</span><span class="n">atoms</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">,</span> <span class="n">allow_calculation</span><span class="o">=</span><span class="n">allow_calculation</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">PropertyNotImplementedError</span><span class="p">(</span><span class="s2">&quot;Property not implemented:&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="HippynnCalculator.to"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.to">[docs]</a>    <span class="k">def</span> <span class="nf">to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HippynnCalculator.to">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.to">[docs]</a>
+    <span class="k">def</span> <span class="nf">to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># The below section is complicated because the pytorch `to` method does not have a strict signature.</span>
@@ -392,7 +423,10 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">a</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="HippynnCalculator.calculate"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">system_changes</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HippynnCalculator.calculate">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.calculate">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">system_changes</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Accepts &#39;properties&#39; and &#39;system changes&#39; but ignores them,</span>
 <span class="sd">        purely for compatibility with ASE base calculator</span>
@@ -447,7 +481,10 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_needs_calculation</span> <span class="o">=</span> <span class="kc">False</span></div>
 
-<div class="viewcode-block" id="HippynnCalculator.calculation_required"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.calculation_required">[docs]</a>    <span class="k">def</span> <span class="nf">calculation_required</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">):</span>
+
+<div class="viewcode-block" id="HippynnCalculator.calculation_required">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.HippynnCalculator.calculation_required">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculation_required</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-15</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns true if:</span>
 <span class="sd">        1. A property in the list `properties` is not supported.</span>
@@ -466,10 +503,14 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_needs_calculation</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_needs_calculation</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_needs_calculation</span></div>
+</div>
 
 
-<div class="viewcode-block" id="calculator_from_model"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.calculator_from_model">[docs]</a><span class="k">def</span> <span class="nf">calculator_from_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="calculator_from_model">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.calculator.html#hippynn.interfaces.ase_interface.calculator_from_model">[docs]</a>
+<span class="k">def</span> <span class="nf">calculator_from_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Attempt to find the energy and charge nodes automatically.</span>
 
@@ -498,6 +539,7 @@
             <span class="n">charges</span> <span class="o">=</span> <span class="n">possible_charge</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">HippynnCalculator</span><span class="p">(</span><span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span> <span class="n">charges</span><span class="o">=</span><span class="n">charges</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>

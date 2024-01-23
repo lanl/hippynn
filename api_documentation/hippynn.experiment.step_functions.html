@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>step_functions module &mdash; hippynn 0.0.1 documentation</title>
+  <title>step_functions module &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
@@ -16,9 +16,9 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -54,6 +54,12 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.html">custom_kernels package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.databases.html">databases package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.experiment.html">experiment package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.SetupParams"><code class="docutils literal notranslate"><span class="pre">SetupParams</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.assemble_for_training"><code class="docutils literal notranslate"><span class="pre">assemble_for_training()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.setup_and_train"><code class="docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.setup_training"><code class="docutils literal notranslate"><span class="pre">setup_training()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.test_model"><code class="docutils literal notranslate"><span class="pre">test_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.train_model"><code class="docutils literal notranslate"><span class="pre">train_model()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.assembly.html">assembly module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.controllers.html">controllers module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.device.html">device module</a></li>
@@ -61,7 +67,29 @@
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.metric_tracker.html">metric_tracker module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.routines.html">routines module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.serialization.html">serialization module</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">step_functions module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">step_functions module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.step_functions.ClosureStep"><code class="docutils literal notranslate"><span class="pre">ClosureStep</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.experiment.step_functions.ClosureStep.step"><code class="docutils literal notranslate"><span class="pre">ClosureStep.step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.step_functions.StandardStep"><code class="docutils literal notranslate"><span class="pre">StandardStep</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.experiment.step_functions.StandardStep.step"><code class="docutils literal notranslate"><span class="pre">StandardStep.step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.step_functions.StepFn"><code class="docutils literal notranslate"><span class="pre">StepFn</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.experiment.step_functions.StepFn.step"><code class="docutils literal notranslate"><span class="pre">StepFn.step</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.step_functions.TwoStep"><code class="docutils literal notranslate"><span class="pre">TwoStep</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.experiment.step_functions.TwoStep.step"><code class="docutils literal notranslate"><span class="pre">TwoStep.step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.step_functions.closure_step_fn"><code class="docutils literal notranslate"><span class="pre">closure_step_fn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.step_functions.get_step_function"><code class="docutils literal notranslate"><span class="pre">get_step_function()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.step_functions.standard_step_fn"><code class="docutils literal notranslate"><span class="pre">standard_step_fn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.step_functions.twostep_step_fn"><code class="docutils literal notranslate"><span class="pre">twostep_step_fn()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.graphs.html">graphs package</a></li>
@@ -106,8 +134,86 @@
            <div itemprop="articleBody">
              
   <section id="step-functions-module">
-<h1>step_functions module<a class="headerlink" href="#step-functions-module" title="Permalink to this heading"></a></h1>
+<h1>step_functions module<a class="headerlink" href="#step-functions-module" title="Link to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.experiment.step_functions</span></code> module.</p>
+<p id="module-hippynn.experiment.step_functions">This file implements various stepping protocols used by different optimizer APIs.</p>
+<dl class="simple">
+<dt>In particular:</dt><dd><ul class="simple">
+<li><p>The “standard” step function which only requires that backwards has been called.</p></li>
+<li><p>The “closure” step function for when line search is required (currently only active on LBFGS)</p></li>
+<li><p>The “two step” style of Sharpness Aware Minimization algorithms</p></li>
+</ul>
+</dd>
+</dl>
+<p>The main output function here is <cite>get_step_function(optimizer)-&gt; callable</cite>.</p>
+<p>The various step functions are provided as classes that act with staticmethods.
+This is to provide for the possibility of extension, for example, to schemes with
+stepping schemes that require additional state, or for the possibility to specifiy
+the step function explicitly within the controller.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.experiment.step_functions.ClosureStep">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ClosureStep</span></span><a class="reference internal" href="../_modules/hippynn/experiment/step_functions.html#ClosureStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.step_functions.ClosureStep" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hippynn.experiment.step_functions.StepFn" title="hippynn.experiment.step_functions.StepFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepFn</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.step_functions.ClosureStep.step">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_targets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hippynn.experiment.step_functions.ClosureStep.step" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.experiment.step_functions.StandardStep">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StandardStep</span></span><a class="reference internal" href="../_modules/hippynn/experiment/step_functions.html#StandardStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.step_functions.StandardStep" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hippynn.experiment.step_functions.StepFn" title="hippynn.experiment.step_functions.StepFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepFn</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.step_functions.StandardStep.step">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_targets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hippynn.experiment.step_functions.StandardStep.step" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.experiment.step_functions.StepFn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StepFn</span></span><a class="reference internal" href="../_modules/hippynn/experiment/step_functions.html#StepFn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.step_functions.StepFn" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.experiment.step_functions.StepFn.step">
+<span class="sig-name descname"><span class="pre">step</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">NotImplemented</span></em><a class="headerlink" href="#hippynn.experiment.step_functions.StepFn.step" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.experiment.step_functions.TwoStep">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TwoStep</span></span><a class="reference internal" href="../_modules/hippynn/experiment/step_functions.html#TwoStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.step_functions.TwoStep" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hippynn.experiment.step_functions.StepFn" title="hippynn.experiment.step_functions.StepFn"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepFn</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.step_functions.TwoStep.step">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_targets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hippynn.experiment.step_functions.TwoStep.step" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.experiment.step_functions.closure_step_fn">
+<span class="sig-name descname"><span class="pre">closure_step_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_targets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/step_functions.html#closure_step_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.step_functions.closure_step_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.experiment.step_functions.get_step_function">
+<span class="sig-name descname"><span class="pre">get_step_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optimizer</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">callable</span></span></span><a class="reference internal" href="../_modules/hippynn/experiment/step_functions.html#get_step_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.step_functions.get_step_function" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.experiment.step_functions.standard_step_fn">
+<span class="sig-name descname"><span class="pre">standard_step_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_targets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/step_functions.html#standard_step_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.step_functions.standard_step_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.experiment.step_functions.twostep_step_fn">
+<span class="sig-name descname"><span class="pre">twostep_step_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_targets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/step_functions.html#twostep_step_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.step_functions.twostep_step_fn" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 
 

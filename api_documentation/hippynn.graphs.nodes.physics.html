@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>physics module &mdash; hippynn 0.0.1 documentation</title>
+  <title>physics module &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
@@ -16,9 +16,9 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -55,6 +55,16 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.databases.html">databases package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.experiment.html">experiment package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.graphs.html">graphs package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.GraphModule"><code class="docutils literal notranslate"><span class="pre">GraphModule</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.IdxType"><code class="docutils literal notranslate"><span class="pre">IdxType</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.Predictor"><code class="docutils literal notranslate"><span class="pre">Predictor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.compute_evaluation_order"><code class="docutils literal notranslate"><span class="pre">compute_evaluation_order()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.copy_subgraph"><code class="docutils literal notranslate"><span class="pre">copy_subgraph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.find_relatives"><code class="docutils literal notranslate"><span class="pre">find_relatives()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.find_unique_relative"><code class="docutils literal notranslate"><span class="pre">find_unique_relative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.get_connected_nodes"><code class="docutils literal notranslate"><span class="pre">get_connected_nodes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.get_subgraph"><code class="docutils literal notranslate"><span class="pre">get_subgraph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.replace_node"><code class="docutils literal notranslate"><span class="pre">replace_node()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.indextransformers.html">indextransformers package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.indextypes.html">indextypes package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="hippynn.graphs.nodes.html">nodes package</a><ul class="current">
@@ -66,7 +76,77 @@
 <li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.nodes.misc.html">misc module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.nodes.networks.html">networks module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.nodes.pairs.html">pairs module</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">physics module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">physics module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.physics.AtomToMolSummer"><code class="docutils literal notranslate"><span class="pre">AtomToMolSummer</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.AtomToMolSummer.__init__"><code class="docutils literal notranslate"><span class="pre">AtomToMolSummer.__init__()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.AtomToMolSummer.expansion0"><code class="docutils literal notranslate"><span class="pre">AtomToMolSummer.expansion0()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.AtomToMolSummer.expansion1"><code class="docutils literal notranslate"><span class="pre">AtomToMolSummer.expansion1()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.physics.BondToMolSummmer"><code class="docutils literal notranslate"><span class="pre">BondToMolSummmer</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.BondToMolSummmer.__init__"><code class="docutils literal notranslate"><span class="pre">BondToMolSummmer.__init__()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.BondToMolSummmer.expansion0"><code class="docutils literal notranslate"><span class="pre">BondToMolSummmer.expansion0()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.BondToMolSummmer.expansion1"><code class="docutils literal notranslate"><span class="pre">BondToMolSummmer.expansion1()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.BondToMolSummmer.expansion2"><code class="docutils literal notranslate"><span class="pre">BondToMolSummmer.expansion2()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.physics.ChargeMomentNode"><code class="docutils literal notranslate"><span class="pre">ChargeMomentNode</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.ChargeMomentNode.__init__"><code class="docutils literal notranslate"><span class="pre">ChargeMomentNode.__init__()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.ChargeMomentNode.expansion0"><code class="docutils literal notranslate"><span class="pre">ChargeMomentNode.expansion0()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.ChargeMomentNode.expansion1"><code class="docutils literal notranslate"><span class="pre">ChargeMomentNode.expansion1()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.ChargeMomentNode.expansion2"><code class="docutils literal notranslate"><span class="pre">ChargeMomentNode.expansion2()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.physics.ChargePairSetup"><code class="docutils literal notranslate"><span class="pre">ChargePairSetup</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.ChargePairSetup.expansion0"><code class="docutils literal notranslate"><span class="pre">ChargePairSetup.expansion0()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.ChargePairSetup.expansion1"><code class="docutils literal notranslate"><span class="pre">ChargePairSetup.expansion1()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.ChargePairSetup.expansion2"><code class="docutils literal notranslate"><span class="pre">ChargePairSetup.expansion2()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.ChargePairSetup.expansion3"><code class="docutils literal notranslate"><span class="pre">ChargePairSetup.expansion3()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.ChargePairSetup.expansion4"><code class="docutils literal notranslate"><span class="pre">ChargePairSetup.expansion4()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.physics.CombineEnergyNode"><code class="docutils literal notranslate"><span class="pre">CombineEnergyNode</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.CombineEnergyNode.__init__"><code class="docutils literal notranslate"><span class="pre">CombineEnergyNode.__init__()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.CombineEnergyNode.expansion0"><code class="docutils literal notranslate"><span class="pre">CombineEnergyNode.expansion0()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.CombineEnergyNode.expansion1"><code class="docutils literal notranslate"><span class="pre">CombineEnergyNode.expansion1()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.CombineEnergyNode.expansion2"><code class="docutils literal notranslate"><span class="pre">CombineEnergyNode.expansion2()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.physics.CoulombEnergyNode"><code class="docutils literal notranslate"><span class="pre">CoulombEnergyNode</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.CoulombEnergyNode.__init__"><code class="docutils literal notranslate"><span class="pre">CoulombEnergyNode.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.physics.DipoleNode"><code class="docutils literal notranslate"><span class="pre">DipoleNode</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.physics.GradientNode"><code class="docutils literal notranslate"><span class="pre">GradientNode</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.GradientNode.__init__"><code class="docutils literal notranslate"><span class="pre">GradientNode.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.physics.MultiGradientNode"><code class="docutils literal notranslate"><span class="pre">MultiGradientNode</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.MultiGradientNode.__init__"><code class="docutils literal notranslate"><span class="pre">MultiGradientNode.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.physics.PerAtom"><code class="docutils literal notranslate"><span class="pre">PerAtom</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.PerAtom.__init__"><code class="docutils literal notranslate"><span class="pre">PerAtom.__init__()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.PerAtom.expansion0"><code class="docutils literal notranslate"><span class="pre">PerAtom.expansion0()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.PerAtom.expansion1"><code class="docutils literal notranslate"><span class="pre">PerAtom.expansion1()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.physics.QuadrupoleNode"><code class="docutils literal notranslate"><span class="pre">QuadrupoleNode</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.physics.ScreenedCoulombEnergyNode"><code class="docutils literal notranslate"><span class="pre">ScreenedCoulombEnergyNode</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.ScreenedCoulombEnergyNode.__init__"><code class="docutils literal notranslate"><span class="pre">ScreenedCoulombEnergyNode.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.physics.StressForceNode"><code class="docutils literal notranslate"><span class="pre">StressForceNode</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.StressForceNode.__init__"><code class="docutils literal notranslate"><span class="pre">StressForceNode.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.graphs.nodes.physics.VecMag"><code class="docutils literal notranslate"><span class="pre">VecMag</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.VecMag.__init__"><code class="docutils literal notranslate"><span class="pre">VecMag.__init__()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.physics.VecMag.expansion2"><code class="docutils literal notranslate"><span class="pre">VecMag.expansion2()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.nodes.tags.html">tags module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.nodes.targets.html">targets module</a></li>
 </ul>
@@ -119,8 +199,307 @@
            <div itemprop="articleBody">
              
   <section id="physics-module">
-<h1>physics module<a class="headerlink" href="#physics-module" title="Permalink to this heading"></a></h1>
+<h1>physics module<a class="headerlink" href="#physics-module" title="Link to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.graphs.nodes.physics</span></code> module.</p>
+<p id="module-hippynn.graphs.nodes.physics">Nodes for physics transformations</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.AtomToMolSummer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AtomToMolSummer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#AtomToMolSummer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.AtomToMolSummer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ExpandParents" title="hippynn.graphs.nodes.base.definition_helpers.ExpandParents"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExpandParents</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoNoKw" title="hippynn.graphs.nodes.base.definition_helpers.AutoNoKw"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoNoKw</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.SingleNode" title="hippynn.graphs.nodes.base.base.SingleNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">SingleNode</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.AtomToMolSummer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#AtomToMolSummer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.AtomToMolSummer.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.AtomToMolSummer.expansion0">
+<span class="sig-name descname"><span class="pre">expansion0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#AtomToMolSummer.expansion0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.AtomToMolSummer.expansion0" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (_BaseNode)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.AtomToMolSummer.expansion1">
+<span class="sig-name descname"><span class="pre">expansion1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdxer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#AtomToMolSummer.expansion1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.AtomToMolSummer.expansion1" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (_BaseNode, AtomIndexer)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.BondToMolSummmer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BondToMolSummmer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#BondToMolSummmer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.BondToMolSummmer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ExpandParents" title="hippynn.graphs.nodes.base.definition_helpers.ExpandParents"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExpandParents</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoNoKw" title="hippynn.graphs.nodes.base.definition_helpers.AutoNoKw"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoNoKw</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.SingleNode" title="hippynn.graphs.nodes.base.base.SingleNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">SingleNode</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.BondToMolSummmer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#BondToMolSummmer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.BondToMolSummmer.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.BondToMolSummmer.expansion0">
+<span class="sig-name descname"><span class="pre">expansion0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">purpose</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#BondToMolSummmer.expansion0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.BondToMolSummmer.expansion0" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (_BaseNode)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.BondToMolSummmer.expansion1">
+<span class="sig-name descname"><span class="pre">expansion1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdxer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_idxer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#BondToMolSummmer.expansion1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.BondToMolSummmer.expansion1" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (_BaseNode, AtomIndexer, PairIndexer)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.BondToMolSummmer.expansion2">
+<span class="sig-name descname"><span class="pre">expansion2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_molecules</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#BondToMolSummmer.expansion2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.BondToMolSummmer.expansion2" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (_BaseNode, _BaseNode, _BaseNode, _BaseNode, _BaseNode)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.ChargeMomentNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ChargeMomentNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#ChargeMomentNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.ChargeMomentNode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ExpandParents" title="hippynn.graphs.nodes.base.definition_helpers.ExpandParents"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExpandParents</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoNoKw" title="hippynn.graphs.nodes.base.definition_helpers.AutoNoKw"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoNoKw</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.SingleNode" title="hippynn.graphs.nodes.base.base.SingleNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">SingleNode</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.ChargeMomentNode.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#ChargeMomentNode.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.ChargeMomentNode.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.ChargeMomentNode.expansion0">
+<span class="sig-name descname"><span class="pre">expansion0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charges</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">purpose</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#ChargeMomentNode.expansion0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.ChargeMomentNode.expansion0" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (_BaseNode)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.ChargeMomentNode.expansion1">
+<span class="sig-name descname"><span class="pre">expansion1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">purpose</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#ChargeMomentNode.expansion1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.ChargeMomentNode.expansion1" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (Charges, PositionsNode)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.ChargeMomentNode.expansion2">
+<span class="sig-name descname"><span class="pre">expansion2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdxer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#ChargeMomentNode.expansion2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.ChargeMomentNode.expansion2" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (Charges, PositionsNode, AtomIndexer)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.ChargePairSetup">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ChargePairSetup</span></span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#ChargePairSetup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.ChargePairSetup" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ExpandParents" title="hippynn.graphs.nodes.base.definition_helpers.ExpandParents"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExpandParents</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.ChargePairSetup.expansion0">
+<span class="sig-name descname"><span class="pre">expansion0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charges</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">purpose</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#ChargePairSetup.expansion0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.ChargePairSetup.expansion0" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (Charges)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.ChargePairSetup.expansion1">
+<span class="sig-name descname"><span class="pre">expansion1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">purpose</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#ChargePairSetup.expansion1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.ChargePairSetup.expansion1" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (Charges, SpeciesNode)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.ChargePairSetup.expansion2">
+<span class="sig-name descname"><span class="pre">expansion2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_or_pair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">purpose</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#ChargePairSetup.expansion2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.ChargePairSetup.expansion2" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (Charges, _BaseNode, SpeciesNode)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.ChargePairSetup.expansion3">
+<span class="sig-name descname"><span class="pre">expansion3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pidxer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_distance</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#ChargePairSetup.expansion3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.ChargePairSetup.expansion3" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (Charges, PositionsNode, PaddingIndexer)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.ChargePairSetup.expansion4">
+<span class="sig-name descname"><span class="pre">expansion4</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pairfinder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pidxer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_distance</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#ChargePairSetup.expansion4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.ChargePairSetup.expansion4" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (Charges, PairIndexer, AtomIndexer)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.CombineEnergyNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CombineEnergyNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#CombineEnergyNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.CombineEnergyNode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.tags.html#hippynn.graphs.nodes.tags.Energies" title="hippynn.graphs.nodes.tags.Energies"><code class="xref py py-class docutils literal notranslate"><span class="pre">Energies</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoKw" title="hippynn.graphs.nodes.base.definition_helpers.AutoKw"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoKw</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ExpandParents" title="hippynn.graphs.nodes.base.definition_helpers.ExpandParents"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExpandParents</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.multi.html#hippynn.graphs.nodes.base.multi.MultiNode" title="hippynn.graphs.nodes.base.multi.MultiNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiNode</span></code></a></p>
+<p>Combines Local atom energies from different Energy Nodes.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This node has parent expansion, following these procedures.</p>
+<ol class="arabic simple">
+<li><p>If matching (_BaseNode, Energies), then apply expansion0</p></li>
+<li><p>If matching (Energies, _BaseNode), then apply expansion0</p></li>
+<li><p>If matching (_BaseNode, _BaseNode), then apply expansion1</p></li>
+<li><p>If matching (_BaseNode, _BaseNode, PaddingIndexer), then apply expansion2</p></li>
+<li><p>Asserts that the number of parents is 4</p></li>
+<li><p>Transforms the parents to have index states (&lt;IdxType.Atoms&gt;, &lt;IdxType.Atoms&gt;, None, None)</p></li>
+</ol>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.CombineEnergyNode.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#CombineEnergyNode.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.CombineEnergyNode.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.CombineEnergyNode.expansion0">
+<span class="sig-name descname"><span class="pre">expansion0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_2</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#CombineEnergyNode.expansion0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.CombineEnergyNode.expansion0" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (Energies, _BaseNode)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.CombineEnergyNode.expansion1">
+<span class="sig-name descname"><span class="pre">expansion1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_2</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#CombineEnergyNode.expansion1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.CombineEnergyNode.expansion1" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (_BaseNode, _BaseNode)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.CombineEnergyNode.expansion2">
+<span class="sig-name descname"><span class="pre">expansion2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdindexer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#CombineEnergyNode.expansion2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.CombineEnergyNode.expansion2" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (_BaseNode, _BaseNode, PaddingIndexer)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.CoulombEnergyNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CoulombEnergyNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_conversion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#CoulombEnergyNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.CoulombEnergyNode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hippynn.graphs.nodes.physics.ChargePairSetup" title="hippynn.graphs.nodes.physics.ChargePairSetup"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChargePairSetup</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.tags.html#hippynn.graphs.nodes.tags.Energies" title="hippynn.graphs.nodes.tags.Energies"><code class="xref py py-class docutils literal notranslate"><span class="pre">Energies</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoKw" title="hippynn.graphs.nodes.base.definition_helpers.AutoKw"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoKw</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.multi.html#hippynn.graphs.nodes.base.multi.MultiNode" title="hippynn.graphs.nodes.base.multi.MultiNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiNode</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.CoulombEnergyNode.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_conversion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#CoulombEnergyNode.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.CoulombEnergyNode.__init__" title="Link to this definition"></a></dt>
+<dd><p>Besides the normal ‘name’ and ‘parents’ arguments, this node requires an <cite>energy_conversion</cite> parameter.
+This corresponds to coulomb’s constant k in the equation E = kqq/r.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.DipoleNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DipoleNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#DipoleNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.DipoleNode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hippynn.graphs.nodes.physics.ChargeMomentNode" title="hippynn.graphs.nodes.physics.ChargeMomentNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChargeMomentNode</span></code></a></p>
+<p>Compute the dipole of point charges.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This node has parent expansion, following these procedures.</p>
+<ol class="arabic simple">
+<li><p>If matching (_BaseNode), then apply expansion0</p></li>
+<li><p>If matching (Charges, PositionsNode), then apply expansion1</p></li>
+<li><p>If matching (Charges, PositionsNode, AtomIndexer), then apply expansion2</p></li>
+<li><p>Asserts that the number of parents is 4</p></li>
+<li><p>Gets main_output of nodes: casts MultiNodes to their main output</p></li>
+<li><p>Transforms the parents to have index states (&lt;IdxType.Atoms&gt;, &lt;IdxType.Atoms&gt;, None, None)</p></li>
+</ol>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.GradientNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GradientNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#GradientNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.GradientNode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoKw" title="hippynn.graphs.nodes.base.definition_helpers.AutoKw"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoKw</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.SingleNode" title="hippynn.graphs.nodes.base.base.SingleNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">SingleNode</span></code></a></p>
+<p>Compute the gradient of a quantity.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.GradientNode.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#GradientNode.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.GradientNode.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.MultiGradientNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MultiGradientNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecular_energies_parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_BaseNode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generalized_coordinates_parents</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">_BaseNode</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#MultiGradientNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.MultiGradientNode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoKw" title="hippynn.graphs.nodes.base.definition_helpers.AutoKw"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoKw</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.multi.html#hippynn.graphs.nodes.base.multi.MultiNode" title="hippynn.graphs.nodes.base.multi.MultiNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiNode</span></code></a></p>
+<p>Compute the gradient of a quantity.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.MultiGradientNode.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecular_energies_parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_BaseNode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generalized_coordinates_parents</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">_BaseNode</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#MultiGradientNode.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.MultiGradientNode.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.PerAtom">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PerAtom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#PerAtom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.PerAtom" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ExpandParents" title="hippynn.graphs.nodes.base.definition_helpers.ExpandParents"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExpandParents</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoNoKw" title="hippynn.graphs.nodes.base.definition_helpers.AutoNoKw"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoNoKw</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.SingleNode" title="hippynn.graphs.nodes.base.base.SingleNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">SingleNode</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.PerAtom.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#PerAtom.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.PerAtom.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.PerAtom.expansion0">
+<span class="sig-name descname"><span class="pre">expansion0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">purpose</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#PerAtom.expansion0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.PerAtom.expansion0" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (_BaseNode)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.PerAtom.expansion1">
+<span class="sig-name descname"><span class="pre">expansion1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#PerAtom.expansion1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.PerAtom.expansion1" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (_BaseNode, _BaseNode)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.QuadrupoleNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuadrupoleNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#QuadrupoleNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.QuadrupoleNode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hippynn.graphs.nodes.physics.ChargeMomentNode" title="hippynn.graphs.nodes.physics.ChargeMomentNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChargeMomentNode</span></code></a></p>
+<p>Compute the traceless quadrupole of point charges.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This node has parent expansion, following these procedures.</p>
+<ol class="arabic simple">
+<li><p>If matching (_BaseNode), then apply expansion0</p></li>
+<li><p>If matching (Charges, PositionsNode), then apply expansion1</p></li>
+<li><p>If matching (Charges, PositionsNode, AtomIndexer), then apply expansion2</p></li>
+<li><p>Asserts that the number of parents is 4</p></li>
+<li><p>Gets main_output of nodes: casts MultiNodes to their main output</p></li>
+<li><p>Transforms the parents to have index states (&lt;IdxType.Atoms&gt;, &lt;IdxType.Atoms&gt;, None, None)</p></li>
+</ol>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.ScreenedCoulombEnergyNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScreenedCoulombEnergyNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_conversion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screening</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#ScreenedCoulombEnergyNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.ScreenedCoulombEnergyNode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hippynn.graphs.nodes.physics.ChargePairSetup" title="hippynn.graphs.nodes.physics.ChargePairSetup"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChargePairSetup</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.tags.html#hippynn.graphs.nodes.tags.Energies" title="hippynn.graphs.nodes.tags.Energies"><code class="xref py py-class docutils literal notranslate"><span class="pre">Energies</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoKw" title="hippynn.graphs.nodes.base.definition_helpers.AutoKw"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoKw</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.multi.html#hippynn.graphs.nodes.base.multi.MultiNode" title="hippynn.graphs.nodes.base.multi.MultiNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiNode</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.ScreenedCoulombEnergyNode.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_conversion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screening</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#ScreenedCoulombEnergyNode.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.ScreenedCoulombEnergyNode.__init__" title="Link to this definition"></a></dt>
+<dd><p>Besides the normal ‘name’ and ‘parents’ arguments, this node requires an <cite>energy_conversion</cite> parameter.
+This corresponds to coulomb’s constant k in the equation E = kqq/r.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.StressForceNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StressForceNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#StressForceNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.StressForceNode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoNoKw" title="hippynn.graphs.nodes.base.definition_helpers.AutoNoKw"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoNoKw</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.multi.html#hippynn.graphs.nodes.base.multi.MultiNode" title="hippynn.graphs.nodes.base.multi.MultiNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiNode</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.StressForceNode.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#StressForceNode.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.StressForceNode.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.VecMag">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VecMag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_helper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#VecMag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.VecMag" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ExpandParents" title="hippynn.graphs.nodes.base.definition_helpers.ExpandParents"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExpandParents</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoNoKw" title="hippynn.graphs.nodes.base.definition_helpers.AutoNoKw"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoNoKw</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.SingleNode" title="hippynn.graphs.nodes.base.base.SingleNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">SingleNode</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.VecMag.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_helper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#VecMag.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.VecMag.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.physics.VecMag.expansion2">
+<span class="sig-name descname"><span class="pre">expansion2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">helper</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">purpose</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/physics.html#VecMag.expansion2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.physics.VecMag.expansion2" title="Link to this definition"></a></dt>
+<dd><p>Used for creation from parents with signature (_BaseNode, _BaseNode)</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 

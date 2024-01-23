@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Periodic Boundary Conditions &mdash; hippynn 0.0.1 documentation</title>
+  <title>Periodic Boundary Conditions &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
@@ -16,9 +16,9 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -101,7 +101,7 @@
            <div itemprop="articleBody">
              
   <section id="periodic-boundary-conditions">
-<h1>Periodic Boundary Conditions<a class="headerlink" href="#periodic-boundary-conditions" title="Permalink to this heading"></a></h1>
+<h1>Periodic Boundary Conditions<a class="headerlink" href="#periodic-boundary-conditions" title="Link to this heading"></a></h1>
 <p>Periodic boundary conditions require a cell node. Triclinic cells are fully supported.</p>
 <p>Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">species</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">SpeciesNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">)</span>
@@ -120,7 +120,7 @@ memory and time than open boundary conditions. The less skewed your cells are, a
 are the larger cells are compared to the cutoff distance required,
 the fewer images needed to be searched in finding pairs.</p>
 <section id="dynamic-pair-finder">
-<h2>Dynamic Pair Finder<a class="headerlink" href="#dynamic-pair-finder" title="Permalink to this heading"></a></h2>
+<h2>Dynamic Pair Finder<a class="headerlink" href="#dynamic-pair-finder" title="Link to this heading"></a></h2>
 <p>For highly complex datasets, there is a more flexible pairfinder which
 can be built as such:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">enc</span><span class="p">,</span> <span class="n">padidxer</span> <span class="o">=</span> <span class="n">indexers</span><span class="o">.</span><span class="n">acquire_encoding_padding</span><span class="p">(</span>
@@ -144,7 +144,7 @@ cell side lengths, the <a class="reference internal" href="../api_documentation/
 alternatively. It should exhibit reduced computation times, especially for large systems.</p>
 </section>
 <section id="pair-finder-memory">
-<h2>Pair Finder Memory<a class="headerlink" href="#pair-finder-memory" title="Permalink to this heading"></a></h2>
+<h2>Pair Finder Memory<a class="headerlink" href="#pair-finder-memory" title="Link to this heading"></a></h2>
 <p>When using a trained model to run MD or for any application where atom positions
 change only slightly between subsquent model calls,
 <a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory" title="hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory"><code class="xref py py-class docutils literal notranslate"><span class="pre">PeriodicPairIndexerMemory</span></code></a> and
@@ -156,11 +156,11 @@ pair distances computed at each step, but decrease the number of times new pairs
 be computed. Skin should be set to zero while training for fastest results.</p>
 </section>
 <section id="caching-pre-computed-pairs">
-<h2>Caching Pre-computed Pairs<a class="headerlink" href="#caching-pre-computed-pairs" title="Permalink to this heading"></a></h2>
+<h2>Caching Pre-computed Pairs<a class="headerlink" href="#caching-pre-computed-pairs" title="Link to this heading"></a></h2>
 <p>To mitigate the cost of periodic pairfinding (with either of the above methods),
 the pairs for each system in the training database can be cached. To do this,
 first assemble your modules for training. Then run
-<code class="xref py py-func docutils literal notranslate"><span class="pre">precompute_pairs()</span></code> on the training module.
+<a class="reference internal" href="../api_documentation/hippynn.experiment.assembly.html#hippynn.experiment.assembly.precompute_pairs" title="hippynn.experiment.assembly.precompute_pairs"><code class="xref py py-func docutils literal notranslate"><span class="pre">precompute_pairs()</span></code></a> on the training module.
 This produces a cache of the pairs in the database, and replaces the
 pair finder with an input node that gets the information from this cache.
 After that, you’ll have to re-assemble a new model for training,
@@ -181,7 +181,7 @@ due to current limitations in pytorch. As such we recommend you move the
 dataset to a GPU and use <code class="docutils literal notranslate"><span class="pre">n_workers=None</span></code> when caching pairs.</p>
 </section>
 <section id="what-s-not-yet-supported">
-<h2>What’s not yet supported<a class="headerlink" href="#what-s-not-yet-supported" title="Permalink to this heading"></a></h2>
+<h2>What’s not yet supported<a class="headerlink" href="#what-s-not-yet-supported" title="Link to this heading"></a></h2>
 <p>During training, we don’t yet have support for mixed PBCs where
 some directions are periodic and others are open.
 However, the ASE interface can almost (but not quite yet) handle

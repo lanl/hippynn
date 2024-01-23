@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.layers.pairs.filters &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.layers.pairs.filters &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -81,7 +81,9 @@
 
 <span class="kn">from</span> <span class="nn">.open</span> <span class="kn">import</span> <span class="n">_PairIndexer</span>
 
-<div class="viewcode-block" id="FilterDistance"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.filters.html#hippynn.layers.pairs.filters.FilterDistance">[docs]</a><span class="k">class</span> <span class="nc">FilterDistance</span><span class="p">(</span><span class="n">_PairIndexer</span><span class="p">):</span>
+<div class="viewcode-block" id="FilterDistance">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.filters.html#hippynn.layers.pairs.filters.FilterDistance">[docs]</a>
+<span class="k">class</span> <span class="nc">FilterDistance</span><span class="p">(</span><span class="n">_PairIndexer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Filters a list of tensors in *pair_lists by distance. </span>
 <span class="sd">    pair_dist is first positional argument.</span>
 
@@ -89,11 +91,15 @@
 <span class="sd">    FilterPairIndexers behave as regular PairIndexers. </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-<div class="viewcode-block" id="FilterDistance.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.filters.html#hippynn.layers.pairs.filters.FilterDistance.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="o">*</span><span class="n">pair_tensors</span><span class="p">):</span>
+<div class="viewcode-block" id="FilterDistance.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.filters.html#hippynn.layers.pairs.filters.FilterDistance.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="o">*</span><span class="n">pair_tensors</span><span class="p">):</span>
         <span class="n">r_cut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hard_dist_cutoff</span> 
         <span class="n">idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">pair_dist</span> <span class="o">&lt;=</span> <span class="n">r_cut</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">pair_tensors</span> <span class="o">=</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="o">*</span><span class="n">pair_tensors</span>
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">pl</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">pl</span> <span class="ow">in</span> <span class="n">pair_tensors</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">pl</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">pl</span> <span class="ow">in</span> <span class="n">pair_tensors</span><span class="p">)</span></div>
+</div>
+
 
 </pre></div>
 

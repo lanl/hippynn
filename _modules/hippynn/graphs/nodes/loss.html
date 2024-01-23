@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.graphs.nodes.loss &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.graphs.nodes.loss &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -107,17 +107,25 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="ReduceSingleNode"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.ReduceSingleNode">[docs]</a><span class="k">class</span> <span class="nc">ReduceSingleNode</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">):</span>
+<div class="viewcode-block" id="ReduceSingleNode">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.ReduceSingleNode">[docs]</a>
+<span class="k">class</span> <span class="nc">ReduceSingleNode</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">):</span>
     <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
 
-<div class="viewcode-block" id="ReduceSingleNode.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.ReduceSingleNode.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+<div class="viewcode-block" id="ReduceSingleNode.__init__">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.ReduceSingleNode.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classname</span> <span class="o">+</span> <span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">parent</span> <span class="o">=</span> <span class="n">elementwise_compare_reduce</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">main_output</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">parent</span><span class="p">,))</span></div>
 
-<div class="viewcode-block" id="ReduceSingleNode.of_node"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.ReduceSingleNode.of_node">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="ReduceSingleNode.of_node">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.ReduceSingleNode.of_node">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">of_node</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">pred</span><span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">op</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -125,24 +133,40 @@
             <span class="bp">cls</span><span class="o">.</span><span class="n">torch_module</span> <span class="o">=</span> <span class="n">LambdaModule</span><span class="p">(</span><span class="n">op</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Mean"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.Mean">[docs]</a><span class="k">class</span> <span class="nc">Mean</span><span class="p">(</span><span class="n">ReduceSingleNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Mean">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.Mean">[docs]</a>
+<span class="k">class</span> <span class="nc">Mean</span><span class="p">(</span><span class="n">ReduceSingleNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="mean_sq"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.mean_sq">[docs]</a><span class="k">def</span> <span class="nf">mean_sq</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
+
+<div class="viewcode-block" id="mean_sq">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.mean_sq">[docs]</a>
+<span class="k">def</span> <span class="nf">mean_sq</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="MeanSq"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.MeanSq">[docs]</a><span class="k">class</span> <span class="nc">MeanSq</span><span class="p">(</span><span class="n">ReduceSingleNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">mean_sq</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MeanSq">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.MeanSq">[docs]</a>
+<span class="k">class</span> <span class="nc">MeanSq</span><span class="p">(</span><span class="n">ReduceSingleNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">mean_sq</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="Std"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.Std">[docs]</a><span class="k">class</span> <span class="nc">Std</span><span class="p">(</span><span class="n">ReduceSingleNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Std">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.Std">[docs]</a>
+<span class="k">class</span> <span class="nc">Std</span><span class="p">(</span><span class="n">ReduceSingleNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="Var"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.Var">[docs]</a><span class="k">class</span> <span class="nc">Var</span><span class="p">(</span><span class="n">ReduceSingleNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">var</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Var">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.Var">[docs]</a>
+<span class="k">class</span> <span class="nc">Var</span><span class="p">(</span><span class="n">ReduceSingleNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">var</span><span class="p">):</span>
     <span class="k">pass</span></div>
+
 
 
 <span class="k">class</span> <span class="nc">_BaseCompareLoss</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">):</span>
@@ -170,22 +194,37 @@
                 <span class="bp">cls</span><span class="o">.</span><span class="n">torch_module</span> <span class="o">=</span> <span class="n">LambdaModule</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="RsqMod"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.RsqMod">[docs]</a><span class="k">class</span> <span class="nc">RsqMod</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="RsqMod.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.RsqMod.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span> <span class="n">true</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">predicted</span> <span class="o">-</span> <span class="n">true</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="n">true</span><span class="o">.</span><span class="n">var</span><span class="p">())</span></div></div>
+<div class="viewcode-block" id="RsqMod">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.RsqMod">[docs]</a>
+<span class="k">class</span> <span class="nc">RsqMod</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="RsqMod.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.RsqMod.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span> <span class="n">true</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">predicted</span> <span class="o">-</span> <span class="n">true</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="n">true</span><span class="o">.</span><span class="n">var</span><span class="p">())</span></div>
+</div>
 
 
-<div class="viewcode-block" id="Rsq"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.Rsq">[docs]</a><span class="k">class</span> <span class="nc">Rsq</span><span class="p">(</span><span class="n">_BaseCompareLoss</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Rsq">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.Rsq">[docs]</a>
+<span class="k">class</span> <span class="nc">Rsq</span><span class="p">(</span><span class="n">_BaseCompareLoss</span><span class="p">):</span>
     <span class="n">torch_module</span> <span class="o">=</span> <span class="n">RsqMod</span><span class="p">()</span>
     <span class="n">_classname</span> <span class="o">=</span> <span class="s2">&quot;Rsq&quot;</span></div>
 
 
-<div class="viewcode-block" id="MSELoss"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.MSELoss">[docs]</a><span class="k">class</span> <span class="nc">MSELoss</span><span class="p">(</span><span class="n">_BaseCompareLoss</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MSELoss">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.MSELoss">[docs]</a>
+<span class="k">class</span> <span class="nc">MSELoss</span><span class="p">(</span><span class="n">_BaseCompareLoss</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="MAELoss"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.MAELoss">[docs]</a><span class="k">class</span> <span class="nc">MAELoss</span><span class="p">(</span><span class="n">_BaseCompareLoss</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">l1_loss</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MAELoss">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.MAELoss">[docs]</a>
+<span class="k">class</span> <span class="nc">MAELoss</span><span class="p">(</span><span class="n">_BaseCompareLoss</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">l1_loss</span><span class="p">):</span>
     <span class="k">pass</span></div>
+
 
 
 <span class="k">class</span> <span class="nc">_LPReg</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">):</span>
@@ -202,19 +241,30 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auto_module_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">torch_module</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="lpreg"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.lpreg">[docs]</a><span class="k">def</span> <span class="nf">lpreg</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<div class="viewcode-block" id="lpreg">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.lpreg">[docs]</a>
+<span class="k">def</span> <span class="nf">lpreg</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">_LPReg</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">pred</span></div>
 
 
-<div class="viewcode-block" id="l2reg"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.l2reg">[docs]</a><span class="k">def</span> <span class="nf">l2reg</span><span class="p">(</span><span class="n">network</span><span class="p">):</span>
+
+<div class="viewcode-block" id="l2reg">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.l2reg">[docs]</a>
+<span class="k">def</span> <span class="nf">l2reg</span><span class="p">(</span><span class="n">network</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">lpreg</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="l1reg"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.l1reg">[docs]</a><span class="k">def</span> <span class="nf">l1reg</span><span class="p">(</span><span class="n">network</span><span class="p">):</span>
+
+<div class="viewcode-block" id="l1reg">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.l1reg">[docs]</a>
+<span class="k">def</span> <span class="nf">l1reg</span><span class="p">(</span><span class="n">network</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">lpreg</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
 
+
 <span class="c1"># For loss functions with phases</span>
-<div class="viewcode-block" id="absolute_errors"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.absolute_errors">[docs]</a><span class="k">def</span> <span class="nf">absolute_errors</span><span class="p">(</span><span class="n">predict</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">true</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+<div class="viewcode-block" id="absolute_errors">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.absolute_errors">[docs]</a>
+<span class="k">def</span> <span class="nf">absolute_errors</span><span class="p">(</span><span class="n">predict</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">true</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the absolute errors with phases between predicted and true values. In</span>
 <span class="sd">    other words, prediction should be close to the absolute value of true, and the sign</span>
 <span class="sd">    does not matter.</span>
@@ -228,6 +278,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">true</span> <span class="o">-</span> <span class="n">predict</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">true</span> <span class="o">+</span> <span class="n">predict</span><span class="p">))</span></div>
+
 
 
 </pre></div>

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>metric_tracker module &mdash; hippynn 0.0.1 documentation</title>
+  <title>metric_tracker module &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
@@ -16,9 +16,9 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -54,11 +54,31 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.html">custom_kernels package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.databases.html">databases package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.experiment.html">experiment package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.SetupParams"><code class="docutils literal notranslate"><span class="pre">SetupParams</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.assemble_for_training"><code class="docutils literal notranslate"><span class="pre">assemble_for_training()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.setup_and_train"><code class="docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.setup_training"><code class="docutils literal notranslate"><span class="pre">setup_training()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.test_model"><code class="docutils literal notranslate"><span class="pre">test_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.train_model"><code class="docutils literal notranslate"><span class="pre">train_model()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.assembly.html">assembly module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.controllers.html">controllers module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.device.html">device module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.evaluator.html">evaluator module</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">metric_tracker module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">metric_tracker module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.metric_tracker.MetricTracker"><code class="docutils literal notranslate"><span class="pre">MetricTracker</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.experiment.metric_tracker.MetricTracker.__init__"><code class="docutils literal notranslate"><span class="pre">MetricTracker.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.experiment.metric_tracker.MetricTracker.current_epoch"><code class="docutils literal notranslate"><span class="pre">MetricTracker.current_epoch</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.experiment.metric_tracker.MetricTracker.evaluation_print"><code class="docutils literal notranslate"><span class="pre">MetricTracker.evaluation_print()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.experiment.metric_tracker.MetricTracker.evaluation_print_better"><code class="docutils literal notranslate"><span class="pre">MetricTracker.evaluation_print_better()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.experiment.metric_tracker.MetricTracker.from_evaluator"><code class="docutils literal notranslate"><span class="pre">MetricTracker.from_evaluator()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.experiment.metric_tracker.MetricTracker.plot_over_time"><code class="docutils literal notranslate"><span class="pre">MetricTracker.plot_over_time()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.experiment.metric_tracker.MetricTracker.register_metrics"><code class="docutils literal notranslate"><span class="pre">MetricTracker.register_metrics()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.metric_tracker.table_evaluation_print"><code class="docutils literal notranslate"><span class="pre">table_evaluation_print()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.metric_tracker.table_evaluation_print_better"><code class="docutils literal notranslate"><span class="pre">table_evaluation_print_better()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.routines.html">routines module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.serialization.html">serialization module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.step_functions.html">step_functions module</a></li>
@@ -106,8 +126,126 @@
            <div itemprop="articleBody">
              
   <section id="metric-tracker-module">
-<h1>metric_tracker module<a class="headerlink" href="#metric-tracker-module" title="Permalink to this heading"></a></h1>
+<h1>metric_tracker module<a class="headerlink" href="#metric-tracker-module" title="Link to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.experiment.metric_tracker</span></code> module.</p>
+<p id="module-hippynn.experiment.metric_tracker">Keep track of training metrics over the experiment</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.experiment.metric_tracker.MetricTracker">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MetricTracker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stopping_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('train',</span> <span class="pre">'valid',</span> <span class="pre">'test')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/metric_tracker.html#MetricTracker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.metric_tracker.MetricTracker" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>MetricTracker instances keep track of metrics and models for an experiment</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metric_names</strong> – the tracked metrics</p></li>
+<li><p><strong>stopping_key</strong> – the metric used to determine what model is best</p></li>
+<li><p><strong>best_metric_values</strong> – dictionary of metric keys to the best metric values observed so far.
+lower is assumed to be better.</p></li>
+<li><p><strong>best_model</strong> – state dict for the best model so far.</p></li>
+<li><p><strong>epoch_metric_values</strong> – list (index epoch) of
+dictionary (key split, value of dictionary (key metric, value metric value)</p></li>
+<li><p><strong>other_metric_values</strong> – dictionary of metric values at other times than after an epoch, for example
+the final test values.</p></li>
+<li><p><strong>epoch_times</strong> – timing info for each epoch</p></li>
+<li><p><strong>quiet</strong> – whether to print the values registered.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.metric_tracker.MetricTracker.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stopping_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('train',</span> <span class="pre">'valid',</span> <span class="pre">'test')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/metric_tracker.html#MetricTracker.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.metric_tracker.MetricTracker.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metric_names</strong> – </p></li>
+<li><p><strong>stopping_key</strong> – </p></li>
+<li><p><strong>quiet</strong> – </p></li>
+<li><p><strong>split_names</strong> – splits to track.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hippynn.experiment.metric_tracker.MetricTracker.current_epoch">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">current_epoch</span></span><a class="headerlink" href="#hippynn.experiment.metric_tracker.MetricTracker.current_epoch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.metric_tracker.MetricTracker.evaluation_print">
+<span class="sig-name descname"><span class="pre">evaluation_print</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evaluation_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/metric_tracker.html#MetricTracker.evaluation_print"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.metric_tracker.MetricTracker.evaluation_print" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.metric_tracker.MetricTracker.evaluation_print_better">
+<span class="sig-name descname"><span class="pre">evaluation_print_better</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evaluation_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">better_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/metric_tracker.html#MetricTracker.evaluation_print_better"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.metric_tracker.MetricTracker.evaluation_print_better" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.metric_tracker.MetricTracker.from_evaluator">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_evaluator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evaluator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/metric_tracker.html#MetricTracker.from_evaluator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.metric_tracker.MetricTracker.from_evaluator" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.metric_tracker.MetricTracker.plot_over_time">
+<span class="sig-name descname"><span class="pre">plot_over_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/metric_tracker.html#MetricTracker.plot_over_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.metric_tracker.MetricTracker.plot_over_time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.metric_tracker.MetricTracker.register_metrics">
+<span class="sig-name descname"><span class="pre">register_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">when</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/metric_tracker.html#MetricTracker.register_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.metric_tracker.MetricTracker.register_metrics" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metric_info</strong> – dictionary of metric names: metric values</p></li>
+<li><p><strong>when</strong> – string or integer specifying epoch number.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.experiment.metric_tracker.table_evaluation_print">
+<span class="sig-name descname"><span class="pre">table_evaluation_print</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evaluation_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/metric_tracker.html#table_evaluation_print"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.metric_tracker.table_evaluation_print" title="Link to this definition"></a></dt>
+<dd><p>Print metric results as a table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>evaluation_dict</strong> – dict[eval type]-&gt;dict[metric]-&gt;value</p></li>
+<li><p><strong>metric_names</strong> – Names</p></li>
+<li><p><strong>ncs</strong> – Number of columns for name fields.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.experiment.metric_tracker.table_evaluation_print_better">
+<span class="sig-name descname"><span class="pre">table_evaluation_print_better</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evaluation_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">better_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/metric_tracker.html#table_evaluation_print_better"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.metric_tracker.table_evaluation_print_better" title="Link to this definition"></a></dt>
+<dd><p>Print metric results as a table, add a ‘*’ character for metrics in better_dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>evaluation_dict</strong> – dict[eval type]-&gt;dict[metric]-&gt;value</p></li>
+<li><p><strong>better_dict</strong> – dict[eval type]-&gt;dict[metric]-&gt;bool</p></li>
+<li><p><strong>metric_names</strong> – Names</p></li>
+<li><p><strong>ncs</strong> – Number of columns for name fields.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 

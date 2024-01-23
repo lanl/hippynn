@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ase_database module &mdash; hippynn 0.0.1 documentation</title>
+  <title>ase_database module &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
@@ -16,9 +16,9 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -57,7 +57,17 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.graphs.html">graphs package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.interfaces.html">interfaces package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="hippynn.interfaces.ase_interface.html">ase_interface package</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">ase_database module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.interfaces.ase_interface.html#hippynn.interfaces.ase_interface.AseDatabase"><code class="docutils literal notranslate"><span class="pre">AseDatabase</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.interfaces.ase_interface.html#hippynn.interfaces.ase_interface.HippynnCalculator"><code class="docutils literal notranslate"><span class="pre">HippynnCalculator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.interfaces.ase_interface.html#hippynn.interfaces.ase_interface.calculator_from_model"><code class="docutils literal notranslate"><span class="pre">calculator_from_model()</span></code></a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">ase_database module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.interfaces.ase_interface.ase_database.AseDatabase"><code class="docutils literal notranslate"><span class="pre">AseDatabase</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.interfaces.ase_interface.ase_database.AseDatabase.__init__"><code class="docutils literal notranslate"><span class="pre">AseDatabase.__init__()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.interfaces.ase_interface.ase_database.AseDatabase.load_arrays"><code class="docutils literal notranslate"><span class="pre">AseDatabase.load_arrays()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.interfaces.ase_interface.ase_unittests.html">ase_unittests module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.interfaces.ase_interface.calculator.html">calculator module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.interfaces.ase_interface.pairfinder.html">pairfinder module</a></li>
@@ -109,8 +119,88 @@
            <div itemprop="articleBody">
              
   <section id="ase-database-module">
-<h1>ase_database module<a class="headerlink" href="#ase-database-module" title="Permalink to this heading"></a></h1>
+<h1>ase_database module<a class="headerlink" href="#ase-database-module" title="Link to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.interfaces.ase_interface.ase_database</span></code> module.</p>
+<p id="module-hippynn.interfaces.ase_interface.ase_database">Dataset stored as ase database file (ideally either .json or .db, or in .xyz, .extxyz formats)</p>
+<p>See: <a class="reference external" href="https://databases.fysik.dtu.dk/ase/ase/db/db.html">https://databases.fysik.dtu.dk/ase/ase/db/db.html</a> for documentation
+on typical columns present in ase database</p>
+<p>Typically used column names in ase db/xyz format:</p>
+<p>positions : x,y,z cartesian positions (Angstrom)
+forces : x,y,z carteisian forces (ev/Angstrom)
+energy : energy (eV)
+energy_per_atom : energy per atom (eV/atom)
+cell : x,y,z of cell (3x3) (Angstrom)
+charges : atom-specific charges
+stress: (6,) atomic stresses
+initial_charges : atom-specific initial charges 
+inital_magmoms :atom-specific initial magnetic moments
+numbers : atom Zs (integer)
+pbc : periodic boundary conditions (bool)
+ctime : computer time (float)
+mtime : time (float)
+dipole : molecular dipole (3) vector</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.interfaces.ase_interface.ase_database.AseDatabase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AseDatabase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_unfound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/ase_interface/ase_database.html#AseDatabase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.ase_interface.ase_database.AseDatabase" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.databases.database.html#hippynn.databases.database.Database" title="hippynn.databases.database.Database"><code class="xref py py-class docutils literal notranslate"><span class="pre">Database</span></code></a>, <a class="reference internal" href="hippynn.databases.restarter.html#hippynn.databases.restarter.Restartable" title="hippynn.databases.restarter.Restartable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Restartable</span></code></a></p>
+<p>Database stored as ase database file(s) in a directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> – directory path where the ase database(s) is stored</p></li>
+<li><p><strong>name</strong> – name or list of names for files for ase databases.</p></li>
+</ul>
+</dd>
+</dl>
+<p>This function loads an ase database(s) ({name}.json/.db) OR ({{name}.extxyz,.xyz})
+variable db_name including all inputs and targets.</p>
+<p>filenames should end with .json, .db, .extxyz, and .xyz, etc; Anything parsable by ase.io.load</p>
+<p>Other arguments: See <code class="docutils literal notranslate"><span class="pre">Database</span></code>.</p>
+<dl class="simple">
+<dt>See: <a class="reference external" href="https://databases.fysik.dtu.dk/ase/ase/db/db.html">https://databases.fysik.dtu.dk/ase/ase/db/db.html</a> for documentation</dt><dd><p>on typical columns present in ase database</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.interfaces.ase_interface.ase_database.AseDatabase.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_unfound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/ase_interface/ase_database.html#AseDatabase.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.ase_interface.ase_database.AseDatabase.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arr_dict</strong> – dictionary mapping strings to numpy arrays</p></li>
+<li><p><strong>inputs</strong> – list of strings for input db_names</p></li>
+<li><p><strong>targets</strong> – list of strings for output db_namees</p></li>
+<li><p><strong>seed</strong> – int, for random splitting</p></li>
+<li><p><strong>test_size</strong> – fraction of data to use in test split</p></li>
+<li><p><strong>valid_size</strong> – fraction of data to use in train split</p></li>
+<li><p><strong>num_workers</strong> – passed to pytorch dataloaders</p></li>
+<li><p><strong>pin_memory</strong> – passed to pytorch dataloaders</p></li>
+<li><p><strong>allow_unfound</strong> – If true, skip checking if the needed inputs and targets are found.
+This allows setting inputs=None and/or targets=None.</p></li>
+<li><p><strong>quiet</strong> – If True, print little or nothing while loading.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.interfaces.ase_interface.ase_database.AseDatabase.load_arrays">
+<span class="sig-name descname"><span class="pre">load_arrays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_unfound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/interfaces/ase_interface/ase_database.html#AseDatabase.load_arrays"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.interfaces.ase_interface.ase_database.AseDatabase.load_arrays" title="Link to this definition"></a></dt>
+<dd><p>load arrays load ase database into hippynn database arrays</p>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>filename<span class="classifier">str</span></dt><dd><p>filename or path of database to convert</p>
+</dd>
+<dt>prefix<span class="classifier">str, optional</span></dt><dd><p>prefix for output numpy arrays, by default None</p>
+</dd>
+<dt>return_data<span class="classifier">bool, optional</span></dt><dd><p>whether or not to return the data or write to files, by default False</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 

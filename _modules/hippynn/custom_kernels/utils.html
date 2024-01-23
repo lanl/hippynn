@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.custom_kernels.utils &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.custom_kernels.utils &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -184,7 +184,9 @@
 <span class="n">_CACHE_STORE</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="n">_make_cache</span><span class="p">)</span>
 
 <span class="n">CACHE_LOCK_MISSES</span> <span class="o">=</span> <span class="mi">0</span>
-<div class="viewcode-block" id="resort_pairs_cached"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.utils.html#hippynn.custom_kernels.utils.resort_pairs_cached">[docs]</a><span class="k">def</span> <span class="nf">resort_pairs_cached</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">others</span><span class="p">):</span>
+<div class="viewcode-block" id="resort_pairs_cached">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.utils.html#hippynn.custom_kernels.utils.resort_pairs_cached">[docs]</a>
+<span class="k">def</span> <span class="nf">resort_pairs_cached</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">others</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">CACHE_LOCK_MISSES</span>
     <span class="n">deque</span><span class="p">,</span> <span class="n">lock</span> <span class="o">=</span> <span class="n">_CACHE_STORE</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">device</span><span class="p">]</span>
     <span class="n">got_lock</span> <span class="o">=</span> <span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">(</span><span class="n">blocking</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -196,6 +198,7 @@
         <span class="k">return</span> <span class="n">entry</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">others</span><span class="p">)</span>
     <span class="n">CACHE_LOCK_MISSES</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">resort_pairs</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">others</span><span class="p">)</span></div>
+
 
 </pre></div>
 

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.interfaces.pyseqm_interface.gen_par &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.interfaces.pyseqm_interface.gen_par &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -91,8 +91,12 @@
     <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="gen_par"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.gen_par.html#hippynn.interfaces.pyseqm_interface.gen_par.gen_par">[docs]</a><span class="k">class</span> <span class="nc">gen_par</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="gen_par.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.gen_par.html#hippynn.interfaces.pyseqm_interface.gen_par.gen_par.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="gen_par">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.gen_par.html#hippynn.interfaces.pyseqm_interface.gen_par.gen_par">[docs]</a>
+<span class="k">class</span> <span class="nc">gen_par</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="gen_par.__init__">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.gen_par.html#hippynn.interfaces.pyseqm_interface.gen_par.gen_par.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model_file</span><span class="o">=</span><span class="s2">&quot;experiment_structure.pt&quot;</span><span class="p">,</span>
         <span class="n">state_file</span><span class="o">=</span><span class="s2">&quot;best_checkpoint.pt&quot;</span><span class="p">,</span>
@@ -126,14 +130,19 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">input_order</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seqm_module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">node_from_name</span><span class="p">(</span><span class="n">seqm_node_name</span><span class="p">)</span><span class="o">.</span><span class="n">torch_module</span></div>
 
-<div class="viewcode-block" id="gen_par.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.gen_par.html#hippynn.interfaces.pyseqm_interface.gen_par.gen_par.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
+
+<div class="viewcode-block" id="gen_par.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.gen_par.html#hippynn.interfaces.pyseqm_interface.gen_par.gen_par.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_order</span><span class="p">:</span>
             <span class="nb">input</span> <span class="o">=</span> <span class="p">[</span><span class="n">species</span><span class="p">,</span> <span class="n">positions</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">input</span> <span class="o">=</span> <span class="p">[</span><span class="n">positions</span><span class="p">,</span> <span class="n">species</span><span class="p">]</span>
         <span class="n">par</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_par</span><span class="p">(</span><span class="o">*</span><span class="nb">input</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">learned_parameters</span> <span class="o">=</span> <span class="n">pack_par</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqm_module</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">par</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">learned_parameters</span></div></div>
+        <span class="k">return</span> <span class="n">learned_parameters</span></div>
+</div>
+
 </pre></div>
 
            </div>

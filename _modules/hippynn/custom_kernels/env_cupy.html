@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.custom_kernels.env_cupy &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.custom_kernels.env_cupy &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -200,15 +200,20 @@
                    <span class="s2">&quot;error condition likely indicates that torch can find the GPU, but cupy can&#39;t.</span><span class="se">\n</span><span class="s2">&quot;</span>
                    <span class="s2">&quot;Alternatively, disable custom kernels.&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CupyGPUKernel"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_cupy.html#hippynn.custom_kernels.env_cupy.CupyGPUKernel">[docs]</a><span class="k">class</span> <span class="nc">CupyGPUKernel</span><span class="p">:</span>
+<div class="viewcode-block" id="CupyGPUKernel">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_cupy.html#hippynn.custom_kernels.env_cupy.CupyGPUKernel">[docs]</a>
+<span class="k">class</span> <span class="nc">CupyGPUKernel</span><span class="p">:</span>
     <span class="n">_cupy_name</span> <span class="o">=</span> <span class="kc">None</span>
-<div class="viewcode-block" id="CupyGPUKernel.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_cupy.html#hippynn.custom_kernels.env_cupy.CupyGPUKernel.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CupyGPUKernel.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_cupy.html#hippynn.custom_kernels.env_cupy.CupyGPUKernel.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="n">cupy</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">kernel32</span> <span class="o">=</span> <span class="n">_cupy_gpu_not_found</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">kernel64</span> <span class="o">=</span> <span class="n">_cupy_gpu_not_found</span>
       <span class="k">else</span><span class="p">:</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">kernel32</span> <span class="o">=</span> <span class="n">_CUPY_MODULES</span><span class="p">[</span><span class="s1">&#39;float&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cupy_name</span><span class="p">)</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">kernel64</span> <span class="o">=</span> <span class="n">_CUPY_MODULES</span><span class="p">[</span><span class="s1">&#39;double&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cupy_name</span><span class="p">)</span></div>
+
     
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dtype</span><span class="p">,</span><span class="n">BPG</span><span class="p">,</span><span class="n">TPB</span><span class="p">,</span><span class="n">array_args</span><span class="p">,</span><span class="n">shape_args</span><span class="p">):</span>
     
@@ -224,9 +229,12 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Bad dtype: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dtype</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">out_array</span></div>
+
       
 
-<div class="viewcode-block" id="CupyEnvsum"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_cupy.html#hippynn.custom_kernels.env_cupy.CupyEnvsum">[docs]</a><span class="k">class</span> <span class="nc">CupyEnvsum</span><span class="p">(</span><span class="n">CupyGPUKernel</span><span class="p">,</span><span class="n">WrappedEnvsum</span><span class="p">):</span>
+<div class="viewcode-block" id="CupyEnvsum">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_cupy.html#hippynn.custom_kernels.env_cupy.CupyEnvsum">[docs]</a>
+<span class="k">class</span> <span class="nc">CupyEnvsum</span><span class="p">(</span><span class="n">CupyGPUKernel</span><span class="p">,</span><span class="n">WrappedEnvsum</span><span class="p">):</span>
     <span class="n">_cupy_name</span> <span class="o">=</span> <span class="s1">&#39;cupy_envsum&#39;</span>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">sense</span><span class="p">,</span><span class="n">feat</span><span class="p">,</span><span class="n">pfirst</span><span class="p">,</span><span class="n">psecond</span><span class="p">):</span>
         <span class="n">psecond_hold</span> <span class="o">=</span> <span class="n">psecond</span>
@@ -256,7 +264,10 @@
         <span class="n">args</span> <span class="o">=</span> <span class="o">*</span><span class="n">array_args</span><span class="p">,</span><span class="o">*</span><span class="n">shape_args</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span><span class="n">BPG</span><span class="p">,</span><span class="n">TPB</span><span class="p">,</span><span class="n">array_args</span><span class="p">,</span><span class="n">shape_args</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CupySensesum"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_cupy.html#hippynn.custom_kernels.env_cupy.CupySensesum">[docs]</a><span class="k">class</span> <span class="nc">CupySensesum</span><span class="p">(</span><span class="n">CupyGPUKernel</span><span class="p">,</span><span class="n">WrappedSensesum</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CupySensesum">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_cupy.html#hippynn.custom_kernels.env_cupy.CupySensesum">[docs]</a>
+<span class="k">class</span> <span class="nc">CupySensesum</span><span class="p">(</span><span class="n">CupyGPUKernel</span><span class="p">,</span><span class="n">WrappedSensesum</span><span class="p">):</span>
     <span class="n">_cupy_name</span> <span class="o">=</span> <span class="s1">&#39;cupy_sensesum&#39;</span>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">env</span><span class="p">,</span><span class="n">feat</span><span class="p">,</span><span class="n">pfirst</span><span class="p">,</span><span class="n">psecond</span><span class="p">):</span>
         <span class="n">dev</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">device</span>
@@ -281,7 +292,10 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span><span class="n">BPG</span><span class="p">,</span><span class="n">TPB</span><span class="p">,</span><span class="n">array_args</span><span class="p">,</span><span class="n">shape_args</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="CupyFeatsum"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_cupy.html#hippynn.custom_kernels.env_cupy.CupyFeatsum">[docs]</a><span class="k">class</span> <span class="nc">CupyFeatsum</span><span class="p">(</span><span class="n">CupyGPUKernel</span><span class="p">,</span><span class="n">WrappedFeatsum</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CupyFeatsum">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_cupy.html#hippynn.custom_kernels.env_cupy.CupyFeatsum">[docs]</a>
+<span class="k">class</span> <span class="nc">CupyFeatsum</span><span class="p">(</span><span class="n">CupyGPUKernel</span><span class="p">,</span><span class="n">WrappedFeatsum</span><span class="p">):</span>
     <span class="n">_cupy_name</span> <span class="o">=</span> <span class="s1">&#39;cupy_featsum&#39;</span>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">env</span><span class="p">,</span><span class="n">sense</span><span class="p">,</span><span class="n">pfirst</span><span class="p">,</span><span class="n">psecond</span><span class="p">):</span>
         <span class="n">pfirst_hold</span> <span class="o">=</span> <span class="n">pfirst</span>
@@ -315,6 +329,7 @@
         <span class="n">BPG</span> <span class="o">=</span> <span class="p">(</span><span class="n">BPG_x</span><span class="p">,</span> <span class="n">BPG_y</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span><span class="n">BPG</span><span class="p">,</span><span class="n">TPB</span><span class="p">,</span><span class="n">array_args</span><span class="p">,</span><span class="n">shape_args</span><span class="p">)</span></div>
+
         
 <span class="n">cupy_envsum</span> <span class="o">=</span> <span class="n">CupyEnvsum</span><span class="p">()</span>
 <span class="n">cupy_sensesum</span> <span class="o">=</span> <span class="n">CupySensesum</span><span class="p">()</span>

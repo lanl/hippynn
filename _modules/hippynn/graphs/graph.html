@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.graphs.graph &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.graphs.graph &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -100,8 +100,12 @@
 <span class="c1"># type.</span>
 
 
-<div class="viewcode-block" id="GraphModule"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.graphs.GraphModule">[docs]</a><span class="k">class</span> <span class="nc">GraphModule</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="GraphModule.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.graphs.GraphModule.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">required_inputs</span><span class="p">,</span> <span class="n">nodes_to_compute</span><span class="p">):</span>
+<div class="viewcode-block" id="GraphModule">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.graphs.GraphModule">[docs]</a>
+<span class="k">class</span> <span class="nc">GraphModule</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="GraphModule.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.graphs.GraphModule.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">required_inputs</span><span class="p">,</span> <span class="n">nodes_to_compute</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        takes a graph, makes a pytorch neural network</span>
@@ -151,10 +155,16 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="GraphModule.get_module"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.graphs.GraphModule.get_module">[docs]</a>    <span class="k">def</span> <span class="nf">get_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GraphModule.get_module">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.graphs.GraphModule.get_module">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">moddict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">names_dict</span><span class="p">[</span><span class="n">node</span><span class="p">]]</span></div>
 
-<div class="viewcode-block" id="GraphModule.print_structure"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.graphs.GraphModule.print_structure">[docs]</a>    <span class="k">def</span> <span class="nf">print_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GraphModule.print_structure">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.graphs.GraphModule.print_structure">[docs]</a>
+    <span class="k">def</span> <span class="nf">print_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Pretty-print the structure of the nodes and links comprising this graph.&quot;&quot;&quot;</span>
         <span class="n">in_nodes</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="s2">&quot;I</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">)}</span>
         <span class="n">out_nodes</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="s2">&quot;O</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">)}</span>
@@ -177,7 +187,10 @@
         <span class="n">node_map</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
         <span class="n">node_map</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">n</span><span class="p">:</span> <span class="s2">&quot;Out</span><span class="si">{}</span><span class="s2">:&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward_output_list</span><span class="p">)})</span></div>
 
-<div class="viewcode-block" id="GraphModule.node_from_name"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.graphs.GraphModule.node_from_name">[docs]</a>    <span class="k">def</span> <span class="nf">node_from_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GraphModule.node_from_name">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.graphs.GraphModule.node_from_name">[docs]</a>
+    <span class="k">def</span> <span class="nf">node_from_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward_output_list</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">match</span><span class="o">.</span><span class="n">db_name</span> <span class="o">==</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">match</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                 <span class="n">node</span> <span class="o">=</span> <span class="n">match</span>
@@ -186,12 +199,18 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Name &#39;</span><span class="si">{}</span><span class="s2">&#39; not found in graph.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">node</span></div>
 
-<div class="viewcode-block" id="GraphModule.extra_repr"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.graphs.GraphModule.extra_repr">[docs]</a>    <span class="k">def</span> <span class="nf">extra_repr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GraphModule.extra_repr">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.graphs.GraphModule.extra_repr">[docs]</a>
+    <span class="k">def</span> <span class="nf">extra_repr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;Inputs: </span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2"> Outputs: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="GraphModule.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.graphs.GraphModule.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">input_values</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GraphModule.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.graphs.GraphModule.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">input_values</span><span class="p">):</span>
         <span class="c1"># Add gradient computation if needed (e.g. for force computation)</span>
         <span class="n">computed</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">node</span><span class="p">:</span> <span class="n">value</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">requires_grad</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">)</span>
@@ -201,7 +220,9 @@
         <span class="k">for</span> <span class="n">this_node</span><span class="p">,</span> <span class="n">inputs_for_this_node</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward_output_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_inputs_list</span><span class="p">):</span>
             <span class="n">computed</span><span class="p">[</span><span class="n">this_node</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_module</span><span class="p">(</span><span class="n">this_node</span><span class="p">)(</span><span class="o">*</span><span class="p">(</span><span class="n">computed</span><span class="p">[</span><span class="n">inkey</span><span class="p">]</span> <span class="k">for</span> <span class="n">inkey</span> <span class="ow">in</span> <span class="n">inputs_for_this_node</span><span class="p">))</span>
 
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">computed</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">computed</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">)</span></div>
+</div>
+
 
 
 <span class="k">class</span> <span class="nc">_DebugGraphModule</span><span class="p">(</span><span class="n">GraphModule</span><span class="p">):</span>

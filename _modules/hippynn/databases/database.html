@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.databases.database &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.databases.database &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -89,12 +89,16 @@
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">TensorDataset</span><span class="p">,</span> <span class="n">Subset</span>
 
 
-<div class="viewcode-block" id="Database"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database">[docs]</a><span class="k">class</span> <span class="nc">Database</span><span class="p">:</span>
+<div class="viewcode-block" id="Database">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database">[docs]</a>
+<span class="k">class</span> <span class="nc">Database</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for holding a pytorch dataset, splitting it, generating dataloaders, etc.&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Database.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="Database.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">arr_dict</span><span class="p">,</span>
         <span class="n">inputs</span><span class="p">,</span>
@@ -161,6 +165,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">make_trainvalidtest_split</span><span class="p">(</span><span class="n">test_size</span><span class="o">=</span><span class="n">test_size</span><span class="p">,</span> <span class="n">valid_size</span><span class="o">=</span><span class="n">valid_size</span><span class="p">)</span></div>
 
+
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">arrdict_len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">)</span>
 
@@ -172,7 +177,9 @@
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Database inputs not defined, set </span><span class="si">{</span><span class="n">Database</span><span class="si">}</span><span class="s2">.targets.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span>
 
-<div class="viewcode-block" id="Database.send_to_device"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.send_to_device">[docs]</a>    <span class="k">def</span> <span class="nf">send_to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Database.send_to_device">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.send_to_device">[docs]</a>
+    <span class="k">def</span> <span class="nf">send_to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="s2">&quot;Send a database to a device&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Arrays must be split before sending database to device.&quot;</span><span class="p">)</span>
@@ -192,7 +199,10 @@
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">arrdict</span><span class="p">:</span>
                 <span class="n">arrdict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">arrdict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Database.make_random_split"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_random_split">[docs]</a>    <span class="k">def</span> <span class="nf">make_random_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">split_size</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Database.make_random_split">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_random_split">[docs]</a>
+    <span class="k">def</span> <span class="nf">make_random_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">split_size</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param evaluation_mode: String naming the split, can be anything, but &#39;train&#39;, &#39;valid&#39;, and &#39;test&#39; are special.s</span>
@@ -211,7 +221,10 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_explicit_split</span><span class="p">(</span><span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">split_indices</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Database.make_trainvalidtest_split"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_trainvalidtest_split">[docs]</a>    <span class="k">def</span> <span class="nf">make_trainvalidtest_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">,</span> <span class="n">valid_size</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Database.make_trainvalidtest_split">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_trainvalidtest_split">[docs]</a>
+    <span class="k">def</span> <span class="nf">make_trainvalidtest_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">,</span> <span class="n">valid_size</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitting_completed</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Database already split!&quot;</span><span class="p">)</span>
 
@@ -229,7 +242,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">make_random_split</span><span class="p">(</span><span class="s2">&quot;valid&quot;</span><span class="p">,</span> <span class="n">valid_size</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">split_the_rest</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Database.make_explicit_split"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_explicit_split">[docs]</a>    <span class="k">def</span> <span class="nf">make_explicit_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">split_indices</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Database.make_explicit_split">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_explicit_split">[docs]</a>
+    <span class="k">def</span> <span class="nf">make_explicit_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">split_indices</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitting_completed</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Database already split!&quot;</span><span class="p">)</span>
 
@@ -251,11 +267,17 @@
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Arrays for split: </span><span class="si">{</span><span class="n">evaluation_mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">prettyprint_arrays</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">evaluation_mode</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="Database.split_the_rest"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.split_the_rest">[docs]</a>    <span class="k">def</span> <span class="nf">split_the_rest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Database.split_the_rest">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.split_the_rest">[docs]</a>
+    <span class="k">def</span> <span class="nf">split_the_rest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">make_explicit_split</span><span class="p">(</span><span class="n">evaluation_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">splitting_completed</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="Database.make_generator"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_generator">[docs]</a>    <span class="k">def</span> <span class="nf">make_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_type</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subsample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Database.make_generator">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_generator">[docs]</a>
+    <span class="k">def</span> <span class="nf">make_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_type</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subsample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Makes a dataloader for the given type of split and evaluation mode of the model.</span>
 
@@ -303,15 +325,21 @@
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">generator</span></div>
+
         
-<div class="viewcode-block" id="Database.trim_all_arrays"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.trim_all_arrays">[docs]</a>    <span class="k">def</span> <span class="nf">trim_all_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">index</span><span class="p">):</span>
+<div class="viewcode-block" id="Database.trim_all_arrays">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.trim_all_arrays">[docs]</a>
+    <span class="k">def</span> <span class="nf">trim_all_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">index</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        To be used in conjuction with remove_high_property</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">index</span><span class="p">]</span></div>
+
     
-<div class="viewcode-block" id="Database.remove_high_property"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.remove_high_property">[docs]</a>    <span class="k">def</span> <span class="nf">remove_high_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">perAtom</span><span class="p">,</span><span class="n">species_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">cut</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">std_factor</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<div class="viewcode-block" id="Database.remove_high_property">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.remove_high_property">[docs]</a>
+    <span class="k">def</span> <span class="nf">remove_high_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">perAtom</span><span class="p">,</span><span class="n">species_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">cut</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">std_factor</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This function removes outlier data from the dataset</span>
 <span class="sd">        Must be called before splitting</span>
@@ -346,11 +374,15 @@
             <span class="n">failArr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">-</span><span class="n">Kmean</span><span class="p">)</span><span class="o">&gt;</span><span class="n">std_cut</span>
             <span class="c1">#This does nothing with ndim=1</span>
             <span class="n">trimArr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">failArr</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">ndim</span><span class="p">)))</span><span class="o">==</span><span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">trim_all_arrays</span><span class="p">(</span><span class="n">trimArr</span><span class="p">)</span></div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trim_all_arrays</span><span class="p">(</span><span class="n">trimArr</span><span class="p">)</span></div>
+</div>
 
 
 
-<div class="viewcode-block" id="compute_index_mask"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.compute_index_mask">[docs]</a><span class="k">def</span> <span class="nf">compute_index_mask</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">index_pool</span><span class="p">):</span>
+
+<div class="viewcode-block" id="compute_index_mask">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.compute_index_mask">[docs]</a>
+<span class="k">def</span> <span class="nf">compute_index_mask</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">index_pool</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">index_pool</span><span class="p">)):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provided indices not in database&quot;</span><span class="p">)</span>
 
@@ -364,7 +396,10 @@
     <span class="k">return</span> <span class="n">index_mask</span></div>
 
 
-<div class="viewcode-block" id="prettyprint_arrays"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.prettyprint_arrays">[docs]</a><span class="k">def</span> <span class="nf">prettyprint_arrays</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">):</span>
+
+<div class="viewcode-block" id="prettyprint_arrays">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.prettyprint_arrays">[docs]</a>
+<span class="k">def</span> <span class="nf">prettyprint_arrays</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pretty-print array dictionary</span>
 <span class="sd">    :return: None</span>
@@ -386,10 +421,17 @@
     <span class="n">printline</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="NamedTensorDataset"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.NamedTensorDataset">[docs]</a><span class="k">class</span> <span class="nc">NamedTensorDataset</span><span class="p">(</span><span class="n">TensorDataset</span><span class="p">):</span>
-<div class="viewcode-block" id="NamedTensorDataset.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.NamedTensorDataset.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor_names</span><span class="p">,</span> <span class="o">*</span><span class="n">tensors</span><span class="p">):</span>
+
+<div class="viewcode-block" id="NamedTensorDataset">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.NamedTensorDataset">[docs]</a>
+<span class="k">class</span> <span class="nc">NamedTensorDataset</span><span class="p">(</span><span class="n">TensorDataset</span><span class="p">):</span>
+<div class="viewcode-block" id="NamedTensorDataset.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.NamedTensorDataset.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor_names</span><span class="p">,</span> <span class="o">*</span><span class="n">tensors</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">tensors</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tensor_map</span> <span class="o">=</span> <span class="n">tensor_names</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tensor_map</span> <span class="o">=</span> <span class="n">tensor_names</span></div>
+</div>
+
 </pre></div>
 
            </div>

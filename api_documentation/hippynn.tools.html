@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tools module &mdash; hippynn 0.0.1 documentation</title>
+  <title>tools module &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
@@ -16,9 +16,9 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -60,7 +60,25 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.networks.html">networks package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.plotting.html">plotting package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.pretraining.html">pretraining module</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">tools module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">tools module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.active_directory"><code class="docutils literal notranslate"><span class="pre">active_directory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.arrdict_len"><code class="docutils literal notranslate"><span class="pre">arrdict_len()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.device_fallback"><code class="docutils literal notranslate"><span class="pre">device_fallback()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.isiterable"><code class="docutils literal notranslate"><span class="pre">isiterable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.log_terminal"><code class="docutils literal notranslate"><span class="pre">log_terminal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.np_of_torchdefaultdtype"><code class="docutils literal notranslate"><span class="pre">np_of_torchdefaultdtype()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.pad_np_array_to_length_with_zeros"><code class="docutils literal notranslate"><span class="pre">pad_np_array_to_length_with_zeros()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.param_print"><code class="docutils literal notranslate"><span class="pre">param_print()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.print_lr"><code class="docutils literal notranslate"><span class="pre">print_lr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.progress_bar"><code class="docutils literal notranslate"><span class="pre">progress_bar()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.teed_file_output"><code class="docutils literal notranslate"><span class="pre">teed_file_output</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.tools.teed_file_output.__init__"><code class="docutils literal notranslate"><span class="pre">teed_file_output.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.tools.teed_file_output.flush"><code class="docutils literal notranslate"><span class="pre">teed_file_output.flush()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.tools.teed_file_output.write"><code class="docutils literal notranslate"><span class="pre">teed_file_output.write()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -95,8 +113,120 @@
            <div itemprop="articleBody">
              
   <section id="tools-module">
-<h1>tools module<a class="headerlink" href="#tools-module" title="Permalink to this heading"></a></h1>
+<h1>tools module<a class="headerlink" href="#tools-module" title="Link to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.tools</span></code> module.</p>
+<p id="module-hippynn.tools">Misc helpful functions which are not part of the library organization per se.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.tools.active_directory">
+<span class="sig-name descname"><span class="pre">active_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dirname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#active_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.active_directory" title="Link to this definition"></a></dt>
+<dd><p>Context manager for temporarily switching the current working directory.</p>
+<p>If create is None, always succeed.
+If create is True, only succeed if the directory does not exist, and create one.
+If create is False, only succeed if the directory does exist, and switch to it.</p>
+<p>In other words, use create=True if you want to force that it’s a new directory.
+Use create=False if you want to switch to an existing directory.
+Use create=None create a directory if you are okay with either alternative.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dirname</strong> – directory to enter</p></li>
+<li><p><strong>create</strong> – (None,True,False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p>If directory status not compatible with <cite>create</cite> constraints.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.tools.arrdict_len">
+<span class="sig-name descname"><span class="pre">arrdict_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_dictionary</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#arrdict_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.arrdict_len" title="Link to this definition"></a></dt>
+<dd><p>Return the length of one of the arrays in a dictionary. Under the assumption that they are all the same.
+:param array_dictionary:
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.tools.device_fallback">
+<span class="sig-name descname"><span class="pre">device_fallback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#device_fallback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.device_fallback" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.tools.isiterable">
+<span class="sig-name descname"><span class="pre">isiterable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#isiterable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.isiterable" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.tools.log_terminal">
+<span class="sig-name descname"><span class="pre">log_terminal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#log_terminal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.log_terminal" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Param<span class="colon">:</span></dt>
+<dd class="field-odd"><p>file: filename or string</p>
+</dd>
+<dt class="field-even">Param<span class="colon">:</span></dt>
+<dd class="field-even"><p>args:   piped to <code class="docutils literal notranslate"><span class="pre">open(file,*args,**kwargs)</span></code> if file is a string</p>
+</dd>
+<dt class="field-odd">Param<span class="colon">:</span></dt>
+<dd class="field-odd"><p>kwargs: piped to <code class="docutils literal notranslate"><span class="pre">open(file,*args,**kwargs)</span></code> if file is a string</p>
+</dd>
+</dl>
+<p>Context manager where stdout and stderr are redirected to the specified file
+in addition to the usual stdout and stderr.
+The manager yields the file. Writes to the opened file object with
+“with log_terminal(…) as &lt;file&gt;” will not automatically
+be piped into the terminal.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.tools.np_of_torchdefaultdtype">
+<span class="sig-name descname"><span class="pre">np_of_torchdefaultdtype</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#np_of_torchdefaultdtype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.np_of_torchdefaultdtype" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.tools.pad_np_array_to_length_with_zeros">
+<span class="sig-name descname"><span class="pre">pad_np_array_to_length_with_zeros</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#pad_np_array_to_length_with_zeros"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.pad_np_array_to_length_with_zeros" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.tools.param_print">
+<span class="sig-name descname"><span class="pre">param_print</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#param_print"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.param_print" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.tools.print_lr">
+<span class="sig-name descname"><span class="pre">print_lr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#print_lr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.print_lr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.tools.progress_bar">
+<span class="sig-name descname"><span class="pre">progress_bar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#progress_bar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.progress_bar" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.tools.teed_file_output">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">teed_file_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">streams</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#teed_file_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.teed_file_output" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.tools.teed_file_output.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">streams</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#teed_file_output.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.teed_file_output.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.tools.teed_file_output.flush">
+<span class="sig-name descname"><span class="pre">flush</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#teed_file_output.flush"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.teed_file_output.flush" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.tools.teed_file_output.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">arg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#teed_file_output.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.teed_file_output.write" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 
 

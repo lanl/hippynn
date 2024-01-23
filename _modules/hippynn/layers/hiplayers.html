@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.layers.hiplayers &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.layers.hiplayers &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -87,7 +87,9 @@
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">settings</span>
 
 
-<div class="viewcode-block" id="warn_if_under"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.warn_if_under">[docs]</a><span class="k">def</span> <span class="nf">warn_if_under</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+<div class="viewcode-block" id="warn_if_under">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.warn_if_under">[docs]</a>
+<span class="k">def</span> <span class="nf">warn_if_under</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># no pairs</span>
         <span class="k">return</span>
     <span class="n">dmin</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
@@ -104,26 +106,46 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="CosCutoff"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.CosCutoff">[docs]</a><span class="k">class</span> <span class="nc">CosCutoff</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="CosCutoff.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.CosCutoff.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hard_max_dist</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CosCutoff">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.CosCutoff">[docs]</a>
+<span class="k">class</span> <span class="nc">CosCutoff</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="CosCutoff.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.CosCutoff.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hard_max_dist</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hard_max_dist</span> <span class="o">=</span> <span class="n">hard_max_dist</span></div>
 
-<div class="viewcode-block" id="CosCutoff.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.CosCutoff.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist_tensor</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CosCutoff.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.CosCutoff.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist_tensor</span><span class="p">):</span>
         <span class="n">cutoff_sense</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">dist_tensor</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">hard_max_dist</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
         <span class="n">cutoff_sense</span> <span class="o">=</span> <span class="n">cutoff_sense</span> <span class="o">*</span> <span class="p">(</span><span class="n">dist_tensor</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hard_max_dist</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">cutoff_sense</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">cutoff_sense</span></div></div>
+        <span class="k">return</span> <span class="n">cutoff_sense</span></div>
+</div>
 
 
-<div class="viewcode-block" id="SensitivityModule"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.SensitivityModule">[docs]</a><span class="k">class</span> <span class="nc">SensitivityModule</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="SensitivityModule.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.SensitivityModule.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hard_max_dist</span><span class="p">,</span> <span class="n">cutoff_type</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SensitivityModule">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.SensitivityModule">[docs]</a>
+<span class="k">class</span> <span class="nc">SensitivityModule</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="SensitivityModule.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.SensitivityModule.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hard_max_dist</span><span class="p">,</span> <span class="n">cutoff_type</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span> <span class="o">=</span> <span class="n">cutoff_type</span><span class="p">(</span><span class="n">hard_max_dist</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hard_max_dist</span> <span class="o">=</span> <span class="n">hard_max_dist</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hard_max_dist</span> <span class="o">=</span> <span class="n">hard_max_dist</span></div>
+</div>
 
 
-<div class="viewcode-block" id="GaussianSensitivityModule"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.GaussianSensitivityModule">[docs]</a><span class="k">class</span> <span class="nc">GaussianSensitivityModule</span><span class="p">(</span><span class="n">SensitivityModule</span><span class="p">):</span>
-<div class="viewcode-block" id="GaussianSensitivityModule.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.GaussianSensitivityModule.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">min_dist_soft</span><span class="p">,</span> <span class="n">max_dist_soft</span><span class="p">,</span> <span class="n">hard_max_dist</span><span class="p">,</span> <span class="n">cutoff_type</span><span class="o">=</span><span class="n">CosCutoff</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GaussianSensitivityModule">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.GaussianSensitivityModule">[docs]</a>
+<span class="k">class</span> <span class="nc">GaussianSensitivityModule</span><span class="p">(</span><span class="n">SensitivityModule</span><span class="p">):</span>
+<div class="viewcode-block" id="GaussianSensitivityModule.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.GaussianSensitivityModule.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">min_dist_soft</span><span class="p">,</span> <span class="n">max_dist_soft</span><span class="p">,</span> <span class="n">hard_max_dist</span><span class="p">,</span> <span class="n">cutoff_type</span><span class="o">=</span><span class="n">CosCutoff</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">hard_max_dist</span><span class="p">,</span> <span class="n">cutoff_type</span><span class="p">)</span>
         <span class="n">init_mu</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">max_dist_soft</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">min_dist_soft</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">)</span>
@@ -133,7 +155,10 @@
         <span class="n">init_sigma</span> <span class="o">=</span> <span class="n">min_dist_soft</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n_dist</span>  <span class="c1"># pulled from theano code</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">fill_</span><span class="p">(</span><span class="n">init_sigma</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GaussianSensitivityModule.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.GaussianSensitivityModule.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distflat</span><span class="p">,</span> <span class="n">warn_low_distances</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GaussianSensitivityModule.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.GaussianSensitivityModule.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distflat</span><span class="p">,</span> <span class="n">warn_low_distances</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">warn_low_distances</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">warn_low_distances</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">WARN_LOW_DISTANCES</span>
         <span class="k">if</span> <span class="n">warn_low_distances</span><span class="p">:</span>
@@ -151,11 +176,17 @@
         <span class="n">base_sense</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">nondim</span><span class="p">)</span>
 
         <span class="n">total_sense</span> <span class="o">=</span> <span class="n">base_sense</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span><span class="p">(</span><span class="n">distflat</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">total_sense</span></div></div>
+        <span class="k">return</span> <span class="n">total_sense</span></div>
+</div>
 
 
-<div class="viewcode-block" id="InverseSensitivityModule"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InverseSensitivityModule">[docs]</a><span class="k">class</span> <span class="nc">InverseSensitivityModule</span><span class="p">(</span><span class="n">SensitivityModule</span><span class="p">):</span>
-<div class="viewcode-block" id="InverseSensitivityModule.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InverseSensitivityModule.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">min_dist_soft</span><span class="p">,</span> <span class="n">max_dist_soft</span><span class="p">,</span> <span class="n">hard_max_dist</span><span class="p">,</span> <span class="n">cutoff_type</span><span class="o">=</span><span class="n">CosCutoff</span><span class="p">):</span>
+
+<div class="viewcode-block" id="InverseSensitivityModule">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InverseSensitivityModule">[docs]</a>
+<span class="k">class</span> <span class="nc">InverseSensitivityModule</span><span class="p">(</span><span class="n">SensitivityModule</span><span class="p">):</span>
+<div class="viewcode-block" id="InverseSensitivityModule.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InverseSensitivityModule.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">min_dist_soft</span><span class="p">,</span> <span class="n">max_dist_soft</span><span class="p">,</span> <span class="n">hard_max_dist</span><span class="p">,</span> <span class="n">cutoff_type</span><span class="o">=</span><span class="n">CosCutoff</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">hard_max_dist</span><span class="p">,</span> <span class="n">cutoff_type</span><span class="p">)</span>
         <span class="n">init_mu</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">max_dist_soft</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">min_dist_soft</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">))</span>
@@ -164,7 +195,10 @@
         <span class="n">init_sigma</span> <span class="o">=</span> <span class="n">min_dist_soft</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n_dist</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">fill_</span><span class="p">(</span><span class="n">init_sigma</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="InverseSensitivityModule.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InverseSensitivityModule.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distflat</span><span class="p">,</span> <span class="n">warn_low_distances</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="InverseSensitivityModule.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InverseSensitivityModule.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distflat</span><span class="p">,</span> <span class="n">warn_low_distances</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">warn_low_distances</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">warn_low_distances</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">WARN_LOW_DISTANCES</span>
         <span class="k">if</span> <span class="n">warn_low_distances</span><span class="p">:</span>
@@ -182,11 +216,17 @@
 
         <span class="n">total_sense</span> <span class="o">=</span> <span class="n">base_sense</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span><span class="p">(</span><span class="n">distflat</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">total_sense</span></div></div>
+        <span class="k">return</span> <span class="n">total_sense</span></div>
+</div>
 
 
-<div class="viewcode-block" id="SensitivityBottleneck"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.SensitivityBottleneck">[docs]</a><span class="k">class</span> <span class="nc">SensitivityBottleneck</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="SensitivityBottleneck.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.SensitivityBottleneck.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+
+<div class="viewcode-block" id="SensitivityBottleneck">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.SensitivityBottleneck">[docs]</a>
+<span class="k">class</span> <span class="nc">SensitivityBottleneck</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="SensitivityBottleneck.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.SensitivityBottleneck.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">n_dist</span><span class="p">,</span>
         <span class="n">min_soft_dist</span><span class="p">,</span>
@@ -206,18 +246,27 @@
 
         <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">orthogonal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matching</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SensitivityBottleneck.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.SensitivityBottleneck.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distflat</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SensitivityBottleneck.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.SensitivityBottleneck.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distflat</span><span class="p">):</span>
         <span class="n">base_sense</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_sense</span><span class="p">(</span><span class="n">distflat</span><span class="p">)</span>
         <span class="n">reduced_sense</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">base_sense</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">matching</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">reduced_sense</span></div></div>
+        <span class="k">return</span> <span class="n">reduced_sense</span></div>
+</div>
 
 
-<div class="viewcode-block" id="InteractLayer"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayer">[docs]</a><span class="k">class</span> <span class="nc">InteractLayer</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+<div class="viewcode-block" id="InteractLayer">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayer">[docs]</a>
+<span class="k">class</span> <span class="nc">InteractLayer</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hipnn&#39;s interaction layer</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="InteractLayer.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">):</span>
+<div class="viewcode-block" id="InteractLayer.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayer.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor</span>
 
@@ -246,10 +295,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">selfint</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">)</span>  <span class="c1"># includes bias term and self-interactions</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">xavier_normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selfint</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="InteractLayer.regularization_params"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayer.regularization_params">[docs]</a>    <span class="k">def</span> <span class="nf">regularization_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="InteractLayer.regularization_params">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayer.regularization_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">regularization_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">int_weights</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selfint</span><span class="o">.</span><span class="n">weight</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="InteractLayer.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayer.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">dist_pairs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="InteractLayer.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayer.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">dist_pairs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pytorch Enforced Forward function</span>
 
@@ -285,17 +340,26 @@
         <span class="c1"># VSZ + WZ + B</span>
         <span class="n">features_out_total</span> <span class="o">=</span> <span class="n">features_out</span> <span class="o">+</span> <span class="n">features_out_selfpart</span>
 
-        <span class="k">return</span> <span class="n">features_out_total</span></div></div>
+        <span class="k">return</span> <span class="n">features_out_total</span></div>
+</div>
 
 
-<div class="viewcode-block" id="InteractLayerVec"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerVec">[docs]</a><span class="k">class</span> <span class="nc">InteractLayerVec</span><span class="p">(</span><span class="n">InteractLayer</span><span class="p">):</span>
-<div class="viewcode-block" id="InteractLayerVec.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerVec.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">):</span>
+
+<div class="viewcode-block" id="InteractLayerVec">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerVec">[docs]</a>
+<span class="k">class</span> <span class="nc">InteractLayerVec</span><span class="p">(</span><span class="n">InteractLayer</span><span class="p">):</span>
+<div class="viewcode-block" id="InteractLayerVec.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerVec.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">vecscales</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">nf_out</span><span class="p">))</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vecscales</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="InteractLayerVec.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerVec.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">dist_pairs</span><span class="p">,</span> <span class="n">coord_pairs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="InteractLayerVec.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerVec.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">dist_pairs</span><span class="p">,</span> <span class="n">coord_pairs</span><span class="p">):</span>
 
         <span class="n">n_atoms_real</span> <span class="o">=</span> <span class="n">in_features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">sense_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensitivity</span><span class="p">(</span><span class="n">dist_pairs</span><span class="p">)</span>
@@ -322,11 +386,17 @@
 
         <span class="n">features_out_total</span> <span class="o">=</span> <span class="n">features_out</span> <span class="o">+</span> <span class="n">features_out_vec</span> <span class="o">+</span> <span class="n">features_out_selfpart</span>
 
-        <span class="k">return</span> <span class="n">features_out_total</span></div></div>
+        <span class="k">return</span> <span class="n">features_out_total</span></div>
+</div>
 
 
-<div class="viewcode-block" id="InteractLayerQuad"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerQuad">[docs]</a><span class="k">class</span> <span class="nc">InteractLayerQuad</span><span class="p">(</span><span class="n">InteractLayerVec</span><span class="p">):</span>
-<div class="viewcode-block" id="InteractLayerQuad.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerQuad.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">):</span>
+
+<div class="viewcode-block" id="InteractLayerQuad">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerQuad">[docs]</a>
+<span class="k">class</span> <span class="nc">InteractLayerQuad</span><span class="p">(</span><span class="n">InteractLayerVec</span><span class="p">):</span>
+<div class="viewcode-block" id="InteractLayerQuad.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerQuad.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">quadscales</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">nf_out</span><span class="p">))</span>
@@ -336,7 +406,10 @@
         <span class="n">upper_ind</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;upper_ind&quot;</span><span class="p">,</span> <span class="n">upper_ind</span><span class="p">,</span> <span class="n">persistent</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Static, not part of module state</span></div>
 
-<div class="viewcode-block" id="InteractLayerQuad.forward"><a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerQuad.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">dist_pairs</span><span class="p">,</span> <span class="n">coord_pairs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="InteractLayerQuad.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerQuad.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">dist_pairs</span><span class="p">,</span> <span class="n">coord_pairs</span><span class="p">):</span>
 
         <span class="n">n_atoms_real</span> <span class="o">=</span> <span class="n">in_features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">sense_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensitivity</span><span class="p">(</span><span class="n">dist_pairs</span><span class="p">)</span>
@@ -389,7 +462,9 @@
 
         <span class="n">features_out_total</span> <span class="o">=</span> <span class="n">features_out</span> <span class="o">+</span> <span class="n">features_out_vec</span> <span class="o">+</span> <span class="n">features_out_quad</span> <span class="o">+</span> <span class="n">features_out_selfpart</span>
 
-        <span class="k">return</span> <span class="n">features_out_total</span></div></div>
+        <span class="k">return</span> <span class="n">features_out_total</span></div>
+</div>
+
 </pre></div>
 
            </div>

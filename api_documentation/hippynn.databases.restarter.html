@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>restarter module &mdash; hippynn 0.0.1 documentation</title>
+  <title>restarter module &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
@@ -16,9 +16,9 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -53,11 +53,34 @@
 <li class="toctree-l1 current"><a class="reference internal" href="hippynn.html">hippynn API documentation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.html">custom_kernels package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.databases.html">databases package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.html#hippynn.databases.AseDatabase"><code class="docutils literal notranslate"><span class="pre">AseDatabase</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.html#hippynn.databases.Database"><code class="docutils literal notranslate"><span class="pre">Database</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.html#hippynn.databases.DirectoryDatabase"><code class="docutils literal notranslate"><span class="pre">DirectoryDatabase</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.html#hippynn.databases.NPZDatabase"><code class="docutils literal notranslate"><span class="pre">NPZDatabase</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.SNAPJson.html">SNAPJson module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.database.html">database module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html">h5_pyanitools module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.ondisk.html">ondisk module</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">restarter module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">restarter module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.restarter.NoRestart"><code class="docutils literal notranslate"><span class="pre">NoRestart</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.databases.restarter.NoRestart.attempt_reload"><code class="docutils literal notranslate"><span class="pre">NoRestart.attempt_reload()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.restarter.RestartDB"><code class="docutils literal notranslate"><span class="pre">RestartDB</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.databases.restarter.RestartDB.__init__"><code class="docutils literal notranslate"><span class="pre">RestartDB.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.databases.restarter.RestartDB.attempt_reload"><code class="docutils literal notranslate"><span class="pre">RestartDB.attempt_reload()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.restarter.Restartable"><code class="docutils literal notranslate"><span class="pre">Restartable</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.databases.restarter.Restartable.make_restarter"><code class="docutils literal notranslate"><span class="pre">Restartable.make_restarter()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.restarter.Restarter"><code class="docutils literal notranslate"><span class="pre">Restarter</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.databases.restarter.Restarter.attempt_reload"><code class="docutils literal notranslate"><span class="pre">Restarter.attempt_reload()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.experiment.html">experiment package</a></li>
@@ -103,8 +126,68 @@
            <div itemprop="articleBody">
              
   <section id="restarter-module">
-<h1>restarter module<a class="headerlink" href="#restarter-module" title="Permalink to this heading"></a></h1>
+<h1>restarter module<a class="headerlink" href="#restarter-module" title="Link to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.databases.restarter</span></code> module.</p>
+<p id="module-hippynn.databases.restarter">Classes for allowing reload of database.</p>
+<p>This isn’t meant to cover all possible use cases,
+but the conveniently allow restarting from a checkpoint
+file without manually re-loading the database.</p>
+<p>Restarting a database should only be performed
+if no preprocessing is applied, i.e. in order
+for this functionality to work automatically, you should
+save a copy of your database completely preprocessed.
+Otherwise you’ll need to reproduce the processing
+that was applied between constructing the database object
+and constructing the checkpoint.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.databases.restarter.NoRestart">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NoRestart</span></span><a class="reference internal" href="../_modules/hippynn/databases/restarter.html#NoRestart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.restarter.NoRestart" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hippynn.databases.restarter.Restarter" title="hippynn.databases.restarter.Restarter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Restarter</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.databases.restarter.NoRestart.attempt_reload">
+<span class="sig-name descname"><span class="pre">attempt_reload</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/restarter.html#NoRestart.attempt_reload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.restarter.NoRestart.attempt_reload" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.databases.restarter.RestartDB">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RestartDB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/restarter.html#RestartDB"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.restarter.RestartDB" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#hippynn.databases.restarter.Restarter" title="hippynn.databases.restarter.Restarter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Restarter</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.databases.restarter.RestartDB.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/restarter.html#RestartDB.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.restarter.RestartDB.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.databases.restarter.RestartDB.attempt_reload">
+<span class="sig-name descname"><span class="pre">attempt_reload</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/restarter.html#RestartDB.attempt_reload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.restarter.RestartDB.attempt_reload" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.databases.restarter.Restartable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Restartable</span></span><a class="reference internal" href="../_modules/hippynn/databases/restarter.html#Restartable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.restarter.Restartable" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.databases.restarter.Restartable.make_restarter">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_restarter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/restarter.html#Restartable.make_restarter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.restarter.Restartable.make_restarter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.databases.restarter.Restarter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Restarter</span></span><a class="reference internal" href="../_modules/hippynn/databases/restarter.html#Restarter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.restarter.Restarter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.databases.restarter.Restarter.attempt_reload">
+<span class="sig-name descname"><span class="pre">attempt_reload</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/restarter.html#Restarter.attempt_reload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.restarter.Restarter.attempt_reload" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 
 

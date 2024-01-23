@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>serialization module &mdash; hippynn 0.0.1 documentation</title>
+  <title>serialization module &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
@@ -16,9 +16,9 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -54,13 +54,29 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.html">custom_kernels package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.databases.html">databases package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.experiment.html">experiment package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.SetupParams"><code class="docutils literal notranslate"><span class="pre">SetupParams</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.assemble_for_training"><code class="docutils literal notranslate"><span class="pre">assemble_for_training()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.setup_and_train"><code class="docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.setup_training"><code class="docutils literal notranslate"><span class="pre">setup_training()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.test_model"><code class="docutils literal notranslate"><span class="pre">test_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.train_model"><code class="docutils literal notranslate"><span class="pre">train_model()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.assembly.html">assembly module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.controllers.html">controllers module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.device.html">device module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.evaluator.html">evaluator module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.metric_tracker.html">metric_tracker module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.routines.html">routines module</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">serialization module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">serialization module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.serialization.check_mapping_devices"><code class="docutils literal notranslate"><span class="pre">check_mapping_devices()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.serialization.create_state"><code class="docutils literal notranslate"><span class="pre">create_state()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.serialization.create_structure_file"><code class="docutils literal notranslate"><span class="pre">create_structure_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.serialization.load_checkpoint"><code class="docutils literal notranslate"><span class="pre">load_checkpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.serialization.load_checkpoint_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.serialization.load_model_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_model_from_cwd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.serialization.load_saved_tensors"><code class="docutils literal notranslate"><span class="pre">load_saved_tensors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.experiment.serialization.restore_checkpoint"><code class="docutils literal notranslate"><span class="pre">restore_checkpoint()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.step_functions.html">step_functions module</a></li>
 </ul>
 </li>
@@ -106,8 +122,164 @@
            <div itemprop="articleBody">
              
   <section id="serialization-module">
-<h1>serialization module<a class="headerlink" href="#serialization-module" title="Permalink to this heading"></a></h1>
+<h1>serialization module<a class="headerlink" href="#serialization-module" title="Link to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.experiment.serialization</span></code> module.</p>
+<p id="module-hippynn.experiment.serialization">checkpoint and state generation</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.experiment.serialization.check_mapping_devices">
+<span class="sig-name descname"><span class="pre">check_mapping_devices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map_location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/serialization.html#check_mapping_devices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.serialization.check_mapping_devices" title="Link to this definition"></a></dt>
+<dd><p>Check options for restarting across devices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>map_location</strong> – device mapping argument for torch.load.</p></li>
+<li><p><strong>model_device</strong> – automatically handle device mapping.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>TypeError</strong> – if both map_location and model_device are specified</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>processed map_location and model_device</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.experiment.serialization.create_state">
+<span class="sig-name descname"><span class="pre">create_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.graphs.graph.html#hippynn.graphs.graph.GraphModule" title="hippynn.graphs.graph.GraphModule"><span class="pre">GraphModule</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">controller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.experiment.controllers.html#hippynn.experiment.controllers.PatienceController" title="hippynn.experiment.controllers.PatienceController"><span class="pre">PatienceController</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_tracker</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker" title="hippynn.experiment.metric_tracker.MetricTracker"><span class="pre">MetricTracker</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/hippynn/experiment/serialization.html#create_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.serialization.create_state" title="Link to this definition"></a></dt>
+<dd><p>Create an experiment state dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – current model</p></li>
+<li><p><strong>controller</strong> – patience controller</p></li>
+<li><p><strong>metric_tracker</strong> – current metrics</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionary containing experiment state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.experiment.serialization.create_structure_file">
+<span class="sig-name descname"><span class="pre">create_structure_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">training_modules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.experiment.assembly.html#hippynn.experiment.assembly.TrainingModules" title="hippynn.experiment.assembly.TrainingModules"><span class="pre">TrainingModules</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.databases.database.html#hippynn.databases.database.Database" title="hippynn.databases.database.Database"><span class="pre">Database</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">controller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.experiment.controllers.html#hippynn.experiment.controllers.PatienceController" title="hippynn.experiment.controllers.PatienceController"><span class="pre">PatienceController</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'experiment_structure.pt'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/hippynn/experiment/serialization.html#create_structure_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.serialization.create_structure_file" title="Link to this definition"></a></dt>
+<dd><p>Save an experiment structure. (i.e. full model, not just state_dict).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>training_modules</strong> – contains model, controller, and loss</p></li>
+<li><p><strong>database</strong> – database for training</p></li>
+<li><p><strong>controller</strong> – patience controller</p></li>
+<li><p><strong>fname</strong> – filename to save the checkpoint</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.experiment.serialization.load_checkpoint">
+<span class="sig-name descname"><span class="pre">load_checkpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure_fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restore_db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/hippynn/experiment/serialization.html#load_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.serialization.load_checkpoint" title="Link to this definition"></a></dt>
+<dd><p>Load checkpoint file from given filename.</p>
+<p>For details more information on to use this function, see <a class="reference internal" href="../examples/restarting.html"><span class="doc">Restarting training</span></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>structure_fname</strong> – name of the structure file</p></li>
+<li><p><strong>state_fname</strong> – name of the state file</p></li>
+<li><p><strong>restore_db</strong> – restore database or not, defaults to True</p></li>
+<li><p><strong>map_location</strong> – device mapping argument for <code class="docutils literal notranslate"><span class="pre">torch.load</span></code>, defaults to None</p></li>
+<li><p><strong>model_device</strong> – automatically handle device mapping. Defaults to None, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>experiment structure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.experiment.serialization.load_checkpoint_from_cwd">
+<span class="sig-name descname"><span class="pre">load_checkpoint_from_cwd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map_location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/hippynn/experiment/serialization.html#load_checkpoint_from_cwd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.serialization.load_checkpoint_from_cwd" title="Link to this definition"></a></dt>
+<dd><p>Same as <code class="docutils literal notranslate"><span class="pre">load_checkpoint</span></code>, but using default filenames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>map_location</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>dict</em><em>, </em><em>torch.device</em><em>, </em><em>Callable</em><em>]</em><em>, </em><em>optional</em>) – device mapping argument for <code class="docutils literal notranslate"><span class="pre">torch.load</span></code>, defaults to None</p></li>
+<li><p><strong>model_device</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>str</em><em>, </em><em>torch.device</em><em>]</em><em>, </em><em>optional</em>) – automatically handle device mapping. Defaults to None, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>experiment structure</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.experiment.serialization.load_model_from_cwd">
+<span class="sig-name descname"><span class="pre">load_model_from_cwd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map_location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="hippynn.graphs.graph.html#hippynn.graphs.graph.GraphModule" title="hippynn.graphs.graph.GraphModule"><span class="pre">GraphModule</span></a></span></span><a class="reference internal" href="../_modules/hippynn/experiment/serialization.html#load_model_from_cwd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.serialization.load_model_from_cwd" title="Link to this definition"></a></dt>
+<dd><p>Only load model from current working directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>map_location</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>dict</em><em>, </em><em>torch.device</em><em>, </em><em>Callable</em><em>]</em><em>, </em><em>optional</em>) – device mapping argument for <code class="docutils literal notranslate"><span class="pre">torch.load</span></code>, defaults to None</p></li>
+<li><p><strong>model_device</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>str</em><em>, </em><em>torch.device</em><em>]</em><em>, </em><em>optional</em>) – automatically handle device mapping. Defaults to None, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>model with reloaded parameters</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.GraphModule" title="hippynn.graphs.GraphModule">GraphModule</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.experiment.serialization.load_saved_tensors">
+<span class="sig-name descname"><span class="pre">load_saved_tensors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure_fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hippynn/experiment/serialization.html#load_saved_tensors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.serialization.load_saved_tensors" title="Link to this definition"></a></dt>
+<dd><p>Load torch tensors from file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>structure_fname</strong> – name of the structure file</p></li>
+<li><p><strong>state_fname</strong> – name of the state file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>loaded dictionaries of checkpoint and model parameters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.experiment.serialization.restore_checkpoint">
+<span class="sig-name descname"><span class="pre">restore_checkpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restore_db</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/hippynn/experiment/serialization.html#restore_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.serialization.restore_checkpoint" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>structure</strong> – experiment structure object</p></li>
+<li><p><strong>state</strong> – experiment state object</p></li>
+<li><p><strong>restore_db</strong> – Attempt to restore database (true/false)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>experiment structure</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 

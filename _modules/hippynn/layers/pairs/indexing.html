@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.layers.pairs.indexing &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.layers.pairs.indexing &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -85,12 +85,16 @@
 <span class="kn">from</span> <span class="nn">.open</span> <span class="kn">import</span> <span class="n">_PairIndexer</span>
 
 
-<div class="viewcode-block" id="ExternalNeighbors"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.ExternalNeighbors">[docs]</a><span class="k">class</span> <span class="nc">ExternalNeighbors</span><span class="p">(</span><span class="n">_PairIndexer</span><span class="p">):</span>
+<div class="viewcode-block" id="ExternalNeighbors">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.ExternalNeighbors">[docs]</a>
+<span class="k">class</span> <span class="nc">ExternalNeighbors</span><span class="p">(</span><span class="n">_PairIndexer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    module for ASE-like neighbors list fed into the graph</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ExternalNeighbors.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.ExternalNeighbors.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">real_atoms</span><span class="p">,</span> <span class="n">shifts</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">):</span>
+<div class="viewcode-block" id="ExternalNeighbors.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.ExternalNeighbors.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">real_atoms</span><span class="p">,</span> <span class="n">shifts</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">):</span>
         <span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">atom_coordinates</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_molecules</span> <span class="o">*</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">)[</span><span class="n">real_atoms</span><span class="p">]</span>
         <span class="n">paircoord</span> <span class="o">=</span> <span class="n">atom_coordinates</span><span class="p">[</span><span class="n">pair_second</span><span class="p">]</span> <span class="o">-</span> <span class="n">atom_coordinates</span><span class="p">[</span><span class="n">pair_first</span><span class="p">]</span> <span class="o">+</span> <span class="n">shifts</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="o">@</span> <span class="n">cell</span>
@@ -103,11 +107,17 @@
         <span class="n">pair_second</span> <span class="o">=</span> <span class="n">pair_second</span><span class="p">[</span><span class="n">within_cutoff_pairs</span><span class="p">]</span>
         <span class="n">paircoord</span> <span class="o">=</span> <span class="n">paircoord</span><span class="p">[</span><span class="n">within_cutoff_pairs</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">distflat</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">paircoord</span></div></div>
+        <span class="k">return</span> <span class="n">distflat</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">paircoord</span></div>
+</div>
 
 
-<div class="viewcode-block" id="PairReIndexer"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairReIndexer">[docs]</a><span class="k">class</span> <span class="nc">PairReIndexer</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="PairReIndexer.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairReIndexer.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molatomatom_thing</span><span class="p">,</span> <span class="n">molecule_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PairReIndexer">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairReIndexer">[docs]</a>
+<span class="k">class</span> <span class="nc">PairReIndexer</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="PairReIndexer.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairReIndexer.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molatomatom_thing</span><span class="p">,</span> <span class="n">molecule_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">):</span>
 
         <span class="n">molecule_position</span> <span class="o">=</span> <span class="n">molecule_index</span><span class="p">[</span><span class="n">pair_first</span><span class="p">]</span>
         <span class="n">absolute_first</span> <span class="o">=</span> <span class="n">atom_index</span><span class="p">[</span><span class="n">pair_first</span><span class="p">]</span>
@@ -115,11 +125,17 @@
         <span class="n">out</span> <span class="o">=</span> <span class="n">molatomatom_thing</span><span class="p">[</span><span class="n">molecule_position</span><span class="p">,</span> <span class="n">absolute_first</span><span class="p">,</span> <span class="n">absolute_second</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">ndimension</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">out</span></div></div>
+        <span class="k">return</span> <span class="n">out</span></div>
+</div>
 
 
-<div class="viewcode-block" id="PairDeIndexer"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairDeIndexer">[docs]</a><span class="k">class</span> <span class="nc">PairDeIndexer</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="PairDeIndexer.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairDeIndexer.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">molecule_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PairDeIndexer">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairDeIndexer">[docs]</a>
+<span class="k">class</span> <span class="nc">PairDeIndexer</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="PairDeIndexer.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairDeIndexer.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">molecule_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">):</span>
         <span class="n">molecule_position</span> <span class="o">=</span> <span class="n">molecule_index</span><span class="p">[</span><span class="n">pair_first</span><span class="p">]</span>
         <span class="n">absolute_first</span> <span class="o">=</span> <span class="n">atom_index</span><span class="p">[</span><span class="n">pair_first</span><span class="p">]</span>
         <span class="n">absolute_second</span> <span class="o">=</span> <span class="n">atom_index</span><span class="p">[</span><span class="n">pair_second</span><span class="p">]</span>
@@ -131,11 +147,17 @@
 
         <span class="n">result</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="o">*</span><span class="n">out_shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">features</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">features</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
         <span class="n">result</span><span class="p">[</span><span class="n">molecule_position</span><span class="p">,</span> <span class="n">absolute_first</span><span class="p">,</span> <span class="n">absolute_second</span><span class="p">]</span> <span class="o">=</span> <span class="n">features</span>
-        <span class="k">return</span> <span class="n">result</span></div></div>
+        <span class="k">return</span> <span class="n">result</span></div>
+</div>
 
 
-<div class="viewcode-block" id="MolPairSummer"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.MolPairSummer">[docs]</a><span class="k">class</span> <span class="nc">MolPairSummer</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="MolPairSummer.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.MolPairSummer.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pairfeatures</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MolPairSummer">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.MolPairSummer">[docs]</a>
+<span class="k">class</span> <span class="nc">MolPairSummer</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="MolPairSummer.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.MolPairSummer.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pairfeatures</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">):</span>
         <span class="n">pair_mol</span> <span class="o">=</span> <span class="n">mol_index</span><span class="p">[</span><span class="n">pair_first</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">pairfeatures</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">feat_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>
@@ -145,18 +167,30 @@
         <span class="n">out_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_molecules</span><span class="p">,</span> <span class="o">*</span><span class="n">feat_shape</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">out_shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">pairfeatures</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">pairfeatures</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
         <span class="n">result</span><span class="o">.</span><span class="n">index_add_</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pair_mol</span><span class="p">,</span> <span class="n">pairfeatures</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span></div></div>
+        <span class="k">return</span> <span class="n">result</span></div>
+</div>
 
 
-<div class="viewcode-block" id="PairCacher"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairCacher">[docs]</a><span class="k">class</span> <span class="nc">PairCacher</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="PairCacher.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairCacher.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_images</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PairCacher">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairCacher">[docs]</a>
+<span class="k">class</span> <span class="nc">PairCacher</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="PairCacher.__init__">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairCacher.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_images</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_images</span><span class="p">(</span><span class="n">n_images</span><span class="o">=</span><span class="n">n_images</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PairCacher.set_images"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairCacher.set_images">[docs]</a>    <span class="k">def</span> <span class="nf">set_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_images</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PairCacher.set_images">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairCacher.set_images">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_images</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_images</span> <span class="o">=</span> <span class="n">n_images</span></div>
 
-<div class="viewcode-block" id="PairCacher.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairCacher.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
+
+<div class="viewcode-block" id="PairCacher.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairCacher.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">cell_offsets</span><span class="p">,</span> <span class="n">offset_index</span><span class="p">,</span> <span class="n">real_atoms</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms_max</span>
     <span class="p">):</span>
         <span class="c1"># Set up absolute indices</span>
@@ -184,18 +218,30 @@
             <span class="n">indices</span><span class="o">=</span><span class="n">indices</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">pair_first</span><span class="o">.</span><span class="n">device</span>
         <span class="p">)</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">coalesce</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">s</span></div></div>
+        <span class="k">return</span> <span class="n">s</span></div>
+</div>
 
 
-<div class="viewcode-block" id="PairUncacher"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairUncacher">[docs]</a><span class="k">class</span> <span class="nc">PairUncacher</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="PairUncacher.__init__"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairUncacher.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_images</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PairUncacher">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairUncacher">[docs]</a>
+<span class="k">class</span> <span class="nc">PairUncacher</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="PairUncacher.__init__">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairUncacher.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_images</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_images</span><span class="p">(</span><span class="n">n_images</span><span class="o">=</span><span class="n">n_images</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PairUncacher.set_images"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairUncacher.set_images">[docs]</a>    <span class="k">def</span> <span class="nf">set_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_images</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PairUncacher.set_images">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairUncacher.set_images">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_images</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_images</span> <span class="o">=</span> <span class="n">n_images</span></div>
 
-<div class="viewcode-block" id="PairUncacher.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairUncacher.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sparse</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">real_atoms</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PairUncacher.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PairUncacher.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sparse</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">real_atoms</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">sparse</span><span class="o">.</span><span class="n">is_sparse</span><span class="p">:</span>
             <span class="n">sparse</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">to_sparse</span><span class="p">(</span><span class="n">sparse_dim</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
@@ -218,10 +264,14 @@
 
         <span class="n">distflat</span> <span class="o">=</span> <span class="n">paircoord</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">distflat</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">paircoord</span><span class="p">,</span> <span class="n">cell_offsets</span><span class="p">,</span> <span class="n">offset_index</span></div></div>
+        <span class="k">return</span> <span class="n">distflat</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">paircoord</span><span class="p">,</span> <span class="n">cell_offsets</span><span class="p">,</span> <span class="n">offset_index</span></div>
+</div>
 
 
-<div class="viewcode-block" id="padded_neighlist"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.padded_neighlist">[docs]</a><span class="k">def</span> <span class="nf">padded_neighlist</span><span class="p">(</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_coord</span><span class="p">,</span> <span class="n">atom_array</span><span class="p">):</span>
+
+<div class="viewcode-block" id="padded_neighlist">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.padded_neighlist">[docs]</a>
+<span class="k">def</span> <span class="nf">padded_neighlist</span><span class="p">(</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_coord</span><span class="p">,</span> <span class="n">atom_array</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert from index list pair_first, pair_second</span>
 <span class="sd">    to index list of `jlist`</span>
@@ -279,9 +329,16 @@
     <span class="k">return</span> <span class="n">jlist_pad</span><span class="p">,</span> <span class="n">rijlist_pad</span></div>
 
 
-<div class="viewcode-block" id="PaddedNeighModule"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PaddedNeighModule">[docs]</a><span class="k">class</span> <span class="nc">PaddedNeighModule</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="PaddedNeighModule.forward"><a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PaddedNeighModule.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_coord</span><span class="p">,</span> <span class="n">atom_array</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">padded_neighlist</span><span class="p">(</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_coord</span><span class="p">,</span> <span class="n">atom_array</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="PaddedNeighModule">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PaddedNeighModule">[docs]</a>
+<span class="k">class</span> <span class="nc">PaddedNeighModule</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="PaddedNeighModule.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.indexing.html#hippynn.layers.pairs.indexing.PaddedNeighModule.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_coord</span><span class="p">,</span> <span class="n">atom_array</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">padded_neighlist</span><span class="p">(</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_coord</span><span class="p">,</span> <span class="n">atom_array</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>

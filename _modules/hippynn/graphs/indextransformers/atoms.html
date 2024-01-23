@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.graphs.indextransformers.atoms &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.graphs.indextransformers.atoms &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -89,7 +89,9 @@
 <span class="c1"># TODO: Rewrite so it can use non-one-hot-encodings?</span>
 
 
-<div class="viewcode-block" id="idx_molatom_atom"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.atoms.html#hippynn.graphs.indextransformers.atoms.idx_molatom_atom">[docs]</a><span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">)</span>
+<div class="viewcode-block" id="idx_molatom_atom">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.atoms.html#hippynn.graphs.indextransformers.atoms.idx_molatom_atom">[docs]</a>
+<span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">idx_molatom_atom</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
     <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;auto-generating indexing for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
 
@@ -125,7 +127,10 @@
     <span class="k">return</span> <span class="n">parents</span><span class="p">,</span> <span class="bp">cls</span></div>
 
 
-<div class="viewcode-block" id="idx_atom_molatom"><a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.atoms.html#hippynn.graphs.indextransformers.atoms.idx_atom_molatom">[docs]</a><span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">)</span>
+
+<div class="viewcode-block" id="idx_atom_molatom">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.atoms.html#hippynn.graphs.indextransformers.atoms.idx_atom_molatom">[docs]</a>
+<span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">idx_atom_molatom</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">origin_node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -133,6 +138,7 @@
         <span class="k">return</span> <span class="n">parents</span><span class="p">,</span> <span class="n">AtomDeIndexer</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;De-indexing not yet implemented in loss graph&quot;</span><span class="p">)</span></div>
+
         <span class="c1"># TODO: refactor out padding indexer creation for loss from the molatom-atom indexer, then re-use it here.</span>
 </pre></div>
 

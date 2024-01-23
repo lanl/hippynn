@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.custom_kernels.env_numba &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.custom_kernels.env_numba &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -100,7 +100,9 @@
 
 <span class="c1"># Kernel which sums sensitivities and features to get environment.</span>
 <span class="c1"># Numpy core signature: (p,n),(a,f),(p),(p),(a,n,f)</span>
-<div class="viewcode-block" id="WrappedEnvsum"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum">[docs]</a><span class="k">class</span> <span class="nc">WrappedEnvsum</span><span class="p">(</span><span class="n">NumbaCompatibleTensorFunction</span><span class="p">):</span>
+<div class="viewcode-block" id="WrappedEnvsum">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum">[docs]</a>
+<span class="k">class</span> <span class="nc">WrappedEnvsum</span><span class="p">(</span><span class="n">NumbaCompatibleTensorFunction</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">args</span>
         <span class="n">psecond_hold</span> <span class="o">=</span> <span class="n">psecond</span>
@@ -109,12 +111,17 @@
         <span class="n">args</span> <span class="o">=</span> <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="n">atom1_ids</span><span class="p">,</span> <span class="n">atom1_starts</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-<div class="viewcode-block" id="WrappedEnvsum.out_shape"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum.out_shape">[docs]</a>    <span class="k">def</span> <span class="nf">out_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sense_shape</span><span class="p">,</span> <span class="n">feat_shape</span><span class="p">,</span> <span class="o">*</span><span class="n">other_shapes</span><span class="p">):</span>
+<div class="viewcode-block" id="WrappedEnvsum.out_shape">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum.out_shape">[docs]</a>
+    <span class="k">def</span> <span class="nf">out_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sense_shape</span><span class="p">,</span> <span class="n">feat_shape</span><span class="p">,</span> <span class="o">*</span><span class="n">other_shapes</span><span class="p">):</span>
         <span class="n">n_pair</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sense_shape</span>
         <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_feature</span> <span class="o">=</span> <span class="n">feat_shape</span>
         <span class="k">return</span> <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feature</span></div>
 
-<div class="viewcode-block" id="WrappedEnvsum.launch_bounds"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum.launch_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">launch_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sense_shape</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">pfs</span><span class="p">,</span> <span class="n">pss</span><span class="p">,</span> <span class="n">atom1_ids_shape</span><span class="p">,</span> <span class="o">*</span><span class="n">other_shapes</span><span class="p">):</span>
+
+<div class="viewcode-block" id="WrappedEnvsum.launch_bounds">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum.launch_bounds">[docs]</a>
+    <span class="k">def</span> <span class="nf">launch_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sense_shape</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">pfs</span><span class="p">,</span> <span class="n">pss</span><span class="p">,</span> <span class="n">atom1_ids_shape</span><span class="p">,</span> <span class="o">*</span><span class="n">other_shapes</span><span class="p">):</span>
         <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sense_shape</span>
         <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">fs</span>
         <span class="p">(</span><span class="n">n_atoms_interacting</span><span class="p">,)</span> <span class="o">=</span> <span class="n">atom1_ids_shape</span>
@@ -127,7 +134,10 @@
         <span class="n">BPG</span> <span class="o">=</span> <span class="p">(</span><span class="n">BPG_X</span><span class="p">,</span> <span class="n">BPG_Y</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">BPG</span><span class="p">,</span> <span class="n">TPB</span></div>
 
-<div class="viewcode-block" id="WrappedEnvsum.make_kernel"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum.make_kernel">[docs]</a>    <span class="nd">@staticmethod</span>
+
+<div class="viewcode-block" id="WrappedEnvsum.make_kernel">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum.make_kernel">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">make_kernel</span><span class="p">(</span><span class="n">KERNEL_DTYPE</span><span class="p">):</span>
         <span class="n">sig</span> <span class="o">=</span> <span class="s2">&quot;void(</span><span class="si">{DTYPE}</span><span class="s2">[:,:,],</span><span class="si">{DTYPE}</span><span class="s2">[:,:],int64[:],int64[:],int64[:],int64[:],</span><span class="si">{DTYPE}</span><span class="s2">[:,:,:])&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="n">DTYPE</span><span class="o">=</span><span class="n">KERNEL_DTYPE</span>
@@ -163,6 +173,7 @@
 
         <span class="k">return</span> <span class="n">kernel</span></div>
 
+
     <span class="nd">@staticmethod</span>
     <span class="nd">@via_numpy</span>
     <span class="nd">@numba</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -189,15 +200,23 @@
         <span class="k">return</span> <span class="n">env_features</span></div>
 
 
+
 <span class="c1"># Kernel which sums environment and features to get sensitivity</span>
 <span class="c1"># Numpy core signature: (a,n,f),(a,f),(p),(p),(p,n),</span>
-<div class="viewcode-block" id="WrappedSensesum"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum">[docs]</a><span class="k">class</span> <span class="nc">WrappedSensesum</span><span class="p">(</span><span class="n">NumbaCompatibleTensorFunction</span><span class="p">):</span>
-<div class="viewcode-block" id="WrappedSensesum.out_shape"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum.out_shape">[docs]</a>    <span class="k">def</span> <span class="nf">out_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_shape</span><span class="p">,</span> <span class="n">feat_shape</span><span class="p">,</span> <span class="n">pfirst_shape</span><span class="p">,</span> <span class="n">psecond_shape</span><span class="p">):</span>
+<div class="viewcode-block" id="WrappedSensesum">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum">[docs]</a>
+<span class="k">class</span> <span class="nc">WrappedSensesum</span><span class="p">(</span><span class="n">NumbaCompatibleTensorFunction</span><span class="p">):</span>
+<div class="viewcode-block" id="WrappedSensesum.out_shape">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum.out_shape">[docs]</a>
+    <span class="k">def</span> <span class="nf">out_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_shape</span><span class="p">,</span> <span class="n">feat_shape</span><span class="p">,</span> <span class="n">pfirst_shape</span><span class="p">,</span> <span class="n">psecond_shape</span><span class="p">):</span>
         <span class="p">(</span><span class="n">n_pair</span><span class="p">,)</span> <span class="o">=</span> <span class="n">pfirst_shape</span>
         <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">env_shape</span>
         <span class="k">return</span> <span class="n">n_pair</span><span class="p">,</span> <span class="n">n_nu</span></div>
 
-<div class="viewcode-block" id="WrappedSensesum.launch_bounds"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum.launch_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">launch_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_shape</span><span class="p">,</span> <span class="n">feat_shape</span><span class="p">,</span> <span class="n">pfirst_shape</span><span class="p">,</span> <span class="n">psecond_shape</span><span class="p">):</span>
+
+<div class="viewcode-block" id="WrappedSensesum.launch_bounds">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum.launch_bounds">[docs]</a>
+    <span class="k">def</span> <span class="nf">launch_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_shape</span><span class="p">,</span> <span class="n">feat_shape</span><span class="p">,</span> <span class="n">pfirst_shape</span><span class="p">,</span> <span class="n">psecond_shape</span><span class="p">):</span>
         <span class="p">(</span><span class="n">n_pairs</span><span class="p">,)</span> <span class="o">=</span> <span class="n">pfirst_shape</span>
         <span class="n">n_atoms</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">env_shape</span>
         <span class="n">TPB_MAX</span> <span class="o">=</span> <span class="mi">512</span>
@@ -207,7 +226,10 @@
         <span class="n">BPG</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_pairs</span> <span class="o">+</span> <span class="n">TPB_X</span> <span class="o">-</span><span class="mi">1</span> <span class="p">)</span><span class="o">//</span><span class="n">TPB_X</span>
         <span class="k">return</span> <span class="n">BPG</span><span class="p">,</span> <span class="n">TPB</span></div>
 
-<div class="viewcode-block" id="WrappedSensesum.make_kernel"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum.make_kernel">[docs]</a>    <span class="nd">@staticmethod</span>
+
+<div class="viewcode-block" id="WrappedSensesum.make_kernel">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedSensesum.make_kernel">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">make_kernel</span><span class="p">(</span><span class="n">KERNEL_DTYPE</span><span class="p">):</span>
         <span class="n">sig</span> <span class="o">=</span> <span class="s2">&quot;void(</span><span class="si">{DTYPE}</span><span class="s2">[:,:,:],</span><span class="si">{DTYPE}</span><span class="s2">[:,:],int64[:], int64[:],</span><span class="si">{DTYPE}</span><span class="s2">[:,:])&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DTYPE</span><span class="o">=</span><span class="n">KERNEL_DTYPE</span><span class="p">)</span>
 
@@ -229,6 +251,7 @@
 
         <span class="k">return</span> <span class="n">kernel</span></div>
 
+
     <span class="nd">@staticmethod</span>
     <span class="nd">@via_numpy</span>
     <span class="nd">@numba</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -247,9 +270,12 @@
         <span class="k">return</span> <span class="n">sense</span></div>
 
 
+
 <span class="c1"># Kernel which sums environment and sensitivity to get features</span>
 <span class="c1"># Numpy core signature: (a,n,f),(p,n),(p),(p),(a,f),</span>
-<div class="viewcode-block" id="WrappedFeatsum"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum">[docs]</a><span class="k">class</span> <span class="nc">WrappedFeatsum</span><span class="p">(</span><span class="n">NumbaCompatibleTensorFunction</span><span class="p">):</span>
+<div class="viewcode-block" id="WrappedFeatsum">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum">[docs]</a>
+<span class="k">class</span> <span class="nc">WrappedFeatsum</span><span class="p">(</span><span class="n">NumbaCompatibleTensorFunction</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">args</span>
         <span class="n">pfirst_hold</span> <span class="o">=</span> <span class="n">pfirst</span>
@@ -258,11 +284,16 @@
         <span class="n">args</span> <span class="o">=</span> <span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="n">atom2_ids</span><span class="p">,</span> <span class="n">atom2_starts</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-<div class="viewcode-block" id="WrappedFeatsum.out_shape"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum.out_shape">[docs]</a>    <span class="k">def</span> <span class="nf">out_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_shape</span><span class="p">,</span> <span class="o">*</span><span class="n">other_shapes</span><span class="p">):</span>
+<div class="viewcode-block" id="WrappedFeatsum.out_shape">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum.out_shape">[docs]</a>
+    <span class="k">def</span> <span class="nf">out_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_shape</span><span class="p">,</span> <span class="o">*</span><span class="n">other_shapes</span><span class="p">):</span>
         <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feature</span> <span class="o">=</span> <span class="n">env_shape</span>
         <span class="k">return</span> <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_feature</span></div>
 
-<div class="viewcode-block" id="WrappedFeatsum.launch_bounds"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum.launch_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">launch_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_shape</span><span class="p">,</span> <span class="n">sense_shape</span><span class="p">,</span> <span class="n">pfirst_shape</span><span class="p">,</span> <span class="n">psecond_shape</span><span class="p">,</span> <span class="n">atom2_id_shape</span><span class="p">,</span> <span class="n">atom2_startshape</span><span class="p">):</span>
+
+<div class="viewcode-block" id="WrappedFeatsum.launch_bounds">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum.launch_bounds">[docs]</a>
+    <span class="k">def</span> <span class="nf">launch_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_shape</span><span class="p">,</span> <span class="n">sense_shape</span><span class="p">,</span> <span class="n">pfirst_shape</span><span class="p">,</span> <span class="n">psecond_shape</span><span class="p">,</span> <span class="n">atom2_id_shape</span><span class="p">,</span> <span class="n">atom2_startshape</span><span class="p">):</span>
         <span class="c1"># Note, this kernel has transposed launch bounds:</span>
         <span class="c1"># The blocks in the x direction go with threads in the</span>
         <span class="c1"># y direction, and likewise for y blocks-&gt; x threads</span>
@@ -286,7 +317,10 @@
         <span class="n">BPG</span> <span class="o">=</span> <span class="p">(</span><span class="n">BPG_x</span><span class="p">,</span> <span class="n">BPG_y</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">BPG</span><span class="p">,</span> <span class="n">TPB</span></div>
 
-<div class="viewcode-block" id="WrappedFeatsum.make_kernel"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum.make_kernel">[docs]</a>    <span class="nd">@staticmethod</span>
+
+<div class="viewcode-block" id="WrappedFeatsum.make_kernel">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum.make_kernel">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">make_kernel</span><span class="p">(</span><span class="n">KERNEL_DTYPE</span><span class="p">):</span>
         <span class="n">sig</span> <span class="o">=</span> <span class="s2">&quot;void(</span><span class="si">{DTYPE}</span><span class="s2">[:,:,:],</span><span class="si">{DTYPE}</span><span class="s2">[:,:],int64[:],int64[:],int64[:],int64[:],</span><span class="si">{DTYPE}</span><span class="s2">[:,:])&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="n">DTYPE</span><span class="o">=</span><span class="n">KERNEL_DTYPE</span>
@@ -324,6 +358,7 @@
 
         <span class="k">return</span> <span class="n">kernel</span></div>
 
+
     <span class="nd">@staticmethod</span>
     <span class="nd">@via_numpy</span>
     <span class="nd">@numba</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -352,6 +387,7 @@
                         <span class="n">tmp</span><span class="p">[</span><span class="n">fidx</span><span class="p">]</span> <span class="o">+=</span> <span class="n">env</span><span class="p">[</span><span class="n">pfidx</span><span class="p">,</span> <span class="n">nidx</span><span class="p">,</span> <span class="n">fidx</span><span class="p">]</span> <span class="o">*</span> <span class="n">sens</span><span class="p">[</span><span class="n">pidx</span><span class="p">,</span> <span class="n">nidx</span><span class="p">]</span>
             <span class="n">feat</span><span class="p">[</span><span class="n">psidx</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span>
         <span class="k">return</span> <span class="n">feat</span></div>
+
 
 
 <span class="n">new_envsum</span> <span class="o">=</span> <span class="n">WrappedEnvsum</span><span class="p">()</span>

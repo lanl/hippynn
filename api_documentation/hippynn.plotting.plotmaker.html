@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>plotmaker module &mdash; hippynn 0.0.1 documentation</title>
+  <title>plotmaker module &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
@@ -16,9 +16,9 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -59,7 +59,18 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.layers.html">layers package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.networks.html">networks package</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.plotting.html">plotting package</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">plotmaker module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">plotmaker module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.plotting.plotmaker.PlotMaker"><code class="docutils literal notranslate"><span class="pre">PlotMaker</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.plotting.plotmaker.PlotMaker.__init__"><code class="docutils literal notranslate"><span class="pre">PlotMaker.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.plotting.plotmaker.PlotMaker.assemble_module"><code class="docutils literal notranslate"><span class="pre">PlotMaker.assemble_module()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.plotting.plotmaker.PlotMaker.make_full_location"><code class="docutils literal notranslate"><span class="pre">PlotMaker.make_full_location()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.plotting.plotmaker.PlotMaker.make_plots"><code class="docutils literal notranslate"><span class="pre">PlotMaker.make_plots()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.plotting.plotmaker.PlotMaker.plot_phase"><code class="docutils literal notranslate"><span class="pre">PlotMaker.plot_phase()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.plotting.plotmaker.PlotMaker.required_nodes"><code class="docutils literal notranslate"><span class="pre">PlotMaker.required_nodes</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.plotting.plotters.html">plotters module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.plotting.timeplots.html">timeplots module</a></li>
 </ul>
@@ -101,8 +112,45 @@
            <div itemprop="articleBody">
              
   <section id="plotmaker-module">
-<h1>plotmaker module<a class="headerlink" href="#plotmaker-module" title="Permalink to this heading"></a></h1>
+<h1>plotmaker module<a class="headerlink" href="#plotmaker-module" title="Link to this heading"></a></h1>
 <p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.plotting.plotmaker</span></code> module.</p>
+<dl class="py class" id="module-hippynn.plotting.plotmaker">
+<dt class="sig sig-object py" id="hippynn.plotting.plotmaker.PlotMaker">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PlotMaker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">plotters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_every</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'plots/'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/plotting/plotmaker.html#PlotMaker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.plotting.plotmaker.PlotMaker" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The plot maker is responsible for collecting the data for the plotters and executing the plotters.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.plotting.plotmaker.PlotMaker.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">plotters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_every</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'plots/'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/plotting/plotmaker.html#PlotMaker.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.plotting.plotmaker.PlotMaker.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.plotting.plotmaker.PlotMaker.assemble_module">
+<span class="sig-name descname"><span class="pre">assemble_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/plotting/plotmaker.html#PlotMaker.assemble_module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.plotting.plotmaker.PlotMaker.assemble_module" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.plotting.plotmaker.PlotMaker.make_full_location">
+<span class="sig-name descname"><span class="pre">make_full_location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sub_location</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/plotting/plotmaker.html#PlotMaker.make_full_location"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.plotting.plotmaker.PlotMaker.make_full_location" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.plotting.plotmaker.PlotMaker.make_plots">
+<span class="sig-name descname"><span class="pre">make_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sub_location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/plotting/plotmaker.html#PlotMaker.make_plots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.plotting.plotmaker.PlotMaker.make_plots" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.plotting.plotmaker.PlotMaker.plot_phase">
+<span class="sig-name descname"><span class="pre">plot_phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction_all_vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_all_vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">when</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/plotting/plotmaker.html#PlotMaker.plot_phase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.plotting.plotmaker.PlotMaker.plot_phase" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hippynn.plotting.plotmaker.PlotMaker.required_nodes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">required_nodes</span></span><a class="headerlink" href="#hippynn.plotting.plotmaker.PlotMaker.required_nodes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 
 

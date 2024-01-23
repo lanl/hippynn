@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hippynn.custom_kernels.test_env_numba &mdash; hippynn 0.0.1 documentation</title>
+  <title>hippynn.custom_kernels.test_env_numba &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
@@ -15,9 +15,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=8df938ec"></script>
+        <script src="../../../_static/documentation_options.js?v=c9d3d048"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -89,7 +89,9 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_numba</span>
 
 
-<div class="viewcode-block" id="get_simulated_data"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.get_simulated_data">[docs]</a><span class="k">def</span> <span class="nf">get_simulated_data</span><span class="p">(</span>
+<div class="viewcode-block" id="get_simulated_data">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.get_simulated_data">[docs]</a>
+<span class="k">def</span> <span class="nf">get_simulated_data</span><span class="p">(</span>
     <span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">atom_prob</span><span class="p">,</span> <span class="n">n_features</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">printinfo</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -179,6 +181,7 @@
     <span class="k">return</span> <span class="n">pair_sense</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span></div>
 
 
+
 <span class="n">TEST_TINY_PARAMS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">n_molecules</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">atom_prob</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_nu</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
 <span class="n">TEST_SMALL_PARAMS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">n_molecules</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">atom_prob</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_nu</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="n">TEST_MEDIUM_PARAMS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">n_molecules</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">atom_prob</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">n_nu</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
@@ -212,8 +215,12 @@
 <span class="c1"># A class for testing the correctness of the kernels functions.</span>
 
 
-<div class="viewcode-block" id="Envops_tester"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester">[docs]</a><span class="k">class</span> <span class="nc">Envops_tester</span><span class="p">:</span>
-<div class="viewcode-block" id="Envops_tester.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">envsum_raw</span><span class="p">,</span> <span class="n">sensesum_raw</span><span class="p">,</span> <span class="n">featsum_raw</span><span class="p">,</span> <span class="n">suspicious_deviation</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+<div class="viewcode-block" id="Envops_tester">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester">[docs]</a>
+<span class="k">class</span> <span class="nc">Envops_tester</span><span class="p">:</span>
+<div class="viewcode-block" id="Envops_tester.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">envsum_raw</span><span class="p">,</span> <span class="n">sensesum_raw</span><span class="p">,</span> <span class="n">featsum_raw</span><span class="p">,</span> <span class="n">suspicious_deviation</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">envsum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensesum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">featsum</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">autograd_wrapper</span><span class="o">.</span><span class="n">wrap_envops</span><span class="p">(</span>
             <span class="n">envsum_impl</span><span class="o">=</span><span class="n">envsum_raw</span><span class="p">,</span> <span class="n">sensesum_impl</span><span class="o">=</span><span class="n">sensesum_raw</span><span class="p">,</span> <span class="n">featsum_impl</span><span class="o">=</span><span class="n">featsum_raw</span>
         <span class="p">)</span>
@@ -221,7 +228,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">tol_f32</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>  <span class="c1"># Absolute tolerance a bit fuzzier for float32.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">suspicious_deviation</span> <span class="o">=</span> <span class="n">suspicious_deviation</span></div>
 
-<div class="viewcode-block" id="Envops_tester.check_grad_and_gradgrad"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_grad_and_gradgrad">[docs]</a>    <span class="k">def</span> <span class="nf">check_grad_and_gradgrad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">differentiable_inputs</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">funcname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Envops_tester.check_grad_and_gradgrad">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_grad_and_gradgrad">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_grad_and_gradgrad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">differentiable_inputs</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">funcname</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">funcname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">funcname</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__qualname__</span>
         <span class="k">try</span><span class="p">:</span>
@@ -237,7 +247,10 @@
         <span class="k">finally</span><span class="p">:</span>
             <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Envops_tester.check_all_grad_once"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_all_grad_once">[docs]</a>    <span class="k">def</span> <span class="nf">check_all_grad_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
+
+<div class="viewcode-block" id="Envops_tester.check_all_grad_once">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_all_grad_once">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_all_grad_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
         <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">get_simulated_data</span><span class="p">(</span><span class="o">**</span><span class="n">TEST_TINY_PARAMS</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
         <span class="n">n_atoms</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">=</span> <span class="n">feat</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sense</span><span class="o">.</span><span class="n">shape</span>
@@ -246,11 +259,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">check_grad_and_gradgrad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sensesum</span><span class="p">,</span> <span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">),</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="n">funcname</span><span class="o">=</span><span class="s2">&quot;sensesum&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">check_grad_and_gradgrad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">featsum</span><span class="p">,</span> <span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">),</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="n">funcname</span><span class="o">=</span><span class="s2">&quot;featsum&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Envops_tester.check_all_grad"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_all_grad">[docs]</a>    <span class="k">def</span> <span class="nf">check_all_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
+
+<div class="viewcode-block" id="Envops_tester.check_all_grad">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_all_grad">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_all_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeats</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">check_all_grad_once</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Envops_tester.check_allclose_once"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_allclose_once">[docs]</a>    <span class="k">def</span> <span class="nf">check_allclose_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_large</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
+
+<div class="viewcode-block" id="Envops_tester.check_allclose_once">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_allclose_once">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_allclose_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_large</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
         <span class="k">if</span> <span class="n">use_large</span><span class="p">:</span>
             <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">get_simulated_data</span><span class="p">(</span><span class="o">**</span><span class="n">TEST_LARGE_PARAMS</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -273,7 +292,10 @@
             <span class="k">if</span> <span class="n">max_deviation</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">suspicious_deviation</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Closeness check for </span><span class="si">{}</span><span class="s2"> by suspicious amount&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">max_deviation</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Envops_tester.check_empty"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_empty">[docs]</a>    <span class="k">def</span> <span class="nf">check_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)):</span>
+
+<div class="viewcode-block" id="Envops_tester.check_empty">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_empty">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)):</span>
 
         <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">get_simulated_data</span><span class="p">(</span><span class="o">**</span><span class="n">TEST_TINY_PARAMS</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
         <span class="n">pfirst</span> <span class="o">=</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,),</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span><span class="n">device</span><span class="o">=</span><span class="n">pfirst</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>    
@@ -287,7 +309,10 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Failed an operation on data with zero pairs&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ee</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Passed zero-pair check&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Envops_tester.all_close_witherror"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.all_close_witherror">[docs]</a>    <span class="k">def</span> <span class="nf">all_close_witherror</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Envops_tester.all_close_witherror">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.all_close_witherror">[docs]</a>
+    <span class="k">def</span> <span class="nf">all_close_witherror</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">):</span>
         <span class="n">r1</span> <span class="o">=</span> <span class="n">r1</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
         <span class="n">r2</span> <span class="o">=</span> <span class="n">r2</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">r1</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">:</span>  <span class="c1"># Get tolerance</span>
@@ -320,14 +345,20 @@
             <span class="k">raise</span> <span class="n">aee</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">diff_arr</span> <span class="o">/</span> <span class="n">tol_arr</span><span class="p">))</span>  <span class="c1"># max violation of bounds</span></div>
 
-<div class="viewcode-block" id="Envops_tester.check_allclose"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_allclose">[docs]</a>    <span class="k">def</span> <span class="nf">check_allclose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">use_large</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
+
+<div class="viewcode-block" id="Envops_tester.check_allclose">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_allclose">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_allclose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">use_large</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeats</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">check_allclose_once</span><span class="p">(</span><span class="n">use_large</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Failed during iteration </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">ee</span></div>
 
-<div class="viewcode-block" id="Envops_tester.check_correctness"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_correctness">[docs]</a>    <span class="k">def</span> <span class="nf">check_correctness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_grad</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_small</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_large</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
+
+<div class="viewcode-block" id="Envops_tester.check_correctness">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_correctness">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_correctness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_grad</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_small</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_large</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">check_empty</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Checking gradients </span><span class="si">{}</span><span class="s2"> times...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_grad</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">check_all_grad</span><span class="p">(</span><span class="n">repeats</span><span class="o">=</span><span class="n">n_grad</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
@@ -339,7 +370,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">check_allclose</span><span class="p">(</span><span class="n">repeats</span><span class="o">=</span><span class="n">n_large</span><span class="p">,</span> <span class="n">use_large</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Passed large tensor forward checks!&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Envops_tester.check_speed"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_speed">[docs]</a>    <span class="k">def</span> <span class="nf">check_speed</span><span class="p">(</span>
+
+<div class="viewcode-block" id="Envops_tester.check_speed">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_speed">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_speed</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">n_repetitions</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">),</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_LARGE_PARAMS</span><span class="p">,</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span>
     <span class="p">):</span>
 
@@ -387,21 +421,31 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Overall </span><span class="si">{}</span><span class="s2"> time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">compare_against</span><span class="p">,</span> <span class="n">tnsum</span><span class="p">))</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Overall time now: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tsum</span><span class="p">))</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Overall speedup: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tnsum</span> <span class="o">/</span> <span class="n">tsum</span><span class="p">))</span>
-        <span class="k">return</span>  <span class="c1"># prof</span></div></div>
+        <span class="k">return</span>  <span class="c1"># prof</span></div>
+</div>
+
 
 
 <span class="kn">import</span> <span class="nn">time</span>
 
 
-<div class="viewcode-block" id="TimerHolder"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimerHolder">[docs]</a><span class="k">class</span> <span class="nc">TimerHolder</span><span class="p">:</span>
-<div class="viewcode-block" id="TimerHolder.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimerHolder.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TimerHolder">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimerHolder">[docs]</a>
+<span class="k">class</span> <span class="nc">TimerHolder</span><span class="p">:</span>
+<div class="viewcode-block" id="TimerHolder.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimerHolder.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">snippets</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span></div>
 
-<div class="viewcode-block" id="TimerHolder.add"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimerHolder.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TimerHolder.add">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimerHolder.add">[docs]</a>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">TimedSnippet</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">snippets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">t</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">elapsed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -416,9 +460,15 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">([</span><span class="n">t</span><span class="o">.</span><span class="n">elapsed</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">snippets</span><span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="TimedSnippet"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimedSnippet">[docs]</a><span class="k">class</span> <span class="nc">TimedSnippet</span><span class="p">:</span>
-<div class="viewcode-block" id="TimedSnippet.__init__"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimedSnippet.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TimedSnippet">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimedSnippet">[docs]</a>
+<span class="k">class</span> <span class="nc">TimedSnippet</span><span class="p">:</span>
+<div class="viewcode-block" id="TimedSnippet.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.TimedSnippet.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="kc">None</span></div>
+
 
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
@@ -437,7 +487,10 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span></div>
 
 
-<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">env_impl</span><span class="p">,</span><span class="n">sense_impl</span><span class="p">,</span><span class="n">feat_impl</span><span class="p">):</span>
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.main">[docs]</a>
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">env_impl</span><span class="p">,</span><span class="n">sense_impl</span><span class="p">,</span><span class="n">feat_impl</span><span class="p">):</span>
     <span class="n">tester</span> <span class="o">=</span> <span class="n">Envops_tester</span><span class="p">(</span>
         <span class="n">env_impl</span><span class="p">,</span>
         <span class="n">sense_impl</span><span class="p">,</span>
@@ -490,6 +543,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Small systems:&quot;</span><span class="p">,</span> <span class="n">TEST_SMALL_PARAMS</span><span class="p">)</span>
     <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span><span class="p">,</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_SMALL_PARAMS</span><span class="p">)</span></div>
+
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
