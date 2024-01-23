@@ -12,18 +12,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
-    # Standard drop-in approach that should work for most people.
-    - uses: ammaraskar/sphinx-action@master
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
       with:
-        # FIXME: how to build with mocking torch?
-        # use CPU only torch as this action will be likely for doc building only
-        pre-build-command: "pip3 install -U sphinx sphinx_rtd_theme graphviz ase torch --extra-index-url https://download.pytorch.org/whl/cpu && pip install ."
-        docs-folder: "docs/"
-        # a new target that always builds api_doc first
-        build-command: "make html_all"
+        python-version: "3.9"
+
+    - name: Install dependencies and package
+      run: >-
+        pip3 install -U sphinx sphinx_rtd_theme graphviz ase torch --extra-index-url https://download.pytorch.org/whl/cpu && pip install .
+
+    - name: Build docs
+      run: |
+        cd docs
+        make html_all
+
     # Create an artifact of the html output.
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: DocumentationHTML
         path: docs/build/html/

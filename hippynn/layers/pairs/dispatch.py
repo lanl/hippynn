@@ -6,8 +6,6 @@ from itertools import product
 import numpy as np
 from scipy.spatial import KDTree
 import torch
-import os
-from datetime import datetime
 
 from .open import PairMemory
 

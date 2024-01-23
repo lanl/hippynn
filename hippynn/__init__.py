@@ -3,8 +3,14 @@
 The hippynn python package.
 
 """
+
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions
+
 # Configurational settings
 from ._settings_setup import settings
+
 
 # Pytorch modules
 from . import layers
