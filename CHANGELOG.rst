@@ -1,5 +1,10 @@
-0.0.2a3
+0.0.3
 =======
+
+Breaking changes:
+-----------------
+
+- The minimum python version has been increased to 3.9
 
 New Features:
 -------------
@@ -8,7 +13,7 @@ New Features:
   See /examples/excited_states_azomethane.py.
 
 - New MultiGradient node for computing multiple partial derivatives of 
-  the same node simultaneously.
+  using one call to automatic differentiation.
 
 Improvements:
 -------------
