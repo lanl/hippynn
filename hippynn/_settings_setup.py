@@ -72,6 +72,7 @@ default_settings = {
     "DEBUG_AUTOINDEXING": (False, strtobool),
     "USE_CUSTOM_KERNELS": ("auto", kernel_handler),
     "WARN_LOW_DISTANCES": (True, strtobool),
+    "TIMEPLOT_AUTOSCALING": (True, strtobool),
 }
 
 settings = SimpleNamespace(**{k: default for k, (default, handler) in default_settings.items()})
