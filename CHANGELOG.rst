@@ -12,8 +12,8 @@ New Features:
 - Add nodes for non-adiabatic coupling vectors (NACR) and phase-less loss.
   See /examples/excited_states_azomethane.py.
 
-- New MultiGradient node for computing multiple partial derivatives of 
-  using one call to automatic differentiation.
+- New MultiGradient node for computing more than one partial derivative
+  using a single call to automatic differentiation.
 
 Improvements:
 -------------
@@ -23,6 +23,11 @@ Improvements:
 - Add out-of-range warning to FuzzyHistogrammer.
 
 - Create Memory parent class to remove redundancy.
+
+- New setting TIMEPLOT_AUTOSCALING. If True (default), time plots with 
+  log-scaling on the axes will only be produced if warranted by the data.
+  If False, time plots with linear-scaling and log-scaling will be produced
+  every time.
 
 Bug Fixes:
 ----------

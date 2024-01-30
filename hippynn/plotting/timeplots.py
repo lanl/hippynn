@@ -66,12 +66,13 @@ def plot_over_time(metric_name, metric_data, pltkwd_info, save_dir):
 
     datamin = min(min(arr) for arr in metric_data.values())
     datamax = max(max(arr) for arr in metric_data.values())
-    if datamin > 0 and datamax / datamin > 2:
+    # if settings.TIMEPLOT_AUTOSCALING is set to True, only produce log-scale plots under certain conditions
+    if (not settings.TIMEPLOT_AUTOSCALING) or (datamin > 0 and datamax / datamin > 2):
         plt.yscale("log")
         fname = os.path.join(save_dir, metric_name + "_logplot" + settings.DEFAULT_PLOT_FILETYPE)
         plt.savefig(fname)
 
-        if max(len(arr) for arr in metric_data.values()) > 10:
+        if (not settings.TIMEPLOT_AUTOSCALING) or (max(len(arr) for arr in metric_data.values()) > 10):
             plt.xscale("log")
             fname = os.path.join(save_dir, metric_name + "_loglogplot" + settings.DEFAULT_PLOT_FILETYPE)
             plt.savefig(fname)
