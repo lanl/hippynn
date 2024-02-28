@@ -211,11 +211,11 @@ class InteractLayer(torch.nn.Module):
 
 
 class InteractLayerVec(InteractLayer):
-    def __init__(self, nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module):
+    def __init__(self, nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module, cusp_reg):
         super().__init__(nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module)
-
         self.vecscales = torch.nn.Parameter(torch.Tensor(nf_out))
         torch.nn.init.normal_(self.vecscales.data)
+        self.cusp_reg = cusp_reg
 
     def forward(self, in_features, pair_first, pair_second, dist_pairs, coord_pairs):
 
@@ -235,7 +235,7 @@ class InteractLayerVec(InteractLayer):
         env_features_vec = env_features_vec.reshape(n_atoms_real * 3, self.n_dist * self.nf_in)
         features_out_vec = torch.mm(env_features_vec, weights_rs)
         features_out_vec = features_out_vec.reshape(n_atoms_real, 3, self.nf_out)
-        features_out_vec = torch.square(features_out_vec).sum(dim=1) + 1e-6
+        features_out_vec = torch.square(features_out_vec).sum(dim=1) + self.cusp_reg
         features_out_vec = torch.sqrt(features_out_vec)
         features_out_vec = features_out_vec * self.vecscales.unsqueeze(0)
 
@@ -248,16 +248,16 @@ class InteractLayerVec(InteractLayer):
 
 
 class InteractLayerQuad(InteractLayerVec):
-    def __init__(self, nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module):
-        super().__init__(nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module)
-
+    def __init__(self, nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module, cusp_reg):
+        super().__init__(nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module, cusp_reg)
         self.quadscales = torch.nn.Parameter(torch.Tensor(nf_out))
         torch.nn.init.normal_(self.quadscales.data)
         # upper indices of flattened 3x3 array minus the (3,3) component
         # which is not needed for a traceless tensor
         upper_ind = torch.as_tensor([0, 1, 2, 4, 5], dtype=torch.int64)
         self.register_buffer("upper_ind", upper_ind, persistent=False)  # Static, not part of module state
-
+        self.cusp_reg = cusp_reg
+        
     def forward(self, in_features, pair_first, pair_second, dist_pairs, coord_pairs):
 
         n_atoms_real = in_features.shape[0]
@@ -280,7 +280,7 @@ class InteractLayerQuad(InteractLayerVec):
         features_out_vec = torch.mm(env_features_vec, weights_rs)
         # Norm and scale
         features_out_vec = features_out_vec.reshape(n_atoms_real, 3, self.nf_out)
-        features_out_vec = torch.square(features_out_vec).sum(dim=1) + 1e-6
+        features_out_vec = torch.square(features_out_vec).sum(dim=1) + self.cusp_reg
         features_out_vec = torch.sqrt(features_out_vec)
         features_out_vec = features_out_vec * self.vecscales.unsqueeze(0)
 
@@ -303,12 +303,12 @@ class InteractLayerQuad(InteractLayerVec):
         quadfirst = torch.square(features_out_quad).sum(dim=1)
         quadsecond = features_out_quad[:, 0, :] * features_out_quad[:, 3, :]
         features_out_quad = 2 * (quadfirst + quadsecond)
-        features_out_quad = torch.sqrt(features_out_quad + 1e-6)
+        features_out_quad = torch.sqrt(features_out_quad + self.cusp_reg)
         # Scales
         features_out_quad = features_out_quad * self.quadscales.unsqueeze(0)
 
         features_out_selfpart = self.selfint(in_features)
 
         features_out_total = features_out + features_out_vec + features_out_quad + features_out_selfpart
-
+        
         return features_out_total
