@@ -213,7 +213,7 @@ class InteractLayer(torch.nn.Module):
 
 class InteractLayerVec(InteractLayer):
     def __init__(self, nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module, cusp_reg):
-        super().__init__(nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module)
+        super().__init__(nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module, cusp_reg)
         self.vecscales = torch.nn.Parameter(torch.Tensor(nf_out))
         torch.nn.init.normal_(self.vecscales.data)
         self.cusp_reg = cusp_reg
