@@ -139,7 +139,7 @@ class InteractLayer(torch.nn.Module):
     Hipnn's interaction layer
     """
 
-    def __init__(self, nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module):
+    def __init__(self, nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module, cusp_reg):
         """
         Constructor
 
@@ -150,6 +150,7 @@ class InteractLayer(torch.nn.Module):
         :param maxd_soft: maximum distance for initial sensitivities
         :param hard_cutoff: maximum distance for cutoff function
         :param sensitivity_module: class or callable that builds sensitivity functions, should return nn.Module
+        :param cusp_reg: 
         """
         super().__init__()
 
