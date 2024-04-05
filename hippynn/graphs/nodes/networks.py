@@ -3,6 +3,7 @@ Nodes for networks.
 """
 from .tags import Encoder, PairIndexer, Network, AtomIndexer
 from .base import _BaseNode, AutoKw, ExpandParents, SingleNode
+from .base.multi import IndexNode
 from .indexers import OneHotEncoder, PaddingIndexer, acquire_encoding_padding
 from .pairs import OpenPairIndexer, PeriodicPairIndexer
 from .inputs import SpeciesNode, PositionsNode, CellNode
@@ -78,8 +79,10 @@ class Hipnn(DefaultNetworkExpansion, AutoKw, Network, SingleNode):
         parents = self.expand_parents(
             parents, species_set=net_module.species_set, dist_hard_max=net_module.dist_hard_max, periodic=periodic
         )
-
         super().__init__(name, parents, module=net_module)
+
+        _make_feature_nodes(self)
+
 
 
 class HipnnVec(DefaultNetworkExpansion, AutoKw, Network, SingleNode):
@@ -111,6 +114,8 @@ class HipnnVec(DefaultNetworkExpansion, AutoKw, Network, SingleNode):
 
         super().__init__(name, parents, module=net_module)
 
+        _make_feature_nodes(self)
+
 
 class HipnnQuad(HipnnVec):
     """
@@ -118,3 +123,32 @@ class HipnnQuad(HipnnVec):
     """
 
     _auto_module_class = network_modules.hipnn.HipnnQuad
+
+
+def _make_feature_nodes(network_node):
+    """
+    This function can be used on a network to make nodes that refer to the individual feature blocks.
+    :param network_node: the input network, which is modified in-place
+    :return: None
+    """
+    import warnings
+    warnings.warn("This function is included for backwards compatibility and may be removed in a future release. "
+                  "The preferred way to access these nodes is through `network.feature_nodes`, which is available on "
+                  "networks created with this version of hippynn or later.")
+
+    if hasattr(network_node, "feature_nodes"):
+        return network_node.feature_nodes
+
+    net_module = network_node.torch_module
+    n_interactions = net_module.ni
+
+    feature_nodes = []
+
+    index_state = IdxType.Atoms
+    parents = (network_node,)
+    for i in range(n_interactions + 1):
+        name = f"{network_node.name}_features_{i}"
+        fnode = IndexNode(name=name, parents=parents, index=i, index_state=index_state)
+        feature_nodes.append(fnode)
+    network_node.feature_nodes = feature_nodes
+

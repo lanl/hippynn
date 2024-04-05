@@ -67,7 +67,7 @@ where_low_dist = database.arr_dict["indices"][low_dist_configs]
 database.make_explicit_split("LOW_DISTANCE_FILTER", where_low_dist)
 
 # This deletes the new split, although deleting it is not necessary;
-# this data iwll not be included in train/valid/test splits
+# this data will not be included in train/valid/test splits
 del database.splits["LOW_DISTANCE_FILTER"]
 
 ### Continue on with data processing, e.g.
