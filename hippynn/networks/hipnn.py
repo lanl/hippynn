@@ -245,7 +245,9 @@ class HipnnVec(Hipnn):
     """
     HIP-NN-TS with l=1
     """
+
     _interaction_class = InteractLayerVec
+
     def __init__(self, *args, cusp_reg=1e-6, **kwargs):
         # cusp regularization for tensor sensitivity l>0. Defaults to 1e-6.
         super().__init__(*args, cusp_reg=cusp_reg, **kwargs)
