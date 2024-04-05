@@ -7,6 +7,7 @@ from . import controllers
 from . import evaluator
 from . import metric_tracker
 from . import assembly
+from . import serialization
 from . import routines
 
 from .assembly import assemble_for_training
