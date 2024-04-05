@@ -8,7 +8,7 @@ That script will generate the files for a model.
 import torch
 
 if torch.cuda.is_available():
-    device = torch.cuda.get_default_device
+    device = torch.device(0)
 else:
     device = torch.device("cpu")
 import hippynn
