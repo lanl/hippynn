@@ -149,8 +149,6 @@ def load_checkpoint(
 
     # transfer stuff back to model_device
     structure = restore_checkpoint(structure, state, restore_db=restore_db)
-    # Apply backwards compatibility for model.
-    backward_compatibility(structure["training_modules"].model)
     # no transfer happens in either case, as the tensors are on the target devices already
     if model_device == "cpu" or map_location != None:
         evaluator = structure["training_modules"].evaluator
@@ -162,7 +160,6 @@ def load_checkpoint(
         optimizer = structure["controller"].optimizer
         model, loss, evaluator = training_modules
         model, evaluator, optimizer = set_devices(model, loss, evaluator, optimizer, model_device)
-        model = backward_compatibility(model)
     # if neither map_location nor model_device is set, directly return
     return structure
 
@@ -200,40 +197,8 @@ def load_model_from_cwd(map_location=None, model_device=None, **kwargs) -> Graph
 
     model = structure["training_modules"].model
     model.load_state_dict(state)
-    backward_compatibility(model)
     if map_location == None and model_device != None and model_device != "cpu":
         model = model.to(model_device)
 
     return model
 
-
-def backward_compatibility(model):
-    """ Mutates model graph in place to incorporate new attributes to ensure that
-    older hipnn models run with current code. 
-
-    Note that this function is subject to frequent changes depending on which 
-    older versions of hippynn are still supported.
-
-    :param model: hipnn model. 
-    :type model: GraphModule
-    """
-    # add `cusp_reg` to older models trained with default values. 
-    DEPRECATED_CUSP_REG = 1e-30
-    for k, v in model._modules["moddict"].items():
-        if isinstance(v, (HipnnVec,)): 
-            if "cusp_reg" in vars(v):
-                pass
-            else:
-                warnings.warn(
-                    "Deprecated: Hipnn model trained with outdated cusp-regularization", 
-                    # PendingDeprecationWarning
-                )
-                # Set cusp regularization for HipnnQuad or HipnnVec 
-                model._modules["moddict"][k].cusp_reg = DEPRECATED_CUSP_REG
-                
-                # Set cusp regularization for interaction layers
-                for l in model._modules["moddict"][k].interaction_layers:
-                    if isinstance(l, (ResNetWrapper,)):
-                        l.base_layer.cusp_reg = DEPRECATED_CUSP_REG
-                    else:
-                        l.cusp_reg = DEPRECATED_CUSP_REG

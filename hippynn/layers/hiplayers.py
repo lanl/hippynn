@@ -139,7 +139,7 @@ class InteractLayer(torch.nn.Module):
     Hipnn's interaction layer
     """
 
-    def __init__(self, nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module, cusp_reg):
+    def __init__(self, nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module, cusp_reg=None):
         """
         Constructor
 
@@ -150,10 +150,13 @@ class InteractLayer(torch.nn.Module):
         :param maxd_soft: maximum distance for initial sensitivities
         :param hard_cutoff: maximum distance for cutoff function
         :param sensitivity_module: class or callable that builds sensitivity functions, should return nn.Module
-        :param cusp_reg: 
+        :param cusp_reg: ignored, only provided with compatibility for tensor sensitivity API
         """
         super().__init__()
 
+        if type(self) is InteractLayer and cusp_reg is not None:
+            # Parameter is not used in this class.
+            warnings.warn(f"Parameter `cusp_reg`={cusp_reg} is ignored in this class, and is only provided for API compatibility.")
         self.n_dist = n_dist
         self.nf_in = nf_in
         self.nf_out = nf_out
@@ -218,6 +221,53 @@ class InteractLayerVec(InteractLayer):
         torch.nn.init.normal_(self.vecscales.data)
         self.cusp_reg = cusp_reg
 
+
+    def __setstate__(self, state):
+        output = super().__setstate__(state)
+        if not hasattr(self, "cusp_reg"):
+            # The layer was created before the cusp regularization was a parameter.
+            # Add a patch that if a state dict is loaded in with no cusp parameter,
+            # use the pre-introduction static value.
+            warnings.warn("Loading a module which does not contain the 'cusp_reg' parameter. "
+                          "In the future, this behavior will cause an error. "
+                          "To avoid this warning, re-save this model to disk. "
+                          )
+            self.handle = self.register_load_state_dict_post_hook(self.compatibility_hook)
+        return output
+    @staticmethod
+    def compatibility_hook(self, incompatible_keys):
+        missing = incompatible_keys.missing_keys
+        if not missing:
+            # No need for compatibility!
+            return
+
+        if len(missing) != 1:
+            warnings.warn("Backwards compatibility hook may have failed due to the presence of multiple missing keys!")
+            return
+
+        for m in missing:
+            if m.endswith('_extra_state'):
+                break
+        else:
+            # Python reminder: The mysterious "else" clause of the for loop
+            # activates when python does not break out of the for loop.
+            return # No _extra_state type variable was missing: just return.
+
+        DEPRECATED_CUSP_REG = 1e-30
+        warnings.warn(f"Loaded state does not contain 'cusp_reg' parameter. "
+                      f"Using deprecated value of 1e-30. "
+                      f"This compatibility behavior will be removed in the future. "
+                      f"To avoid this warning, re-save this model."
+                      )
+        self.set_extra_state({"cusp_reg": DEPRECATED_CUSP_REG})
+        missing.remove(m)
+
+    def get_extra_state(self):
+        return {"cusp_reg": self.cusp_reg}
+
+    def set_extra_state(self, state):
+        self.cusp_reg = state['cusp_reg']
+
     def forward(self, in_features, pair_first, pair_second, dist_pairs, coord_pairs):
 
         n_atoms_real = in_features.shape[0]
@@ -257,8 +307,7 @@ class InteractLayerQuad(InteractLayerVec):
         # which is not needed for a traceless tensor
         upper_ind = torch.as_tensor([0, 1, 2, 4, 5], dtype=torch.int64)
         self.register_buffer("upper_ind", upper_ind, persistent=False)  # Static, not part of module state
-        self.cusp_reg = cusp_reg
-        
+
     def forward(self, in_features, pair_first, pair_second, dist_pairs, coord_pairs):
 
         n_atoms_real = in_features.shape[0]
