@@ -29,11 +29,11 @@ class DirectoryDatabase(Database, Restartable):
     """
 
     def __init__(self, directory, name, inputs, targets, *args, quiet=False, allow_unfound=False, **kwargs):
-        if allow_unfound:
-            raise ValueError("DirectoryDatabase class does not support allow_unfound argument.")
+        #if allow_unfound:
+        #    raise ValueError("DirectoryDatabase class does not support allow_unfound argument.")
 
         arr_dict = self.load_arrays(directory, name, inputs, targets, quiet=quiet)
-        super().__init__(arr_dict, inputs, targets, *args, **kwargs, quiet=quiet)
+        super().__init__(arr_dict, inputs, targets, *args, **kwargs, quiet=quiet, allow_unfound=allow_unfound)
 
         self.restarter = self.make_restarter(
             directory,
@@ -43,6 +43,7 @@ class DirectoryDatabase(Database, Restartable):
             *args,
             **kwargs,
             quiet=quiet,
+            allow_unfound=allow_unfound,
         )
 
     def get_file_dict(self, directory, prefix):

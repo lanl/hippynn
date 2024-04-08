@@ -7,8 +7,7 @@ import torch.nn.functional
 from ... import settings
 from ..indextypes import IdxType, elementwise_compare_reduce
 from .base import SingleNode
-from ...layers.algebra import LambdaModule
-
+from ...layers import algebra as algebra_modules
 from ...layers import regularization as reg_modules
 
 
@@ -44,7 +43,7 @@ class ReduceSingleNode(SingleNode):
     def __init_subclass__(cls, op=None, **kwargs):
         if op is not None:
             cls._classname = op.__name__
-            cls.torch_module = LambdaModule(op)
+            cls.torch_module = algebra_modules.LambdaModule(op)
 
 
 class Mean(ReduceSingleNode, op=torch.mean):
@@ -89,8 +88,29 @@ class _BaseCompareLoss(SingleNode):
                 # Note: as of now, we need to wrap raw operations as a loss module because
                 # the graph module's ModuleList can't take non-torch operations.
                 # Add the lambda to the graph module instead to put the problem nearer to the solution?
-                cls.torch_module = LambdaModule(op)
+                cls.torch_module = algebra_modules.LambdaModule(op)
 
+class _WeightedCompareLoss(SingleNode):
+    _index_state = IdxType.Scalar
+    def __init__(self, predicted,true, weight):
+        name = "{}({},{},{})".format(self._classname, predicted.name, true.name, weight.name)
+        predicted, true, weight = elementwise_compare_reduce(predicted, true, weight)
+        super().__init__(name, (predicted, true, weight), module=None)
+    @classmethod
+    def of_node(cls, node, weight):
+        node = node.main_output
+        true = node.true
+        predicted = node.pred
+        weight = weight.true
+        return cls(predicted, true, weight)
+
+class WeightedMSELoss(_WeightedCompareLoss):
+    _classname = "WeightedMSE"
+    torch_module = algebra_modules.WeightedMSELoss()
+
+class WeightedMAELoss(_WeightedCompareLoss):
+    _classname = "WeightedMAE"
+    torch_module = algebra_modules.WeightedMAELoss()
 
 class RsqMod(torch.nn.Module):
     def forward(self, predicted, true):
