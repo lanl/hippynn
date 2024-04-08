@@ -21,7 +21,17 @@ class InputNode(SingleNode):
     requires_grad = False
     input_type_str = "Input"
 
-    def __init__(self, name=None, db_name=None):
+    def __init__(self, name=None, db_name=None, index_state=None):
+
+        if hasattr(self,"_index_state") and self._index_state is not None:
+            if index_state is not None:
+                if index_state != self._index_state:
+                    raise ValueError(f"Cannot override IdxType {self._index_state} of node type {self.__class__.__name___} "
+                                     f"with user-specified type {index_state}.")
+        else:
+            if index_state is not None:
+                self._index_state = index_state
+
         if db_name is None and name is None:
             raise TypeError("Input node requires name or db_name arguments.")
         if name is None and db_name is not None:

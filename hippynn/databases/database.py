@@ -57,9 +57,11 @@ class Database:
             print(f"All arrays:")
             prettyprint_arrays(arr_dict)
 
-        if not allow_unfound:
-            for k in self.var_list:
-                if k not in arr_dict and k not in ("indices", "split_indices"):
+        for k in self.var_list:
+            if k not in arr_dict and k not in ("indices", "split_indices"):
+                if allow_unfound:
+                    warnings.warn(f"Required database quantity '{k}' not present.")
+                else:
                     raise KeyError(
                         f"Array dictionary missing required variable:'{k}'."
                         "Pass allow_unfound=True to avoid checking of inputs targets."
