@@ -15,8 +15,6 @@ from .assembly import TrainingModules
 from .controllers import PatienceController
 from .device import set_devices
 from .metric_tracker import MetricTracker
-from ..networks.hipnn import HipnnVec
-from ..layers.transform import ResNetWrapper
 
 DEFAULT_STRUCTURE_FNAME = "experiment_structure.pt"
 
