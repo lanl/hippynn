@@ -117,6 +117,30 @@
 
 
 
+<span class="k">class</span> <span class="nc">_WeightedLoss</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="n">loss_func</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">true</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+        <span class="n">unweighted_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_func</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">true</span><span class="p">,</span> <span class="n">reduction</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+        <span class="n">normalized_weights</span> <span class="o">=</span> <span class="n">weights</span><span class="o">/</span><span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+        <span class="n">weighted_loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">normalized_weights</span><span class="o">*</span><span class="n">unweighted_loss</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">weighted_loss</span>
+
+
+<div class="viewcode-block" id="WeightedMSELoss">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.algebra.html#hippynn.layers.algebra.WeightedMSELoss">[docs]</a>
+<span class="k">class</span> <span class="nc">WeightedMSELoss</span><span class="p">(</span><span class="n">_WeightedLoss</span><span class="p">):</span>
+    <span class="n">loss_func</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="WeightedMAELoss">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.algebra.html#hippynn.layers.algebra.WeightedMAELoss">[docs]</a>
+<span class="k">class</span> <span class="nc">WeightedMAELoss</span><span class="p">(</span><span class="n">_WeightedLoss</span><span class="p">):</span>
+    <span class="n">loss_func</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">l1_loss</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="AtLeast2D">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.algebra.html#hippynn.layers.algebra.AtLeast2D">[docs]</a>
 <span class="k">class</span> <span class="nc">AtLeast2D</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
