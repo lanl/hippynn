@@ -96,7 +96,7 @@
     <span class="k">if</span> <span class="n">dmin</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">:</span>
         <span class="n">d_count</span> <span class="o">=</span> <span class="n">distance</span> <span class="o">&lt;</span> <span class="n">threshold</span>
         <span class="n">d_frac</span> <span class="o">=</span> <span class="n">d_count</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">distance</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-        <span class="n">d_sum</span> <span class="o">=</span> <span class="p">(</span><span class="n">d_count</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+        <span class="n">d_sum</span> <span class="o">=</span> <span class="p">(</span><span class="n">d_count</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="s2">&quot;Provided distances are underneath sensitivity range!</span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;Minimum distance in current batch: </span><span class="si">{</span><span class="n">dmin</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -266,7 +266,7 @@
 
 <div class="viewcode-block" id="InteractLayer.__init__">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayer.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">,</span> <span class="n">cusp_reg</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor</span>
 
@@ -277,9 +277,13 @@
 <span class="sd">        :param maxd_soft: maximum distance for initial sensitivities</span>
 <span class="sd">        :param hard_cutoff: maximum distance for cutoff function</span>
 <span class="sd">        :param sensitivity_module: class or callable that builds sensitivity functions, should return nn.Module</span>
+<span class="sd">        :param cusp_reg: ignored, only provided with compatibility for tensor sensitivity API</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="ow">is</span> <span class="n">InteractLayer</span> <span class="ow">and</span> <span class="n">cusp_reg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Parameter is not used in this class.</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter `cusp_reg`=</span><span class="si">{</span><span class="n">cusp_reg</span><span class="si">}</span><span class="s2"> is ignored in this class, and is only provided for API compatibility.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">=</span> <span class="n">n_dist</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span> <span class="o">=</span> <span class="n">nf_in</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span> <span class="o">=</span> <span class="n">nf_out</span>
@@ -350,11 +354,69 @@
 <span class="k">class</span> <span class="nc">InteractLayerVec</span><span class="p">(</span><span class="n">InteractLayer</span><span class="p">):</span>
 <div class="viewcode-block" id="InteractLayerVec.__init__">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerVec.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">)</span>
-
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">,</span> <span class="n">cusp_reg</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">,</span> <span class="n">cusp_reg</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vecscales</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">nf_out</span><span class="p">))</span>
-        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vecscales</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vecscales</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cusp_reg</span> <span class="o">=</span> <span class="n">cusp_reg</span></div>
+
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;cusp_reg&quot;</span><span class="p">):</span>
+            <span class="c1"># The layer was created before the cusp regularization was a parameter.</span>
+            <span class="c1"># Add a patch that if a state dict is loaded in with no cusp parameter,</span>
+            <span class="c1"># use the pre-introduction static value.</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Loading a module which does not contain the &#39;cusp_reg&#39; parameter. &quot;</span>
+                <span class="s2">&quot;In the future, this behavior will cause an error. &quot;</span>
+                <span class="s2">&quot;To avoid this warning, re-save this model to disk. &quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">register_load_state_dict_post_hook</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compatibility_hook</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span>
+
+<div class="viewcode-block" id="InteractLayerVec.compatibility_hook">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerVec.compatibility_hook">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">compatibility_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incompatible_keys</span><span class="p">):</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="n">incompatible_keys</span><span class="o">.</span><span class="n">missing_keys</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="c1"># No need for compatibility!</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Backwards compatibility hook may have failed due to the presence of multiple missing keys!&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_extra_state&quot;</span><span class="p">):</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Python reminder: The mysterious &quot;else&quot; clause of the for loop</span>
+            <span class="c1"># activates when python does not break out of the for loop.</span>
+            <span class="k">return</span>  <span class="c1"># No _extra_state type variable was missing: just return.</span>
+
+        <span class="n">DEPRECATED_CUSP_REG</span> <span class="o">=</span> <span class="mf">1e-30</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Loaded state does not contain &#39;cusp_reg&#39; parameter. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Using deprecated value of 1e-30. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;This compatibility behavior will be removed in the future. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;To avoid this warning, re-save this model.&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_extra_state</span><span class="p">({</span><span class="s2">&quot;cusp_reg&quot;</span><span class="p">:</span> <span class="n">DEPRECATED_CUSP_REG</span><span class="p">})</span>
+        <span class="n">missing</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">m</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InteractLayerVec.get_extra_state">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerVec.get_extra_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_extra_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;cusp_reg&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cusp_reg</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="InteractLayerVec.set_extra_state">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerVec.set_extra_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_extra_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cusp_reg</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;cusp_reg&quot;</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="InteractLayerVec.forward">
@@ -377,7 +439,7 @@
         <span class="n">env_features_vec</span> <span class="o">=</span> <span class="n">env_features_vec</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms_real</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span><span class="p">)</span>
         <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">env_features_vec</span><span class="p">,</span> <span class="n">weights_rs</span><span class="p">)</span>
         <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">features_out_vec</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms_real</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">)</span>
-        <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">features_out_vec</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-30</span>
+        <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">features_out_vec</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">cusp_reg</span>
         <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">features_out_vec</span><span class="p">)</span>
         <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">features_out_vec</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vecscales</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
@@ -396,9 +458,8 @@
 <span class="k">class</span> <span class="nc">InteractLayerQuad</span><span class="p">(</span><span class="n">InteractLayerVec</span><span class="p">):</span>
 <div class="viewcode-block" id="InteractLayerQuad.__init__">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.hiplayers.html#hippynn.layers.hiplayers.InteractLayerQuad.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">)</span>
-
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">,</span> <span class="n">cusp_reg</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">,</span> <span class="n">cusp_reg</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">quadscales</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">nf_out</span><span class="p">))</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quadscales</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
         <span class="c1"># upper indices of flattened 3x3 array minus the (3,3) component</span>
@@ -431,7 +492,7 @@
         <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">env_features_vec</span><span class="p">,</span> <span class="n">weights_rs</span><span class="p">)</span>
         <span class="c1"># Norm and scale</span>
         <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">features_out_vec</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms_real</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">)</span>
-        <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">features_out_vec</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-30</span>
+        <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">features_out_vec</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">cusp_reg</span>
         <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">features_out_vec</span><span class="p">)</span>
         <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">features_out_vec</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vecscales</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
@@ -454,7 +515,7 @@
         <span class="n">quadfirst</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">features_out_quad</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">quadsecond</span> <span class="o">=</span> <span class="n">features_out_quad</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">features_out_quad</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">features_out_quad</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">quadfirst</span> <span class="o">+</span> <span class="n">quadsecond</span><span class="p">)</span>
-        <span class="n">features_out_quad</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">features_out_quad</span> <span class="o">+</span> <span class="mf">1e-30</span><span class="p">)</span>
+        <span class="n">features_out_quad</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">features_out_quad</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">cusp_reg</span><span class="p">)</span>
         <span class="c1"># Scales</span>
         <span class="n">features_out_quad</span> <span class="o">=</span> <span class="n">features_out_quad</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">quadscales</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 

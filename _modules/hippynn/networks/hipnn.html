@@ -165,6 +165,7 @@
         <span class="n">sensitivity_type</span><span class="o">=</span><span class="s2">&quot;inverse&quot;</span><span class="p">,</span>
         <span class="n">resnet</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">activation</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Softplus</span><span class="p">,</span>
+        <span class="n">cusp_reg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -182,6 +183,7 @@
 <span class="sd">           &#39;inverse&#39; is what is in hip-nn original paper.</span>
 <span class="sd">        :param resnet: bool or int, if int, size of internal resnet width</span>
 <span class="sd">        :param activation: activation function or subclass of nn.module.</span>
+<span class="sd">        :param cusp_reg: Used for API compatibility, but ignored in vanilla HIP-NN.</span>
 
 <span class="sd">        Note: only one of possible_species or n_input_features is needed. If both are supplied,</span>
 <span class="sd">        they must be consistent with each other.</span>
@@ -263,7 +265,7 @@
 
             <span class="c1"># Add interaction layer</span>
             <span class="n">lay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interaction_class</span><span class="p">(</span>
-                <span class="n">in_size</span><span class="p">,</span> <span class="n">middle_size</span><span class="p">,</span> <span class="n">n_sensitivities</span><span class="p">,</span> <span class="n">dist_soft_min</span><span class="p">,</span> <span class="n">dist_soft_max</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">sensitivity_type</span>
+                <span class="n">in_size</span><span class="p">,</span> <span class="n">middle_size</span><span class="p">,</span> <span class="n">n_sensitivities</span><span class="p">,</span> <span class="n">dist_soft_min</span><span class="p">,</span> <span class="n">dist_soft_max</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">sensitivity_type</span><span class="p">,</span> <span class="n">cusp_reg</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">resnet</span><span class="p">:</span>
                 <span class="n">lay</span> <span class="o">=</span> <span class="n">ResNetWrapper</span><span class="p">(</span><span class="n">lay</span><span class="p">,</span> <span class="n">in_size</span><span class="p">,</span> <span class="n">middle_size</span><span class="p">,</span> <span class="n">out_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">)</span>
@@ -340,6 +342,13 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_interaction_class</span> <span class="o">=</span> <span class="n">InteractLayerVec</span>
+
+<div class="viewcode-block" id="HipnnVec.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.HipnnVec.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">cusp_reg</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># cusp regularization for tensor sensitivity l&gt;0. Defaults to 1e-6.</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">cusp_reg</span><span class="o">=</span><span class="n">cusp_reg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="HipnnVec.forward">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.HipnnVec.forward">[docs]</a>

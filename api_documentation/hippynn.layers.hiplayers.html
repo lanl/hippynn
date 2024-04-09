@@ -88,7 +88,10 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.hiplayers.InteractLayerVec"><code class="docutils literal notranslate"><span class="pre">InteractLayerVec</span></code></a><ul>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.hiplayers.InteractLayerVec.__init__"><code class="docutils literal notranslate"><span class="pre">InteractLayerVec.__init__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.hiplayers.InteractLayerVec.compatibility_hook"><code class="docutils literal notranslate"><span class="pre">InteractLayerVec.compatibility_hook()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.hiplayers.InteractLayerVec.forward"><code class="docutils literal notranslate"><span class="pre">InteractLayerVec.forward()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.hiplayers.InteractLayerVec.get_extra_state"><code class="docutils literal notranslate"><span class="pre">InteractLayerVec.get_extra_state()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.hiplayers.InteractLayerVec.set_extra_state"><code class="docutils literal notranslate"><span class="pre">InteractLayerVec.set_extra_state()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.hiplayers.InteractLayerVec.training"><code class="docutils literal notranslate"><span class="pre">InteractLayerVec.training</span></code></a></li>
 </ul>
 </li>
@@ -225,12 +228,12 @@ registered hooks while the latter silently ignores them.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="hippynn.layers.hiplayers.InteractLayer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InteractLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mind_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxd_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_module</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/hiplayers.html#InteractLayer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.hiplayers.InteractLayer" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InteractLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mind_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxd_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cusp_reg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/hiplayers.html#InteractLayer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.hiplayers.InteractLayer" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <p>Hipnn’s interaction layer</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.layers.hiplayers.InteractLayer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mind_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxd_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_module</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/hiplayers.html#InteractLayer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.hiplayers.InteractLayer.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mind_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxd_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cusp_reg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/hiplayers.html#InteractLayer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.hiplayers.InteractLayer.__init__" title="Link to this definition"></a></dt>
 <dd><p>Constructor</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -242,6 +245,7 @@ registered hooks while the latter silently ignores them.</p>
 <li><p><strong>maxd_soft</strong> – maximum distance for initial sensitivities</p></li>
 <li><p><strong>hard_cutoff</strong> – maximum distance for cutoff function</p></li>
 <li><p><strong>sensitivity_module</strong> – class or callable that builds sensitivity functions, should return nn.Module</p></li>
+<li><p><strong>cusp_reg</strong> – ignored, only provided with compatibility for tensor sensitivity API</p></li>
 </ul>
 </dd>
 </dl>
@@ -280,11 +284,11 @@ registered hooks while the latter silently ignores them.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="hippynn.layers.hiplayers.InteractLayerQuad">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InteractLayerQuad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mind_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxd_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_module</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/hiplayers.html#InteractLayerQuad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.hiplayers.InteractLayerQuad" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InteractLayerQuad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mind_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxd_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cusp_reg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/hiplayers.html#InteractLayerQuad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.hiplayers.InteractLayerQuad" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#hippynn.layers.hiplayers.InteractLayerVec" title="hippynn.layers.hiplayers.InteractLayerVec"><code class="xref py py-class docutils literal notranslate"><span class="pre">InteractLayerVec</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.layers.hiplayers.InteractLayerQuad.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mind_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxd_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_module</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/hiplayers.html#InteractLayerQuad.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.hiplayers.InteractLayerQuad.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mind_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxd_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cusp_reg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/hiplayers.html#InteractLayerQuad.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.hiplayers.InteractLayerQuad.__init__" title="Link to this definition"></a></dt>
 <dd><p>Constructor</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -296,6 +300,7 @@ registered hooks while the latter silently ignores them.</p>
 <li><p><strong>maxd_soft</strong> – maximum distance for initial sensitivities</p></li>
 <li><p><strong>hard_cutoff</strong> – maximum distance for cutoff function</p></li>
 <li><p><strong>sensitivity_module</strong> – class or callable that builds sensitivity functions, should return nn.Module</p></li>
+<li><p><strong>cusp_reg</strong> – ignored, only provided with compatibility for tensor sensitivity API</p></li>
 </ul>
 </dd>
 </dl>
@@ -329,11 +334,11 @@ registered hooks while the latter silently ignores them.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="hippynn.layers.hiplayers.InteractLayerVec">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InteractLayerVec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mind_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxd_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_module</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/hiplayers.html#InteractLayerVec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.hiplayers.InteractLayerVec" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InteractLayerVec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mind_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxd_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cusp_reg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/hiplayers.html#InteractLayerVec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.hiplayers.InteractLayerVec" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#hippynn.layers.hiplayers.InteractLayer" title="hippynn.layers.hiplayers.InteractLayer"><code class="xref py py-class docutils literal notranslate"><span class="pre">InteractLayer</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.layers.hiplayers.InteractLayerVec.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mind_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxd_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_module</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/hiplayers.html#InteractLayerVec.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.hiplayers.InteractLayerVec.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mind_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxd_soft</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cusp_reg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/hiplayers.html#InteractLayerVec.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.hiplayers.InteractLayerVec.__init__" title="Link to this definition"></a></dt>
 <dd><p>Constructor</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -345,10 +350,16 @@ registered hooks while the latter silently ignores them.</p>
 <li><p><strong>maxd_soft</strong> – maximum distance for initial sensitivities</p></li>
 <li><p><strong>hard_cutoff</strong> – maximum distance for cutoff function</p></li>
 <li><p><strong>sensitivity_module</strong> – class or callable that builds sensitivity functions, should return nn.Module</p></li>
+<li><p><strong>cusp_reg</strong> – ignored, only provided with compatibility for tensor sensitivity API</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.hiplayers.InteractLayerVec.compatibility_hook">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compatibility_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">incompatible_keys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/hiplayers.html#InteractLayerVec.compatibility_hook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.hiplayers.InteractLayerVec.compatibility_hook" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.layers.hiplayers.InteractLayerVec.forward">
@@ -365,6 +376,37 @@ registered hooks while the latter silently ignores them.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Interaction output features</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.hiplayers.InteractLayerVec.get_extra_state">
+<span class="sig-name descname"><span class="pre">get_extra_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/hiplayers.html#InteractLayerVec.get_extra_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.hiplayers.InteractLayerVec.get_extra_state" title="Link to this definition"></a></dt>
+<dd><p>Return any extra state to include in the module’s state_dict.</p>
+<p>Implement this and a corresponding <a class="reference internal" href="#hippynn.layers.hiplayers.InteractLayerVec.set_extra_state" title="hippynn.layers.hiplayers.InteractLayerVec.set_extra_state"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_extra_state()</span></code></a> for your module
+if you need to store extra state. This function is called when building the
+module’s <cite>state_dict()</cite>.</p>
+<p>Note that extra state should be picklable to ensure working serialization
+of the state_dict. We only provide provide backwards compatibility guarantees
+for serializing Tensors; other objects may break backwards compatibility if
+their serialized pickled form changes.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>object: Any extra state to store in the module’s state_dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.hiplayers.InteractLayerVec.set_extra_state">
+<span class="sig-name descname"><span class="pre">set_extra_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/hiplayers.html#InteractLayerVec.set_extra_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.hiplayers.InteractLayerVec.set_extra_state" title="Link to this definition"></a></dt>
+<dd><p>Set extra state contained in the loaded <cite>state_dict</cite>.</p>
+<p>This function is called from <code class="xref py py-func docutils literal notranslate"><span class="pre">load_state_dict()</span></code> to handle any extra state
+found within the <cite>state_dict</cite>. Implement this function and a corresponding
+<a class="reference internal" href="#hippynn.layers.hiplayers.InteractLayerVec.get_extra_state" title="hippynn.layers.hiplayers.InteractLayerVec.get_extra_state"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_extra_state()</span></code></a> for your module if you need to store extra state within its
+<cite>state_dict</cite>.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>state (dict): Extra state from the <cite>state_dict</cite></p>
 </dd>
 </dl>
 </dd></dl>
