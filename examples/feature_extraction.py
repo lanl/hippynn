@@ -23,10 +23,6 @@ network_node = model.node_from_name("HIPNN")  # This name was defined in the tra
 # Here we get nodes associated with the features from each block of a HIP-NN model.
 # Note: the first set is typically just a one-hot species representation, and does not reflect the atom's environment.
 
-# Note!!!: For backwards compatibility, you may need to run this function on the network:
-hippynn.graphs.networks._make_feature_nodes(network_node)
-# If your network is created with this version of hippynn or later, it is not necessary to run this function.
-
 feature_nodes = network_node.feature_nodes  # list of feature nodes
 feature_node_dict = {node.name: node for node in feature_nodes}  # dictionary of feature nodes
 
