@@ -83,7 +83,7 @@ class _FeatureNodesMixin:
         self._feature_nodes = feature_nodes
 
 
-class Hipnn(DefaultNetworkExpansion, AutoKw, Network, SingleNode,_FeatureNodesMixin):
+class Hipnn(DefaultNetworkExpansion, AutoKw, Network, SingleNode, _FeatureNodesMixin):
     """
     Node for HIP-NN neural networks
     """
@@ -112,9 +112,7 @@ class Hipnn(DefaultNetworkExpansion, AutoKw, Network, SingleNode,_FeatureNodesMi
         super().__init__(name, parents, module=net_module)
 
 
-
-
-class HipnnVec(DefaultNetworkExpansion, AutoKw, Network, SingleNode,_FeatureNodesMixin):
+class HipnnVec(DefaultNetworkExpansion, AutoKw, Network, SingleNode, _FeatureNodesMixin):
     """
     Node for HIP-NN-TS neural networks, l=1
     """
@@ -144,14 +142,9 @@ class HipnnVec(DefaultNetworkExpansion, AutoKw, Network, SingleNode,_FeatureNode
         super().__init__(name, parents, module=net_module)
 
 
-
 class HipnnQuad(HipnnVec):
     """
     Node for HIP-NN-TS neural networks, l=2
     """
 
     _auto_module_class = network_modules.hipnn.HipnnQuad
-
-
-
-
