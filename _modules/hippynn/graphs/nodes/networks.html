@@ -140,9 +140,39 @@
 
 
 
+<span class="k">class</span> <span class="nc">_FeatureNodesMixin</span><span class="p">:</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">feature_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_feature_nodes&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_feature_nodes</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_feature_nodes</span>
+
+    <span class="k">def</span> <span class="nf">_make_feature_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function can be used on a network to make nodes that refer to the individual feature blocks.</span>
+<span class="sd">        We use this function/class to provide backwards compatibility with models that did not have this</span>
+<span class="sd">        attribute when created.</span>
+<span class="sd">        :param self: the input network, which is modified in-place</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">net_module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">torch_module</span>
+        <span class="n">n_interactions</span> <span class="o">=</span> <span class="n">net_module</span><span class="o">.</span><span class="n">ni</span>
+
+        <span class="n">feature_nodes</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="p">,)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_interactions</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_features_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">fnode</span> <span class="o">=</span> <span class="n">IndexNode</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="n">parents</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">index_state</span><span class="o">=</span><span class="n">index_state</span><span class="p">)</span>
+            <span class="n">feature_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fnode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_feature_nodes</span> <span class="o">=</span> <span class="n">feature_nodes</span>
+
+
 <div class="viewcode-block" id="Hipnn">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.networks.html#hippynn.graphs.nodes.networks.Hipnn">[docs]</a>
-<span class="k">class</span> <span class="nc">Hipnn</span><span class="p">(</span><span class="n">DefaultNetworkExpansion</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">Network</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Hipnn</span><span class="p">(</span><span class="n">DefaultNetworkExpansion</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">Network</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">_FeatureNodesMixin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Node for HIP-NN neural networks</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -173,17 +203,14 @@
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span>
             <span class="n">parents</span><span class="p">,</span> <span class="n">species_set</span><span class="o">=</span><span class="n">net_module</span><span class="o">.</span><span class="n">species_set</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">net_module</span><span class="o">.</span><span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="n">periodic</span>
         <span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">net_module</span><span class="p">)</span>
-
-        <span class="n">_make_feature_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">net_module</span><span class="p">)</span></div>
 </div>
-
 
 
 
 <div class="viewcode-block" id="HipnnVec">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.networks.html#hippynn.graphs.nodes.networks.HipnnVec">[docs]</a>
-<span class="k">class</span> <span class="nc">HipnnVec</span><span class="p">(</span><span class="n">DefaultNetworkExpansion</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">Network</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">HipnnVec</span><span class="p">(</span><span class="n">DefaultNetworkExpansion</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">Network</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">_FeatureNodesMixin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Node for HIP-NN-TS neural networks, l=1</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -215,9 +242,7 @@
             <span class="n">parents</span><span class="p">,</span> <span class="n">species_set</span><span class="o">=</span><span class="n">net_module</span><span class="o">.</span><span class="n">species_set</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">net_module</span><span class="o">.</span><span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="n">periodic</span>
         <span class="p">)</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">net_module</span><span class="p">)</span>
-
-        <span class="n">_make_feature_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">net_module</span><span class="p">)</span></div>
 </div>
 
 
@@ -230,35 +255,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">network_modules</span><span class="o">.</span><span class="n">hipnn</span><span class="o">.</span><span class="n">HipnnQuad</span></div>
-
-
-
-<span class="k">def</span> <span class="nf">_make_feature_nodes</span><span class="p">(</span><span class="n">network_node</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This function can be used on a network to make nodes that refer to the individual feature blocks.</span>
-<span class="sd">    :param network_node: the input network, which is modified in-place</span>
-<span class="sd">    :return: None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">warnings</span>
-    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;This function is included for backwards compatibility and may be removed in a future release. &quot;</span>
-                  <span class="s2">&quot;The preferred way to access these nodes is through `network.feature_nodes`, which is available on &quot;</span>
-                  <span class="s2">&quot;networks created with this version of hippynn or later.&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">network_node</span><span class="p">,</span> <span class="s2">&quot;feature_nodes&quot;</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">network_node</span><span class="o">.</span><span class="n">feature_nodes</span>
-
-    <span class="n">net_module</span> <span class="o">=</span> <span class="n">network_node</span><span class="o">.</span><span class="n">torch_module</span>
-    <span class="n">n_interactions</span> <span class="o">=</span> <span class="n">net_module</span><span class="o">.</span><span class="n">ni</span>
-
-    <span class="n">feature_nodes</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
-    <span class="n">parents</span> <span class="o">=</span> <span class="p">(</span><span class="n">network_node</span><span class="p">,)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_interactions</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">network_node</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_features_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">fnode</span> <span class="o">=</span> <span class="n">IndexNode</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="n">parents</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">index_state</span><span class="o">=</span><span class="n">index_state</span><span class="p">)</span>
-        <span class="n">feature_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fnode</span><span class="p">)</span>
-    <span class="n">network_node</span><span class="o">.</span><span class="n">feature_nodes</span> <span class="o">=</span> <span class="n">feature_nodes</span>
 
 </pre></div>
 
