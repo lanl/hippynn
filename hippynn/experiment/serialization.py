@@ -5,6 +5,7 @@ checkpoint and state generation
 from typing import Tuple, Union
 
 import torch
+import warnings
 
 from ..databases import Database
 from ..databases.restarter import Restartable
@@ -75,7 +76,6 @@ def restore_checkpoint(structure: dict, state: dict, restore_db=True) -> dict:
 
     :return: experiment structure
     """
-
     structure["training_modules"][0].load_state_dict(state["model"])
     structure["controller"].load_state_dict(state["controller"])
 
@@ -197,4 +197,6 @@ def load_model_from_cwd(map_location=None, model_device=None, **kwargs) -> Graph
     model.load_state_dict(state)
     if map_location == None and model_device != None and model_device != "cpu":
         model = model.to(model_device)
+
     return model
+

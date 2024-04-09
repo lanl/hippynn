@@ -80,6 +80,7 @@ class Hipnn(torch.nn.Module):
         sensitivity_type="inverse",
         resnet=True,
         activation=torch.nn.Softplus,
+        cusp_reg=None,
     ):
         """
 
@@ -97,6 +98,7 @@ class Hipnn(torch.nn.Module):
            'inverse' is what is in hip-nn original paper.
         :param resnet: bool or int, if int, size of internal resnet width
         :param activation: activation function or subclass of nn.module.
+        :param cusp_reg: Used for API compatibility, but ignored in vanilla HIP-NN.
 
         Note: only one of possible_species or n_input_features is needed. If both are supplied,
         they must be consistent with each other.
@@ -178,7 +180,7 @@ class Hipnn(torch.nn.Module):
 
             # Add interaction layer
             lay = self._interaction_class(
-                in_size, middle_size, n_sensitivities, dist_soft_min, dist_soft_max, dist_hard_max, sensitivity_type
+                in_size, middle_size, n_sensitivities, dist_soft_min, dist_soft_max, dist_hard_max, sensitivity_type, cusp_reg
             )
             if self.resnet:
                 lay = ResNetWrapper(lay, in_size, middle_size, out_size, self.activation)
@@ -245,6 +247,10 @@ class HipnnVec(Hipnn):
     """
 
     _interaction_class = InteractLayerVec
+
+    def __init__(self, *args, cusp_reg=1e-6, **kwargs):
+        # cusp regularization for tensor sensitivity l>0. Defaults to 1e-6.
+        super().__init__(*args, cusp_reg=cusp_reg, **kwargs)
 
     def forward(self, features, pair_first, pair_second, pair_dist, pair_coord):
         features = features.to(pair_dist.dtype)  # Convert one-hot features to floating point features.
