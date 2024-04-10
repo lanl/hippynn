@@ -33,7 +33,7 @@ def hierarchical_energy_initialization(
     :param database:        InterfaceDB object to get training data, required if model contains E0 term
     :param trainable_after: Determines if it should change .requires_grad attribute for the E0 parameters
     :param decay_factor:    change initialized weights of further energy layers by ``df**N`` for layer N
-    :param encoder:         network for running the species encoding. Can be auto-identified from energy node
+    :param encoder:         species encoder, can be auto-identified from energy node
     :param energy_name:     name for the energy variable, can be auto-identified from energy node
     :param species_name:    name for the species variable, can be auto-identified from energy node
     :param peratom:
