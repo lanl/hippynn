@@ -179,9 +179,9 @@ with hippynn.tools.active_directory(netname):
 
         # Now that we have a database and a model, we can
         # Fit the non-interacting energies by examining the database.
-        from hippynn.pretraining import set_e0_values
+        from hippynn.pretraining import hierarchical_energy_initialization
 
-        set_e0_values(henergy, database, peratom=True, energy_name="energyperatom", decay_factor=1e-2)
+        hierarchical_energy_initialization(henergy, database, peratom=True, energy_name="energyperatom", decay_factor=1e-2)
 
         from hippynn.experiment.controllers import RaiseBatchSizeOnPlateau, PatienceController
 

@@ -2,6 +2,7 @@
 Things to do before training, i.e. initialization of network and diagnostics.
 """
 
+import warnings
 import numpy as np
 import torch
 
@@ -15,9 +16,9 @@ from .graphs.nodes.physics import VecMag
 from .networks.hipnn import compute_hipnn_e0
 
 
-def set_e0_values(
+def hierarchical_energy_initialization(
     energy_module,
-    database,
+    database=None,
     trainable_after=False,
     decay_factor=1e-2,
     encoder=None,
@@ -29,12 +30,13 @@ def set_e0_values(
     Computes values for the non-interacting energy using the training data.
 
     :param energy_module:   HEnergyNode or torch module for energy prediction
-    :param database:        InterfaceDB object to get training data
-    :param trainable_after: Determines if it should change .requires_grad attribute for the E0 parameters.
+    :param database:        InterfaceDB object to get training data, required if model contains E0 term
+    :param trainable_after: Determines if it should change .requires_grad attribute for the E0 parameters
     :param decay_factor:    change initialized weights of further energy layers by ``df**N`` for layer N
-    :param network_module:  network for running the species encoding. Can be auto-identified from energy node
+    :param encoder:         species encoder, can be auto-identified from energy node
     :param energy_name:     name for the energy variable, can be auto-identified from energy node
     :param species_name:    name for the species variable, can be auto-identified from energy node
+    :param peratom:
     :return: None
     """
 
@@ -51,31 +53,37 @@ def set_e0_values(
     if isinstance(encoder, _BaseNode):
         encoder = encoder.torch_module
 
-    train_data = database.splits["train"]
-
-    z_vals = train_data[species_name]
-    t_vals = train_data[energy_name]
-
-    encoder.to(t_vals.device)
-    eovals = compute_hipnn_e0(encoder, z_vals, t_vals, peratom=peratom)
-    eo_layer = energy_module.layers[0]
-
-    if not eo_layer.weight.data.shape[-1] == eovals.shape[-1]:
-        raise NotImplementedError("The function set_eo_values does not currently work with custom InputNodes.")
+    # If model has E0 term, set its initial value using the database provided
+    if not energy_module.first_is_interacting:
+        if database is None:
+            raise ValueError("Database must be provided if model includes E0 energy term.")
     
-    eo_layer.weight.data = eovals.reshape(1,-1)
-    print("Computed E0 energies:", eovals)
-    print("Computed E0 energies:", eovals)
-    eo_layer.weight.data = eovals.expand_as(eo_layer.weight.data)
-    print("Computed E0 energies:", eovals)   
-    eo_layer.weight.data = eovals.expand_as(eo_layer.weight.data)
+        train_data = database.splits["train"]
+
+        z_vals = train_data[species_name]
+        t_vals = train_data[energy_name]
+
+        encoder.to(t_vals.device)
+        eovals = compute_hipnn_e0(encoder, z_vals, t_vals, peratom=peratom)
+        eo_layer = energy_module.layers[0]
+
+        if not eo_layer.weight.data.shape[-1] == eovals.shape[-1]:
+            raise ValueError("The shape of the computed E0 values does not match the shape expected by the model.")
+        
+        eo_layer.weight.data = eovals.reshape(1,-1)
+        print("Computed E0 energies:", eovals)
+        eo_layer.weight.data = eovals.expand_as(eo_layer.weight.data)
+        eo_layer.weight.requires_grad_(trainable_after)
     
-    eo_layer.weight.requires_grad_(trainable_after)
+    # Decay layers E1, E2, etc... according to decay_factor
     for layer in energy_module.layers[1:]:
         layer.weight.data *= decay_factor
         layer.bias.data *= decay_factor
         decay_factor *= decay_factor
 
+def set_e0_values(*args, **kwargs):
+    warnings.warn("The function set_e0_values is depreciated. Please use the hierarchical_energy_initialization function instead.")
+    return hierarchical_energy_initialization(*args, **kwargs)
 
 def _setup_min_dist_graph(
     species_name,

@@ -224,8 +224,8 @@ with hippynn.tools.log_terminal("training_log_tag_%d.txt" % TAG, "wt"):  # and t
 
         database = DirectoryDatabase(**database_params)
 
-        # from hippynn.pretraining import set_e0_values
-        # set_e0_values(henergy,database,energy_name="T_transpose",trainable_after=False)
+        # from hippynn.pretraining import hierarchical_energy_initialization
+        # hierarchical_energy_initialization(henergy,database,energy_name="T_transpose",trainable_after=False)
 
         init_lr = 1e-5
         optimizer = torch.optim.Adam(training_modules.model.parameters(), lr=init_lr)

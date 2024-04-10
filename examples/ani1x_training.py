@@ -215,9 +215,9 @@ def main(args):
                                seed=args.seed,
                                anidata_location=args.anidata_location)
 
-            from hippynn.pretraining import set_e0_values
+            from hippynn.pretraining import hierarchical_energy_initialization
 
-            set_e0_values(henergy, database, trainable_after=False)
+            hierarchical_energy_initialization(henergy, database, trainable_after=False)
 
             setup_params = setup_experiment(training_modules,
                                             device=args.gpu,
