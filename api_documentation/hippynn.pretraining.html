@@ -62,6 +62,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">pretraining module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.pretraining.calculate_max_system_force"><code class="docutils literal notranslate"><span class="pre">calculate_max_system_force()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.pretraining.calculate_min_dists"><code class="docutils literal notranslate"><span class="pre">calculate_min_dists()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.pretraining.hierarchical_energy_initialization"><code class="docutils literal notranslate"><span class="pre">hierarchical_energy_initialization()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.pretraining.set_e0_values"><code class="docutils literal notranslate"><span class="pre">set_e0_values()</span></code></a></li>
 </ul>
 </li>
@@ -189,19 +190,20 @@ if the cell is not specified, open boundaries are used.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="hippynn.pretraining.set_e0_values">
-<span class="sig-name descname"><span class="pre">set_e0_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainable_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peratom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/pretraining.html#set_e0_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.pretraining.set_e0_values" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="hippynn.pretraining.hierarchical_energy_initialization">
+<span class="sig-name descname"><span class="pre">hierarchical_energy_initialization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainable_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peratom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/pretraining.html#hierarchical_energy_initialization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.pretraining.hierarchical_energy_initialization" title="Link to this definition"></a></dt>
 <dd><p>Computes values for the non-interacting energy using the training data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>energy_module</strong> – HEnergyNode or torch module for energy prediction</p></li>
-<li><p><strong>database</strong> – InterfaceDB object to get training data</p></li>
-<li><p><strong>trainable_after</strong> – Determines if it should change .requires_grad attribute for the E0 parameters.</p></li>
+<li><p><strong>database</strong> – InterfaceDB object to get training data, required if model contains E0 term</p></li>
+<li><p><strong>trainable_after</strong> – Determines if it should change .requires_grad attribute for the E0 parameters</p></li>
 <li><p><strong>decay_factor</strong> – change initialized weights of further energy layers by <code class="docutils literal notranslate"><span class="pre">df**N</span></code> for layer N</p></li>
-<li><p><strong>network_module</strong> – network for running the species encoding. Can be auto-identified from energy node</p></li>
+<li><p><strong>encoder</strong> – species encoder, can be auto-identified from energy node</p></li>
 <li><p><strong>energy_name</strong> – name for the energy variable, can be auto-identified from energy node</p></li>
 <li><p><strong>species_name</strong> – name for the species variable, can be auto-identified from energy node</p></li>
+<li><p><strong>peratom</strong> – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -209,6 +211,11 @@ if the cell is not specified, open boundaries are used.</p></li>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.pretraining.set_e0_values">
+<span class="sig-name descname"><span class="pre">set_e0_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/pretraining.html#set_e0_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.pretraining.set_e0_values" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </section>
 

@@ -127,8 +127,8 @@ Now we'll load a database::
 
 Now that we have a database and a model, we can fit the non-interacting energies using the training set in the database::
 
-    from hippynn.pretraining import set_e0_values
-    set_e0_values(henergy,database,trainable_after=False)
+    from hippynn.pretraining import hierarchical_energy_initialization
+    hierarchical_energy_initialization(henergy,database,trainable_after=False)
 
 We're almost there. We specify the training procedure with ``SetupParams``. We need to have
 
