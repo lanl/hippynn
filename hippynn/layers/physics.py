@@ -206,7 +206,7 @@ class WolfScreening(AlphaScreening):
 class LocalDampingCosine(AlphaScreening):
     """ Local damping using complement of the hipnn cutoff function. ('glue-on' method)
     g =     1 if pair_dist > R_cutoff
-            1 - [cos(\pi/2 * dist * R_cutoff)]^2  otherwise
+            1 - [cos(pi/2 * dist * R_cutoff)]^2  otherwise
     """
     def __init__(self, alpha): 
         """ 
