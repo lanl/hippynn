@@ -184,9 +184,9 @@ with hippynn.tools.active_directory(netname, create=True):
 
         # Now that we have a database and a model, we can
         # Fit the non-interacting energies by examining the database.
-        from hippynn.pretraining import set_e0_values
+        from hippynn.pretraining import hierarchical_energy_initialization
 
-        set_e0_values(henergy, database, energy_name="singlet_T", trainable_after=True)
+        hierarchical_energy_initialization(henergy, database, energy_name="singlet_T", trainable_after=True)
 
         patience = 10
         batch_size = 512
