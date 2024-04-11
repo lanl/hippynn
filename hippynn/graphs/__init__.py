@@ -27,6 +27,7 @@ from . import indextransformers
 from .graph import GraphModule
 
 from .predictor import Predictor
+from .ensemble import make_ensemble
 
 __all__ = [
     "get_subgraph",

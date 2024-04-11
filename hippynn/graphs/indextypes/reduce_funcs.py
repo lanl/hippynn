@@ -89,7 +89,7 @@ def get_reduced_index_state(*nodes_to_reduce):
     Find the index state for comparison between values in a loss function or plot.
 
     .. Note::
-        This function is unlikely to be directed needed as a user.
+        This function is unlikely to be directly needed as a user.
         it's more likely you want to use :func:`elementwise_compare_reduce`.
 
     :param nodes_to_reduce:
