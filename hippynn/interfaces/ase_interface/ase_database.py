@@ -69,17 +69,18 @@ class AseDatabase(Database, Restartable):
         )
 
     def load_arrays(self, directory, filename, inputs, targets, quiet=False, allow_unfound=False):
-        """load arrays load ase database into hippynn database arrays
-
-        Parameters
-        ----------
-        filename : str
-            filename or path of database to convert
-        prefix : str, optional
-            prefix for output numpy arrays, by default None
-        return_data : bool, optional
-            whether or not to return the data or write to files, by default False
         """
+        load arrays load ase database into hippynn database arrays
+
+        :param directory: directory where database is stored
+        :param filename: file or path to file from directory
+        :param inputs:
+        :param targets:
+        :param quiet:
+        :param allow_unfound:
+        :return:
+        """
+
         var_list = inputs + targets
         try:
             if isinstance(filename, str):
