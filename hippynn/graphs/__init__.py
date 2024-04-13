@@ -40,4 +40,5 @@ __all__ = [
     "GraphModule",
     "Predictor",
     "IdxType",
+    "make_ensemble",
 ]

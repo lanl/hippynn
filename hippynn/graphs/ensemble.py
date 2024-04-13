@@ -16,13 +16,15 @@ from .gops import merge_children_recursive
 from typing import List, Dict, Union, Tuple
 
 
-def make_ensemble(models, *, targets: List[str] = "auto", inputs: List[str] = "auto", quiet=False,
+def make_ensemble(models, *, targets: List[str] = "auto", inputs: List[str] = "auto",
+                  prefix: str = "ensemble_", quiet=False,
                   ) -> Tuple[GraphModule, Tuple[Dict[str, int], Dict[str, int]]]:
 
     """
     :param models: list containing str, node, or graphmodule, or str to glob for model directories.
     :param targets: list of db_name strings or the string 'auto', which will attempt to infer.
     :param inputs: list of db_name strings of the string 'auto', which will attempt to infer.
+    :param prefix: specifies the prefix for the db_name of created ensemble nodes.
     :param quiet: whether to print information about the constructed ensemble.
     :return: ensemble GraphModule, (intput_info, output_info)
     """
@@ -47,7 +49,7 @@ def make_ensemble(models, *, targets: List[str] = "auto", inputs: List[str] = "a
     ensemble_info = make_ensemble_info(input_classes, target_classes, quiet=quiet)
 
     # Phase 2 build ensemble graph and GraphModule.
-    ensemble_outputs: List[EnsembleTarget] = construct_outputs(target_classes)
+    ensemble_outputs: List[EnsembleTarget] = construct_outputs(target_classes, prefix=prefix)
     ensemble_inputs: List[_BaseNode] = replace_inputs(input_classes)
     merged_inputs: List[_BaseNode] = merge_children_recursive(ensemble_inputs)
 
@@ -180,7 +182,7 @@ def make_ensemble_info(input_classes: Dict[str, List[GraphModule]], output_class
     return ensemble_info
 
 
-def construct_outputs(output_classes: Dict[str, List[GraphModule]]) -> List[EnsembleTarget]:
+def construct_outputs(output_classes: Dict[str, List[GraphModule]], prefix: str) -> List[EnsembleTarget]:
     ensemble_outputs = {}
 
     for db_name, parents in sorted(output_classes.items(), key=lambda x: x[0]):
@@ -201,7 +203,7 @@ def construct_outputs(output_classes: Dict[str, List[GraphModule]]) -> List[Ense
         reduced_parents = [index_type_coercion(p, reduced_index_state) for p in parents]
 
         # Build db_form output
-        ensemble_node = EnsembleTarget(name=f"ensemble_{db_name}", parents=db_state_parents)
+        ensemble_node = EnsembleTarget(name=f"{prefix}{db_name}", parents=db_state_parents)
         ensemble_outputs[db_name] = ensemble_node
 
         if reduced_index_state != db_index_state:
