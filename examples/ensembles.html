@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ASE Calculators &mdash; hippynn 0+unknown documentation</title>
+  <title>Ensembling Models &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="LAMMPS interface" href="mliap_unified.html" />
-    <link rel="prev" title="Restarting training" href="restarting.html" /> 
+    <link rel="next" title="Periodic Boundary Conditions" href="periodic.html" />
+    <link rel="prev" title="Predictor" href="predictor.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -53,11 +53,11 @@
 <li class="toctree-l2"><a class="reference internal" href="controller.html">Controller</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plotting.html">Plotting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="predictor.html">Predictor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ensembles.html">Ensembling Models</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Ensembling Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="periodic.html">Periodic Boundary Conditions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="forces.html">Force Training</a></li>
 <li class="toctree-l2"><a class="reference internal" href="restarting.html">Restarting training</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">ASE Calculators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ase_calculator.html">ASE Calculators</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mliap_unified.html">LAMMPS interface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="excited_states.html">Non-Adiabiatic Excited States</a></li>
 <li class="toctree-l2"><a class="reference internal" href="weighted_loss.html">Weighted/Masked Loss Functions</a></li>
@@ -83,51 +83,46 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
-      <li class="breadcrumb-item active">ASE Calculators</li>
+      <li class="breadcrumb-item active">Ensembling Models</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/examples/ase_calculator.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/examples/ensembles.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
-        <a href="restarting.html" class="btn btn-neutral float-left" title="Restarting training" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mliap_unified.html" class="btn btn-neutral float-right" title="LAMMPS interface" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="predictor.html" class="btn btn-neutral float-left" title="Predictor" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="periodic.html" class="btn btn-neutral float-right" title="Periodic Boundary Conditions" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
   </div>
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="ase-calculators">
-<h1>ASE Calculators<a class="headerlink" href="#ase-calculators" title="Link to this heading"></a></h1>
-<p>Hippynn models can be used with <code class="docutils literal notranslate"><span class="pre">ase</span></code> to perform molecular dynamics or other tests.</p>
-<p>To build an ASE calculator, you must pass the node associated with energy.
-Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.interfaces.ase_interface</span> <span class="kn">import</span> <span class="n">HippynnCalculator</span>
-<span class="n">energy_node</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">node_from_name</span><span class="p">(</span><span class="s2">&quot;energy&quot;</span><span class="p">)</span>
-<span class="n">calc</span> <span class="o">=</span> <span class="n">HippynnCalculator</span><span class="p">(</span><span class="n">energy_node</span><span class="p">,</span><span class="n">en_unit</span><span class="o">=</span><span class="n">units</span><span class="o">.</span><span class="n">eV</span><span class="p">)</span>
-<span class="n">calc</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+  <section id="ensembling-models">
+<h1>Ensembling Models<a class="headerlink" href="#ensembling-models" title="Link to this heading"></a></h1>
+<p>Using the <a class="reference internal" href="../api_documentation/hippynn.graphs.html#hippynn.graphs.make_ensemble" title="hippynn.graphs.make_ensemble"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_ensemble()</span></code></a> function makes it easy to combine models.</p>
+<p>By default, ensembling is based on the db_name for the nodes in each input graph.
+Nodes which have the same name will be assigned an ensemble node which combines
+the different versions of that quantity, and additionally calculates the
+mean and standard deviation.</p>
+<p>It is easy to make an ensemble from a glob string or a list of directories where
+the models are saved:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.graphs</span> <span class="kn">import</span> <span class="n">make_ensemble</span>
+<span class="n">model_form</span> <span class="o">=</span> <span class="s1">&#39;../../collected_models/quad0_b512_p5_GPU*&#39;</span>
+<span class="n">ensemble_graph</span><span class="p">,</span> <span class="n">ensemble_info</span> <span class="o">=</span> <span class="n">make_ensemble</span><span class="p">(</span><span class="n">model_form</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Take note of the <code class="docutils literal notranslate"><span class="pre">en_unit</span></code> and <code class="docutils literal notranslate"><span class="pre">dist_unit</span></code> parameters for the calculator.
-These parameters inform the calculator what units the model consumes and produces for energy and
-for distance. If unspecified, the <code class="docutils literal notranslate"><span class="pre">en_unit</span></code> is kcal/mol, and the <code class="docutils literal notranslate"><span class="pre">dist_unit</span></code> is angstrom.
-Whatever units your model uses, the output of the calculator will be in the <code class="docutils literal notranslate"><span class="pre">ase</span></code> unit system,
-which has energy in eV and distance in Angstroms.</p>
-<p>Given an ase atoms object, one can assign the calculator:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="o">.</span><span class="n">calc</span> <span class="o">=</span> <span class="n">calc</span>
-</pre></div>
-</div>
-<p>And proceed to perform whatever simulation is desired.</p>
-<p>The <a class="reference internal" href="../api_documentation/hippynn.interfaces.ase_interface.html#hippynn.interfaces.ase_interface.HippynnCalculator" title="hippynn.interfaces.ase_interface.HippynnCalculator"><code class="xref py py-class docutils literal notranslate"><span class="pre">HippynnCalculator</span></code></a> also supports a charge node for charge and dipole predictions,
-and generates calculations for force and stress based on the energy using pytorch’s
-automatic differentiation capabilities.</p>
+<p>The ensemble graph takes the inputs which are required for all of the models in the ensemble.
+The <code class="docutils literal notranslate"><span class="pre">ensemble_info</span></code> object provides the counts for the inputs and targets of the ensemble
+and the counts of those corresponding quantities across the ensemble members.</p>
+<p>A typical use case would be to then build a Predictor or ASE Calculator from the ensemble.
+See <code class="file docutils literal notranslate"><span class="pre">~examples/ensembling_models.py</span></code> for a detailed example.</p>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="restarting.html" class="btn btn-neutral float-left" title="Restarting training" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mliap_unified.html" class="btn btn-neutral float-right" title="LAMMPS interface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="predictor.html" class="btn btn-neutral float-left" title="Predictor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="periodic.html" class="btn btn-neutral float-right" title="Periodic Boundary Conditions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

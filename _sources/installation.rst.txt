@@ -43,6 +43,21 @@ Interfacing codes:
 Installation Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Conda
+-----
+Install using conda::
+
+    conda install -c conda-forge hippynn
+
+Pip
+---
+Install using pip::
+
+    pip install hippynn
+
+Install from source:
+--------------------
+
 Clone the hippynn_ repository and navigate into it, e.g.::
 
     $ git clone https://github.com/lanl/hippynn.git
@@ -55,14 +70,14 @@ Clone the hippynn_ repository and navigate into it, e.g.::
   out ``cupy`` from the conda_requirements.txt file.
 
 Dependencies using conda
--------------------------
+........................
 
 Install dependencies from conda using recommended channels::
 
     $ conda install -c pytorch -c conda-forge --file conda_requirements.txt
 
 Dependencies using pip
------------------------
+.......................
 
 Minimum dependencies using pip::
 

@@ -80,9 +80,9 @@
 <span class="sd">Nodes not otherwise categorized.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">..indextypes</span> <span class="kn">import</span> <span class="n">IdxType</span>
-<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">MultiNode</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">ExpandParents</span>
 <span class="kn">from</span> <span class="nn">...layers</span> <span class="kn">import</span> <span class="n">indexers</span> <span class="k">as</span> <span class="n">index_modules</span><span class="p">,</span> <span class="n">algebra</span> <span class="k">as</span> <span class="n">algebra_modules</span>
-
+<span class="kn">from</span> <span class="nn">..indextypes</span> <span class="kn">import</span> <span class="n">elementwise_compare_reduce</span>
 
 <div class="viewcode-block" id="StrainInducer">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.misc.html#hippynn.graphs.nodes.misc.StrainInducer">[docs]</a>
@@ -113,6 +113,34 @@
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.misc.html#hippynn.graphs.nodes.misc.ListNode.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="EnsembleTarget">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.misc.html#hippynn.graphs.nodes.misc.EnsembleTarget">[docs]</a>
+<span class="k">class</span> <span class="nc">EnsembleTarget</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">algebra_modules</span><span class="o">.</span><span class="n">EnsembleTarget</span>
+    <span class="n">_input_names</span> <span class="o">=</span> <span class="bp">NotImplemented</span>  <span class="c1"># NotImplemented tells __init_subclass__ that we will fill this in later.</span>
+    <span class="n">_output_names</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span>
+
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">require_compatible_idx_states</span><span class="p">()</span>
+
+<div class="viewcode-block" id="EnsembleTarget.__init__">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.misc.html#hippynn.graphs.nodes.misc.EnsembleTarget.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
+
+        <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
+
+        <span class="n">index_state</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_index_state</span>
+        <span class="n">db_name</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">db_name</span>  <span class="c1"># assumes that all are the same!</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_index_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">index_state</span><span class="p">,)</span><span class="o">*</span><span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;input_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parents</span><span class="p">))]</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">out_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_names</span><span class="p">):</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">db_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">out_name</span><span class="si">}</span><span class="s1">&#39;</span></div>
 </div>
 
 </pre></div>

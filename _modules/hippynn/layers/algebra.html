@@ -206,6 +206,21 @@
         <span class="k">return</span> <span class="n">bundled_inputs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">]</span></div>
 </div>
 
+
+<div class="viewcode-block" id="EnsembleTarget">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.algebra.html#hippynn.layers.algebra.EnsembleTarget">[docs]</a>
+<span class="k">class</span> <span class="nc">EnsembleTarget</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="EnsembleTarget.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.algebra.html#hippynn.layers.algebra.EnsembleTarget.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">input_tensors</span><span class="p">):</span>
+        <span class="n">n_members</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_tensors</span><span class="p">)</span>
+
+        <span class="nb">all</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">input_tensors</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="nb">all</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="nb">all</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="nb">all</span></div>
+</div>
+
 </pre></div>
 
            </div>

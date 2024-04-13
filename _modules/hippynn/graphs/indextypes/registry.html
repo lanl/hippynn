@@ -161,6 +161,43 @@
 
 
 
+<div class="viewcode-block" id="assign_index_aliases">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.registry.html#hippynn.graphs.indextypes.assign_index_aliases">[docs]</a>
+<span class="k">def</span> <span class="nf">assign_index_aliases</span><span class="p">(</span><span class="o">*</span><span class="n">nodes</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Store the input set of nodes in the index cache as index aliases of each other.</span>
+
+<span class="sd">    Errors if the nodes contain two different nodes with the same index state.</span>
+
+<span class="sd">    :param nodes:</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Developer node:</span>
+    <span class="c1"># In the interest of safety this function currently errors rather than over-write information.</span>
+    <span class="c1"># Operationally, it is not clear if it really needs to be safe or not.</span>
+    <span class="c1"># If there becomes a convenient reason to make this function overwrite current info,</span>
+    <span class="c1"># it could be changed.</span>
+    
+    <span class="n">nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+    <span class="n">state_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="o">.</span><span class="n">_index_state</span><span class="p">:</span> <span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">}</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">state_map</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Input nodes did not each have a unique index state!</span><span class="se">\n</span><span class="s2">&quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;Nodes and corresponding states: </span><span class="se">\n</span><span class="s2">&quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="si">{</span><span class="p">[(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="o">.</span><span class="n">_index_state</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">nodes</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">target_state</span><span class="p">,</span> <span class="n">target_node</span> <span class="ow">in</span> <span class="n">state_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="ow">is</span> <span class="n">target_node</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">idxcache_info</span> <span class="o">=</span> <span class="p">(</span><span class="n">target_state</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">idxcache_info</span> <span class="ow">in</span> <span class="n">_index_cache</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Index state for node is already cached: </span><span class="si">{</span><span class="n">idxcache_info</span><span class="p">,</span><span class="n">_index_cache</span><span class="p">[</span><span class="n">idxcache_info</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_index_cache</span><span class="p">[</span><span class="n">idxcache_info</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_node</span></div>
+
+
+
+
 <div class="viewcode-block" id="register_index_transformer">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.registry.html#hippynn.graphs.indextypes.register_index_transformer">[docs]</a>
 <span class="k">def</span> <span class="nf">register_index_transformer</span><span class="p">(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">):</span>

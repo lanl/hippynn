@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="graph module" href="hippynn.graphs.graph.html" />
-    <link rel="prev" title="targets module" href="hippynn.graphs.nodes.targets.html" /> 
+    <link rel="prev" title="ensemble module" href="hippynn.graphs.ensemble.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -64,10 +64,12 @@
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.find_unique_relative"><code class="docutils literal notranslate"><span class="pre">find_unique_relative()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.get_connected_nodes"><code class="docutils literal notranslate"><span class="pre">get_connected_nodes()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.get_subgraph"><code class="docutils literal notranslate"><span class="pre">get_subgraph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.make_ensemble"><code class="docutils literal notranslate"><span class="pre">make_ensemble()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.replace_node"><code class="docutils literal notranslate"><span class="pre">replace_node()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.indextransformers.html">indextransformers package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.indextypes.html">indextypes package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.nodes.html">nodes package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.ensemble.html">ensemble module</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">gops module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.GraphInconsistency"><code class="docutils literal notranslate"><span class="pre">GraphInconsistency</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.check_evaluation_order"><code class="docutils literal notranslate"><span class="pre">check_evaluation_order()</span></code></a></li>
@@ -75,6 +77,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.compute_evaluation_order"><code class="docutils literal notranslate"><span class="pre">compute_evaluation_order()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.copy_subgraph"><code class="docutils literal notranslate"><span class="pre">copy_subgraph()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.get_subgraph"><code class="docutils literal notranslate"><span class="pre">get_subgraph()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.merge_children"><code class="docutils literal notranslate"><span class="pre">merge_children()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.merge_children_recursive"><code class="docutils literal notranslate"><span class="pre">merge_children_recursive()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.replace_node"><code class="docutils literal notranslate"><span class="pre">replace_node()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.replace_node_with_constant"><code class="docutils literal notranslate"><span class="pre">replace_node_with_constant()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.search_by_name"><code class="docutils literal notranslate"><span class="pre">search_by_name()</span></code></a></li>
@@ -117,7 +121,7 @@
             <a href="../_sources/api_documentation/hippynn.graphs.gops.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
-        <a href="hippynn.graphs.nodes.targets.html" class="btn btn-neutral float-left" title="targets module" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hippynn.graphs.ensemble.html" class="btn btn-neutral float-left" title="ensemble module" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="hippynn.graphs.graph.html" class="btn btn-neutral float-right" title="graph module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
   </div>
   <hr/>
@@ -230,6 +234,37 @@ you have finished your graph-level operations.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="hippynn.graphs.gops.merge_children">
+<span class="sig-name descname"><span class="pre">merge_children</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_nodes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/gops.html#merge_children"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.gops.merge_children" title="Link to this definition"></a></dt>
+<dd><p>Merge the children of some seed nodes if those children are identical.</p>
+<p>This function changes a graph in-place.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>start_nodes</strong> – </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>child_nodes: the merged children, post merge</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.graphs.gops.merge_children_recursive">
+<span class="sig-name descname"><span class="pre">merge_children_recursive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_nodes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/gops.html#merge_children_recursive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.gops.merge_children_recursive" title="Link to this definition"></a></dt>
+<dd><p>Merge children of some seed nodes if they are identical computations,
+and apply to future children until no more merges can be performed.</p>
+<p>This function changes a graph in-place.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>start_nodes</strong> – </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Merged nodes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="hippynn.graphs.gops.replace_node">
 <span class="sig-name descname"><span class="pre">replace_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disconnect_old</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/gops.html#replace_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.gops.replace_node" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
@@ -295,7 +330,7 @@ Raises NodeNotFoundError if no nodes found</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="hippynn.graphs.nodes.targets.html" class="btn btn-neutral float-left" title="targets module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hippynn.graphs.ensemble.html" class="btn btn-neutral float-left" title="ensemble module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="hippynn.graphs.graph.html" class="btn btn-neutral float-right" title="graph module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

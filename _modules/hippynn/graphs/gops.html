@@ -79,6 +79,7 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Graph Operations (&quot;gops&quot;) that process or transform a set of nodes.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 
 <span class="kn">from</span> <span class="nn">.nodes.base</span> <span class="kn">import</span> <span class="n">InputNode</span><span class="p">,</span> <span class="n">MultiNode</span>
@@ -86,7 +87,7 @@
 <span class="kn">from</span> <span class="nn">.nodes.base.node_functions</span> <span class="kn">import</span> <span class="n">NodeNotFound</span><span class="p">,</span> <span class="n">NodeOperationError</span>
 <span class="kn">from</span> <span class="nn">.indextypes</span> <span class="kn">import</span> <span class="n">soft_index_type_coercion</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">get_connected_nodes</span><span class="p">,</span> <span class="n">find_unique_relative</span>
-
+<span class="kn">from</span> <span class="nn">..tools</span> <span class="kn">import</span> <span class="n">is_equal_state_dict</span>
 
 <div class="viewcode-block" id="get_subgraph">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.gops.html#hippynn.graphs.get_subgraph">[docs]</a>
@@ -409,6 +410,118 @@
         <span class="k">return</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="n">n</span><span class="o">.</span><span class="n">db_name</span> <span class="o">==</span> <span class="n">name_or_dbname</span><span class="p">)</span>
     <span class="k">except</span> <span class="n">NodeNotFound</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="n">n</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name_or_dbname</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="merge_children_recursive">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.gops.html#hippynn.graphs.merge_children_recursive">[docs]</a>
+<span class="k">def</span> <span class="nf">merge_children_recursive</span><span class="p">(</span><span class="n">start_nodes</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Merge children of some seed nodes if they are identical computations,</span>
+<span class="sd">    and apply to future children until no more merges can be performed.</span>
+
+<span class="sd">    This function changes a graph in-place.</span>
+
+<span class="sd">    :param start_nodes:</span>
+<span class="sd">    :return: Merged nodes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">all_merged_nodes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="n">start_nodes</span><span class="p">:</span>
+        <span class="n">merged_nodes</span> <span class="o">=</span> <span class="n">merge_children</span><span class="p">(</span><span class="n">start_nodes</span><span class="p">)</span>
+        <span class="n">all_merged_nodes</span> <span class="o">+=</span> <span class="n">merged_nodes</span>
+        <span class="n">next_nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">merged_nodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+                <span class="n">next_nodes</span> <span class="o">+=</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">next_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+        <span class="n">start_nodes</span> <span class="o">=</span> <span class="n">next_nodes</span>
+
+    <span class="k">return</span> <span class="n">all_merged_nodes</span></div>
+
+
+
+<div class="viewcode-block" id="merge_children">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.gops.html#hippynn.graphs.merge_children">[docs]</a>
+<span class="k">def</span> <span class="nf">merge_children</span><span class="p">(</span><span class="n">start_nodes</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Merge the children of some seed nodes if those children are identical.</span>
+
+<span class="sd">    This function changes a graph in-place.</span>
+
+<span class="sd">    :param start_nodes:</span>
+<span class="sd">    :return: child_nodes: the merged children, post merge</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">.nodes.tags</span> <span class="kn">import</span> <span class="n">PairIndexer</span>
+    <span class="n">next_generation</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">c</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">start_nodes</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">children</span><span class="p">]))</span>
+
+    <span class="c1"># Check same parents</span>
+    <span class="c1"># Check same node type</span>
+    <span class="c1"># Check same module type</span>
+    <span class="n">node_class_map</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">next_generation</span><span class="p">:</span>
+        <span class="n">node_class</span> <span class="o">=</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">node</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">torch_module</span><span class="p">),</span> <span class="n">node</span><span class="o">.</span><span class="n">parents</span><span class="p">)</span>
+        <span class="n">node_class_map</span><span class="p">[</span><span class="n">node_class</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+    <span class="c1"># Only merge things when there is more than one node of the same class</span>
+    <span class="n">considered_node_classes</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">node_class_map</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">}</span>
+
+    <span class="c1"># Check all nodes from the class have the same module state dict</span>
+    <span class="c1"># Add exceptional code for PairIndexer by finding the one with the maximum distance threshold.</span>
+    <span class="n">mergeable_node_classes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nodes_to_merge</span> <span class="ow">in</span> <span class="n">considered_node_classes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>  <span class="c1"># CODA</span>
+
+        <span class="n">first</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">nodes_to_merge</span>
+        <span class="c1"># check if the state dict of nodes is all equal.</span>
+        <span class="n">d1</span> <span class="o">=</span> <span class="n">first</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">rest</span><span class="p">:</span>
+            <span class="n">d2</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_equal_state_dict</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">):</span>
+                <span class="n">nodes_can_merge</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nodes_can_merge</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nodes_can_merge</span><span class="p">:</span>
+            <span class="k">continue</span>  <span class="c1"># DS AL CODA (back to considered_node_classes.values() iteration.)</span>
+
+        <span class="c1"># Extra code to handle merging of pair indexers.</span>
+        <span class="c1"># Even if we clean up the pair indexer with an extra state we would still need logic to merge them.</span>
+        <span class="c1"># TODO: Clean up hard_dist_cutoff vs dist_hard max and make it impossible for the node and</span>
+        <span class="c1"># TODO module to disagree.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">):</span>
+            <span class="n">max_r</span> <span class="o">=</span> <span class="n">first</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">hard_dist_cutoff</span>
+            <span class="n">max_r_node</span> <span class="o">=</span> <span class="n">first</span>
+            <span class="n">swap_first_in</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">other_node</span> <span class="ow">in</span> <span class="n">rest</span><span class="p">:</span>
+                <span class="n">this_r</span> <span class="o">=</span> <span class="n">other_node</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">hard_dist_cutoff</span>
+                <span class="k">if</span> <span class="n">this_r</span> <span class="o">&gt;</span> <span class="n">max_r</span><span class="p">:</span>
+                    <span class="n">max_r_node</span> <span class="o">=</span> <span class="n">other_node</span>
+                    <span class="n">max_r</span> <span class="o">=</span> <span class="n">this_r</span>
+                    <span class="n">swap_first_in</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="n">swap_first_in</span><span class="p">:</span>
+                <span class="c1"># Make the max_radius node the first one.</span>
+                <span class="n">first</span> <span class="o">=</span> <span class="n">max_r_node</span>
+                <span class="n">rest</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes_to_merge</span> <span class="k">if</span> <span class="n">n</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">first</span><span class="p">]</span>
+                <span class="n">nodes_to_merge</span> <span class="o">=</span> <span class="n">first</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span>
+
+        <span class="n">mergeable_node_classes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nodes_to_merge</span><span class="p">)</span>
+
+    <span class="c1"># actually perform the merging after all the analysis is done.</span>
+    <span class="n">new_children</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># These are the nodes that have been swapped into the graphs.</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">)</span> <span class="ow">in</span> <span class="n">mergeable_node_classes</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">equivalent_node</span> <span class="ow">in</span> <span class="n">rest</span><span class="p">:</span>
+            <span class="n">replace_node</span><span class="p">(</span><span class="n">equivalent_node</span><span class="p">,</span> <span class="n">first</span><span class="p">)</span>
+            <span class="n">equivalent_node</span><span class="o">.</span><span class="n">disconnect_recursive</span><span class="p">()</span>
+        <span class="n">new_children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">first</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">new_children</span></div>
+
 
 </pre></div>
 
