@@ -1,7 +1,7 @@
 import collections
 import glob
 
-from .. import tools
+from ..tools import device_fallback, active_directory
 from . import GraphModule, replace_node, get_subgraph
 
 from .indextypes import get_reduced_index_state, index_type_coercion
@@ -41,8 +41,8 @@ def make_ensemble(models, *, targets: List[str] = "auto", inputs: List[str] = "a
         if not quiet:
             print("Identified output quantities:", targets)
 
-    input_classes : Dict[str, List[_BaseNode]] = collate_inputs(graphs, inputs)
-    target_classes : Dict[str, List[_BaseNode]] = collate_targets(graphs, targets)
+    input_classes: Dict[str, List[_BaseNode]] = collate_inputs(graphs, inputs)
+    target_classes: Dict[str, List[_BaseNode]] = collate_targets(graphs, targets)
 
     ensemble_info = make_ensemble_info(input_classes, target_classes, quiet=quiet)
 
@@ -74,15 +74,17 @@ def get_graphs(models: Union[List[Union[str, GraphModule, _BaseNode]], str]) -> 
     if isinstance(models, str):
         models = glob.glob(models)
 
+    device = None
     for model in models:
         if isinstance(model, str):
             from ..experiment.serialization import load_model_from_cwd
 
             # Get graph from disk
-            map_location = tools.device_fallback()
-            with tools.active_directory(d, create=False):
+            if device is None:
+                device = device_fallback()
+            with active_directory(model, create=False):
                 try:
-                    model = load_model_from_cwd(map_location=map_location)
+                    model = load_model_from_cwd(map_location=device)
                 except FileNotFoundError:
                     import warnings
                     warnings.warn(f"Model not found in directory: {model}")
