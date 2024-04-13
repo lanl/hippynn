@@ -11,7 +11,6 @@ from .indextypes import soft_index_type_coercion
 from . import get_connected_nodes, find_unique_relative
 from ..tools import is_equal_state_dict
 
-
 def get_subgraph(required_nodes):
     """
     Get the subgraph associated with some target (required) nodes.
@@ -311,72 +310,70 @@ def search_by_name(nodes, name_or_dbname):
 
 def merge_children_recursive(start_nodes):
     """
+    Merge children of some seed nodes if they are identical computations,
+    and apply to future children until no more merges can be performed.
+
     This function changes a graph in-place.
 
     :param start_nodes:
-    :return: None
+    :return: Merged nodes.
     """
 
+    all_merged_nodes = []
     while start_nodes:
-        next_nodes = merge_children(start_nodes)
-        print("MERGING DONE!",next_nodes)
+        merged_nodes = merge_children(start_nodes)
+        all_merged_nodes += merged_nodes
+        next_nodes = []
+        for node in merged_nodes:
+            if isinstance(node, MultiNode):
+                next_nodes += node.children
+            else:
+                next_nodes.append(node)
+
         start_nodes = next_nodes
 
+    return all_merged_nodes
 
 
 def merge_children(start_nodes):
     """
+    Merge the children of some seed nodes if those children are identical.
+
     This function changes a graph in-place.
 
     :param start_nodes:
     :return: child_nodes: the merged children, post merge
 
     """
-    print = lambda *args,**kwargs: None
 
-    print("merging children of these nodes:", start_nodes)
     from .nodes.tags import PairIndexer
-    next_generation = [c for s in start_nodes for c in s.children]
+    next_generation = list(set([c for s in start_nodes for c in s.children]))
 
     # Check same parents
     # Check same node type
     # Check same module type
-    # Check same module state dict
-    # make exception for PairIndexer by finding the one with the maximum distance threshold
-
     node_class_map = collections.defaultdict(list)
     for node in next_generation:
         node_class = (type(node), type(node.torch_module), node.parents)
         node_class_map[node_class].append(node)
 
-    print("Node class map:")
-    print("keys:")
-    print(node_class_map.keys())
-    print("whole thing")
-    for k, v in node_class_map.items():
-        print("\t", k)
-        for n in v:
-            print("\t\t", n)
-
+    # Only merge things when there is more than one node of the same class
     considered_node_classes = {k: v for k, v in node_class_map.items() if len(v) > 1}
-    print("considered node classes:")
-    print(considered_node_classes)
+
+    # Check all nodes from the class have the same module state dict
+    # Add exceptional code for PairIndexer by finding the one with the maximum distance threshold.
     mergeable_node_classes = []
     for nodes_to_merge in considered_node_classes.values():  # CODA
 
-        nodes_can_merge = False  #  until we have checked the parameters, we do not know.
         first, *rest = nodes_to_merge
         # check if the state dict of nodes is all equal.
         d1 = first.torch_module.state_dict()
         for node in rest:
             d2 = node.torch_module.state_dict()
             if not is_equal_state_dict(d1, d2):
-                print("State dicts were not equal!")
-                print(d1, d2)
                 nodes_can_merge = False
                 break
         else:
-            print("All state dicts are equal! We have liftoff!")
             nodes_can_merge = True
 
         if not nodes_can_merge:
@@ -410,7 +407,8 @@ def merge_children(start_nodes):
     for (first, *rest) in mergeable_node_classes:
         for equivalent_node in rest:
             replace_node(equivalent_node, first)
+            equivalent_node.disconnect_recursive()
         new_children.append(first)
 
-    print("Done!",new_children)
     return new_children
+

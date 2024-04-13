@@ -82,7 +82,7 @@ class GraphModule(torch.nn.Module):
     def get_module(self, node):
         return self.moddict[self.names_dict[node]]
 
-    def print_structure(self):
+    def print_structure(self, suppress=True):
         """Pretty-print the structure of the nodes and links comprising this graph."""
         in_nodes = {n: "I{}".format(i) for i, n in enumerate(self.input_nodes)}
         out_nodes = {n: "O{}".format(i) for i, n in enumerate(self.nodes_to_compute)}
@@ -96,7 +96,12 @@ class GraphModule(torch.nn.Module):
         for k, v in out_nodes.items():
             print("\t", v, ":", k)
         print("Order:")
+        all_inputs = set(n for this_list in self.forward_inputs_list for n in this_list)
         for computed, inputs_for_computed in zip(self.forward_output_list, self.forward_inputs_list):
+            if computed not in all_inputs and computed not in self.nodes_to_compute:
+                # most likely this is just the child of MultiNode which is still unpacked.
+                continue
+
             pre = ",".join({node_map[n] for n in inputs_for_computed})
             mid = "{:3} : {}".format(node_map[computed], computed.name)
             print("{:-<20}-> {}".format(pre, mid))

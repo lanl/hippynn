@@ -6,6 +6,7 @@ from .nodes.misc import EnsembleTarget
 from .indextypes import get_reduced_index_state, index_type_coercion
 from .indextypes.reduce_funcs import db_state_of
 from .indextypes.registry import assign_index_aliases
+from .gops import merge_children_recursive
 
 
 def make_ensemble(graphs, targets="auto", inputs="auto", quiet=False):
@@ -40,7 +41,11 @@ def make_ensemble(graphs, targets="auto", inputs="auto", quiet=False):
 
     ensemble_outputs = construct_outputs(target_classes)
     ensemble_inputs = replace_inputs(input_classes)
-
+    merged_inputs = merge_children_recursive(ensemble_inputs)
+    if not quiet:
+        print("Merged the following nodes from the ensemble members:")
+        for node in merged_inputs:
+            print("\t", node)
 
     ensemble_graph = make_ensemble_graph(ensemble_inputs, ensemble_outputs)
 
@@ -144,17 +149,16 @@ def make_ensemble_info(input_classes, output_classes, quiet=False):
     output_info = {k: len(v) for k, v in output_classes.items()}
 
     if not quiet:
-        print("Inputs needed and model counts:")
+        print("Inputs needed and respective model counts:")
         for k, v in input_info.items():
-            print(f"\t{k}:{v}")
-        print("Outputs generated and model counts:")
+            print(f"\t{k} : {v}")
+        print("Outputs generated and respective model counts:")
         for k, v in output_info.items():
-            print(f"\t{k}:{v}")
+            print(f"\t{k} : {v}")
 
     ensemble_info = input_info, output_info
 
     return ensemble_info
-
 
 
 def construct_outputs(output_classes):
