@@ -1,10 +1,6 @@
 import torch
 import hippynn
 
-import ase.build
-
-from hippynn.interfaces.ase_interface import HippynnCalculator
-
 if torch.cuda.is_available():
     device = 0
 else:
@@ -18,7 +14,11 @@ ensemble_graph, ensemble_info = hippynn.graphs.make_ensemble(model_form)
 # The name will be the prefix 'ensemble' followed by the db_name from the ensemble members.
 ensemble_energy = ensemble_graph.node_from_name("ensemble_T")
 
-### Building an ASE calculator
+### Building an ASE calculator for the ensemble
+
+import ase.build
+
+from hippynn.interfaces.ase_interface import HippynnCalculator
 
 # The ensemble node has `mean`, `std`, and `all` outputs.
 energy_node = ensemble_energy.mean
@@ -39,7 +39,8 @@ print("In units of kcal/mol", energy_value / (ase.units.kcal/ase.units.mol))
 # The name in the results dictionary comes from the key in the 'extra_properties' dictionary.
 print("All predictions:", calc.results["ens_predictions"])
 
-### Building a Predictor object
+
+### Building a Predictor object for the ensemble
 pred = hippynn.graphs.Predictor.from_graph(ensemble_graph)
 
 # get batch-like inputs to the ensemble
