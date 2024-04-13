@@ -33,6 +33,12 @@ class GraphModule(torch.nn.Module):
         """
         super().__init__()
 
+        nodes_to_compute = list(nodes_to_compute)
+
+        if len(nodes_to_compute) == 0:
+            raise ValueError("Length of `nodes_to_compute` was zero. A graph module "
+                             "must receive a list of outputs with length greater than zero.")
+
         assert all(isinstance(n, InputNode) for n in required_inputs)
 
         self.input_nodes = required_inputs

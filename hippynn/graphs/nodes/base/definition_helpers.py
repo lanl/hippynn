@@ -14,7 +14,7 @@ import contextlib
 from .. import _debprint
 
 from . import _BaseNode
-from ...indextypes import index_type_coercion, elementwise_compare_reduce
+from ...indextypes import index_type_coercion, elementwise_compare_reduce, get_reduced_index_state
 
 
 class AutoNoKw:
@@ -379,7 +379,8 @@ class CompatibleIdxTypeTransformer(FormTransformer):
         """
         Enforces that all parents have compatible index states.
         """
-        return elementwise_compare_reduce(parents)
+        index_state = get_reduced_index_state(*parents)
+        return parents
 
 
 class FormAssertion(FormHandler):

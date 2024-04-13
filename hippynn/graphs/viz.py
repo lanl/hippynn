@@ -103,7 +103,7 @@ def get_viz_node_names(node_set):
     unique_names = {}
     for node in node_set:
         if node.name in nonunique_names:
-            unique_names[node] = "{} (id={})".format(node.name, id(node))
+            unique_names[node] = "{}<id={}>".format(node.name, hex(id(node)))
         else:
             unique_names[node] = node.name
     return unique_names

@@ -153,3 +153,36 @@ def pad_np_array_to_length_with_zeros(array, length, axis=0):
 
 def np_of_torchdefaultdtype():
     return torch.ones(1, dtype=torch.get_default_dtype()).numpy().dtype
+
+def is_equal_state_dict(d1, d2):
+    """
+    Checks if two pytorch state dictionaries are equal. Calls itself recursively
+    if the value for a parameter is a dictionary.
+
+
+    :param d1:
+    :param d2:
+    :return:
+    """
+    if set(d1.keys()) != set(d2.keys()):
+        # They have different sets of keys.
+        return False
+    for k in d1:
+        v1 = d1[k]
+        v2 = d2[k]
+        if type(v1) != type(v2):
+            return False
+        if isinstance(v1, torch.Tensor):
+            if torch.equal(v1, v2):
+                continue
+            else:
+                return False
+        elif isinstance(v1, dict):
+            # call recursive:
+            return is_equal_state_dict(v1, v2)
+        elif v1 != v2:
+            return False
+
+    return True
+
+

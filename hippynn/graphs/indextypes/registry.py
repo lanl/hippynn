@@ -80,6 +80,40 @@ def clear_index_cache():
     _index_cache = {}
 
 
+def assign_index_aliases(*nodes):
+    """
+    Store the input set of nodes in the index cache as index aliases of each other.
+
+    Errors if the nodes contain two different nodes with the same index state.
+
+    :param nodes:
+    :return: None
+    """
+    # Developer node:
+    # In the interest of safety this function currently errors rather than over-write information.
+    # Operationally, it is not clear if it really needs to be safe or not.
+    # If there becomes a convenient reason to make this function overwrite current info,
+    # it could be changed.
+    
+    nodes = set(nodes)
+    state_map = {n._index_state: n for n in nodes}
+    if len(state_map) != len(nodes):
+        raise ValueError(f"Input nodes did not each have a unique index state!\n"
+                         f"Nodes and corresponding states: \n"
+                         f"\t{[(n, n._index_state) for n in nodes]}")
+
+    for target_state, target_node in state_map.items():
+        for n in nodes:
+            if n is target_node:
+                continue
+            idxcache_info = (target_state, n)
+            if idxcache_info in _index_cache:
+                raise ValueError(f"Index state for node is already cached: {idxcache_info,_index_cache[idxcache_info]}")
+            else:
+                _index_cache[idxcache_info] = target_node
+
+
+
 def register_index_transformer(input_idxstate, output_idxstate):
     """
     Decorator for registering a transformer from one IdxType to another.
