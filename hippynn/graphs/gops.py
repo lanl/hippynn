@@ -1,6 +1,7 @@
 """
 Graph Operations ("gops") that process or transform a set of nodes.
 """
+import collections
 import copy
 
 from .nodes.base import InputNode, MultiNode
@@ -8,7 +9,7 @@ from .nodes.base.algebra import ValueNode
 from .nodes.base.node_functions import NodeNotFound, NodeOperationError
 from .indextypes import soft_index_type_coercion
 from . import get_connected_nodes, find_unique_relative
-
+from ..tools import is_equal_state_dict
 
 def get_subgraph(required_nodes):
     """
@@ -305,3 +306,109 @@ def search_by_name(nodes, name_or_dbname):
         return find_unique_relative(nodes, lambda n: n.db_name == name_or_dbname)
     except NodeNotFound:
         return find_unique_relative(nodes, lambda n: n.name == name_or_dbname)
+
+
+def merge_children_recursive(start_nodes):
+    """
+    Merge children of some seed nodes if they are identical computations,
+    and apply to future children until no more merges can be performed.
+
+    This function changes a graph in-place.
+
+    :param start_nodes:
+    :return: Merged nodes.
+    """
+
+    all_merged_nodes = []
+    while start_nodes:
+        merged_nodes = merge_children(start_nodes)
+        all_merged_nodes += merged_nodes
+        next_nodes = []
+        for node in merged_nodes:
+            if isinstance(node, MultiNode):
+                next_nodes += node.children
+            else:
+                next_nodes.append(node)
+
+        start_nodes = next_nodes
+
+    return all_merged_nodes
+
+
+def merge_children(start_nodes):
+    """
+    Merge the children of some seed nodes if those children are identical.
+
+    This function changes a graph in-place.
+
+    :param start_nodes:
+    :return: child_nodes: the merged children, post merge
+
+    """
+
+    from .nodes.tags import PairIndexer
+    next_generation = list(set([c for s in start_nodes for c in s.children]))
+
+    # Check same parents
+    # Check same node type
+    # Check same module type
+    node_class_map = collections.defaultdict(list)
+    for node in next_generation:
+        node_class = (type(node), type(node.torch_module), node.parents)
+        node_class_map[node_class].append(node)
+
+    # Only merge things when there is more than one node of the same class
+    considered_node_classes = {k: v for k, v in node_class_map.items() if len(v) > 1}
+
+    # Check all nodes from the class have the same module state dict
+    # Add exceptional code for PairIndexer by finding the one with the maximum distance threshold.
+    mergeable_node_classes = []
+    for nodes_to_merge in considered_node_classes.values():  # CODA
+
+        first, *rest = nodes_to_merge
+        # check if the state dict of nodes is all equal.
+        d1 = first.torch_module.state_dict()
+        for node in rest:
+            d2 = node.torch_module.state_dict()
+            if not is_equal_state_dict(d1, d2):
+                nodes_can_merge = False
+                break
+        else:
+            nodes_can_merge = True
+
+        if not nodes_can_merge:
+            continue  # DS AL CODA (back to considered_node_classes.values() iteration.)
+
+        # Extra code to handle merging of pair indexers.
+        # Even if we clean up the pair indexer with an extra state we would still need logic to merge them.
+        # TODO: Clean up hard_dist_cutoff vs dist_hard max and make it impossible for the node and
+        # TODO module to disagree.
+        if isinstance(first, PairIndexer):
+            max_r = first.torch_module.hard_dist_cutoff
+            max_r_node = first
+            swap_first_in = False
+            for other_node in rest:
+                this_r = other_node.torch_module.hard_dist_cutoff
+                if this_r > max_r:
+                    max_r_node = other_node
+                    max_r = this_r
+                    swap_first_in = True
+
+            if swap_first_in:
+                # Make the max_radius node the first one.
+                first = max_r_node
+                rest = [n for n in nodes_to_merge if n is not first]
+                nodes_to_merge = first, *rest
+
+        mergeable_node_classes.append(nodes_to_merge)
+
+    # actually perform the merging after all the analysis is done.
+    new_children = []  # These are the nodes that have been swapped into the graphs.
+    for (first, *rest) in mergeable_node_classes:
+        for equivalent_node in rest:
+            replace_node(equivalent_node, first)
+            equivalent_node.disconnect_recursive()
+        new_children.append(first)
+
+    return new_children
+

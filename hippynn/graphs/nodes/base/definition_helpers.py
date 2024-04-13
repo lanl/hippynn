@@ -14,7 +14,7 @@ import contextlib
 from .. import _debprint
 
 from . import _BaseNode
-from ...indextypes import index_type_coercion
+from ...indextypes import index_type_coercion, elementwise_compare_reduce, get_reduced_index_state
 
 
 class AutoNoKw:
@@ -38,7 +38,7 @@ def temporary_parents(child, parents):
     Context manager for temporarily connecting a node to a set of parents.
     This is used during parent expansion so that `find_relatives` and
     `find_unique_relatives` can treat the nodes as connected even though
-    they they are not fully formed.
+    they are not fully formed.
 
     :param child:
     :param parents:
@@ -201,6 +201,14 @@ class ParentExpander:
         return IndexFormTransformer(form, needed_index_states)
 
     @adds_to_forms
+    def require_compatible_idx_states(self):
+        """
+        Ensure that all parents have commensurate index states.
+        :return:
+        """
+        return CompatibleIdxTypeTransformer(AlwaysMatch)
+
+    @adds_to_forms
     def require_idx_states(self, *needed_index_states):
         """
         Always coerce the nodes into a needed index state.
@@ -357,6 +365,22 @@ class MainOutputTransformer(FormTransformer):
         Gets main_output of nodes: casts multinodes to single nodes
         """
         return tuple(p.main_output for p in parents)
+
+
+class CompatibleIdxTypeTransformer(FormTransformer):
+    def __init__(self, form):
+        super().__init__(form, self.fn)
+
+    def add_class_doc(self):
+        return """Attempts coercion of all inputs to the same index state."""
+
+    @staticmethod
+    def fn(node_self, *parents, **kwargs):
+        """
+        Enforces that all parents have compatible index states.
+        """
+        index_state = get_reduced_index_state(*parents)
+        return parents
 
 
 class FormAssertion(FormHandler):

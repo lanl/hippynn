@@ -74,3 +74,12 @@ class Idx(torch.nn.Module):
 
     def forward(self, bundled_inputs):
         return bundled_inputs[self.index]
+
+class EnsembleTarget(torch.nn.Module):
+    def forward(self,*input_tensors):
+        n_members = len(input_tensors)
+
+        all = torch.stack(input_tensors, dim=1)
+        mean = torch.mean(all, dim=1)
+        std = torch.std(all, dim=1)
+        return mean, std, all
