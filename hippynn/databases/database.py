@@ -57,15 +57,26 @@ class Database:
             print(f"All arrays:")
             prettyprint_arrays(arr_dict)
 
-        for k in self.var_list:
+        try:
+            _var_list = self.var_list
+        except RuntimeError:
+            if not quiet:
+                print("Database inputs and/or targets not specified. "
+                      "The database will not be checked against and model inputs and targets (db_info).")
+            _var_list = []
+
+
+        for k in _var_list:
             if k not in arr_dict and k not in ("indices", "split_indices"):
                 if allow_unfound:
-                    warnings.warn(f"Required database quantity '{k}' not present.")
+                    warnings.warn(f"Required database quantity '{k}' not present during database initialization.")
                 else:
                     raise KeyError(
                         f"Array dictionary missing required variable:'{k}'."
                         "Pass allow_unfound=True to avoid checking of inputs targets."
                     )
+        if not quiet and _var_list and not allow_unfound:
+            print("Finished checking input and target arrays; all necessary arrays were found.")
 
         self.arr_dict = arr_dict
         if "indices" not in arr_dict:
