@@ -139,15 +139,26 @@
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All arrays:&quot;</span><span class="p">)</span>
             <span class="n">prettyprint_arrays</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_list</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">_var_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_list</span>
+        <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Database inputs and/or targets not specified. &quot;</span>
+                      <span class="s2">&quot;The database will not be checked against and model inputs and targets (db_info).&quot;</span><span class="p">)</span>
+            <span class="n">_var_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_var_list</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">arr_dict</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;indices&quot;</span><span class="p">,</span> <span class="s2">&quot;split_indices&quot;</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">allow_unfound</span><span class="p">:</span>
-                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Required database quantity &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; not present.&quot;</span><span class="p">)</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Required database quantity &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; not present during database initialization.&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Array dictionary missing required variable:&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
                         <span class="s2">&quot;Pass allow_unfound=True to avoid checking of inputs targets.&quot;</span>
                     <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span> <span class="ow">and</span> <span class="n">_var_list</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">allow_unfound</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Finished checking input and target arrays; all necessary arrays were found.&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span> <span class="o">=</span> <span class="n">arr_dict</span>
         <span class="k">if</span> <span class="s2">&quot;indices&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">arr_dict</span><span class="p">:</span>
