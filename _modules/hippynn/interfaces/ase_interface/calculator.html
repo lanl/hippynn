@@ -16,7 +16,7 @@
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../../../_static/documentation_options.js?v=c9d3d048"></script>
-        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -144,7 +144,7 @@
     <span class="c1"># The required nodes passed back are copies of the ones passed in.</span>
     <span class="c1"># We use assume_inputed to avoid grabbing pieces of the graph</span>
     <span class="c1"># that are only prerequisites for the pair indexer.</span>
-    <span class="n">new_required</span><span class="p">,</span> <span class="n">new_subgraph</span> <span class="o">=</span> <span class="n">copy_subgraph</span><span class="p">(</span><span class="n">required_nodes</span><span class="p">,</span> <span class="n">assume_inputed</span><span class="o">=</span><span class="n">pair_indexers</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s2">&quot;ASE&quot;</span><span class="p">)</span>
+    <span class="n">new_required</span><span class="p">,</span> <span class="n">new_subgraph</span> <span class="o">=</span> <span class="n">copy_subgraph</span><span class="p">(</span><span class="n">required_nodes</span><span class="p">,</span> <span class="n">assume_inputed</span><span class="o">=</span><span class="n">pair_indexers</span><span class="p">)</span>
     <span class="c1"># We now need access to the copied indexers, rather than the originals</span>
     <span class="n">pair_indexers</span> <span class="o">=</span> <span class="n">find_relatives</span><span class="p">(</span><span class="n">new_required</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">PairIndexer</span><span class="p">,</span> <span class="n">new_subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
 
@@ -161,12 +161,12 @@
     <span class="c1">###############################################################</span>
     <span class="c1"># Set up graph to accept external pair indices and shifts</span>
 
-    <span class="n">in_shift</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;(ASE)shift_vector&quot;</span><span class="p">)</span>
-    <span class="n">in_cell</span> <span class="o">=</span> <span class="n">CellNode</span><span class="p">(</span><span class="s2">&quot;(ASE)cell&quot;</span><span class="p">)</span>
-    <span class="n">in_pair_first</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;(ASE)pair_first&quot;</span><span class="p">)</span>
-    <span class="n">in_pair_second</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;(ASE)pair_second&quot;</span><span class="p">)</span>
+    <span class="n">in_shift</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;shift_vector&quot;</span><span class="p">)</span>
+    <span class="n">in_cell</span> <span class="o">=</span> <span class="n">CellNode</span><span class="p">(</span><span class="s2">&quot;cell&quot;</span><span class="p">)</span>
+    <span class="n">in_pair_first</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;pair_first&quot;</span><span class="p">)</span>
+    <span class="n">in_pair_second</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;pair_second&quot;</span><span class="p">)</span>
     <span class="n">external_pairs</span> <span class="o">=</span> <span class="n">ExternalNeighborIndexer</span><span class="p">(</span>
-        <span class="s2">&quot;(ASE)EXTERNAL_NEIGHBORS&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;external_neighbors&quot;</span><span class="p">,</span>
         <span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">indexer</span><span class="o">.</span><span class="n">real_atoms</span><span class="p">,</span> <span class="n">in_shift</span><span class="p">,</span> <span class="n">in_cell</span><span class="p">,</span> <span class="n">in_pair_first</span><span class="p">,</span> <span class="n">in_pair_second</span><span class="p">),</span>
         <span class="n">hard_dist_cutoff</span><span class="o">=</span><span class="n">min_radius</span><span class="p">,</span>
     <span class="p">)</span>
@@ -182,7 +182,7 @@
             <span class="n">mapped_node</span> <span class="o">=</span> <span class="n">external_pairs</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">mapped_node</span> <span class="o">=</span> <span class="n">PairFilter</span><span class="p">(</span>
-                <span class="s2">&quot;DistanceFilter-(ASE)EXTERNAL_NEIGHBORS&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;DistanceFilter_external_neighbors&quot;</span><span class="p">,</span>
                 <span class="p">(</span><span class="n">external_pairs</span><span class="p">),</span>
                 <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">pi</span><span class="o">.</span><span class="n">dist_hard_max</span><span class="p">,</span> 
             <span class="p">)</span>
@@ -194,9 +194,9 @@
 
     <span class="n">energy</span><span class="p">,</span> <span class="o">*</span><span class="n">new_required</span> <span class="o">=</span> <span class="n">new_required</span>
 
-    <span class="n">cellscaleinducer</span> <span class="o">=</span> <span class="n">StrainInducer</span><span class="p">(</span><span class="s2">&quot;(ASE)Strain_inducer&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">in_cell</span><span class="p">))</span>
+    <span class="n">cellscaleinducer</span> <span class="o">=</span> <span class="n">StrainInducer</span><span class="p">(</span><span class="s2">&quot;Strain_inducer&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">in_cell</span><span class="p">))</span>
     <span class="n">strain</span> <span class="o">=</span> <span class="n">cellscaleinducer</span><span class="o">.</span><span class="n">strain</span>
-    <span class="n">derivatives</span> <span class="o">=</span> <span class="n">StressForceNode</span><span class="p">(</span><span class="s2">&quot;(ASE)StressForceCalculator&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">strain</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">in_cell</span><span class="p">))</span>
+    <span class="n">derivatives</span> <span class="o">=</span> <span class="n">StressForceNode</span><span class="p">(</span><span class="s2">&quot;StressForceCalculator&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">strain</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">in_cell</span><span class="p">))</span>
 
     <span class="n">replace_node</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">cellscaleinducer</span><span class="o">.</span><span class="n">strained_coordinates</span><span class="p">)</span>
     <span class="n">replace_node</span><span class="p">(</span><span class="n">in_cell</span><span class="p">,</span> <span class="n">cellscaleinducer</span><span class="o">.</span><span class="n">strained_cell</span><span class="p">)</span>
@@ -208,7 +208,7 @@
 
     <span class="k">if</span> <span class="n">charges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">charges</span><span class="p">,</span> <span class="o">*</span><span class="n">new_required</span> <span class="o">=</span> <span class="n">new_required</span>
-        <span class="n">dipole_moment</span> <span class="o">=</span> <span class="n">DipoleNode</span><span class="p">(</span><span class="s2">&quot;(ASE)DIPOLE&quot;</span><span class="p">,</span> <span class="n">charges</span><span class="p">)</span>
+        <span class="n">dipole_moment</span> <span class="o">=</span> <span class="n">DipoleNode</span><span class="p">(</span><span class="s2">&quot;Dipole&quot;</span><span class="p">,</span> <span class="n">charges</span><span class="p">)</span>
         <span class="n">implemented_nodes</span> <span class="o">=</span> <span class="o">*</span><span class="n">implemented_nodes</span><span class="p">,</span> <span class="n">charges</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span> <span class="n">dipole_moment</span>
         <span class="n">implemented_properties</span> <span class="o">=</span> <span class="n">implemented_properties</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;charges&quot;</span><span class="p">,</span> <span class="s2">&quot;dipole_moment&quot;</span><span class="p">]</span>
 

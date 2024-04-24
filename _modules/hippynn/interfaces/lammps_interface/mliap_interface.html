@@ -16,7 +16,7 @@
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../../../_static/documentation_options.js?v=c9d3d048"></script>
-        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -238,7 +238,7 @@
     <span class="n">search_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">targ</span><span class="p">,</span> <span class="n">sg</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">sg</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">targ</span><span class="p">)</span>
     <span class="n">pair_indexers</span> <span class="o">=</span> <span class="n">find_relatives</span><span class="p">(</span><span class="n">required_nodes</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">PairIndexer</span><span class="p">,</span> <span class="n">subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
 
-    <span class="n">new_required</span><span class="p">,</span> <span class="n">new_subgraph</span> <span class="o">=</span> <span class="n">copy_subgraph</span><span class="p">(</span><span class="n">required_nodes</span><span class="p">,</span> <span class="n">assume_inputed</span><span class="o">=</span><span class="n">pair_indexers</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s2">&quot;LAMMPS&quot;</span><span class="p">)</span>
+    <span class="n">new_required</span><span class="p">,</span> <span class="n">new_subgraph</span> <span class="o">=</span> <span class="n">copy_subgraph</span><span class="p">(</span><span class="n">required_nodes</span><span class="p">,</span> <span class="n">assume_inputed</span><span class="o">=</span><span class="n">pair_indexers</span><span class="p">)</span>
     <span class="n">pair_indexers</span> <span class="o">=</span> <span class="n">find_relatives</span><span class="p">(</span><span class="n">new_required</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">PairIndexer</span><span class="p">,</span> <span class="n">new_subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
 
     <span class="n">species</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">new_required</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">new_subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
@@ -253,15 +253,15 @@
     <span class="c1">###############################################################</span>
     <span class="c1"># Set up graph to accept external pair indices and shifts</span>
 
-    <span class="n">in_pair_first</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;(LAMMPS)pair_first&quot;</span><span class="p">)</span>
+    <span class="n">in_pair_first</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;pair_first&quot;</span><span class="p">)</span>
     <span class="n">in_pair_first</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span>
-    <span class="n">in_pair_second</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;(LAMMPS)pair_second&quot;</span><span class="p">)</span>
+    <span class="n">in_pair_second</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;pair_second&quot;</span><span class="p">)</span>
     <span class="n">in_pair_second</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span>
-    <span class="n">in_pair_coord</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;(LAMMPS)pair_coord&quot;</span><span class="p">)</span>
+    <span class="n">in_pair_coord</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;pair_coord&quot;</span><span class="p">)</span>
     <span class="n">in_pair_coord</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span>
-    <span class="n">in_nlocal</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;(LAMMPS)nlocal&quot;</span><span class="p">)</span>
+    <span class="n">in_nlocal</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;nlocal&quot;</span><span class="p">)</span>
     <span class="n">in_nlocal</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
-    <span class="n">pair_dist</span> <span class="o">=</span> <span class="n">VecMag</span><span class="p">(</span><span class="s2">&quot;(LAMMPS)pair_dist&quot;</span><span class="p">,</span> <span class="n">in_pair_coord</span><span class="p">)</span>
+    <span class="n">pair_dist</span> <span class="o">=</span> <span class="n">VecMag</span><span class="p">(</span><span class="s2">&quot;pair_dist&quot;</span><span class="p">,</span> <span class="n">in_pair_coord</span><span class="p">)</span>
     <span class="n">mapped_pair_first</span> <span class="o">=</span> <span class="n">ReIndexAtomNode</span><span class="p">(</span><span class="s2">&quot;pair_first_internal&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">in_pair_first</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">))</span>
     <span class="n">mapped_pair_second</span> <span class="o">=</span> <span class="n">ReIndexAtomNode</span><span class="p">(</span><span class="s2">&quot;pair_second_internal&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">in_pair_second</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">))</span>
 
@@ -302,8 +302,8 @@
             <span class="s2">&quot;an object with an `atom_energies` attribute.&quot;</span>
         <span class="p">)</span>
 
-    <span class="n">local_atom_energy</span> <span class="o">=</span> <span class="n">LocalAtomEnergyNode</span><span class="p">(</span><span class="s2">&quot;(LAMMPS)local_atom_energy&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">atom_energies</span><span class="p">,</span> <span class="n">in_nlocal</span><span class="p">))</span>
-    <span class="n">grad_rij</span> <span class="o">=</span> <span class="n">GradientNode</span><span class="p">(</span><span class="s2">&quot;(LAMMPS)grad_rij&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">local_atom_energy</span><span class="o">.</span><span class="n">total_local_energy</span><span class="p">,</span> <span class="n">in_pair_coord</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">local_atom_energy</span> <span class="o">=</span> <span class="n">LocalAtomEnergyNode</span><span class="p">(</span><span class="s2">&quot;local_atom_energy&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">atom_energies</span><span class="p">,</span> <span class="n">in_nlocal</span><span class="p">))</span>
+    <span class="n">grad_rij</span> <span class="o">=</span> <span class="n">GradientNode</span><span class="p">(</span><span class="s2">&quot;grad_rij&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">local_atom_energy</span><span class="o">.</span><span class="n">total_local_energy</span><span class="p">,</span> <span class="n">in_pair_coord</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="n">implemented_nodes</span> <span class="o">=</span> <span class="n">local_atom_energy</span><span class="o">.</span><span class="n">local_atom_energies</span><span class="p">,</span> <span class="n">local_atom_energy</span><span class="o">.</span><span class="n">total_local_energy</span><span class="p">,</span> <span class="n">grad_rij</span>
 
