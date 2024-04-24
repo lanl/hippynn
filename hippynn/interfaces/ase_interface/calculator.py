@@ -64,7 +64,7 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
     # The required nodes passed back are copies of the ones passed in.
     # We use assume_inputed to avoid grabbing pieces of the graph
     # that are only prerequisites for the pair indexer.
-    new_required, new_subgraph = copy_subgraph(required_nodes, assume_inputed=pair_indexers, tag="ASE")
+    new_required, new_subgraph = copy_subgraph(required_nodes, assume_inputed=pair_indexers)
     # We now need access to the copied indexers, rather than the originals
     pair_indexers = find_relatives(new_required, search_fn(PairIndexer, new_subgraph), why_desc=why)
 
@@ -81,12 +81,12 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
     ###############################################################
     # Set up graph to accept external pair indices and shifts
 
-    in_shift = InputNode("(ASE)shift_vector")
-    in_cell = CellNode("(ASE)cell")
-    in_pair_first = InputNode("(ASE)pair_first")
-    in_pair_second = InputNode("(ASE)pair_second")
+    in_shift = InputNode("shift_vector")
+    in_cell = CellNode("cell")
+    in_pair_first = InputNode("pair_first")
+    in_pair_second = InputNode("pair_second")
     external_pairs = ExternalNeighborIndexer(
-        "(ASE)EXTERNAL_NEIGHBORS",
+        "external_neighbors",
         (positions, indexer.real_atoms, in_shift, in_cell, in_pair_first, in_pair_second),
         hard_dist_cutoff=min_radius,
     )
@@ -102,7 +102,7 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
             mapped_node = external_pairs
         else:
             mapped_node = PairFilter(
-                "DistanceFilter-(ASE)EXTERNAL_NEIGHBORS",
+                "DistanceFilter_external_neighbors",
                 (external_pairs),
                 dist_hard_max=pi.dist_hard_max, 
             )
@@ -114,9 +114,9 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
 
     energy, *new_required = new_required
 
-    cellscaleinducer = StrainInducer("(ASE)Strain_inducer", (positions, in_cell))
+    cellscaleinducer = StrainInducer("Strain_inducer", (positions, in_cell))
     strain = cellscaleinducer.strain
-    derivatives = StressForceNode("(ASE)StressForceCalculator", (energy, strain, positions, in_cell))
+    derivatives = StressForceNode("StressForceCalculator", (energy, strain, positions, in_cell))
 
     replace_node(positions, cellscaleinducer.strained_coordinates)
     replace_node(in_cell, cellscaleinducer.strained_cell)
@@ -128,7 +128,7 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
 
     if charges is not None:
         charges, *new_required = new_required
-        dipole_moment = DipoleNode("(ASE)DIPOLE", charges)
+        dipole_moment = DipoleNode("Dipole", charges)
         implemented_nodes = *implemented_nodes, charges.main_output, dipole_moment
         implemented_properties = implemented_properties + ["charges", "dipole_moment"]
 

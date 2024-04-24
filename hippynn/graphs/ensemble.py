@@ -96,7 +96,7 @@ def get_graphs(models: Union[List[Union[str, GraphModule, _BaseNode]], str]) -> 
         elif isinstance(model, _BaseNode):
             subgraph = get_subgraph([model])
             subgraph_inputs = list({x for x in subgraph if isinstance(x, InputNode)})
-            model = GraphModule(subgraph_inputs, [model])
+            model = GraphModule(subgraph_inputs, [model.main_output])
             graphs.append(model)
 
         elif isinstance(model, GraphModule):

@@ -137,7 +137,7 @@ def setup_LAMMPS_graph(energy):
     search_fn = lambda targ, sg: lambda n: n in sg and isinstance(n, targ)
     pair_indexers = find_relatives(required_nodes, search_fn(PairIndexer, subgraph), why_desc=why)
 
-    new_required, new_subgraph = copy_subgraph(required_nodes, assume_inputed=pair_indexers, tag="LAMMPS")
+    new_required, new_subgraph = copy_subgraph(required_nodes, assume_inputed=pair_indexers)
     pair_indexers = find_relatives(new_required, search_fn(PairIndexer, new_subgraph), why_desc=why)
 
     species = find_unique_relative(new_required, search_fn(SpeciesNode, new_subgraph), why_desc=why)
@@ -152,15 +152,15 @@ def setup_LAMMPS_graph(energy):
     ###############################################################
     # Set up graph to accept external pair indices and shifts
 
-    in_pair_first = InputNode("(LAMMPS)pair_first")
+    in_pair_first = InputNode("pair_first")
     in_pair_first._index_state = hippynn.graphs.IdxType.Pair
-    in_pair_second = InputNode("(LAMMPS)pair_second")
+    in_pair_second = InputNode("pair_second")
     in_pair_second._index_state = hippynn.graphs.IdxType.Pair
-    in_pair_coord = InputNode("(LAMMPS)pair_coord")
+    in_pair_coord = InputNode("pair_coord")
     in_pair_coord._index_state = hippynn.graphs.IdxType.Pair
-    in_nlocal = InputNode("(LAMMPS)nlocal")
+    in_nlocal = InputNode("nlocal")
     in_nlocal._index_state = hippynn.graphs.IdxType.Scalar
-    pair_dist = VecMag("(LAMMPS)pair_dist", in_pair_coord)
+    pair_dist = VecMag("pair_dist", in_pair_coord)
     mapped_pair_first = ReIndexAtomNode("pair_first_internal", (in_pair_first, inv_real_atoms))
     mapped_pair_second = ReIndexAtomNode("pair_second_internal", (in_pair_second, inv_real_atoms))
 
@@ -201,8 +201,8 @@ def setup_LAMMPS_graph(energy):
             "an object with an `atom_energies` attribute."
         )
 
-    local_atom_energy = LocalAtomEnergyNode("(LAMMPS)local_atom_energy", (atom_energies, in_nlocal))
-    grad_rij = GradientNode("(LAMMPS)grad_rij", (local_atom_energy.total_local_energy, in_pair_coord), -1)
+    local_atom_energy = LocalAtomEnergyNode("local_atom_energy", (atom_energies, in_nlocal))
+    grad_rij = GradientNode("grad_rij", (local_atom_energy.total_local_energy, in_pair_coord), -1)
 
     implemented_nodes = local_atom_energy.local_atom_energies, local_atom_energy.total_local_energy, grad_rij
 
