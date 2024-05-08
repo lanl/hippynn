@@ -40,7 +40,7 @@ energy_node = model.node_from_name("energy")
 calc = HippynnCalculator(energy_node, en_unit=units.eV)
 calc.to(torch.float64)
 if torch.cuda.is_available():
-    nrep = 30  # 27,000 atoms -- should fit in a 12 GB GPU if using custom kernels.
+    nrep = 25  # 31,250 atoms -- should fit in a 16 GB GPU if using custom kernels.
     calc.to(torch.device("cuda"))
 else:
     nrep = 10  # 1,000 atoms.
