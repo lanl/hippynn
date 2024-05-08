@@ -1,3 +1,17 @@
+"""
+Example training to the SNAP database for Indium Phosphide.
+
+This script was designed for an external dataset available at
+https://github.com/FitSNAP/FitSNAP
+
+For info on the dataset, see the following publication:
+Explicit Multielement Extension of the Spectral Neighbor Analysis Potential for Chemically Complex Systems
+M. A. Cusentino, M. A. Wood, and A. P. Thompson
+The Journal of Physical Chemistry A 2020 124 (26), 5456-5464
+DOI: 10.1021/acs.jpca.0c02450
+
+"""
+
 import numpy as np
 import torch
 torch.set_default_dtype(torch.float32)

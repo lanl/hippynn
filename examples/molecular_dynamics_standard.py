@@ -33,7 +33,7 @@ from hippynn.molecular_dynamics.md import (
 )
 
 if torch.cuda.is_available():
-    nrep = 10
+    nrep = 30
     device = "cuda"
 else:
     nrep = 10
@@ -52,23 +52,23 @@ positions_node = model.node_from_name("coordinates")
 energy_node = model.node_from_name("energy")
 force_node = physics.GradientNode("force", (energy_node, positions_node), sign=-1)
 
-# # Replace pair-finder with more efficient one (the HippynnCalculator also does this)
-# old_pairs_node = model.node_from_name("PairIndexer")
-# species_node = model.node_from_name("species")
-# cell_node = model.node_from_name("cell")
-# model.print_structure()
-# # PositionsNode, Encoder, PaddingIndexer, CellNode
-# new_pairs_node = KDTreePairsMemory("PairIndexer", parents=(positions_node, species_node, cell_node), skin=2, dist_hard_max=7.5)
-# hippynn_node = model.node_from_name("HIPNN")
-# print(hippynn_node.parents)
-# replace_node(old_pairs_node, new_pairs_node)
+# Replace pair-finder with more efficient one (the HippynnCalculator also does this)
+old_pairs_node = model.node_from_name("PairIndexer")
+species_node = model.node_from_name("species")
+cell_node = model.node_from_name("cell")
+model.print_structure()
+# PositionsNode, Encoder, PaddingIndexer, CellNode
+new_pairs_node = KDTreePairsMemory("PairIndexer", parents=(positions_node, species_node, cell_node), skin=2, dist_hard_max=7.5)
+hippynn_node = model.node_from_name("HIPNN")
+print(hippynn_node.parents)
+replace_node(old_pairs_node, new_pairs_node)
 
 model = Predictor(inputs=model.input_nodes, outputs=[force_node])
 model.to(device)
 model.to(torch.float64)
 
 # Use ASE to generate initial positions and velocities
-atoms = ase.build.bulk("Al", crystalstructure="fcc", a=4.05)
+atoms = ase.build.bulk("Al", crystalstructure="fcc", a=4.05, orthorhombic=True)
 reps = nrep * np.eye(3, dtype=int)
 atoms = ase.build.make_supercell(atoms, reps, wrap=True)
 

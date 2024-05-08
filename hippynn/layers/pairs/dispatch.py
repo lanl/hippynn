@@ -138,7 +138,7 @@ def neighbor_list_torch(cutoff: float, coords, cell):
 def neighbor_list_kdtree(cutoff, coords, cell):
     '''
     Use KD Tree implementation from scipy.spatial to find pairs under periodic boundary conditions 
-    with an orthonormal cell.
+    with an orthorhombic cell.
     '''
     
     # Verify that cell is orthorhombic

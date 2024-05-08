@@ -1,12 +1,15 @@
 """
 Script running an aluminum model with ASE.
-For training see `ani_aluminum_example.py`.
-This will generate the files for a model.
+
+This script is designed to match the 
+LAMMPS script located at 
+./lammps/in.mliap.unified.hippynn.Al
+
+Before running this script, you must run 
+`ani_aluminum_example_multilayer.py` to 
+train the corresponding model.
 
 Modified from ase MD example.
-
-If a GPU is available, this script
-will use it, and run a somewhat bigger system.
 """
 
 # Imports
@@ -29,7 +32,7 @@ try:
     with active_directory("TEST_ALUMINUM_MODEL_MULTILAYER", create=False):
         bundle = load_checkpoint_from_cwd(map_location='cpu',restore_db=False)
 except FileNotFoundError:
-    raise FileNotFoundError("Model not found, run ani_aluminum_example.py first!")
+    raise FileNotFoundError("Model not found, run ani_aluminum_example_multilayer.py first!")
 
 model = bundle["training_modules"].model
 
@@ -38,15 +41,14 @@ model = bundle["training_modules"].model
 energy_node = model.node_from_name("energy")
 calc = HippynnCalculator(energy_node, en_unit=units.eV)
 calc.to(torch.float64)
+
 if torch.cuda.is_available():
-    nrep = 4
     calc.to(torch.device('cuda'))
-else:
-    nrep = 10
 
 # Build the atoms object
 atoms = FaceCenteredCubic(directions=np.eye(3, dtype=int),
                           size=(1,1,1), symbol='Al', pbc=(True,True,True))
+nrep = 4
 reps = nrep*np.eye(3, dtype=int)
 atoms = ase.build.make_supercell(atoms, reps, wrap=True)
 atoms.calc = calc

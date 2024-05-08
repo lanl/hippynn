@@ -64,7 +64,7 @@ predictor = hippynn.graphs.Predictor.from_graph(model, additional_outputs=featur
 
 import sys
 
-sys.path.append("../../datasets/ani-al/readers/lib/")
+sys.path.append("../../datasets/ani-al/readers/lib/")  # location of pyanitools.py
 import pyanitools  # Check if pyanitools is found early
 from hippynn.databases.h5_pyanitools import PyAniDirectoryDB
 
