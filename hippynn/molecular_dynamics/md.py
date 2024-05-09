@@ -305,7 +305,8 @@ class LangevinDynamics(DynamicVariableUpdater):
         self.frix = frix
         self.kB = 0.001987204 * self.force_factor
 
-        torch.manual_seed(seed)
+        if seed is not None:
+            torch.manual_seed(seed)
 
     def _pre_step(self, dt):
         """Updates to variables performed during each step of MD simulation
@@ -316,6 +317,7 @@ class LangevinDynamics(DynamicVariableUpdater):
         dt : float
             timestep
         """
+
         self.variable.values["position"] = (
             self.variable.values["position"] + self.variable.values["velocity"] * dt
         )
@@ -335,14 +337,20 @@ class LangevinDynamics(DynamicVariableUpdater):
             self.variable.device
         )
 
+        if len(self.variable.values["force"].shape) != len(
+            self.variable.values["mass"].shape
+        ):
+            self.variable.values["mass"] = self.variable.values["mass"][..., None]
+
         self.variable.values["acceleration"] = (
             self.variable.values["force"].detach()
             / self.variable.values["mass"]
             * self.force_factor
         )
 
-        self.variable.values["velocity"] = self.variable.values["velocity"] + (
-            +dt * self.variable.values["acceleration"]
+        self.variable.values["velocity"] = (
+            self.variable.values["velocity"]
+            + dt * self.variable.values["acceleration"]
             - self.frix * self.variable.values["velocity"] * dt
             + torch.sqrt(
                 2
