@@ -284,9 +284,9 @@ class _DispatchNeighbors(torch.nn.Module):
         # print("Pairs found",pair_first.shape)
         coordflat = coordinates.reshape(n_molecules * n_atoms_max, 3)[real_atoms]
         paircoord = coordflat[pair_first] - coordflat[pair_second] + pair_offsets
-        distflat2 = paircoord.norm(dim=1)
+        distflat = paircoord.norm(dim=1)
 
-        return distflat2, pair_first, pair_second, paircoord, offsets, offset_index
+        return distflat, pair_first, pair_second, paircoord, offsets, offset_index
 
 
 class NPNeighbors(_DispatchNeighbors):
@@ -336,7 +336,7 @@ class KDTreePairsMemory(PairMemory):
 
             inputs = (coordinates, nonblank, real_atoms, inv_real_atoms, cells, mol_index, n_molecules, n_atoms_max)
             outputs = self._pair_indexer(*inputs)
-            distflat2, pair_first, pair_second, paircoord, offsets, offset_index = outputs
+            distflat, pair_first, pair_second, paircoord, offsets, offset_index = outputs
 
             with torch.no_grad():
                 pair_mol = mol_index[pair_first]
@@ -359,7 +359,16 @@ class KDTreePairsMemory(PairMemory):
 
             coordflat = coordinates.reshape(n_molecules * n_atoms_max, 3)[real_atoms]
             paircoord = coordflat[self.pair_first] - coordflat[self.pair_second] + self.pair_offsets
-            distflat2 = paircoord.norm(dim=1)
+            distflat = paircoord.norm(dim=1)
 
-        return distflat2, self.pair_first, self.pair_second, paircoord, self.offsets, self.offset_index
+        # We will trim the lists to only send forward relevant atoms, improving performance.
+        within_cutoff_pairs = distflat < self.hard_dist_cutoff
 
+        return (
+            distflat[within_cutoff_pairs],
+            self.pair_first[within_cutoff_pairs],
+            self.pair_second[within_cutoff_pairs],
+            paircoord[within_cutoff_pairs],
+            self.offsets[within_cutoff_pairs],
+            self.offset_index[within_cutoff_pairs],
+        )

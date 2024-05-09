@@ -1,9 +1,13 @@
 """
-This script demonstrates how to design your own
-MD algorithm using the custom MD module. 
+This script demonstrates how to use the custom MD module. 
+It is intended to mirror the `ase_example.py` example,
+using the custom MD module rather than ASE.
 
 Before running this script, you must run 
 `ani_aluminum_example.py` to train a model.
+
+If a GPU is available, this script
+will use it, and run a somewhat bigger system.
 """
 
 import numpy as np
@@ -24,20 +28,19 @@ from hippynn.tools import active_directory
 from hippynn.molecular_dynamics.md import (
     StaticVariable,
     DynamicVariable,
-    LangevinDynamics,
     VelocityVerlet,
-    DynamicVariableUpdater,
     MolecularDynamics,
 )
 
+# Adjust size of system depending on device
 if torch.cuda.is_available():
-    nrep = 10
+    nrep = 25
     device = "cuda"
 else:
     nrep = 10
     device = "cpu"
 
-# Load the model
+# Load the pre-trained model
 try:
     with active_directory("TEST_ALUMINUM_MODEL", create=False):
         bundle = load_checkpoint_from_cwd(map_location="cpu", restore_db=False)
@@ -50,23 +53,19 @@ positions_node = model.node_from_name("coordinates")
 energy_node = model.node_from_name("energy")
 force_node = physics.GradientNode("force", (energy_node, positions_node), sign=-1)
 
-# # Replace pair-finder with more efficient one (the HippynnCalculator also does this)
-# old_pairs_node = model.node_from_name("PairIndexer")
-# species_node = model.node_from_name("species")
-# cell_node = model.node_from_name("cell")
-# model.print_structure()
-# # PositionsNode, Encoder, PaddingIndexer, CellNode
-# new_pairs_node = KDTreePairsMemory("PairIndexer", parents=(positions_node, species_node, cell_node), skin=2, dist_hard_max=7.5)
-# hippynn_node = model.node_from_name("HIPNN")
-# print(hippynn_node.parents)
-# replace_node(old_pairs_node, new_pairs_node)
+# Replace pair-finder with more efficient one so that system can fit on GPU
+old_pairs_node = model.node_from_name("PairIndexer")
+species_node = model.node_from_name("species")
+cell_node = model.node_from_name("cell")
+new_pairs_node = KDTreePairsMemory("PairIndexer", parents=(positions_node, species_node, cell_node), skin=1.0, dist_hard_max=7.5)
+replace_node(old_pairs_node, new_pairs_node)
 
 model = Predictor(inputs=model.input_nodes, outputs=[force_node])
 model.to(device)
 model.to(torch.float64)
 
 # Use ASE to generate initial positions and velocities
-atoms = ase.build.bulk("Al", crystalstructure="fcc", a=4.05)
+atoms = ase.build.bulk("Al", crystalstructure="fcc", a=4.05, orthorhombic=True)
 reps = nrep * np.eye(3, dtype=int)
 atoms = ase.build.make_supercell(atoms, reps, wrap=True)
 
@@ -77,17 +76,26 @@ atoms.rattle(0.1, rng=rng)
 MaxwellBoltzmannDistribution(atoms, temperature_K=500, rng=rng)
 
 # Initialize MD variables
-
+# NOTE: Setting the initial acceleration is only necessary to exactly match the results
+# in `ase_example.py.` In general, it can be set to zero without impacting the statistics
+# of the trajectory.
 coordinates=torch.tensor(np.array([atoms.get_positions()]), device=device)
 cell=torch.tensor(np.array([atoms.get_cell()]), device=device)
 species=torch.tensor(np.array([atoms.get_atomic_numbers()]), device=device)
+init_force = model(
+    coordinates=coordinates,
+    cell=cell,
+    species=species,
+)["force"] 
+init_acceleration = init_force / atoms.get_masses().reshape(1,-1,1)
 
+# Define a position "Variable"
 position_variable = DynamicVariable(
     name="position",
     starting_values={
         "position": atoms.get_positions(),
         "velocity": atoms.get_velocities(),
-        "acceleration": np.zeros_like(atoms.get_velocities()),
+        "acceleration": init_acceleration,
         "mass": atoms.get_masses(),
     },
     model_input_map={
@@ -96,45 +104,11 @@ position_variable = DynamicVariable(
     device=device,
 )
 
-### Design your own variable updater ###
-class VelocityVerlet2(DynamicVariableUpdater):
-    def __init__(self, force_key, param2):
-        self.force_key = force_key
-        self.param2 = param2
-
-    def pre_step(self, dt):
-        self.variable.data["velocity"] = (
-            self.variable.data["velocity"]
-            + 0.5 * dt * self.variable.data["acceleration"]
-        )
-        self.variable.data["position"] = (
-            self.variable.data["position"] + self.variable.data["velocity"] * dt
-        )
-
-    def post_step(self, dt, model_outputs):
-        self.variable.data["force"] = model_outputs[self.force_key].to(self.variable.device)
-        if len(self.variable.data["force"].shape) == len(
-            self.variable.data["mass"].shape
-        ):
-            self.variable.data["acceleration"] = (
-                self.variable.data["force"].detach()
-                / self.variable.data["mass"]
-                * self.force_factor
-            )
-        else:
-            self.variable.data["acceleration"] = (
-                self.variable.data["force"].detach()
-                / self.variable.data["mass"][..., None]
-                * self.force_factor
-            )
-        self.variable.data["velocity"] = (
-            self.variable.data["velocity"]
-            + 0.5 * dt * self.variable.data["acceleration"]
-        )
-
+# Set an "Updater" for the position variable
 position_updater = VelocityVerlet(force_key="force")
 position_variable.set_updater(position_updater)
 
+# Define species and cell Variables
 species_variable = StaticVariable(
     name="species",
     values={"values": atoms.get_atomic_numbers()},
@@ -149,14 +123,14 @@ cell_variable = StaticVariable(
     device=device,
 )
 
-# Set up and run MD
+# Set up MD driver
 emdee = MolecularDynamics(
     dynamic_variables=[position_variable],
     static_variables=[species_variable, cell_variable],
     model=model,
 )
 
-
+# This Tracker imitates the Tracker from ase_example.py and is optional to use
 class Tracker:
     def __init__(self):
         self.last_call_time = time.time()
@@ -187,6 +161,7 @@ class Tracker:
             % (ekin, ekin / (1.5 * units.kB))
         )
 
+# Run MD!
 tracker = Tracker()
 for i in trange(100):  # Run 2 ps
     n_steps = 20

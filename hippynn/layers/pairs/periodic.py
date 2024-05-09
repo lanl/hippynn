@@ -287,7 +287,7 @@ class PeriodicPairIndexerMemory(PairMemory):
 
             inputs = (coordinates, nonblank, real_atoms, inv_real_atoms, cells)
             outputs = self._pair_indexer(*inputs)
-            distflat2, pair_first, pair_second, paircoord, cell_offsets, offset_num, pair_mol = outputs
+            distflat, pair_first, pair_second, paircoord, cell_offsets, offset_num, pair_mol = outputs
 
             for name, var in [
                 ("cell_offsets", cell_offsets),
@@ -305,6 +305,16 @@ class PeriodicPairIndexerMemory(PairMemory):
             pair_shifts = torch.matmul(self.cell_offsets.unsqueeze(1).to(cells.dtype), cells[self.pair_mol]).squeeze(1)
             coordflat = coordinates.reshape(self.n_molecules * self.n_atoms, 3)[real_atoms]
             paircoord = coordflat[self.pair_first] - coordflat[self.pair_second] + pair_shifts
-            distflat2 = paircoord.norm(dim=1)
+            distflat = paircoord.norm(dim=1)
 
-        return distflat2, self.pair_first, self.pair_second, paircoord, self.cell_offsets, self.offset_num
+        # We will trim the lists to only send forward relevant atoms, improving performance.
+        within_cutoff_pairs = distflat < self.hard_dist_cutoff
+
+        return (
+            distflat[within_cutoff_pairs],
+            self.pair_first[within_cutoff_pairs],
+            self.pair_second[within_cutoff_pairs],
+            paircoord[within_cutoff_pairs],
+            self.cell_offsets[within_cutoff_pairs],
+            self.offset_num[within_cutoff_pairs],
+        )
