@@ -266,7 +266,7 @@ class LangevinDynamics(DynamicVariableUpdater):
     Implements the Langevin algorithm
     """
 
-    required_variable_values = ["position", "velocity", "mass"]
+    required_variable_values = ["position", "velocity", "mass", "cell"]
 
     def __init__(
         self,
@@ -322,6 +322,29 @@ class LangevinDynamics(DynamicVariableUpdater):
             self.variable.values["position"] + self.variable.values["velocity"] * dt
         )
 
+        # Deal with PBC
+        cell = self.variable.values["cell"][0]
+        coords = self.variable.values["position"][0]
+
+        cell_prod = cell @ cell.T
+        if torch.count_nonzero(cell_prod - torch.diag(torch.diag(cell_prod))):
+            raise ValueError("Algorithm currently only works for orthorhombic cells")
+
+        # This has NOT been thoroughly tested!
+        if torch.count_nonzero(cell - torch.diag(torch.diag(cell))):
+            # Transform via isometry to a basis where cell is a diagonal matrix if it currently is not
+            new_cell = torch.sqrt(cell_prod)
+            new_coords = coords @ torch.linalg.inv(cell) @ new_cell
+            # Wrap
+            new_coords = new_coords % torch.diag(new_cell)
+            # Transform back
+            coords = new_coords @ torch.linalg.inv(new_cell) @ cell
+
+        else:
+            coords = coords % torch.diag(cell)
+
+        self.variable.values["position"] = coords.unsqueeze(0)
+
     def _post_step(self, dt, model_outputs):
         """Updates to variables performed during each step of MD simulation
           after HIPNN model evaluation
@@ -360,7 +383,7 @@ class LangevinDynamics(DynamicVariableUpdater):
                 / self.variable.values["mass"]
                 * dt
             )
-            * torch.randn_like(self.variable.values["velocity"])
+            * torch.randn_like(self.variable.values["velocity"], memory_format=torch.contiguous_format)
         )
 
 
