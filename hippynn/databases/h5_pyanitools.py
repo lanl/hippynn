@@ -157,7 +157,7 @@ class PyAniMethods:
 
 
 class PyAniFileDB(Database, PyAniMethods, Restartable):
-    def __init__(self, file, inputs, targets, *args, allow_unfound=False,species_key="species", quiet=False, **kwargs):
+    def __init__(self, file, inputs, targets, *args, allow_unfound=False, species_key="species", quiet=False, **kwargs):
 
         self.file = file
         self.inputs = inputs

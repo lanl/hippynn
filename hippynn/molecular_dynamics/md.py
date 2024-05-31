@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union
+from functools import singledispatchmethod
 
 import numpy as np
 import torch
@@ -7,154 +7,189 @@ import torch
 from tqdm.autonotebook import trange
 import ase
 
-from ..graphs import GraphModule
+from ..graphs import Predictor
 
 
 class Variable:
     """
     Tracks the state of a quantity (eg. position, cell, species,
     volume) on each particle or each system in an MD simulation. Can
-    also hold additional values associated to that quantity (such as
+    also hold additional data associated to that quantity (such as
     velocity, acceleration, etc...)
     """
 
     def __init__(
         self,
         name: str,
-        values: dict[str, torch.Tensor],
-        model_input_map: dict[str, torch.Tensor] = dict(),
-        device: Union[str, torch.device] = None,
-    ) -> None:
-        """
-        Parameters
-        ----------
-        name : str
-            name for variable
-        values : dict[str, torch.Tensor]
-            dictionary of tracked values in the form `value_name: value`
-        model_input_map : dict[str, torch.Tensor], optional
-            dictionary of correspondences between values tracked by Variable
-            and values input to HIP-NN model in the form
-            `hipnn-model-input-key: variable-value-key`, by default dict()
-        device : Union[str, torch.device], optional
-            device on which to keep values, by default None
-        """
-
-        self.name = name
-        self.model_input_map = model_input_map
-        self.set_values(values)
-
-        if device is not None:
-            self.to(device)
-
-    def set_values(self, values: dict[str, torch.Tensor]):
-        if not isinstance(values, dict):
-            raise TypeError("The argument for 'values' must be a dictionary.")
-
-        for key, value in values.items():
-            if not isinstance(value, torch.Tensor):
-                value = torch.tensor(value)
-            if value.shape[0] != 1:  # GraphModule requires inputs in batches
-                value.unsqueeze_(0)
-            values[key] = value
-
-        try:
-            self.values.update(values)
-        except AttributeError:
-            self.values = values
-
-    def to(self, device: Union[str, torch.device]) -> None:
-        """
-        Moves values stored in internal variable to 'device'.
-        """
-        self.device = device
-        for key, value in self.values.items():
-            self.values[key] = value.to(device)
-
-
-class StaticVariable(Variable):
-    """
-    A Variable child class for Variables whose values do not change
-    during the MD simulation.
-    """
-
-    pass
-
-
-class DynamicVariable(Variable):
-    """
-    A Variable child class for Variables whose values change
-    during the MD simulation.
-    """
-
-    def __init__(
-        self,
-        name: str,
-        starting_values: dict[str, torch.Tensor],
+        data: dict[str, torch.Tensor],
         model_input_map: dict[str, str] = dict(),
-        updater: DynamicVariableUpdater = None,
-        device: Union[str, torch.device] = None,
+        updater: VariableUpdater = None,
+        device: torch.device = None,
+        dtype: torch.dtype = None,
     ) -> None:
         """
         Parameters
         ----------
         name : str
             name for variable
-        starting_values : dict[str, torch.Tensor]
-            dictionary of tracked values in the form `value_name: value`
+        data : dict[str, torch.Tensor]
+            dictionary of tracked data in the form `value_name: value`
+        updater : VariableUpdater
+            object which will update the data of the Variable
+            over the course of the MD simulation
         model_input_map : dict[str, str], optional
-            dictionary of correspondences between values tracked by Variable
-            and values input to HIP-NN model in the form
-            `hipnn-model-input-key: variable-value-key`, by default dict()
-        updater : DynamicVariableUpdater, optional
-            object which will update the values of the Variable
-            over the course of the MD simulation, by default None
+            dictionary of correspondences between data tracked by Variable
+            and inputs to the HIP-NN model in the form
+            `hipnn-db_name: variable-data-key`, by default dict()
         device : Union[str, torch.device], optional
-            device on which to keep values, by default None
+            device on which to keep data, by default None
         """
         self.name = name
+        self.data = data
         self.model_input_map = model_input_map
-
-        self.set_updater(updater)
-        self.set_values(starting_values)
-
-        if device is not None:
-            self.to(device)
-
-    def set_updater(self, updater: DynamicVariableUpdater):
         self.updater = updater
-        if updater is not None:
-            updater._attach(self)
+        self.device = device
+        self.dtype = dtype
+
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, data):
+        if not isinstance(data, dict):
+            raise TypeError(f"The argument for 'data' must be a dictionary, but instead is of type {type(data)}.")
+
+        for key, value in data.items():
+            if isinstance(value, np.ndarray):
+                data[key] = torch.as_tensor(value)
+            elif not isinstance(value, torch.Tensor):
+                raise TypeError(f"The values in the 'data' dictionary must be of type torch.Tensor, but found value of type {type(value)}.")
+            
+        batch_sizes = set([value.shape[0] for value in data.values()])
+        if len(batch_sizes) > 1:
+            raise ValueError(
+                f"Inconsistent batch sizes found: {batch_sizes}. The first axis of each array in 'data' must be a batch axis of the same size."
+            )
+
+        self._data = data
+
+    @property
+    def model_input_map(self):
+        return self._model_input_map
+
+    @model_input_map.setter
+    def model_input_map(self, model_input_map):
+        if not isinstance(model_input_map, dict):
+            raise TypeError(f"The argument for 'model_input_map' must be a dictionary, but instead is of type {type(model_input_map)}.")
+
+        for key, value in model_input_map.items():
+            if not isinstance(key, str):
+                raise TypeError(
+                    f"Each key and value in the 'model_input_map' dictionary should be of type str, but type {type(key)} found."
+                )
+            if not isinstance(value, str):
+                raise TypeError(
+                    f"Each key and value in the 'model_input_map' dictionary should be of type str, but type {type(value)} found."
+                )
+            if not value in self.data.keys():
+                raise ValueError(
+                    f"Each value in the 'model_input_map' dictionary should correspond to a key in the 'data' dictionary. "
+                    + f"Each key of the 'model_input_map' should correspond to hippynn db_name. Value {value} found in 'model_input_map', but no corresponding key in the 'data' dictionary found."
+                )
+
+        self._model_input_map = model_input_map
+
+    @property
+    def updater(self):
+        return self._updater
+
+    @updater.setter
+    def updater(self, updater):
+        if updater is None:
+            self._updater = None
+            return
+        if not isinstance(updater, VariableUpdater):
+            raise TypeError(f"Updater must be of type VariableUpdater, but instead is {type(updater)}")
+        updater.variable = self
+        self._updater = updater
+
+    @property
+    def device(self):
+        return self._device
+
+    @device.setter
+    def device(self, device):
+        if device is None:
+            self._device = None
+            return
+        if not isinstance(device, torch.device):
+            raise TypeError(f"Device must be of type 'torch.device', but instead is {type(device)}")
+        self._device = device
+        for key, value in self.data.items():
+            self.data[key] = value.to(device)
+
+    @property
+    def dtype(self):
+        return self._dtype
+
+    @dtype.setter
+    def dtype(self, dtype):
+        if dtype is None:
+            self._dtype = None
+            return
+        float_dtypes = [torch.float, torch.float16, torch.float32, torch.float64]
+        if not dtype in float_dtypes:
+            raise ValueError(f"Valid dtypes are {float_dtypes}, however the provided dtype was {dtype}.")
+        self._dtype = dtype
+        for key, value in self.data.items():
+            if value.dtype in float_dtypes:
+                self.data[key] = value.to(dtype)
+
+    @singledispatchmethod
+    def to(self, arg):
+        raise ValueError(f"Argument must be of type torch.device or torch.dtype, but provided argument is of type {type(arg)}.")
+
+    @to.register
+    def _(self, arg: torch.device):
+        self.device = arg
+
+    @to.register
+    def _(self, arg: torch.dtype):
+        self.dtype = arg
 
 
-class DynamicVariableUpdater:
+class VariableUpdater:
     """
-    Parent class for algorithms to make updates to the values of a Variable during
+    Parent class for algorithms to make updates to the data of a Variable during
     each step on an MD simulation.
 
-    Subclasses should redefine __init__, _pre_step, _post_step, and
-    required_variable_values as needed. The inputs to _pre_step and _post_step
+    Subclasses should redefine __init__, pre_step, post_step, and
+    required_variable_data as needed. The inputs to pre_step and post_step
     should not be changed.
     """
 
-    required_variable_values = (
-        []
-    )  # A list of keys which must appear in the Variable.values
-    # any Variable that will be updated by objects of this class.
-    # Checked for in _attach function.
+    # A list of keys which must appear in Variable.data for any Variable that will be updated by objects of this class.
+    # Checked for by variable.setter.
+    required_variable_data = []
 
     def __init__(self):
         pass
 
-    def _attach(self, variable: DynamicVariable):
-        self.variable = variable
-        for value in self.required_variable_values:
-            if value not in self.variable.values.keys():
-                raise ValueError(
-                    f"Cannot attach to Variable with no assigned values for {value}. Use Variable.set_values to add values for {value}."
-                )
+    @property
+    def variable(self):
+        return self._variable
 
-    def _pre_step(self, dt):
+    @variable.setter
+    def variable(self, variable):
+        for key in self.required_variable_data:
+            if key not in variable.data.keys():
+                raise ValueError(
+                    f"Cannot attach to Variable with no assigned values for {key}. Update Variable.data to include values for {key}."
+                )
+        self._variable = variable
+
+    def pre_step(self, dt):
         """Updates to variables performed during each step of MD simulation
           before HIPNN model evaluation
 
@@ -163,9 +198,9 @@ class DynamicVariableUpdater:
         dt : float
             timestep
         """
-        pass
+        raise NotImplementedError("All subclasses must implement this method.")
 
-    def _post_step(self, dt, model_outputs):
+    def post_step(self, dt, model_outputs):
         """Updates to variables performed during each step of MD simulation
           after HIPNN model evaluation
 
@@ -176,15 +211,50 @@ class DynamicVariableUpdater:
         model_outputs : dict
             dictionary of HIPNN model outputs
         """
+        raise NotImplementedError("All subclasses must implement this method.")
+
+
+class NullUpdater(VariableUpdater):
+    """
+    Makes no change to the variable data at each step of MD.
+    """
+
+    def pre_step(self, dt):
+        pass
+
+    def post_step(self, dt, model_outputs):
         pass
 
 
-class VelocityVerlet(DynamicVariableUpdater):
+def wrap_coordinates_into_cell(coordinates, cell):
+    coords = coordinates
+
+    cell_prod = cell @ torch.transpose(cell, dim0=-2, dim1=-1)
+    if torch.count_nonzero(cell_prod - torch.diag_embed(torch.diagonal(cell_prod, dim1=-2, dim2=-1))):
+        raise ValueError("Algorithm currently only works for orthorhombic cells")
+
+    # This has NOT been thoroughly tested!
+    if torch.count_nonzero(cell - torch.diag_embed(torch.diagonal(cell, dim1=-2, dim2=-1))):
+        # Transform via isometry to a basis where cell is a diagonal matrix if it currently is not
+        new_cell = torch.sqrt(cell_prod)
+        new_coords = coords @ torch.linalg.inv(cell) @ new_cell
+        # Wrap
+        new_coords = new_coords % torch.diagonal(new_cell, dim1=-2, dim2=-1)
+        # Transform back
+        coords = new_coords @ torch.linalg.inv(new_cell) @ cell
+
+    else:
+        coords = torch.remainder(coords, torch.diagonal(cell, dim1=-2, dim2=-1)[:, None])
+
+    return coords
+
+
+class VelocityVerlet(VariableUpdater):
     """
     Implements the Velocity Verlet algorithm
     """
 
-    required_variable_values = ["position", "velocity", "acceleration", "mass"]
+    required_variable_data = ["position", "velocity", "acceleration", "mass"]
 
     def __init__(
         self,
@@ -210,7 +280,7 @@ class VelocityVerlet(DynamicVariableUpdater):
         self.force_key = force_key
         self.force_factor = units_force / units_acc
 
-    def _pre_step(self, dt):
+    def pre_step(self, dt):
         """Updates to variables performed during each step of MD simulation
           before HIPNN model evaluation
 
@@ -219,15 +289,12 @@ class VelocityVerlet(DynamicVariableUpdater):
         dt : float
             timestep
         """
-        self.variable.values["velocity"] = (
-            self.variable.values["velocity"]
-            + 0.5 * dt * self.variable.values["acceleration"]
-        )
-        self.variable.values["position"] = (
-            self.variable.values["position"] + self.variable.values["velocity"] * dt
-        )
+        self.variable.data["velocity"] = self.variable.data["velocity"] + 0.5 * dt * self.variable.data["acceleration"]
+        self.variable.data["position"] = self.variable.data["position"] + self.variable.data["velocity"] * dt
+        if "cell" in self.variable.data.keys():
+            self.variable.data["position"] = wrap_coordinates_into_cell(self.variable.data["position"], self.variable.data["cell"])
 
-    def _post_step(self, dt, model_outputs):
+    def post_step(self, dt, model_outputs):
         """Updates to variables performed during each step of MD simulation
           after HIPNN model evaluation
 
@@ -238,35 +305,22 @@ class VelocityVerlet(DynamicVariableUpdater):
         model_outputs : dict
             dictionary of HIPNN model outputs
         """
-        self.variable.values["force"] = model_outputs[self.force_key].to(
-            self.variable.device
-        )
-        if len(self.variable.values["force"].shape) == len(
-            self.variable.values["mass"].shape
-        ):
-            self.variable.values["acceleration"] = (
-                self.variable.values["force"].detach()
-                / self.variable.values["mass"]
-                * self.force_factor
-            )
+        self.variable.data["force"] = model_outputs[self.force_key].to(self.variable.device)
+        if len(self.variable.data["force"].shape) == len(self.variable.data["mass"].shape):
+            self.variable.data["acceleration"] = self.variable.data["force"].detach() / self.variable.data["mass"] * self.force_factor
         else:
-            self.variable.values["acceleration"] = (
-                self.variable.values["force"].detach()
-                / self.variable.values["mass"][..., None]
-                * self.force_factor
+            self.variable.data["acceleration"] = (
+                self.variable.data["force"].detach() / self.variable.data["mass"][..., None] * self.force_factor
             )
-        self.variable.values["velocity"] = (
-            self.variable.values["velocity"]
-            + 0.5 * dt * self.variable.values["acceleration"]
-        )
+        self.variable.data["velocity"] = self.variable.data["velocity"] + 0.5 * dt * self.variable.data["acceleration"]
 
 
-class LangevinDynamics(DynamicVariableUpdater):
+class LangevinDynamics(VariableUpdater):
     """
     Implements the Langevin algorithm
     """
 
-    required_variable_values = ["position", "velocity", "mass", "cell"]
+    required_variable_data = ["position", "velocity", "mass"]
 
     def __init__(
         self,
@@ -308,7 +362,7 @@ class LangevinDynamics(DynamicVariableUpdater):
         if seed is not None:
             torch.manual_seed(seed)
 
-    def _pre_step(self, dt):
+    def pre_step(self, dt):
         """Updates to variables performed during each step of MD simulation
           before HIPNN model evaluation
 
@@ -318,34 +372,12 @@ class LangevinDynamics(DynamicVariableUpdater):
             timestep
         """
 
-        self.variable.values["position"] = (
-            self.variable.values["position"] + self.variable.values["velocity"] * dt
-        )
+        self.variable.data["position"] = self.variable.data["position"] + self.variable.data["velocity"] * dt
 
-        # Deal with PBC
-        cell = self.variable.values["cell"][0]
-        coords = self.variable.values["position"][0]
+        if "cell" in self.variable.data.keys():
+            self.variable.data["position"] = wrap_coordinates_into_cell(self.variable.data["position"], self.variable.data["cell"])
 
-        cell_prod = cell @ cell.T
-        if torch.count_nonzero(cell_prod - torch.diag(torch.diag(cell_prod))):
-            raise ValueError("Algorithm currently only works for orthorhombic cells")
-
-        # This has NOT been thoroughly tested!
-        if torch.count_nonzero(cell - torch.diag(torch.diag(cell))):
-            # Transform via isometry to a basis where cell is a diagonal matrix if it currently is not
-            new_cell = torch.sqrt(cell_prod)
-            new_coords = coords @ torch.linalg.inv(cell) @ new_cell
-            # Wrap
-            new_coords = new_coords % torch.diag(new_cell)
-            # Transform back
-            coords = new_coords @ torch.linalg.inv(new_cell) @ cell
-
-        else:
-            coords = coords % torch.diag(cell)
-
-        self.variable.values["position"] = coords.unsqueeze(0)
-
-    def _post_step(self, dt, model_outputs):
+    def post_step(self, dt, model_outputs):
         """Updates to variables performed during each step of MD simulation
           after HIPNN model evaluation
 
@@ -356,34 +388,19 @@ class LangevinDynamics(DynamicVariableUpdater):
         model_outputs : dict
             dictionary of HIPNN model outputs
         """
-        self.variable.values["force"] = model_outputs[self.force_key].to(
-            self.variable.device
-        )
+        self.variable.data["force"] = model_outputs[self.force_key].to(self.variable.device)
 
-        if len(self.variable.values["force"].shape) != len(
-            self.variable.values["mass"].shape
-        ):
-            self.variable.values["mass"] = self.variable.values["mass"][..., None]
+        if len(self.variable.data["force"].shape) != len(self.variable.data["mass"].shape):
+            self.variable.data["mass"] = self.variable.data["mass"][..., None]
 
-        self.variable.values["acceleration"] = (
-            self.variable.values["force"].detach()
-            / self.variable.values["mass"]
-            * self.force_factor
-        )
+        self.variable.data["acceleration"] = self.variable.data["force"].detach() / self.variable.data["mass"] * self.force_factor
 
-        self.variable.values["velocity"] = (
-            self.variable.values["velocity"]
-            + dt * self.variable.values["acceleration"]
-            - self.frix * self.variable.values["velocity"] * dt
-            + torch.sqrt(
-                2
-                * self.kB
-                * self.frix
-                * self.temperature
-                / self.variable.values["mass"]
-                * dt
-            )
-            * torch.randn_like(self.variable.values["velocity"], memory_format=torch.contiguous_format)
+        self.variable.data["velocity"] = (
+            self.variable.data["velocity"]
+            + dt * self.variable.data["acceleration"]
+            - self.frix * self.variable.data["velocity"] * dt
+            + torch.sqrt(2 * self.kB * self.frix * self.temperature / self.variable.data["mass"] * dt)
+            * torch.randn_like(self.variable.data["velocity"], memory_format=torch.contiguous_format)
         )
 
 
@@ -394,50 +411,143 @@ class MolecularDynamics:
 
     def __init__(
         self,
-        dynamic_variables: list[DynamicVariable],
-        static_variables: list[StaticVariable],
-        model: GraphModule,
+        variables: list[Variable],
+        model: Predictor,
+        device: torch.device = None,
+        dtype: torch.dtype = None,
     ):
         """
         Parameters
         ----------
-        dynamic_variables : list[DynamicVariable]
-            list of DynamicVariable objects which will be tracked during simulation
-        static_variables : list[StaticVariable]
-            list of StaticVariable objects which will be tracked during simulation
-        model : GraphModule
-            HIPNN GraphModule (eg. hippynn.graphs.predictor.Predictor object)
+        variables : list[Variable]
+            list of Variable objects which will be tracked during simulation
+        model : Predictor
+            HIPNN Predictor
         """
-        self.dynamic_variables = dynamic_variables
-        self.static_variables = static_variables
+
+        self.variables = variables
         self.model = model
+        self.device = device
+        self.dtype = dtype
 
         self._data = dict()
+
+    @property
+    def variables(self):
+        return self._variables
+
+    @variables.setter
+    def variables(self, variables):
+        if not isinstance(variables, list):
+            variables = [variables]
+        for variable in variables:
+            if not isinstance(variable, Variable):
+                raise TypeError(f"Each element of 'variables' must be of type Variable. Element of type {type(variable)} found.")
+            if variable.updater is None:
+                raise ValueError(f"Variable with name {variable.name} does not have a VariableUpdater set.")
+
+        variable_names = [variable.name for variable in variables]
+        if len(variable_names) != len(set(variable_names)):
+            raise ValueError(f"Duplicate name found for Variables. Each Variable must have a distinct name. Names found: {variable_names}")
+
+        batch_sizes = set([value.shape[0] for variable in variables for value in variable.data.values()])
+        if len(batch_sizes) > 1:
+            raise ValueError(
+                f"Inconsistent batch sizes found: {batch_sizes}. The first axis of each array in 'data' represents a batch axis."
+            )
+
+        self._variables = variables
+
+    @property
+    def model(self):
+        return self._model
+
+    @model.setter
+    def model(self, model):
+        if not isinstance(model, Predictor):
+            raise TypeError(f"Model must be of type 'Predictor', but is of type {type(model)} instead.")
+
+        input_db_names = [node.db_name for node in model.inputs]
+        variable_data_db_names = [key for variable in self.variables for key in variable.model_input_map.keys()]
+        for db_name in input_db_names:
+            if db_name not in variable_data_db_names:
+                raise ValueError(
+                    f"Model requires input for '{db_name}', but no Variable found which contains an entry for '{db_name}' in its 'model_input_map'."
+                    + f" Entries in the 'model_input_map' should have the form 'hipnn-db_name: variable-data-key' where 'hipnn-db_name'"
+                    + f" refers to the db_name of an input for the hippynn Predictor model,"
+                    + f" and 'variable-data-key' corresponds to a key in the 'data' dictionary of one of the Variables."
+                )
+        self._model = model
+
+    @property
+    def device(self):
+        return self._device
+
+    @device.setter
+    def device(self, device):
+        if device is None:
+            self._device = None
+            return
+        if not isinstance(device, torch.device):
+            raise TypeError(f"Device must be of type 'torch.device', but instead is {type(device)}")
+        self._device = device
+        self.model.to(device)
+        for variable in self.variables:
+            variable.to(device)
+
+    @property
+    def dtype(self):
+        return self._dtype
+
+    @dtype.setter
+    def dtype(self, dtype):
+        if dtype is None:
+            self._dtype = None
+            return
+        float_dtypes = [torch.float, torch.float16, torch.float32, torch.float64]
+        if not dtype in float_dtypes:
+            raise ValueError(f"Valid dtypes are {float_dtypes}, however the provided dtype was {dtype}.")
+        self._dtype = dtype
+        self.model.to(dtype)
+        for variable in self.variables:
+            variable.to(dtype)
+
+    @singledispatchmethod
+    def to(self, arg):
+        raise ValueError(f"Argument must be of type torch.device or torch.dtype, but provided argument is of type {type(arg)}.")
+
+    @to.register
+    def _(self, arg: torch.device):
+        self.device = arg
+
+    @to.register
+    def _(self, arg: torch.dtype):
+        self.dtype = arg
 
     def _step(
         self,
         dt: float,
     ):
-        for variable in self.dynamic_variables:
-            variable.updater._pre_step(dt)
+        for variable in self.variables:
+            variable.updater.pre_step(dt)
 
-        model_outputs = self.model(
-            **{
-                hippynn_key: variable.values[variable_key]
-                for variable in [*self.dynamic_variables, *self.static_variables]
-                for hippynn_key, variable_key in variable.model_input_map.items()
-            }
-        )
+        model_inputs = {
+            hipnn_db_name: variable.data[variable_key]
+            for variable in self.variables
+            for hipnn_db_name, variable_key in variable.model_input_map.items()
+        }
 
-        for variable in self.dynamic_variables:
-            variable.updater._post_step(dt, model_outputs)
+        model_outputs = self.model(**model_inputs)
+
+        for variable in self.variables:
+            variable.updater.post_step(dt, model_outputs)
 
         return model_outputs
 
-    def _update_values(self, model_outputs: dict):
+    def _update_data(self, model_outputs: dict):
 
-        for variable in [*self.dynamic_variables, *self.static_variables]:
-            for key, value in variable.values.items():
+        for variable in self.variables:
+            for key, value in variable.data.items():
                 try:
                     self._data[f"{variable.name}_{key}"].append(value.cpu().detach()[0])
                 except KeyError:
@@ -459,13 +569,13 @@ class MolecularDynamics:
         n_steps : int
             number of steps to execute
         record_every : int, optional
-            frequency at which to store the values at a step in memory,
+            frequency at which to store the data at a step in memory,
             record_every = 1 means every step will be stored, by default None
         """
         for i in trange(n_steps):
             model_outputs = self._step(dt)
             if record_every is not None and (i + 1) % record_every == 0:
-                self._update_values(model_outputs)
+                self._update_data(model_outputs)
 
     def get_data(self):
         """Returns a dictionary of the recorded data"""
