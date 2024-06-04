@@ -8,6 +8,7 @@ from scipy.spatial import KDTree
 import torch
 
 from .open import PairMemory
+from .periodic import filter_pairs
 
 def wrap_points_np(coords, cell, inv_cell):
     # cell is (basis,cartesian)
@@ -368,14 +369,5 @@ class KDTreePairsMemory(PairMemory):
             paircoord = coordflat[self.pair_first] - coordflat[self.pair_second] + self.pair_offsets
             distflat = paircoord.norm(dim=1)
 
-        # We will trim the lists to only send forward relevant atoms, improving performance.
-        within_cutoff_pairs = distflat < self.hard_dist_cutoff
-
-        return (
-            distflat[within_cutoff_pairs],
-            self.pair_first[within_cutoff_pairs],
-            self.pair_second[within_cutoff_pairs],
-            paircoord[within_cutoff_pairs],
-            self.offsets[within_cutoff_pairs],
-            self.offset_index[within_cutoff_pairs],
-        )
+        # We filter the lists to only send forward relevant pairs (those with distance under cutoff), improving performance.   
+        return filter_pairs(self.hard_dist_cutoff, distflat, self.pair_first, self.pair_second, paircoord, self.offsets, self.offset_index)

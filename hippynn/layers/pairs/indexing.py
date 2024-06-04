@@ -5,6 +5,7 @@ import torch
 
 from ...custom_kernels.utils import get_id_and_starts
 from .open import _PairIndexer
+from .periodic import filter_pairs
 
 
 class ExternalNeighbors(_PairIndexer):
@@ -18,14 +19,8 @@ class ExternalNeighbors(_PairIndexer):
         paircoord = atom_coordinates[pair_second] - atom_coordinates[pair_first] + shifts.to(cell.dtype) @ cell
         distflat = paircoord.norm(dim=1)
 
-        # Trim the list to only include relevant atoms, improving performance.
-        within_cutoff_pairs = distflat < self.hard_dist_cutoff
-        distflat = distflat[within_cutoff_pairs]
-        pair_first = pair_first[within_cutoff_pairs]
-        pair_second = pair_second[within_cutoff_pairs]
-        paircoord = paircoord[within_cutoff_pairs]
-
-        return distflat, pair_first, pair_second, paircoord
+        # We filter the lists to only send forward relevant pairs (those with distance under cutoff), improving performance.   
+        return filter_pairs(self.hard_dist_cutoff, distflat, pair_first, pair_second, paircoord)
 
 
 class PairReIndexer(torch.nn.Module):

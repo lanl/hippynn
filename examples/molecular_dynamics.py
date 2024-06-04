@@ -34,7 +34,7 @@ from hippynn.molecular_dynamics.md import (
 
 # Adjust size of system depending on device
 if torch.cuda.is_available():
-    nrep = 25
+    nrep = 5
     device = torch.device("cuda")
 else:
     nrep = 10

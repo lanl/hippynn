@@ -147,6 +147,9 @@ def wrap_systems_torch(coords, cell, cutoff: float):
 
     return inv_cell, wrapped_coords, wrapped_offset.to(torch.int64), n_bounds
 
+def filter_pairs(cutoff, distflat, *addn_features):
+    filter = distflat < cutoff
+    return tuple((array[filter] for array in [distflat, *addn_features]))
 
 class PeriodicPairIndexer(_PairIndexer):
     """
@@ -307,14 +310,5 @@ class PeriodicPairIndexerMemory(PairMemory):
             paircoord = coordflat[self.pair_first] - coordflat[self.pair_second] + pair_shifts
             distflat = paircoord.norm(dim=1)
 
-        # We will trim the lists to only send forward relevant atoms, improving performance.
-        within_cutoff_pairs = distflat < self.hard_dist_cutoff
-
-        return (
-            distflat[within_cutoff_pairs],
-            self.pair_first[within_cutoff_pairs],
-            self.pair_second[within_cutoff_pairs],
-            paircoord[within_cutoff_pairs],
-            self.cell_offsets[within_cutoff_pairs],
-            self.offset_num[within_cutoff_pairs],
-        )
+        # We filter the lists to only send forward relevant pairs (those with distance under cutoff), improving performance.   
+        return filter_pairs(self.hard_dist_cutoff, distflat, self.pair_first, self.pair_second, paircoord, self.cell_offsets, self.offset_num)
