@@ -100,7 +100,7 @@ position_variable = Variable(
         "velocity": init_velocity,
         "acceleration": init_acceleration,
         "mass": mass,
-        "cell": cell,  # if added, PBC will be applied in each step of the VelocityVerlet updater
+        "cell": cell,  # if added, coordinates will be wrapped in each step of the VelocityVerlet updater
     },
     model_input_map={
         "coordinates": "position",

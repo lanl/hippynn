@@ -8,6 +8,7 @@ from tqdm.autonotebook import trange
 import ase
 
 from ..graphs import Predictor
+from ..layers.pairs.periodic import wrap_systems_torch
 
 
 class Variable:
@@ -57,15 +58,10 @@ class Variable:
 
     @data.setter
     def data(self, data):
-        if not isinstance(data, dict):
-            raise TypeError(f"The argument for 'data' must be a dictionary, but instead is of type {type(data)}.")
-
         for key, value in data.items():
             if isinstance(value, np.ndarray):
                 data[key] = torch.as_tensor(value)
-            elif not isinstance(value, torch.Tensor):
-                raise TypeError(f"The values in the 'data' dictionary must be of type torch.Tensor, but found value of type {type(value)}.")
-            
+           
         batch_sizes = set([value.shape[0] for value in data.values()])
         if len(batch_sizes) > 1:
             raise ValueError(
@@ -80,24 +76,12 @@ class Variable:
 
     @model_input_map.setter
     def model_input_map(self, model_input_map):
-        if not isinstance(model_input_map, dict):
-            raise TypeError(f"The argument for 'model_input_map' must be a dictionary, but instead is of type {type(model_input_map)}.")
-
         for key, value in model_input_map.items():
-            if not isinstance(key, str):
-                raise TypeError(
-                    f"Each key and value in the 'model_input_map' dictionary should be of type str, but type {type(key)} found."
-                )
-            if not isinstance(value, str):
-                raise TypeError(
-                    f"Each key and value in the 'model_input_map' dictionary should be of type str, but type {type(value)} found."
-                )
             if not value in self.data.keys():
                 raise ValueError(
                     f"Each value in the 'model_input_map' dictionary should correspond to a key in the 'data' dictionary. "
                     + f"Each key of the 'model_input_map' should correspond to hippynn db_name. Value {value} found in 'model_input_map', but no corresponding key in the 'data' dictionary found."
                 )
-
         self._model_input_map = model_input_map
 
     @property
@@ -109,8 +93,6 @@ class Variable:
         if updater is None:
             self._updater = None
             return
-        if not isinstance(updater, VariableUpdater):
-            raise TypeError(f"Updater must be of type VariableUpdater, but instead is {type(updater)}")
         updater.variable = self
         self._updater = updater
 
@@ -123,8 +105,6 @@ class Variable:
         if device is None:
             self._device = None
             return
-        if not isinstance(device, torch.device):
-            raise TypeError(f"Device must be of type 'torch.device', but instead is {type(device)}")
         self._device = device
         for key, value in self.data.items():
             self.data[key] = value.to(device)
@@ -138,10 +118,8 @@ class Variable:
         if dtype is None:
             self._dtype = None
             return
-        float_dtypes = [torch.float, torch.float16, torch.float32, torch.float64]
-        if not dtype in float_dtypes:
-            raise ValueError(f"Valid dtypes are {float_dtypes}, however the provided dtype was {dtype}.")
         self._dtype = dtype
+        float_dtypes = [torch.float, torch.float16, torch.float32, torch.float64]
         for key, value in self.data.items():
             if value.dtype in float_dtypes:
                 self.data[key] = value.to(dtype)
@@ -225,30 +203,6 @@ class NullUpdater(VariableUpdater):
     def post_step(self, dt, model_outputs):
         pass
 
-
-def wrap_coordinates_into_cell(coordinates, cell):
-    coords = coordinates
-
-    cell_prod = cell @ torch.transpose(cell, dim0=-2, dim1=-1)
-    if torch.count_nonzero(cell_prod - torch.diag_embed(torch.diagonal(cell_prod, dim1=-2, dim2=-1))):
-        raise ValueError("Algorithm currently only works for orthorhombic cells")
-
-    # This has NOT been thoroughly tested!
-    if torch.count_nonzero(cell - torch.diag_embed(torch.diagonal(cell, dim1=-2, dim2=-1))):
-        # Transform via isometry to a basis where cell is a diagonal matrix if it currently is not
-        new_cell = torch.sqrt(cell_prod)
-        new_coords = coords @ torch.linalg.inv(cell) @ new_cell
-        # Wrap
-        new_coords = new_coords % torch.diagonal(new_cell, dim1=-2, dim2=-1)
-        # Transform back
-        coords = new_coords @ torch.linalg.inv(new_cell) @ cell
-
-    else:
-        coords = torch.remainder(coords, torch.diagonal(cell, dim1=-2, dim2=-1)[:, None])
-
-    return coords
-
-
 class VelocityVerlet(VariableUpdater):
     """
     Implements the Velocity Verlet algorithm
@@ -291,8 +245,10 @@ class VelocityVerlet(VariableUpdater):
         """
         self.variable.data["velocity"] = self.variable.data["velocity"] + 0.5 * dt * self.variable.data["acceleration"]
         self.variable.data["position"] = self.variable.data["position"] + self.variable.data["velocity"] * dt
-        if "cell" in self.variable.data.keys():
-            self.variable.data["position"] = wrap_coordinates_into_cell(self.variable.data["position"], self.variable.data["cell"])
+        try:
+            _, self.variable.data["position"], *_ = wrap_systems_torch(coords=self.variable.data["position"], cell=self.variable.data["cell"], cutoff=0) # cutoff only used for discarded outputs; can be set arbitrarily
+        except KeyError:
+            pass
 
     def post_step(self, dt, model_outputs):
         """Updates to variables performed during each step of MD simulation
@@ -374,8 +330,10 @@ class LangevinDynamics(VariableUpdater):
 
         self.variable.data["position"] = self.variable.data["position"] + self.variable.data["velocity"] * dt
 
-        if "cell" in self.variable.data.keys():
-            self.variable.data["position"] = wrap_coordinates_into_cell(self.variable.data["position"], self.variable.data["cell"])
+        try:
+            _, self.variable.data["position"], *_ = wrap_systems_torch(coords=self.variable.data["position"], cell=self.variable.data["cell"], cutoff=0) # cutoff only used for discarded outputs; can be set arbitrarily
+        except KeyError:
+            pass
 
     def post_step(self, dt, model_outputs):
         """Updates to variables performed during each step of MD simulation
@@ -441,8 +399,6 @@ class MolecularDynamics:
         if not isinstance(variables, list):
             variables = [variables]
         for variable in variables:
-            if not isinstance(variable, Variable):
-                raise TypeError(f"Each element of 'variables' must be of type Variable. Element of type {type(variable)} found.")
             if variable.updater is None:
                 raise ValueError(f"Variable with name {variable.name} does not have a VariableUpdater set.")
 
@@ -464,9 +420,6 @@ class MolecularDynamics:
 
     @model.setter
     def model(self, model):
-        if not isinstance(model, Predictor):
-            raise TypeError(f"Model must be of type 'Predictor', but is of type {type(model)} instead.")
-
         input_db_names = [node.db_name for node in model.inputs]
         variable_data_db_names = [key for variable in self.variables for key in variable.model_input_map.keys()]
         for db_name in input_db_names:
@@ -488,8 +441,6 @@ class MolecularDynamics:
         if device is None:
             self._device = None
             return
-        if not isinstance(device, torch.device):
-            raise TypeError(f"Device must be of type 'torch.device', but instead is {type(device)}")
         self._device = device
         self.model.to(device)
         for variable in self.variables:
@@ -504,9 +455,6 @@ class MolecularDynamics:
         if dtype is None:
             self._dtype = None
             return
-        float_dtypes = [torch.float, torch.float16, torch.float32, torch.float64]
-        if not dtype in float_dtypes:
-            raise ValueError(f"Valid dtypes are {float_dtypes}, however the provided dtype was {dtype}.")
         self._dtype = dtype
         self.model.to(dtype)
         for variable in self.variables:
