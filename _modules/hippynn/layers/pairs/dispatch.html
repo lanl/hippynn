@@ -224,7 +224,7 @@
 <span class="k">def</span> <span class="nf">neighbor_list_kdtree</span><span class="p">(</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">cell</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Use KD Tree implementation from scipy.spatial to find pairs under periodic boundary conditions </span>
-<span class="sd">    with an orthonormal cell.</span>
+<span class="sd">    with an orthorhombic cell.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     
     <span class="c1"># Verify that cell is orthorhombic</span>
@@ -266,10 +266,16 @@
     <span class="n">pairs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">pairs</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">coords</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
     <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">unbind</span><span class="p">(</span><span class="n">pairs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
+    <span class="c1"># Wrap coordinates into cell and keep track of how they were translated</span>
+    <span class="n">inv_cell</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+    <span class="n">coords</span><span class="p">,</span> <span class="n">wrapped_offset</span> <span class="o">=</span> <span class="n">wrap_points_torch</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">inv_cell</span><span class="p">)</span>
+
     <span class="c1"># Find difference vector between pairs without considering the MIC</span>
     <span class="n">pair_diff</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">pair_first</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="n">pair_second</span><span class="p">])</span>
 
     <span class="c1"># Possible adjacent offset directions for images of the difference vector</span>
+    <span class="c1"># More is not needed because of the restriction that the cutoff is less than the length of </span>
+    <span class="c1"># each side of the cell</span>
     <span class="n">offset_range</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">3</span><span class="p">)),</span> <span class="n">device</span><span class="o">=</span><span class="n">coords</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
     <span class="c1"># All adjacent offsets</span>
@@ -284,8 +290,9 @@
     <span class="c1"># Index of shortest offset image</span>
     <span class="n">pair_diff</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">pair_diff</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="c1"># Offset direction corresponding to shortest offset image</span>
+    <span class="c1"># Offset direction corresponding to shortest offset image plus accounting for the wrapping done earlier</span>
     <span class="n">pair_image</span> <span class="o">=</span> <span class="n">offset_range</span><span class="p">[</span><span class="n">pair_diff</span><span class="p">]</span>
+    <span class="n">pair_image</span> <span class="o">-=</span> <span class="p">(</span><span class="n">wrapped_offset</span><span class="p">[</span><span class="n">pair_first</span><span class="p">]</span> <span class="o">-</span> <span class="n">wrapped_offset</span><span class="p">[</span><span class="n">pair_second</span><span class="p">])</span>
 
     <span class="c1"># KDTree only returns each pair once (eg. (1,2) but not (2,1))</span>
     <span class="n">doubled_pair_first</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">concat</span><span class="p">((</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">))</span>
