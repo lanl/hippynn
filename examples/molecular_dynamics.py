@@ -106,7 +106,7 @@ position_variable = Variable(
         "coordinates": "position",
     },
     device=device,
-    updater=VelocityVerlet(force_key="force"),
+    updater=VelocityVerlet(force_db_name="force"),
 )
 
 # Define species and cell Variables
