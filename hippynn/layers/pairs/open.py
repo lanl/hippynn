@@ -70,6 +70,8 @@ class PairMemory(torch.nn.Module):
     set to zero while training for fastest results.
     '''
 
+    # TODO: Adapt to work system-by-system
+
     # ## Subclasses should update the following ## #
     _pair_indexer_class = NotImplemented
 

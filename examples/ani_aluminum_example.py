@@ -3,7 +3,8 @@
 Example training to the ANI-aluminum dataset.
 
 This script was designed for an external dataset available at
-https://github.com/atomistic-ml/ani-al
+https://github.com/atomistic-ml/ani-al. One should download the
+entire repository.
 
 Note: It is necessary to untar the h5 data files in ani-al/data/
 before running this script.
@@ -23,7 +24,7 @@ with custom kernels -off-.
 
 import sys
 
-sys.path.append("../../datasets/ani-al/readers/lib/")
+sys.path.append("../../datasets/ani-al/readers/lib/")  # location of pyanitools.py
 import pyanitools  # Check if pyanitools is found early
 
 import torch

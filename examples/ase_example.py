@@ -1,7 +1,9 @@
 """
 Script running an aluminum model with ASE.
-For training see `ani_aluminum_example.py`.
-This will generate the files for a model.
+
+Before running this script, you must run 
+`ani_aluminum_example.py` to train the corresponding
+model.
 
 Modified from ase MD example.
 
@@ -12,7 +14,6 @@ will use it, and run a somewhat bigger system.
 # Imports
 import numpy as np
 import torch
-import hippynn
 import ase
 import time
 
@@ -39,21 +40,22 @@ energy_node = model.node_from_name("energy")
 calc = HippynnCalculator(energy_node, en_unit=units.eV)
 calc.to(torch.float64)
 if torch.cuda.is_available():
-    nrep = 30  # 27,000 atoms -- should fit in a 12 GB GPU if using custom kernels.
+    nrep = 25  # 31,250 atoms -- should fit in a 16 GB GPU if using custom kernels.
     calc.to(torch.device("cuda"))
 else:
     nrep = 10  # 1,000 atoms.
 
 # Build the atoms object
-atoms = ase.build.bulk("Al", crystalstructure="fcc", a=4.05)
+atoms = ase.build.bulk("Al", crystalstructure="fcc", a=4.05, orthorhombic=True)
 reps = nrep * np.eye(3, dtype=int)
 atoms = ase.build.make_supercell(atoms, reps, wrap=True)
 atoms.calc = calc
 
 print("Number of atoms:", len(atoms))
 
-atoms.rattle(0.1)
-MaxwellBoltzmannDistribution(atoms, temperature_K=500)
+rng = np.random.default_rng(seed=0)
+atoms.rattle(0.1, rng=rng)
+MaxwellBoltzmannDistribution(atoms, temperature_K=500, rng=rng)
 dyn = VelocityVerlet(atoms, 1 * units.fs)
 
 

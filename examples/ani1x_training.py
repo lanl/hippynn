@@ -21,7 +21,7 @@ import hippynn
 import ase.units
 
 import sys
-sys.path.append("../../datasets/ani-al/readers/lib/")
+sys.path.append("../../datasets/ani-al/readers/lib/")  # location of pyanitools.py
 
 import pyanitools
 
