@@ -83,6 +83,7 @@
 
 <span class="kn">from</span> <span class="nn">...custom_kernels.utils</span> <span class="kn">import</span> <span class="n">get_id_and_starts</span>
 <span class="kn">from</span> <span class="nn">.open</span> <span class="kn">import</span> <span class="n">_PairIndexer</span>
+<span class="kn">from</span> <span class="nn">.periodic</span> <span class="kn">import</span> <span class="n">filter_pairs</span>
 
 
 <div class="viewcode-block" id="ExternalNeighbors">
@@ -100,14 +101,8 @@
         <span class="n">paircoord</span> <span class="o">=</span> <span class="n">atom_coordinates</span><span class="p">[</span><span class="n">pair_second</span><span class="p">]</span> <span class="o">-</span> <span class="n">atom_coordinates</span><span class="p">[</span><span class="n">pair_first</span><span class="p">]</span> <span class="o">+</span> <span class="n">shifts</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="o">@</span> <span class="n">cell</span>
         <span class="n">distflat</span> <span class="o">=</span> <span class="n">paircoord</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="c1"># Trim the list to only include relevant atoms, improving performance.</span>
-        <span class="n">within_cutoff_pairs</span> <span class="o">=</span> <span class="n">distflat</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">hard_dist_cutoff</span>
-        <span class="n">distflat</span> <span class="o">=</span> <span class="n">distflat</span><span class="p">[</span><span class="n">within_cutoff_pairs</span><span class="p">]</span>
-        <span class="n">pair_first</span> <span class="o">=</span> <span class="n">pair_first</span><span class="p">[</span><span class="n">within_cutoff_pairs</span><span class="p">]</span>
-        <span class="n">pair_second</span> <span class="o">=</span> <span class="n">pair_second</span><span class="p">[</span><span class="n">within_cutoff_pairs</span><span class="p">]</span>
-        <span class="n">paircoord</span> <span class="o">=</span> <span class="n">paircoord</span><span class="p">[</span><span class="n">within_cutoff_pairs</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">distflat</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">paircoord</span></div>
+        <span class="c1"># We filter the lists to only send forward relevant pairs (those with distance under cutoff), improving performance.   </span>
+        <span class="k">return</span> <span class="n">filter_pairs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hard_dist_cutoff</span><span class="p">,</span> <span class="n">distflat</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">paircoord</span><span class="p">)</span></div>
 </div>
 
 
