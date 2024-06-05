@@ -34,7 +34,7 @@ from hippynn.molecular_dynamics.md import (
 
 # Adjust size of system depending on device
 if torch.cuda.is_available():
-    nrep = 5
+    nrep = 25
     device = torch.device("cuda")
 else:
     nrep = 10
@@ -100,7 +100,7 @@ position_variable = Variable(
         "velocity": init_velocity,
         "acceleration": init_acceleration,
         "mass": mass,
-        "cell": cell,  # if added, coordinates will be wrapped in each step of the VelocityVerlet updater
+        "cell": cell,  # Optional. If added, coordinates will be wrapped in each step of the VelocityVerlet updater. Otherwise, they will be temporarily wrapped for model evaluation only and stored in their unwrapped form
     },
     model_input_map={
         "coordinates": "position",
