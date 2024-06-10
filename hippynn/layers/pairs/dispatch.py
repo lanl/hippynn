@@ -8,6 +8,7 @@ from scipy.spatial import KDTree
 import torch
 
 from .open import PairMemory
+from .periodic import filter_pairs
 
 def wrap_points_np(coords, cell, inv_cell):
     # cell is (basis,cartesian)
@@ -138,7 +139,7 @@ def neighbor_list_torch(cutoff: float, coords, cell):
 def neighbor_list_kdtree(cutoff, coords, cell):
     '''
     Use KD Tree implementation from scipy.spatial to find pairs under periodic boundary conditions 
-    with an orthonormal cell.
+    with an orthorhombic cell.
     '''
     
     # Verify that cell is orthorhombic
@@ -180,10 +181,16 @@ def neighbor_list_kdtree(cutoff, coords, cell):
     pairs = torch.as_tensor(pairs, device=coords.device)
     pair_first, pair_second = torch.unbind(pairs, dim=1)
 
+    # Wrap coordinates into cell and keep track of how they were translated
+    inv_cell = torch.linalg.inv(cell)
+    coords, wrapped_offset = wrap_points_torch(coords, cell, inv_cell)
+
     # Find difference vector between pairs without considering the MIC
     pair_diff = torch.sub(coords[pair_first], coords[pair_second])
 
     # Possible adjacent offset directions for images of the difference vector
+    # More is not needed because of the restriction that the cutoff is less than the length of 
+    # each side of the cell
     offset_range = torch.tensor(list(product([-1, 0, 1], repeat=3)), device=coords.device)
 
     # All adjacent offsets
@@ -198,8 +205,9 @@ def neighbor_list_kdtree(cutoff, coords, cell):
     # Index of shortest offset image
     pair_diff = torch.argmin(pair_diff, dim=1)
 
-    # Offset direction corresponding to shortest offset image
+    # Offset direction corresponding to shortest offset image plus accounting for the wrapping done earlier
     pair_image = offset_range[pair_diff]
+    pair_image -= (wrapped_offset[pair_first] - wrapped_offset[pair_second])
 
     # KDTree only returns each pair once (eg. (1,2) but not (2,1))
     doubled_pair_first = torch.concat((pair_first, pair_second))
@@ -284,9 +292,9 @@ class _DispatchNeighbors(torch.nn.Module):
         # print("Pairs found",pair_first.shape)
         coordflat = coordinates.reshape(n_molecules * n_atoms_max, 3)[real_atoms]
         paircoord = coordflat[pair_first] - coordflat[pair_second] + pair_offsets
-        distflat2 = paircoord.norm(dim=1)
+        distflat = paircoord.norm(dim=1)
 
-        return distflat2, pair_first, pair_second, paircoord, offsets, offset_index
+        return distflat, pair_first, pair_second, paircoord, offsets, offset_index
 
 
 class NPNeighbors(_DispatchNeighbors):
@@ -336,7 +344,7 @@ class KDTreePairsMemory(PairMemory):
 
             inputs = (coordinates, nonblank, real_atoms, inv_real_atoms, cells, mol_index, n_molecules, n_atoms_max)
             outputs = self._pair_indexer(*inputs)
-            distflat2, pair_first, pair_second, paircoord, offsets, offset_index = outputs
+            distflat, pair_first, pair_second, paircoord, offsets, offset_index = outputs
 
             with torch.no_grad():
                 pair_mol = mol_index[pair_first]
@@ -359,7 +367,7 @@ class KDTreePairsMemory(PairMemory):
 
             coordflat = coordinates.reshape(n_molecules * n_atoms_max, 3)[real_atoms]
             paircoord = coordflat[self.pair_first] - coordflat[self.pair_second] + self.pair_offsets
-            distflat2 = paircoord.norm(dim=1)
+            distflat = paircoord.norm(dim=1)
 
-        return distflat2, self.pair_first, self.pair_second, paircoord, self.offsets, self.offset_index
-
+        # We filter the lists to only send forward relevant pairs (those with distance under cutoff), improving performance.   
+        return filter_pairs(self.hard_dist_cutoff, distflat, self.pair_first, self.pair_second, paircoord, self.offsets, self.offset_index)

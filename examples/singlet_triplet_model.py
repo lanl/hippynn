@@ -1,3 +1,5 @@
+# NOTE: This script needs revision before it will run
+
 import torch
 
 # Setup pytorch things
