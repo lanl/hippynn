@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.optimizer.BatchOptimizer &mdash; hippynn 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=c9d3d048"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../optimizer.html">hippynn.optimizer</a></li>
+      <li class="breadcrumb-item active">hippynn.optimizer.BatchOptimizer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.optimizer.BatchOptimizer</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch.nn.functional</span> <span class="kn">import</span> <span class="n">normalize</span>
+
+
+<div class="viewcode-block" id="GeometryOptimizer">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.BatchOptimizer.html#hippynn.optimizer.BatchOptimizer.GeometryOptimizer">[docs]</a>
+<span class="k">class</span> <span class="nc">GeometryOptimizer</span><span class="p">():</span>
+
+<div class="viewcode-block" id="GeometryOptimizer.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.BatchOptimizer.html#hippynn.optimizer.BatchOptimizer.GeometryOptimizer.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">coords</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_steps</span> <span class="o">=</span> <span class="n">max_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_step</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span> <span class="o">=</span> <span class="n">logfile</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_signal</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="c1"># __call__ call self.step() method if the current step is less than the max_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_step</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_step</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_steps</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stop_signal</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    <span class="k">def</span> <span class="nf">_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">coords</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_step</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_signal</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;step </span><span class="si">%d</span><span class="s1"> :</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_step</span><span class="p">))</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="c1">#f.write(&#39;coordinates:\n&#39;)</span>
+                <span class="c1">#f.write(str(self.coords))</span>
+                <span class="c1">#f.write(&#39;\n&#39;)</span>
+
+<div class="viewcode-block" id="GeometryOptimizer.fmax_criteria">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.BatchOptimizer.html#hippynn.optimizer.BatchOptimizer.GeometryOptimizer.fmax_criteria">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fmax_criteria</span><span class="p">(</span><span class="n">forces</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+        <span class="c1"># not all optimizers use fmax as a criteria to stop</span>
+        <span class="c1"># but it is a common criteria</span>
+        <span class="c1"># forces are in the shape of (batch_size, n_atoms, 3)</span>
+        <span class="k">return</span> <span class="n">forces</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">fmax</span></div>
+
+    
+<div class="viewcode-block" id="GeometryOptimizer.duq">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.BatchOptimizer.html#hippynn.optimizer.BatchOptimizer.GeometryOptimizer.duq">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">duq</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+        <span class="c1"># this is useful for batch calculation</span>
+        <span class="c1"># (n,) -&gt; (n,1,1)</span>
+        <span class="k">return</span> <span class="n">t</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span></div>
+</div>
+
+        
+
+<div class="viewcode-block" id="BatchFIRE">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.BatchOptimizer.html#hippynn.optimizer.BatchOptimizer.BatchFIRE">[docs]</a>
+<span class="k">class</span> <span class="nc">BatchFIRE</span><span class="p">(</span><span class="n">GeometryOptimizer</span><span class="p">):</span>
+    <span class="c1"># FIRE algorithm for batch of coordinates, forces will be input to step() function</span>
+    <span class="c1"># assuming the input coordinates are in the shape of (batch_size, n_atoms, 3)</span>
+    <span class="c1"># set dt for each molecule individually</span>
+
+<div class="viewcode-block" id="BatchFIRE.__init__">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.BatchOptimizer.html#hippynn.optimizer.BatchOptimizer.BatchFIRE.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">dt_max</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">N_min</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">f_inc</span><span class="o">=</span><span class="mf">1.1</span><span class="p">,</span> <span class="n">f_dec</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">a_start</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">f_alpha</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">max_steps</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt_start</span> <span class="o">=</span> <span class="n">dt</span>   <span class="c1"># save for reset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxstep</span> <span class="o">=</span> <span class="n">maxstep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt_max</span> <span class="o">=</span> <span class="n">dt_max</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">N_min</span> <span class="o">=</span> <span class="n">N_min</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_inc</span> <span class="o">=</span> <span class="n">f_inc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_dec</span> <span class="o">=</span> <span class="n">f_dec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a_start</span> <span class="o">=</span> <span class="n">a_start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_alpha</span> <span class="o">=</span> <span class="n">f_alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fmax</span> <span class="o">=</span> <span class="n">fmax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span> <span class="o">=</span> <span class="n">logfile</span>
+
+        <span class="c1"># enable initialization without coords</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">a_start</span>
+            <span class="c1"># Nsteps is the number of steps where P became positive</span>
+            <span class="c1"># NOT number of times step() function is called!</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Nsteps</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span></div>
+
+        
+
+<div class="viewcode-block" id="BatchFIRE.step">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.BatchOptimizer.html#hippynn.optimizer.BatchOptimizer.BatchFIRE.step">[docs]</a>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forces</span><span class="p">):</span>
+        <span class="c1"># forces: (batch_size, n_atoms, 3)</span>
+        
+        <span class="c1"># force projection on velocity</span>
+        <span class="c1">###TODO: from the FIRE paper, the projection seems to be per-atom, not per-molecule</span>
+        <span class="c1"># but the implementation in ASE is per-molecule, not sure why they did this but I will follow their implementation</span>
+
+        <span class="n">fmax_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmax_criteria</span><span class="p">(</span><span class="n">forces</span><span class="p">)</span>
+        <span class="c1"># if all molecules have forces smaller than fmax, stop the optimization</span>
+        <span class="k">if</span> <span class="n">fmax_mask</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stop_signal</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span>
+
+        <span class="n">f_dot_v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">forces</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="c1"># update velocity first time</span>
+        <span class="c1">#print(self.duq((1 - self.a)).shape, self.v.shape, self.duq(self.a).shape, normalize(forces, p=2, dim=2).shape, torch.norm(self.v, dim=(1,2)).shape)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duq</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span> \
+                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">duq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">normalize</span><span class="p">(</span><span class="n">forces</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">duq</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+    
+        <span class="c1"># increase dt where P is positive and N is larger than N_min</span>
+        <span class="n">positiveP_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">f_dot_v</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">Nsteps_mask</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nsteps</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">N_min</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">positiveP_mask</span> <span class="o">&amp;</span> <span class="n">Nsteps_mask</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span> <span class="p">(</span><span class="n">mask</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_inc</span> <span class="o">+</span> <span class="o">~</span><span class="n">mask</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dt_max</span><span class="p">)</span>
+        <span class="c1"># decrease a where P is positive and N is larger than N_min</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_alpha</span> <span class="o">*</span> <span class="n">mask</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="o">~</span><span class="n">mask</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nsteps</span> <span class="o">+=</span> <span class="n">positiveP_mask</span>
+
+        <span class="c1"># decrease dt where P is not positive</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="p">(</span> <span class="o">~</span><span class="n">positiveP_mask</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_dec</span> <span class="o">+</span> <span class="n">positiveP_mask</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>
+        <span class="c1"># set velocity to zero where P is not positive</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">duq</span><span class="p">(</span><span class="n">positiveP_mask</span><span class="p">)</span>
+        <span class="c1"># reset a to a_start where P is not positive</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_start</span> <span class="o">*</span> <span class="o">~</span><span class="n">positiveP_mask</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="n">positiveP_mask</span>
+        <span class="c1"># reset Nsteps to zero where P is not positive</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nsteps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nsteps</span> <span class="o">*</span> <span class="n">positiveP_mask</span>
+
+        <span class="c1"># update coordinates</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span> <span class="o">*</span> <span class="n">forces</span>
+        <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span>
+        <span class="n">dr</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duq</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">maxstep</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dr</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="nb">max</span><span class="o">=</span><span class="mf">1.0</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">+</span> <span class="n">dr</span></div>
+
+
+<div class="viewcode-block" id="BatchFIRE.reset">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.BatchOptimizer.html#hippynn.optimizer.BatchOptimizer.BatchFIRE.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt_start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nsteps</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="BatchFIRE.log">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.BatchOptimizer.html#hippynn.optimizer.BatchOptimizer.BatchFIRE.log">[docs]</a>
+    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;dt: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">))</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="s1">&#39;v: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">))</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="s1">&#39;a: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">))</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="s1">&#39;Nsteps: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nsteps</span><span class="p">))</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="n">extra_message</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
