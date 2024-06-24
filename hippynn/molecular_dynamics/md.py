@@ -3,10 +3,9 @@ from functools import singledispatchmethod
 
 import numpy as np
 import torch
-
-from tqdm.autonotebook import trange
 import ase
 
+from ..tools import progress_bar
 from ..graphs import Predictor
 from ..layers.pairs.periodic import wrap_systems_torch
 
@@ -359,8 +358,7 @@ class MolecularDynamics:
         device: torch.device = None,
         dtype: torch.dtype = None,
     ):
-        """_summary_
-
+        """
         :param variables: list of Variable objects which will be tracked during simulation
         :type variables: list[Variable]
         :param model: HIPNN Predictor
@@ -506,7 +504,7 @@ class MolecularDynamics:
         :type record_every: int, optional
         """        
 
-        for i in trange(n_steps):
+        for i in progress_bar(range(n_steps)):
             model_outputs = self._step(dt)
             if record_every is not None and (i + 1) % record_every == 0:
                 self._update_data(model_outputs)
