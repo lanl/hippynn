@@ -23,7 +23,7 @@ class Variable:
         name: str,
         data: dict[str, torch.Tensor],
         model_input_map: dict[str, str] = dict(),
-        updater: _VariableUpdater = None,
+        updater: VariableUpdater = None,
         device: torch.device = None,
         dtype: torch.dtype = None,
     ) -> None:
@@ -38,7 +38,7 @@ class Variable:
         :type model_input_map: dict[str, str], optional
         :param updater: object which will update the data of the Variable
             over the course of the MD simulation, defaults to None
-        :type updater: _VariableUpdater, optional
+        :type updater: VariableUpdater, optional
         :param device: device on which to keep data, defaults to None
         :type device: torch.device, optional
         :param dtype: dtype for float type data, defaults to None
@@ -136,14 +136,11 @@ class Variable:
         self.dtype = arg
 
 
-class _VariableUpdater:
+class VariableUpdater:
     """
-    Parent class for algorithms that make updates to the data of a Variable during
-    each step of an MD simulation.
+    Parent class for algorithms that make updates to the data of a Variable during each step of an MD simulation.
 
-    Subclasses should redefine __init__, pre_step, post_step, and
-    required_variable_data as needed. The inputs to pre_step and post_step
-    should not be changed.
+    Subclasses should redefine __init__, pre_step, post_step, and required_variable_data as needed. The inputs to pre_step and post_step should not be changed.
     """
 
     # A list of keys which must appear in Variable.data for any Variable that will be updated by objects of this class.
@@ -167,8 +164,7 @@ class _VariableUpdater:
         self._variable = variable
 
     def pre_step(self, dt):
-        """Updates to variables performed during each step of MD simulation
-          before HIPNN model evaluation
+        """Updates to variables performed during each step of MD simulation before HIPNN model evaluation
 
         :param dt: timestep
         :type dt: float
@@ -176,8 +172,7 @@ class _VariableUpdater:
         pass
 
     def post_step(self, dt, model_outputs):
-        """Updates to variables performed during each step of MD simulation
-          after HIPNN model evaluation
+        """Updates to variables performed during each step of MD simulation after HIPNN model evaluation
 
         :param dt: timestep
         :type dt: float
@@ -187,7 +182,7 @@ class _VariableUpdater:
         pass
 
 
-class NullUpdater(_VariableUpdater):
+class NullUpdater(VariableUpdater):
     """
     Makes no change to the variable data at each step of MD.
     """
@@ -198,7 +193,7 @@ class NullUpdater(_VariableUpdater):
     def post_step(self, dt, model_outputs):
         pass
 
-class VelocityVerlet(_VariableUpdater):
+class VelocityVerlet(VariableUpdater):
     """
     Implements the Velocity Verlet algorithm
     """
@@ -228,8 +223,7 @@ class VelocityVerlet(_VariableUpdater):
         self.force_factor = units_force / units_acc
 
     def pre_step(self, dt):
-        """Updates to variables performed during each step of MD simulation
-          before HIPNN model evaluation
+        """Updates to variables performed during each step of MD simulation before HIPNN model evaluation
 
         :param dt: timestep
         :type dt: float
@@ -242,8 +236,7 @@ class VelocityVerlet(_VariableUpdater):
             pass
 
     def post_step(self, dt, model_outputs):
-        """Updates to variables performed during each step of MD simulation
-          after HIPNN model evaluation
+        """Updates to variables performed during each step of MD simulation after HIPNN model evaluation
 
         :param dt: timestep
         :type dt: float
@@ -260,7 +253,7 @@ class VelocityVerlet(_VariableUpdater):
         self.variable.data["velocity"] = self.variable.data["velocity"] + 0.5 * dt * self.variable.data["acceleration"]
 
 
-class LangevinDynamics(_VariableUpdater):
+class LangevinDynamics(VariableUpdater):
     """
     Implements the Langevin algorithm
     """
@@ -306,8 +299,7 @@ class LangevinDynamics(_VariableUpdater):
             torch.manual_seed(seed)
 
     def pre_step(self, dt):
-        """Updates to variables performed during each step of MD simulation
-          before HIPNN model evaluation
+        """Updates to variables performed during each step of MD simulation before HIPNN model evaluation
 
         :param dt: timestep
         :type dt: float
@@ -321,8 +313,7 @@ class LangevinDynamics(_VariableUpdater):
             pass
 
     def post_step(self, dt, model_outputs):
-        """Updates to variables performed during each step of MD simulation
-          after HIPNN model evaluation
+        """Updates to variables performed during each step of MD simulation after HIPNN model evaluation
 
         :param dt: timestep
         :type dt: float
@@ -386,7 +377,7 @@ class MolecularDynamics:
             variables = [variables]
         for variable in variables:
             if variable.updater is None:
-                raise ValueError(f"Variable with name {variable.name} does not have a _VariableUpdater set.")
+                raise ValueError(f"Variable with name {variable.name} does not have a VariableUpdater set.")
 
         variable_names = [variable.name for variable in variables]
         if len(variable_names) != len(set(variable_names)):
