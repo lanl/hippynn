@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>algebra module &mdash; hippynn 0+unknown documentation</title>
+  <title>hippynn.layers.algebra module &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
@@ -22,8 +22,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="excited module" href="hippynn.layers.excited.html" />
-    <link rel="prev" title="periodic module" href="hippynn.layers.pairs.periodic.html" /> 
+    <link rel="next" title="hippynn.layers.excited module" href="hippynn.layers.excited.html" />
+    <link rel="prev" title="hippynn.layers.pairs.periodic module" href="hippynn.layers.pairs.periodic.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,69 +51,74 @@
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="hippynn.html">hippynn API documentation</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.html">custom_kernels package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hippynn.databases.html">databases package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hippynn.experiment.html">experiment package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hippynn.graphs.html">graphs package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hippynn.interfaces.html">interfaces package</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="hippynn.layers.html">layers package</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.pairs.html">pairs package</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">algebra module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.algebra.AtLeast2D"><code class="docutils literal notranslate"><span class="pre">AtLeast2D</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.algebra.AtLeast2D.forward"><code class="docutils literal notranslate"><span class="pre">AtLeast2D.forward()</span></code></a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="hippynn.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.html">hippynn.custom_kernels package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.html">hippynn.databases package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.experiment.html">hippynn.experiment package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html">hippynn.graphs package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.interfaces.html">hippynn.interfaces package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="hippynn.layers.html">hippynn.layers package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="hippynn.layers.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l5 current"><a class="current reference internal" href="#">hippynn.layers.algebra module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.algebra.AtLeast2D"><code class="docutils literal notranslate"><span class="pre">AtLeast2D</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.algebra.AtLeast2D.forward"><code class="docutils literal notranslate"><span class="pre">AtLeast2D.forward()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.algebra.EnsembleTarget"><code class="docutils literal notranslate"><span class="pre">EnsembleTarget</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.algebra.EnsembleTarget.forward"><code class="docutils literal notranslate"><span class="pre">EnsembleTarget.forward()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.algebra.EnsembleTarget"><code class="docutils literal notranslate"><span class="pre">EnsembleTarget</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.algebra.EnsembleTarget.forward"><code class="docutils literal notranslate"><span class="pre">EnsembleTarget.forward()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.algebra.Idx"><code class="docutils literal notranslate"><span class="pre">Idx</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.algebra.Idx.__init__"><code class="docutils literal notranslate"><span class="pre">Idx.__init__()</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.algebra.Idx.extra_repr"><code class="docutils literal notranslate"><span class="pre">Idx.extra_repr()</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.algebra.Idx.forward"><code class="docutils literal notranslate"><span class="pre">Idx.forward()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.algebra.Idx"><code class="docutils literal notranslate"><span class="pre">Idx</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.algebra.Idx.__init__"><code class="docutils literal notranslate"><span class="pre">Idx.__init__()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.algebra.Idx.extra_repr"><code class="docutils literal notranslate"><span class="pre">Idx.extra_repr()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.algebra.Idx.forward"><code class="docutils literal notranslate"><span class="pre">Idx.forward()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.algebra.LambdaModule"><code class="docutils literal notranslate"><span class="pre">LambdaModule</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.algebra.LambdaModule.__init__"><code class="docutils literal notranslate"><span class="pre">LambdaModule.__init__()</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.algebra.LambdaModule.extra_repr"><code class="docutils literal notranslate"><span class="pre">LambdaModule.extra_repr()</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.algebra.LambdaModule.forward"><code class="docutils literal notranslate"><span class="pre">LambdaModule.forward()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.algebra.LambdaModule"><code class="docutils literal notranslate"><span class="pre">LambdaModule</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.algebra.LambdaModule.__init__"><code class="docutils literal notranslate"><span class="pre">LambdaModule.__init__()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.algebra.LambdaModule.extra_repr"><code class="docutils literal notranslate"><span class="pre">LambdaModule.extra_repr()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.algebra.LambdaModule.forward"><code class="docutils literal notranslate"><span class="pre">LambdaModule.forward()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.algebra.ListMod"><code class="docutils literal notranslate"><span class="pre">ListMod</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.algebra.ListMod.forward"><code class="docutils literal notranslate"><span class="pre">ListMod.forward()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.algebra.ListMod"><code class="docutils literal notranslate"><span class="pre">ListMod</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.algebra.ListMod.forward"><code class="docutils literal notranslate"><span class="pre">ListMod.forward()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.algebra.ValueMod"><code class="docutils literal notranslate"><span class="pre">ValueMod</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.algebra.ValueMod.__init__"><code class="docutils literal notranslate"><span class="pre">ValueMod.__init__()</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.algebra.ValueMod.extra_repr"><code class="docutils literal notranslate"><span class="pre">ValueMod.extra_repr()</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.algebra.ValueMod.forward"><code class="docutils literal notranslate"><span class="pre">ValueMod.forward()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.algebra.ValueMod"><code class="docutils literal notranslate"><span class="pre">ValueMod</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.algebra.ValueMod.__init__"><code class="docutils literal notranslate"><span class="pre">ValueMod.__init__()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.algebra.ValueMod.extra_repr"><code class="docutils literal notranslate"><span class="pre">ValueMod.extra_repr()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.algebra.ValueMod.forward"><code class="docutils literal notranslate"><span class="pre">ValueMod.forward()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.algebra.WeightedMAELoss"><code class="docutils literal notranslate"><span class="pre">WeightedMAELoss</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.algebra.WeightedMAELoss.loss_func"><code class="docutils literal notranslate"><span class="pre">WeightedMAELoss.loss_func()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.algebra.WeightedMAELoss"><code class="docutils literal notranslate"><span class="pre">WeightedMAELoss</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.algebra.WeightedMAELoss.loss_func"><code class="docutils literal notranslate"><span class="pre">WeightedMAELoss.loss_func()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.algebra.WeightedMSELoss"><code class="docutils literal notranslate"><span class="pre">WeightedMSELoss</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.algebra.WeightedMSELoss.loss_func"><code class="docutils literal notranslate"><span class="pre">WeightedMSELoss.loss_func()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.algebra.WeightedMSELoss"><code class="docutils literal notranslate"><span class="pre">WeightedMSELoss</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.algebra.WeightedMSELoss.loss_func"><code class="docutils literal notranslate"><span class="pre">WeightedMSELoss.loss_func()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.excited.html">excited module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.hiplayers.html">hiplayers module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.indexers.html">indexers module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.physics.html">physics module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.regularization.html">regularization module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.targets.html">targets module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.transform.html">transform module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.layers.excited.html">hippynn.layers.excited module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.layers.hiplayers.html">hippynn.layers.hiplayers module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.layers.indexers.html">hippynn.layers.indexers module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.layers.physics.html">hippynn.layers.physics module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.layers.regularization.html">hippynn.layers.regularization module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.layers.targets.html">hippynn.layers.targets module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.layers.transform.html">hippynn.layers.transform module</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="hippynn.molecular_dynamics.html">molecular_dynamics package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hippynn.networks.html">networks package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hippynn.optimizer.html">optimizer package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hippynn.plotting.html">plotting package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hippynn.pretraining.html">pretraining module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hippynn.tools.html">tools module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.molecular_dynamics.html">hippynn.molecular_dynamics package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.networks.html">hippynn.networks package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.optimizer.html">hippynn.optimizer package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.plotting.html">hippynn.plotting package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#submodules">Submodules</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
@@ -134,24 +139,23 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="hippynn.html">hippynn package</a></li>
-          <li class="breadcrumb-item"><a href="hippynn.layers.html">layers package</a></li>
-      <li class="breadcrumb-item active">algebra module</li>
+          <li class="breadcrumb-item"><a href="hippynn.layers.html">hippynn.layers package</a></li>
+      <li class="breadcrumb-item active">hippynn.layers.algebra module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api_documentation/hippynn.layers.algebra.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
-        <a href="hippynn.layers.pairs.periodic.html" class="btn btn-neutral float-left" title="periodic module" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="hippynn.layers.excited.html" class="btn btn-neutral float-right" title="excited module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hippynn.layers.pairs.periodic.html" class="btn btn-neutral float-left" title="hippynn.layers.pairs.periodic module" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hippynn.layers.excited.html" class="btn btn-neutral float-right" title="hippynn.layers.excited module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
   </div>
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="algebra-module">
-<h1>algebra module<a class="headerlink" href="#algebra-module" title="Link to this heading"></a></h1>
-<p>Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.layers.algebra</span></code> module.</p>
-<p id="module-hippynn.layers.algebra">Layers for simple operations</p>
+  <section id="module-hippynn.layers.algebra">
+<span id="hippynn-layers-algebra-module"></span><h1>hippynn.layers.algebra module<a class="headerlink" href="#module-hippynn.layers.algebra" title="Link to this heading"></a></h1>
+<p>Layers for simple operations</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="hippynn.layers.algebra.AtLeast2D">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AtLeast2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/algebra.html#AtLeast2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.algebra.AtLeast2D" title="Link to this definition"></a></dt>
@@ -351,8 +355,8 @@ See <code class="xref py py-class docutils literal notranslate"><span class="pre
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="hippynn.layers.pairs.periodic.html" class="btn btn-neutral float-left" title="periodic module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="hippynn.layers.excited.html" class="btn btn-neutral float-right" title="excited module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hippynn.layers.pairs.periodic.html" class="btn btn-neutral float-left" title="hippynn.layers.pairs.periodic module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hippynn.layers.excited.html" class="btn btn-neutral float-right" title="hippynn.layers.excited module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
