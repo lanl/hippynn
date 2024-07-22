@@ -3,6 +3,8 @@ import triton
 import triton.language as tl
 from .utils import resort_pairs_cached
 
+from .env_pytorch import envsum as envsum_pt, sensesum as sensesum_pt, featsum as featsum_pt
+
 @triton.jit
 def envsum_kernel(out_env_ptr,
                   sens_ptr,
@@ -39,6 +41,9 @@ def envsum_kernel(out_env_ptr,
     tl.store(out_env_ptr + (target_id * sens_size * feat_size) + block_ids, tmp, mask=mask)
 
 def envsum_triton(sensitivities, features, pair_first, pair_second, atom_ids, atom_starts, out_env_fetures=None):
+    if sensitivities.device == torch.device('cpu'):
+        return featsum_pt(sensitivities,features,pair_first,pair_second)
+
     n_pairs, n_nu = sensitivities.shape
     n_atom, n_feat = features.shape
     (n_atom_with_pairs,) = atom_ids.shape
@@ -107,6 +112,9 @@ def sensesum_kernel(out_sense_ptr,
              mask=sens_block_ids < sens_size)
 
 def sensesum(env, features, pair_first, pair_second, out_sense=None):
+    if env.device == torch.device('cpu'):
+        return featsum_pt(env,features,pair_first,pair_second)
+
     _, n_nu, _ = env.shape
     n_atom, n_feat = features.shape
     n_pairs = len(pair_first)
@@ -167,6 +175,8 @@ def featsum_kernel(out_feat,
     tl.store(out_feat + (target_id * feat_size) + feat_block_ids, tmp, mask=feat_block_ids < feat_size)
 
 def featsum_triton(env, sense, pair_first, pair_second, atom2_ids, atom2_starts, out_feat=None):
+    if env.device == torch.device('cpu'):
+        return featsum_pt(env,sense,pair_first,pair_second)
     n_atom, n_nu, n_feat = env.shape
     (n_pairs,) = pair_first.shape
     (n_atoms_with_pairs,) = atom2_ids.shape
