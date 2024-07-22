@@ -68,7 +68,7 @@ def envsum_triton(sensitivities, features, pair_first, pair_second, atom_ids, at
 
 def envsum(sense, features, pfirst, psecond):
     if sense.device == torch.device('cpu'):
-        return featsum_pt(sense,features,pfirst,psecond)
+        return envsum_pt(sense,features,pfirst,psecond)
     psecond_hold = psecond
     argsort, atom1_ids, atom1_starts, pfirst, (sense, psecond) = resort_pairs_cached(pfirst, [sense, psecond])
     resort_pairs_cached(psecond_hold, [])
@@ -112,7 +112,7 @@ def sensesum_kernel(out_sense_ptr,
 
 def sensesum(env, features, pair_first, pair_second, out_sense=None):
     if env.device == torch.device('cpu'):
-        return featsum_pt(env,features,pair_first,pair_second)
+        return sensesum_pt(env,features,pair_first,pair_second)
     _, n_nu, _ = env.shape
     n_atom, n_feat = features.shape
     n_pairs = len(pair_first)
