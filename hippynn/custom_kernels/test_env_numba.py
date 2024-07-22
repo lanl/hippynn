@@ -8,7 +8,8 @@ import torch
 from . import env_pytorch
 from . import autograd_wrapper
 from . import env_numba
-
+# set the seed for reproducibility
+np.random.seed(0)
 
 def get_simulated_data(
     n_molecules, n_atoms, atom_prob, n_features, n_nu, printinfo=False, dtype=None, device=torch.device("cpu")

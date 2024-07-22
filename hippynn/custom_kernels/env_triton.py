@@ -94,7 +94,7 @@ def sensesum_kernel(out_sense_ptr,
     mask = (sens_block_ids[:, None] < sens_size) & (feat_block_ids[None, :] < feat_size)
     block_ids = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
     # [p2_sens_size, p2_feat_size]
-    env = tl.load(env_ptr + (first * sens_size * feat_size) + block_ids, mask=mask)
+    env = tl.load(env_ptr + (first * sens_size * feat_size) + block_ids, mask=mask, other=0.0)
     # [p2_feat_size, ]
     feat = tl.load(feat_ptr + (second * feat_size) + feat_block_ids, 
                 mask=feat_block_ids < feat_size, other=0.0)
@@ -166,7 +166,7 @@ def featsum_kernel(out_feat,
         mask = (sens_block_ids[:, None] < sens_size) & (feat_block_ids[None, :] < feat_size)
         block_ids = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
         # [p2_sens_size, p2_feat_size]
-        env = tl.load(env_ptr + (pair_ind * sens_size * feat_size) + block_ids, mask=mask)
+        env = tl.load(env_ptr + (pair_ind * sens_size * feat_size) + block_ids, mask=mask, other=0.0)
         # temp_mat and tmp is [p2_feat_size,]
         temp_mat = tl.sum(env * sense[:, None], axis=0)
         tmp = tmp + temp_mat
