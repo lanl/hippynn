@@ -370,7 +370,7 @@ def main(env_impl,sense_impl,feat_impl):
         print("Running GPU tests")
         meminfo = numba.cuda.current_context().get_memory_info()
         use_large_gpu = meminfo.free > 2 ** 31
-        use_verylarge_gpu = meminfo.free > 2**3
+        use_verylarge_gpu = meminfo.free > 2**35
 
         n_large = 3 if use_large_gpu else 0
         tester.check_correctness(device=torch.device("cuda"),n_large=n_large)
