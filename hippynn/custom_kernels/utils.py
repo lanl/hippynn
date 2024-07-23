@@ -104,6 +104,9 @@ def _make_cache():
 # Dict mapping device to key cache info
 _CACHE_STORE = collections.defaultdict(_make_cache)
 
+def clear_pair_cache():
+    _CACHE_STORE.clear()
+
 CACHE_LOCK_MISSES = 0
 def resort_pairs_cached(key, others):
     global CACHE_LOCK_MISSES
