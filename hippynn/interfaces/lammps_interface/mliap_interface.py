@@ -35,6 +35,8 @@ class MLIAPInterface(MLIAPUnified):
         :param model_device: the device to send torch data to (cpu or cuda)
         """
         super().__init__()
+        if hippynn.settings.PYTORCH_GPU_MEM_FRAC < 1.0:
+            torch.cuda.set_per_process_memory_fraction(hippynn.settings.PYTORCH_GPU_MEM_FRAC)
         self.element_types = element_types
         self.ndescriptors = ndescriptors
         self.model_device = model_device
