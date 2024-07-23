@@ -64,3 +64,8 @@ The following settings are available:
      - true, false
      - false
      - no
+   * - PYTORCH_GPU_MEM_FRAC
+     - In the Lammps interface, limit the amount of memory used by pytorch. Setting this value below 1.0 can force pytorch to garbage collect before entirely depleating GPU memory, leaving room for Lammps/KOKKOS. Leaving this variable unset imposes no pytorch memory limit
+     - float between 0 and 1
+     - 1.0
+     - no

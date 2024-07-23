@@ -117,6 +117,8 @@
 <span class="sd">        :param model_device: the device to send torch data to (cpu or cuda)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">PYTORCH_GPU_MEM_FRAC</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">set_per_process_memory_fraction</span><span class="p">(</span><span class="n">hippynn</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">PYTORCH_GPU_MEM_FRAC</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">element_types</span> <span class="o">=</span> <span class="n">element_types</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ndescriptors</span> <span class="o">=</span> <span class="n">ndescriptors</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_device</span> <span class="o">=</span> <span class="n">model_device</span>
