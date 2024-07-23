@@ -8,8 +8,8 @@ import torch
 from . import env_pytorch
 from . import autograd_wrapper
 from . import env_numba
-# set the seed for reproducibility
-np.random.seed(0)
+from . import env_cupy
+
 
 def get_simulated_data(
     n_molecules, n_atoms, atom_prob, n_features, n_nu, printinfo=False, dtype=None, device=torch.device("cpu")
@@ -243,7 +243,8 @@ class Envops_tester:
         return np.max(np.abs(diff_arr / tol_arr))  # max violation of bounds
 
     def check_allclose(self, repeats=30, use_large=False, device=torch.device("cpu")):
-        for i in range(repeats):
+        from tqdm.auto import tqdm
+        for i in tqdm(range(repeats),leave=False):
             try:
                 self.check_allclose_once(use_large, device=device)
             except Exception as ee:
@@ -273,6 +274,10 @@ class Envops_tester:
             comp_envsum = env_numba.new_envsum
             comp_sensesum = env_numba.new_sensesum
             comp_featsum = env_numba.new_featsum
+        elif compare_against == "Cupy":
+            comp_envsum = env_cupy.cupy_envsum
+            comp_sensesum = env_cupy.cupy_sensesum
+            comp_featsum = env_cupy.cupy_featsum
         else:
             raise ValueError("Unknown implementation to comapre against:'{}'".format(compare_against))
 
@@ -360,6 +365,8 @@ class TimedSnippet:
 
 
 def main(env_impl,sense_impl,feat_impl):
+
+    np.random.seed(0)
     tester = Envops_tester(
         env_impl,
         sense_impl,
@@ -371,31 +378,32 @@ def main(env_impl,sense_impl,feat_impl):
         print("Running GPU tests")
         meminfo = numba.cuda.current_context().get_memory_info()
         use_large_gpu = meminfo.free > 2 ** 31
-        use_verylarge_gpu = meminfo.free > 2**35
-
-        n_large = 3 if use_large_gpu else 0
+        use_verylarge_gpu = meminfo.free > 2**34
+        
+        n_large = 10 if use_large_gpu else 0
         tester.check_correctness(device=torch.device("cuda"),n_large=n_large)
+        compare_against = "Pytorch"
         if use_verylarge_gpu:
             print("-" * 80)
             print("Mega systems:", TEST_MEGA_PARAMS)
-            tester.check_speed(n_repetitions=20,data_size=TEST_MEGA_PARAMS, device=torch.device("cuda"), compare_against="Pytorch")
+            tester.check_speed(n_repetitions=20,data_size=TEST_MEGA_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
         else:
             print("Numba indicates less than 32GB free GPU memory -- skipping mega system test")
         if use_large_gpu:
             print("-" * 80)
-            tester.check_speed(n_repetitions=20,data_size=TEST_LARGE_PARAMS, device=torch.device("cuda"), compare_against="Pytorch") 
+            tester.check_speed(n_repetitions=20,data_size=TEST_LARGE_PARAMS, device=torch.device("cuda"), compare_against=compare_against) 
         else:
             print("Numba indicates less than 2GB free GPU memory -- skipping large system test")
 
         print("-" * 80)
         print("Medium systems:", TEST_MEDIUM_PARAMS)
         tester.check_speed(
-            n_repetitions=100, data_size=TEST_MEDIUM_PARAMS, device=torch.device("cuda"), compare_against="Pytorch"
+            n_repetitions=100, data_size=TEST_MEDIUM_PARAMS, device=torch.device("cuda"), compare_against=compare_against
         )
         print("-" * 80)
         print("Small systems:", TEST_SMALL_PARAMS)
         tester.check_speed(
-            n_repetitions=100, data_size=TEST_SMALL_PARAMS, device=torch.device("cuda"), compare_against="Pytorch"
+            n_repetitions=100, data_size=TEST_SMALL_PARAMS, device=torch.device("cuda"), compare_against=compare_against
         )
 
     else:
@@ -405,13 +413,13 @@ def main(env_impl,sense_impl,feat_impl):
     tester.check_correctness()
     print("-" * 80)
     print("Large systems:", TEST_LARGE_PARAMS)
-    tester.check_speed(n_repetitions=10, compare_against="Pytorch")
+    tester.check_speed(n_repetitions=10, compare_against=compare_against)
     print("-" * 80)
     print("Medium systems:", TEST_MEDIUM_PARAMS)
-    tester.check_speed(n_repetitions=100, data_size=TEST_MEDIUM_PARAMS, compare_against="Pytorch")
+    tester.check_speed(n_repetitions=100, data_size=TEST_MEDIUM_PARAMS, compare_against=compare_against)
     print("-" * 80)
     print("Small systems:", TEST_SMALL_PARAMS)
-    tester.check_speed(n_repetitions=100, compare_against="Pytorch", data_size=TEST_SMALL_PARAMS)
+    tester.check_speed(n_repetitions=100, compare_against=compare_against, data_size=TEST_SMALL_PARAMS)
 
 
 if __name__ == "__main__":
