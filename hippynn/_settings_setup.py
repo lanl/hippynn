@@ -73,6 +73,7 @@ default_settings = {
     "USE_CUSTOM_KERNELS": ("auto", kernel_handler),
     "WARN_LOW_DISTANCES": (True, strtobool),
     "TIMEPLOT_AUTOSCALING": (True, strtobool),
+    "PYTORCH_GPU_MEM_FRAC": (1.0, float),
 }
 
 settings = SimpleNamespace(**{k: default for k, (default, handler) in default_settings.items()})
