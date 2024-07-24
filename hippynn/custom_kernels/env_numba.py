@@ -50,9 +50,7 @@ class WrappedEnvsum(NumbaCompatibleTensorFunction):
 
     @staticmethod
     def make_kernel(KERNEL_DTYPE):
-        sig = "void({DTYPE}[:,:,],{DTYPE}[:,:],int64[:],int64[:],int64[:],int64[:],{DTYPE}[:,:,:])".format(
-            DTYPE=KERNEL_DTYPE
-        )
+        sig = "void({DTYPE}[:,:,],{DTYPE}[:,:],int64[:],int64[:],int64[:],int64[:],{DTYPE}[:,:,:])".format(DTYPE=KERNEL_DTYPE)
 
         @numba.cuda.jit(
             sig,
@@ -123,9 +121,9 @@ class WrappedSensesum(NumbaCompatibleTensorFunction):
         n_atoms, n_nu, n_feat = env_shape
         TPB_MAX = 512
         TPB_Y = n_nu
-        TPB_X = TPB_MAX//TPB_Y
-        TPB = (TPB_X,TPB_Y)
-        BPG = (n_pairs + TPB_X -1 )//TPB_X
+        TPB_X = TPB_MAX // TPB_Y
+        TPB = (TPB_X, TPB_Y)
+        BPG = (n_pairs + TPB_X - 1) // TPB_X
         return BPG, TPB
 
     @staticmethod
@@ -209,9 +207,7 @@ class WrappedFeatsum(NumbaCompatibleTensorFunction):
 
     @staticmethod
     def make_kernel(KERNEL_DTYPE):
-        sig = "void({DTYPE}[:,:,:],{DTYPE}[:,:],int64[:],int64[:],int64[:],int64[:],{DTYPE}[:,:])".format(
-            DTYPE=KERNEL_DTYPE
-        )
+        sig = "void({DTYPE}[:,:,:],{DTYPE}[:,:],int64[:],int64[:],int64[:],int64[:],{DTYPE}[:,:])".format(DTYPE=KERNEL_DTYPE)
 
         @numba.cuda.jit(
             sig,

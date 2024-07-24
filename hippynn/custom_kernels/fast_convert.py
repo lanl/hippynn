@@ -7,6 +7,7 @@ not exposed all of these functions directly.
 import numpy as np
 
 from numba.cuda.cudadrv import devices, devicearray
+
 try:
     from numba.cuda.api_util import prepare_shape_strides_dtype
 except ImportError:
@@ -34,14 +35,15 @@ typedict = {
     torch.int32: "<i4",
     torch.int64: "<i8",
 }
-typedict = {k:np.dtype(typestr) for k,typestr in typedict.items()}
+typedict = {k: np.dtype(typestr) for k, typestr in typedict.items()}
+
 
 @require_context
-def batch_convert_torch_to_numba(*tensors,typedict=typedict):
+def batch_convert_torch_to_numba(*tensors, typedict=typedict):
     out = []
 
     for tensor in tensors:
-        #v2 array interface only
+        # v2 array interface only
 
         # CUDA devices are little-endian and tensors are stored in native byte
         # order. 1-byte entries are endian-agnostic.
@@ -58,20 +60,15 @@ def batch_convert_torch_to_numba(*tensors,typedict=typedict):
         data_ptr = tensor.data_ptr() if tensor.numel() > 0 else 0
         data = (data_ptr, False)  # read-only is false
 
-
         shape = shape
         strides = strides
 
-        shape, strides, dtype = prepare_shape_strides_dtype(
-            shape, strides, dtype, order='C')
+        shape, strides, dtype = prepare_shape_strides_dtype(shape, strides, dtype, order="C")
         size = driver.memory_size_from_info(shape, strides, dtype.itemsize)
         devptr = driver.get_devptr_for_active_ctx(data_ptr)
-        data = driver.MemoryPointer(
-            current_context(), devptr, size=size, owner=tensor)
+        data = driver.MemoryPointer(current_context(), devptr, size=size, owner=tensor)
         stream = 0  # No "Numba default stream", not the CUDA default stream
-        da = devicearray.DeviceNDArray(shape=shape, strides=strides,
-                                       dtype=dtype, gpu_data=data,
-                                       stream=stream)
+        da = devicearray.DeviceNDArray(shape=shape, strides=strides, dtype=dtype, gpu_data=data, stream=stream)
         out.append(da)
 
     return out

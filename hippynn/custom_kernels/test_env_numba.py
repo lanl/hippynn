@@ -402,10 +402,10 @@ def main(env_impl, sense_impl, feat_impl, args=None):
         # calling without arguments looks for them from command line
         args = parse_args()
 
-    if isinstance(args,dict):
+    if isinstance(args, dict):
         from types import SimpleNamespace
-        args = SimpleNamespace(**args)
 
+        args = SimpleNamespace(**args)
 
     print("Got args:", args)
     np.random.seed(args.seed)
@@ -480,13 +480,21 @@ def parse_args():
     parser.add_argument("--seed", type=int, default=0, help="name for run")
 
     parser.add_argument(
-        "--compare-against", type=str, default="pytorch", help="""
-    implementation to compare speed with. Options are: pytorch, numba, cupy, triton""",)
+        "--compare-against",
+        type=str,
+        default="pytorch",
+        help="""
+    implementation to compare speed with. Options are: pytorch, numba, cupy, triton""",
+    )
 
     parser.add_argument(
-        "--n_large", type=int, default=0, help="""
+        "--n_large",
+        type=int,
+        default=0,
+        help="""
     Number of times to check correctness of forward pass. Set this to a large number (e.g. 200) to
-    stress-test a new implementation against corner-cases.""",)
+    stress-test a new implementation against corner-cases.""",
+    )
 
     parser.add_argument("--no-test-cpu", action="store_true", default=False, help="Set to false to skip CPU tests.")
     parser.add_argument("--no-test-gpu", action="store_true", default=False, help="Set to false to skip GPU tests.")
