@@ -321,6 +321,7 @@ class Envops_tester:
             for i in range(n_repetitions):
                 print(".", end="", flush=True)
                 sense, feat, pfirst, psecond = get_simulated_data(**data_size, dtype=torch.float32, device=device)
+                torch.cuda.synchronize()
                 with tne.add():
                     env = comp_envsum(sense, feat, pfirst, psecond)
                 with tns.add():
@@ -400,6 +401,12 @@ def main(env_impl, sense_impl, feat_impl, args=None):
     if args is None:
         # calling without arguments looks for them from command line
         args = parse_args()
+
+    if isinstance(args,dict):
+        from types import SimpleNamespace
+        args = SimpleNamespace(**args)
+
+
     print("Got args:", args)
     np.random.seed(args.seed)
     tester = Envops_tester(
@@ -473,7 +480,7 @@ def parse_args():
     parser.add_argument("--seed", type=int, default=0, help="name for run")
 
     parser.add_argument(
-        "--compare_against", type=str, default="pytorch", help="""
+        "--compare-against", type=str, default="pytorch", help="""
     implementation to compare speed with. Options are: pytorch, numba, cupy, triton""",)
 
     parser.add_argument(
