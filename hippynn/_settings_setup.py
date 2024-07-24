@@ -86,7 +86,7 @@ config_sources = {}  # Dictionary of configuration variable sources mapping to d
 
 rc_name = os.path.expanduser("~/.hippynnrc")
 if os.path.exists(rc_name) and os.path.isfile(rc_name):
-    config = configparser.ConfigParser()
+    config = configparser.ConfigParser(inline_comment_prefixes="#")
     config.read(rc_name)
     config_sources["~/.hippynnrc"] = config["GLOBALS"]
 
