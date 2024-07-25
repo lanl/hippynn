@@ -48,7 +48,7 @@ def envsum_kernel(
         temp_mat = s[:, None] * feat[None, :]
         tmp = tmp + temp_mat
 
-    atom_offset = (target_id * sens_size * feat_size)
+    atom_offset = target_id * sens_size * feat_size
     env_block_id = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
 
     # TODO: use sparsity of sensitivities to reduce workload? (see numba envsum implementation)
@@ -88,7 +88,7 @@ def envsum(sense, features, pfirst, psecond):
         return envsum_pt(sense, features, pfirst, psecond)
     psecond_hold = psecond
     argsort, atom1_ids, atom1_starts, pfirst, (sense, psecond) = resort_pairs_cached(pfirst, [sense, psecond])
-    resort_pairs_cached(psecond_hold, []) # Preemptively sort for backwards pass.
+    resort_pairs_cached(psecond_hold, [])  # Preemptively sort for backwards pass.
     return envsum_triton(sense, features, pfirst, psecond, atom1_ids, atom1_starts, out_env_fetures=None)
 
 
@@ -237,5 +237,5 @@ def featsum(env, sense, pfirst, psecond):
         return featsum_pt(env, sense, pfirst, psecond)
     pfirst_hold = pfirst
     argsort, atom2_ids, atom2_starts, psecond, (sense, pfirst) = resort_pairs_cached(psecond, [sense, pfirst])
-    resort_pairs_cached(pfirst_hold, []) # preemptively sort (probably no-op)
+    resort_pairs_cached(pfirst_hold, [])  # preemptively sort (probably no-op)
     return featsum_triton(env, sense, pfirst, psecond, atom2_ids, atom2_starts, out_feat=None)
