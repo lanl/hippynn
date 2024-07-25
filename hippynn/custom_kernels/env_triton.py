@@ -22,24 +22,37 @@ def envsum_kernel(
     dtype: tl.constexpr = tl.float32,
 ):
     atom_id = tl.program_id(axis=0)
-    start = tl.load(atom_starts_ptr + atom_id, mask=atom_id < atom_size, other=0)
-    end = tl.load(atom_starts_ptr + atom_id + 1, mask=atom_id < atom_size, other=0)
-    target_id = tl.load(atom_ids_ptr + atom_id, mask=atom_id < atom_size, other=0)
+
+    valid_atom_id = atom_id < atom_size
+
+    start = tl.load(atom_starts_ptr + atom_id, mask=valid_atom_id, other=0)
+    end = tl.load(atom_starts_ptr + atom_id + 1, mask=valid_atom_id, other=0)
+    target_id = tl.load(atom_ids_ptr + atom_id, mask=valid_atom_id, other=0)
+
     sens_block_ids = tl.arange(0, p2_sens_size)
     feat_block_ids = tl.arange(0, p2_feat_size)
+
+    valid_sens = sens_block_ids < sens_size
+    valid_feat = feat_block_ids < feat_size
+    valid_env = valid_sens[:, None] & valid_feat[None, :]
+
     tmp = tl.zeros((p2_sens_size, p2_feat_size), dtype=dtype)
+
     for ind in range(start, end):
         # [p2_sens_size,], coming from the pair sensitivity
-        s = tl.load(sens_ptr + (ind * sens_size) + sens_block_ids, mask=sens_block_ids < sens_size, other=0.0)
-        pair_ind = tl.load(psecond_ptr + ind)  # TODO do we need mask here
+        s = tl.load(sens_ptr + (ind * sens_size) + sens_block_ids, mask=valid_sens, other=0.0)
+        atom2_id = tl.load(psecond_ptr + ind)  # TODO C: do we need mask here # N: I don't think so
         # [p2_feat_size,], coming from the neighbor feature
-        feat = tl.load(feat_ptr + (pair_ind * feat_size) + feat_block_ids, mask=feat_block_ids < feat_size, other=0.0)
+        feat = tl.load(feat_ptr + (atom2_id * feat_size) + feat_block_ids, mask=valid_feat, other=0.0)
         # temp_mat and tmp is [p2_sens_size, p2_feat_size]
         temp_mat = s[:, None] * feat[None, :]
         tmp = tmp + temp_mat
-    mask = (sens_block_ids[:, None] < sens_size) & (feat_block_ids[None, :] < feat_size)
-    block_ids = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
-    tl.store(out_env_ptr + (target_id * sens_size * feat_size) + block_ids, tmp, mask=mask)
+
+    atom_offset = (target_id * sens_size * feat_size)
+    env_block_id = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
+
+    # TODO: use sparsity of sensitivities to reduce workload? (see numba envsum implementation)
+    tl.store(out_env_ptr + atom_offset + env_block_id, tmp, mask=valid_env)
 
 
 def envsum_triton(sensitivities, features, pair_first, pair_second, atom_ids, atom_starts, out_env_fetures=None):
@@ -75,7 +88,7 @@ def envsum(sense, features, pfirst, psecond):
         return envsum_pt(sense, features, pfirst, psecond)
     psecond_hold = psecond
     argsort, atom1_ids, atom1_starts, pfirst, (sense, psecond) = resort_pairs_cached(pfirst, [sense, psecond])
-    resort_pairs_cached(psecond_hold, [])
+    resort_pairs_cached(psecond_hold, []) # Preemptively sort for backwards pass.
     return envsum_triton(sense, features, pfirst, psecond, atom1_ids, atom1_starts, out_env_fetures=None)
 
 
@@ -94,16 +107,24 @@ def sensesum_kernel(
     dtype: tl.constexpr = tl.float32,
 ):
     pair_id = tl.program_id(axis=0)
-    first = tl.load(pfirst_ptr + pair_id, mask=pair_id < pair_size, other=0)
-    second = tl.load(psecond_ptr + pair_id, mask=pair_id < pair_size, other=0)
+    valid_pair = pair_id < pair_size
+
+    first = tl.load(pfirst_ptr + pair_id, mask=valid_pair, other=0)
+    second = tl.load(psecond_ptr + pair_id, mask=valid_pair, other=0)
+
     sens_block_ids = tl.arange(0, p2_sens_size)
     feat_block_ids = tl.arange(0, p2_feat_size)
-    mask = (sens_block_ids[:, None] < sens_size) & (feat_block_ids[None, :] < feat_size)
+
+    valid_sens = sens_block_ids < sens_size
+    valid_feat = feat_block_ids < feat_size
+    valid_env = valid_sens[:, None] & valid_feat[None, :]
+
     block_ids = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
     # [p2_sens_size, p2_feat_size]
-    env = tl.load(env_ptr + (first * sens_size * feat_size) + block_ids, mask=mask, other=0.0)
+    env = tl.load(env_ptr + (first * sens_size * feat_size) + block_ids, mask=valid_env, other=0.0)
     # [p2_feat_size, ]
-    feat = tl.load(feat_ptr + (second * feat_size) + feat_block_ids, mask=feat_block_ids < feat_size, other=0.0)
+    feat = tl.load(feat_ptr + (second * feat_size) + feat_block_ids, mask=valid_feat, other=0.0)
+    # N: What is going on in this string?
     """
     type_f32: tl.constexpr = tl.float32
     type_check: tl.constexpr = (dtype == type_f32)
@@ -113,7 +134,8 @@ def sensesum_kernel(
         res = tl.sum(env * feat[None, :], axis=1)
     """
     res = tl.sum(env * feat[None, :], axis=1)
-    tl.store(out_sense_ptr + (pair_id * sens_size) + sens_block_ids, res, mask=sens_block_ids < sens_size)
+    # TODO: use sparsity of sensitivities to reduce workload? (see numba envsum implementation)
+    tl.store(out_sense_ptr + (pair_id * sens_size) + sens_block_ids, res, mask=valid_sens)
 
 
 def sensesum(env, features, pair_first, pair_second, out_sense=None):
@@ -152,24 +174,33 @@ def featsum_kernel(
     dtype: tl.constexpr = tl.float32,
 ):
     atom_id = tl.program_id(axis=0)
-    start = tl.load(atom2_starts_ptr + atom_id, mask=atom_id < atom_size, other=0)
-    end = tl.load(atom2_starts_ptr + atom_id + 1, mask=atom_id < atom_size, other=0)
-    target_id = tl.load(atom2_ids_ptr + atom_id, mask=atom_id < atom_size, other=0)
+    valid_atom = atom_id < atom_size
+
+    start = tl.load(atom2_starts_ptr + atom_id, mask=valid_atom, other=0)
+    end = tl.load(atom2_starts_ptr + atom_id + 1, mask=valid_atom, other=0)
+    target_id = tl.load(atom2_ids_ptr + atom_id, mask=valid_atom, other=0)
+
     sens_block_ids = tl.arange(0, p2_sens_size)
     feat_block_ids = tl.arange(0, p2_feat_size)
+    valid_feat = feat_block_ids < feat_size
+    valid_sens = sens_block_ids < sens_size
+
+    valid_env = valid_sens[:, None] * valid_feat[None, :]
+
+    env_block_ids = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
+
     tmp = tl.zeros((p2_feat_size,), dtype=dtype)
+
     for ind in range(start, end):
         # [p2_sens_size,], coming from the pair sensitivity
-        sense = tl.load(sens_ptr + (ind * sens_size) + sens_block_ids, mask=sens_block_ids < sens_size, other=0.0)
-        pair_ind = tl.load(pfirst_ptr + ind)  # TODO do we need mask here
-        mask = (sens_block_ids[:, None] < sens_size) & (feat_block_ids[None, :] < feat_size)
-        block_ids = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
+        sense = tl.load(sens_ptr + (ind * sens_size) + sens_block_ids, mask=valid_sens, other=0.0)
+        atom1_ind = tl.load(pfirst_ptr + ind)  # C: TODO do we need mask here #N: Don't think so
         # [p2_sens_size, p2_feat_size]
-        env = tl.load(env_ptr + (pair_ind * sens_size * feat_size) + block_ids, mask=mask, other=0.0)
+        env = tl.load(env_ptr + (atom1_ind * sens_size * feat_size) + env_block_ids, mask=valid_env, other=0.0)
         # temp_mat and tmp is [p2_feat_size,]
         temp_mat = tl.sum(env * sense[:, None], axis=0)
         tmp = tmp + temp_mat
-    tl.store(out_feat + (target_id * feat_size) + feat_block_ids, tmp, mask=feat_block_ids < feat_size)
+    tl.store(out_feat + (target_id * feat_size) + feat_block_ids, tmp, mask=valid_feat)
 
 
 def featsum_triton(env, sense, pair_first, pair_second, atom2_ids, atom2_starts, out_feat=None):
@@ -206,5 +237,5 @@ def featsum(env, sense, pfirst, psecond):
         return featsum_pt(env, sense, pfirst, psecond)
     pfirst_hold = pfirst
     argsort, atom2_ids, atom2_starts, psecond, (sense, pfirst) = resort_pairs_cached(psecond, [sense, pfirst])
-    resort_pairs_cached(pfirst_hold, [])
+    resort_pairs_cached(pfirst_hold, []) # preemptively sort (probably no-op)
     return featsum_triton(env, sense, pfirst, psecond, atom2_ids, atom2_starts, out_feat=None)

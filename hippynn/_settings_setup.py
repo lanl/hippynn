@@ -54,7 +54,7 @@ def kernel_handler(kernel_string):
         "true": True,
     }.get(kernel_string, kernel_string)
 
-    if kernel not in [True, False, "auto", "cupy", "numba"]:
+    if kernel not in [True, False, "auto", "triton", "cupy", "numba"]:
         warnings.warn(f"Unrecognized custom kernel option: {kernel_string}. Setting custom kernels to 'auto'")
         kernel = "auto"
 
