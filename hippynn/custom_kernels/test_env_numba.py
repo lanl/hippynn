@@ -426,8 +426,8 @@ def main(env_impl, sense_impl, feat_impl, args=None):
         use_verylarge_gpu = free_mem > 30 * (2**30)
 
         use_ultra = (not correctness) and use_verylarge_gpu and (compare_against.lower() != "pytorch")
-        
-        n_large = args.n_large if use_large_gpu else 0
+
+        n_large = args.n_large if use_large_gpu else 5
         if correctness:
             tester.check_correctness(device=torch.device("cuda"), n_large=n_large)
 
@@ -435,7 +435,9 @@ def main(env_impl, sense_impl, feat_impl, args=None):
             if use_ultra:
                 print("-" * 80)
                 print("Ultra systems:", TEST_ULTRA_PARAMS)
-                tester.check_speed(n_repetitions=20, data_size=TEST_ULTRA_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
+                tester.check_speed(
+                    n_repetitions=20, data_size=TEST_ULTRA_PARAMS, device=torch.device("cuda"), compare_against=compare_against
+                )
             print("-" * 80)
             print("Mega systems:", TEST_MEGA_PARAMS)
             tester.check_speed(n_repetitions=20, data_size=TEST_MEGA_PARAMS, device=torch.device("cuda"), compare_against=compare_against)

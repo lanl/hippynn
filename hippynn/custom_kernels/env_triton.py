@@ -12,6 +12,7 @@ try:
 except ImportError:
     pass
 
+
 @triton.jit
 def envsum_kernel(
     out_env_ptr,
