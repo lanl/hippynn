@@ -121,6 +121,7 @@ TEST_SMALL_PARAMS = dict(n_molecules=10, n_atoms=30, atom_prob=0.7, n_features=1
 TEST_MEDIUM_PARAMS = dict(n_molecules=100, n_atoms=30, atom_prob=0.7, n_features=20, n_nu=20)
 TEST_LARGE_PARAMS = dict(n_molecules=1000, n_atoms=30, atom_prob=0.7, n_features=80, n_nu=20)
 TEST_MEGA_PARAMS = dict(n_molecules=500, n_atoms=30, atom_prob=0.7, n_features=128, n_nu=100)
+TEST_ULTRA_PARAMS = dict(n_molecules=500, n_atoms=30, atom_prob=0.7, n_features=128, n_nu=320)
 
 # reference implementation
 
@@ -407,7 +408,6 @@ def main(env_impl, sense_impl, feat_impl, args=None):
 
         args = SimpleNamespace(**args)
 
-    print("Got args:", args)
     np.random.seed(args.seed)
     tester = Envops_tester(
         env_impl,
@@ -426,11 +426,18 @@ def main(env_impl, sense_impl, feat_impl, args=None):
         use_large_gpu = meminfo.free > 2**31
         use_verylarge_gpu = meminfo.free > 30 * (2**30)
 
+        use_ultra = (not correctness) and use_verylarge_gpu and (compare_against.lower() != "pytorch")
+        
         n_large = args.n_large if use_large_gpu else 0
         if correctness:
             tester.check_correctness(device=torch.device("cuda"), n_large=n_large)
 
         if use_verylarge_gpu:
+            if use_ultra:
+
+                print("-" * 80)
+                print("Ultra systems:", TEST_ULTRA_PARAMS)
+                tester.check_speed(n_repetitions=20, data_size=TEST_ULTRA_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
             print("-" * 80)
             print("Mega systems:", TEST_MEGA_PARAMS)
             tester.check_speed(n_repetitions=20, data_size=TEST_MEGA_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
