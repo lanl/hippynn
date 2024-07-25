@@ -427,9 +427,10 @@ def main(env_impl, sense_impl, feat_impl, args=None):
 
         use_ultra = (not correctness) and use_verylarge_gpu and (compare_against.lower() != "pytorch")
 
-        n_large = args.n_large if use_large_gpu else 5
+        n_large_gpu = args.n_large if use_large_gpu else 0
+        
         if correctness:
-            tester.check_correctness(device=torch.device("cuda"), n_large=n_large)
+            tester.check_correctness(device=torch.device("cuda"), n_large=n_large_gpu)
 
         if use_verylarge_gpu:
             if use_ultra:
@@ -465,8 +466,8 @@ def main(env_impl, sense_impl, feat_impl, args=None):
 
     if test_cpu:
         print("Running CPU tests")
-        if test_gpu:
-            tester.check_correctness()
+        if correctness:
+            tester.check_correctness(n_large=args.n_large)
 
         print("-" * 80)
         print("Large systems:", TEST_LARGE_PARAMS)
@@ -498,7 +499,7 @@ def parse_args():
     parser.add_argument(
         "--n_large",
         type=int,
-        default=0,
+        default=5,
         help="""
     Number of times to check correctness of forward pass. Set this to a large number (e.g. 200) to
     stress-test a new implementation against corner-cases.""",
