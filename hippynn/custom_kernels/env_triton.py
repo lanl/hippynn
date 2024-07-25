@@ -3,8 +3,14 @@ import triton
 import triton.language as tl
 from .utils import resort_pairs_cached
 
-from .env_pytorch import envsum as envsum_pt, sensesum as sensesum_pt, featsum as featsum_pt
+# Load backup implementation for CPU tensors.
+from .env_pytorch import envsum as envsum_alternative, sensesum as sensesum_alternative, featsum as featsum_alternative
 
+# If numba is available, this implementation will default to numba on CPU. If not, use vanilla pytorch.
+try:
+    from .env_numba import new_envsum as envsum_alternative, new_sensesum as sensesum_alternative, new_featsum as featsum_alternative
+except ImportError:
+    pass
 
 @triton.jit
 def envsum_kernel(
@@ -85,7 +91,7 @@ def envsum_triton(sensitivities, features, pair_first, pair_second, atom_ids, at
 
 def envsum(sense, features, pfirst, psecond):
     if sense.device == torch.device("cpu"):
-        return envsum_pt(sense, features, pfirst, psecond)
+        return envsum_alternative(sense, features, pfirst, psecond)
     psecond_hold = psecond
     argsort, atom1_ids, atom1_starts, pfirst, (sense, psecond) = resort_pairs_cached(pfirst, [sense, psecond])
     resort_pairs_cached(psecond_hold, [])  # Preemptively sort for backwards pass.
@@ -124,7 +130,7 @@ def sensesum_kernel(
     env = tl.load(env_ptr + (first * sens_size * feat_size) + block_ids, mask=valid_env, other=0.0)
     # [p2_feat_size, ]
     feat = tl.load(feat_ptr + (second * feat_size) + feat_block_ids, mask=valid_feat, other=0.0)
-    # N: What is going on in this string?
+    # TODO N: What is going on in this string?
     """
     type_f32: tl.constexpr = tl.float32
     type_check: tl.constexpr = (dtype == type_f32)
@@ -140,7 +146,7 @@ def sensesum_kernel(
 
 def sensesum(env, features, pair_first, pair_second, out_sense=None):
     if env.device == torch.device("cpu"):
-        return sensesum_pt(env, features, pair_first, pair_second)
+        return sensesum_alternative(env, features, pair_first, pair_second)
     _, n_nu, _ = env.shape
     n_atom, n_feat = features.shape
     n_pairs = len(pair_first)
@@ -234,7 +240,7 @@ def featsum_triton(env, sense, pair_first, pair_second, atom2_ids, atom2_starts,
 
 def featsum(env, sense, pfirst, psecond):
     if env.device == torch.device("cpu"):
-        return featsum_pt(env, sense, pfirst, psecond)
+        return featsum_alternative(env, sense, pfirst, psecond)
     pfirst_hold = pfirst
     argsort, atom2_ids, atom2_starts, psecond, (sense, pfirst) = resort_pairs_cached(psecond, [sense, pfirst])
     resort_pairs_cached(pfirst_hold, [])  # preemptively sort (probably no-op)
