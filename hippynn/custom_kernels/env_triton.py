@@ -37,6 +37,7 @@ def envsum_kernel(
 
     sens_block_ids = tl.arange(0, p2_sens_size)
     feat_block_ids = tl.arange(0, p2_feat_size)
+    env_block_ids = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
 
     valid_sens = sens_block_ids < sens_size
     valid_feat = feat_block_ids < feat_size
@@ -55,25 +56,24 @@ def envsum_kernel(
         tmp = tmp + temp_mat
 
     atom_offset = target_id * sens_size * feat_size
-    env_block_id = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
 
     # TODO: use sparsity of sensitivities to reduce workload? (see numba envsum implementation)
-    tl.store(out_env_ptr + atom_offset + env_block_id, tmp, mask=valid_env)
+    tl.store(out_env_ptr + atom_offset + env_block_ids, tmp, mask=valid_env)
 
 
-def envsum_triton(sensitivities, features, pair_first, pair_second, atom_ids, atom_starts, out_env_fetures=None):
+def envsum_triton(sensitivities, features, pair_first, pair_second, atom_ids, atom_starts, out_env=None):
     n_pairs, n_nu = sensitivities.shape
     n_atom, n_feat = features.shape
     (n_atom_with_pairs,) = atom_ids.shape
-    if out_env_fetures == None:
-        out_env_fetures = torch.zeros((n_atom, n_nu, n_feat), dtype=features.dtype, device=features.device)
+    if out_env is None:
+        out_env = torch.zeros((n_atom, n_nu, n_feat), dtype=features.dtype, device=features.device)
     dtype = tl.float32
     if features.dtype == torch.float64:
         dtype = tl.float64
     p2_sens_size = triton.next_power_of_2(n_nu)
     p2_feat_size = triton.next_power_of_2(n_feat)
     envsum_kernel[(n_atom_with_pairs,)](
-        out_env_fetures,
+        out_env,
         sensitivities,
         features,
         pair_second,
@@ -86,7 +86,7 @@ def envsum_triton(sensitivities, features, pair_first, pair_second, atom_ids, at
         p2_feat_size,
         dtype=dtype,
     )
-    return out_env_fetures
+    return out_env
 
 
 def envsum(sense, features, pfirst, psecond):
@@ -95,7 +95,7 @@ def envsum(sense, features, pfirst, psecond):
     psecond_hold = psecond
     argsort, atom1_ids, atom1_starts, pfirst, (sense, psecond) = resort_pairs_cached(pfirst, [sense, psecond])
     resort_pairs_cached(psecond_hold, [])  # Preemptively sort for backwards pass.
-    return envsum_triton(sense, features, pfirst, psecond, atom1_ids, atom1_starts, out_env_fetures=None)
+    return envsum_triton(sense, features, pfirst, psecond, atom1_ids, atom1_starts, out_env=None)
 
 
 @triton.jit
@@ -120,14 +120,14 @@ def sensesum_kernel(
 
     sens_block_ids = tl.arange(0, p2_sens_size)
     feat_block_ids = tl.arange(0, p2_feat_size)
+    env_block_ids = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
 
     valid_sens = sens_block_ids < sens_size
     valid_feat = feat_block_ids < feat_size
     valid_env = valid_sens[:, None] & valid_feat[None, :]
 
-    block_ids = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
     # [p2_sens_size, p2_feat_size]
-    env = tl.load(env_ptr + (first * sens_size * feat_size) + block_ids, mask=valid_env, other=0.0)
+    env = tl.load(env_ptr + (first * sens_size * feat_size) + env_block_ids, mask=valid_env, other=0.0)
     # [p2_feat_size, ]
     feat = tl.load(feat_ptr + (second * feat_size) + feat_block_ids, mask=valid_feat, other=0.0)
     # TODO N: What is going on in this string?
@@ -150,7 +150,7 @@ def sensesum(env, features, pair_first, pair_second, out_sense=None):
     _, n_nu, _ = env.shape
     n_atom, n_feat = features.shape
     n_pairs = len(pair_first)
-    if out_sense == None:
+    if out_sense is None:
         out_sense = torch.zeros((n_pairs, n_nu), dtype=features.dtype, device=features.device)
     dtype = tl.float32
     if features.dtype == torch.float64:
@@ -188,12 +188,11 @@ def featsum_kernel(
 
     sens_block_ids = tl.arange(0, p2_sens_size)
     feat_block_ids = tl.arange(0, p2_feat_size)
-    valid_feat = feat_block_ids < feat_size
-    valid_sens = sens_block_ids < sens_size
-
-    valid_env = valid_sens[:, None] * valid_feat[None, :]
-
     env_block_ids = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
+
+    valid_sens = sens_block_ids < sens_size
+    valid_feat = feat_block_ids < feat_size
+    valid_env = valid_sens[:, None] & valid_feat[None, :]
 
     tmp = tl.zeros((p2_feat_size,), dtype=dtype)
 
@@ -213,7 +212,7 @@ def featsum_triton(env, sense, pair_first, pair_second, atom2_ids, atom2_starts,
     n_atom, n_nu, n_feat = env.shape
     (n_pairs,) = pair_first.shape
     (n_atoms_with_pairs,) = atom2_ids.shape
-    if out_feat == None:
+    if out_feat is None:
         out_feat = torch.zeros((n_atom, n_feat), dtype=env.dtype, device=env.device)
     dtype = tl.float32
     if env.dtype == torch.float64:
