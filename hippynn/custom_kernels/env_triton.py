@@ -49,7 +49,7 @@ def envsum_kernel(
     for ind in range(start, end):
         # [p2_sens_size,], coming from the pair sensitivity
         s = tl.load(sens_ptr + (ind * sens_size) + sens_block_ids, mask=valid_sens, other=0.0)
-        atom2_id = tl.load(psecond_ptr + ind)  # TODO C: do we need mask here # N: I don't think so
+        atom2_id = tl.load(psecond_ptr + ind)
         # [p2_feat_size,], coming from the neighbor feature
         feat = tl.load(feat_ptr + (atom2_id * feat_size) + feat_block_ids, mask=valid_feat, other=0.0)
         # temp_mat and tmp is [p2_sens_size, p2_feat_size]
@@ -131,7 +131,9 @@ def sensesum_kernel(
     env = tl.load(env_ptr + (first * sens_size * feat_size) + env_block_ids, mask=valid_env, other=0.0)
     # [p2_feat_size, ]
     feat = tl.load(feat_ptr + (second * feat_size) + feat_block_ids, mask=valid_feat, other=0.0)
-    # TODO N: What is going on in this string?
+    # TODO: Here we use outer product followed by sum b/c built-in triton dot needs batches and FP<64.
+    # Can we make this better then?
+    # For future reference:
     """
     type_f32: tl.constexpr = tl.float32
     type_check: tl.constexpr = (dtype == type_f32)
@@ -140,6 +142,7 @@ def sensesum_kernel(
     else:
         res = tl.sum(env * feat[None, :], axis=1)
     """
+
     res = tl.sum(env * feat[None, :], axis=1)
     # TODO: use sparsity of sensitivities to reduce workload? (see numba envsum implementation)
     tl.store(out_sense_ptr + (pair_id * sens_size) + sens_block_ids, res, mask=valid_sens)
@@ -200,7 +203,7 @@ def featsum_kernel(
     for ind in range(start, end):
         # [p2_sens_size,], coming from the pair sensitivity
         sense = tl.load(sens_ptr + (ind * sens_size) + sens_block_ids, mask=valid_sens, other=0.0)
-        atom1_ind = tl.load(pfirst_ptr + ind)  # C: TODO do we need mask here #N: Don't think so
+        atom1_ind = tl.load(pfirst_ptr + ind)
         # [p2_sens_size, p2_feat_size]
         env = tl.load(env_ptr + (atom1_ind * sens_size * feat_size) + env_block_ids, mask=valid_env, other=0.0)
         # temp_mat and tmp is [p2_feat_size,]

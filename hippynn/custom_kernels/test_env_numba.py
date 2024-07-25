@@ -428,7 +428,7 @@ def main(env_impl, sense_impl, feat_impl, args=None):
         use_ultra = (not correctness) and use_verylarge_gpu and (compare_against.lower() != "pytorch")
 
         n_large_gpu = args.n_large if use_large_gpu else 0
-        
+
         if correctness:
             tester.check_correctness(device=torch.device("cuda"), n_large=n_large_gpu)
 
