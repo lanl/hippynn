@@ -1,7 +1,6 @@
 """
 Test module for verifying implementation correctness against pytorch.
 """
-import numba
 import numpy as np
 import torch
 
@@ -10,6 +9,7 @@ from . import autograd_wrapper
 from .utils import clear_pair_cache
 
 import warnings
+
 
 try:
     from . import env_numba
@@ -383,13 +383,11 @@ class TimedSnippet:
     def __enter__(self):
         if torch.cuda.is_available():
             torch.cuda.synchronize()
-            numba.cuda.synchronize()
         self.start = time.time()
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         if torch.cuda.is_available():
             torch.cuda.synchronize()
-            numba.cuda.synchronize()
         self.end = time.time()
 
     @property
@@ -422,9 +420,10 @@ def main(env_impl, sense_impl, feat_impl, args=None):
 
     if torch.cuda.is_available() and not args.no_test_gpu:
         print("Running GPU tests")
-        meminfo = numba.cuda.current_context().get_memory_info()
-        use_large_gpu = meminfo.free > 2**31
-        use_verylarge_gpu = meminfo.free > 30 * (2**30)
+        free_mem, total_mem = torch.cuda.memory.mem_get_info()
+
+        use_large_gpu = free_mem > 2**31
+        use_verylarge_gpu = free_mem > 30 * (2**30)
 
         use_ultra = (not correctness) and use_verylarge_gpu and (compare_against.lower() != "pytorch")
         
@@ -434,7 +433,6 @@ def main(env_impl, sense_impl, feat_impl, args=None):
 
         if use_verylarge_gpu:
             if use_ultra:
-
                 print("-" * 80)
                 print("Ultra systems:", TEST_ULTRA_PARAMS)
                 tester.check_speed(n_repetitions=20, data_size=TEST_ULTRA_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
@@ -445,6 +443,7 @@ def main(env_impl, sense_impl, feat_impl, args=None):
             print("Numba indicates less than 30GB free GPU memory -- skipping mega system test")
         if use_large_gpu:
             print("-" * 80)
+            print("Large systems:", TEST_LARGE_PARAMS)
             tester.check_speed(n_repetitions=20, data_size=TEST_LARGE_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
         else:
             print("Numba indicates less than 2GB free GPU memory -- skipping large system test")
