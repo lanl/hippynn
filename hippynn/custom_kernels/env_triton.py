@@ -2,6 +2,7 @@ import torch
 import triton
 import triton.language as tl
 from .utils import resort_pairs_cached
+import math
 
 # Load backup implementation for CPU tensors.
 from .env_pytorch import envsum as envsum_alternative, sensesum as sensesum_alternative, featsum as featsum_alternative
@@ -12,7 +13,77 @@ try:
 except ImportError:
     pass
 
+def config_pruner(configs, kwargs):
+    '''
+    Trims the unnecessary config options based on the sens. and feat. sizes
+    '''
+    p2_sens_size = triton.next_power_of_2(kwargs["sens_size"])
+    p2_feat_size = triton.next_power_of_2(kwargs["feat_size"])
 
+    used = set()
+    for config in configs:
+        sense_block_size = min(p2_sens_size, config.kwargs["SENS_BLOCK_SIZE"])
+        feat_block_size = min(p2_feat_size, config.kwargs["FEAT_BLOCK_SIZE"])
+
+        if (sense_block_size,
+            feat_block_size,
+            config.num_stages,
+            config.num_warps) in used:
+            continue
+        used.add((sense_block_size,
+                feat_block_size,
+                config.num_stages,
+                config.num_warps))
+        yield triton.Config(
+              {
+                "SENS_BLOCK_SIZE": sense_block_size,
+                "FEAT_BLOCK_SIZE": feat_block_size,
+              },
+              num_stages=config.num_stages,
+              num_warps=config.num_warps,
+        )
+
+def get_autotune_config():
+    '''
+    Create a list of config options for the kernels
+    TODO: Need to spend time actually figuring out more reasonable options
+    targeted for modern GPUs
+    '''
+    return [
+        triton.Config({'SENS_BLOCK_SIZE': 16, 'FEAT_BLOCK_SIZE': 16}),
+        triton.Config({'SENS_BLOCK_SIZE': 16, 'FEAT_BLOCK_SIZE': 32}),
+        triton.Config({'SENS_BLOCK_SIZE': 16, 'FEAT_BLOCK_SIZE': 64}),
+        triton.Config({'SENS_BLOCK_SIZE': 16, 'FEAT_BLOCK_SIZE': 128}),
+        triton.Config({'SENS_BLOCK_SIZE': 16, 'FEAT_BLOCK_SIZE': 256}),
+
+        triton.Config({'SENS_BLOCK_SIZE': 32, 'FEAT_BLOCK_SIZE': 32}),
+        triton.Config({'SENS_BLOCK_SIZE': 32, 'FEAT_BLOCK_SIZE': 64}),
+        triton.Config({'SENS_BLOCK_SIZE': 32, 'FEAT_BLOCK_SIZE': 128}),
+        triton.Config({'SENS_BLOCK_SIZE': 32, 'FEAT_BLOCK_SIZE': 128}, num_warps=8),
+
+        triton.Config({'SENS_BLOCK_SIZE': 32, 'FEAT_BLOCK_SIZE': 256}),
+        triton.Config({'SENS_BLOCK_SIZE': 32, 'FEAT_BLOCK_SIZE': 256}, num_warps=8),
+
+        
+        triton.Config({'SENS_BLOCK_SIZE': 64, 'FEAT_BLOCK_SIZE': 32}),
+        triton.Config({'SENS_BLOCK_SIZE': 64, 'FEAT_BLOCK_SIZE': 64}),
+        triton.Config({'SENS_BLOCK_SIZE': 64, 'FEAT_BLOCK_SIZE': 128}),
+        triton.Config({'SENS_BLOCK_SIZE': 64, 'FEAT_BLOCK_SIZE': 256}),
+
+        triton.Config({'SENS_BLOCK_SIZE': 128, 'FEAT_BLOCK_SIZE': 32}),
+        triton.Config({'SENS_BLOCK_SIZE': 128, 'FEAT_BLOCK_SIZE': 64}),
+        triton.Config({'SENS_BLOCK_SIZE': 128, 'FEAT_BLOCK_SIZE': 64}, num_warps=8),
+
+        triton.Config({'SENS_BLOCK_SIZE': 256, 'FEAT_BLOCK_SIZE': 32}),
+        triton.Config({'SENS_BLOCK_SIZE': 256, 'FEAT_BLOCK_SIZE': 64}),
+        triton.Config({'SENS_BLOCK_SIZE': 256, 'FEAT_BLOCK_SIZE': 64}, num_warps=8), 
+    ]
+
+@triton.autotune(
+    configs=get_autotune_config(),
+    key=['sens_size', 'feat_size'],
+    prune_configs_by={ "early_config_prune": config_pruner}
+)
 @triton.jit
 def envsum_kernel(
     out_env_ptr,
@@ -24,11 +95,14 @@ def envsum_kernel(
     atom_size,
     sens_size: tl.constexpr,
     feat_size: tl.constexpr,
-    p2_sens_size: tl.constexpr,
-    p2_feat_size: tl.constexpr,
+    SENS_BLOCK_SIZE: tl.constexpr,
+    FEAT_BLOCK_SIZE: tl.constexpr,
+
     dtype: tl.constexpr = tl.float32,
 ):
     atom_id = tl.program_id(axis=0)
+    sens_id = tl.program_id(axis=1)
+    feat_id = tl.program_id(axis=2)
 
     valid_atom_id = atom_id < atom_size
 
@@ -36,23 +110,23 @@ def envsum_kernel(
     end = tl.load(atom_starts_ptr + atom_id + 1, mask=valid_atom_id, other=0)
     target_id = tl.load(atom_ids_ptr + atom_id, mask=valid_atom_id, other=0)
 
-    sens_block_ids = tl.arange(0, p2_sens_size)
-    feat_block_ids = tl.arange(0, p2_feat_size)
+    sens_block_ids = tl.arange(0, SENS_BLOCK_SIZE) + (sens_id * SENS_BLOCK_SIZE)
+    feat_block_ids = tl.arange(0, FEAT_BLOCK_SIZE) + (feat_id * FEAT_BLOCK_SIZE)
     env_block_ids = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
 
     valid_sens = sens_block_ids < sens_size
     valid_feat = feat_block_ids < feat_size
     valid_env = valid_sens[:, None] & valid_feat[None, :]
 
-    tmp = tl.zeros((p2_sens_size, p2_feat_size), dtype=dtype)
+    tmp = tl.zeros((SENS_BLOCK_SIZE, FEAT_BLOCK_SIZE), dtype=dtype)
 
     for ind in range(start, end):
-        # [p2_sens_size,], coming from the pair sensitivity
+        # [SENS_BLOCK_SIZE,], coming from the pair sensitivity
         s = tl.load(sens_ptr + (ind * sens_size) + sens_block_ids, mask=valid_sens, other=0.0)
         atom2_id = tl.load(psecond_ptr + ind)
-        # [p2_feat_size,], coming from the neighbor feature
+        # [FEAT_BLOCK_SIZE,], coming from the neighbor feature
         feat = tl.load(feat_ptr + (atom2_id * feat_size) + feat_block_ids, mask=valid_feat, other=0.0)
-        # temp_mat and tmp is [p2_sens_size, p2_feat_size]
+        # temp_mat and tmp is [SENS_BLOCK_SIZE, FEAT_BLOCK_SIZE]
         temp_mat = s[:, None] * feat[None, :]
         tmp = tmp + temp_mat
 
@@ -60,7 +134,6 @@ def envsum_kernel(
 
     # TODO: use sparsity of sensitivities to reduce workload? (see numba envsum implementation)
     tl.store(out_env_ptr + atom_offset + env_block_ids, tmp, mask=valid_env)
-
 
 def envsum_triton(sensitivities, features, pair_first, pair_second, atom_ids, atom_starts, out_env=None):
     n_pairs, n_nu = sensitivities.shape
@@ -71,9 +144,10 @@ def envsum_triton(sensitivities, features, pair_first, pair_second, atom_ids, at
     dtype = tl.float32
     if features.dtype == torch.float64:
         dtype = tl.float64
-    p2_sens_size = triton.next_power_of_2(n_nu)
-    p2_feat_size = triton.next_power_of_2(n_feat)
-    envsum_kernel[(n_atom_with_pairs,)](
+
+    grid = lambda META: (n_atom_with_pairs, triton.cdiv(n_nu, META['SENS_BLOCK_SIZE']),  triton.cdiv(n_feat, META['FEAT_BLOCK_SIZE']))
+
+    envsum_kernel[grid](
         out_env,
         sensitivities,
         features,
@@ -83,10 +157,10 @@ def envsum_triton(sensitivities, features, pair_first, pair_second, atom_ids, at
         n_atom_with_pairs,
         n_nu,
         n_feat,
-        p2_sens_size,
-        p2_feat_size,
         dtype=dtype,
     )
+    #print('best config')
+    #print(envsum_kernel.best_config) 
     return out_env
 
 
@@ -98,7 +172,11 @@ def envsum(sense, features, pfirst, psecond):
     resort_pairs_cached(psecond_hold, [])  # Preemptively sort for backwards pass.
     return envsum_triton(sense, features, pfirst, psecond, atom1_ids, atom1_starts, out_env=None)
 
-
+@triton.autotune(
+    configs=get_autotune_config(),
+    key=['sens_size', 'feat_size'],
+    prune_configs_by={ "early_config_prune": config_pruner}
+)
 @triton.jit
 def sensesum_kernel(
     out_sense_ptr,
@@ -109,43 +187,49 @@ def sensesum_kernel(
     pair_size,
     sens_size: tl.constexpr,
     feat_size: tl.constexpr,
-    p2_sens_size: tl.constexpr,
-    p2_feat_size: tl.constexpr,
+    SENS_BLOCK_SIZE: tl.constexpr,
+    FEAT_BLOCK_SIZE: tl.constexpr,
     dtype: tl.constexpr = tl.float32,
 ):
     pair_id = tl.program_id(axis=0)
+    sense_id = tl.program_id(axis=1)
+    num_feat_blocks: tl.constexpr = tl.cdiv(feat_size, FEAT_BLOCK_SIZE)
     valid_pair = pair_id < pair_size
 
     first = tl.load(pfirst_ptr + pair_id, mask=valid_pair, other=0)
     second = tl.load(psecond_ptr + pair_id, mask=valid_pair, other=0)
 
-    sens_block_ids = tl.arange(0, p2_sens_size)
-    feat_block_ids = tl.arange(0, p2_feat_size)
-    env_block_ids = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
+    sens_block_ids = tl.arange(0, SENS_BLOCK_SIZE) + (sense_id * SENS_BLOCK_SIZE)
+    feat_block_ids = tl.arange(0, FEAT_BLOCK_SIZE)
 
     valid_sens = sens_block_ids < sens_size
-    valid_feat = feat_block_ids < feat_size
-    valid_env = valid_sens[:, None] & valid_feat[None, :]
-
-    # [p2_sens_size, p2_feat_size]
-    env = tl.load(env_ptr + (first * sens_size * feat_size) + env_block_ids, mask=valid_env, other=0.0)
-    # [p2_feat_size, ]
-    feat = tl.load(feat_ptr + (second * feat_size) + feat_block_ids, mask=valid_feat, other=0.0)
-    # TODO: Here we use outer product followed by sum b/c built-in triton dot needs batches and FP<64.
-    # Can we make this better then?
-    # For future reference:
-    """
-    type_f32: tl.constexpr = tl.float32
-    type_check: tl.constexpr = (dtype == type_f32)
-    if type_check:
-        res = tl.dot(env, feat[:, None])
-    else:
-        res = tl.sum(env * feat[None, :], axis=1)
-    """
-
-    res = tl.sum(env * feat[None, :], axis=1)
+    
+    
+    tmp = tl.zeros((SENS_BLOCK_SIZE,), dtype=dtype)
+    for feat_id in range(num_feat_blocks):
+        valid_feat = feat_block_ids < feat_size
+        env_block_ids = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
+        valid_env = valid_sens[:, None] & valid_feat[None, :]
+        # [SENS_BLOCK_SIZE, FEAT_BLOCK_SIZE]
+        env = tl.load(env_ptr + (first * sens_size * feat_size) + env_block_ids, mask=valid_env, other=0.0)
+        # [FEAT_BLOCK_SIZE, ]
+        feat = tl.load(feat_ptr + (second * feat_size) + feat_block_ids, mask=valid_feat, other=0.0)
+        # TODO: Here we use outer product followed by sum b/c built-in triton dot needs batches and FP<64.
+        # Can we make this better then?
+        # For future reference:
+        """
+        type_f32: tl.constexpr = tl.float32
+        type_check: tl.constexpr = (dtype == type_f32)
+        if type_check:
+            res = tl.dot(env, feat[:, None])
+        else:
+            res = tl.sum(env * feat[None, :], axis=1)
+        """
+        tmp += tl.sum(env * feat[None, :], axis=1)
+        # increment the feat block id
+        feat_block_ids += FEAT_BLOCK_SIZE
     # TODO: use sparsity of sensitivities to reduce workload? (see numba envsum implementation)
-    tl.store(out_sense_ptr + (pair_id * sens_size) + sens_block_ids, res, mask=valid_sens)
+    tl.store(out_sense_ptr + (pair_id * sens_size) + sens_block_ids, tmp, mask=valid_sens)
 
 
 def sensesum(env, features, pair_first, pair_second, out_sense=None):
@@ -159,14 +243,18 @@ def sensesum(env, features, pair_first, pair_second, out_sense=None):
     dtype = tl.float32
     if features.dtype == torch.float64:
         dtype = tl.float64
-    p2_sens_size = triton.next_power_of_2(n_nu)
-    p2_feat_size = triton.next_power_of_2(n_feat)
-    sensesum_kernel[(n_pairs,)](
-        out_sense, env, features, pair_first, pair_second, n_pairs, n_nu, n_feat, p2_sens_size, p2_feat_size, dtype=dtype
+
+    grid = lambda META: (n_pairs, triton.cdiv(n_nu, META['SENS_BLOCK_SIZE']))
+    sensesum_kernel[grid](
+        out_sense, env, features, pair_first, pair_second, n_pairs, n_nu, n_feat, dtype=dtype
     )
     return out_sense
 
-
+@triton.autotune(
+    configs=get_autotune_config(),
+    key=['sens_size', 'feat_size'],
+    prune_configs_by={ "early_config_prune": config_pruner}
+)
 @triton.jit
 def featsum_kernel(
     out_feat,
@@ -179,36 +267,42 @@ def featsum_kernel(
     atom_size,
     sens_size: tl.constexpr,
     feat_size: tl.constexpr,
-    p2_sens_size: tl.constexpr,
-    p2_feat_size: tl.constexpr,
+    SENS_BLOCK_SIZE: tl.constexpr,
+    FEAT_BLOCK_SIZE: tl.constexpr,
     dtype: tl.constexpr = tl.float32,
 ):
     atom_id = tl.program_id(axis=0)
+    feat_id = tl.program_id(axis=1)
+    num_sense_blocks: tl.constexpr = tl.cdiv(sens_size, SENS_BLOCK_SIZE)
     valid_atom = atom_id < atom_size
 
     start = tl.load(atom2_starts_ptr + atom_id, mask=valid_atom, other=0)
     end = tl.load(atom2_starts_ptr + atom_id + 1, mask=valid_atom, other=0)
     target_id = tl.load(atom2_ids_ptr + atom_id, mask=valid_atom, other=0)
 
-    sens_block_ids = tl.arange(0, p2_sens_size)
-    feat_block_ids = tl.arange(0, p2_feat_size)
-    env_block_ids = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
 
-    valid_sens = sens_block_ids < sens_size
+    feat_block_ids = tl.arange(0, FEAT_BLOCK_SIZE) + (feat_id * FEAT_BLOCK_SIZE)
+
     valid_feat = feat_block_ids < feat_size
-    valid_env = valid_sens[:, None] & valid_feat[None, :]
 
-    tmp = tl.zeros((p2_feat_size,), dtype=dtype)
+    tmp = tl.zeros((FEAT_BLOCK_SIZE,), dtype=dtype)
 
     for ind in range(start, end):
-        # [p2_sens_size,], coming from the pair sensitivity
-        sense = tl.load(sens_ptr + (ind * sens_size) + sens_block_ids, mask=valid_sens, other=0.0)
-        atom1_ind = tl.load(pfirst_ptr + ind)
-        # [p2_sens_size, p2_feat_size]
-        env = tl.load(env_ptr + (atom1_ind * sens_size * feat_size) + env_block_ids, mask=valid_env, other=0.0)
-        # temp_mat and tmp is [p2_feat_size,]
-        temp_mat = tl.sum(env * sense[:, None], axis=0)
-        tmp = tmp + temp_mat
+        sens_block_ids = tl.arange(0, SENS_BLOCK_SIZE)
+        for sense_id in range(num_sense_blocks):
+            valid_sens = sens_block_ids < sens_size
+            # [SENS_BLOCK_SIZE,], coming from the pair sensitivity
+            sense = tl.load(sens_ptr + (ind * sens_size) + sens_block_ids, mask=valid_sens, other=0.0)
+            atom1_ind = tl.load(pfirst_ptr + ind)
+            # [SENS_BLOCK_SIZE, FEAT_BLOCK_SIZE]
+            env_block_ids = sens_block_ids[:, None] * feat_size + feat_block_ids[None, :]
+            valid_env = valid_sens[:, None] & valid_feat[None, :]
+            env = tl.load(env_ptr + (atom1_ind * sens_size * feat_size) + env_block_ids, mask=valid_env, other=0.0)
+            # temp_mat and tmp is [FEAT_BLOCK_SIZE,]
+            temp_mat = tl.sum(env * sense[:, None], axis=0)
+            tmp = tmp + temp_mat
+            # increment the sense block id
+            sens_block_ids += SENS_BLOCK_SIZE
     tl.store(out_feat + (target_id * feat_size) + feat_block_ids, tmp, mask=valid_feat)
 
 
@@ -221,9 +315,9 @@ def featsum_triton(env, sense, pair_first, pair_second, atom2_ids, atom2_starts,
     dtype = tl.float32
     if env.dtype == torch.float64:
         dtype = tl.float64
-    p2_sens_size = triton.next_power_of_2(n_nu)
-    p2_feat_size = triton.next_power_of_2(n_feat)
-    featsum_kernel[(n_atoms_with_pairs,)](
+    grid = lambda META: (n_atoms_with_pairs, triton.cdiv(n_feat, META['FEAT_BLOCK_SIZE']))
+
+    featsum_kernel[grid](
         out_feat,
         env,
         sense,
@@ -234,8 +328,6 @@ def featsum_triton(env, sense, pair_first, pair_second, atom2_ids, atom2_starts,
         n_atoms_with_pairs,
         n_nu,
         n_feat,
-        p2_sens_size,
-        p2_feat_size,
         dtype=dtype,
     )
     return out_feat
