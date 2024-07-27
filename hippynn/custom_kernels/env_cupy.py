@@ -177,6 +177,10 @@ class CupyEnvsum(CupyGPUKernel, WrappedEnvsum):
         array_args = sense, feat, psecond, atom1_ids, atom1_starts, env_out
         shape_args = n_nu, n_feat, n_interact
 
+        if n_feat > 512:
+            raise ValueError(f"Numba GPU custom kernels are not compatible with feature sizes greater than 512 (got {n_feat})")
+
+
         TPB_MAX = 512
         TPB_X = n_feat
         TPB_Y = TPB_MAX // n_feat
@@ -204,6 +208,9 @@ class CupySensesum(CupyGPUKernel, WrappedSensesum):
         sense_out = torch.zeros((n_pairs, n_nu), device=dev, dtype=dtype)
         array_args = env, feat, pfirst, psecond, sense_out
         shape_args = n_pairs, n_nu, n_feat
+
+        if n_nu > 512:
+            raise ValueError(f"Numba GPU custom kernels are not compatible with sensitivity sizes greater than 512 (got {n_nu})")
 
         TPB_MAX = 512
         TPB_Y = n_nu
@@ -234,6 +241,9 @@ class CupyFeatsum(CupyGPUKernel, WrappedFeatsum):
         feat_out = torch.zeros((n_atoms, n_feat), device=dev, dtype=dtype)
         array_args = env, sense, pfirst, atom2_ids, atom2_starts, feat_out
         shape_args = n_nu, n_feat, n_interact
+
+        if n_feat > 512:
+            raise ValueError(f"Cupy GPU custom kernels are not compatible with feature sizes greater than 512 (got {n_feat})")
 
         TPB_max = 512
         if n_feat > 32:
