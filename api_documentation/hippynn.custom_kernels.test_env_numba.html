@@ -22,7 +22,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="hippynn.custom_kernels.utils module" href="hippynn.custom_kernels.utils.html" />
+    <link rel="next" title="hippynn.custom_kernels.test_env_triton module" href="hippynn.custom_kernels.test_env_triton.html" />
     <link rel="prev" title="hippynn.custom_kernels.test_env_cupy module" href="hippynn.custom_kernels.test_env_cupy.html" /> 
 </head>
 
@@ -59,6 +59,7 @@
 <li class="toctree-l5"><a class="reference internal" href="hippynn.custom_kernels.env_cupy.html">hippynn.custom_kernels.env_cupy module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html">hippynn.custom_kernels.env_numba module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.custom_kernels.env_pytorch.html">hippynn.custom_kernels.env_pytorch module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.custom_kernels.env_triton.html">hippynn.custom_kernels.env_triton module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.custom_kernels.fast_convert.html">hippynn.custom_kernels.fast_convert module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html">hippynn.custom_kernels.tensor_wrapper module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.custom_kernels.test_env_cupy.html">hippynn.custom_kernels.test_env_cupy module</a></li>
@@ -91,8 +92,10 @@
 </li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.custom_kernels.test_env_numba.get_simulated_data"><code class="docutils literal notranslate"><span class="pre">get_simulated_data()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.custom_kernels.test_env_numba.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.custom_kernels.test_env_numba.parse_args"><code class="docutils literal notranslate"><span class="pre">parse_args()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.custom_kernels.test_env_triton.html">hippynn.custom_kernels.test_env_triton module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.custom_kernels.utils.html">hippynn.custom_kernels.utils module</a></li>
 </ul>
 </li>
@@ -137,7 +140,7 @@
       </li>
   </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
         <a href="hippynn.custom_kernels.test_env_cupy.html" class="btn btn-neutral float-left" title="hippynn.custom_kernels.test_env_cupy module" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="hippynn.custom_kernels.utils.html" class="btn btn-neutral float-right" title="hippynn.custom_kernels.utils module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hippynn.custom_kernels.test_env_triton.html" class="btn btn-neutral float-right" title="hippynn.custom_kernels.test_env_triton module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
   </div>
   <hr/>
 </div>
@@ -198,7 +201,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.custom_kernels.test_env_numba.Envops_tester.check_speed">
-<span class="sig-name descname"><span class="pre">check_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_repetitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">device(type='cpu')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'atom_prob':</span> <span class="pre">0.7,</span> <span class="pre">'n_atoms':</span> <span class="pre">30,</span> <span class="pre">'n_features':</span> <span class="pre">80,</span> <span class="pre">'n_molecules':</span> <span class="pre">1000,</span> <span class="pre">'n_nu':</span> <span class="pre">20}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compare_against</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Pytorch'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels/test_env_numba.html#Envops_tester.check_speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.test_env_numba.Envops_tester.check_speed" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_repetitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">device(type='cpu')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'atom_prob':</span> <span class="pre">0.7,</span> <span class="pre">'n_atoms':</span> <span class="pre">30,</span> <span class="pre">'n_features':</span> <span class="pre">80,</span> <span class="pre">'n_molecules':</span> <span class="pre">1000,</span> <span class="pre">'n_nu':</span> <span class="pre">20}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compare_against</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pytorch'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels/test_env_numba.html#Envops_tester.check_speed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.test_env_numba.Envops_tester.check_speed" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -286,7 +289,12 @@ for all atoms i, (i,i) is not a pair.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hippynn.custom_kernels.test_env_numba.main">
-<span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env_impl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sense_impl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feat_impl</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels/test_env_numba.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.test_env_numba.main" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env_impl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sense_impl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feat_impl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels/test_env_numba.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.test_env_numba.main" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.custom_kernels.test_env_numba.parse_args">
+<span class="sig-name descname"><span class="pre">parse_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels/test_env_numba.html#parse_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.test_env_numba.parse_args" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -296,7 +304,7 @@ for all atoms i, (i,i) is not a pair.</p></li>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="hippynn.custom_kernels.test_env_cupy.html" class="btn btn-neutral float-left" title="hippynn.custom_kernels.test_env_cupy module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="hippynn.custom_kernels.utils.html" class="btn btn-neutral float-right" title="hippynn.custom_kernels.utils module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hippynn.custom_kernels.test_env_triton.html" class="btn btn-neutral float-right" title="hippynn.custom_kernels.test_env_triton module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

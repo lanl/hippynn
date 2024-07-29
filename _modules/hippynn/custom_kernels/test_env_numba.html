@@ -80,20 +80,36 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Test module for verifying implementation correctness against pytorch.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">numba</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_pytorch</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">autograd_wrapper</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_numba</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">clear_pair_cache</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_numba</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;numba implementation not importable.&quot;</span><span class="p">)</span>
+    <span class="n">env_numba</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_cupy</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;cupy implementation not importable.&quot;</span><span class="p">)</span>
+    <span class="n">env_cupy</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_triton</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;triton implementation not importable.&quot;</span><span class="p">)</span>
+    <span class="n">env_triton</span> <span class="o">=</span> <span class="kc">None</span>
 
 
 <div class="viewcode-block" id="get_simulated_data">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.get_simulated_data">[docs]</a>
-<span class="k">def</span> <span class="nf">get_simulated_data</span><span class="p">(</span>
-    <span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">atom_prob</span><span class="p">,</span> <span class="n">n_features</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">printinfo</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
-<span class="p">):</span>
+<span class="k">def</span> <span class="nf">get_simulated_data</span><span class="p">(</span><span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">atom_prob</span><span class="p">,</span> <span class="n">n_features</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">printinfo</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get semi-realistic test data for hipnn.</span>
 <span class="sd">    n_molecules : number of molecules in the batch</span>
@@ -160,7 +176,7 @@
     <span class="n">n_pairs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pair_first</span><span class="p">)</span>
 
     <span class="c1"># NOTE: These fake sensitivities are NONSYMMETRIC.</span>
-    <span class="c1"># Current HIPNN does not do that, but a future one could.</span>
+    <span class="c1"># Current HIP-NN does not do that, but a future one could.</span>
     <span class="n">on_sensitivites</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span> <span class="o">/</span> <span class="n">n_nu</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">/</span> <span class="n">n_nu</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">))</span>
     <span class="n">pair_sensitivites</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">))</span> <span class="o">*</span> <span class="n">on_sensitivites</span>
     <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">pair_first</span> <span class="o">==</span> <span class="n">pair_second</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span>
@@ -182,11 +198,12 @@
 
 
 
-<span class="n">TEST_TINY_PARAMS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">n_molecules</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">atom_prob</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_nu</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">TEST_TINY_PARAMS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">n_molecules</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">atom_prob</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">n_nu</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
 <span class="n">TEST_SMALL_PARAMS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">n_molecules</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">atom_prob</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_nu</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="n">TEST_MEDIUM_PARAMS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">n_molecules</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">atom_prob</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">n_nu</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="n">TEST_LARGE_PARAMS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">n_molecules</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">atom_prob</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">n_nu</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="n">TEST_MEGA_PARAMS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">n_molecules</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">atom_prob</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">n_nu</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">TEST_ULTRA_PARAMS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">n_molecules</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">atom_prob</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">n_nu</span><span class="o">=</span><span class="mi">320</span><span class="p">)</span>
 
 <span class="c1"># reference implementation</span>
 
@@ -295,16 +312,16 @@
 
 <div class="viewcode-block" id="Envops_tester.check_empty">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_empty">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)):</span>
+    <span class="k">def</span> <span class="nf">check_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
 
         <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">get_simulated_data</span><span class="p">(</span><span class="o">**</span><span class="n">TEST_TINY_PARAMS</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="n">pfirst</span> <span class="o">=</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,),</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span><span class="n">device</span><span class="o">=</span><span class="n">pfirst</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>    
-        <span class="n">sense</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="n">sense</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="n">dtype</span><span class="o">=</span><span class="n">sense</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span><span class="n">device</span><span class="o">=</span><span class="n">sense</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-        
+        <span class="n">pfirst</span> <span class="o">=</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">pfirst</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">sense</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">sense</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">sense</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">sense</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">envsum</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span><span class="n">feat</span><span class="p">,</span><span class="n">pfirst</span><span class="p">,</span><span class="n">psecond</span><span class="p">)</span>
-            <span class="n">sense_g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensesum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span><span class="n">feat</span><span class="p">,</span><span class="n">pfirst</span><span class="p">,</span><span class="n">psecond</span><span class="p">)</span>
-            <span class="n">feat_g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">featsum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span><span class="n">sense</span><span class="p">,</span><span class="n">pfirst</span><span class="p">,</span><span class="n">psecond</span><span class="p">)</span>
+            <span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">envsum</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+            <span class="n">sense_g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensesum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+            <span class="n">feat_g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">featsum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Failed an operation on data with zero pairs&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ee</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Passed zero-pair check&quot;</span><span class="p">)</span></div>
@@ -349,7 +366,9 @@
 <div class="viewcode-block" id="Envops_tester.check_allclose">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_allclose">[docs]</a>
     <span class="k">def</span> <span class="nf">check_allclose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">use_large</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)):</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">repeats</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">repeats</span><span class="p">),</span> <span class="n">leave</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">check_allclose_once</span><span class="p">(</span><span class="n">use_large</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
@@ -373,37 +392,57 @@
 
 <div class="viewcode-block" id="Envops_tester.check_speed">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.Envops_tester.check_speed">[docs]</a>
-    <span class="k">def</span> <span class="nf">check_speed</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">n_repetitions</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">),</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_LARGE_PARAMS</span><span class="p">,</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span>
-    <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check_speed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_repetitions</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">),</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_LARGE_PARAMS</span><span class="p">,</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;pytorch&quot;</span><span class="p">):</span>
 
-        <span class="k">if</span> <span class="n">compare_against</span> <span class="o">==</span> <span class="s2">&quot;Pytorch&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">compare_against</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;pytorch&quot;</span><span class="p">:</span>
             <span class="n">comp_envsum</span> <span class="o">=</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">envsum</span>
             <span class="n">comp_sensesum</span> <span class="o">=</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">sensesum</span>
             <span class="n">comp_featsum</span> <span class="o">=</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">featsum</span>
-        <span class="k">elif</span> <span class="n">compare_against</span> <span class="o">==</span> <span class="s2">&quot;Numba&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">compare_against</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;numba&quot;</span><span class="p">:</span>
             <span class="n">comp_envsum</span> <span class="o">=</span> <span class="n">env_numba</span><span class="o">.</span><span class="n">new_envsum</span>
             <span class="n">comp_sensesum</span> <span class="o">=</span> <span class="n">env_numba</span><span class="o">.</span><span class="n">new_sensesum</span>
             <span class="n">comp_featsum</span> <span class="o">=</span> <span class="n">env_numba</span><span class="o">.</span><span class="n">new_featsum</span>
+        <span class="k">elif</span> <span class="n">compare_against</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;cupy&quot;</span><span class="p">:</span>
+            <span class="n">comp_envsum</span> <span class="o">=</span> <span class="n">env_cupy</span><span class="o">.</span><span class="n">cupy_envsum</span>
+            <span class="n">comp_sensesum</span> <span class="o">=</span> <span class="n">env_cupy</span><span class="o">.</span><span class="n">cupy_sensesum</span>
+            <span class="n">comp_featsum</span> <span class="o">=</span> <span class="n">env_cupy</span><span class="o">.</span><span class="n">cupy_featsum</span>
+        <span class="k">elif</span> <span class="n">compare_against</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;triton&quot;</span><span class="p">:</span>
+            <span class="n">comp_envsum</span> <span class="o">=</span> <span class="n">env_triton</span><span class="o">.</span><span class="n">envsum</span>
+            <span class="n">comp_sensesum</span> <span class="o">=</span> <span class="n">env_triton</span><span class="o">.</span><span class="n">featsum</span>
+            <span class="n">comp_featsum</span> <span class="o">=</span> <span class="n">env_triton</span><span class="o">.</span><span class="n">featsum</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown implementation to comapre against:&#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">compare_against</span><span class="p">))</span>
 
         <span class="n">te</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">tf</span> <span class="o">=</span> <span class="p">(</span><span class="n">TimerHolder</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;Envsum&quot;</span><span class="p">,</span> <span class="s2">&quot;Sensesum&quot;</span><span class="p">,</span> <span class="s2">&quot;Featsum&quot;</span><span class="p">))</span>
-        <span class="n">tne</span><span class="p">,</span> <span class="n">tns</span><span class="p">,</span> <span class="n">tnf</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">TimerHolder</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">compare_against</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;Envsum&quot;</span><span class="p">,</span> <span class="s2">&quot;Sensesum&quot;</span><span class="p">,</span> <span class="s2">&quot;Featsum&quot;</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">tne</span><span class="p">,</span> <span class="n">tns</span><span class="p">,</span> <span class="n">tnf</span> <span class="o">=</span> <span class="p">(</span><span class="n">TimerHolder</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">compare_against</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;Envsum&quot;</span><span class="p">,</span> <span class="s2">&quot;Sensesum&quot;</span><span class="p">,</span> <span class="s2">&quot;Featsum&quot;</span><span class="p">))</span>
+
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Repetitions: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_repetitions</span><span class="p">))</span>
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="c1"># Warming up by running on data of this specific size</span>
+            <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">get_simulated_data</span><span class="p">(</span><span class="o">**</span><span class="n">data_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">env</span> <span class="o">=</span> <span class="n">comp_envsum</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+            <span class="n">comp_sensesum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+            <span class="n">comp_featsum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">envsum</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sensesum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">featsum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+
+            <span class="c1"># Note: in this implementation we clear the pair cache for each run.</span>
+            <span class="c1"># In real conditions speedups could be greater due to caching of pairs.</span>
+
             <span class="c1"># with torch.autograd.profiler.profile() as prof:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_repetitions</span><span class="p">):</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">get_simulated_data</span><span class="p">(</span><span class="o">**</span><span class="n">data_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
                 <span class="k">with</span> <span class="n">tne</span><span class="o">.</span><span class="n">add</span><span class="p">():</span>
                     <span class="n">env</span> <span class="o">=</span> <span class="n">comp_envsum</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
                 <span class="k">with</span> <span class="n">tns</span><span class="o">.</span><span class="n">add</span><span class="p">():</span>
                     <span class="n">comp_sensesum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
                 <span class="k">with</span> <span class="n">tnf</span><span class="o">.</span><span class="n">add</span><span class="p">():</span>
                     <span class="n">comp_featsum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+                <span class="n">clear_pair_cache</span><span class="p">()</span>
                 <span class="k">with</span> <span class="n">te</span><span class="o">.</span><span class="n">add</span><span class="p">():</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">envsum</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
                 <span class="k">with</span> <span class="n">ts</span><span class="o">.</span><span class="n">add</span><span class="p">():</span>
@@ -473,13 +512,11 @@
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-            <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
-            <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
     <span class="nd">@property</span>
@@ -490,66 +527,133 @@
 
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.main">[docs]</a>
-<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">env_impl</span><span class="p">,</span><span class="n">sense_impl</span><span class="p">,</span><span class="n">feat_impl</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">env_impl</span><span class="p">,</span> <span class="n">sense_impl</span><span class="p">,</span> <span class="n">feat_impl</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># calling without arguments looks for them from command line</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">SimpleNamespace</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="n">SimpleNamespace</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
     <span class="n">tester</span> <span class="o">=</span> <span class="n">Envops_tester</span><span class="p">(</span>
         <span class="n">env_impl</span><span class="p">,</span>
         <span class="n">sense_impl</span><span class="p">,</span>
         <span class="n">feat_impl</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="c1"># % time</span>
 
-    <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+    <span class="n">compare_against</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">compare_against</span>
+    <span class="n">test_gpu</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">no_test_gpu</span>
+    <span class="n">test_cpu</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">no_test_cpu</span>
+    <span class="n">correctness</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">no_correctness</span>
+
+    <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">no_test_gpu</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running GPU tests&quot;</span><span class="p">)</span>
-        <span class="n">meminfo</span> <span class="o">=</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">current_context</span><span class="p">()</span><span class="o">.</span><span class="n">get_memory_info</span><span class="p">()</span>
-        <span class="n">use_large_gpu</span> <span class="o">=</span> <span class="n">meminfo</span><span class="o">.</span><span class="n">free</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">31</span>
-        <span class="n">use_verylarge_gpu</span> <span class="o">=</span> <span class="n">meminfo</span><span class="o">.</span><span class="n">free</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="o">**</span><span class="mi">3</span>
+        <span class="n">free_mem</span><span class="p">,</span> <span class="n">total_mem</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">memory</span><span class="o">.</span><span class="n">mem_get_info</span><span class="p">()</span>
 
-        <span class="n">n_large</span> <span class="o">=</span> <span class="mi">3</span> <span class="k">if</span> <span class="n">use_large_gpu</span> <span class="k">else</span> <span class="mi">0</span>
-        <span class="n">tester</span><span class="o">.</span><span class="n">check_correctness</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span><span class="n">n_large</span><span class="o">=</span><span class="n">n_large</span><span class="p">)</span>
+        <span class="n">use_large_gpu</span> <span class="o">=</span> <span class="n">free_mem</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="o">**</span><span class="mi">31</span>
+        <span class="n">use_verylarge_gpu</span> <span class="o">=</span> <span class="n">free_mem</span> <span class="o">&gt;</span> <span class="mi">30</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">30</span><span class="p">)</span>
+
+        <span class="n">use_ultra</span> <span class="o">=</span> <span class="p">(</span><span class="ow">not</span> <span class="n">correctness</span><span class="p">)</span> <span class="ow">and</span> <span class="n">use_verylarge_gpu</span> <span class="ow">and</span> <span class="p">(</span><span class="n">compare_against</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;pytorch&quot;</span><span class="p">)</span>
+
+        <span class="n">n_large_gpu</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">n_large</span> <span class="k">if</span> <span class="n">use_large_gpu</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">correctness</span><span class="p">:</span>
+            <span class="n">tester</span><span class="o">.</span><span class="n">check_correctness</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span> <span class="n">n_large</span><span class="o">=</span><span class="n">n_large_gpu</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">use_verylarge_gpu</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">use_ultra</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ultra systems:&quot;</span><span class="p">,</span> <span class="n">TEST_ULTRA_PARAMS</span><span class="p">)</span>
+                <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span>
+                    <span class="n">n_repetitions</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_ULTRA_PARAMS</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span> <span class="n">compare_against</span><span class="o">=</span><span class="n">compare_against</span>
+                <span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mega systems:&quot;</span><span class="p">,</span> <span class="n">TEST_MEGA_PARAMS</span><span class="p">)</span>
-            <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span><span class="n">data_size</span><span class="o">=</span><span class="n">TEST_MEGA_PARAMS</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span><span class="p">)</span>
+            <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_MEGA_PARAMS</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span> <span class="n">compare_against</span><span class="o">=</span><span class="n">compare_against</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Numba indicates less than 32GB free GPU memory -- skipping mega system test&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Numba indicates less than 30GB free GPU memory -- skipping mega system test&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">use_large_gpu</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
-            <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span><span class="n">data_size</span><span class="o">=</span><span class="n">TEST_LARGE_PARAMS</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span><span class="p">)</span> 
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Large systems:&quot;</span><span class="p">,</span> <span class="n">TEST_LARGE_PARAMS</span><span class="p">)</span>
+            <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_LARGE_PARAMS</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span> <span class="n">compare_against</span><span class="o">=</span><span class="n">compare_against</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Numba indicates less than 2GB free GPU memory -- skipping large system test&quot;</span><span class="p">)</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Medium systems:&quot;</span><span class="p">,</span> <span class="n">TEST_MEDIUM_PARAMS</span><span class="p">)</span>
-        <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span>
-            <span class="n">n_repetitions</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_MEDIUM_PARAMS</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span>
-        <span class="p">)</span>
+        <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_MEDIUM_PARAMS</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span> <span class="n">compare_against</span><span class="o">=</span><span class="n">compare_against</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Small systems:&quot;</span><span class="p">,</span> <span class="n">TEST_SMALL_PARAMS</span><span class="p">)</span>
-        <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span>
-            <span class="n">n_repetitions</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_SMALL_PARAMS</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span>
-        <span class="p">)</span>
+        <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_SMALL_PARAMS</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">),</span> <span class="n">compare_against</span><span class="o">=</span><span class="n">compare_against</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cuda not available, not running GPU tests.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">no_test_gpu</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cuda not available, not running GPU tests.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Skipped GPU tests.&quot;</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running CPU tests&quot;</span><span class="p">)</span>
-    <span class="n">tester</span><span class="o">.</span><span class="n">check_correctness</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Large systems:&quot;</span><span class="p">,</span> <span class="n">TEST_LARGE_PARAMS</span><span class="p">)</span>
-    <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Medium systems:&quot;</span><span class="p">,</span> <span class="n">TEST_MEDIUM_PARAMS</span><span class="p">)</span>
-    <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_MEDIUM_PARAMS</span><span class="p">,</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Small systems:&quot;</span><span class="p">,</span> <span class="n">TEST_SMALL_PARAMS</span><span class="p">)</span>
-    <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">compare_against</span><span class="o">=</span><span class="s2">&quot;Pytorch&quot;</span><span class="p">,</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_SMALL_PARAMS</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">test_cpu</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running CPU tests&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">correctness</span><span class="p">:</span>
+            <span class="n">tester</span><span class="o">.</span><span class="n">check_correctness</span><span class="p">(</span><span class="n">n_large</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">n_large</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Large systems:&quot;</span><span class="p">,</span> <span class="n">TEST_LARGE_PARAMS</span><span class="p">)</span>
+        <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">compare_against</span><span class="o">=</span><span class="n">compare_against</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Medium systems:&quot;</span><span class="p">,</span> <span class="n">TEST_MEDIUM_PARAMS</span><span class="p">)</span>
+        <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_MEDIUM_PARAMS</span><span class="p">,</span> <span class="n">compare_against</span><span class="o">=</span><span class="n">compare_against</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Small systems:&quot;</span><span class="p">,</span> <span class="n">TEST_SMALL_PARAMS</span><span class="p">)</span>
+        <span class="n">tester</span><span class="o">.</span><span class="n">check_speed</span><span class="p">(</span><span class="n">n_repetitions</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">compare_against</span><span class="o">=</span><span class="n">compare_against</span><span class="p">,</span> <span class="n">data_size</span><span class="o">=</span><span class="n">TEST_SMALL_PARAMS</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Skipped CPU tests.&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="parse_args">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.test_env_numba.html#hippynn.custom_kernels.test_env_numba.parse_args">[docs]</a>
+<span class="k">def</span> <span class="nf">parse_args</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--seed&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;name for run&quot;</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--compare-against&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;pytorch&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    implementation to compare speed with. Options are: pytorch, numba, cupy, triton&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--n_large&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Number of times to check correctness of forward pass. Set this to a large number (e.g. 200) to</span>
+<span class="s2">    stress-test a new implementation against corner-cases.&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--no-test-cpu&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Set to false to skip CPU tests.&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--no-test-gpu&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Set to false to skip GPU tests.&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--no-correctness&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Set to false to skip GPU tests.&quot;</span><span class="p">)</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">args</span></div>
 
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">main</span><span class="p">(</span><span class="n">env_numba</span><span class="o">.</span><span class="n">new_envsum</span><span class="p">,</span>
-         <span class="n">env_numba</span><span class="o">.</span><span class="n">new_sensesum</span><span class="p">,</span>
-         <span class="n">env_numba</span><span class="o">.</span><span class="n">new_featsum</span><span class="p">,</span>
+    <span class="n">main</span><span class="p">(</span>
+        <span class="n">env_numba</span><span class="o">.</span><span class="n">new_envsum</span><span class="p">,</span>
+        <span class="n">env_numba</span><span class="o">.</span><span class="n">new_sensesum</span><span class="p">,</span>
+        <span class="n">env_numba</span><span class="o">.</span><span class="n">new_featsum</span><span class="p">,</span>
     <span class="p">)</span>
 </pre></div>
 

@@ -124,6 +124,8 @@
     <span class="k">def</span> <span class="nf">launch_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sense_shape</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">pfs</span><span class="p">,</span> <span class="n">pss</span><span class="p">,</span> <span class="n">atom1_ids_shape</span><span class="p">,</span> <span class="o">*</span><span class="n">other_shapes</span><span class="p">):</span>
         <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sense_shape</span>
         <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">fs</span>
+        <span class="k">if</span> <span class="n">n_feat</span> <span class="o">&gt;</span> <span class="mi">512</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Numba GPU custom kernels are not compatible with feature sizes greater than 512 (got </span><span class="si">{</span><span class="n">n_feat</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
         <span class="p">(</span><span class="n">n_atoms_interacting</span><span class="p">,)</span> <span class="o">=</span> <span class="n">atom1_ids_shape</span>
         <span class="n">TPB_MAX</span> <span class="o">=</span> <span class="mi">512</span>
         <span class="n">TPB_X</span> <span class="o">=</span> <span class="n">n_feat</span>
@@ -139,9 +141,7 @@
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedEnvsum.make_kernel">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">make_kernel</span><span class="p">(</span><span class="n">KERNEL_DTYPE</span><span class="p">):</span>
-        <span class="n">sig</span> <span class="o">=</span> <span class="s2">&quot;void(</span><span class="si">{DTYPE}</span><span class="s2">[:,:,],</span><span class="si">{DTYPE}</span><span class="s2">[:,:],int64[:],int64[:],int64[:],int64[:],</span><span class="si">{DTYPE}</span><span class="s2">[:,:,:])&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="n">DTYPE</span><span class="o">=</span><span class="n">KERNEL_DTYPE</span>
-        <span class="p">)</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="s2">&quot;void(</span><span class="si">{DTYPE}</span><span class="s2">[:,:,],</span><span class="si">{DTYPE}</span><span class="s2">[:,:],int64[:],int64[:],int64[:],int64[:],</span><span class="si">{DTYPE}</span><span class="s2">[:,:,:])&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DTYPE</span><span class="o">=</span><span class="n">KERNEL_DTYPE</span><span class="p">)</span>
 
         <span class="nd">@numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span>
             <span class="n">sig</span><span class="p">,</span>
@@ -219,11 +219,14 @@
     <span class="k">def</span> <span class="nf">launch_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_shape</span><span class="p">,</span> <span class="n">feat_shape</span><span class="p">,</span> <span class="n">pfirst_shape</span><span class="p">,</span> <span class="n">psecond_shape</span><span class="p">):</span>
         <span class="p">(</span><span class="n">n_pairs</span><span class="p">,)</span> <span class="o">=</span> <span class="n">pfirst_shape</span>
         <span class="n">n_atoms</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">env_shape</span>
+        <span class="k">if</span> <span class="n">n_nu</span> <span class="o">&gt;</span> <span class="mi">512</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Numba GPU custom kernels are not compatible with sensitivity sizes greater than 512 (got </span><span class="si">{</span><span class="n">n_nu</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
         <span class="n">TPB_MAX</span> <span class="o">=</span> <span class="mi">512</span>
         <span class="n">TPB_Y</span> <span class="o">=</span> <span class="n">n_nu</span>
-        <span class="n">TPB_X</span> <span class="o">=</span> <span class="n">TPB_MAX</span><span class="o">//</span><span class="n">TPB_Y</span>
-        <span class="n">TPB</span> <span class="o">=</span> <span class="p">(</span><span class="n">TPB_X</span><span class="p">,</span><span class="n">TPB_Y</span><span class="p">)</span>
-        <span class="n">BPG</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_pairs</span> <span class="o">+</span> <span class="n">TPB_X</span> <span class="o">-</span><span class="mi">1</span> <span class="p">)</span><span class="o">//</span><span class="n">TPB_X</span>
+        <span class="n">TPB_X</span> <span class="o">=</span> <span class="n">TPB_MAX</span> <span class="o">//</span> <span class="n">TPB_Y</span>
+        <span class="n">TPB</span> <span class="o">=</span> <span class="p">(</span><span class="n">TPB_X</span><span class="p">,</span> <span class="n">TPB_Y</span><span class="p">)</span>
+        <span class="n">BPG</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_pairs</span> <span class="o">+</span> <span class="n">TPB_X</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">TPB_X</span>
         <span class="k">return</span> <span class="n">BPG</span><span class="p">,</span> <span class="n">TPB</span></div>
 
 
@@ -303,6 +306,8 @@
         <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sense_shape</span>
         <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">env_shape</span>
         <span class="n">TPB_max</span> <span class="o">=</span> <span class="mi">512</span>
+        <span class="k">if</span> <span class="n">n_feat</span> <span class="o">&gt;</span> <span class="mi">512</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Numba GPU custom kernels are not compatible with feature sizes greater than 512 (got </span><span class="si">{</span><span class="n">n_feat</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">n_feat</span> <span class="o">&gt;</span> <span class="mi">32</span><span class="p">:</span>
             <span class="n">TPB_x</span> <span class="o">=</span> <span class="p">((</span><span class="n">n_feat</span> <span class="o">+</span> <span class="mi">31</span><span class="p">)</span> <span class="o">//</span> <span class="mi">32</span><span class="p">)</span> <span class="o">*</span> <span class="mi">32</span>
             <span class="n">TPB_y</span> <span class="o">=</span> <span class="n">TPB_max</span> <span class="o">//</span> <span class="n">TPB_x</span>
@@ -322,9 +327,7 @@
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_numba.html#hippynn.custom_kernels.env_numba.WrappedFeatsum.make_kernel">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">make_kernel</span><span class="p">(</span><span class="n">KERNEL_DTYPE</span><span class="p">):</span>
-        <span class="n">sig</span> <span class="o">=</span> <span class="s2">&quot;void(</span><span class="si">{DTYPE}</span><span class="s2">[:,:,:],</span><span class="si">{DTYPE}</span><span class="s2">[:,:],int64[:],int64[:],int64[:],int64[:],</span><span class="si">{DTYPE}</span><span class="s2">[:,:])&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="n">DTYPE</span><span class="o">=</span><span class="n">KERNEL_DTYPE</span>
-        <span class="p">)</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="s2">&quot;void(</span><span class="si">{DTYPE}</span><span class="s2">[:,:,:],</span><span class="si">{DTYPE}</span><span class="s2">[:,:],int64[:],int64[:],int64[:],int64[:],</span><span class="si">{DTYPE}</span><span class="s2">[:,:])&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DTYPE</span><span class="o">=</span><span class="n">KERNEL_DTYPE</span><span class="p">)</span>
 
         <span class="nd">@numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span>
             <span class="n">sig</span><span class="p">,</span>

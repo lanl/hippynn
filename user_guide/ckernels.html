@@ -56,7 +56,11 @@
 <li class="toctree-l2"><a class="reference internal" href="databases.html">Databases</a></li>
 <li class="toctree-l2"><a class="reference internal" href="loss_graph.html">Model and Loss Graphs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="units.html">Units in hippynn</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Custom Kernels</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Custom Kernels</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bottom-line-up-front">Bottom line up front</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#detailed-explanation">Detailed Explanation</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="settings.html">Library Settings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="custom_nodes.html">Creating Custom Node Types</a></li>
 </ul>
@@ -95,16 +99,29 @@
              
   <section id="custom-kernels">
 <h1>Custom Kernels<a class="headerlink" href="#custom-kernels" title="Link to this heading"></a></h1>
+<section id="bottom-line-up-front">
+<h2>Bottom line up front<a class="headerlink" href="#bottom-line-up-front" title="Link to this heading"></a></h2>
+<p>We use custom kernels in <cite>hippynn</cite> to accelerate the HIP-NN neural network message passing.
+On the GPU, the best implementation to select is <code class="docutils literal notranslate"><span class="pre">triton</span></code>, followed by <code class="docutils literal notranslate"><span class="pre">cupy</span></code>,
+followed by <code class="docutils literal notranslate"><span class="pre">numba</span></code>. On the CPU, only <code class="docutils literal notranslate"><span class="pre">numba</span></code> is available. In general, these
+custom kernels are very useful, and the only reasons for them to be off is if are
+if the packages are not available for installation in your environment or if diagnosing
+whether or not a bug could be related to potential misconfiguration of these additional packages.
+<code class="docutils literal notranslate"><span class="pre">triton</span></code> comes with recent versions of <code class="docutils literal notranslate"><span class="pre">pytorch</span></code>, so optimistically you may already be
+configured to use the custom kernels.</p>
+</section>
+<section id="detailed-explanation">
+<h2>Detailed Explanation<a class="headerlink" href="#detailed-explanation" title="Link to this heading"></a></h2>
 <p>Analogs of convolutional layers that apply to continously variable points in space, such as the
-<cite>HIP-NN</cite> interaction layer, can be awkward to write in pure-pytorch.</p>
+HIP-NN interaction layer, can be awkward to write in pure-pytorch.</p>
 <p>The <a class="reference internal" href="../api_documentation/hippynn.custom_kernels.html#module-hippynn.custom_kernels" title="hippynn.custom_kernels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">custom_kernels</span></code></a> subpackage implements some more efficient kernels for both the forward
 and backward pass of the sum over neighbors. This is implemented, more or less, as a CSR-type
 sparse sum over the set of pairs of atoms, which, depending on the kernel, utilizes some
 mixture of inner products and outer products on the remaining “feature” and “sensitivity” axes.
 This behavior can be switched off (and is off by default if the dependencies are not installed)
 to revert to a pure pytorch implementation.</p>
-<p>The custom kernels provide <cite>much</cite> better memory footprint than the pure pytorch implementation,
-and a decent amount of speedup on those core operations. The memory footprint of the pytorch
+<p>The custom kernels provide <em>much</em> better memory footprint than the pure pytorch implementation,
+and a very good amount of speedup on those core operations. The memory footprint of the pytorch
 implementation is approximately:</p>
 <div class="math notranslate nohighlight">
 \[O(N_\mathrm{pairs}N_\mathrm{sensitivities}N_\mathrm{features}),\]</div>
@@ -112,21 +129,34 @@ implementation is approximately:</p>
 <div class="math notranslate nohighlight">
 \[O(N_\mathrm{pairs}N_\mathrm{sensitivities} +
   N_\mathrm{atoms}N_\mathrm{features}N_\mathrm{sensitivities}).\]</div>
-<p>The custom kernels are implemented using <code class="docutils literal notranslate"><span class="pre">numba</span></code> and/or <code class="docutils literal notranslate"><span class="pre">cupy</span></code>, depending
+<p>The custom kernels are implemented using <code class="docutils literal notranslate"><span class="pre">triton</span></code>, <code class="docutils literal notranslate"><span class="pre">cupy</span></code> and/or <code class="docutils literal notranslate"><span class="pre">numba</span></code>, depending
 on what is installed in your python environment.
 However, there are certain overheads in using them.
 In particular, if you are using a GPU and your batch size is small,
 the pytorch implementations may actually be faster, because they launch more quickly.
-This is especially true if you use a shallower model (one interaction layer) with
+This is especially true if you use a shallow HIP-NN type model (one interaction layer) with
 with a small number of elements, because the memory waste in a pure pytorch
 implementation is proportional to the number of input features.
-If you are using a CPU, the custom kernels are recommended at all times.</p>
+Nonetheless for most practical purposes, keeping custom kernels
+on at all times is computationally recommended.
+If you are using a CPU, the custom kernels are provided only using <code class="docutils literal notranslate"><span class="pre">numba</span></code>, but they
+do not come with any large overheads, and so provide computatonal benefits at all times.
+The only reason to turn custom kernels off, in general, is to diagnose whether there are
+issues with how they are being deployed; if <code class="docutils literal notranslate"><span class="pre">numba</span></code> or <code class="docutils literal notranslate"><span class="pre">cupy</span></code> is not correctly installed,
+then we have found that sometimes the kernels may silently fail.</p>
 <p>The three custom kernels correspond to the interaction sum in hip-nn:</p>
-<p>For envsum, sensum, featsum:</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}a'_{i,a} =  = \sum_{\nu,b} V^\nu_{a,b} e^{\nu}_{i,b}\\e^{\nu}_{i,a} = \sum_p s^\nu_{p} z_{p_j,a}\end{aligned}\end{align} \]</div>
+<p>Where <span class="math notranslate nohighlight">\(a\)</span> is the pre-activation for an interaction layer using input features <span class="math notranslate nohighlight">\(z\)</span>.</p>
+<p>For envsum, sensesum, featsum:</p>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}e^{\nu}_{i,a} = \sum_p s^\nu_{p} z_{p_j,a}\\s_{p,\nu} = \sum_{a} e^{\nu}_{p_i,a} z_{p_j,a}\\f_{j,a} = \sum_{\nu,i} e_{p_i,\nu,a} s_{p_i,a}\end{aligned}\end{align} \]</div>
+<p>These three functions form a closed system under automatic differentiation, and are linked to each
+other in pytorch’s autograd, thereby supporting custom kernels in backwards passes and in
+double-backwards passes associated with Force training or similar features.</p>
 <p>Custom kernels can be set ahead of time using <a class="reference internal" href="settings.html"><span class="doc">Library Settings</span></a> and dynamically
 using <a class="reference internal" href="../api_documentation/hippynn.custom_kernels.html#hippynn.custom_kernels.set_custom_kernels" title="hippynn.custom_kernels.set_custom_kernels"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_custom_kernels()</span></code></a>.</p>
+</section>
 </section>
 
 
