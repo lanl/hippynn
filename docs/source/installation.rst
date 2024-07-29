@@ -11,20 +11,22 @@ Requirements:
     * pytorch_ >= 1.9
     * numpy_
 Optional Dependencies:
-    * numba_ (recommended, for accelerating performance)
-    * cupy_ (also for accelerating performance)
+    * triton_ (recommended, for improved GPU performance)
+    * numba_ (recommended for improved CPU performance)
+    * cupy_ (Alternative for accelerating GPU performance)
     * ASE_ (for usage with ase)
     * matplotlib_ (for plotting)
     * tqdm_ (for progress bars)
     * graphviz_ (for viewing model graphs as figures)
-    * h5py_ (for ani-h5 datasets)
-    * pyanitools_ (for ani-h5 datasets)
+    * h5py_ (for loading ani-h5 datasets)
+    * pyanitools_ (for loading ani-h5 datasets)
 
 Interfacing codes:
     * ASE_
     * PYSEQM_
     * LAMMPS_
 
+.. _triton: https://triton-lang.org/
 .. _numpy: https://numpy.org/
 .. _Python: http://www.python.org
 .. _pytorch: http://www.pytorch.org

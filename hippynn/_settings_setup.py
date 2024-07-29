@@ -54,7 +54,7 @@ def kernel_handler(kernel_string):
         "true": True,
     }.get(kernel_string, kernel_string)
 
-    if kernel not in [True, False, "auto", "cupy", "numba"]:
+    if kernel not in [True, False, "auto", "triton", "cupy", "numba"]:
         warnings.warn(f"Unrecognized custom kernel option: {kernel_string}. Setting custom kernels to 'auto'")
         kernel = "auto"
 
@@ -87,7 +87,7 @@ config_sources = {}  # Dictionary of configuration variable sources mapping to d
 
 rc_name = os.path.expanduser("~/.hippynnrc")
 if os.path.exists(rc_name) and os.path.isfile(rc_name):
-    config = configparser.ConfigParser()
+    config = configparser.ConfigParser(inline_comment_prefixes="#")
     config.read(rc_name)
     config_sources["~/.hippynnrc"] = config["GLOBALS"]
 

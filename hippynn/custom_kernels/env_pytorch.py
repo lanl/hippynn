@@ -22,7 +22,6 @@ def sensesum(env, features, pair_first, pair_second):
     sense = (pair_env * pair_feat.unsqueeze(1)).sum(dim=2)
     return sense
 
-
 def featsum(env, sense, pair_first, pair_second):
     n_atoms, n_nu, n_feat = env.shape
     pair_env = env[pair_first]

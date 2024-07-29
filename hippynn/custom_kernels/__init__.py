@@ -34,8 +34,16 @@ try:
 except ImportError:
     pass
 
+try:
+    import triton
+
+    CUSTOM_KERNELS_AVAILABLE.append("triton")
+except ImportError:
+    pass
+
 if not CUSTOM_KERNELS_AVAILABLE:
-    warnings.warn("Numba or cupy not available: Custom Kernels will be disabled.")
+    warnings.warn(
+        "Triton, cupy and numba are not available: Custom kernels will be disabled and performance maybe be degraded.")
 
 CUSTOM_KERNELS_ACTIVE = False
 
@@ -75,7 +83,7 @@ def set_custom_kernels(active: Union[bool, str] = True):
     Activate or deactivate custom kernels for interaction.
 
     :param active: If true, set custom kernels to the best available. If False, turn them off and default to pytorch.
-       If "numba" or "cupy", use those implementations explicitly. If "auto", use best available.
+       If "triton", "numba" or "cupy", use those implementations explicitly. If "auto", use best available.
     :return: None
     """
     global envsum, sensesum, featsum, CUSTOM_KERNELS_ACTIVE
@@ -83,7 +91,7 @@ def set_custom_kernels(active: Union[bool, str] = True):
     if isinstance(active, str):
         active = active.lower()
 
-    if active not in [True, False, "numba", "cupy", "pytorch", "auto"]:
+    if active not in [True, False, "triton", "numba", "cupy", "pytorch", "auto"]:
         raise ValueError(f"Unrecognized custom kernel implementation: {active}")
 
     active_map = {"auto": True, "pytorch": False}
@@ -91,10 +99,12 @@ def set_custom_kernels(active: Union[bool, str] = True):
         if active == "auto" or active == "pytorch":
             active = False
         elif active:
-            raise RuntimeError("Numba or cupy was not found. Custom kernels are not available.")
+            raise RuntimeError(
+                "Triton, numba and cupy were not found. Custom kernels are not available, but they were required by library settings.")
     else:
         active = active_map.get(active, active)
 
+    # Handle fallback to pytorch kernels.
     if not active:
         envsum = env_pytorch.envsum
         sensesum = env_pytorch.sensesum
@@ -102,11 +112,15 @@ def set_custom_kernels(active: Union[bool, str] = True):
         CUSTOM_KERNELS_ACTIVE = False
         return
 
+    # Select custom kernel implementation
+
     if not CUSTOM_KERNELS_AVAILABLE:
         raise RuntimeError("Numba was not found. Custom kernels are not available.")
 
     if active is True:
-        if "cupy" in CUSTOM_KERNELS_AVAILABLE:
+        if "triton" in CUSTOM_KERNELS_AVAILABLE:
+            active = "triton"
+        elif "cupy" in CUSTOM_KERNELS_AVAILABLE:
             active = "cupy"
         else:
             active = "numba"
@@ -114,7 +128,11 @@ def set_custom_kernels(active: Union[bool, str] = True):
     if active not in CUSTOM_KERNELS_AVAILABLE:
         raise RuntimeError(f"Unavailable custom kernel implementation: {active}")
 
-    if active == "cupy":
+    if active == "triton":
+        from .env_triton import envsum as triton_envsum, sensesum as triton_sensesum, featsum as triton_featsum
+
+        envsum, sensesum, featsum = autograd_wrapper.wrap_envops(triton_envsum, triton_sensesum, triton_featsum)
+    elif active == "cupy":
         _check_numba()
         _check_cupy()
         from .env_cupy import cupy_envsum, cupy_featsum, cupy_sensesum
