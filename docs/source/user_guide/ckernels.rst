@@ -10,6 +10,8 @@ followed by ``numba``. On the CPU, only ``numba`` is available. In general, thes
 custom kernels are very useful, and the only reasons for them to be off is if are
 if the packages are not available for installation in your environment or if diagnosing
 whether or not a bug could be related to potential misconfiguration of these additional packages.
+``triton`` comes with recent versions of ``pytorch``, so optimistically you may already be
+configured to use the custom kernels.
 
 Detailed Explanation
 --------------------
