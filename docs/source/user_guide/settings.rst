@@ -45,8 +45,8 @@ The following settings are available:
      - false
      - Yes
    * - USE_CUSTOM_KERNELS
-     - Use custom kernels with numba or cupy. Auto tries to detect the installation of numba or cupy. For more info see :doc:`/user_guide/ckernels`.
-     - auto, true, false, pytorch, numba, cupy
+     - Use custom kernels with triton, numba or cupy. Auto tries to detect the installation. For more info see :doc:`/user_guide/ckernels`.
+     - auto, true, false, pytorch, numba, cupy, triton
      - auto
      - Not directly, use :func:`~hippynn.custom_kernels.set_custom_kernels`
    * - WARN_LOW_DISTANCES

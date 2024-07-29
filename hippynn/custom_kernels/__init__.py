@@ -42,7 +42,8 @@ except ImportError:
     pass
 
 if not CUSTOM_KERNELS_AVAILABLE:
-    warnings.warn("Numba or cupy not available: Custom Kernels will be disabled.")
+    warnings.warn(
+        "Triton, cupy and numba are not available: Custom kernels will be disabled and performance maybe be degraded.")
 
 CUSTOM_KERNELS_ACTIVE = False
 
@@ -82,7 +83,7 @@ def set_custom_kernels(active: Union[bool, str] = True):
     Activate or deactivate custom kernels for interaction.
 
     :param active: If true, set custom kernels to the best available. If False, turn them off and default to pytorch.
-       If "numba" or "cupy", use those implementations explicitly. If "auto", use best available.
+       If "triton", "numba" or "cupy", use those implementations explicitly. If "auto", use best available.
     :return: None
     """
     global envsum, sensesum, featsum, CUSTOM_KERNELS_ACTIVE
@@ -98,7 +99,8 @@ def set_custom_kernels(active: Union[bool, str] = True):
         if active == "auto" or active == "pytorch":
             active = False
         elif active:
-            raise RuntimeError("Numba or cupy was not found. Custom kernels are not available, but they were required by library settings.")
+            raise RuntimeError(
+                "Triton, numba and cupy were not found. Custom kernels are not available, but they were required by library settings.")
     else:
         active = active_map.get(active, active)
 
