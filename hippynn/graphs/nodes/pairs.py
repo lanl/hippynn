@@ -279,7 +279,7 @@ class RDFBins(ExpandParents, AutoKw, SingleNode):
         Build a default Periodic Pair indexer.
         """
         pairs = PeriodicPairIndexer("Period Pairs", (pos, spec, cell), dist_hard_max=dist_hard_max)
-        return pairs
+        return pairs,
 
     @_parent_expander.match(PositionsNode, SpeciesNode)
     def expand1(self, pos, spec, *, purpose, dist_hard_max=None, **kwargs):
@@ -287,7 +287,7 @@ class RDFBins(ExpandParents, AutoKw, SingleNode):
         Builds an open pair indexer.
         """
         pairs = OpenPairIndexer("Period Pairs", (pos, spec), dist_hard_max=dist_hard_max)
-        return pairs
+        return pairs,
 
     @_parent_expander.match(PairIndexer)
     def expand2(self, pairs, *, purpose, **kwargs):
