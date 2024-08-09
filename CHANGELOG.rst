@@ -7,6 +7,7 @@ New Features:
 -------------
 
 - Added a new custom cuda kernel implementation using triton. These are highly performant and now the default implementation.
+- Added Batch optimizer features in order to optimize geometries in parallel on the GPU. Algorithms include FIRE and BFGS.
 
 Improvements:
 -------------
