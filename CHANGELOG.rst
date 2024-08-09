@@ -7,10 +7,13 @@ New Features:
 -------------
 
 - Added a new custom cuda kernel implementation using triton. These are highly performant and now the default implementation.
+- Exporting a database to NPZ or H5 format after preprocessing it is now just a function call away.
+- SNAPjson format can now support an optional number of comment lines.
 
 Improvements:
 -------------
 
+- Eliminated dependency on pyanitools for loading ANI-style H5 datasets.
 
 Bug Fixes:
 ----------

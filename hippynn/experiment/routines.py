@@ -356,9 +356,8 @@ def test_model(database, evaluator, batch_size, when, metric_tracker=None):
     metric_tracker.quiet = False
     evaluation_data = collections.OrderedDict(
         (
-            ("train", database.make_generator("train", "eval", batch_size)),
-            ("valid", database.make_generator("valid", "eval", batch_size)),
-            ("test", database.make_generator("test", "eval", batch_size)),
+            (key, database.make_generator(key, "eval", batch_size))  # During testing, run through all splits in the database.
+            for key in database.splits
         )
     )
     evaluation_metrics = {k: evaluator.evaluate(gen, eval_type=k, when=when) for k, gen in evaluation_data.items()}
