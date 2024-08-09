@@ -3,10 +3,9 @@ from functools import singledispatchmethod
 
 import numpy as np
 import torch
-
-from tqdm.autonotebook import trange
 import ase
 
+from ..tools import progress_bar
 from ..graphs import Predictor
 from ..layers.pairs.periodic import wrap_systems_torch
 
@@ -24,29 +23,27 @@ class Variable:
         name: str,
         data: dict[str, torch.Tensor],
         model_input_map: dict[str, str] = dict(),
-        updater: _VariableUpdater = None,
+        updater: VariableUpdater = None,
         device: torch.device = None,
         dtype: torch.dtype = None,
     ) -> None:
         """
-        Parameters
-        ----------
-        name : str
-            name for variable
-        data : dict[str, torch.Tensor]
-            dictionary of tracked data in the form `value_name: value`
-        model_input_map : dict[str, str], optional
-            dictionary of correspondences between data tracked by Variable
+        :param name: name for variable
+        :type name: str
+        :param data: dictionary of tracked data in the form `value_name: value`
+        :type data: dict[str, torch.Tensor]
+        :param model_input_map: dictionary of correspondences between data tracked by Variable
             and inputs to the HIP-NN model in the form
-            `hipnn-db_name: variable-data-key`, by default dict()
-        updater : _VariableUpdater, optional
-            object which will update the data of the Variable
-            over the course of the MD simulation, by default None
-        device : torch.device, optional
-            device on which to keep data, by default None
-        dtype : torch.dtype, optional
-            dtype for float type data, by default None
-        """
+            `hipnn-db_name: variable-data-key`, defaults to dict()
+        :type model_input_map: dict[str, str], optional
+        :param updater: object which will update the data of the Variable
+            over the course of the MD simulation, defaults to None
+        :type updater: VariableUpdater, optional
+        :param device: device on which to keep data, defaults to None
+        :type device: torch.device, optional
+        :param dtype: dtype for float type data, defaults to None
+        :type dtype: torch.dtype, optional
+        """       
         self.name = name
         self.data = data
         self.model_input_map = model_input_map
@@ -139,14 +136,11 @@ class Variable:
         self.dtype = arg
 
 
-class _VariableUpdater:
+class VariableUpdater:
     """
-    Parent class for algorithms that make updates to the data of a Variable during
-    each step of an MD simulation.
+    Parent class for algorithms that make updates to the data of a Variable during each step of an MD simulation.
 
-    Subclasses should redefine __init__, pre_step, post_step, and
-    required_variable_data as needed. The inputs to pre_step and post_step
-    should not be changed.
+    Subclasses should redefine __init__, pre_step, post_step, and required_variable_data as needed. The inputs to pre_step and post_step should not be changed.
     """
 
     # A list of keys which must appear in Variable.data for any Variable that will be updated by objects of this class.
@@ -170,31 +164,25 @@ class _VariableUpdater:
         self._variable = variable
 
     def pre_step(self, dt):
-        """Updates to variables performed during each step of MD simulation
-          before HIPNN model evaluation
+        """Updates to variables performed during each step of MD simulation before HIPNN model evaluation
 
-        Parameters
-        ----------
-        dt : float
-            timestep
-        """
+        :param dt: timestep
+        :type dt: float
+        """        
         pass
 
     def post_step(self, dt, model_outputs):
-        """Updates to variables performed during each step of MD simulation
-          after HIPNN model evaluation
+        """Updates to variables performed during each step of MD simulation after HIPNN model evaluation
 
-        Parameters
-        ----------
-        dt : float
-            timestep
-        model_outputs : dict
-            dictionary of HIPNN model outputs
-        """
+        :param dt: timestep
+        :type dt: float
+        :param model_outputs: dictionary of HIPNN model outputs
+        :type model_outputs: dict
+        """        
         pass
 
 
-class NullUpdater(_VariableUpdater):
+class NullUpdater(VariableUpdater):
     """
     Makes no change to the variable data at each step of MD.
     """
@@ -205,7 +193,7 @@ class NullUpdater(_VariableUpdater):
     def post_step(self, dt, model_outputs):
         pass
 
-class VelocityVerlet(_VariableUpdater):
+class VelocityVerlet(VariableUpdater):
     """
     Implements the Velocity Verlet algorithm
     """
@@ -219,32 +207,27 @@ class VelocityVerlet(_VariableUpdater):
         units_acc: float = ase.units.Ang / (1.0**2),
     ):
         """
-        Parameters
-        ----------
-        force_db_name : str
-            key which will correspond to the force on the corresponding Variable
+        :param force_db_name: key which will correspond to the force on the corresponding Variable
             in the HIPNN model output dictionary
-        units_force : float, optional
-            amount of eV equal to one in the units used for force output
+        :type force_db_name: str
+        :param units_force: amount of eV equal to one in the units used for force output
             of HIPNN model (eg. if force output in kcal, units_force =
             ase.units.kcal = 2.6114e22 since 2.6114e22 kcal = 1 eV),
-            by default ase.units.eV = 1
-        units_acc : float, optional
-            amount of Ang/fs^2 equal to one in the units used for acceleration
-            in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1
-        """
+            by default ase.units.eV = 1, defaults to ase.units.eV
+        :type units_force: float, optional
+        :param units_acc: amount of Ang/fs^2 equal to one in the units used for acceleration
+            in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to ase.units.Ang/(1.0**2)
+        :type units_acc: float, optional
+        """        
         self.force_key = force_db_name
         self.force_factor = units_force / units_acc
 
     def pre_step(self, dt):
-        """Updates to variables performed during each step of MD simulation
-          before HIPNN model evaluation
+        """Updates to variables performed during each step of MD simulation before HIPNN model evaluation
 
-        Parameters
-        ----------
-        dt : float
-            timestep
-        """
+        :param dt: timestep
+        :type dt: float
+        """        
         self.variable.data["velocity"] = self.variable.data["velocity"] + 0.5 * dt * self.variable.data["acceleration"]
         self.variable.data["position"] = self.variable.data["position"] + self.variable.data["velocity"] * dt
         try:
@@ -253,16 +236,13 @@ class VelocityVerlet(_VariableUpdater):
             pass
 
     def post_step(self, dt, model_outputs):
-        """Updates to variables performed during each step of MD simulation
-          after HIPNN model evaluation
+        """Updates to variables performed during each step of MD simulation after HIPNN model evaluation
 
-        Parameters
-        ----------
-        dt : float
-            timestep
-        model_outputs : dict
-            dictionary of HIPNN model outputs
-        """
+        :param dt: timestep
+        :type dt: float
+        :param model_outputs: dictionary of HIPNN model outputs
+        :type model_outputs: dict
+        """        
         self.variable.data["force"] = model_outputs[self.force_key].to(self.variable.device)
         if len(self.variable.data["force"].shape) == len(self.variable.data["mass"].shape):
             self.variable.data["acceleration"] = self.variable.data["force"].detach() / self.variable.data["mass"] * self.force_factor
@@ -273,7 +253,7 @@ class VelocityVerlet(_VariableUpdater):
         self.variable.data["velocity"] = self.variable.data["velocity"] + 0.5 * dt * self.variable.data["acceleration"]
 
 
-class LangevinDynamics(_VariableUpdater):
+class LangevinDynamics(VariableUpdater):
     """
     Implements the Langevin algorithm
     """
@@ -290,26 +270,24 @@ class LangevinDynamics(_VariableUpdater):
         seed: int = None,
     ):
         """
-        Parameters
-        ----------
-        force_db_name : str
-            key which will correspond to the force on the corresponding Variable
+        :param force_db_name: key which will correspond to the force on the corresponding Variable
             in the HIPNN model output dictionary
-        temperature : float
-            temperature for Langevin algorithm
-        frix : float
-            friction coefficient for Langevin algorithm
-        units_force : float, optional
-            amount of eV equal to one in the units used for force output
+        :type force_db_name: str
+        :param temperature: temperature for Langevin algorithm
+        :type temperature: float
+        :param frix: friction coefficient for Langevin algorithm
+        :type frix: float
+        :param units_force: amount of eV equal to one in the units used for force output
             of HIPNN model (eg. if force output in kcal, units_force =
             ase.units.kcal = 2.6114e22 since 2.6114e22 kcal = 1 eV),
-            by default ase.units.eV = 1
-        units_acc : float, optional
-            amount of Ang/fs^2 equal to one in the units used for acceleration
-            in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1
-        seed : int, optional
-            used to set seed for reproducibility, by default None
-        """
+            by default ase.units.eV = 1, defaults to ase.units.eV
+        :type units_force: float, optional
+        :param units_acc: amount of Ang/fs^2 equal to one in the units used for acceleration
+            in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to ase.units.Ang/(1.0**2)
+        :type units_acc: float, optional
+        :param seed: used to set seed for reproducibility, defaults to None
+        :type seed: int, optional
+        """        
 
         self.force_key = force_db_name
         self.force_factor = units_force / units_acc
@@ -321,14 +299,11 @@ class LangevinDynamics(_VariableUpdater):
             torch.manual_seed(seed)
 
     def pre_step(self, dt):
-        """Updates to variables performed during each step of MD simulation
-          before HIPNN model evaluation
+        """Updates to variables performed during each step of MD simulation before HIPNN model evaluation
 
-        Parameters
-        ----------
-        dt : float
-            timestep
-        """
+        :param dt: timestep
+        :type dt: float
+        """        
 
         self.variable.data["position"] = self.variable.data["position"] + self.variable.data["velocity"] * dt
 
@@ -338,16 +313,14 @@ class LangevinDynamics(_VariableUpdater):
             pass
 
     def post_step(self, dt, model_outputs):
-        """Updates to variables performed during each step of MD simulation
-          after HIPNN model evaluation
+        """Updates to variables performed during each step of MD simulation after HIPNN model evaluation
 
-        Parameters
-        ----------
-        dt : float
-            timestep
-        model_outputs : dict
-            dictionary of HIPNN model outputs
-        """
+        :param dt: timestep
+        :type dt: float
+        :param model_outputs: dictionary of HIPNN model outputs
+        :type model_outputs: dict
+        """        
+
         self.variable.data["force"] = model_outputs[self.force_key].to(self.variable.device)
 
         if len(self.variable.data["force"].shape) != len(self.variable.data["mass"].shape):
@@ -377,17 +350,15 @@ class MolecularDynamics:
         dtype: torch.dtype = None,
     ):
         """
-        Parameters
-        ----------
-        variables : list[Variable]
-            list of Variable objects which will be tracked during simulation
-        model : Predictor
-            HIPNN Predictor
-        device : torch.device, optional
-            device to move variables and model to, by default None
-        dtype : torch.dtype, optional
-            dtype to convert all float type variable data and model parameters to, by default None
-        """
+        :param variables: list of Variable objects which will be tracked during simulation
+        :type variables: list[Variable]
+        :param model: HIPNN Predictor
+        :type model: Predictor
+        :param device: device to move variables and model to, defaults to None
+        :type device: torch.device, optional
+        :param dtype: dtype to convert all float type variable data and model parameters to, defaults to None
+        :type dtype: torch.dtype, optional
+        """        
 
         self.variables = variables
         self.model = model
@@ -406,7 +377,7 @@ class MolecularDynamics:
             variables = [variables]
         for variable in variables:
             if variable.updater is None:
-                raise ValueError(f"Variable with name {variable.name} does not have a _VariableUpdater set.")
+                raise ValueError(f"Variable with name {variable.name} does not have a VariableUpdater set.")
 
         variable_names = [variable.name for variable in variables]
         if len(variable_names) != len(set(variable_names)):
@@ -513,20 +484,18 @@ class MolecularDynamics:
         
 
     def run(self, dt: float, n_steps: int, record_every: int = None):
-        """
-        Run `n_steps` of MD algorithm.
+        """Run `n_steps` of MD algorithm.
 
-        Parameters
-        ----------
-        dt : float
-            timestep
-        n_steps : int
-            number of steps to execute
-        record_every : int, optional
-            frequency at which to store the data at a step in memory,
-            record_every = 1 means every step will be stored, by default None
-        """
-        for i in trange(n_steps):
+        :param dt: timestep
+        :type dt: float
+        :param n_steps: number of steps to execute
+        :type n_steps: int
+        :param record_every: frequency at which to store the data at a step in memory,
+            record_every = 1 means every step will be stored, defaults to None
+        :type record_every: int, optional
+        """        
+
+        for i in progress_bar(range(n_steps)):
             model_outputs = self._step(dt)
             if record_every is not None and (i + 1) % record_every == 0:
                 self._update_data(model_outputs)

@@ -19,9 +19,9 @@ def wrap_envops(envsum_impl, sensesum_impl, featsum_impl):
             if pfirst.shape[0] == 0:
                 n_pair, n_nu = sense.shape
                 n_atom, n_feat = feat.shape
-                if n_pair!=0 or psecond.shape[0]!=0:
+                if n_pair != 0 or psecond.shape[0] != 0:
                     raise ValueError("Inconsistent shapes for envsum.")
-                return torch.zeros((n_atom,n_nu,n_feat),dtype=feat.dtype,device=feat.device)
+                return torch.zeros((n_atom, n_nu, n_feat), dtype=feat.dtype, device=feat.device)
             env = envsum_impl(sense, feat, pfirst, psecond)
             return env
 
@@ -49,9 +49,9 @@ def wrap_envops(envsum_impl, sensesum_impl, featsum_impl):
             if pfirst.shape[0] == 0:
                 n_atom0, n_nu, n_feat0 = env.shape
                 n_atom1, n_feat1 = feat.shape
-                if psecond.shape[0] !=0 or n_atom0!=n_atom1 or n_feat0 != n_feat1:
+                if psecond.shape[0] != 0 or n_atom0 != n_atom1 or n_feat0 != n_feat1:
                     raise ValueError("Inconsistent shapes for sensesum")
-                return torch.zeros((0,n_nu),dtype=feat.dtype,device=feat.device)
+                return torch.zeros((0, n_nu), dtype=feat.dtype, device=feat.device)
             sense = sensesum_impl(env, feat, pfirst, psecond)
             return sense
 
@@ -72,9 +72,9 @@ def wrap_envops(envsum_impl, sensesum_impl, featsum_impl):
             if pfirst.shape[0] == 0:
                 n_atom, n_nu0, n_feat = env.shape
                 n_pair, n_nu1 = sense.shape
-                if psecond.shape[0] !=0 or n_nu0!=n_nu1:
+                if psecond.shape[0] != 0 or n_nu0 != n_nu1:
                     raise ValueError("Inconsistent shapes for featsum")
-                return torch.zeros((n_atom,n_feat),dtype=env.dtype,device=env.device)
+                return torch.zeros((n_atom, n_feat), dtype=env.dtype, device=env.device)
             feat = featsum_impl(env, sense, pfirst, psecond)
             return feat
 

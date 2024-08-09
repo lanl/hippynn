@@ -39,23 +39,25 @@ class RestartDB(Restarter):
         return state
 
     def __setstate__(self, state):
-        cls_module, cls_name = state["cls"]
-        try:
-            import importlib
+        cls_state = state["cls"]
+        if isinstance(cls_state, tuple):
+            cls_module, cls_name = cls_state
+            try:
+                import importlib
 
-            module = importlib.import_module(cls_module)
-            state["cls"] = getattr(module, cls_name)
-        except (ImportError, AttributeError) as ee:
-            # Save the message, not the full exception object
-            # including traceback etc.
-            state["cls"] = ee.msg
+                module = importlib.import_module(cls_module)
+                state["cls"] = getattr(module, cls_name)
+            except (ImportError, AttributeError) as ee:
+                # Save the message, not the full exception object
+                # including traceback etc.
+                state["cls"] = ee.msg
         for k, v in state.items():
             setattr(self, k, v)
 
     def attempt_reload(self):
         print("restarting", self.cls)
         if isinstance(self.cls, str):
-            raise RuntimeError(f"Not restartable due to error: {self.cls}")
+            raise RuntimeError(f"Not restartable due to class error: {self.cls}")
         try:
             db = self.cls(*self.args, **self.kwargs)
         except Exception as eee:

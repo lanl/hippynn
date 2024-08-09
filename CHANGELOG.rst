@@ -1,3 +1,20 @@
+
+
+Breaking changes:
+-----------------
+
+New Features:
+-------------
+
+- Added a new custom cuda kernel implementation using triton. These are highly performant and now the default implementation.
+
+Improvements:
+-------------
+
+
+Bug Fixes:
+----------
+
 0.0.3
 =======
 

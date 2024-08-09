@@ -45,8 +45,8 @@ The following settings are available:
      - false
      - Yes
    * - USE_CUSTOM_KERNELS
-     - Use custom kernels with numba or cupy. Auto tries to detect the installation of numba or cupy. For more info see :doc:`/user_guide/ckernels`.
-     - auto, true, false, pytorch, numba, cupy
+     - Use custom kernels with triton, numba or cupy. Auto tries to detect the installation. For more info see :doc:`/user_guide/ckernels`.
+     - auto, true, false, pytorch, numba, cupy, triton
      - auto
      - Not directly, use :func:`~hippynn.custom_kernels.set_custom_kernels`
    * - WARN_LOW_DISTANCES
@@ -63,4 +63,9 @@ The following settings are available:
      - Print verbose information about the execution of a graph module. Don't turn this on unless something is going wrong inside of a GraphModule
      - true, false
      - false
+     - no
+   * - PYTORCH_GPU_MEM_FRAC
+     - In the Lammps interface, limit the amount of memory used by pytorch. Setting this value below 1.0 can force pytorch to garbage collect before entirely depleating GPU memory, leaving room for Lammps/KOKKOS. Leaving this variable unset imposes no pytorch memory limit
+     - float between 0 and 1
+     - 1.0
      - no
