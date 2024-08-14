@@ -82,6 +82,32 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">torch.autograd</span>
 
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+
+<span class="n">_DEVICE_CONTEXT_LOCK</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+<span class="n">_DEVICE_TIMEOUT</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># if custom kernels have locked for 10S, throw an error</span>
+
+
+<span class="nd">@contextmanager</span>
+<span class="k">def</span> <span class="nf">_lock_device</span><span class="p">(</span><span class="n">tensor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function locks the torch.cuda.device, which affects how</span>
+<span class="sd">    triton and cupy try to launch their kernels.</span>
+<span class="sd">    :param tensor:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">acquired</span> <span class="o">=</span> <span class="n">_DEVICE_CONTEXT_LOCK</span><span class="o">.</span><span class="n">acquire</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">_DEVICE_TIMEOUT</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">acquired</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Custom kernel device-lock appears deadlocked. (exceeded timeout </span><span class="si">{</span><span class="n">_DEVICE_CONTEXT_LOCK</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Developer note: device_of is safe to CPU tensors, but torch.cuda.device is not!</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_of</span><span class="p">(</span><span class="n">tensor</span><span class="p">):</span>
+            <span class="k">yield</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">_DEVICE_CONTEXT_LOCK</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
 
 <div class="viewcode-block" id="wrap_envops">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.autograd_wrapper.html#hippynn.custom_kernels.autograd_wrapper.wrap_envops">[docs]</a>
@@ -103,7 +129,8 @@
                 <span class="k">if</span> <span class="n">n_pair</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">psecond</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Inconsistent shapes for envsum.&quot;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_atom</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">feat</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">feat</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-            <span class="n">env</span> <span class="o">=</span> <span class="n">envsum_impl</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">_lock_device</span><span class="p">(</span><span class="n">feat</span><span class="p">):</span>
+                <span class="n">env</span> <span class="o">=</span> <span class="n">envsum_impl</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">env</span>
 
         <span class="nd">@staticmethod</span>
@@ -133,7 +160,8 @@
                 <span class="k">if</span> <span class="n">psecond</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">n_atom0</span> <span class="o">!=</span> <span class="n">n_atom1</span> <span class="ow">or</span> <span class="n">n_feat0</span> <span class="o">!=</span> <span class="n">n_feat1</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Inconsistent shapes for sensesum&quot;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">feat</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">feat</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-            <span class="n">sense</span> <span class="o">=</span> <span class="n">sensesum_impl</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">_lock_device</span><span class="p">(</span><span class="n">feat</span><span class="p">):</span>
+                <span class="n">sense</span> <span class="o">=</span> <span class="n">sensesum_impl</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">sense</span>
 
         <span class="nd">@staticmethod</span>
@@ -156,7 +184,8 @@
                 <span class="k">if</span> <span class="n">psecond</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">n_nu0</span> <span class="o">!=</span> <span class="n">n_nu1</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Inconsistent shapes for featsum&quot;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_atom</span><span class="p">,</span> <span class="n">n_feat</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-            <span class="n">feat</span> <span class="o">=</span> <span class="n">featsum_impl</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">_lock_device</span><span class="p">(</span><span class="n">env</span><span class="p">):</span>
+                <span class="n">feat</span> <span class="o">=</span> <span class="n">featsum_impl</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">feat</span>
 
         <span class="nd">@staticmethod</span>
