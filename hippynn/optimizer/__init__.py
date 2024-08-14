@@ -1,24 +1,8 @@
-from ..graphs import Predictor
-from .BatchOptimizer import *
+"""
+Functionality for Batch optimization of configurations under a potential energy surface..
 
-class HippyNNBatchOptimizer():
-    def __init__(self, model, optimizer=BatchFIRE(), dump_traj=False):
-        
-        # assume model is a hippynn model, and there will be 'Grad' in its output
-        self.predictor = Predictor.from_graph(model)
-        self.optimizer = optimizer
-        self.dump_traj = dump_traj
+Contributed by Shuhao Zhang (CMU, LANL)
+"""
 
-    def __call__(self, Z, R):
-        coords = R.clone()
-        self.optimizer.reset(coords)
-        while not self.optimizer.stop_signal:
-            ret = self.predictor(Z=Z, R=coords)
-            forces = -ret['Grad']
-            self.optimizer(forces)
-            coords = self.optimizer.coords
-        return coords
-    
-    def dump_step(self, Z, R):
-        # need to figure out how to dump a batch of structures
-        pass
+from .algorithms import BFGSv1, BFGSv2, BFGSv3, FIRE, NewtonRaphson
+from .batch_optimizer import Optimizer

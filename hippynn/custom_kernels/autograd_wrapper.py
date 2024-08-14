@@ -3,6 +3,32 @@ Wraps non-pytorch implementations for use with pytorch autograd.
 """
 import torch.autograd
 
+import threading
+from contextlib import contextmanager
+
+_DEVICE_CONTEXT_LOCK = threading.Lock()
+_DEVICE_TIMEOUT = 10  # if custom kernels have locked for 10S, throw an error
+
+
+@contextmanager
+def _lock_device(tensor):
+    """
+    This function locks the torch.cuda.device, which affects how
+    triton and cupy try to launch their kernels.
+    :param tensor:
+    :return:
+    """
+    acquired = _DEVICE_CONTEXT_LOCK.acquire(timeout=_DEVICE_TIMEOUT)
+
+    if not acquired:
+        raise TimeoutError(f"Custom kernel device-lock appears deadlocked. (exceeded timeout {_DEVICE_CONTEXT_LOCK})")
+    try:
+        # Developer note: device_of is safe to CPU tensors, but torch.cuda.device is not!
+        with torch.cuda.device_of(tensor):
+            yield
+    finally:
+        _DEVICE_CONTEXT_LOCK.release()
+
 
 def wrap_envops(envsum_impl, sensesum_impl, featsum_impl):
     """
@@ -22,7 +48,8 @@ def wrap_envops(envsum_impl, sensesum_impl, featsum_impl):
                 if n_pair != 0 or psecond.shape[0] != 0:
                     raise ValueError("Inconsistent shapes for envsum.")
                 return torch.zeros((n_atom, n_nu, n_feat), dtype=feat.dtype, device=feat.device)
-            env = envsum_impl(sense, feat, pfirst, psecond)
+            with _lock_device(feat):
+                env = envsum_impl(sense, feat, pfirst, psecond)
             return env
 
         @staticmethod
@@ -52,7 +79,8 @@ def wrap_envops(envsum_impl, sensesum_impl, featsum_impl):
                 if psecond.shape[0] != 0 or n_atom0 != n_atom1 or n_feat0 != n_feat1:
                     raise ValueError("Inconsistent shapes for sensesum")
                 return torch.zeros((0, n_nu), dtype=feat.dtype, device=feat.device)
-            sense = sensesum_impl(env, feat, pfirst, psecond)
+            with _lock_device(feat):
+                sense = sensesum_impl(env, feat, pfirst, psecond)
             return sense
 
         @staticmethod
@@ -75,7 +103,8 @@ def wrap_envops(envsum_impl, sensesum_impl, featsum_impl):
                 if psecond.shape[0] != 0 or n_nu0 != n_nu1:
                     raise ValueError("Inconsistent shapes for featsum")
                 return torch.zeros((n_atom, n_feat), dtype=env.dtype, device=env.device)
-            feat = featsum_impl(env, sense, pfirst, psecond)
+            with _lock_device(env):
+                feat = featsum_impl(env, sense, pfirst, psecond)
             return feat
 
         @staticmethod

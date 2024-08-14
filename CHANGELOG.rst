@@ -7,8 +7,9 @@ New Features:
 -------------
 
 - Added a new custom cuda kernel implementation using triton. These are highly performant and now the default implementation.
-- Exporting a database to NPZ or H5 format after preprocessing it is now just a function call away.
+- Exporting a database to NPZ or H5 format after preprocessing is now just a function call away.
 - SNAPjson format can now support an optional number of comment lines.
+- Added Batch optimizer features in order to optimize geometries in parallel on the GPU. Algorithms include FIRE and BFGS.
 
 Improvements:
 -------------
@@ -17,6 +18,8 @@ Improvements:
 
 Bug Fixes:
 ----------
+
+- Fixed bug where custom kernels were not launching properly on non-default GPUs
 
 0.0.3
 =======
