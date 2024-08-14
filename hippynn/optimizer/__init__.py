@@ -1,5 +1,5 @@
 """
-Functionality for Batch optimization of configurations under a potential energy surface..
+Functionality for Batch geometry optimization of configurations under a potential energy surface..
 
 Contributed by Shuhao Zhang (CMU, LANL)
 """
