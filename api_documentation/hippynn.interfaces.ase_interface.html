@@ -179,13 +179,16 @@ variable db_name including all inputs and targets.</p>
 <li><p><strong>arr_dict</strong> – dictionary mapping strings to numpy arrays</p></li>
 <li><p><strong>inputs</strong> – list of strings for input db_names</p></li>
 <li><p><strong>targets</strong> – list of strings for output db_namees</p></li>
-<li><p><strong>seed</strong> – int, for random splitting</p></li>
+<li><p><strong>seed</strong> – int, for random splitting, or “mask” for pre-split.
+Can also be existing numpy.random.RandomState.
+Can also be tuple from numpy.random.RandomState.get_state()</p></li>
 <li><p><strong>test_size</strong> – fraction of data to use in test split</p></li>
 <li><p><strong>valid_size</strong> – fraction of data to use in train split</p></li>
 <li><p><strong>num_workers</strong> – passed to pytorch dataloaders</p></li>
 <li><p><strong>pin_memory</strong> – passed to pytorch dataloaders</p></li>
 <li><p><strong>allow_unfound</strong> – If true, skip checking if the needed inputs and targets are found.
 This allows setting inputs=None and/or targets=None.</p></li>
+<li><p><strong>auto_split</strong> – If true, look for keys like “split_*” to make initial splits from. See write_npz() method.</p></li>
 <li><p><strong>quiet</strong> – If True, print little or nothing while loading.</p></li>
 </ul>
 </dd>

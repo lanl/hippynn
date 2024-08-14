@@ -116,6 +116,12 @@ is the one exception to the shapes given above.
 Note that input of bond variables for periodic systems can be ill-defined
 if there are multiple bonds between the same pairs of atoms. This is not yet
 supported.</p>
+<p>A note on <em>cell</em> variables. The shape of a cell variable should be specified as (n_atoms,3,3).
+There are two common conventions for the cell matrix itself; we use the convention that the basis index
+comes first, and the cartesian index comes second. That is similar to <cite>ase</cite>,
+the [i,j] element of the cell gives the j cartesian coordinate of cell vector i. If you experience
+massive difficulties fitting to periodic boundary conditions, you may check the transposed version
+of your cell data, or compute the RDF.</p>
 <section id="ase-objects-database-handling">
 <h2>ASE Objects Database handling<a class="headerlink" href="#ase-objects-database-handling" title="Link to this heading"></a></h2>
 <p>If your training data is stored as ASE files of any type (.json,.db,.xyz,.traj … etc.) it can be loaded directly

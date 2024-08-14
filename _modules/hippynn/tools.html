@@ -268,6 +268,23 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">pad_width</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="unsqueeze_multiple">
+<a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.unsqueeze_multiple">[docs]</a>
+<span class="k">def</span> <span class="nf">unsqueeze_multiple</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dims</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds unsqueezing dimensions dimensions</span>
+<span class="sd">    :param tensor:</span>
+<span class="sd">    :param dims:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">tensor</span>
+    <span class="n">dims</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">dims</span><span class="p">))</span>
+    <span class="k">while</span> <span class="n">dims</span><span class="p">:</span>
+        <span class="n">d</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span> <span class="o">=</span> <span class="n">dims</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="o">+</span><span class="mi">1</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">rest</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tensor</span></div>
 
 <div class="viewcode-block" id="np_of_torchdefaultdtype">
 <a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.np_of_torchdefaultdtype">[docs]</a>
@@ -277,7 +294,7 @@
 
 <div class="viewcode-block" id="is_equal_state_dict">
 <a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.is_equal_state_dict">[docs]</a>
-<span class="k">def</span> <span class="nf">is_equal_state_dict</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">is_equal_state_dict</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">raise_where</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Checks if two pytorch state dictionaries are equal. Calls itself recursively</span>
 <span class="sd">    if the value for a parameter is a dictionary.</span>
@@ -285,25 +302,41 @@
 
 <span class="sd">    :param d1:</span>
 <span class="sd">    :param d2:</span>
+<span class="sd">    :param raise_where: if not equal, use an assertion to fail.</span>
 <span class="sd">    :return:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">d1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">raise_where</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;State dictionaries not equal keys: </span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">d1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="n">d2</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="c1"># They have different sets of keys.</span>
         <span class="k">return</span> <span class="kc">False</span>
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">d1</span><span class="p">:</span>
         <span class="n">v1</span> <span class="o">=</span> <span class="n">d1</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
         <span class="n">v2</span> <span class="o">=</span> <span class="n">d2</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">type</span><span class="p">(</span><span class="n">v2</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">raise_where</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;State dictionaries not equal at key </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">; </span><span class="si">{</span><span class="n">v1</span><span class="si">}</span><span class="s2"> != </span><span class="si">{</span><span class="n">v2</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
                 <span class="k">continue</span>
             <span class="k">else</span><span class="p">:</span>
+
+                <span class="k">if</span> <span class="n">raise_where</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">v1</span><span class="o">.</span><span class="n">shape</span><span class="o">!=</span><span class="n">v2</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;State dictionaries not equal at key </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span>
+                                             <span class="sa">f</span><span class="s2">&quot; due to shapes: </span><span class="si">{</span><span class="n">v1</span><span class="o">.</span><span class="n">shape</span><span class="si">=}</span><span class="s2">,</span><span class="si">{</span><span class="n">v2</span><span class="o">.</span><span class="n">shape</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">where_not_equal</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">ne</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span><span class="n">v2</span><span class="p">))</span>
+                    <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;State dictionaries not equal at key </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span>
+                                         <span class="sa">f</span><span class="s2">&quot; at locations </span><span class="si">{</span><span class="n">where_not_equal</span><span class="si">}</span><span class="s2">;&quot;</span> <span class="o">+</span>
+                                         <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">v1</span><span class="p">[</span><span class="n">where_not_equal</span><span class="p">]</span><span class="si">}</span><span class="s2"> != </span><span class="si">{</span><span class="n">v2</span><span class="p">[</span><span class="n">where_not_equal</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="c1"># call recursive:</span>
-            <span class="k">return</span> <span class="n">is_equal_state_dict</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">is_equal_state_dict</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">,</span> <span class="n">raise_where</span><span class="o">=</span><span class="n">raise_where</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">v1</span> <span class="o">!=</span> <span class="n">v2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">raise_where</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;State dictionaries not equal at key </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">; </span><span class="si">{</span><span class="n">v1</span><span class="si">}</span><span class="s2"> != </span><span class="si">{</span><span class="n">v2</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">return</span> <span class="kc">True</span></div>
