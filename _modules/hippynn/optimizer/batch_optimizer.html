@@ -132,10 +132,12 @@
                     <span class="n">force_node</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="s1">&#39;force&#39;</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,)</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No automatic force node could be found for optimizer.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ee</span>
-                <span class="c1"># TODO even find an energy node if we can?</span>
+                <span class="c1"># TODO even find an energy node if we can and add forces to it?</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">force_node</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">db_name</span> <span class="o">==</span> <span class="n">force_key</span><span class="p">)</span>
 
         <span class="n">additional_outputs</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">force_node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">force_node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">force_node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">:</span>
             <span class="n">additional_outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">force_node</span><span class="p">]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="o">=</span> <span class="n">Predictor</span><span class="o">.</span><span class="n">from_graph</span><span class="p">(</span>
