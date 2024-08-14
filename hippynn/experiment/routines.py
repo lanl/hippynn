@@ -207,8 +207,8 @@ def setup_training(
         model, loss, evaluator, optimizer, setup_params.device or tools.device_fallback()
     )
 
-    metrics = MetricTracker(evaluator.loss_names, stopping_key=controller.stopping_key)
-
+    metrics = MetricTracker(evaluator.loss_names,
+                            stopping_key=controller.stopping_key)
     return training_modules, controller, metrics
 
 
@@ -353,17 +353,21 @@ def test_model(database, evaluator, batch_size, when, metric_tracker=None):
 
     if metric_tracker is None:
         metric_tracker = MetricTracker(evaluator.loss_names, stopping_key=None)
-    metric_tracker.quiet = False
+
+    # A little dance to make sure train, valid, test always come first, when present.
+    basic_splits = ["train", "valid", "test"]
+    basic_splits = [s for s in basic_splits if s in database.splits]
+    splits = basic_splits + [s for s in database.splits if s not in basic_splits]
+
     evaluation_data = collections.OrderedDict(
         (
-            ("train", database.make_generator("train", "eval", batch_size)),
-            ("valid", database.make_generator("valid", "eval", batch_size)),
-            ("test", database.make_generator("test", "eval", batch_size)),
+            (key, database.make_generator(key, "eval", batch_size))
+            for key in splits
         )
     )
     evaluation_metrics = {k: evaluator.evaluate(gen, eval_type=k, when=when) for k, gen in evaluation_data.items()}
     metric_tracker.register_metrics(evaluation_metrics, when=when)
-    metric_tracker.evaluation_print(evaluation_metrics)
+    metric_tracker.evaluation_print(evaluation_metrics, quiet=False)
     return metric_tracker
 
 

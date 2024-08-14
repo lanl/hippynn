@@ -50,10 +50,12 @@ class Optimizer:
                     force_node = find_unique_relative(model.nodes_to_compute, lambda node: 'force' in node.name,)
                 except Exception as ee:
                     raise ValueError("No automatic force node could be found for optimizer.") from ee
-                # TODO even find an energy node if we can?
+                # TODO even find an energy node if we can and add forces to it?
+        else:
+            force_node = find_unique_relative(model.nodes_to_compute, lambda node: node.db_name == force_key)
 
         additional_outputs = None
-        if force_node not in model.nodes_to_compute:
+        if force_node is not None and force_node not in model.nodes_to_compute:
             additional_outputs = [force_node]
 
         self.predictor = Predictor.from_graph(

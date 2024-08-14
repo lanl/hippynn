@@ -67,20 +67,23 @@ def create_structure_file(
         torch.save(structure, pfile)
 
 
-def restore_checkpoint(structure: dict, state: dict, restore_db=True) -> dict:
+def restore_checkpoint(structure: dict, state: dict, restart_db=False) -> dict:
     """
+
+    This function loads the parameters from the state dictionary into the modules,
+    optionally tries to restart the database, and sets the RNG state.
 
     :param structure: experiment structure object
     :param state: experiment state object
-    :param restore_db: Attempt to restore database (true/false)
+    :param restart_db: Attempt to restore database (true/false)
 
     :return: experiment structure
     """
     structure["training_modules"][0].load_state_dict(state["model"])
     structure["controller"].load_state_dict(state["controller"])
 
-    if "database" in structure and restore_db:
-        structure["database"] = structure["database"].attempt_reload()
+    if "database" in structure and restart_db:
+        structure["database"] = structure["database"].attempt_restart()
 
     structure["metric_tracker"] = state["metric_tracker"]
     torch.random.set_rng_state(state["torch_rng_state"])
@@ -109,7 +112,8 @@ def check_mapping_devices(map_location, model_device):
 
 
 def load_saved_tensors(structure_fname: str, state_fname: str, **kwargs) -> Tuple[dict, dict]:
-    """Load torch tensors from file.
+    """
+    Load torch tensors from file.
 
     :param structure_fname: name of the structure file
     :param state_fname: name of the state file
@@ -125,7 +129,7 @@ def load_saved_tensors(structure_fname: str, state_fname: str, **kwargs) -> Tupl
 
 
 def load_checkpoint(
-    structure_fname: str, state_fname: str, restore_db=True, map_location=None, model_device=None, **kwargs
+    structure_fname: str, state_fname: str, restart_db=False, map_location=None, model_device=None, **kwargs
 ) -> dict:
     """
     Load checkpoint file from given filename.
@@ -134,7 +138,7 @@ def load_checkpoint(
 
     :param structure_fname: name of the structure file
     :param state_fname: name of the state file
-    :param restore_db: restore database or not, defaults to True
+    :param restart_db: restore database or not, defaults to True
     :param map_location: device mapping argument for ``torch.load``, defaults to None
     :param model_device: automatically handle device mapping. Defaults to None, defaults to None
     :return: experiment structure
@@ -146,7 +150,7 @@ def load_checkpoint(
     structure, state = load_saved_tensors(structure_fname, state_fname, **kwargs)
 
     # transfer stuff back to model_device
-    structure = restore_checkpoint(structure, state, restore_db=restore_db)
+    structure = restore_checkpoint(structure, state, restart_db=restart_db)
     # no transfer happens in either case, as the tensors are on the target devices already
     if model_device == "cpu" or map_location != None:
         evaluator = structure["training_modules"].evaluator

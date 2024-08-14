@@ -24,8 +24,6 @@ with custom kernels -off-.
 
 import sys
 
-sys.path.append("../../datasets/ani-al/readers/lib/")  # location of pyanitools.py
-import pyanitools  # Check if pyanitools is found early
 
 import torch
 

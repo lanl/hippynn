@@ -16,12 +16,12 @@ and constructing the checkpoint.
 
 
 class Restarter:
-    def attempt_reload(self):
+    def attempt_restart(self):
         return NotImplemented
 
 
 class NoRestart(Restarter):
-    def attempt_reload(self):
+    def attempt_restart(self):
         print("Couldn't reload database. It might have been generated in-memory.")
         return None
 
@@ -54,7 +54,7 @@ class RestartDB(Restarter):
         for k, v in state.items():
             setattr(self, k, v)
 
-    def attempt_reload(self):
+    def attempt_restart(self):
         print("restarting", self.cls)
         if isinstance(self.cls, str):
             raise RuntimeError(f"Not restartable due to class error: {self.cls}")
