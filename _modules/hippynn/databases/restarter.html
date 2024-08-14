@@ -96,9 +96,9 @@
 <div class="viewcode-block" id="Restarter">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.Restarter">[docs]</a>
 <span class="k">class</span> <span class="nc">Restarter</span><span class="p">:</span>
-<div class="viewcode-block" id="Restarter.attempt_reload">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.Restarter.attempt_reload">[docs]</a>
-    <span class="k">def</span> <span class="nf">attempt_reload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Restarter.attempt_restart">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.Restarter.attempt_restart">[docs]</a>
+    <span class="k">def</span> <span class="nf">attempt_restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">NotImplemented</span></div>
 </div>
 
@@ -107,9 +107,9 @@
 <div class="viewcode-block" id="NoRestart">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.NoRestart">[docs]</a>
 <span class="k">class</span> <span class="nc">NoRestart</span><span class="p">(</span><span class="n">Restarter</span><span class="p">):</span>
-<div class="viewcode-block" id="NoRestart.attempt_reload">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.NoRestart.attempt_reload">[docs]</a>
-    <span class="k">def</span> <span class="nf">attempt_reload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="NoRestart.attempt_restart">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.NoRestart.attempt_restart">[docs]</a>
+    <span class="k">def</span> <span class="nf">attempt_restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Couldn&#39;t reload database. It might have been generated in-memory.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 </div>
@@ -149,9 +149,9 @@
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 
-<div class="viewcode-block" id="RestartDB.attempt_reload">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.RestartDB.attempt_reload">[docs]</a>
-    <span class="k">def</span> <span class="nf">attempt_reload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="RestartDB.attempt_restart">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.RestartDB.attempt_restart">[docs]</a>
+    <span class="k">def</span> <span class="nf">attempt_restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;restarting&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not restartable due to class error: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
