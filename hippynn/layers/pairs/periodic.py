@@ -1,9 +1,6 @@
 import torch
 
-from scipy.spatial import KDTree
-
 from .open import _PairIndexer, PairMemory
-from torch.profiler import profile, record_function, ProfilerActivity
 
 # Deprecated?
 class StaticImagePeriodicPairIndexer(_PairIndexer):
