@@ -11,7 +11,7 @@ if __name__ == "__main__":
     # Load trained model
     try:
         with active_directory("../TEST_INP_MODEL", create=False):
-            bundle = load_checkpoint_from_cwd(map_location="cpu", restore_db=False)
+            bundle = load_checkpoint_from_cwd(map_location="cpu")
     except FileNotFoundError:
         raise FileNotFoundError("Model not found, run lammps_train_model_InP.py first!")
 

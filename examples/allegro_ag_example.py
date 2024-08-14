@@ -20,7 +20,6 @@ Timing:
 """
 import os
 import torch
-import ase.io
 import time
 
 import hippynn
@@ -30,7 +29,7 @@ from hippynn.databases import AseDatabase
 torch.set_default_dtype(torch.float32)
 hippynn.settings.WARN_LOW_DISTANCES = False
 
-max_epochs=500
+max_epochs = 500
 
 network_params = {
     "possible_species": [0, 47],

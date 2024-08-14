@@ -43,7 +43,7 @@ else:
 # Load the pre-trained model
 try:
     with active_directory("TEST_ALUMINUM_MODEL", create=False):
-        bundle = load_checkpoint_from_cwd(map_location="cpu", restore_db=False)
+        bundle = load_checkpoint_from_cwd(map_location="cpu")
 except FileNotFoundError:
     raise FileNotFoundError("Model not found, run ani_aluminum_example.py first!")
 

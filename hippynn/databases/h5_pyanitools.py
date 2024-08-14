@@ -212,13 +212,15 @@ class PyAniFileDB(Database, PyAniMethods, Restartable):
 
 class PyAniDirectoryDB(Database, PyAniMethods, Restartable):
     def __init__(self, directory, inputs, targets, *args, files=None, allow_unfound=False, species_key="species",
-                 quiet=False,**kwargs):
+                 quiet=False, driver='core', **kwargs):
 
         self.directory = directory
         self.files = files
         self.inputs = inputs
         self.targets = targets
         self.species_key = species_key
+        self.driver = driver
+
         arr_dict = self.load_arrays(allow_unfound=allow_unfound,quiet=quiet)
 
         super().__init__(arr_dict, inputs, targets, *args, **kwargs, quiet=quiet, allow_unfound=allow_unfound)
@@ -242,14 +244,15 @@ class PyAniDirectoryDB(Database, PyAniMethods, Restartable):
 
         file_batches = []
         for f in progress_bar(files, desc="Data Files", unit="file"):
-            file_batches.append(self.extract_full_file(f,species_key=self.species_key))
+            file_batches.append(self.extract_full_file(f, species_key=self.species_key))
 
-        data, max_atoms_list = zip(*file_batches)
+        data, max_atoms_list, sys_count = zip(*file_batches)
 
         n_atoms_max = max(max_atoms_list)
         batches = [item for fb in data for item in fb]
+        sys_count = sum(sys_count)
 
-        arr_dict = self.process_batches(batches, n_atoms_max, species_key=self.species_key)
+        arr_dict = self.process_batches(batches, n_atoms_max, sys_count, species_key=self.species_key)
         arr_dict = self.filter_arrays(arr_dict, quiet=quiet, allow_unfound=allow_unfound)
         return arr_dict
 
