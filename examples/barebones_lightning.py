@@ -93,7 +93,8 @@ with hippynn.tools.active_directory(netname):
         # )
         from hippynn.experiment import HippynnLightningModule
 
-        lightmod, datamodule = HippynnLightningModule.from_experiment_setup(training_modules, database, experiment_params)
-        import pytorch_lightning as pl
-        trainer = pl.Trainer(accelerator='cpu') #'auto' detects MPS which doesn't work.
-        trainer.fit(model=lightmod, datamodule=datamodule)
+# lightning prefers to run exactly where the script is located
+lightmod, datamodule = HippynnLightningModule.from_experiment_setup(training_modules, database, experiment_params)
+import pytorch_lightning as pl
+trainer = pl.Trainer(accelerator='cpu') #'auto' detects MPS which doesn't work.
+trainer.fit(model=lightmod, datamodule=datamodule)

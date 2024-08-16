@@ -110,8 +110,9 @@ class HippynnLightningModule(pl.LightningModule):
 
         batch_model_outputs = self.model(*batch_inputs)
         batch_train_loss = self.loss(*batch_model_outputs, *batch_targets)[0]
-        print(f'{batch_train_loss=}')
+
         self.log("train_loss", batch_train_loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        return batch_train_loss
 
     def validation_step(self, batch, batch_idx):
 
@@ -120,8 +121,6 @@ class HippynnLightningModule(pl.LightningModule):
         batch_targets = batch[-self.n_targets:]
 
         batch_dict = dict(zip(self.inputs, batch_inputs))
-        for k,v in batch_dict.items():
-            print(k,v.shape,v.dtype)
         batch_predictions = self.model(*batch_inputs)
 
         outputs = (batch_predictions,batch_targets)
