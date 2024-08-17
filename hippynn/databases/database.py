@@ -514,7 +514,7 @@ class Database:
 
         return write_h5_function(self, split=split, file=h5path, species_key=species_key, overwrite=overwrite)
 
-    def write_npz(self, file: str, record_split_masks: bool = True, overwrite: bool = False, split_prefix=None, return_only=False):
+    def write_npz(self, file: str, record_split_masks: bool = True, compressed:bool =True, overwrite: bool = False, split_prefix=None, return_only=False):
         """
         :param file: str, Path, or file object compatible with np.save
         :param record_split_masks: 
@@ -561,7 +561,10 @@ class Database:
             if file.exists() and not overwrite:
                 raise FileExistsError(f"File exists: {file}")
 
-        np.savez_compressed(file, **arr_dict)
+        if compressed:
+            np.savez_compressed(file, **arr_dict)
+        else:
+            np.savez(file, **arr_dict)
 
         return arr_dict
 

@@ -39,6 +39,7 @@ class HippynnLightningModule(pl.LightningModule):
         self.targets = targets
         self.n_inputs = len(self.inputs)
         self.n_targets = len(self.targets)
+        self.n_outputs = n_outputs
         self.plot_maker = plot_maker
 
         self.validation_step_outputs = []
@@ -80,6 +81,7 @@ class HippynnLightningModule(pl.LightningModule):
             plot_maker = evaluator.plot_maker,
             inputs = database.inputs,
             targets = database.targets,
+            n_outputs =  evaluator.n_outputs
             **kwargs,
         )
 
@@ -100,7 +102,7 @@ class HippynnLightningModule(pl.LightningModule):
             "name": "learning_rate",
         }
 
-        return dict(optimizer=self.optimizer, lr_scheduler_config=lr_scheduler_config)
+        return dict(optimizer=self.optimizer, lr_scheduler=lr_scheduler_config)
 
 
     def training_step(self, batch, batch_idx):
@@ -121,22 +123,29 @@ class HippynnLightningModule(pl.LightningModule):
         batch_targets = batch[-self.n_targets:]
 
         batch_dict = dict(zip(self.inputs, batch_inputs))
-        batch_predictions = self.model(*batch_inputs)
+        with torch.autograd.set_grad_enabled(True):
+            batch_predictions = self.model(*batch_inputs)
 
-        outputs = (batch_predictions,batch_targets)
+        outputs = (batch_predictions, batch_targets)
         self.validation_step_outputs.append(outputs)
         return batch_predictions
 
     def on_validation_epoch_end(self,prefix="valid_"):
 
-        all_predictions, all_targets = zip(*self.validation_step_outputs)
-        all_predictions = [torch.cat(x, dim=0) if x[0].shape != () else x[0] for x in all_predictions]
-        all_targets = [torch.cat(x, dim=0) for x in all_targets]
+        all_batch_predictions, all_batch_targets = zip(*self.validation_step_outputs)
+        # now 'shape' (n_batch, n_outputs) -> need to transpose.
+        all_batch_predictions = [[bpred[i] for bpred in all_batch_predictions] for i in range(self.n_outputs)]
+        # now 'shape' (n_batch, n_targets) -> need to transpose.
+        all_batch_targets = [[bpred[i] for bpred in all_batch_targets] for i in range(self.n_targets)]
+
+        # now cat each prediction and target across the batch index.
+        all_predictions = [torch.cat(x, dim=0) if x[0].shape != () else x[0] for x in all_batch_predictions]
+        all_targets = [torch.cat(x, dim=0) for x in all_batch_targets]
 
         all_losses = [x.item() for x in self.loss(*all_predictions, *all_targets)]
         loss_dict = {name: value for name, value in zip(self.eval_names, all_losses)}
         for k,v in loss_dict.items():
-            self.log(prefix + k, v, on_epoch=True, logger=True)
+            self.log(prefix + k, v, on_epoch=True, logger=True, sync_dist=True)
         self.validation_step_outputs.clear()  # free memory
         return
 
