@@ -101,7 +101,7 @@ class HippynnLightningModule(pl.LightningModule):
                 "scheduler": self.scheduler,
                 "interval": "epoch",  # can be epoch or step
                 "frequency": 1,# How many intervals should pass between calls to  `scheduler.step()`.
-                "monitor": self.stopping_key, # Metric to to monitor for schedulers like `ReduceLROnPlateau`
+                "monitor": "valid_" + self.stopping_key, # Metric to to monitor for schedulers like `ReduceLROnPlateau`
                 "strict": True,
                 "name": "learning_rate",
             }
