@@ -127,8 +127,12 @@ class HippynnLightningModule(pl.LightningModule):
         batch_targets = batch[-self.n_targets:]
 
         batch_dict = dict(zip(self.inputs, batch_inputs))
+
+        # it is very very common to fit to derivatives, e.g. force.
         with torch.autograd.set_grad_enabled(True):
             batch_predictions = self.model(*batch_inputs)
+
+        batch_predictions = [bp.detach() for bp in batch_predictions]
 
         outputs = (batch_predictions, batch_targets)
         self.validation_step_outputs.append(outputs)
