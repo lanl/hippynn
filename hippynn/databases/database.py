@@ -32,6 +32,7 @@ class Database:
         auto_split=False,
         device=None,
         quiet=False,
+        dataloader_kwargs=None
     ):
         """
         :param arr_dict: dictionary mapping strings to numpy arrays
@@ -122,6 +123,8 @@ class Database:
                 raise ValueError("Device cannot be set in constructor unless automatic split provided.")
             else:
                 self.send_to_device(device)
+
+        self.dataloader_kwargs = dataloader_kwargs.copy() if dataloader_kwargs else {}
 
     def __len__(self):
         return arrdict_len(self.arr_dict)
@@ -425,6 +428,7 @@ class Database:
             shuffle=shuffle,
             pin_memory=self.pin_memory,
             num_workers=self.num_workers,
+            **self.dataloader_kwargs,
         )
 
         return generator
