@@ -203,6 +203,10 @@ class RaiseBatchSizeOnPlateau:
         self.boredom = 0
         self.last_epoch = 0
 
+    @property
+    def optimizer(self):
+        return self.inner.optimizer
+
     def set_controller(self, box):
         self.controller = box
 
