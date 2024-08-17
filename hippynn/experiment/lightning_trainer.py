@@ -42,7 +42,6 @@ class HippynnLightningModule(pl.LightningModule):
         self.n_targets = len(self.targets)
         self.n_outputs = n_outputs
         self.plot_maker = plot_maker
-
         self.validation_step_outputs = []
 
         if not isinstance(step_fn:=get_step_function(optimizer), StandardStep):  # :=
@@ -150,11 +149,22 @@ class HippynnLightningModule(pl.LightningModule):
         all_predictions = [torch.cat(x, dim=0) if x[0].shape != () else x[0] for x in all_batch_predictions]
         all_targets = [torch.cat(x, dim=0) for x in all_batch_targets]
 
-        all_losses = [x.item() for x in self.loss(*all_predictions, *all_targets)]
+        all_losses = [x.item() for x in self.eval_loss(*all_predictions, *all_targets)]
+
         loss_dict = {name: value for name, value in zip(self.eval_names, all_losses)}
         for k,v in loss_dict.items():
             self.log(prefix + k, v, on_epoch=True, logger=True, sync_dist=True)
+        loss_dict = dict(valid=loss_dict)
+
         self.validation_step_outputs.clear()  # free memory
+
+        # register metrics and push to controller
+        out_ = self.metric_tracker.register_metrics(loss_dict, when=self.current_epoch)
+        better_metrics, better_model, stopping_metric = out_
+        self.metric_tracker.evaluation_print_better(loss_dict, better_metrics)
+
+        continue_training = self.controller.push_epoch(self.current_epoch, better_model, stopping_metric)
+
         return
 
     def test_step(self, batch, batch_idx):

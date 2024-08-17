@@ -85,7 +85,6 @@ class MetricTracker:
                 except KeyError:
                     if split_type not in self.best_metric_values:
                         # Haven't seen this split before!
-                        print("ADDING ",split_type)
                         self.best_metric_values[split_type] = {}
                         better_metrics[split_type] = {}
                     better = True  # old best was not found!
