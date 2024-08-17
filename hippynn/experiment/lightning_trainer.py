@@ -23,6 +23,7 @@ class HippynnLightningModule(pl.LightningModule):
                  plot_maker: PlotMaker,
                  inputs:list[str],
                  targets:list[str],
+                 n_outputs:int,
                  *args,**kwargs): # forwards args and kwargs to where?
         super().__init__()
 
@@ -81,7 +82,7 @@ class HippynnLightningModule(pl.LightningModule):
             plot_maker = evaluator.plot_maker,
             inputs = database.inputs,
             targets = database.targets,
-            n_outputs =  evaluator.n_outputs
+            n_outputs =  evaluator.n_outputs,
             **kwargs,
         )
 
@@ -93,16 +94,19 @@ class HippynnLightningModule(pl.LightningModule):
 
     def configure_optimizers(self):
 
-        lr_scheduler_config = {
-            "scheduler": self.scheduler,
-            "interval": "epoch",  # can be epoch or step
-            "frequency": 1,# How many intervals should pass between calls to  `scheduler.step()`.
-            "monitor": self.stopping_key, # Metric to to monitor for schedulers like `ReduceLROnPlateau`
-            "strict": True,
-            "name": "learning_rate",
-        }
+        config = dict(optimizer=self.optimizer)
 
-        return dict(optimizer=self.optimizer, lr_scheduler=lr_scheduler_config)
+        if self.scheduler is not None:
+            config["lr_scheduler"] = {
+                "scheduler": self.scheduler,
+                "interval": "epoch",  # can be epoch or step
+                "frequency": 1,# How many intervals should pass between calls to  `scheduler.step()`.
+                "monitor": self.stopping_key, # Metric to to monitor for schedulers like `ReduceLROnPlateau`
+                "strict": True,
+                "name": "learning_rate",
+            }
+
+        return config
 
 
     def training_step(self, batch, batch_idx):
