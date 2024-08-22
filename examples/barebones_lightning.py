@@ -67,6 +67,8 @@ with hippynn.tools.active_directory(netname):
             valid_size=0.1,  # Fraction or number of samples to validate on
             seed=2001,  # Random seed for splitting data
             **db_info,  # Adds the inputs and targets db_names from the model as things to load
+            dataloader_kwargs=dict(persistent_workers=True,multiprocessing_context='fork'),
+            num_workers=2,
         )
 
         # Now that we have a database and a model, we can
