@@ -114,14 +114,14 @@ class MetricTracker:
             return
         table_evaluation_print(evaluation_dict, self.metric_names, self.name_column_width)
 
-    def evaluation_print_better(self, evaluation_dict, better_dict, quiet=None):
+    def evaluation_print_better(self, evaluation_dict, better_dict, quiet=None, _print=print):
         if quiet is None:
             quiet = self.quiet
         if quiet:
             return
-        table_evaluation_print_better(evaluation_dict, better_dict, self.metric_names, self.name_column_width)
+        table_evaluation_print_better(evaluation_dict, better_dict, self.metric_names, self.name_column_width, _print=print)
         if self.stopping_key:
-            print(
+            _print(
                 "Best {} so far: {:>8.5g}".format(
                     self.stopping_key, self.best_metric_values["valid"][self.stopping_key]
                 )
@@ -133,7 +133,7 @@ class MetricTracker:
 
 # Driver for printing evaluation table results, with * for better entries.
 # Decoupled from the estate in case we want to more easily change print formatting.
-def table_evaluation_print_better(evaluation_dict, better_dict, metric_names, n_columns):
+def table_evaluation_print_better(evaluation_dict, better_dict, metric_names, n_columns, _print=print):
     """
     Print metric results as a table, add a '*' character for metrics in better_dict.
 
@@ -156,16 +156,16 @@ def table_evaluation_print_better(evaluation_dict, better_dict, metric_names, n_
     header = " " * (n_columns + 2) + "".join("{:>14}".format(tn) for tn in type_names)
     rowstring = "{:<" + str(n_columns) + "}: " + "   {}{:>10.5g}" * n_types
 
-    print(header)
-    print("-" * len(header))
+    _print(header)
+    _print("-" * len(header))
     for n, valsbet in zip(metric_names, transposed_values_better):
         rowoutput = [k for bv in valsbet for k in bv]
-        print(rowstring.format(n, *rowoutput))
+        _print(rowstring.format(n, *rowoutput))
 
 
 # Driver for printing evaluation table results.
 # Decoupled from the estate in case we want to more easily change print formatting.
-def table_evaluation_print(evaluation_dict, metric_names, n_columns):
+def table_evaluation_print(evaluation_dict, metric_names, n_columns, _print=print):
     """
     Print metric results as a table.
 
@@ -183,8 +183,8 @@ def table_evaluation_print(evaluation_dict, metric_names, n_columns):
     header = " " * (n_columns + 2) + "".join("{:>14}".format(tn) for tn in type_names)
     rowstring = "{:<" + str(n_columns) + "}: " + "    {:>10.5g}" * n_types
 
-    print(header)
-    print("-" * len(header))
+    _print(header)
+    _print("-" * len(header))
     for n, vals in zip(metric_names, transposed_values):
-        print(rowstring.format(n, *vals))
-    print("-" * len(header))
+        _print(rowstring.format(n, *vals))
+    _print("-" * len(header))

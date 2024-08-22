@@ -1,3 +1,14 @@
+"""
+Pytorch Lightning training interface.
+
+This module is somewhat experimental. Using pytorch lightning
+successfully in a distributed context may require understanding
+and adjusting the various settings related to parallelism, e.g.
+multiprocessing context, torch ddp backend, and how they interact
+with your HPC environment.
+
+Some features of hippynn experiments may not be implemented yet.
+"""
 import torch
 
 import pytorch_lightning as pl
@@ -42,7 +53,9 @@ class HippynnLightningModule(pl.LightningModule):
         self.n_targets = len(self.targets)
         self.n_outputs = n_outputs
         self.plot_maker = plot_maker
-        self.validation_step_outputs = []
+
+        # Storage for predictions across batches for eval mode.
+        self.eval_step_outputs = []
 
         if not isinstance(step_fn:=get_step_function(optimizer), StandardStep):  # :=
             raise NotImplementedError(f"Optimzers with non-standard steps are not yet supported. {optimizer,step_fn}")
@@ -116,10 +129,10 @@ class HippynnLightningModule(pl.LightningModule):
         batch_model_outputs = self.model(*batch_inputs)
         batch_train_loss = self.loss(*batch_model_outputs, *batch_targets)[0]
 
-        self.log("train_loss", batch_train_loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("train_loss", batch_train_loss)
         return batch_train_loss
 
-    def validation_step(self, batch, batch_idx):
+    def _eval_step(self, batch, batch_idx):
 
 
         batch_inputs = batch[: self.n_inputs]
@@ -134,12 +147,19 @@ class HippynnLightningModule(pl.LightningModule):
         batch_predictions = [bp.detach() for bp in batch_predictions]
 
         outputs = (batch_predictions, batch_targets)
-        self.validation_step_outputs.append(outputs)
+        self.eval_step_outputs.append(outputs)
         return batch_predictions
 
-    def on_validation_epoch_end(self,prefix="valid_"):
+    def validation_step(self, batch, batch_idx):
+        return self._eval_step(batch,batch_idx) # does it work to just run it this way?
 
-        all_batch_predictions, all_batch_targets = zip(*self.validation_step_outputs)
+    def test_step(self, batch, batch_idx):
+        return self._eval_step(batch,batch_idx) # does it work to just run it this way?
+
+
+    def _eval_epoch_end(self, prefix):
+
+        all_batch_predictions, all_batch_targets = zip(*self.eval_step_outputs)
         # now 'shape' (n_batch, n_outputs) -> need to transpose.
         all_batch_predictions = [[bpred[i] for bpred in all_batch_predictions] for i in range(self.n_outputs)]
         # now 'shape' (n_batch, n_targets) -> need to transpose.
@@ -150,28 +170,35 @@ class HippynnLightningModule(pl.LightningModule):
         all_targets = [torch.cat(x, dim=0) for x in all_batch_targets]
 
         all_losses = [x.item() for x in self.eval_loss(*all_predictions, *all_targets)]
+        self.eval_step_outputs.clear()  # free memory
 
         loss_dict = {name: value for name, value in zip(self.eval_names, all_losses)}
+
+        # log with pytorch ligthning
         for k,v in loss_dict.items():
             self.log(prefix + k, v, on_epoch=True, logger=True, sync_dist=True)
-        loss_dict = dict(valid=loss_dict)
 
-        self.validation_step_outputs.clear()  # free memory
-
+        loss_dict = {
+            prefix[:-1]:loss_dict
+        }
         # register metrics and push to controller
         out_ = self.metric_tracker.register_metrics(loss_dict, when=self.current_epoch)
         better_metrics, better_model, stopping_metric = out_
-        self.metric_tracker.evaluation_print_better(loss_dict, better_metrics)
+        self.metric_tracker.evaluation_print_better(loss_dict, better_metrics,_print=self.print)
+        return better_model, stopping_metric
 
+    def on_validation_epoch_end(self):
+        better_model, stopping_metric = self._eval_epoch_end(prefix="valid_")
         continue_training = self.controller.push_epoch(self.current_epoch, better_model, stopping_metric)
 
         return
 
-    def test_step(self, batch, batch_idx):
-        return self.validation_step(batch,batch_idx) # does it work to just run it this way?
+        return
 
     def on_test_epoch_end(self):
-        return self.on_validation_epoch_end(prefix="test_")
+        self._eval_epoch_end(prefix="test_")
+        return
+
 
 
 

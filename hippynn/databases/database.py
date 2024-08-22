@@ -1,6 +1,8 @@
 """
 Base database functionality from dictionary of numpy arrays
 """
+
+from typing import Union
 import warnings
 import numpy as np
 import torch
@@ -20,19 +22,19 @@ class Database:
 
     def __init__(
         self,
-        arr_dict,
-        inputs,
-        targets,
-        seed,
-        test_size=None,
-        valid_size=None,
-        num_workers=0,
-        pin_memory=True,
-        allow_unfound=False,
-        auto_split=False,
-        device=None,
+        arr_dict: dict[str,torch.Tensor],
+        inputs: list[str],
+        targets: list[str],
+        seed: [int,np.random.RandomState,tuple],
+        test_size: Union[float,int]=None,
+        valid_size: Union[float,int]=None,
+        num_workers: int=0,
+        pin_memory: bool=True,
+        allow_unfound:bool =False,
+        auto_split:bool =False,
+        device: torch.device=None,
+        dataloader_kwargs:dict[str,object]=None,
         quiet=False,
-        dataloader_kwargs=None
     ):
         """
         :param arr_dict: dictionary mapping strings to numpy arrays
@@ -48,6 +50,9 @@ class Database:
         :param allow_unfound: If true, skip checking if the needed inputs and targets are found.
            This allows setting inputs=None and/or targets=None.
         :param auto_split: If true, look for keys like "split_*" to make initial splits from. See write_npz() method.
+        :param device: if set, move the dataset to this device after splitting.
+        :param dataloader_kwargs: dictionary, passed to pytorch dataloaders in addition to num_workers, pin_memory.
+           Refer to pytorch documentation for details.
         :param quiet: If True, print little or nothing while loading.
         """
 
