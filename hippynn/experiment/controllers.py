@@ -53,7 +53,6 @@ class Controller:
     ):
 
         self.optimizer = optimizer
-        self.scheduler = scheduler
 
         self.stopping_key = stopping_key
 
@@ -150,12 +149,16 @@ class PatienceController(Controller):
 
     @property
     def max_epochs(self):
-        return min(self.last_best + self.patience, self._max_epochs)
+        return min(self.last_best + self.patience + 1, self._max_epochs)
 
 
-class RaiseBatchSizeOnPlateau:
+# Developer note: The inheritance here is only so that pytorch lightning
+# readily identifies this as a scheduler.
+class RaiseBatchSizeOnPlateau(ReduceLROnPlateau):
     """
     Learning rate scheduler compatible with pytorch schedulers.
+
+    Note: The "VERBOSE" Parameter has been deprecated and no longer does anything.
 
     This roughly implements the scheme outlined in the following paper:
 
@@ -183,9 +186,20 @@ class RaiseBatchSizeOnPlateau:
         patience=10,
         threshold=0.0001,
         threshold_mode="rel",
-        verbose=True,
+        verbose=None, # DEPRECATED
         controller=None,
     ):
+        """
+
+        :param optimizer:
+        :param max_batch_size:
+        :param factor:
+        :param patience:
+        :param threshold:
+        :param threshold_mode:
+        :param verbose:
+        :param controller:
+        """
 
         if threshold_mode not in ("abs", "rel"):
             raise ValueError("Mode must be 'abs' or 'rel'")
@@ -196,13 +210,13 @@ class RaiseBatchSizeOnPlateau:
             factor=factor,
             threshold=threshold,
             threshold_mode=threshold_mode,
-            verbose=verbose,
         )
         self.controller = controller
         self.max_batch_size = max_batch_size
         self.best_metric = float("inf")
         self.boredom = 0
         self.last_epoch = 0
+        warnings.warn("Parameter verbose no longer supported for schedulers. It will be ignored.")
 
     @property
     def optimizer(self):
@@ -255,12 +269,9 @@ class RaiseBatchSizeOnPlateau:
             new_batch_size = min(new_batch_size, self.max_batch_size)
             self.controller.batch_size = new_batch_size
             self.boredom = 0
-            if self.inner.verbose:
-                print("Raising batch size to", new_batch_size)
+
             if new_batch_size >= self.max_batch_size:
                 self.inner.last_epoch = self.last_epoch - 1
-                if self.inner.verbose:
-                    print("Max batch size reached, Lowering learning rate from here.")
 
         return
 

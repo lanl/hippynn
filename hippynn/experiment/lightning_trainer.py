@@ -8,7 +8,11 @@ multiprocessing context, torch ddp backend, and how they interact
 with your HPC environment.
 
 Some features of hippynn experiments may not be implemented yet.
+    - The plotmaker is currently not supported.
+
 """
+import warnings
+
 import torch
 
 import pytorch_lightning as pl
@@ -29,8 +33,8 @@ class HippynnLightningModule(pl.LightningModule):
                  eval_loss: GraphModule,
                  eval_names: list[str],
                  stopping_key: str,
-                 optimizer: torch.optim.Optimizer,
-                 scheduler: torch.optim.lr_scheduler,
+                 optimizer_list: list[torch.optim.Optimizer],
+                 scheduler_list: list[torch.optim.lr_scheduler],
                  controller: Controller,
                  metric_tracker: MetricTracker,
                  plot_maker: PlotMaker,
@@ -47,8 +51,8 @@ class HippynnLightningModule(pl.LightningModule):
         self.stopping_key = stopping_key
         self.controller = controller
         self.metric_tracker = metric_tracker
-        self.optimizer = optimizer # does this conflict with PL names?
-        self.scheduler = scheduler # does this conflict with PL names?
+        self.optimizer_list = optimizer_list
+        self.scheduler_list = scheduler_list
         self.inputs = inputs
         self.targets = targets
         self.n_inputs = len(self.inputs)
@@ -56,18 +60,24 @@ class HippynnLightningModule(pl.LightningModule):
         self.n_outputs = n_outputs
         self.plot_maker = plot_maker
 
+        self._last_reload_dlene = None #storage for whether batch size should be changed.
+
         # Storage for predictions across batches for eval mode.
         self.eval_step_outputs = []
 
-        if not isinstance(step_fn:=get_step_function(optimizer), StandardStep):  # :=
-            raise NotImplementedError(f"Optimzers with non-standard steps are not yet supported. {optimizer,step_fn}")
+        for optimizer in self.optimizer_list:
+            if not isinstance(step_fn:=get_step_function(optimizer), StandardStep):  # :=
+                raise NotImplementedError(f"Optimzers with non-standard steps are not yet supported. {optimizer,step_fn}")
+
+
         if args or kwargs:
-            raise NotImplementedError("No args or kwargs support yet.")
+            raise NotImplementedError("Generic args and kwargs not supported.")
 
     @classmethod
     def from_experiment_setup(cls, training_modules: TrainingModules, database: Database, setup_params:SetupParams, **kwargs):
         training_modules, controller, metric_tracker = setup_training(training_modules, setup_params)
         return cls.from_train_setup(training_modules, database, controller, metric_tracker, **kwargs)
+
 
     @classmethod
     def from_train_setup(cls,
@@ -88,8 +98,8 @@ class HippynnLightningModule(pl.LightningModule):
             loss = loss,
             eval_loss = evaluator.loss,
             eval_names = evaluator.loss_names,
-            optimizer = controller.optimizer,
-            scheduler = controller.scheduler,
+            optimizer_list = [controller.optimizer],
+            scheduler_list = controller.scheduler_list,
             stopping_key = controller.stopping_key,
             controller = controller,
             metric_tracker = metric_tracker,
@@ -99,6 +109,8 @@ class HippynnLightningModule(pl.LightningModule):
             n_outputs =  evaluator.n_outputs,
             **kwargs,
         )
+        if evaluator.plot_maker is not None:
+            warnings.warn("plot_maker is not currently supported in pytorch lightning. The current plot_maker will be ignored.")
 
         # pytorch lightning is now in charge of stepping the scheduler.
         controller.scheduler_list = []
@@ -110,23 +122,26 @@ class HippynnLightningModule(pl.LightningModule):
 
     def configure_optimizers(self):
 
-        config = dict(optimizer=self.optimizer)
-
-        if self.scheduler is not None:
-            config["lr_scheduler"] = {
-                "scheduler": self.scheduler,
+        scheduler_list = []
+        for s in self.scheduler_list:
+            config =  {
+                "scheduler": s,
                 "interval": "epoch",  # can be epoch or step
-                "frequency": 1,# How many intervals should pass between calls to  `scheduler.step()`.
-                "monitor": "valid_" + self.stopping_key, # Metric to to monitor for schedulers like `ReduceLROnPlateau`
+                "frequency": 1,  # How many intervals should pass between calls to  `scheduler.step()`.
+                "monitor": "valid_" + self.stopping_key,  # Metric to to monitor for schedulers like `ReduceLROnPlateau`
                 "strict": True,
                 "name": "learning_rate",
             }
+            scheduler_list.append(config)
 
-        return config
+        optimizer_list = self.optimizer_list.copy()
+
+        return optimizer_list, scheduler_list
 
     def on_train_epoch_start(self):
-        print_lr(self.optimizer,print_=self.print)
-
+        for optimizer in self.optimizer_list:
+            print_lr(optimizer, print_=self.print)
+        self.print("Batch size:", self.trainer.train_dataloader.batch_size)
 
     def training_step(self, batch, batch_idx):
 
@@ -161,7 +176,7 @@ class HippynnLightningModule(pl.LightningModule):
         return self._eval_step(batch,batch_idx)
 
     def test_step(self, batch, batch_idx):
-        return self._eval_step(batch,batch_idx)
+        return self._eval_step(batch, batch_idx)
 
 
     def _eval_epoch_end(self, prefix):
@@ -208,6 +223,29 @@ class HippynnLightningModule(pl.LightningModule):
                                                        self.better_model,
                                                        self.stopping_metric,
                                                        _print=self.print)
+        if not continue_training:
+            self.print("Controller terminated training.")
+            self.trainer.should_stop = True
+
+
+        # Logic for changing the batch size without always requiring new dataloaders.
+        controller_batch_size = self.controller.batch_size
+        trainer_batch_size = self.trainer.train_dataloader.batch_size
+        if controller_batch_size != trainer_batch_size:
+            # Need to trigger a batch size change.
+            if self._last_reload_dlene is None:
+                self._last_reload_dlene = self.trainer.reload_dataloaders_every_n_epochs
+
+            self.trainer.datamodule.batch_size = controller_batch_size
+            self.trainer.reload_dataloaders_every_n_epochs = 1
+
+        elif self._last_reload_dlene is not None:
+            # Restore the last saved value for this.
+            self.trainer.reload_dataloaders_every_n_epochs = self._last_reload_dlene
+            self._last_reload_dlene = None
+        else:
+            # Batch sizes match, and there's no variable to restore.
+            pass
 
         return
 
@@ -229,7 +267,6 @@ class HippynnControllerCallback(pl.Callback):
 
         better_model = pl_module.better_model
         continue_training = self.controller.push_epoch(pl_module.current_epoch, better_model, stopping_metric)
-
 
 
 

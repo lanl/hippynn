@@ -448,6 +448,7 @@ def training_loop(
         qprint("_" * 50)
         qprint("Epoch {}:".format(epoch))
         tools.print_lr(optimizer)
+        qprint("Batch Size:", controller.batch_size)
 
         qprint(flush=True, end="")
 

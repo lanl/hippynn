@@ -31,7 +31,7 @@ The following settings are available:
      - Dynamic
    * - PROGRESS
      - Progress bars function during training, evaluation, and prediction
-     - tqdm, none
+     - tqdm, none, or floating point string specifying default update rate in seconds (default 1).
      - tqdm
      - Yes, but assign this to a generator-wrapper such as ``tqdm.tqdm``, or with a python ``None`` to disable. The wrapper must accept ``tqdm`` arguments, although it technically doesn't have to do anything with them.
    * - DEFAULT_PLOT_FILETYPE
