@@ -100,6 +100,8 @@ class HippynnLightningModule(pl.LightningModule):
             **kwargs,
         )
 
+        # pytorch lightning is now in charge of stepping the scheduler.
+        controller.scheduler_list = []
 
         if callbacks is not None or batch_callbacks is not None:
             return NotImplemented("arbitrary callbacks are not yet supported with pytorch lightning.")
