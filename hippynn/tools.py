@@ -133,9 +133,9 @@ def arrdict_len(array_dictionary):
     return len(next(iter(array_dictionary.values())))
 
 
-def print_lr(optimizer):
+def print_lr(optimizer, print_=print):
     for i, param_group in enumerate(optimizer.param_groups):
-        print("Learning rate:{:>10.5g}".format(param_group["lr"]))
+        print_("Learning rate:{:>10.5g}".format(param_group["lr"]))
 
 
 def isiterable(obj):

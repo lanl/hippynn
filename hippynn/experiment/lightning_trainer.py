@@ -123,7 +123,7 @@ class HippynnLightningModule(pl.LightningModule):
         return config
 
     def on_train_epoch_start(self):
-        print_lr(self.optimizer)
+        print_lr(self.optimizer,print_=self.print)
 
 
     def training_step(self, batch, batch_idx):
@@ -198,7 +198,7 @@ class HippynnLightningModule(pl.LightningModule):
 
     def on_validation_epoch_end(self):
         better_model, stopping_metric = self._eval_epoch_end(prefix="valid_")
-        continue_training = self.controller.push_epoch(self.current_epoch, better_model, stopping_metric)
+        continue_training = self.controller.push_epoch(self.current_epoch, better_model, stopping_metric, print_=self.print)
         return
 
     def on_test_epoch_end(self):
