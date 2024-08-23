@@ -122,6 +122,7 @@ TEST_MEDIUM_PARAMS = dict(n_molecules=100, n_atoms=30, atom_prob=0.7, n_features
 TEST_LARGE_PARAMS = dict(n_molecules=1000, n_atoms=30, atom_prob=0.7, n_features=80, n_nu=20)
 TEST_MEGA_PARAMS = dict(n_molecules=500, n_atoms=30, atom_prob=0.7, n_features=128, n_nu=100)
 TEST_ULTRA_PARAMS = dict(n_molecules=500, n_atoms=30, atom_prob=0.7, n_features=128, n_nu=320)
+TEST_GIGA_PARAMS = dict(n_molecules=32, n_atoms=30, atom_prob=0.7, n_features=512, n_nu=320)
 
 # reference implementation
 
@@ -434,6 +435,12 @@ def main(env_impl, sense_impl, feat_impl, args=None):
 
         if use_verylarge_gpu:
             if use_ultra:
+
+                print("-" * 80)
+                print("Giga systems:", TEST_GIGA_PARAMS)
+                tester.check_speed(
+                    n_repetitions=20, data_size=TEST_GIGA_PARAMS, device=torch.device("cuda"), compare_against=compare_against
+                )
                 print("-" * 80)
                 print("Ultra systems:", TEST_ULTRA_PARAMS)
                 tester.check_speed(
