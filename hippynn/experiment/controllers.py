@@ -120,6 +120,7 @@ class Controller:
         if not self.quiet:
             print("Epochs since last best:", self.boredom)
             print("Current max epochs:", self.max_epochs)
+
         return self.current_epoch < self.max_epochs
 
 

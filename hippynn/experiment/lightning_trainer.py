@@ -20,6 +20,8 @@ from .controllers import Controller
 from .metric_tracker import MetricTracker
 from .step_functions import get_step_function, StandardStep
 from ..plotting import PlotMaker
+from ..tools import print_lr
+
 
 class HippynnLightningModule(pl.LightningModule):
     def __init__(self,model: GraphModule,
@@ -120,6 +122,9 @@ class HippynnLightningModule(pl.LightningModule):
 
         return config
 
+    def on_train_epoch_start(self):
+        print_lr(self.optimizer)
+
 
     def training_step(self, batch, batch_idx):
 
@@ -140,7 +145,7 @@ class HippynnLightningModule(pl.LightningModule):
 
         batch_dict = dict(zip(self.inputs, batch_inputs))
 
-        # it is very very common to fit to derivatives, e.g. force.
+        # it is very very common to fit to derivatives, e.g. force, in hippynn. Override lightning default.
         with torch.autograd.set_grad_enabled(True):
             batch_predictions = self.model(*batch_inputs)
 
@@ -151,10 +156,10 @@ class HippynnLightningModule(pl.LightningModule):
         return batch_predictions
 
     def validation_step(self, batch, batch_idx):
-        return self._eval_step(batch,batch_idx) # does it work to just run it this way?
+        return self._eval_step(batch,batch_idx)
 
     def test_step(self, batch, batch_idx):
-        return self._eval_step(batch,batch_idx) # does it work to just run it this way?
+        return self._eval_step(batch,batch_idx)
 
 
     def _eval_epoch_end(self, prefix):
@@ -174,30 +179,46 @@ class HippynnLightningModule(pl.LightningModule):
 
         loss_dict = {name: value for name, value in zip(self.eval_names, all_losses)}
 
+        self.log_dict({prefix+k:v for k,v in loss_dict.items()}, sync_dist=True)
         # log with pytorch ligthning
         for k,v in loss_dict.items():
             self.log(prefix + k, v, on_epoch=True, logger=True, sync_dist=True)
 
-        loss_dict = {
-            prefix[:-1]:loss_dict
-        }
+        loss_dict = {prefix[:-1]:loss_dict}  # strip underscore from prefix.
+
         # register metrics and push to controller
         out_ = self.metric_tracker.register_metrics(loss_dict, when=self.current_epoch)
         better_metrics, better_model, stopping_metric = out_
+        self.stopping_metric = stopping_metric
+        self.better_model = better_model
         self.metric_tracker.evaluation_print_better(loss_dict, better_metrics,_print=self.print)
+
+
         return better_model, stopping_metric
 
     def on_validation_epoch_end(self):
         better_model, stopping_metric = self._eval_epoch_end(prefix="valid_")
         continue_training = self.controller.push_epoch(self.current_epoch, better_model, stopping_metric)
-
-        return
-
         return
 
     def on_test_epoch_end(self):
         self._eval_epoch_end(prefix="test_")
         return
+
+
+class HippynnControllerCallback(pl.Callback):
+    def __init__(self, trainer, controller, datamodule):
+        self.controller = controller
+        self.datamodule = datamodule
+
+    def on_validation_epoch_start(self, trainer, pl_module):
+        pl_module.stopping_metric = None
+        pl_module.better_model = None
+
+    def on_validation_epoch_end(self, trainer, pl_module):
+
+        better_model = pl_module.better_model
+        continue_training = self.controller.push_epoch(pl_module.current_epoch, better_model, stopping_metric)
 
 
 
