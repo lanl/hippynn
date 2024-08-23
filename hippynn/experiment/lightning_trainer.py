@@ -185,22 +185,29 @@ class HippynnLightningModule(pl.LightningModule):
 
         loss_dict = {prefix[:-1]:loss_dict}  # strip underscore from prefix.
 
-        when = "Sanity Check" if self.trainer.sanity_checking else self.current_epoch
-        # register metrics and push to controller
-        out_ = self.metric_tracker.register_metrics(loss_dict, when=when)
-        better_metrics, better_model, stopping_metric = out_
-        self.stopping_metric = stopping_metric
-        self.better_model = better_model
-        self.metric_tracker.evaluation_print_better(loss_dict, better_metrics,_print=self.print)
 
-        return better_model, stopping_metric
+        if self.trainer.sanity_checking:
+            self.print("Sanity check matric values:")
+            self.metric_tracker.evaluation_print(loss_dict, _print=self.print)
+            return
+
+        # register metrics and push to controller
+        out_ = self.metric_tracker.register_metrics(loss_dict, when=self.current_epoch)
+        better_metrics, better_model, stopping_metric = out_
+        self.metric_tracker.evaluation_print_better(loss_dict, better_metrics,_print=self.print)
+        self.better_model = better_model
+        self.stopping_metric = stopping_metric
+        return
 
     def on_validation_epoch_end(self):
-        better_model, stopping_metric = self._eval_epoch_end(prefix="valid_")
+        self._eval_epoch_end(prefix="valid_")
         if self.trainer.sanity_checking:
             return
 
-        continue_training = self.controller.push_epoch(self.current_epoch, better_model, stopping_metric, print_=self.print)
+        continue_training = self.controller.push_epoch(self.current_epoch,
+                                                       self.better_model,
+                                                       self.stopping_metric,
+                                                       _print=self.print)
 
         return
 

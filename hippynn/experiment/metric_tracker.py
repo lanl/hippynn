@@ -107,12 +107,12 @@ class MetricTracker:
 
         return better_metrics, better_model, stopping_key_metric
 
-    def evaluation_print(self, evaluation_dict, quiet=None):
+    def evaluation_print(self, evaluation_dict, quiet=None, _print=print):
         if quiet is None:
             quiet = self.quiet
         if quiet:
             return
-        table_evaluation_print(evaluation_dict, self.metric_names, self.name_column_width)
+        table_evaluation_print(evaluation_dict, self.metric_names, self.name_column_width, _print=_print)
 
     def evaluation_print_better(self, evaluation_dict, better_dict, quiet=None, _print=print):
         if quiet is None:

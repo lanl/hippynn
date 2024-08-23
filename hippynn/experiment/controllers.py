@@ -103,7 +103,7 @@ class Controller:
     def max_epochs(self):
         return self._max_epochs
 
-    def push_epoch(self, epoch, better_model, metric, print_=print):
+    def push_epoch(self, epoch, better_model, metric, _print=print):
         self.current_epoch += 1
 
         if better_model:
@@ -118,8 +118,8 @@ class Controller:
                 sch.step()
 
         if not self.quiet:
-            print_("Epochs since last best:", self.boredom)
-            print_("Current max epochs:", self.max_epochs)
+            _print("Epochs since last best:", self.boredom)
+            _print("Current max epochs:", self.max_epochs)
 
         return self.current_epoch < self.max_epochs
 
@@ -140,13 +140,13 @@ class PatienceController(Controller):
         self.patience = termination_patience
         self.last_best = 0
 
-    def push_epoch(self, epoch, better_model, metric, print_=print):
+    def push_epoch(self, epoch, better_model, metric, _print=print):
         if better_model:
             if self.boredom > 0 and not self.quiet:
-                print_("Patience for training restored.")
+                _print("Patience for training restored.")
             self.boredom = 0
             self.last_best = epoch
-        return super().push_epoch(epoch, better_model, metric, print_=print_)
+        return super().push_epoch(epoch, better_model, metric, _print=_print)
 
     @property
     def max_epochs(self):
