@@ -116,7 +116,7 @@ class MLIAPInterface(MLIAPUnified):
         self.__dict__.update(state)
         try:
             torch.ones(0).to(self.model_device)
-        except RuntimeError:
+        except (RuntimeError, AssertionError):
             fallback = device_fallback()
             warnings.warn(f"Model device ({self.model_device}) not found, falling back to f{fallback}")
             self.model_device = fallback

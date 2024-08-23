@@ -195,29 +195,31 @@ class HBondSymmetric(torch.nn.Module):
         sense_vals = self.sensitivity(pair_dist)
 
         n_d, n_t, n_f, _ = self.weights[0].shape
+        
+        # NOTE: Old code left here for posterity. At the current moment (Aug 23), this code is far slower.
         # These are the contributions for each bond at a given sensitivity distance
         # bilinear takes shape (pair,feature1),(pair,feature2),(ndist*n_target,feature1,feature2)
         # and sums to pair,(ndist*n_target), which is reshaped.
-        partial_bond_dists = [
-            torch.nn.functional.bilinear(
-                f[pair_first],
-                f[pair_second],
-                w.reshape(self.n_dist * self.n_target, f.shape[-1], f.shape[-1]),
-                bias=None,
-            ).reshape(-1, self.n_dist, self.n_target)
-            for f, w in zip(all_features, weights)
-        ]
-
+        #partial_bond_dists = [
+        #    torch.nn.functional.bilinear(
+        #        f[pair_first],
+        #        f[pair_second],
+        #        w.reshape(self.n_dist * self.n_target, f.shape[-1], f.shape[-1]),
+        #        bias=None,
+        #    ).reshape(-1, self.n_dist, self.n_target)
+        #    for f, w in zip(all_features, weights)
+        #]
         # These are the contributions for each bond
         # multiply pair,ndist by pair,ndist,n_targets
-        partial_bonds = [(pbd * sense_vals.unsqueeze(2)).sum(dim=1) for pbd in partial_bond_dists]
-        # NOTE:
-        # Einsum implementation of combined partial_bond_dists and partial_bond operations, seems to be slower.
-        # But leaving this comment here for readability.
-        # partial_bonds = [
-        #     torch.einsum("bf,bg,bs,stfg->bt",f[pair_first],f[pair_second],sense_vals,w)
-        #     for f,w in zip(all_features,weights)
-        # ]
+        #partial_bonds = [(pbd * sense_vals.unsqueeze(2)).sum(dim=1) for pbd in partial_bond_dists]
+        
+        # NOTE: This code is faster now that pytorch as opt_einsum features built in.
+        # Einsum implementation of combined partial_bond_dists and partial_bond operations..
+        partial_bonds = [
+            torch.einsum("bf,bg,bs,stfg->bt",f[pair_first],f[pair_second],sense_vals,w)
+            for f,w in zip(all_features,weights)
+        ]
+        
 
         if self.positive:
             partial_bonds = [pb + b for pb, b in zip(partial_bonds, self.biases)]
@@ -232,6 +234,7 @@ class HBondSymmetric(torch.nn.Module):
             bond_hier = sum(partial_hier)
         else:
             bond_hier = torch.zeros_like(total_bonds)
+        
         return total_bonds, bond_hier
 
 
