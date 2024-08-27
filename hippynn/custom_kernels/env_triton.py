@@ -10,13 +10,13 @@ except ImportError:
     # Load backup implementation for CPU tensors.
     from .env_pytorch import envsum as envsum_alternative, sensesum as sensesum_alternative, featsum as featsum_alternative
 
-
-def config_pruner(configs, kwargs):
+def config_pruner(configs, nargs, **kwargs):
     """
     Trims the unnecessary config options based on the sens. and feat. sizes
     """
-    p2_sens_size = triton.next_power_of_2(kwargs["sens_size"])
-    p2_feat_size = triton.next_power_of_2(kwargs["feat_size"])
+    #print("For some reason the config pruner also gets arguments:",kwargs)
+    p2_sens_size = triton.next_power_of_2(nargs["sens_size"])
+    p2_feat_size = triton.next_power_of_2(nargs["feat_size"])
 
     used = set()
     for config in configs:
@@ -39,7 +39,6 @@ def config_pruner(configs, kwargs):
             num_stages=config.num_stages,
             num_warps=config.num_warps,
         )
-
 
 def get_autotune_config():
     """
