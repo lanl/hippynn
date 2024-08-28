@@ -16,6 +16,7 @@ import warnings
 import torch
 
 import pytorch_lightning as pl
+from pytorch_lightning.loggers import CSVLogger
 from .routines import TrainingModules
 from ..databases import Database
 from .routines import SetupParams, setup_training
@@ -37,13 +38,13 @@ class HippynnLightningModule(pl.LightningModule):
                  scheduler_list: list[torch.optim.lr_scheduler],
                  controller: Controller,
                  metric_tracker: MetricTracker,
-                 plot_maker: PlotMaker,
                  inputs:list[str],
                  targets:list[str],
                  n_outputs:int,
                  *args,**kwargs): # forwards args and kwargs to where?
         super().__init__()
 
+        self.save_hyperparameters()
         self.model = model
         self.loss = loss
         self.eval_loss = eval_loss
@@ -58,7 +59,6 @@ class HippynnLightningModule(pl.LightningModule):
         self.n_inputs = len(self.inputs)
         self.n_targets = len(self.targets)
         self.n_outputs = n_outputs
-        self.plot_maker = plot_maker
 
         self._last_reload_dlene = None #storage for whether batch size should be changed.
 
@@ -92,6 +92,9 @@ class HippynnLightningModule(pl.LightningModule):
 
         model, loss, evaluator = training_modules
 
+        if evaluator.plot_maker is not None:
+            warnings.warn("plot_maker is not currently supported in pytorch lightning. The current plot_maker will be ignored.")
+
         eval_names = evaluator.loss_names
         trainer = cls(
             model = model,
@@ -103,14 +106,11 @@ class HippynnLightningModule(pl.LightningModule):
             stopping_key = controller.stopping_key,
             controller = controller,
             metric_tracker = metric_tracker,
-            plot_maker = evaluator.plot_maker,
             inputs = database.inputs,
             targets = database.targets,
             n_outputs =  evaluator.n_outputs,
             **kwargs,
         )
-        if evaluator.plot_maker is not None:
-            warnings.warn("plot_maker is not currently supported in pytorch lightning. The current plot_maker will be ignored.")
 
         # pytorch lightning is now in charge of stepping the scheduler.
         controller.scheduler_list = []
@@ -253,21 +253,21 @@ class HippynnLightningModule(pl.LightningModule):
         self._eval_epoch_end(prefix="test_")
         return
 
-
-class HippynnControllerCallback(pl.Callback):
-    def __init__(self, trainer, controller, datamodule):
-        self.controller = controller
-        self.datamodule = datamodule
-
-    def on_validation_epoch_start(self, trainer, pl_module):
-        pl_module.stopping_metric = None
-        pl_module.better_model = None
-
-    def on_validation_epoch_end(self, trainer, pl_module):
-
-        better_model = pl_module.better_model
-        continue_training = self.controller.push_epoch(pl_module.current_epoch, better_model, stopping_metric)
-
+#
+# class HippynnControllerCallback(pl.Callback):
+#     def __init__(self, trainer, controller, datamodule):
+#         self.controller = controller
+#         self.datamodule = datamodule
+#
+#     def on_validation_epoch_start(self, trainer, pl_module):
+#         pl_module.stopping_metric = None
+#         pl_module.better_model = None
+#
+#     def on_validation_epoch_end(self, trainer, pl_module):
+#
+#         better_model = pl_module.better_model
+#         continue_training = self.controller.push_epoch(pl_module.current_epoch, better_model, stopping_metric)
+#
 
 
 class HippynnDataModule(pl.LightningDataModule):

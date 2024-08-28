@@ -153,8 +153,8 @@ def main():
         scheduler=scheduler,
         batch_size=16,  #start batch size
         eval_batch_size=512,
-        max_epochs=1000,
-        termination_patience=5,
+        max_epochs=100,
+        termination_patience=10,
         fraction_train_eval=0.1,
         stopping_key=early_stopping_key,
     )
@@ -164,19 +164,35 @@ def main():
     )
 
 
-
     from hippynn.experiment import HippynnLightningModule
 
     # lightning needs to run exactly where the script is located in distributed modes.
     lightmod, datamodule = HippynnLightningModule.from_experiment_setup(training_modules, database, experiment_params)
     import pytorch_lightning as pl
     from pytorch_lightning.loggers import CSVLogger
-    logger = CSVLogger("TEST_LIGHTNING_LOGS", name=netname)
-    trainer = pl.Trainer(accelerator='cpu',
+    logger = CSVLogger(save_dir='.', name=netname, flush_logs_every_n_steps=1000)
+    from pytorch_lightning.callbacks import ModelCheckpoint
+
+    checkpointer = ModelCheckpoint(monitor=f"valid_{early_stopping_key}",
+                                   save_last=True,
+                                   save_top_k=5,
+                                   every_n_epochs=1,
+                                   every_n_train_steps=None,
+                                   )
+
+    print("logger options",dir(logger))
+
+    # import pdb
+    # pdb.set_trace()
+
+    trainer = pl.Trainer(accelerator='cpu',  #'auto' detects MPS which doesn't work.
                          logger=logger,
                          num_nodes=1,
                          devices=1,
-                         ) #'auto' detects MPS which doesn't work.
+                         callbacks=[checkpointer],
+                         log_every_n_steps=1000, # currently, pt lightning re-serializes hyperparameters in the CSV logger with every save.
+                         )
+
     trainer.fit(model=lightmod, datamodule=datamodule)
 
 if __name__ == "__main__":
