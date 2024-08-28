@@ -142,7 +142,7 @@ class MLIAPInterface(MLIAPUnified):
                     if return_device == "cpu":
                         data.update_pair_forces_cpu(fij)
                     else:
-                        data.update_pari_forces_gpu(fij)
+                        data.update_pair_forces_gpu(fij)
 
             data.energy = total_energy.item()
 
