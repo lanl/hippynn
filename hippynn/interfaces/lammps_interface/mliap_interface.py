@@ -104,13 +104,12 @@ class MLIAPInterface(MLIAPUnified):
             # note your sign for rij might need to be +1 or -1, depending on how your implementation works
             inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
             atom_energy, total_energy, fij = self.graph(*inputs)
-
             # Test if we are using lammps-kokkos or not. Is there a more clear way to do that?
-            if isinstance(data.elems, np.ndarray):
-                return_device = "cpu"
-            else:
-                # Hope that kokkos device and pytorch device are the same (default cuda)
+            using_kokkos = "kokkos" in data.__class__.__module__.lower()
+            if using_kokkos:
                 return_device = elems.device
+            else:
+                return_device = "cpu"
 
             # convert units
             if self.energy_unit is not None:
@@ -128,19 +127,22 @@ class MLIAPInterface(MLIAPUnified):
             fij = fij.type(f.dtype).detach().to(return_device)
 
             # hacky way to detect if we are in kokkos or not.
-            using_kokkos = "kokkos" in data.__module__.lower()
 
             if not using_kokkos:
                 # write back to data.eatoms directly.
                 fij = fij.numpy()
                 data.eatoms = atom_energy.numpy().astype(np.double)
+                if npairs > 0:
+                    data.update_pair_forces(fij)
             else:
                 # view to data.eatoms using pytorch, and write into the view.
                 eatoms = torch.as_tensor(data.eatoms, device=return_device)
                 eatoms.copy_(atom_energy)
-
-            if npairs > 0:
-                data.update_pair_forces(fij)
+                if npairs > 0:
+                    if return_device == "cpu":
+                        data.update_pair_forces_cpu(fij)
+                    else:
+                        data.update_pair_forces_gpu(fij)
 
             data.energy = total_energy.item()
 
