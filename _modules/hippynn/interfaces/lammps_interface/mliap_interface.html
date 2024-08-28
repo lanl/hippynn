@@ -109,12 +109,27 @@
 
 <div class="viewcode-block" id="MLIAPInterface.__init__">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_node</span><span class="p">,</span> <span class="n">element_types</span><span class="p">,</span> <span class="n">ndescriptors</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">model_device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">),</span> <span class="n">compute_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">energy_node</span><span class="p">,</span>
+        <span class="n">element_types</span><span class="p">,</span>
+        <span class="n">ndescriptors</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">model_device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">),</span>
+        <span class="n">compute_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+        <span class="n">energy_unit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">distance_unit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param energy_node: Node for energy</span>
 <span class="sd">        :param element_types: list of atomic symbols corresponding to element types</span>
 <span class="sd">        :param ndescriptors: the number of descriptors to report to LAMMPS</span>
 <span class="sd">        :param model_device: the device to send torch data to (cpu or cuda)</span>
+<span class="sd">        :param energy_unit: If present, multiply the result by the given energy units.</span>
+<span class="sd">            If your model was trained in Hartree and your lammps script will operate in eV,</span>
+<span class="sd">            use en_unit = ase.units.Ha = 27.211386024367243</span>
+<span class="sd">        :param distance_unit: If present, multi input distances by this much as well as dividing into output forces.</span>
+<span class="sd">            If your model was trained to accept nm as input and lammps uses Angstroms,</span>
+<span class="sd">            use dist_unit = ase.units.nm = 10.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">PYTORCH_GPU_MEM_FRAC</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
@@ -122,6 +137,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">element_types</span> <span class="o">=</span> <span class="n">element_types</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ndescriptors</span> <span class="o">=</span> <span class="n">ndescriptors</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_device</span> <span class="o">=</span> <span class="n">model_device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_unit</span> <span class="o">=</span> <span class="n">energy_unit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distance_unit</span> <span class="o">=</span> <span class="n">distance_unit</span>
 
         <span class="c1"># Build the calculator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rcutfac</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">species_set</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="n">setup_LAMMPS_graph</span><span class="p">(</span><span class="n">energy_node</span><span class="p">)</span>
@@ -150,8 +167,8 @@
 
 <div class="viewcode-block" id="MLIAPInterface.empty_tensor">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.empty_tensor">[docs]</a>
-    <span class="k">def</span> <span class="nf">empty_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dimentions</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">dimentions</span><span class="p">,</span><span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_device</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">empty_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimentions</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">dimentions</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_device</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MLIAPInterface.compute_forces">
@@ -164,10 +181,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">nlocal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">nlistatoms</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">nlocal</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1">#If there are no local atoms, do nothing</span>
+            <span class="c1"># If there are no local atoms, do nothing</span>
             <span class="n">elems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">elems</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">ntotal</span><span class="p">)</span>
             <span class="n">z_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">species_set</span><span class="p">[</span><span class="n">elems</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
             <span class="n">npairs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">npairs</span>
+
             <span class="k">if</span> <span class="n">npairs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">pair_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pair_i</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
                 <span class="n">pair_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pair_j</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
@@ -175,33 +193,54 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">pair_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_tensor</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
                 <span class="n">pair_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_tensor</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-                <span class="n">rij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_dtype</span><span class="p">)</span>
-    
+                <span class="n">rij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_dtype</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance_unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">rij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_unit</span> <span class="o">*</span> <span class="n">rij</span>
+
             <span class="c1"># note your sign for rij might need to be +1 or -1, depending on how your implementation works</span>
             <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">z_vals</span><span class="p">,</span> <span class="n">pair_i</span><span class="p">,</span> <span class="n">pair_j</span><span class="p">,</span> <span class="o">-</span><span class="n">rij</span><span class="p">,</span> <span class="n">nlocal</span><span class="p">]</span>
             <span class="n">atom_energy</span><span class="p">,</span> <span class="n">total_energy</span><span class="p">,</span> <span class="n">fij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">)</span>
-    
             <span class="c1"># Test if we are using lammps-kokkos or not. Is there a more clear way to do that?</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">elems</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-                <span class="n">return_device</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Hope that kokkos device and pytorch device are the same (default cuda)</span>
+            <span class="n">using_kokkos</span> <span class="o">=</span> <span class="s2">&quot;kokkos&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__module__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">using_kokkos</span><span class="p">:</span>
                 <span class="n">return_device</span> <span class="o">=</span> <span class="n">elems</span><span class="o">.</span><span class="n">device</span>
-    
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">return_device</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span>
+
+            <span class="c1"># convert units</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">atom_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">en_unit</span> <span class="o">*</span> <span class="n">atom_energy</span>
+                <span class="n">total_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">en_unit</span> <span class="o">*</span> <span class="n">total_energy</span>
+                <span class="n">fij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">en_unit</span> <span class="o">*</span> <span class="n">fij</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance_unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">fij</span> <span class="o">=</span> <span class="n">fij</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_unit</span>
+
             <span class="n">atom_energy</span> <span class="o">=</span> <span class="n">atom_energy</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">return_device</span><span class="p">)</span>
             <span class="n">total_energy</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">return_device</span><span class="p">)</span>
 
             <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">f</span><span class="p">)</span>
             <span class="n">fij</span> <span class="o">=</span> <span class="n">fij</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">return_device</span><span class="p">)</span>
-    
-            <span class="k">if</span> <span class="n">return_device</span> <span class="o">==</span> <span class="s2">&quot;cpu&quot;</span><span class="p">:</span>
+
+            <span class="c1"># hacky way to detect if we are in kokkos or not.</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">using_kokkos</span><span class="p">:</span>
+                <span class="c1"># write back to data.eatoms directly.</span>
                 <span class="n">fij</span> <span class="o">=</span> <span class="n">fij</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
                 <span class="n">data</span><span class="o">.</span><span class="n">eatoms</span> <span class="o">=</span> <span class="n">atom_energy</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">npairs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">update_pair_forces</span><span class="p">(</span><span class="n">fij</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># view to data.eatoms using pytorch, and write into the view.</span>
                 <span class="n">eatoms</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">eatoms</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">return_device</span><span class="p">)</span>
                 <span class="n">eatoms</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">atom_energy</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">npairs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">data</span><span class="o">.</span><span class="n">update_pair_forces</span><span class="p">(</span><span class="n">fij</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">npairs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">return_device</span> <span class="o">==</span> <span class="s2">&quot;cpu&quot;</span><span class="p">:</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">update_pair_forces_cpu</span><span class="p">(</span><span class="n">fij</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">update_pair_forces_gpu</span><span class="p">(</span><span class="n">fij</span><span class="p">)</span>
+
             <span class="n">data</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">item</span><span class="p">()</span></div>
 
 
@@ -214,10 +253,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_device</span><span class="p">)</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">RuntimeError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">):</span>
+        <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
             <span class="n">fallback</span> <span class="o">=</span> <span class="n">device_fallback</span><span class="p">()</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model device (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_device</span><span class="si">}</span><span class="s2">) not found, falling back to f</span><span class="si">{</span><span class="n">fallback</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model_device</span> <span class="o">=</span> <span class="n">fallback</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;en_unit&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">en_unit</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;dist_unit&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dist_unit</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">species_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">species_set</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_device</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_device</span><span class="p">)</span></div>
