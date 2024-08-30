@@ -24,14 +24,14 @@ dipole : molecular dipole (3) vector
 import os
 
 import numpy as np
-from ase.io import read
+from ase.io import read, iread
 
-from ...tools import np_of_torchdefaultdtype
+from ...tools import np_of_torchdefaultdtype, progress_bar
 from ...databases.database import Database
 from ...databases.restarter import Restartable
 from typing import Union
 from typing import List
-
+import hippynn.tools
 
 class AseDatabase(Database, Restartable):
     """
@@ -84,11 +84,11 @@ class AseDatabase(Database, Restartable):
         var_list = inputs + targets
         try:
             if isinstance(filename, str):
-                db = read(directory + filename, index=":")
+                db = list(progress_bar(iread(directory+filename,index=":"), desc='configs'))#read(directory + filename, index=":")
             elif isinstance(filename, (list, np.ndarray)):
                 db = []
-                for name in filename:
-                    temp_db = read(directory + name, index=":")
+                for name in progress_bar(filename, desc='files'):
+                    temp_db = list(progress_bar(iread(directory + name, index=":"), desc='configs'))
                     db += temp_db
         except FileNotFoundError as fee:
             raise FileNotFoundError(

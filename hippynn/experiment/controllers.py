@@ -6,7 +6,6 @@ import warnings
 
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-
 class Controller:
     """
     Class for controlling the training dynamics.
@@ -51,11 +50,10 @@ class Controller:
         fraction_train_eval=0.1,
         quiet=False,
     ):
+        super().__init__()
 
         self.optimizer = optimizer
-
         self.stopping_key = stopping_key
-
         self.batch_size = batch_size
         self.eval_batch_size = eval_batch_size or batch_size
         if max_epochs is None:
@@ -84,7 +82,8 @@ class Controller:
 
     def state_dict(self):
         state_dict = {k: getattr(self, k) for k in self._state_vars}
-        state_dict["optimizer"] = self.optimizer.state_dict()
+        if self.optimizer is not None:
+            state_dict["optimizer"] = self.optimizer.state_dict()
         state_dict["scheduler"] = [sch.state_dict() for sch in self.scheduler_list]
         return state_dict
 
@@ -93,7 +92,8 @@ class Controller:
         for sch, sdict in zip(self.scheduler_list, state_dict["scheduler"]):
             sch.load_state_dict(sdict)
 
-        self.optimizer.load_state_dict(state_dict["optimizer"])
+        if self.optimizer is not None:
+            self.optimizer.load_state_dict(state_dict["optimizer"])
 
         for k in self._state_vars:
             setattr(self, k, state_dict[k])

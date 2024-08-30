@@ -12,11 +12,14 @@ Some features of hippynn experiments may not be implemented yet.
 
 """
 import warnings
+from pathlib import Path
 
 import torch
 
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import CSVLogger
+
+import hippynn.tools
 from .routines import TrainingModules
 from ..databases import Database
 from .routines import SetupParams, setup_training
@@ -26,10 +29,12 @@ from .metric_tracker import MetricTracker
 from .step_functions import get_step_function, StandardStep
 from ..plotting import PlotMaker
 from ..tools import print_lr
+from . import serialization
 
 
 class HippynnLightningModule(pl.LightningModule):
-    def __init__(self,model: GraphModule,
+    def __init__(self,
+                 model: GraphModule,
                  loss: GraphModule,
                  eval_loss: GraphModule,
                  eval_names: list[str],
@@ -38,13 +43,18 @@ class HippynnLightningModule(pl.LightningModule):
                  scheduler_list: list[torch.optim.lr_scheduler],
                  controller: Controller,
                  metric_tracker: MetricTracker,
-                 inputs:list[str],
-                 targets:list[str],
-                 n_outputs:int,
-                 *args,**kwargs): # forwards args and kwargs to where?
+                 inputs: list[str],
+                 targets: list[str],
+                 n_outputs: int,
+                 *args, **kwargs): # forwards args and kwargs to where?
         super().__init__()
 
-        self.save_hyperparameters()
+        self.save_hyperparameters(ignore=['loss', 'model', 'eval_loss', 'controller','optimizer_list','scheduler_list'])
+
+        #del self.hparams['loss']
+        #del self.hparams['model']
+        #del self.hparams['eval_loss']
+
         self.model = model
         self.loss = loss
         self.eval_loss = eval_loss
@@ -60,18 +70,23 @@ class HippynnLightningModule(pl.LightningModule):
         self.n_targets = len(self.targets)
         self.n_outputs = n_outputs
 
+        self.structure_file = None
+
         self._last_reload_dlene = None #storage for whether batch size should be changed.
 
         # Storage for predictions across batches for eval mode.
         self.eval_step_outputs = []
+        self.controller.optimizer = None
 
         for optimizer in self.optimizer_list:
             if not isinstance(step_fn:=get_step_function(optimizer), StandardStep):  # :=
                 raise NotImplementedError(f"Optimzers with non-standard steps are not yet supported. {optimizer,step_fn}")
 
-
         if args or kwargs:
             raise NotImplementedError("Generic args and kwargs not supported.")
+
+
+
 
     @classmethod
     def from_experiment_setup(cls, training_modules: TrainingModules, database: Database, setup_params:SetupParams, **kwargs):
@@ -95,7 +110,6 @@ class HippynnLightningModule(pl.LightningModule):
         if evaluator.plot_maker is not None:
             warnings.warn("plot_maker is not currently supported in pytorch lightning. The current plot_maker will be ignored.")
 
-        eval_names = evaluator.loss_names
         trainer = cls(
             model = model,
             loss = loss,
@@ -118,7 +132,54 @@ class HippynnLightningModule(pl.LightningModule):
         if callbacks is not None or batch_callbacks is not None:
             return NotImplemented("arbitrary callbacks are not yet supported with pytorch lightning.")
 
+
         return trainer, HippynnDataModule(database, controller.batch_size)
+
+    def on_save_checkpoint(self, checkpoint) -> None:
+        print("on save checkpoint", self.trainer.log_dir)
+        if not self.structure_file:
+            print("saving structure")
+            structure = dict(
+                model=self.model,
+                loss=self.loss,
+                eval_loss=self.eval_loss,
+                controller=self.controller,
+                optimizer_list=self.optimizer_list,
+                scheduler_list=self.scheduler_list,
+            )
+            self.structure_file = serialization.DEFAULT_STRUCTURE_FNAME
+            with hippynn.tools.active_directory(self.trainer.log_dir, create=False):
+                torch.save(obj=structure, f=self.structure_file)
+
+        checkpoint['controller_state'] = self.controller.state_dict()
+        return
+
+    @classmethod
+    def load_from_checkpoint(cls,
+                             checkpoint_path,
+                             map_location=None,
+                             structure_file=None,
+                             hparams_file=None,
+                             strict=True,
+                             **kwargs):
+
+        if structure_file is None:
+            # Assume checkpoint_path is like <model_name>/version_<n>/checkpoints/<something>.chkpt
+            structure_file = Path(checkpoint_path)
+            structure_file = structure_file.parent.parent
+            structure_file = structure_file.joinpath(serialization.DEFAULT_STRUCTURE_FNAME)
+
+        structure_args = torch.load(structure_file)
+
+        return super().load_from_checkpoint(checkpoint_path,
+                                     map_location=map_location,
+                                     hparams_file=hparams_file,
+                                     strict=strict, **structure_args, **kwargs)
+
+    def on_load_checkpoint(self, checkpoint) -> None:
+        cstate = checkpoint.pop('controller_state')
+        self.controller.load_state_dict(cstate)
+        return
 
     def configure_optimizers(self):
 
