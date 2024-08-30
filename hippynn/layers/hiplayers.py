@@ -275,16 +275,26 @@ class InteractLayerVec(InteractLayer):
         n_atoms_real = in_features.shape[0]
         sense_vals = self.sensitivity(dist_pairs)
 
+        # Sensitivity stacking
+        sense_vec = sense_vals.unsqueeze(1) * (coord_pairs / dist_pairs.unsqueeze(1)).unsqueeze(2)
+        sense_vec = sense_vec.reshape(-1, self.n_dist * 3)
+        sense_stacked = torch.concatenate([sense_vals, sense_vec], dim=1)
+
+        # Message passing, stack sensitivities to coalesce custom kernel call.
+        # shape (n_atoms, n_nu + 3*n_nu, n_feat)
+        env_features_stacked = custom_kernels.envsum(sense_stacked, in_features, pair_first, pair_second)
+        # shape (n_atoms, 4, n_nu, n_feat)
+        env_features_stacked = env_features_stacked.reshape(-1, 4, self.n_dist, self.nf_in)
+
+        # separate to tensor components
+        env_features, env_features_vec = torch.split(env_features_stacked, [1, 3], dim=1)
+
         # Scalar part
-        env_features = custom_kernels.envsum(sense_vals, in_features, pair_first, pair_second)
         env_features = torch.reshape(env_features, (n_atoms_real, self.n_dist * self.nf_in))
         weights_rs = torch.reshape(self.int_weights.permute(0, 2, 1), (self.n_dist * self.nf_in, self.nf_out))
         features_out = torch.mm(env_features, weights_rs)
 
         # Vector part
-        sense_vec = sense_vals.unsqueeze(1) * (coord_pairs / dist_pairs.unsqueeze(1)).unsqueeze(2)
-        sense_vec = sense_vec.reshape(-1, self.n_dist * 3)
-        env_features_vec = custom_kernels.envsum(sense_vec, in_features, pair_first, pair_second)
         env_features_vec = env_features_vec.reshape(n_atoms_real * 3, self.n_dist * self.nf_in)
         features_out_vec = torch.mm(env_features_vec, weights_rs)
         features_out_vec = features_out_vec.reshape(n_atoms_real, 3, self.nf_out)
