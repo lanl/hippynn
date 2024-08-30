@@ -33,27 +33,30 @@ from . import serialization
 
 
 class HippynnLightningModule(pl.LightningModule):
-    def __init__(self,
-                 model: GraphModule,
-                 loss: GraphModule,
-                 eval_loss: GraphModule,
-                 eval_names: list[str],
-                 stopping_key: str,
-                 optimizer_list: list[torch.optim.Optimizer],
-                 scheduler_list: list[torch.optim.lr_scheduler],
-                 controller: Controller,
-                 metric_tracker: MetricTracker,
-                 inputs: list[str],
-                 targets: list[str],
-                 n_outputs: int,
-                 *args, **kwargs): # forwards args and kwargs to where?
+    def __init__(
+        self,
+        model: GraphModule,
+        loss: GraphModule,
+        eval_loss: GraphModule,
+        eval_names: list[str],
+        stopping_key: str,
+        optimizer_list: list[torch.optim.Optimizer],
+        scheduler_list: list[torch.optim.lr_scheduler],
+        controller: Controller,
+        metric_tracker: MetricTracker,
+        inputs: list[str],
+        targets: list[str],
+        n_outputs: int,
+        *args,
+        **kwargs,
+    ):  # forwards args and kwargs to where?
         super().__init__()
 
-        self.save_hyperparameters(ignore=['loss', 'model', 'eval_loss', 'controller','optimizer_list','scheduler_list'])
+        self.save_hyperparameters(ignore=["loss", "model", "eval_loss", "controller", "optimizer_list", "scheduler_list"])
 
-        #del self.hparams['loss']
-        #del self.hparams['model']
-        #del self.hparams['eval_loss']
+        # del self.hparams['loss']
+        # del self.hparams['model']
+        # del self.hparams['eval_loss']
 
         self.model = model
         self.loss = loss
@@ -72,38 +75,35 @@ class HippynnLightningModule(pl.LightningModule):
 
         self.structure_file = None
 
-        self._last_reload_dlene = None #storage for whether batch size should be changed.
+        self._last_reload_dlene = None  # storage for whether batch size should be changed.
 
         # Storage for predictions across batches for eval mode.
         self.eval_step_outputs = []
         self.controller.optimizer = None
 
         for optimizer in self.optimizer_list:
-            if not isinstance(step_fn:=get_step_function(optimizer), StandardStep):  # :=
+            if not isinstance(step_fn := get_step_function(optimizer), StandardStep):  # :=
                 raise NotImplementedError(f"Optimzers with non-standard steps are not yet supported. {optimizer,step_fn}")
 
         if args or kwargs:
             raise NotImplementedError("Generic args and kwargs not supported.")
 
-
-
-
     @classmethod
-    def from_experiment_setup(cls, training_modules: TrainingModules, database: Database, setup_params:SetupParams, **kwargs):
+    def from_experiment_setup(cls, training_modules: TrainingModules, database: Database, setup_params: SetupParams, **kwargs):
         training_modules, controller, metric_tracker = setup_training(training_modules, setup_params)
         return cls.from_train_setup(training_modules, database, controller, metric_tracker, **kwargs)
 
-
     @classmethod
-    def from_train_setup(cls,
-                         training_modules: TrainingModules,
-                         database: Database,
-                         controller: Controller,
-                         metric_tracker: MetricTracker,
-                         callbacks=None,
-                         batch_callbacks=None,
-                         **kwargs,
-                         ):
+    def from_train_setup(
+        cls,
+        training_modules: TrainingModules,
+        database: Database,
+        controller: Controller,
+        metric_tracker: MetricTracker,
+        callbacks=None,
+        batch_callbacks=None,
+        **kwargs,
+    ):
 
         model, loss, evaluator = training_modules
 
@@ -111,18 +111,18 @@ class HippynnLightningModule(pl.LightningModule):
             warnings.warn("plot_maker is not currently supported in pytorch lightning. The current plot_maker will be ignored.")
 
         trainer = cls(
-            model = model,
-            loss = loss,
-            eval_loss = evaluator.loss,
-            eval_names = evaluator.loss_names,
-            optimizer_list = [controller.optimizer],
-            scheduler_list = controller.scheduler_list,
-            stopping_key = controller.stopping_key,
-            controller = controller,
-            metric_tracker = metric_tracker,
-            inputs = database.inputs,
-            targets = database.targets,
-            n_outputs =  evaluator.n_outputs,
+            model=model,
+            loss=loss,
+            eval_loss=evaluator.loss,
+            eval_names=evaluator.loss_names,
+            optimizer_list=[controller.optimizer],
+            scheduler_list=controller.scheduler_list,
+            stopping_key=controller.stopping_key,
+            controller=controller,
+            metric_tracker=metric_tracker,
+            inputs=database.inputs,
+            targets=database.targets,
+            n_outputs=evaluator.n_outputs,
             **kwargs,
         )
 
@@ -132,13 +132,11 @@ class HippynnLightningModule(pl.LightningModule):
         if callbacks is not None or batch_callbacks is not None:
             return NotImplemented("arbitrary callbacks are not yet supported with pytorch lightning.")
 
-
         return trainer, HippynnDataModule(database, controller.batch_size)
 
     def on_save_checkpoint(self, checkpoint) -> None:
-        print("on save checkpoint", self.trainer.log_dir)
+
         if not self.structure_file:
-            print("saving structure")
             structure = dict(
                 model=self.model,
                 loss=self.loss,
@@ -148,20 +146,15 @@ class HippynnLightningModule(pl.LightningModule):
                 scheduler_list=self.scheduler_list,
             )
             self.structure_file = serialization.DEFAULT_STRUCTURE_FNAME
+            self.print("Saving structure file to", self.trainer.log_dir)
             with hippynn.tools.active_directory(self.trainer.log_dir, create=False):
                 torch.save(obj=structure, f=self.structure_file)
 
-        checkpoint['controller_state'] = self.controller.state_dict()
+        checkpoint["controller_state"] = self.controller.state_dict()
         return
 
     @classmethod
-    def load_from_checkpoint(cls,
-                             checkpoint_path,
-                             map_location=None,
-                             structure_file=None,
-                             hparams_file=None,
-                             strict=True,
-                             **kwargs):
+    def load_from_checkpoint(cls, checkpoint_path, map_location=None, structure_file=None, hparams_file=None, strict=True, **kwargs):
 
         if structure_file is None:
             # Assume checkpoint_path is like <model_name>/version_<n>/checkpoints/<something>.chkpt
@@ -171,13 +164,12 @@ class HippynnLightningModule(pl.LightningModule):
 
         structure_args = torch.load(structure_file)
 
-        return super().load_from_checkpoint(checkpoint_path,
-                                     map_location=map_location,
-                                     hparams_file=hparams_file,
-                                     strict=strict, **structure_args, **kwargs)
+        return super().load_from_checkpoint(
+            checkpoint_path, map_location=map_location, hparams_file=hparams_file, strict=strict, **structure_args, **kwargs
+        )
 
     def on_load_checkpoint(self, checkpoint) -> None:
-        cstate = checkpoint.pop('controller_state')
+        cstate = checkpoint.pop("controller_state")
         self.controller.load_state_dict(cstate)
         return
 
@@ -185,7 +177,7 @@ class HippynnLightningModule(pl.LightningModule):
 
         scheduler_list = []
         for s in self.scheduler_list:
-            config =  {
+            config = {
                 "scheduler": s,
                 "interval": "epoch",  # can be epoch or step
                 "frequency": 1,  # How many intervals should pass between calls to  `scheduler.step()`.
@@ -206,8 +198,8 @@ class HippynnLightningModule(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
 
-        batch_inputs = batch[:self.n_inputs]
-        batch_targets = batch[-self.n_targets:]
+        batch_inputs = batch[: self.n_inputs]
+        batch_targets = batch[-self.n_targets :]
 
         batch_model_outputs = self.model(*batch_inputs)
         batch_train_loss = self.loss(*batch_model_outputs, *batch_targets)[0]
@@ -217,9 +209,8 @@ class HippynnLightningModule(pl.LightningModule):
 
     def _eval_step(self, batch, batch_idx):
 
-
         batch_inputs = batch[: self.n_inputs]
-        batch_targets = batch[-self.n_targets:]
+        batch_targets = batch[-self.n_targets :]
 
         batch_dict = dict(zip(self.inputs, batch_inputs))
 
@@ -234,11 +225,10 @@ class HippynnLightningModule(pl.LightningModule):
         return batch_predictions
 
     def validation_step(self, batch, batch_idx):
-        return self._eval_step(batch,batch_idx)
+        return self._eval_step(batch, batch_idx)
 
     def test_step(self, batch, batch_idx):
         return self._eval_step(batch, batch_idx)
-
 
     def _eval_epoch_end(self, prefix):
 
@@ -257,10 +247,9 @@ class HippynnLightningModule(pl.LightningModule):
 
         loss_dict = {name: value for name, value in zip(self.eval_names, all_losses)}
 
-        self.log_dict({prefix+k:v for k,v in loss_dict.items()}, sync_dist=True)
+        self.log_dict({prefix + k: v for k, v in loss_dict.items()}, sync_dist=True)
 
-        loss_dict = {prefix[:-1]:loss_dict}  # strip underscore from prefix.
-
+        loss_dict = {prefix[:-1]: loss_dict}  # strip underscore from prefix.
 
         if self.trainer.sanity_checking:
             self.print("Sanity check matric values:")
@@ -270,7 +259,7 @@ class HippynnLightningModule(pl.LightningModule):
         # register metrics and push to controller
         out_ = self.metric_tracker.register_metrics(loss_dict, when=self.current_epoch)
         better_metrics, better_model, stopping_metric = out_
-        self.metric_tracker.evaluation_print_better(loss_dict, better_metrics,_print=self.print)
+        self.metric_tracker.evaluation_print_better(loss_dict, better_metrics, _print=self.print)
         self.better_model = better_model
         self.stopping_metric = stopping_metric
         return
@@ -280,14 +269,10 @@ class HippynnLightningModule(pl.LightningModule):
         if self.trainer.sanity_checking:
             return
 
-        continue_training = self.controller.push_epoch(self.current_epoch,
-                                                       self.better_model,
-                                                       self.stopping_metric,
-                                                       _print=self.print)
+        continue_training = self.controller.push_epoch(self.current_epoch, self.better_model, self.stopping_metric, _print=self.print)
         if not continue_training:
             self.print("Controller terminated training.")
             self.trainer.should_stop = True
-
 
         # Logic for changing the batch size without always requiring new dataloaders.
         controller_batch_size = self.controller.batch_size
@@ -314,6 +299,7 @@ class HippynnLightningModule(pl.LightningModule):
         self._eval_epoch_end(prefix="test_")
         return
 
+
 #
 # class HippynnControllerCallback(pl.Callback):
 #     def __init__(self, trainer, controller, datamodule):
@@ -332,7 +318,7 @@ class HippynnLightningModule(pl.LightningModule):
 
 
 class HippynnDataModule(pl.LightningDataModule):
-    def __init__(self, database:Database, batch_size):
+    def __init__(self, database: Database, batch_size):
         super().__init__()
         self.database = database
         self.batch_size = batch_size

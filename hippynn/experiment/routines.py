@@ -306,9 +306,7 @@ def train_model(
         print("Finishing up...")
     print("Training phase ended.")
 
-    if store_metrics:
-        with open("training_metrics.pkl", "wb") as pfile:
-            pickle.dump(metric_tracker, pfile)
+    torch.save(metric_tracker, "training_metrics.pt")
 
     best_model = metric_tracker.best_model
     if best_model:
