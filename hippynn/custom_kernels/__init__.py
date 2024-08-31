@@ -42,7 +42,7 @@ try:
         CUSTOM_KERNELS_AVAILABLE.append("triton")
     else:
         warnings.warn(
-            f"Triton found but not supported by GPU's compute capability: {torch.cuda.get_device_capability()}"
+            f"Triton found but not supported by GPU's compute capability: {device_capbility}"
         )
 except ImportError:
     pass
