@@ -35,21 +35,18 @@ except ImportError:
     pass
 
 try:
+    import triton
     import torch 
-    if torch.cuda.get_device_capability()[0]>6:
-        try:
-            import triton
-            CUSTOM_KERNELS_AVAILABLE.append("triton")
-        except ImportError:
-            pass
-    else: 
-        try:
-            import triton
-            warnings.warn(
-                f"Triton found but not supported by GPU's compute capability: {torch.cuda.get_device_capability()}"
-            )
-        except ImportError:
-            pass
+    device_capbility = torch.cuda.get_device_capability()
+    if device_capbility[0] > 6:
+        CUSTOM_KERNELS_AVAILABLE.append("triton")
+    else:
+        warnings.warn(
+            f"Triton found but not supported by GPU's compute capability: {torch.cuda.get_device_capability()}"
+        )
+except ImportError:
+    pass
+
         
 except ImportError:
     pass
