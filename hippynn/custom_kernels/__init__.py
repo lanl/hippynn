@@ -35,9 +35,22 @@ except ImportError:
     pass
 
 try:
-    import triton
-
-    CUSTOM_KERNELS_AVAILABLE.append("triton")
+    import torch 
+    if torch.cuda.get_device_capability()[0]>6:
+        try:
+            import triton
+            CUSTOM_KERNELS_AVAILABLE.append("triton")
+        except ImportError:
+            pass
+    else: 
+        try:
+            import triton
+            warnings.warn(
+                f"Triton found but not supported by GPU's compute capability: {torch.cuda.get_device_capability()}"
+            )
+        except ImportError:
+            pass
+        
 except ImportError:
     pass
 
@@ -76,7 +89,7 @@ def _check_cupy():
     if not cupy.cuda.is_available():
         if torch.cuda.is_available():
             warnings.warn("cupy.cuda.is_available() returned False: Custom kernels will fail on GPU tensors.")
-
+    
 
 def set_custom_kernels(active: Union[bool, str] = True):
     """
@@ -113,7 +126,6 @@ def set_custom_kernels(active: Union[bool, str] = True):
         return
 
     # Select custom kernel implementation
-
     if not CUSTOM_KERNELS_AVAILABLE:
         raise RuntimeError("Numba was not found. Custom kernels are not available.")
 
