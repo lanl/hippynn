@@ -3,16 +3,13 @@ import os
 import numpy as np
 import torch
 
-from ase import Atoms, units
-from ase.md.velocitydistribution import MaxwellBoltzmannDistribution
+from ase import units
 
-import hippynn
 from hippynn.experiment.serialization import load_checkpoint_from_cwd
 from hippynn.graphs.predictor import Predictor
 from hippynn.molecular_dynamics.md import (
     Variable,
     NullUpdater,
-    VelocityVerlet,
     LangevinDynamics,
     MolecularDynamics,
 )
@@ -101,9 +98,9 @@ with active_directory("md_results"):
         variables=[positions_variable, species_variable, cell_variable],
         model=model,
     )
-    emdee.run(dt=0.001, n_steps=00)
 
-    emdee.run(dt=0.001, n_steps=50, record_every=50)
+    emdee.run(dt=0.001, n_steps=20000)
+    emdee.run(dt=0.001, n_steps=50000, record_every=50)
 
     data = emdee.get_data()
     np.savez("cg_trajectory.npz",

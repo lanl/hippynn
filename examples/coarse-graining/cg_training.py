@@ -15,7 +15,6 @@ from hippynn.graphs.nodes.inputs import SpeciesNode, PositionsNode, CellNode
 from hippynn.graphs.nodes.networks import HipnnQuad
 from hippynn.graphs.nodes.pairs import KDTreePairsMemory
 from hippynn.graphs.nodes.physics import MultiGradientNode
-from hippynn.graphs.nodes.tags import PairIndexer, AtomIndexer
 from hippynn.graphs.nodes.targets import HEnergyNode
 from hippynn.plotting import PlotMaker, Hist2D, SensitivityPlot
 from hippynn.tools import active_directory
