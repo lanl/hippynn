@@ -114,8 +114,18 @@
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">triton</span>
+    <span class="kn">import</span> <span class="nn">torch</span> 
+    <span class="n">device_capability</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">get_device_capability</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">device_capability</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;triton&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Triton found but not supported by GPU&#39;s compute capability: </span><span class="si">{</span><span class="n">device_capability</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">pass</span>
 
-    <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;triton&quot;</span><span class="p">)</span>
+        
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">pass</span>
 
@@ -154,7 +164,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">cupy</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;cupy.cuda.is_available() returned False: Custom kernels will fail on GPU tensors.&quot;</span><span class="p">)</span>
-
+    
 
 <div class="viewcode-block" id="set_custom_kernels">
 <a class="viewcode-back" href="../../api_documentation/hippynn.custom_kernels.html#hippynn.custom_kernels.set_custom_kernels">[docs]</a>
@@ -193,7 +203,6 @@
         <span class="k">return</span>
 
     <span class="c1"># Select custom kernel implementation</span>
-
     <span class="k">if</span> <span class="ow">not</span> <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Numba was not found. Custom kernels are not available.&quot;</span><span class="p">)</span>
 
