@@ -12,6 +12,7 @@ Some features of hippynn experiments may not be implemented yet.
 
 """
 import warnings
+import copy
 from pathlib import Path
 
 import torch
@@ -19,7 +20,6 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import CSVLogger
 
-import hippynn.tools
 from .routines import TrainingModules
 from ..databases import Database
 from .routines import SetupParams, setup_training
@@ -27,7 +27,6 @@ from ..graphs import GraphModule
 from .controllers import Controller
 from .metric_tracker import MetricTracker
 from .step_functions import get_step_function, StandardStep
-from ..plotting import PlotMaker
 from ..tools import print_lr
 from . import serialization
 
@@ -136,7 +135,20 @@ class HippynnLightningModule(pl.LightningModule):
 
     def on_save_checkpoint(self, checkpoint) -> None:
 
+        # Note to future developers:
+        # trainer.log_dir property needs to be called on all ranks! This is weird but important;
+        # do not move trainer.log_dir inside of a rank zero operation!
+        # see https://github.com/Lightning-AI/pytorch-lightning/discussions/8321
+        # Thank you to https://github.com/semaphore-egg .
+        log_dir = self.trainer.log_dir
+
         if not self.structure_file:
+            # Perform change on all ranks.
+            sf = serialization.DEFAULT_STRUCTURE_FNAME
+            self.structure_file = sf
+
+        if self.global_rank == 0 and not self.structure_file:
+            self.print("creating structure file.")
             structure = dict(
                 model=self.model,
                 loss=self.loss,
@@ -145,10 +157,9 @@ class HippynnLightningModule(pl.LightningModule):
                 optimizer_list=self.optimizer_list,
                 scheduler_list=self.scheduler_list,
             )
-            self.structure_file = serialization.DEFAULT_STRUCTURE_FNAME
-            self.print("Saving structure file to", self.trainer.log_dir)
-            with hippynn.tools.active_directory(self.trainer.log_dir, create=False):
-                torch.save(obj=structure, f=self.structure_file)
+            path: Path = Path(log_dir).joinpath(sf)
+            self.print("Saving structure file at", path)
+            torch.save(obj=structure, f=path)
 
         checkpoint["controller_state"] = self.controller.state_dict()
         return
@@ -181,7 +192,7 @@ class HippynnLightningModule(pl.LightningModule):
                 "scheduler": s,
                 "interval": "epoch",  # can be epoch or step
                 "frequency": 1,  # How many intervals should pass between calls to  `scheduler.step()`.
-                "monitor": "valid_" + self.stopping_key,  # Metric to to monitor for schedulers like `ReduceLROnPlateau`
+                "monitor": "valid_" + self.stopping_key,  # Metric to monitor for schedulers like `ReduceLROnPlateau`
                 "strict": True,
                 "name": "learning_rate",
             }
@@ -209,12 +220,10 @@ class HippynnLightningModule(pl.LightningModule):
 
     def _eval_step(self, batch, batch_idx):
 
-        batch_inputs = batch[: self.n_inputs]
-        batch_targets = batch[-self.n_targets :]
+        batch_inputs = batch[:self.n_inputs]
+        batch_targets = batch[-self.n_targets:]
 
-        batch_dict = dict(zip(self.inputs, batch_inputs))
-
-        # it is very very common to fit to derivatives, e.g. force, in hippynn. Override lightning default.
+        # It is very, very common to fit to derivatives, e.g. force, in hippynn. Override lightning default.
         with torch.autograd.set_grad_enabled(True):
             batch_predictions = self.model(*batch_inputs)
 
@@ -249,54 +258,84 @@ class HippynnLightningModule(pl.LightningModule):
 
         self.log_dict({prefix + k: v for k, v in loss_dict.items()}, sync_dist=True)
 
-        loss_dict = {prefix[:-1]: loss_dict}  # strip underscore from prefix.
-
-        if self.trainer.sanity_checking:
-            self.print("Sanity check matric values:")
-            self.metric_tracker.evaluation_print(loss_dict, _print=self.print)
-            return
-
-        # register metrics and push to controller
-        out_ = self.metric_tracker.register_metrics(loss_dict, when=self.current_epoch)
-        better_metrics, better_model, stopping_metric = out_
-        self.metric_tracker.evaluation_print_better(loss_dict, better_metrics, _print=self.print)
-        self.better_model = better_model
-        self.stopping_metric = stopping_metric
         return
 
     def on_validation_epoch_end(self):
         self._eval_epoch_end(prefix="valid_")
+        return
+
+    def on_test_epoch_end(self):
+        self._eval_epoch_end(prefix="test_")
+        return
+
+    def _eval_end(self, prefix, when=None) -> None:
+        if when is None:
+            if self.trainer.sanity_checking:
+                when = "Sanity Check"
+            else:
+                when = self.current_epoch
+
+        # Step 1: get metrics reduced from all ranks.
+        # Copied pattern from pytorch_lightning.
+        metrics = copy.deepcopy(self.trainer.callback_metrics)
+
+        pre_len = len(prefix)
+        loss_dict = {k[pre_len:]: v.item() for k, v in metrics.items() if k.startswith(prefix)}
+
+        loss_dict = {prefix[:-1]: loss_dict}  # strip underscore from prefix and wrap.
+
         if self.trainer.sanity_checking:
+            self.print("Sanity check metric values:")
+            self.metric_tracker.evaluation_print(loss_dict, _print=self.print)
             return
 
-        continue_training = self.controller.push_epoch(self.current_epoch, self.better_model, self.stopping_metric, _print=self.print)
+        # Step 2: register metrics
+        out_ = self.metric_tracker.register_metrics(loss_dict, when=when)
+        better_metrics, better_model, stopping_metric = out_
+        self.metric_tracker.evaluation_print_better(loss_dict, better_metrics, _print=self.print)
+
+        continue_training = self.controller.push_epoch(self.current_epoch,
+                                                       better_model,
+                                                       stopping_metric,
+                                                       _print=self.print)
+
         if not continue_training:
-            self.print("Controller terminated training.")
+            self.print("Controller is terminating training.")
             self.trainer.should_stop = True
 
-        # Logic for changing the batch size without always requiring new dataloaders.
+        # Step 3: Logic for changing the batch size without always requiring new dataloaders.
+        # Step 3a: don't do this when not testing.
+        if not self.trainer.training:
+            return
+
         controller_batch_size = self.controller.batch_size
         trainer_batch_size = self.trainer.train_dataloader.batch_size
         if controller_batch_size != trainer_batch_size:
             # Need to trigger a batch size change.
             if self._last_reload_dlene is None:
+                # save the original value of this variable to the pl module
                 self._last_reload_dlene = self.trainer.reload_dataloaders_every_n_epochs
 
+            # TODO: Make this run even if there isn't an explicit datamodule?
             self.trainer.datamodule.batch_size = controller_batch_size
+            # Tell PL lightning to reload the dataloaders now.
             self.trainer.reload_dataloaders_every_n_epochs = 1
 
         elif self._last_reload_dlene is not None:
-            # Restore the last saved value for this.
+            # Restore the last saved value from the pl module.
             self.trainer.reload_dataloaders_every_n_epochs = self._last_reload_dlene
             self._last_reload_dlene = None
         else:
             # Batch sizes match, and there's no variable to restore.
             pass
-
         return
 
-    def on_test_epoch_end(self):
-        self._eval_epoch_end(prefix="test_")
+    def on_validation_end(self):
+        self._eval_end(prefix="valid_")
+        return
+
+    def on_test_end(self):
+        self._eval_end(prefix="test_", when="test")
         return
 
 
@@ -315,6 +354,22 @@ class HippynnLightningModule(pl.LightningModule):
 #         better_model = pl_module.better_model
 #         continue_training = self.controller.push_epoch(pl_module.current_epoch, better_model, stopping_metric)
 #
+
+from types import FunctionType
+class LightingPrintStagesCallback(pl.Callback):
+    """
+    This callback is for debugging only.
+    It prints whenever a callback stage is entered in pytorch lightning.
+    """
+    for k in dir(pl.Callback):
+        if k.startswith('on_'):
+            def some_method(self, *args, _k=k, **kwargs):
+                all_args = kwargs.copy()
+                all_args.update({i: a for i, a in enumerate(args)})
+                int_args = {k: v for k, v in all_args.items() if isinstance(v, int)}
+                print("Callback stage:", _k, "with integer arguments:", int_args)
+            exec(f"{k} = some_method")
+            del some_method
 
 
 class HippynnDataModule(pl.LightningDataModule):
