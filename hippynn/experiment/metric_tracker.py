@@ -98,7 +98,7 @@ class MetricTracker:
         else:
             self.other_metric_values[when] = metric_info
 
-        if self.stopping_key:
+        if self.stopping_key and "valid" in metric_info:
             better_model = better_metrics.get("valid", {}).get(self.stopping_key, False)
             stopping_key_metric = metric_info["valid"][self.stopping_key]
         else:
