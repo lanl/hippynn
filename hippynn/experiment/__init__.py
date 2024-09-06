@@ -9,10 +9,15 @@ from . import metric_tracker
 from . import assembly
 from . import serialization
 from . import routines
-from .lightning_trainer import HippynnLightningModule
 
 from .assembly import assemble_for_training
 from .routines import setup_and_train, setup_training, train_model, test_model, SetupParams
 
 
-__all__ = ["assemble_for_training", "setup_and_train", "setup_training", "train_model", "test_model", "SetupParams", "HippynnLightningModule"]
+__all__ = ["assemble_for_training", "setup_and_train", "setup_training", "train_model", "test_model", "SetupParams",]
+
+try:
+    from .lightning_trainer import HippynnLightningModule
+    __all__ += ["HippynnLightningModule"]
+except ImportError:
+    pass
