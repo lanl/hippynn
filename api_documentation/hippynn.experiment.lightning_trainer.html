@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.experiment.lightning_trainer module &mdash; hippynn 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=c9d3d048"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="hippynn.experiment.metric_tracker module" href="hippynn.experiment.metric_tracker.html" />
+    <link rel="prev" title="hippynn.experiment.evaluator module" href="hippynn.experiment.evaluator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="hippynn.html">hippynn API documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="hippynn.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.html">hippynn.custom_kernels package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.html">hippynn.databases package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="hippynn.experiment.html">hippynn.experiment package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.SetupParams"><code class="docutils literal notranslate"><span class="pre">SetupParams</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.assemble_for_training"><code class="docutils literal notranslate"><span class="pre">assemble_for_training()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.setup_and_train"><code class="docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.setup_training"><code class="docutils literal notranslate"><span class="pre">setup_training()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.test_model"><code class="docutils literal notranslate"><span class="pre">test_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.train_model"><code class="docutils literal notranslate"><span class="pre">train_model()</span></code></a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="hippynn.experiment.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="hippynn.experiment.assembly.html">hippynn.experiment.assembly module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.experiment.controllers.html">hippynn.experiment.controllers module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.experiment.device.html">hippynn.experiment.device module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.experiment.evaluator.html">hippynn.experiment.evaluator module</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">hippynn.experiment.lightning_trainer module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnDataModule"><code class="docutils literal notranslate"><span class="pre">HippynnDataModule</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnDataModule.__init__"><code class="docutils literal notranslate"><span class="pre">HippynnDataModule.__init__()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnDataModule.test_dataloader"><code class="docutils literal notranslate"><span class="pre">HippynnDataModule.test_dataloader()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnDataModule.train_dataloader"><code class="docutils literal notranslate"><span class="pre">HippynnDataModule.train_dataloader()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnDataModule.val_dataloader"><code class="docutils literal notranslate"><span class="pre">HippynnDataModule.val_dataloader()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule"><code class="docutils literal notranslate"><span class="pre">HippynnLightningModule</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.__init__"><code class="docutils literal notranslate"><span class="pre">HippynnLightningModule.__init__()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">HippynnLightningModule.configure_optimizers()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.from_experiment_setup"><code class="docutils literal notranslate"><span class="pre">HippynnLightningModule.from_experiment_setup()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.from_train_setup"><code class="docutils literal notranslate"><span class="pre">HippynnLightningModule.from_train_setup()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.load_from_checkpoint"><code class="docutils literal notranslate"><span class="pre">HippynnLightningModule.load_from_checkpoint()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_load_checkpoint"><code class="docutils literal notranslate"><span class="pre">HippynnLightningModule.on_load_checkpoint()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_save_checkpoint"><code class="docutils literal notranslate"><span class="pre">HippynnLightningModule.on_save_checkpoint()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_test_end"><code class="docutils literal notranslate"><span class="pre">HippynnLightningModule.on_test_end()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_test_epoch_end"><code class="docutils literal notranslate"><span class="pre">HippynnLightningModule.on_test_epoch_end()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_train_epoch_start"><code class="docutils literal notranslate"><span class="pre">HippynnLightningModule.on_train_epoch_start()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_validation_end"><code class="docutils literal notranslate"><span class="pre">HippynnLightningModule.on_validation_end()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_validation_epoch_end"><code class="docutils literal notranslate"><span class="pre">HippynnLightningModule.on_validation_epoch_end()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.test_step"><code class="docutils literal notranslate"><span class="pre">HippynnLightningModule.test_step()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.training_step"><code class="docutils literal notranslate"><span class="pre">HippynnLightningModule.training_step()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.validation_step"><code class="docutils literal notranslate"><span class="pre">HippynnLightningModule.validation_step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.LightingPrintStagesCallback"><code class="docutils literal notranslate"><span class="pre">LightingPrintStagesCallback</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.lightning_trainer.LightingPrintStagesCallback.k"><code class="docutils literal notranslate"><span class="pre">LightingPrintStagesCallback.k</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.experiment.metric_tracker.html">hippynn.experiment.metric_tracker module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.experiment.routines.html">hippynn.experiment.routines module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.experiment.serialization.html">hippynn.experiment.serialization module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.experiment.step_functions.html">hippynn.experiment.step_functions module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.graphs.html">hippynn.graphs package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.interfaces.html">hippynn.interfaces package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.html">hippynn.layers package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.molecular_dynamics.html">hippynn.molecular_dynamics package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.networks.html">hippynn.networks package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.optimizer.html">hippynn.optimizer package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.plotting.html">hippynn.plotting package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="hippynn.html">hippynn package</a></li>
+          <li class="breadcrumb-item"><a href="hippynn.experiment.html">hippynn.experiment package</a></li>
+      <li class="breadcrumb-item active">hippynn.experiment.lightning_trainer module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api_documentation/hippynn.experiment.lightning_trainer.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="hippynn.experiment.evaluator.html" class="btn btn-neutral float-left" title="hippynn.experiment.evaluator module" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hippynn.experiment.metric_tracker.html" class="btn btn-neutral float-right" title="hippynn.experiment.metric_tracker module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-hippynn.experiment.lightning_trainer">
+<span id="hippynn-experiment-lightning-trainer-module"></span><h1>hippynn.experiment.lightning_trainer module<a class="headerlink" href="#module-hippynn.experiment.lightning_trainer" title="Link to this heading"></a></h1>
+<p>Pytorch Lightning training interface.</p>
+<p>This module is somewhat experimental. Using pytorch lightning
+successfully in a distributed context may require understanding
+and adjusting the various settings related to parallelism, e.g.
+multiprocessing context, torch ddp backend, and how they interact
+with your HPC environment.</p>
+<dl class="simple">
+<dt>Some features of hippynn experiments may not be implemented yet.</dt><dd><ul class="simple">
+<li><p>The plotmaker is currently not supported.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnDataModule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HippynnDataModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnDataModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnDataModule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">LightningDataModule</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnDataModule.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.databases.database.html#hippynn.databases.database.Database" title="hippynn.databases.database.Database"><span class="pre">Database</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnDataModule.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnDataModule.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnDataModule.test_dataloader">
+<span class="sig-name descname"><span class="pre">test_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnDataModule.test_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnDataModule.test_dataloader" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnDataModule.train_dataloader">
+<span class="sig-name descname"><span class="pre">train_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnDataModule.train_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnDataModule.train_dataloader" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnDataModule.val_dataloader">
+<span class="sig-name descname"><span class="pre">val_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnDataModule.val_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnDataModule.val_dataloader" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnLightningModule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HippynnLightningModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnLightningModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">LightningModule</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnLightningModule.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">model:</span> <span class="pre">~hippynn.graphs.graph.GraphModule,</span> <span class="pre">loss:</span> <span class="pre">~hippynn.graphs.graph.GraphModule,</span> <span class="pre">eval_loss:</span> <span class="pre">~hippynn.graphs.graph.GraphModule,</span> <span class="pre">eval_names:</span> <span class="pre">list[str],</span> <span class="pre">stopping_key:</span> <span class="pre">str,</span> <span class="pre">optimizer_list:</span> <span class="pre">list[~torch.optim.optimizer.Optimizer],</span> <span class="pre">scheduler_list:</span> <span class="pre">list[&lt;module</span> <span class="pre">'torch.optim.lr_scheduler'</span> <span class="pre">from</span> <span class="pre">'/opt/hostedtoolcache/Python/3.9.19/x64/lib/python3.9/site-packages/torch/optim/lr_scheduler.py'&gt;],</span> <span class="pre">controller:</span> <span class="pre">~hippynn.experiment.controllers.Controller,</span> <span class="pre">metric_tracker:</span> <span class="pre">~hippynn.experiment.metric_tracker.MetricTracker,</span> <span class="pre">inputs:</span> <span class="pre">list[str],</span> <span class="pre">targets:</span> <span class="pre">list[str],</span> <span class="pre">n_outputs:</span> <span class="pre">int,</span> <span class="pre">*args,</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnLightningModule.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnLightningModule.configure_optimizers">
+<span class="sig-name descname"><span class="pre">configure_optimizers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnLightningModule.configure_optimizers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.configure_optimizers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnLightningModule.from_experiment_setup">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_experiment_setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">training_modules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.experiment.assembly.html#hippynn.experiment.assembly.TrainingModules" title="hippynn.experiment.assembly.TrainingModules"><span class="pre">TrainingModules</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.databases.database.html#hippynn.databases.database.Database" title="hippynn.databases.database.Database"><span class="pre">Database</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">setup_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.experiment.routines.html#hippynn.experiment.routines.SetupParams" title="hippynn.experiment.routines.SetupParams"><span class="pre">SetupParams</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnLightningModule.from_experiment_setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.from_experiment_setup" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnLightningModule.from_train_setup">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_train_setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">training_modules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.experiment.assembly.html#hippynn.experiment.assembly.TrainingModules" title="hippynn.experiment.assembly.TrainingModules"><span class="pre">TrainingModules</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.databases.database.html#hippynn.databases.database.Database" title="hippynn.databases.database.Database"><span class="pre">Database</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">controller</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.experiment.controllers.html#hippynn.experiment.controllers.Controller" title="hippynn.experiment.controllers.Controller"><span class="pre">Controller</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_tracker</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker" title="hippynn.experiment.metric_tracker.MetricTracker"><span class="pre">MetricTracker</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">callbacks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_callbacks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnLightningModule.from_train_setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.from_train_setup" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnLightningModule.load_from_checkpoint">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_checkpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_location</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structure_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hparams_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnLightningModule.load_from_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.load_from_checkpoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnLightningModule.on_load_checkpoint">
+<span class="sig-name descname"><span class="pre">on_load_checkpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnLightningModule.on_load_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_load_checkpoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnLightningModule.on_save_checkpoint">
+<span class="sig-name descname"><span class="pre">on_save_checkpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">checkpoint</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnLightningModule.on_save_checkpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_save_checkpoint" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnLightningModule.on_test_end">
+<span class="sig-name descname"><span class="pre">on_test_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnLightningModule.on_test_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_test_end" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnLightningModule.on_test_epoch_end">
+<span class="sig-name descname"><span class="pre">on_test_epoch_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnLightningModule.on_test_epoch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_test_epoch_end" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnLightningModule.on_train_epoch_start">
+<span class="sig-name descname"><span class="pre">on_train_epoch_start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnLightningModule.on_train_epoch_start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_train_epoch_start" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnLightningModule.on_validation_end">
+<span class="sig-name descname"><span class="pre">on_validation_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnLightningModule.on_validation_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_validation_end" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnLightningModule.on_validation_epoch_end">
+<span class="sig-name descname"><span class="pre">on_validation_epoch_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnLightningModule.on_validation_epoch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_validation_epoch_end" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnLightningModule.test_step">
+<span class="sig-name descname"><span class="pre">test_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnLightningModule.test_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.test_step" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnLightningModule.training_step">
+<span class="sig-name descname"><span class="pre">training_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnLightningModule.training_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.training_step" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.HippynnLightningModule.validation_step">
+<span class="sig-name descname"><span class="pre">validation_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#HippynnLightningModule.validation_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.HippynnLightningModule.validation_step" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.LightingPrintStagesCallback">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LightingPrintStagesCallback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/lightning_trainer.html#LightingPrintStagesCallback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.lightning_trainer.LightingPrintStagesCallback" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Callback</span></code></p>
+<p>This callback is for debugging only.
+It prints whenever a callback stage is entered in pytorch lightning.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.experiment.lightning_trainer.LightingPrintStagesCallback.k">
+<span class="sig-name descname"><span class="pre">k</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'__weakref__'</span></em><a class="headerlink" href="#hippynn.experiment.lightning_trainer.LightingPrintStagesCallback.k" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="hippynn.experiment.evaluator.html" class="btn btn-neutral float-left" title="hippynn.experiment.evaluator module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hippynn.experiment.metric_tracker.html" class="btn btn-neutral float-right" title="hippynn.experiment.metric_tracker module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

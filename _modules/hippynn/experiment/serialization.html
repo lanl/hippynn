@@ -77,7 +77,9 @@
              
   <h1>Source code for hippynn.experiment.serialization</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">checkpoint and state generation</span>
+<span class="sd">Checkpoint and state generation.</span>
+
+<span class="sd">As a user, in most cases you will only need the `load` functions here.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
@@ -90,7 +92,7 @@
 <span class="kn">from</span> <span class="nn">..graphs</span> <span class="kn">import</span> <span class="n">GraphModule</span>
 <span class="kn">from</span> <span class="nn">..tools</span> <span class="kn">import</span> <span class="n">device_fallback</span>
 <span class="kn">from</span> <span class="nn">.assembly</span> <span class="kn">import</span> <span class="n">TrainingModules</span>
-<span class="kn">from</span> <span class="nn">.controllers</span> <span class="kn">import</span> <span class="n">PatienceController</span>
+<span class="kn">from</span> <span class="nn">.controllers</span> <span class="kn">import</span> <span class="n">Controller</span>
 <span class="kn">from</span> <span class="nn">.device</span> <span class="kn">import</span> <span class="n">set_devices</span>
 <span class="kn">from</span> <span class="nn">.metric_tracker</span> <span class="kn">import</span> <span class="n">MetricTracker</span>
 
@@ -101,13 +103,13 @@
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.serialization.html#hippynn.experiment.serialization.create_state">[docs]</a>
 <span class="k">def</span> <span class="nf">create_state</span><span class="p">(</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">GraphModule</span><span class="p">,</span>
-    <span class="n">controller</span><span class="p">:</span> <span class="n">PatienceController</span><span class="p">,</span>
+    <span class="n">controller</span><span class="p">:</span> <span class="n">Controller</span><span class="p">,</span>
     <span class="n">metric_tracker</span><span class="p">:</span> <span class="n">MetricTracker</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create an experiment state dictionary.</span>
 
 <span class="sd">    :param model: current model</span>
-<span class="sd">    :param controller: patience controller</span>
+<span class="sd">    :param controller:  controller</span>
 <span class="sd">    :param metric_tracker: current metrics</span>
 <span class="sd">    :return: dictionary containing experiment state.</span>
 <span class="sd">    :rtype: dict</span>
@@ -126,7 +128,7 @@
 <span class="k">def</span> <span class="nf">create_structure_file</span><span class="p">(</span>
     <span class="n">training_modules</span><span class="p">:</span> <span class="n">TrainingModules</span><span class="p">,</span>
     <span class="n">database</span><span class="p">:</span> <span class="n">Database</span><span class="p">,</span>
-    <span class="n">controller</span><span class="p">:</span> <span class="n">PatienceController</span><span class="p">,</span>
+    <span class="n">controller</span><span class="p">:</span> <span class="n">Controller</span><span class="p">,</span>
     <span class="n">fname</span><span class="o">=</span><span class="n">DEFAULT_STRUCTURE_FNAME</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -134,7 +136,7 @@
 
 <span class="sd">    :param training_modules: contains model, controller, and loss</span>
 <span class="sd">    :param database: database for training</span>
-<span class="sd">    :param controller: patience controller</span>
+<span class="sd">    :param controller: controller</span>
 <span class="sd">    :param fname: filename to save the checkpoint</span>
 
 <span class="sd">    :return: None</span>

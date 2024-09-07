@@ -81,6 +81,7 @@
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau"><code class="docutils literal notranslate"><span class="pre">RaiseBatchSizeOnPlateau</span></code></a><ul>
 <li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.__init__"><code class="docutils literal notranslate"><span class="pre">RaiseBatchSizeOnPlateau.__init__()</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.load_state_dict"><code class="docutils literal notranslate"><span class="pre">RaiseBatchSizeOnPlateau.load_state_dict()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.optimizer"><code class="docutils literal notranslate"><span class="pre">RaiseBatchSizeOnPlateau.optimizer</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.set_controller"><code class="docutils literal notranslate"><span class="pre">RaiseBatchSizeOnPlateau.set_controller()</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.state_dict"><code class="docutils literal notranslate"><span class="pre">RaiseBatchSizeOnPlateau.state_dict()</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.step"><code class="docutils literal notranslate"><span class="pre">RaiseBatchSizeOnPlateau.step()</span></code></a></li>
@@ -91,6 +92,7 @@
 </li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.experiment.device.html">hippynn.experiment.device module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.experiment.evaluator.html">hippynn.experiment.evaluator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.experiment.lightning_trainer.html">hippynn.experiment.lightning_trainer module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.experiment.metric_tracker.html">hippynn.experiment.metric_tracker module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.experiment.routines.html">hippynn.experiment.routines module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.experiment.serialization.html">hippynn.experiment.serialization module</a></li>
@@ -190,7 +192,7 @@ found in the optimizer. See <code class="docutils literal notranslate"><span cla
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.experiment.controllers.Controller.push_epoch">
-<span class="sig-name descname"><span class="pre">push_epoch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">better_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/controllers.html#Controller.push_epoch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.controllers.Controller.push_epoch" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">push_epoch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">better_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_print=&lt;built-in</span> <span class="pre">function</span> <span class="pre">print&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/controllers.html#Controller.push_epoch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.controllers.Controller.push_epoch" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -226,16 +228,17 @@ of epochs.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.experiment.controllers.PatienceController.push_epoch">
-<span class="sig-name descname"><span class="pre">push_epoch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">better_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/controllers.html#PatienceController.push_epoch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.controllers.PatienceController.push_epoch" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">push_epoch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">better_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_print=&lt;built-in</span> <span class="pre">function</span> <span class="pre">print&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/controllers.html#PatienceController.push_epoch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.controllers.PatienceController.push_epoch" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="hippynn.experiment.controllers.RaiseBatchSizeOnPlateau">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RaiseBatchSizeOnPlateau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rel'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">controller</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/controllers.html#RaiseBatchSizeOnPlateau"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RaiseBatchSizeOnPlateau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rel'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">controller</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/controllers.html#RaiseBatchSizeOnPlateau"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ReduceLROnPlateau</span></code></p>
 <p>Learning rate scheduler compatible with pytorch schedulers.</p>
+<p>Note: The “VERBOSE” Parameter has been deprecated and no longer does anything.</p>
 <p>This roughly implements the scheme outlined in the following paper:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;Don&#39;t Decay the Learning Rate, Increase the Batch Size&quot;
 Samuel L. Smith et al., 2018.
@@ -253,12 +256,39 @@ The default base hippynn Controller will do this automatically.</p>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rel'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">controller</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/controllers.html#RaiseBatchSizeOnPlateau.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rel'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">controller</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/controllers.html#RaiseBatchSizeOnPlateau.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>optimizer</strong></p></li>
+<li><p><strong>max_batch_size</strong></p></li>
+<li><p><strong>factor</strong></p></li>
+<li><p><strong>patience</strong></p></li>
+<li><p><strong>threshold</strong></p></li>
+<li><p><strong>threshold_mode</strong></p></li>
+<li><p><strong>verbose</strong></p></li>
+<li><p><strong>controller</strong></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.load_state_dict">
 <span class="sig-name descname"><span class="pre">load_state_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/controllers.html#RaiseBatchSizeOnPlateau.load_state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.load_state_dict" title="Link to this definition"></a></dt>
+<dd><p>Loads the schedulers state.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>state_dict (dict): scheduler state. Should be an object returned</dt><dd><p>from a call to <a class="reference internal" href="#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.state_dict" title="hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.state_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">state_dict()</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.optimizer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">optimizer</span></span><a class="headerlink" href="#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.optimizer" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -269,7 +299,10 @@ The default base hippynn Controller will do this automatically.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.state_dict">
 <span class="sig-name descname"><span class="pre">state_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/controllers.html#RaiseBatchSizeOnPlateau.state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.state_dict" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Returns the state of the scheduler as a <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>.</p>
+<p>It contains an entry for every variable in self.__dict__ which
+is not the optimizer.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.step">

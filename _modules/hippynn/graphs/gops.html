@@ -133,7 +133,8 @@
 
     <span class="n">evaluation_inputs_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">evaluation_outputs_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">unsatisfied_nodes</span> <span class="o">=</span> <span class="n">all_nodes</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="c1"># need to sort to get stable results between runs/processes.</span>
+    <span class="n">unsatisfied_nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">all_nodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
     <span class="n">satisfied_nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">n</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">unsatisfied_nodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>

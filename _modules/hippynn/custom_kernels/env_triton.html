@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.custom_kernels.env_triton &mdash; hippynn 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=c9d3d048"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../custom_kernels.html">hippynn.custom_kernels</a></li>
+      <li class="breadcrumb-item active">hippynn.custom_kernels.env_triton</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.custom_kernels.env_triton</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">triton</span>
+<span class="kn">import</span> <span class="nn">triton.language</span> <span class="k">as</span> <span class="nn">tl</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">resort_pairs_cached</span>
+
+<span class="c1"># If numba is available, this implementation will default to numba on CPU. If not, use vanilla pytorch.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.env_numba</span> <span class="kn">import</span> <span class="n">new_envsum</span> <span class="k">as</span> <span class="n">envsum_alternative</span><span class="p">,</span> <span class="n">new_sensesum</span> <span class="k">as</span> <span class="n">sensesum_alternative</span><span class="p">,</span> <span class="n">new_featsum</span> <span class="k">as</span> <span class="n">featsum_alternative</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c1"># Load backup implementation for CPU tensors.</span>
+    <span class="kn">from</span> <span class="nn">.env_pytorch</span> <span class="kn">import</span> <span class="n">envsum</span> <span class="k">as</span> <span class="n">envsum_alternative</span><span class="p">,</span> <span class="n">sensesum</span> <span class="k">as</span> <span class="n">sensesum_alternative</span><span class="p">,</span> <span class="n">featsum</span> <span class="k">as</span> <span class="n">featsum_alternative</span>
+
+<div class="viewcode-block" id="config_pruner">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_triton.html#hippynn.custom_kernels.env_triton.config_pruner">[docs]</a>
+<span class="k">def</span> <span class="nf">config_pruner</span><span class="p">(</span><span class="n">configs</span><span class="p">,</span> <span class="n">nargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Trims the unnecessary config options based on the sens. and feat. sizes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#print(&quot;For some reason the config pruner also gets arguments:&quot;,kwargs)</span>
+    <span class="n">p2_sens_size</span> <span class="o">=</span> <span class="n">triton</span><span class="o">.</span><span class="n">next_power_of_2</span><span class="p">(</span><span class="n">nargs</span><span class="p">[</span><span class="s2">&quot;sens_size&quot;</span><span class="p">])</span>
+    <span class="n">p2_feat_size</span> <span class="o">=</span> <span class="n">triton</span><span class="o">.</span><span class="n">next_power_of_2</span><span class="p">(</span><span class="n">nargs</span><span class="p">[</span><span class="s2">&quot;feat_size&quot;</span><span class="p">])</span>
+
+    <span class="n">used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">configs</span><span class="p">:</span>
+
+        <span class="c1"># Don&#39;t use block sizes bigger than p2_sens_size or p2_feat_size; they will give the same result</span>
+        <span class="c1"># because there will only be one block.</span>
+        <span class="n">sense_block_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">p2_sens_size</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">])</span>
+        <span class="n">feat_block_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">p2_feat_size</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">sense_block_size</span><span class="p">,</span> <span class="n">feat_block_size</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">num_stages</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">num_warps</span><span class="p">)</span> <span class="ow">in</span> <span class="n">used</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">used</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">sense_block_size</span><span class="p">,</span> <span class="n">feat_block_size</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">num_stages</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">num_warps</span><span class="p">))</span>
+
+        <span class="k">yield</span> <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="n">sense_block_size</span><span class="p">,</span>
+                <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="n">feat_block_size</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="n">num_stages</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">num_stages</span><span class="p">,</span>
+            <span class="n">num_warps</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">num_warps</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_autotune_config">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_triton.html#hippynn.custom_kernels.env_triton.get_autotune_config">[docs]</a>
+<span class="k">def</span> <span class="nf">get_autotune_config</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a list of config options for the kernels</span>
+<span class="sd">    TODO: Need to spend time actually figuring out more reasonable options</span>
+<span class="sd">    targeted for modern GPUs</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">128</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">256</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">128</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">128</span><span class="p">},</span> <span class="n">num_warps</span><span class="o">=</span><span class="mi">8</span><span class="p">),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">256</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">256</span><span class="p">},</span> <span class="n">num_warps</span><span class="o">=</span><span class="mi">8</span><span class="p">),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">128</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">256</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">},</span> <span class="n">num_warps</span><span class="o">=</span><span class="mi">8</span><span class="p">),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">}),</span>
+        <span class="n">triton</span><span class="o">.</span><span class="n">Config</span><span class="p">({</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span> <span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">},</span> <span class="n">num_warps</span><span class="o">=</span><span class="mi">8</span><span class="p">),</span>
+    <span class="p">]</span></div>
+
+
+
+<span class="nd">@triton</span><span class="o">.</span><span class="n">autotune</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="n">get_autotune_config</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sens_size&quot;</span><span class="p">,</span> <span class="s2">&quot;feat_size&quot;</span><span class="p">],</span> <span class="n">prune_configs_by</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;early_config_prune&quot;</span><span class="p">:</span> <span class="n">config_pruner</span><span class="p">})</span>
+<span class="nd">@triton</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span> <span class="nf">envsum_kernel</span><span class="p">(</span>
+    <span class="n">out_env_ptr</span><span class="p">,</span>
+    <span class="n">sens_ptr</span><span class="p">,</span>
+    <span class="n">feat_ptr</span><span class="p">,</span>
+    <span class="n">psecond_ptr</span><span class="p">,</span>
+    <span class="n">atom_ids_ptr</span><span class="p">,</span>
+    <span class="n">atom_starts_ptr</span><span class="p">,</span>
+    <span class="n">atom_size</span><span class="p">,</span>
+    <span class="n">sens_size</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span>
+    <span class="n">feat_size</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span>
+    <span class="n">SENS_BLOCK_SIZE</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span>
+    <span class="n">FEAT_BLOCK_SIZE</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">atom_id</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">program_id</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">sens_id</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">program_id</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">feat_id</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">program_id</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">valid_atom_id</span> <span class="o">=</span> <span class="n">atom_id</span> <span class="o">&lt;</span> <span class="n">atom_size</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">atom_starts_ptr</span> <span class="o">+</span> <span class="n">atom_id</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_atom_id</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">atom_starts_ptr</span> <span class="o">+</span> <span class="n">atom_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_atom_id</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">target_id</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">atom_ids_ptr</span> <span class="o">+</span> <span class="n">atom_id</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_atom_id</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">sens_block_ids</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">SENS_BLOCK_SIZE</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">sens_id</span> <span class="o">*</span> <span class="n">SENS_BLOCK_SIZE</span><span class="p">)</span>
+    <span class="n">feat_block_ids</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">FEAT_BLOCK_SIZE</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">feat_id</span> <span class="o">*</span> <span class="n">FEAT_BLOCK_SIZE</span><span class="p">)</span>
+    <span class="n">env_block_ids</span> <span class="o">=</span> <span class="n">sens_block_ids</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">feat_size</span> <span class="o">+</span> <span class="n">feat_block_ids</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="n">valid_sens</span> <span class="o">=</span> <span class="n">sens_block_ids</span> <span class="o">&lt;</span> <span class="n">sens_size</span>
+    <span class="n">valid_feat</span> <span class="o">=</span> <span class="n">feat_block_ids</span> <span class="o">&lt;</span> <span class="n">feat_size</span>
+    <span class="n">valid_env</span> <span class="o">=</span> <span class="n">valid_sens</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">valid_feat</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">SENS_BLOCK_SIZE</span><span class="p">,</span> <span class="n">FEAT_BLOCK_SIZE</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+        <span class="c1"># [SENS_BLOCK_SIZE,], coming from the pair sensitivity</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">sens_ptr</span> <span class="o">+</span> <span class="p">(</span><span class="n">ind</span> <span class="o">*</span> <span class="n">sens_size</span><span class="p">)</span> <span class="o">+</span> <span class="n">sens_block_ids</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_sens</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">atom2_id</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">psecond_ptr</span> <span class="o">+</span> <span class="n">ind</span><span class="p">)</span>
+        <span class="c1"># [FEAT_BLOCK_SIZE,], coming from the neighbor feature</span>
+        <span class="n">feat</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">feat_ptr</span> <span class="o">+</span> <span class="p">(</span><span class="n">atom2_id</span> <span class="o">*</span> <span class="n">feat_size</span><span class="p">)</span> <span class="o">+</span> <span class="n">feat_block_ids</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_feat</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="c1"># temp_mat and tmp is [SENS_BLOCK_SIZE, FEAT_BLOCK_SIZE]</span>
+        <span class="n">temp_mat</span> <span class="o">=</span> <span class="n">s</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">feat</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span> <span class="o">+</span> <span class="n">temp_mat</span>
+
+    <span class="n">atom_offset</span> <span class="o">=</span> <span class="n">target_id</span> <span class="o">*</span> <span class="n">sens_size</span> <span class="o">*</span> <span class="n">feat_size</span>
+
+    <span class="c1"># TODO: use sparsity of sensitivities to reduce workload? (see numba envsum implementation)</span>
+    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">out_env_ptr</span> <span class="o">+</span> <span class="n">atom_offset</span> <span class="o">+</span> <span class="n">env_block_ids</span><span class="p">,</span> <span class="n">tmp</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_env</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="envsum_triton">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_triton.html#hippynn.custom_kernels.env_triton.envsum_triton">[docs]</a>
+<span class="k">def</span> <span class="nf">envsum_triton</span><span class="p">(</span><span class="n">sensitivities</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">atom_ids</span><span class="p">,</span> <span class="n">atom_starts</span><span class="p">,</span> <span class="n">out_env</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sensitivities</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">shape</span>
+    <span class="p">(</span><span class="n">n_atom_with_pairs</span><span class="p">,)</span> <span class="o">=</span> <span class="n">atom_ids</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="k">if</span> <span class="n">out_env</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out_env</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_atom</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">features</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">features</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">float32</span>
+    <span class="k">if</span> <span class="n">features</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">float64</span>
+
+    <span class="n">grid</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">META</span><span class="p">:</span> <span class="p">(</span><span class="n">n_atom_with_pairs</span><span class="p">,</span> <span class="n">triton</span><span class="o">.</span><span class="n">cdiv</span><span class="p">(</span><span class="n">n_nu</span><span class="p">,</span> <span class="n">META</span><span class="p">[</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">]),</span> <span class="n">triton</span><span class="o">.</span><span class="n">cdiv</span><span class="p">(</span><span class="n">n_feat</span><span class="p">,</span> <span class="n">META</span><span class="p">[</span><span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">]))</span>
+
+    <span class="n">envsum_kernel</span><span class="p">[</span><span class="n">grid</span><span class="p">](</span>
+        <span class="n">out_env</span><span class="p">,</span>
+        <span class="n">sensitivities</span><span class="p">,</span>
+        <span class="n">features</span><span class="p">,</span>
+        <span class="n">pair_second</span><span class="p">,</span>
+        <span class="n">atom_ids</span><span class="p">,</span>
+        <span class="n">atom_starts</span><span class="p">,</span>
+        <span class="n">n_atom_with_pairs</span><span class="p">,</span>
+        <span class="n">n_nu</span><span class="p">,</span>
+        <span class="n">n_feat</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_env</span></div>
+
+
+
+<div class="viewcode-block" id="envsum">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_triton.html#hippynn.custom_kernels.env_triton.envsum">[docs]</a>
+<span class="k">def</span> <span class="nf">envsum</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">sense</span><span class="o">.</span><span class="n">device</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">envsum_alternative</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+    <span class="n">psecond_hold</span> <span class="o">=</span> <span class="n">psecond</span>
+    <span class="n">argsort</span><span class="p">,</span> <span class="n">atom1_ids</span><span class="p">,</span> <span class="n">atom1_starts</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span> <span class="o">=</span> <span class="n">resort_pairs_cached</span><span class="p">(</span><span class="n">pfirst</span><span class="p">,</span> <span class="p">[</span><span class="n">sense</span><span class="p">,</span> <span class="n">psecond</span><span class="p">])</span>
+    <span class="n">resort_pairs_cached</span><span class="p">(</span><span class="n">psecond_hold</span><span class="p">,</span> <span class="p">[])</span>  <span class="c1"># Preemptively sort for backwards pass.</span>
+    <span class="k">return</span> <span class="n">envsum_triton</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="n">atom1_ids</span><span class="p">,</span> <span class="n">atom1_starts</span><span class="p">,</span> <span class="n">out_env</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></div>
+
+
+
+<span class="nd">@triton</span><span class="o">.</span><span class="n">autotune</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="n">get_autotune_config</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sens_size&quot;</span><span class="p">,</span> <span class="s2">&quot;feat_size&quot;</span><span class="p">],</span> <span class="n">prune_configs_by</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;early_config_prune&quot;</span><span class="p">:</span> <span class="n">config_pruner</span><span class="p">})</span>
+<span class="nd">@triton</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span> <span class="nf">sensesum_kernel</span><span class="p">(</span>
+    <span class="n">out_sense_ptr</span><span class="p">,</span>
+    <span class="n">env_ptr</span><span class="p">,</span>
+    <span class="n">feat_ptr</span><span class="p">,</span>
+    <span class="n">pfirst_ptr</span><span class="p">,</span>
+    <span class="n">psecond_ptr</span><span class="p">,</span>
+    <span class="n">pair_size</span><span class="p">,</span>
+    <span class="n">sens_size</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span>
+    <span class="n">feat_size</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span>
+    <span class="n">SENS_BLOCK_SIZE</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span>
+    <span class="n">FEAT_BLOCK_SIZE</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">pair_id</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">program_id</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">sense_id</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">program_id</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">num_feat_blocks</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">cdiv</span><span class="p">(</span><span class="n">feat_size</span><span class="p">,</span> <span class="n">FEAT_BLOCK_SIZE</span><span class="p">)</span>
+    <span class="n">valid_pair</span> <span class="o">=</span> <span class="n">pair_id</span> <span class="o">&lt;</span> <span class="n">pair_size</span>
+
+    <span class="n">first</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">pfirst_ptr</span> <span class="o">+</span> <span class="n">pair_id</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_pair</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">second</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">psecond_ptr</span> <span class="o">+</span> <span class="n">pair_id</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_pair</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">sens_block_ids</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">SENS_BLOCK_SIZE</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">sense_id</span> <span class="o">*</span> <span class="n">SENS_BLOCK_SIZE</span><span class="p">)</span>
+    <span class="n">feat_block_ids</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">FEAT_BLOCK_SIZE</span><span class="p">)</span>
+
+    <span class="n">valid_sens</span> <span class="o">=</span> <span class="n">sens_block_ids</span> <span class="o">&lt;</span> <span class="n">sens_size</span>
+
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">SENS_BLOCK_SIZE</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">feat_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_feat_blocks</span><span class="p">):</span>
+        <span class="n">valid_feat</span> <span class="o">=</span> <span class="n">feat_block_ids</span> <span class="o">&lt;</span> <span class="n">feat_size</span>
+        <span class="n">env_block_ids</span> <span class="o">=</span> <span class="n">sens_block_ids</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">feat_size</span> <span class="o">+</span> <span class="n">feat_block_ids</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">valid_env</span> <span class="o">=</span> <span class="n">valid_sens</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">valid_feat</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="c1"># [SENS_BLOCK_SIZE, FEAT_BLOCK_SIZE]</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">env_ptr</span> <span class="o">+</span> <span class="p">(</span><span class="n">first</span> <span class="o">*</span> <span class="n">sens_size</span> <span class="o">*</span> <span class="n">feat_size</span><span class="p">)</span> <span class="o">+</span> <span class="n">env_block_ids</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_env</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="c1"># [FEAT_BLOCK_SIZE, ]</span>
+        <span class="n">feat</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">feat_ptr</span> <span class="o">+</span> <span class="p">(</span><span class="n">second</span> <span class="o">*</span> <span class="n">feat_size</span><span class="p">)</span> <span class="o">+</span> <span class="n">feat_block_ids</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_feat</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="c1"># TODO: Here we use outer product followed by sum b/c built-in triton dot needs batches and FP&lt;64.</span>
+        <span class="c1"># Can we make this better then?</span>
+        <span class="c1"># For future reference:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        type_f32: tl.constexpr = tl.float32</span>
+<span class="sd">        type_check: tl.constexpr = (dtype == type_f32)</span>
+<span class="sd">        if type_check:</span>
+<span class="sd">            res = tl.dot(env, feat[:, None])</span>
+<span class="sd">        else:</span>
+<span class="sd">            res = tl.sum(env * feat[None, :], axis=1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tmp</span> <span class="o">+=</span> <span class="n">tl</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">env</span> <span class="o">*</span> <span class="n">feat</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># increment the feat block id</span>
+        <span class="n">feat_block_ids</span> <span class="o">+=</span> <span class="n">FEAT_BLOCK_SIZE</span>
+    <span class="c1"># TODO: use sparsity of sensitivities to reduce workload? (see numba envsum implementation)</span>
+    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">out_sense_ptr</span> <span class="o">+</span> <span class="p">(</span><span class="n">pair_id</span> <span class="o">*</span> <span class="n">sens_size</span><span class="p">)</span> <span class="o">+</span> <span class="n">sens_block_ids</span><span class="p">,</span> <span class="n">tmp</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_sens</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="sensesum">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_triton.html#hippynn.custom_kernels.env_triton.sensesum">[docs]</a>
+<span class="k">def</span> <span class="nf">sensesum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">out_sense</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">device</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">sensesum_alternative</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">)</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">n_pairs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pair_first</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">out_sense</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out_sense</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">features</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">features</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">float32</span>
+    <span class="k">if</span> <span class="n">features</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">float64</span>
+
+    <span class="n">grid</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">META</span><span class="p">:</span> <span class="p">(</span><span class="n">n_pairs</span><span class="p">,</span> <span class="n">triton</span><span class="o">.</span><span class="n">cdiv</span><span class="p">(</span><span class="n">n_nu</span><span class="p">,</span> <span class="n">META</span><span class="p">[</span><span class="s2">&quot;SENS_BLOCK_SIZE&quot;</span><span class="p">]))</span>
+    <span class="n">sensesum_kernel</span><span class="p">[</span><span class="n">grid</span><span class="p">](</span><span class="n">out_sense</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_sense</span></div>
+
+
+
+<span class="nd">@triton</span><span class="o">.</span><span class="n">autotune</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="n">get_autotune_config</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sens_size&quot;</span><span class="p">,</span> <span class="s2">&quot;feat_size&quot;</span><span class="p">],</span> <span class="n">prune_configs_by</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;early_config_prune&quot;</span><span class="p">:</span> <span class="n">config_pruner</span><span class="p">})</span>
+<span class="nd">@triton</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span> <span class="nf">featsum_kernel</span><span class="p">(</span>
+    <span class="n">out_feat</span><span class="p">,</span>
+    <span class="n">env_ptr</span><span class="p">,</span>
+    <span class="n">sens_ptr</span><span class="p">,</span>
+    <span class="n">pfirst_ptr</span><span class="p">,</span>
+    <span class="n">psecond_ptr</span><span class="p">,</span>
+    <span class="n">atom2_ids_ptr</span><span class="p">,</span>
+    <span class="n">atom2_starts_ptr</span><span class="p">,</span>
+    <span class="n">atom_size</span><span class="p">,</span>
+    <span class="n">sens_size</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span>
+    <span class="n">feat_size</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span>
+    <span class="n">SENS_BLOCK_SIZE</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span>
+    <span class="n">FEAT_BLOCK_SIZE</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">atom_id</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">program_id</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">feat_id</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">program_id</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">num_sense_blocks</span><span class="p">:</span> <span class="n">tl</span><span class="o">.</span><span class="n">constexpr</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">cdiv</span><span class="p">(</span><span class="n">sens_size</span><span class="p">,</span> <span class="n">SENS_BLOCK_SIZE</span><span class="p">)</span>
+    <span class="n">valid_atom</span> <span class="o">=</span> <span class="n">atom_id</span> <span class="o">&lt;</span> <span class="n">atom_size</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">atom2_starts_ptr</span> <span class="o">+</span> <span class="n">atom_id</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_atom</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">atom2_starts_ptr</span> <span class="o">+</span> <span class="n">atom_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_atom</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">target_id</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">atom2_ids_ptr</span> <span class="o">+</span> <span class="n">atom_id</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_atom</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">feat_block_ids</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">FEAT_BLOCK_SIZE</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">feat_id</span> <span class="o">*</span> <span class="n">FEAT_BLOCK_SIZE</span><span class="p">)</span>
+
+    <span class="n">valid_feat</span> <span class="o">=</span> <span class="n">feat_block_ids</span> <span class="o">&lt;</span> <span class="n">feat_size</span>
+
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">FEAT_BLOCK_SIZE</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+        <span class="n">sens_block_ids</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">SENS_BLOCK_SIZE</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sense_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_sense_blocks</span><span class="p">):</span>
+            <span class="n">valid_sens</span> <span class="o">=</span> <span class="n">sens_block_ids</span> <span class="o">&lt;</span> <span class="n">sens_size</span>
+            <span class="c1"># [SENS_BLOCK_SIZE,], coming from the pair sensitivity</span>
+            <span class="n">sense</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">sens_ptr</span> <span class="o">+</span> <span class="p">(</span><span class="n">ind</span> <span class="o">*</span> <span class="n">sens_size</span><span class="p">)</span> <span class="o">+</span> <span class="n">sens_block_ids</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_sens</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+            <span class="n">atom1_ind</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">pfirst_ptr</span> <span class="o">+</span> <span class="n">ind</span><span class="p">)</span>
+            <span class="c1"># [SENS_BLOCK_SIZE, FEAT_BLOCK_SIZE]</span>
+            <span class="n">env_block_ids</span> <span class="o">=</span> <span class="n">sens_block_ids</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">feat_size</span> <span class="o">+</span> <span class="n">feat_block_ids</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">valid_env</span> <span class="o">=</span> <span class="n">valid_sens</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">valid_feat</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">env</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">env_ptr</span> <span class="o">+</span> <span class="p">(</span><span class="n">atom1_ind</span> <span class="o">*</span> <span class="n">sens_size</span> <span class="o">*</span> <span class="n">feat_size</span><span class="p">)</span> <span class="o">+</span> <span class="n">env_block_ids</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_env</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+            <span class="c1"># temp_mat and tmp is [FEAT_BLOCK_SIZE,]</span>
+            <span class="n">temp_mat</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">env</span> <span class="o">*</span> <span class="n">sense</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">tmp</span> <span class="o">+</span> <span class="n">temp_mat</span>
+            <span class="c1"># increment the sense block id</span>
+            <span class="n">sens_block_ids</span> <span class="o">+=</span> <span class="n">SENS_BLOCK_SIZE</span>
+    <span class="n">tl</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">out_feat</span> <span class="o">+</span> <span class="p">(</span><span class="n">target_id</span> <span class="o">*</span> <span class="n">feat_size</span><span class="p">)</span> <span class="o">+</span> <span class="n">feat_block_ids</span><span class="p">,</span> <span class="n">tmp</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid_feat</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="featsum_triton">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_triton.html#hippynn.custom_kernels.env_triton.featsum_triton">[docs]</a>
+<span class="k">def</span> <span class="nf">featsum_triton</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">atom2_ids</span><span class="p">,</span> <span class="n">atom2_starts</span><span class="p">,</span> <span class="n">out_feat</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">shape</span>
+    <span class="p">(</span><span class="n">n_pairs</span><span class="p">,)</span> <span class="o">=</span> <span class="n">pair_first</span><span class="o">.</span><span class="n">shape</span>
+    <span class="p">(</span><span class="n">n_atoms_with_pairs</span><span class="p">,)</span> <span class="o">=</span> <span class="n">atom2_ids</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="k">if</span> <span class="n">out_feat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out_feat</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_atom</span><span class="p">,</span> <span class="n">n_feat</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">float32</span>
+    <span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">:</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">tl</span><span class="o">.</span><span class="n">float64</span>
+
+    <span class="n">grid</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">META</span><span class="p">:</span> <span class="p">(</span><span class="n">n_atoms_with_pairs</span><span class="p">,</span> <span class="n">triton</span><span class="o">.</span><span class="n">cdiv</span><span class="p">(</span><span class="n">n_feat</span><span class="p">,</span> <span class="n">META</span><span class="p">[</span><span class="s2">&quot;FEAT_BLOCK_SIZE&quot;</span><span class="p">]))</span>
+
+    <span class="n">featsum_kernel</span><span class="p">[</span><span class="n">grid</span><span class="p">](</span>
+        <span class="n">out_feat</span><span class="p">,</span>
+        <span class="n">env</span><span class="p">,</span>
+        <span class="n">sense</span><span class="p">,</span>
+        <span class="n">pair_first</span><span class="p">,</span>
+        <span class="n">pair_second</span><span class="p">,</span>
+        <span class="n">atom2_ids</span><span class="p">,</span>
+        <span class="n">atom2_starts</span><span class="p">,</span>
+        <span class="n">n_atoms_with_pairs</span><span class="p">,</span>
+        <span class="n">n_nu</span><span class="p">,</span>
+        <span class="n">n_feat</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_feat</span></div>
+
+
+
+<div class="viewcode-block" id="featsum">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_triton.html#hippynn.custom_kernels.env_triton.featsum">[docs]</a>
+<span class="k">def</span> <span class="nf">featsum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">device</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">featsum_alternative</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
+    <span class="n">pfirst_hold</span> <span class="o">=</span> <span class="n">pfirst</span>
+    <span class="n">argsort</span><span class="p">,</span> <span class="n">atom2_ids</span><span class="p">,</span> <span class="n">atom2_starts</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">)</span> <span class="o">=</span> <span class="n">resort_pairs_cached</span><span class="p">(</span><span class="n">psecond</span><span class="p">,</span> <span class="p">[</span><span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">])</span>
+    <span class="n">resort_pairs_cached</span><span class="p">(</span><span class="n">pfirst_hold</span><span class="p">,</span> <span class="p">[])</span>  <span class="c1"># preemptively sort (probably no-op)</span>
+    <span class="k">return</span> <span class="n">featsum_triton</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">,</span> <span class="n">atom2_ids</span><span class="p">,</span> <span class="n">atom2_starts</span><span class="p">,</span> <span class="n">out_feat</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

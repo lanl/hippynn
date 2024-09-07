@@ -84,7 +84,6 @@
 
 <span class="kn">from</span> <span class="nn">torch.optim.lr_scheduler</span> <span class="kn">import</span> <span class="n">ReduceLROnPlateau</span>
 
-
 <div class="viewcode-block" id="Controller">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.Controller">[docs]</a>
 <span class="k">class</span> <span class="nc">Controller</span><span class="p">:</span>
@@ -133,12 +132,10 @@
         <span class="n">fraction_train_eval</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
         <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">scheduler</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">stopping_key</span> <span class="o">=</span> <span class="n">stopping_key</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">eval_batch_size</span> <span class="o">=</span> <span class="n">eval_batch_size</span> <span class="ow">or</span> <span class="n">batch_size</span>
         <span class="k">if</span> <span class="n">max_epochs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -170,7 +167,8 @@
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.Controller.state_dict">[docs]</a>
     <span class="k">def</span> <span class="nf">state_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">state_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_vars</span><span class="p">}</span>
-        <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
         <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;scheduler&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">sch</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">sch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler_list</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">state_dict</span></div>
 
@@ -182,7 +180,8 @@
         <span class="k">for</span> <span class="n">sch</span><span class="p">,</span> <span class="n">sdict</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scheduler_list</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;scheduler&quot;</span><span class="p">]):</span>
             <span class="n">sch</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">sdict</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">])</span>
 
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_vars</span><span class="p">:</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">[</span><span class="n">k</span><span class="p">])</span></div>
@@ -194,7 +193,7 @@
 
 <div class="viewcode-block" id="Controller.push_epoch">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.Controller.push_epoch">[docs]</a>
-    <span class="k">def</span> <span class="nf">push_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">push_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">_print</span><span class="o">=</span><span class="nb">print</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="k">if</span> <span class="n">better_model</span><span class="p">:</span>
@@ -209,8 +208,9 @@
                 <span class="n">sch</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Epochs since last best:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Current max epochs:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_epochs</span><span class="p">)</span>
+            <span class="n">_print</span><span class="p">(</span><span class="s2">&quot;Epochs since last best:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span><span class="p">)</span>
+            <span class="n">_print</span><span class="p">(</span><span class="s2">&quot;Current max epochs:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_epochs</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_epochs</span></div>
 </div>
 
@@ -239,26 +239,30 @@
 
 <div class="viewcode-block" id="PatienceController.push_epoch">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.PatienceController.push_epoch">[docs]</a>
-    <span class="k">def</span> <span class="nf">push_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">push_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">_print</span><span class="o">=</span><span class="nb">print</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">better_model</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Patience for training restored.&quot;</span><span class="p">)</span>
+                <span class="n">_print</span><span class="p">(</span><span class="s2">&quot;Patience for training restored.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">last_best</span> <span class="o">=</span> <span class="n">epoch</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">push_epoch</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">push_epoch</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">_print</span><span class="o">=</span><span class="n">_print</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">max_epochs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_best</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">patience</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_epochs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_best</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">patience</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_epochs</span><span class="p">)</span></div>
 
 
 
+<span class="c1"># Developer note: The inheritance here is only so that pytorch lightning</span>
+<span class="c1"># readily identifies this as a scheduler.</span>
 <div class="viewcode-block" id="RaiseBatchSizeOnPlateau">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau">[docs]</a>
-<span class="k">class</span> <span class="nc">RaiseBatchSizeOnPlateau</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">RaiseBatchSizeOnPlateau</span><span class="p">(</span><span class="n">ReduceLROnPlateau</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Learning rate scheduler compatible with pytorch schedulers.</span>
+
+<span class="sd">    Note: The &quot;VERBOSE&quot; Parameter has been deprecated and no longer does anything.</span>
 
 <span class="sd">    This roughly implements the scheme outlined in the following paper:</span>
 
@@ -288,9 +292,20 @@
         <span class="n">patience</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
         <span class="n">threshold</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span>
         <span class="n">threshold_mode</span><span class="o">=</span><span class="s2">&quot;rel&quot;</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="c1"># DEPRECATED</span>
         <span class="n">controller</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param optimizer:</span>
+<span class="sd">        :param max_batch_size:</span>
+<span class="sd">        :param factor:</span>
+<span class="sd">        :param patience:</span>
+<span class="sd">        :param threshold:</span>
+<span class="sd">        :param threshold_mode:</span>
+<span class="sd">        :param verbose:</span>
+<span class="sd">        :param controller:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">threshold_mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;abs&quot;</span><span class="p">,</span> <span class="s2">&quot;rel&quot;</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Mode must be &#39;abs&#39; or &#39;rel&#39;&quot;</span><span class="p">)</span>
@@ -301,14 +316,18 @@
             <span class="n">factor</span><span class="o">=</span><span class="n">factor</span><span class="p">,</span>
             <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
             <span class="n">threshold_mode</span><span class="o">=</span><span class="n">threshold_mode</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">controller</span> <span class="o">=</span> <span class="n">controller</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_batch_size</span> <span class="o">=</span> <span class="n">max_batch_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">best_metric</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">=</span> <span class="mi">0</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Parameter verbose no longer supported for schedulers. It will be ignored.&quot;</span><span class="p">)</span></div>
 
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">optimizer</span>
 
 <div class="viewcode-block" id="RaiseBatchSizeOnPlateau.set_controller">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.controllers.html#hippynn.experiment.controllers.RaiseBatchSizeOnPlateau.set_controller">[docs]</a>
@@ -368,12 +387,9 @@
             <span class="n">new_batch_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">new_batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_batch_size</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">new_batch_size</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">boredom</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Raising batch size to&quot;</span><span class="p">,</span> <span class="n">new_batch_size</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="n">new_batch_size</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_batch_size</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_epoch</span> <span class="o">-</span> <span class="mi">1</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Max batch size reached, Lowering learning rate from here.&quot;</span><span class="p">)</span>
 
         <span class="k">return</span></div>
 </div>
