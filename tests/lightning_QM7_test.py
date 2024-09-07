@@ -1,8 +1,8 @@
-'''
+"""
 
 This is a test script based on /examples/QM7_example.py which uses pytorch lightning to train.
 
-'''
+"""
 
 PERFORM_PLOTTING = True  # Make sure you have matplotlib if you want to set this to TRUE
 
@@ -16,8 +16,15 @@ if torch.cuda.is_available():
 
 import hippynn
 
+
 def main():
     hippynn.settings.WARN_LOW_DISTANCES = False
+
+    # Note: these settings may need to be adjusted depending on the platform where
+    # this code is run.
+    n_devices = 2
+    num_workers = 0
+    multiprocessing_context = "fork"
 
     # Hyperparameters for the network
     netname = "TEST_LIGHTNING_MODEL"
@@ -41,7 +48,7 @@ def main():
     positions = inputs.PositionsNode(db_name="R")
 
     # Model computations
-    network = networks.Hipnn("HIPNN", (species, positions), module_kwargs=network_params)
+    network = networks.HipnnVec("HIPNN", (species, positions), module_kwargs=network_params)
     henergy = targets.HEnergyNode("HEnergy", network)
     molecule_energy = henergy.mol_energy
     molecule_energy.db_name = "T"
@@ -101,9 +108,7 @@ def main():
                 ylabel="Predicted Energy/Atom",
                 saved="PerAtomEn.pdf",
             ),
-            plotting.HierarchicalityPlot(
-                hierarchicality.pred, molecule_energy.pred - molecule_energy.true, saved="HierPlot.pdf"
-            ),
+            plotting.HierarchicalityPlot(hierarchicality.pred, molecule_energy.pred - molecule_energy.true, saved="HierPlot.pdf"),
             plot_every=10,  # How often to make plots -- here, epoch 0, 10, 20...
         )
     else:
@@ -116,6 +121,10 @@ def main():
     training_modules, db_info = assemble_for_training(train_loss, validation_losses, plot_maker=plot_maker)
     training_modules[0].print_structure()
 
+    if num_workers > 0:
+        dataloader_kwargs = dict(multiprocessing_context=multiprocessing_context, persistent_workers=True)
+    else:
+        dataloader_kwargs = None
     database_params = {
         "name": "qm7",  # Prefix for arrays in folder
         "directory": "../../datasets/qm7_processed",
@@ -125,6 +134,8 @@ def main():
         "seed": 2001,
         # How many samples from the training set to use during evaluation
         **db_info,  # Adds the inputs and targets names from the model as things to load
+        "dataloader_kwargs": dataloader_kwargs,
+        "num_workers": num_workers,
     }
 
     from hippynn.databases import DirectoryDatabase
@@ -138,22 +149,23 @@ def main():
 
     hierarchical_energy_initialization(henergy, database, trainable_after=False)
 
-    from hippynn.experiment.controllers import RaiseBatchSizeOnPlateau, PatienceController
+    from hippynn.experiment.controllers import PatienceController
+    from torch.optim.lr_scheduler import ReduceLROnPlateau
 
     optimizer = torch.optim.Adam(training_modules.model.parameters(), lr=1e-3)
 
-    scheduler = RaiseBatchSizeOnPlateau(
+    scheduler = ReduceLROnPlateau(
         optimizer=optimizer,
-        max_batch_size=128,
+        factor=0.5,
         patience=1,
     )
 
     controller = PatienceController(
         optimizer=optimizer,
         scheduler=scheduler,
-        batch_size=16,  #start batch size
-        eval_batch_size=512,
-        max_epochs=100,
+        batch_size=16,  # start batch size
+        eval_batch_size=16,
+        max_epochs=3,
         termination_patience=10,
         fraction_train_eval=0.1,
         stopping_key=early_stopping_key,
@@ -163,37 +175,45 @@ def main():
         controller=controller,
     )
 
-
     from hippynn.experiment import HippynnLightningModule
 
-    # lightning needs to run exactly where the script is located in distributed modes.
     lightmod, datamodule = HippynnLightningModule.from_experiment_setup(training_modules, database, experiment_params)
     import pytorch_lightning as pl
     from pytorch_lightning.loggers import CSVLogger
-    logger = CSVLogger(save_dir='.', name=netname, flush_logs_every_n_steps=1000)
+
+    logger = CSVLogger(save_dir=".", name=netname, flush_logs_every_n_steps=100)
     from pytorch_lightning.callbacks import ModelCheckpoint
 
-    checkpointer = ModelCheckpoint(monitor=f"valid_{early_stopping_key}",
-                                   save_last=True,
-                                   save_top_k=5,
-                                   every_n_epochs=1,
-                                   every_n_train_steps=None,
-                                   )
+    checkpointer = ModelCheckpoint(
+        monitor=f"valid_{early_stopping_key}",
+        save_last=True,
+        save_top_k=5,
+        every_n_epochs=1,
+        every_n_train_steps=None,
+    )
 
-    print("logger options",dir(logger))
+    from hippynn.experiment.lightning_trainer import LightingPrintStagesCallback
 
-    # import pdb
-    # pdb.set_trace()
+    cb = LightingPrintStagesCallback()  # include this callback if you aren't sure what stage of lightning is broken.
 
-    trainer = pl.Trainer(accelerator='cpu',  #'auto' detects MPS which doesn't work.
-                         logger=logger,
-                         num_nodes=1,
-                         devices=1,
-                         callbacks=[checkpointer],
-                         log_every_n_steps=1000, # currently, pt lightning re-serializes hyperparameters in the CSV logger with every save.
-                         )
+    # The default accelerator, 'auto' detects MPS on mac. hippynn doesn't work on MPS (yet).
+    # So we set cpu here.
+    trainer = pl.Trainer(
+        accelerator="cpu",
+        logger=logger,
+        num_nodes=1,
+        devices=n_devices,
+        callbacks=[checkpointer],
+        log_every_n_steps=1,
+        max_epochs=-1,  # This is set this way because the hippynn controller should terminate training.
+    )
 
-    trainer.fit(model=lightmod, datamodule=datamodule)
+    trainer.fit(
+        model=lightmod,
+        datamodule=datamodule,
+    )
+    trainer.test(datamodule=datamodule, ckpt_path="best")
+
 
 if __name__ == "__main__":
     main()
