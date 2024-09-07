@@ -18,7 +18,6 @@ from pathlib import Path
 import torch
 
 import pytorch_lightning as pl
-from pytorch_lightning.loggers import CSVLogger
 
 from .routines import TrainingModules
 from ..databases import Database
@@ -52,10 +51,6 @@ class HippynnLightningModule(pl.LightningModule):
         super().__init__()
 
         self.save_hyperparameters(ignore=["loss", "model", "eval_loss", "controller", "optimizer_list", "scheduler_list"])
-
-        # del self.hparams['loss']
-        # del self.hparams['model']
-        # del self.hparams['eval_loss']
 
         self.model = model
         self.loss = loss
@@ -105,6 +100,8 @@ class HippynnLightningModule(pl.LightningModule):
     ):
 
         model, loss, evaluator = training_modules
+
+        warnings.warn("PytorchLightning hippynn trainer is still experimental.")
 
         if evaluator.plot_maker is not None:
             warnings.warn("plot_maker is not currently supported in pytorch lightning. The current plot_maker will be ignored.")
@@ -169,6 +166,7 @@ class HippynnLightningModule(pl.LightningModule):
 
         if structure_file is None:
             # Assume checkpoint_path is like <model_name>/version_<n>/checkpoints/<something>.chkpt
+            # and that experiment file is stored at <model_name>/version_<n>/experiment_structure.pt
             structure_file = Path(checkpoint_path)
             structure_file = structure_file.parent.parent
             structure_file = structure_file.joinpath(serialization.DEFAULT_STRUCTURE_FNAME)
@@ -338,24 +336,6 @@ class HippynnLightningModule(pl.LightningModule):
         self._eval_end(prefix="test_", when="test")
         return
 
-
-#
-# class HippynnControllerCallback(pl.Callback):
-#     def __init__(self, trainer, controller, datamodule):
-#         self.controller = controller
-#         self.datamodule = datamodule
-#
-#     def on_validation_epoch_start(self, trainer, pl_module):
-#         pl_module.stopping_metric = None
-#         pl_module.better_model = None
-#
-#     def on_validation_epoch_end(self, trainer, pl_module):
-#
-#         better_model = pl_module.better_model
-#         continue_training = self.controller.push_epoch(pl_module.current_epoch, better_model, stopping_metric)
-#
-
-from types import FunctionType
 class LightingPrintStagesCallback(pl.Callback):
     """
     This callback is for debugging only.
