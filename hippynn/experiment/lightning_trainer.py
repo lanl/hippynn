@@ -218,8 +218,8 @@ class HippynnLightningModule(pl.LightningModule):
 
     def _eval_step(self, batch, batch_idx):
 
-        batch_inputs = batch[:self.n_inputs]
-        batch_targets = batch[-self.n_targets:]
+        batch_inputs = batch[: self.n_inputs]
+        batch_targets = batch[-self.n_targets :]
 
         # It is very, very common to fit to derivatives, e.g. force, in hippynn. Override lightning default.
         with torch.autograd.set_grad_enabled(True):
@@ -292,10 +292,7 @@ class HippynnLightningModule(pl.LightningModule):
         better_metrics, better_model, stopping_metric = out_
         self.metric_tracker.evaluation_print_better(loss_dict, better_metrics, _print=self.print)
 
-        continue_training = self.controller.push_epoch(self.current_epoch,
-                                                       better_model,
-                                                       stopping_metric,
-                                                       _print=self.print)
+        continue_training = self.controller.push_epoch(self.current_epoch, better_model, stopping_metric, _print=self.print)
 
         if not continue_training:
             self.print("Controller is terminating training.")
@@ -336,18 +333,22 @@ class HippynnLightningModule(pl.LightningModule):
         self._eval_end(prefix="test_", when="test")
         return
 
+
 class LightingPrintStagesCallback(pl.Callback):
     """
     This callback is for debugging only.
     It prints whenever a callback stage is entered in pytorch lightning.
     """
+
     for k in dir(pl.Callback):
-        if k.startswith('on_'):
+        if k.startswith("on_"):
+
             def some_method(self, *args, _k=k, **kwargs):
                 all_args = kwargs.copy()
                 all_args.update({i: a for i, a in enumerate(args)})
                 int_args = {k: v for k, v in all_args.items() if isinstance(v, int)}
                 print("Callback stage:", _k, "with integer arguments:", int_args)
+
             exec(f"{k} = some_method")
             del some_method
 
