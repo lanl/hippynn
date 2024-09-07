@@ -133,9 +133,9 @@ def arrdict_len(array_dictionary):
     return len(next(iter(array_dictionary.values())))
 
 
-def print_lr(optimizer):
+def print_lr(optimizer, print_=print):
     for i, param_group in enumerate(optimizer.param_groups):
-        print("Learning rate:{:>10.5g}".format(param_group["lr"]))
+        print_("Learning rate:{:>10.5g}".format(param_group["lr"]))
 
 
 def isiterable(obj):
@@ -217,3 +217,18 @@ def is_equal_state_dict(d1, d2, raise_where=False):
     return True
 
 
+def recursive_param_count(state_dict, n=0):
+    for k, v in state_dict.items():
+        if isinstance(v, torch.Tensor):
+            n += v.numel()
+        elif isinstance(v, dict):
+            n += recursive_param_count(v)
+        elif isinstance(v, (list, tuple)):
+            n += recursive_param_count({i: x for i, x in enumerate(v)})
+        elif isinstance(v, (float, int)):
+            n += 1
+        elif v is None:
+            pass
+        else:
+            raise TypeError(f'Unknown type {type(v)=}, value={v}')
+    return n

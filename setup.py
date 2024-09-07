@@ -17,6 +17,7 @@ full_requirements = [
     "tqdm",
     "graphviz",
     "h5py",
+    "lightning",
 ]
 
 setuptools.setup(
