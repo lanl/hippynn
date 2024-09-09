@@ -1,7 +1,7 @@
 """
-Read Databases in the ANI H5 format.
 
-Note: You will need `pyanitools.py` to be importable to import this module.
+Read Databases in the pyanitools H5 format.
+
 """
 
 import os
@@ -37,8 +37,7 @@ class PyAniMethods:
         for c in progress_bar(x, desc="Data Groups", unit="group", total=x.group_size()):
             batch_dict = {}
             if species_key not in c:
-                raise ValueError(f"Species key '{species_key}' not found' in file {file}!\n"
-                                 f"\tFound keys: {set(c.keys())}")
+                raise ValueError(f"Species key '{species_key}' not found' in file {file}!\n" f"\tFound keys: {set(c.keys())}")
             for k, v in c.items():
                 # Filter things we don't need
                 if k in self._IGNORE_KEYS:
@@ -104,18 +103,19 @@ class PyAniMethods:
                 shape_scheme[k][axis] = n_atoms_max
             shape_scheme[k][0] = sys_count
 
-        padding_scheme['sys_number'] = []
+        padding_scheme["sys_number"] = []
         return padding_scheme, shape_scheme, bkey
 
     def process_batches(self, batches, n_atoms_max, sys_count, species_key="species"):
 
         # Get padding abd shape info and batch size key
-        padding_scheme, shape_scheme, size_key =\
-            self.determine_key_structure(batches, sys_count, n_atoms_max, species_key=species_key)
+        padding_scheme, shape_scheme, size_key = self.determine_key_structure(batches, sys_count, n_atoms_max, species_key=species_key)
 
         # add system numbers to the final arrays
-        shape_scheme['sys_number'] = [sys_count, ]
-        batches[0]['sys_number'] = np.asarray([0], dtype=np.int64)
+        shape_scheme["sys_number"] = [
+            sys_count,
+        ]
+        batches[0]["sys_number"] = np.asarray([0], dtype=np.int64)
 
         arr_dict = {}
         for k, shape in shape_scheme.items():
@@ -126,7 +126,7 @@ class PyAniMethods:
         for i, b in enumerate(progress_bar(batches, desc="Processing Batches", unit="batch")):
             # Get batch metadata
             n_sys = b[size_key].shape[0]
-            b['sys_number'] = np.asarray([i], dtype=np.int64)
+            b["sys_number"] = np.asarray([i], dtype=np.int64)
             sys_end = sys_start + n_sys
             # n_atoms_batch = b[species_key].shape[1]  # don't need this!
 
@@ -173,7 +173,7 @@ class PyAniMethods:
 
 
 class PyAniFileDB(Database, PyAniMethods, Restartable):
-    def __init__(self, file, inputs, targets, *args, allow_unfound=False, species_key="species", quiet=False, driver='core', **kwargs):
+    def __init__(self, file, inputs, targets, *args, allow_unfound=False, species_key="species", quiet=False, driver="core", **kwargs):
         """
 
         :param file:
@@ -197,7 +197,14 @@ class PyAniFileDB(Database, PyAniMethods, Restartable):
 
         super().__init__(arr_dict, inputs, targets, *args, **kwargs, quiet=quiet, allow_unfound=allow_unfound)
         self.restarter = self.make_restarter(
-            file, inputs, targets, *args, **kwargs, driver=driver, quiet=quiet, allow_unfound=allow_unfound,
+            file,
+            inputs,
+            targets,
+            *args,
+            **kwargs,
+            driver=driver,
+            quiet=quiet,
+            allow_unfound=allow_unfound,
             species_key=species_key,
         )
 
@@ -211,8 +218,19 @@ class PyAniFileDB(Database, PyAniMethods, Restartable):
 
 
 class PyAniDirectoryDB(Database, PyAniMethods, Restartable):
-    def __init__(self, directory, inputs, targets, *args, files=None, allow_unfound=False, species_key="species",
-                 quiet=False, driver='core', **kwargs):
+    def __init__(
+        self,
+        directory,
+        inputs,
+        targets,
+        *args,
+        files=None,
+        allow_unfound=False,
+        species_key="species",
+        quiet=False,
+        driver="core",
+        **kwargs,
+    ):
 
         self.directory = directory
         self.files = files
@@ -221,11 +239,10 @@ class PyAniDirectoryDB(Database, PyAniMethods, Restartable):
         self.species_key = species_key
         self.driver = driver
 
-        arr_dict = self.load_arrays(allow_unfound=allow_unfound,quiet=quiet)
+        arr_dict = self.load_arrays(allow_unfound=allow_unfound, quiet=quiet)
 
         super().__init__(arr_dict, inputs, targets, *args, **kwargs, quiet=quiet, allow_unfound=allow_unfound)
-        self.restarter = self.make_restarter(directory, inputs, targets, *args, files=files, quiet=quiet,
-                                             species_key=species_key, **kwargs)
+        self.restarter = self.make_restarter(directory, inputs, targets, *args, files=files, quiet=quiet, species_key=species_key, **kwargs)
 
     def load_arrays(self, allow_unfound=False, quiet=False):
 
@@ -257,24 +274,29 @@ class PyAniDirectoryDB(Database, PyAniMethods, Restartable):
         return arr_dict
 
 
-def write_h5(database: Database, split: str = None, file: Path = None, species_key: str = 'species', overwrite=False):
+def write_h5(
+    database: Database,
+    split: str = None,
+    file: Path = None,
+    species_key: str = "species",
+    overwrite: bool = False,
+) -> dict:
     """
-    :param database: database to get
+    :param database: Database to use
     :param split:  str, None, or True; selects data split to save.
      If None, contents of arr_dict are used.
      If True, save all splits and save split masks as well.
-    :param file: where to save the database.
+    :param file: where to save the database. if None, does not save the file.
     :param species_key:  the key used for system contents (padding and chemical formulas)
     :param overwrite:  boolean; enables over-writing of h5 file.
-    :return: dictionary of ANI-style systems.
+    :return: dictionary of pyanitools-format systems.
     """
 
     if split is True:
         database = database.write_npz("", record_split_masks=True, return_only=True)
-        print("writenpz", database.keys())
     elif split in database.splits:
         database = database.splits[split]
-        database = {k: v.to('cpu').numpy() for k,v in database.items()}
+        database = {k: v.to("cpu").numpy() for k, v in database.items()}
     elif split is None:
         database = database.arr_dict
     else:
@@ -297,10 +319,8 @@ def write_h5(database: Database, split: str = None, file: Path = None, species_k
     n_atoms_max = db_species.shape[1]
 
     # determine which keys have second shape of N atoms
-    is_atom_var = {
-        k: (len(k_arr.shape) > 1) and (k_arr.shape[1] == n_atoms_max) for k, k_arr in database.items()
-    }
-    del (is_atom_var[species_key])  # species handled separately
+    is_atom_var = {k: (len(k_arr.shape) > 1) and (k_arr.shape[1] == n_atoms_max) for k, k_arr in database.items()}
+    del is_atom_var[species_key]  # species handled separately
 
     # Create the data dictionary
     # Maps hashes of system chemical formulas to dictionaries of system information.
@@ -343,7 +363,7 @@ def write_h5(database: Database, split: str = None, file: Path = None, species_k
             mol[k] = np.asarray(mol[k])
 
             if np.issubdtype(mol[k].dtype, np.unicode_):
-                mol[k] = [el.encode('utf-8') for el in list(mol[k])]
+                mol[k] = [el.encode("utf-8") for el in list(mol[k])]
                 mol[k] = np.array(mol[k])
     # Store data
     if packer is not None:

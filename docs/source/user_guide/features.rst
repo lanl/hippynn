@@ -11,7 +11,7 @@ Modular set of pytorch layers for atomistic operations
   if you want to use them in your scripts without using the rest of the features
   provided here -- no problem!
 
-API documentation for :mod:`~hippynn.layers`
+API documentation for :mod:`~hippynn.layers` and :mod:`~hippynn.networks`
 
 Graph level API for simple and flexible construction of models from pytorch components.
 ---------------------------------------------------------------------------------------
@@ -25,6 +25,12 @@ Graph level API for simple and flexible construction of models from pytorch comp
 - Graph API is independent of module implementation.
 
 API documentation for :mod:`~hippynn.graphs`
+
+For more information on nodes and graphs, see the `graph exploration ipython notebook`_ which can also
+be found in the example files.
+
+.. _graph exploration ipython notebook: https://github.com/lanl/hippynn/blob/development/examples/graph_exploration.ipynb
+
 
 Plot level API for tracking your training.
 ----------------------------------------------------------
@@ -46,7 +52,7 @@ API documentation for :mod:`~hippynn.experiment`
 Custom Kernels for fast execution
 ----------------------------------------------------------
 - Certain operations are not efficiently written in pure pytorch, we provide
-  alternative implementations with ``numba``
+  alternative implementations.
 - These are directly linked in with pytorch Autograd -- use them like native pytorch functions.
 - These provide advantages in memory footprint and speed
 - Includes CPU and GPU execution for custom kernels
@@ -55,7 +61,8 @@ More information at :doc:`this page </user_guide/ckernels>`
 
 Interfaces
 ----------------------------------------------------------
-- ASE: Define `ase` calculators based on the graph-level API.
-- PYSEQM: Use `pyseqm` calculations as nodes in a graph.
+- ASE: Define ``ase`` calculators based on the graph-level API.
+- PYSEQM: Use ``pyseqm`` calculations as nodes in a graph.
+- LAMMPS: Create a file for use as a `pair style mliap` object.
 
 API documentation for :mod:`~hippynn.interfaces`

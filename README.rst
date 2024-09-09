@@ -106,6 +106,7 @@ The Journal of chemical physics, 148(24), 241715.
 See AUTHORS.txt for information on authors.
 
 See LICENSE.txt for licensing information. hippynn is licensed under the BSD-3 license.
+See COPYRIGHT.txt for copyright information.
 
 Triad National Security, LLC (Triad) owns the copyright to hippynn, which it identifies as project number LA-CC-19-093.
 

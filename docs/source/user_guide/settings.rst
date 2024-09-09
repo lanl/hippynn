@@ -69,3 +69,8 @@ The following settings are available:
      - float between 0 and 1
      - 1.0
      - no
+   * - TIMEPLOT_AUTOSCALING
+     - If True, only provide log-scaled plots of training quantities over time if warranted by the data. If False, always produce all plots in linear, log, and loglog scales.
+     - bool
+     - True
+     - yes

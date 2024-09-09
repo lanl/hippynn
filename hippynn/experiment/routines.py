@@ -21,6 +21,8 @@ from .device import set_devices
 from .. import tools
 from .assembly import TrainingModules
 from .step_functions import get_step_function
+from ..databases import Database
+
 
 from .. import custom_kernels
 
@@ -101,7 +103,7 @@ class SetupParams:
 
 def setup_and_train(
     training_modules: TrainingModules,
-    database,
+    database: Database,
     setup_params: SetupParams,
     store_all_better=False,
     store_best=True,

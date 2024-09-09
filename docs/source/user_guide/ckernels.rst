@@ -60,7 +60,7 @@ The three custom kernels correspond to the interaction sum in hip-nn:
 
 .. math::
 
-    a'_{i,a} =  = \sum_{\nu,b} V^\nu_{a,b} e^{\nu}_{i,b}
+    a'_{i,a} = \sum_{\nu,b} V^\nu_{a,b} e^{\nu}_{i,b}
 
     e^{\nu}_{i,a} = \sum_p s^\nu_{p} z_{p_j,a}
 

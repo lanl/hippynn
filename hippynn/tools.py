@@ -11,7 +11,7 @@ import torch
 from . import settings
 
 
-class teed_file_output:
+class TeedFileOutput:
     def __init__(self, *streams):
         self.streams = streams
 
@@ -42,8 +42,8 @@ def log_terminal(file, *args, **kwargs):
         file = open(file, *args, **kwargs)
     else:
         close_on_exit = False
-    teed_stderr = teed_file_output(file, sys.stderr)
-    teed_stdout = teed_file_output(file, sys.stdout)
+    teed_stderr = TeedFileOutput(file, sys.stderr)
+    teed_stdout = TeedFileOutput(file, sys.stdout)
     with contextlib.redirect_stderr(teed_stderr):
         with contextlib.redirect_stdout(teed_stdout):
             try:
@@ -102,6 +102,16 @@ def active_directory(dirname, create=None):
 
 
 def progress_bar(iterable, *args, **kwargs):
+    """
+    Wrap an iterable in a progress bar according to hippynn's current progress bar settings.
+
+    for args and kwargs, see tqdm documentation.
+
+    :param iterable:
+    :param args:
+    :param kwargs:
+    :return:
+    """
     if settings.PROGRESS is None:
         return iterable
     else:
@@ -166,8 +176,11 @@ def unsqueeze_multiple(tensor, dims: tuple):
         tensor = tensor.unsqueeze(d)
         dims = tuple(d+1 for d in rest)
     return tensor
+
+
 def np_of_torchdefaultdtype():
     return torch.ones(1, dtype=torch.get_default_dtype()).numpy().dtype
+
 
 def is_equal_state_dict(d1, d2, raise_where=False):
     """

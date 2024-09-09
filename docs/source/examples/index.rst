@@ -3,8 +3,8 @@ Examples
 
 Here are some examples about how to use various features in
 ``hippynn``. Besides the :doc:`/examples/minimal_workflow` example,
-the examples are just snippets. For runnable example scripts, see
-`the examples at the hippynn github repository`_
+the examples are just snippets, rather than full scripts.
+For runnable example scripts, see `the examples at the hippynn github repository`_
 
 .. _`the examples at the hippynn github repository`: https://github.com/lanl/hippynn/tree/development/examples
 
@@ -23,5 +23,5 @@ the examples are just snippets. For runnable example scripts, see
     mliap_unified
     excited_states
     weighted_loss
-
+    lightning
 
