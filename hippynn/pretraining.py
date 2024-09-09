@@ -70,7 +70,7 @@ def hierarchical_energy_initialization(
         if not eo_layer.weight.data.shape[-1] == eovals.shape[-1]:
             raise ValueError("The shape of the computed E0 values does not match the shape expected by the model.")
         
-        eo_layer.weight.data = eovals.reshape(1,-1)
+        eo_layer.weight.data = eovals.reshape(1, -1)
         print("Computed E0 energies:", eovals)
         eo_layer.weight.data = eovals.expand_as(eo_layer.weight.data)
         eo_layer.weight.requires_grad_(trainable_after)

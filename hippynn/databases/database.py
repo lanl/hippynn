@@ -1,6 +1,8 @@
 """
 Base database functionality from dictionary of numpy arrays
 """
+
+from typing import Union
 import warnings
 import numpy as np
 import torch
@@ -20,17 +22,18 @@ class Database:
 
     def __init__(
         self,
-        arr_dict,
-        inputs,
-        targets,
-        seed,
-        test_size=None,
-        valid_size=None,
-        num_workers=0,
-        pin_memory=True,
-        allow_unfound=False,
-        auto_split=False,
-        device=None,
+        arr_dict: dict[str,torch.Tensor],
+        inputs: list[str],
+        targets: list[str],
+        seed: [int,np.random.RandomState,tuple],
+        test_size: Union[float,int]=None,
+        valid_size: Union[float,int]=None,
+        num_workers: int=0,
+        pin_memory: bool=True,
+        allow_unfound:bool =False,
+        auto_split:bool =False,
+        device: torch.device=None,
+        dataloader_kwargs:dict[str,object]=None,
         quiet=False,
     ):
         """
@@ -47,6 +50,9 @@ class Database:
         :param allow_unfound: If true, skip checking if the needed inputs and targets are found.
            This allows setting inputs=None and/or targets=None.
         :param auto_split: If true, look for keys like "split_*" to make initial splits from. See write_npz() method.
+        :param device: if set, move the dataset to this device after splitting.
+        :param dataloader_kwargs: dictionary, passed to pytorch dataloaders in addition to num_workers, pin_memory.
+           Refer to pytorch documentation for details.
         :param quiet: If True, print little or nothing while loading.
         """
 
@@ -122,6 +128,8 @@ class Database:
                 raise ValueError("Device cannot be set in constructor unless automatic split provided.")
             else:
                 self.send_to_device(device)
+
+        self.dataloader_kwargs = dataloader_kwargs.copy() if dataloader_kwargs else {}
 
     def __len__(self):
         return arrdict_len(self.arr_dict)
@@ -425,6 +433,7 @@ class Database:
             shuffle=shuffle,
             pin_memory=self.pin_memory,
             num_workers=self.num_workers,
+            **self.dataloader_kwargs,
         )
 
         return generator
@@ -514,7 +523,7 @@ class Database:
 
         return write_h5_function(self, split=split, file=h5path, species_key=species_key, overwrite=overwrite)
 
-    def write_npz(self, file: str, record_split_masks: bool = True, overwrite: bool = False, split_prefix=None, return_only=False):
+    def write_npz(self, file: str, record_split_masks: bool = True, compressed:bool =True, overwrite: bool = False, split_prefix=None, return_only=False):
         """
         :param file: str, Path, or file object compatible with np.save
         :param record_split_masks: 
@@ -561,7 +570,10 @@ class Database:
             if file.exists() and not overwrite:
                 raise FileExistsError(f"File exists: {file}")
 
-        np.savez_compressed(file, **arr_dict)
+        if compressed:
+            np.savez_compressed(file, **arr_dict)
+        else:
+            np.savez(file, **arr_dict)
 
         return arr_dict
 
