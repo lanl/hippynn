@@ -78,6 +78,7 @@
   <h1>Source code for hippynn.molecular_dynamics.md</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">singledispatchmethod</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
@@ -86,7 +87,6 @@
 <span class="kn">from</span> <span class="nn">..tools</span> <span class="kn">import</span> <span class="n">progress_bar</span>
 <span class="kn">from</span> <span class="nn">..graphs</span> <span class="kn">import</span> <span class="n">Predictor</span>
 <span class="kn">from</span> <span class="nn">..layers.pairs.periodic</span> <span class="kn">import</span> <span class="n">wrap_systems_torch</span>
-
 
 <div class="viewcode-block" id="Variable">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.Variable">[docs]</a>
@@ -434,11 +434,12 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;velocity&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">dt</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">],</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">wrap_systems_torch</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">],</span> <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;cell&quot;</span><span class="p">],</span> <span class="n">cutoff</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># cutoff only used for discarded outputs; can be set arbitrarily</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">pass</span></div>
-
+        <span class="k">if</span> <span class="s2">&quot;cell&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">],</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">wrap_systems_torch</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">],</span> <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;cell&quot;</span><span class="p">],</span> <span class="n">cutoff</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># cutoff only impacts unused outputs; can be set arbitrarily</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;unwrapped_position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;unwrapped_position&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;velocity&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">dt</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;unwrapped_position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="LangevinDynamics.post_step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.LangevinDynamics.post_step">[docs]</a>
@@ -543,6 +544,7 @@
                     <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot; Entries in the &#39;model_input_map&#39; should have the form &#39;hipnn-db_name: variable-data-key&#39; where &#39;hipnn-db_name&#39;&quot;</span>
                     <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot; refers to the db_name of an input for the hippynn Predictor model,&quot;</span>
                     <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot; and &#39;variable-data-key&#39; corresponds to a key in the &#39;data&#39; dictionary of one of the Variables.&quot;</span>
+                    <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot; Currently assigned db_names are: </span><span class="si">{</span><span class="n">variable_data_db_names</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
 
