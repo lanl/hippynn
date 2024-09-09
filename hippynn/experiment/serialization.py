@@ -140,7 +140,7 @@ def load_checkpoint(
 
     :param structure_fname: name of the structure file
     :param state_fname: name of the state file
-    :param restart_db: restore database or not, defaults to True
+    :param restart_db: restore database or not, defaults to False
     :param map_location: device mapping argument for ``torch.load``, defaults to None
     :param model_device: automatically handle device mapping. Defaults to None, defaults to None
     :return: experiment structure

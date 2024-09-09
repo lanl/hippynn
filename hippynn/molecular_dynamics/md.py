@@ -1,5 +1,6 @@
 from __future__ import annotations
 from functools import singledispatchmethod
+from copy import copy
 
 import numpy as np
 import torch
@@ -8,7 +9,6 @@ import ase
 from ..tools import progress_bar
 from ..graphs import Predictor
 from ..layers.pairs.periodic import wrap_systems_torch
-
 
 class Variable:
     """
@@ -307,11 +307,12 @@ class LangevinDynamics(VariableUpdater):
 
         self.variable.data["position"] = self.variable.data["position"] + self.variable.data["velocity"] * dt
 
-        try:
-            _, self.variable.data["position"], *_ = wrap_systems_torch(coords=self.variable.data["position"], cell=self.variable.data["cell"], cutoff=0) # cutoff only used for discarded outputs; can be set arbitrarily
-        except KeyError:
-            pass
-
+        if "cell" in self.variable.data.keys():
+            _, self.variable.data["position"], *_ = wrap_systems_torch(coords=self.variable.data["position"], cell=self.variable.data["cell"], cutoff=0) # cutoff only impacts unused outputs; can be set arbitrarily
+            try:
+                self.variable.data["unwrapped_position"] = self.variable.data["unwrapped_position"] + self.variable.data["velocity"] * dt
+            except KeyError:
+                self.variable.data["unwrapped_position"] = copy(self.variable.data["position"])
     def post_step(self, dt, model_outputs):
         """Updates to variables performed during each step of MD simulation after HIPNN model evaluation
 
@@ -406,6 +407,7 @@ class MolecularDynamics:
                     + f" Entries in the 'model_input_map' should have the form 'hipnn-db_name: variable-data-key' where 'hipnn-db_name'"
                     + f" refers to the db_name of an input for the hippynn Predictor model,"
                     + f" and 'variable-data-key' corresponds to a key in the 'data' dictionary of one of the Variables."
+                    + f" Currently assigned db_names are: {variable_data_db_names}."
                 )
         self._model = model
 
