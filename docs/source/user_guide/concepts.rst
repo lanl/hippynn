@@ -45,8 +45,9 @@ Graphs
 
 A :class:`~hippynn.graphs.GraphModule` is a 'compiled' set of nodes; a ``torch.nn.Module`` that executes the graph.
 
-GraphModules are used in a number of places within hippynn.
-
+GraphModules are used in a number of places within hippynn,
+such as the model, the loss, the evaluator, the predictor, the ASE interface,
+and the LAMMPS interface objects all use GraphModules.
 
 Experiment
 ^^^^^^^^^^

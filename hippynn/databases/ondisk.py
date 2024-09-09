@@ -14,7 +14,7 @@ from .restarter import Restartable
 
 class DirectoryDatabase(Database, Restartable):
     """
-    Database stored as NPY files in a diectory.
+    Database stored as NPY files in a directory.
 
     :param directory: directory path where the files are stored
     :param name: prefix for the arrays.

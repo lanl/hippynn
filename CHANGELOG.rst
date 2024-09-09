@@ -3,23 +3,47 @@
 Breaking changes:
 -----------------
 
+- set_e0_values has been renamed hierarchical_energy_initialization. The old name is
+  still provided but deprecated, and will be removed.
+
 New Features:
 -------------
 
-- Added a new custom cuda kernel implementation using triton. These are highly performant and now the default implementation.
-- Exporting a database to NPZ or H5 format after preprocessing is now just a function call away.
-- SNAPjson format can now support an optional number of comment lines.
-- Added Batch optimizer features in order to optimize geometries in parallel on the GPU. Algorithms include FIRE and BFGS.
+- Added a new custom cuda kernel implementation using triton.
+  These are highly performant and now the default implementation.
+- Exporting any database to NPZ or H5 format after preprocessing can be done with a method call.
+- Database states can be cached to disk to simplify the restarting of training.
+- Added batch geometry optimizer features in order to optimize geometries
+  in parallel on the GPU. Algorithms include FIRE, Newton-Raphson, and BFGS.
+- Added experiment pytorch lightning trainer to provide for simple parallelized training.
+- Added a molecular dynamics engine which includes the ability to batch over systems.
+- Added examples pertaining to coarse graining.
+- Added pair finders based on scipy KDTree for training to large systems.
+- Added tool to drastically simplify creating ensemble models. The ensemblized graphs
+  are compatible with molecular dynamics codes such ASE and LAMMPS.
+- Added the ability to weight different systems/atoms/bonds in a loss function.
+
 
 Improvements:
 -------------
 
 - Eliminated dependency on pyanitools for loading ANI-style H5 datasets.
+- SNAPjson format can now support an optional number of comment lines.
+- Added unit conversion options to the LAMMPS interface.
+- Improved performance of bond order regression.
+- It is now possible to limit the memory usage of the MLIAP interface in LAMMPS
+  using a library setting.
+- Provide tunable regularization of HIP-NN-TS with an epsilon parameter, and
+  set the default to use a better value for epsilon.
+
 
 Bug Fixes:
 ----------
 
 - Fixed bug where custom kernels were not launching properly on non-default GPUs
+- Fixed error when LAMMPS interface is in kokkos mode and the kokkos device was set to CPU.
+- MLIAPInterface objects
+- Fixed bug with RDF computer automatic initialization.
 
 0.0.3
 =======

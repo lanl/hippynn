@@ -10,6 +10,7 @@ from ..tools import progress_bar
 from ..graphs import Predictor
 from ..layers.pairs.periodic import wrap_systems_torch
 
+
 class Variable:
     """
     Tracks the state of a quantity (eg. position, cell, species,

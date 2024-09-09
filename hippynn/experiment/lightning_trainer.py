@@ -31,6 +31,9 @@ from . import serialization
 
 
 class HippynnLightningModule(pl.LightningModule):
+    """
+    A pytorch lightning module for running a hippynn experiment.
+    """
     def __init__(
         self,
         model: GraphModule,
@@ -84,6 +87,15 @@ class HippynnLightningModule(pl.LightningModule):
 
     @classmethod
     def from_experiment_setup(cls, training_modules: TrainingModules, database: Database, setup_params: SetupParams, **kwargs):
+        """
+        Create a lightning module using the same arguments as for :func:`hippynn.experiment.setup_and_train`.
+
+        :param training_modules:
+        :param database:
+        :param setup_params:
+        :param kwargs:
+        :return:
+        """
         training_modules, controller, metric_tracker = setup_training(training_modules, setup_params)
         return cls.from_train_setup(training_modules, database, controller, metric_tracker, **kwargs)
 
@@ -98,6 +110,19 @@ class HippynnLightningModule(pl.LightningModule):
         batch_callbacks=None,
         **kwargs,
     ):
+        """
+        Create a lightning module from the same arguments as for :func:`hippynn.experiment.train_model`.
+
+        :param training_modules:
+        :param database:
+        :param controller:
+        :param metric_tracker:
+        :param callbacks:
+        :param batch_callbacks:
+        :param kwargs:
+        :return:
+        """
+
 
         model, loss, evaluator = training_modules
 
@@ -131,6 +156,11 @@ class HippynnLightningModule(pl.LightningModule):
         return trainer, HippynnDataModule(database, controller.batch_size)
 
     def on_save_checkpoint(self, checkpoint) -> None:
+        """
+
+        :param checkpoint:
+        :return:
+        """
 
         # Note to future developers:
         # trainer.log_dir property needs to be called on all ranks! This is weird but important;
@@ -163,6 +193,16 @@ class HippynnLightningModule(pl.LightningModule):
 
     @classmethod
     def load_from_checkpoint(cls, checkpoint_path, map_location=None, structure_file=None, hparams_file=None, strict=True, **kwargs):
+        """
+
+        :param checkpoint_path:
+        :param map_location:
+        :param structure_file:
+        :param hparams_file:
+        :param strict:
+        :param kwargs:
+        :return:
+        """
 
         if structure_file is None:
             # Assume checkpoint_path is like <model_name>/version_<n>/checkpoints/<something>.chkpt
@@ -178,11 +218,20 @@ class HippynnLightningModule(pl.LightningModule):
         )
 
     def on_load_checkpoint(self, checkpoint) -> None:
+        """
+
+        :param checkpoint:
+        :return:
+        """
         cstate = checkpoint.pop("controller_state")
         self.controller.load_state_dict(cstate)
         return
 
     def configure_optimizers(self):
+        """
+
+        :return:
+        """
 
         scheduler_list = []
         for s in self.scheduler_list:
@@ -201,14 +250,24 @@ class HippynnLightningModule(pl.LightningModule):
         return optimizer_list, scheduler_list
 
     def on_train_epoch_start(self):
+        """
+
+        :return:
+        """
         for optimizer in self.optimizer_list:
             print_lr(optimizer, print_=self.print)
         self.print("Batch size:", self.trainer.train_dataloader.batch_size)
 
     def training_step(self, batch, batch_idx):
+        """
+
+        :param batch:
+        :param batch_idx:
+        :return:
+        """
 
         batch_inputs = batch[: self.n_inputs]
-        batch_targets = batch[-self.n_targets :]
+        batch_targets = batch[-self.n_targets:]
 
         batch_model_outputs = self.model(*batch_inputs)
         batch_train_loss = self.loss(*batch_model_outputs, *batch_targets)[0]
@@ -232,9 +291,21 @@ class HippynnLightningModule(pl.LightningModule):
         return batch_predictions
 
     def validation_step(self, batch, batch_idx):
+        """
+
+        :param batch:
+        :param batch_idx:
+        :return:
+        """
         return self._eval_step(batch, batch_idx)
 
     def test_step(self, batch, batch_idx):
+        """
+
+        :param batch:
+        :param batch_idx:
+        :return:
+        """
         return self._eval_step(batch, batch_idx)
 
     def _eval_epoch_end(self, prefix):
@@ -259,10 +330,18 @@ class HippynnLightningModule(pl.LightningModule):
         return
 
     def on_validation_epoch_end(self):
+        """
+
+        :return:
+        """
         self._eval_epoch_end(prefix="valid_")
         return
 
     def on_test_epoch_end(self):
+        """
+
+        :return:
+        """
         self._eval_epoch_end(prefix="test_")
         return
 
@@ -326,10 +405,18 @@ class HippynnLightningModule(pl.LightningModule):
         return
 
     def on_validation_end(self):
+        """
+
+        :return:
+        """
         self._eval_end(prefix="valid_")
         return
 
     def on_test_end(self):
+        """
+
+        :return:
+        """
         self._eval_end(prefix="test_", when="test")
         return
 
@@ -360,10 +447,22 @@ class HippynnDataModule(pl.LightningDataModule):
         self.batch_size = batch_size
 
     def train_dataloader(self):
+        """
+
+        :return:
+        """
         return self.database.make_generator("train", "train", self.batch_size)
 
     def val_dataloader(self):
+        """
+
+        :return:
+        """
         return self.database.make_generator("valid", "eval", self.batch_size)
 
     def test_dataloader(self):
+        """
+
+        :return:
+        """
         return self.database.make_generator("test", "eval", self.batch_size)
