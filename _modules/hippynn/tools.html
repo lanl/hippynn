@@ -89,24 +89,24 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">settings</span>
 
 
-<div class="viewcode-block" id="teed_file_output">
-<a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.teed_file_output">[docs]</a>
-<span class="k">class</span> <span class="nc">teed_file_output</span><span class="p">:</span>
-<div class="viewcode-block" id="teed_file_output.__init__">
-<a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.teed_file_output.__init__">[docs]</a>
+<div class="viewcode-block" id="TeedFileOutput">
+<a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.TeedFileOutput">[docs]</a>
+<span class="k">class</span> <span class="nc">TeedFileOutput</span><span class="p">:</span>
+<div class="viewcode-block" id="TeedFileOutput.__init__">
+<a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.TeedFileOutput.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">streams</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">streams</span> <span class="o">=</span> <span class="n">streams</span></div>
 
 
-<div class="viewcode-block" id="teed_file_output.write">
-<a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.teed_file_output.write">[docs]</a>
+<div class="viewcode-block" id="TeedFileOutput.write">
+<a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.TeedFileOutput.write">[docs]</a>
     <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">stream</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">streams</span><span class="p">:</span>
             <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="teed_file_output.flush">
-<a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.teed_file_output.flush">[docs]</a>
+<div class="viewcode-block" id="TeedFileOutput.flush">
+<a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.TeedFileOutput.flush">[docs]</a>
     <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">stream</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">streams</span><span class="p">:</span>
             <span class="n">stream</span><span class="o">.</span><span class="n">flush</span><span class="p">(</span><span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -134,8 +134,8 @@
         <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">close_on_exit</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">teed_stderr</span> <span class="o">=</span> <span class="n">teed_file_output</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-    <span class="n">teed_stdout</span> <span class="o">=</span> <span class="n">teed_file_output</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+    <span class="n">teed_stderr</span> <span class="o">=</span> <span class="n">TeedFileOutput</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="n">teed_stdout</span> <span class="o">=</span> <span class="n">TeedFileOutput</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">redirect_stderr</span><span class="p">(</span><span class="n">teed_stderr</span><span class="p">):</span>
         <span class="k">with</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">redirect_stdout</span><span class="p">(</span><span class="n">teed_stdout</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
@@ -200,6 +200,16 @@
 <div class="viewcode-block" id="progress_bar">
 <a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.progress_bar">[docs]</a>
 <span class="k">def</span> <span class="nf">progress_bar</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wrap an iterable in a progress bar according to hippynn&#39;s current progress bar settings.</span>
+
+<span class="sd">    for args and kwargs, see tqdm documentation.</span>
+
+<span class="sd">    :param iterable:</span>
+<span class="sd">    :param args:</span>
+<span class="sd">    :param kwargs:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PROGRESS</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">iterable</span>
     <span class="k">else</span><span class="p">:</span>
@@ -286,10 +296,13 @@
         <span class="n">dims</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="o">+</span><span class="mi">1</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">rest</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">tensor</span></div>
 
+
+
 <div class="viewcode-block" id="np_of_torchdefaultdtype">
 <a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.tools.np_of_torchdefaultdtype">[docs]</a>
 <span class="k">def</span> <span class="nf">np_of_torchdefaultdtype</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">())</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">dtype</span></div>
+
 
 
 <div class="viewcode-block" id="is_equal_state_dict">

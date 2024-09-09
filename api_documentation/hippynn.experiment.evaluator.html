@@ -55,12 +55,15 @@
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.html">hippynn.custom_kernels package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.html">hippynn.databases package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="hippynn.experiment.html">hippynn.experiment package</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.SetupParams"><code class="docutils literal notranslate"><span class="pre">SetupParams</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.assemble_for_training"><code class="docutils literal notranslate"><span class="pre">assemble_for_training()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.setup_and_train"><code class="docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.setup_training"><code class="docutils literal notranslate"><span class="pre">setup_training()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.test_model"><code class="docutils literal notranslate"><span class="pre">test_model()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.train_model"><code class="docutils literal notranslate"><span class="pre">train_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.test_model"><code class="docutils literal notranslate"><span class="pre">test_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.SetupParams"><code class="docutils literal notranslate"><span class="pre">SetupParams</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.load_checkpoint"><code class="docutils literal notranslate"><span class="pre">load_checkpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.load_checkpoint_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.experiment.html#hippynn.experiment.load_model_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_model_from_cwd()</span></code></a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="hippynn.experiment.html#submodules">Submodules</a><ul class="current">
 <li class="toctree-l5"><a class="reference internal" href="hippynn.experiment.assembly.html">hippynn.experiment.assembly module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.experiment.controllers.html">hippynn.experiment.controllers module</a></li>
@@ -68,8 +71,8 @@
 <li class="toctree-l5 current"><a class="current reference internal" href="#">hippynn.experiment.evaluator module</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.experiment.evaluator.Evaluator"><code class="docutils literal notranslate"><span class="pre">Evaluator</span></code></a><ul>
 <li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.evaluator.Evaluator.__init__"><code class="docutils literal notranslate"><span class="pre">Evaluator.__init__()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.evaluator.Evaluator.evaluate"><code class="docutils literal notranslate"><span class="pre">Evaluator.evaluate()</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.evaluator.Evaluator.var_list"><code class="docutils literal notranslate"><span class="pre">Evaluator.var_list</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.experiment.evaluator.Evaluator.evaluate"><code class="docutils literal notranslate"><span class="pre">Evaluator.evaluate()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -151,6 +154,11 @@
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="hippynn.experiment.evaluator.Evaluator.var_list">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">var_list</span></span><a class="headerlink" href="#hippynn.experiment.evaluator.Evaluator.var_list" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.experiment.evaluator.Evaluator.evaluate">
 <span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">when</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/evaluator.html#Evaluator.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.evaluator.Evaluator.evaluate" title="Link to this definition"></a></dt>
@@ -164,11 +172,6 @@ for the GPU.
 :param when: int (epoch #) or str describing when the evaluation is performed
 :return: loss_dict – dictionary mapping loss names to loss values for this generator</p>
 </dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="hippynn.experiment.evaluator.Evaluator.var_list">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">var_list</span></span><a class="headerlink" href="#hippynn.experiment.evaluator.Evaluator.var_list" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 

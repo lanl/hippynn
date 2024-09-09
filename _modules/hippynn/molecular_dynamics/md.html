@@ -88,8 +88,9 @@
 <span class="kn">from</span> <span class="nn">..graphs</span> <span class="kn">import</span> <span class="n">Predictor</span>
 <span class="kn">from</span> <span class="nn">..layers.pairs.periodic</span> <span class="kn">import</span> <span class="n">wrap_systems_torch</span>
 
+
 <div class="viewcode-block" id="Variable">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.Variable">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.Variable">[docs]</a>
 <span class="k">class</span> <span class="nc">Variable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Tracks the state of a quantity (eg. position, cell, species,</span>
@@ -99,7 +100,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Variable.__init__">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.Variable.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.Variable.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -207,7 +208,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Variable.to">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.Variable.to">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.Variable.to">[docs]</a>
     <span class="nd">@singledispatchmethod</span>
     <span class="k">def</span> <span class="nf">to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Argument must be of type torch.device or torch.dtype, but provided argument is of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
@@ -224,7 +225,7 @@
 
 
 <div class="viewcode-block" id="VariableUpdater">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.VariableUpdater">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.VariableUpdater">[docs]</a>
 <span class="k">class</span> <span class="nc">VariableUpdater</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parent class for algorithms that make updates to the data of a Variable during each step of an MD simulation.</span>
@@ -237,7 +238,7 @@
     <span class="n">required_variable_data</span> <span class="o">=</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="VariableUpdater.__init__">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.VariableUpdater.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.VariableUpdater.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
@@ -256,7 +257,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_variable</span> <span class="o">=</span> <span class="n">variable</span>
 
 <div class="viewcode-block" id="VariableUpdater.pre_step">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.VariableUpdater.pre_step">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.VariableUpdater.pre_step">[docs]</a>
     <span class="k">def</span> <span class="nf">pre_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates to variables performed during each step of MD simulation before HIPNN model evaluation</span>
 
@@ -267,7 +268,7 @@
 
 
 <div class="viewcode-block" id="VariableUpdater.post_step">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.VariableUpdater.post_step">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.VariableUpdater.post_step">[docs]</a>
     <span class="k">def</span> <span class="nf">post_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">model_outputs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates to variables performed during each step of MD simulation after HIPNN model evaluation</span>
 
@@ -282,27 +283,27 @@
 
 
 <div class="viewcode-block" id="NullUpdater">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.NullUpdater">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.NullUpdater">[docs]</a>
 <span class="k">class</span> <span class="nc">NullUpdater</span><span class="p">(</span><span class="n">VariableUpdater</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Makes no change to the variable data at each step of MD.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="NullUpdater.pre_step">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.NullUpdater.pre_step">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.NullUpdater.pre_step">[docs]</a>
     <span class="k">def</span> <span class="nf">pre_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="NullUpdater.post_step">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.NullUpdater.post_step">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.NullUpdater.post_step">[docs]</a>
     <span class="k">def</span> <span class="nf">post_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">model_outputs</span><span class="p">):</span>
         <span class="k">pass</span></div>
 </div>
 
 
 <div class="viewcode-block" id="VelocityVerlet">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.VelocityVerlet">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.VelocityVerlet">[docs]</a>
 <span class="k">class</span> <span class="nc">VelocityVerlet</span><span class="p">(</span><span class="n">VariableUpdater</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements the Velocity Verlet algorithm</span>
@@ -311,7 +312,7 @@
     <span class="n">required_variable_data</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">,</span> <span class="s2">&quot;velocity&quot;</span><span class="p">,</span> <span class="s2">&quot;acceleration&quot;</span><span class="p">,</span> <span class="s2">&quot;mass&quot;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="VelocityVerlet.__init__">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.VelocityVerlet.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.VelocityVerlet.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">force_db_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -336,7 +337,7 @@
 
 
 <div class="viewcode-block" id="VelocityVerlet.pre_step">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.VelocityVerlet.pre_step">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.VelocityVerlet.pre_step">[docs]</a>
     <span class="k">def</span> <span class="nf">pre_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates to variables performed during each step of MD simulation before HIPNN model evaluation</span>
 
@@ -352,7 +353,7 @@
 
 
 <div class="viewcode-block" id="VelocityVerlet.post_step">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.VelocityVerlet.post_step">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.VelocityVerlet.post_step">[docs]</a>
     <span class="k">def</span> <span class="nf">post_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">model_outputs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates to variables performed during each step of MD simulation after HIPNN model evaluation</span>
 
@@ -374,7 +375,7 @@
 
 
 <div class="viewcode-block" id="LangevinDynamics">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.LangevinDynamics">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.LangevinDynamics">[docs]</a>
 <span class="k">class</span> <span class="nc">LangevinDynamics</span><span class="p">(</span><span class="n">VariableUpdater</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements the Langevin algorithm</span>
@@ -383,7 +384,7 @@
     <span class="n">required_variable_data</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">,</span> <span class="s2">&quot;velocity&quot;</span><span class="p">,</span> <span class="s2">&quot;mass&quot;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="LangevinDynamics.__init__">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.LangevinDynamics.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.LangevinDynamics.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">force_db_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -424,7 +425,7 @@
 
 
 <div class="viewcode-block" id="LangevinDynamics.pre_step">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.LangevinDynamics.pre_step">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.LangevinDynamics.pre_step">[docs]</a>
     <span class="k">def</span> <span class="nf">pre_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates to variables performed during each step of MD simulation before HIPNN model evaluation</span>
 
@@ -442,7 +443,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;unwrapped_position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="LangevinDynamics.post_step">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.LangevinDynamics.post_step">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.LangevinDynamics.post_step">[docs]</a>
     <span class="k">def</span> <span class="nf">post_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">model_outputs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates to variables performed during each step of MD simulation after HIPNN model evaluation</span>
 
@@ -471,14 +472,14 @@
 
 
 <div class="viewcode-block" id="MolecularDynamics">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.MolecularDynamics">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.MolecularDynamics">[docs]</a>
 <span class="k">class</span> <span class="nc">MolecularDynamics</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Driver for MD run</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="MolecularDynamics.__init__">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.MolecularDynamics.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.MolecularDynamics.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">variables</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Variable</span><span class="p">],</span>
@@ -577,7 +578,7 @@
             <span class="n">variable</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MolecularDynamics.to">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.MolecularDynamics.to">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.MolecularDynamics.to">[docs]</a>
     <span class="nd">@singledispatchmethod</span>
     <span class="k">def</span> <span class="nf">to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Argument must be of type torch.device or torch.dtype, but provided argument is of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
@@ -626,7 +627,7 @@
         
 
 <div class="viewcode-block" id="MolecularDynamics.run">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.MolecularDynamics.run">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.MolecularDynamics.run">[docs]</a>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">record_every</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run `n_steps` of MD algorithm.</span>
 
@@ -646,14 +647,14 @@
 
 
 <div class="viewcode-block" id="MolecularDynamics.get_data">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.MolecularDynamics.get_data">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.MolecularDynamics.get_data">[docs]</a>
     <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a dictionary of the recorded data&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span></div>
 
 
 <div class="viewcode-block" id="MolecularDynamics.reset_data">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.md.MolecularDynamics.reset_data">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.MolecularDynamics.reset_data">[docs]</a>
     <span class="k">def</span> <span class="nf">reset_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear all recorded data&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span></div>

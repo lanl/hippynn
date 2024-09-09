@@ -1,7 +1,6 @@
 Controller
 ==========
 
-
 How to define a controller for more customized control of the training process.
 We assume that there is a set of ``training_modules`` assembled and a ``database`` object has been constructed.
 

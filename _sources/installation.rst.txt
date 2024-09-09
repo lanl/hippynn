@@ -2,7 +2,6 @@ Installation
 ============
 
 
-
 Requirements
 ^^^^^^^^^^^^
 
@@ -43,6 +42,8 @@ Interfacing codes:
 .. _LAMMPS: https://www.lammps.org/
 .. _PYSEQM: https://github.com/lanl/PYSEQM
 .. _pytorch-lightning: https://github.com/Lightning-AI/pytorch-lightning
+.. _hippynn: https://github.com/lanl/hippynn/
+
 
 Installation Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -67,7 +68,6 @@ Clone the hippynn_ repository and navigate into it, e.g.::
     $ git clone https://github.com/lanl/hippynn.git
     $ cd hippynn
 
-.. _hippynn: https://github.com/lanl/hippynn/
 
 
 Dependencies using conda

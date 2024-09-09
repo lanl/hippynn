@@ -93,6 +93,7 @@
 
 <span class="n">_AUTO_SPLIT_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;split_mask_&quot;</span>
 
+
 <div class="viewcode-block" id="Database">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database">[docs]</a>
 <span class="k">class</span> <span class="nc">Database</span><span class="p">:</span>
@@ -104,18 +105,18 @@
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">arr_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
+        <span class="n">arr_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
         <span class="n">inputs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">seed</span><span class="p">:</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">,</span><span class="nb">tuple</span><span class="p">],</span>
-        <span class="n">test_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">valid_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">pin_memory</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">allow_unfound</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">auto_split</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dataloader_kwargs</span><span class="p">:</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="nb">object</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">],</span>
+        <span class="n">test_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">valid_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">pin_memory</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">allow_unfound</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">auto_split</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dataloader_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -138,7 +139,7 @@
 <span class="sd">        :param quiet: If True, print little or nothing while loading.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Restartable Children of this class should change this after super().__init__ .</span>
+        <span class="c1"># Restartable Children of this class should change this after calling super().__init__() .</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">restarter</span> <span class="o">=</span> <span class="n">NoRestart</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span>
@@ -157,10 +158,11 @@
             <span class="n">_var_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_list</span>
         <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Database inputs and/or targets not specified. &quot;</span>
-                      <span class="s2">&quot;The database will not be checked against and model inputs and targets (db_info).&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;Database inputs and/or targets not specified. &quot;</span>
+                    <span class="s2">&quot;The database will not be checked against and model inputs and targets (db_info).&quot;</span>
+                <span class="p">)</span>
             <span class="n">_var_list</span> <span class="o">=</span> <span class="p">[]</span>
-
 
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_var_list</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">arr_dict</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;indices&quot;</span><span class="p">,</span> <span class="s2">&quot;split_indices&quot;</span><span class="p">):</span>
@@ -195,13 +197,15 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_split</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">test_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">valid_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Auto split was set but test and valid size was also set.&quot;</span>
-                              <span class="sa">f</span><span class="s2">&quot; Ignoring supplied test and validation sizes (</span><span class="si">{</span><span class="n">test_size</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">valid_size</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Auto split was set but test and valid size was also set.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; Ignoring supplied test and validation sizes (</span><span class="si">{</span><span class="n">test_size</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">valid_size</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">make_automatic_splits</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">test_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">valid_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">test_size</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">valid_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Both test and valid size must be set for auto-splitting based on fractions&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Both test_size and valid_size must be set for splitting when creating a database.&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">make_trainvalidtest_split</span><span class="p">(</span><span class="n">test_size</span><span class="o">=</span><span class="n">test_size</span><span class="p">,</span> <span class="n">valid_size</span><span class="o">=</span><span class="n">valid_size</span><span class="p">)</span>
 
@@ -227,10 +231,15 @@
 
 <div class="viewcode-block" id="Database.send_to_device">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.send_to_device">[docs]</a>
-    <span class="k">def</span> <span class="nf">send_to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">send_to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Move the database to an accelerator device if possible.</span>
 <span class="sd">        In some circumstances this can accelerate training.</span>
+
+<span class="sd">        .. Note::</span>
+<span class="sd">           If the database is moved to a GPU,</span>
+<span class="sd">           pin_memory will be set to False</span>
+<span class="sd">           and num_workers will be set to 0.</span>
 
 <span class="sd">        :param device: device to move to, if None, try to auto-detect.</span>
 <span class="sd">        :return:</span>
@@ -251,15 +260,17 @@
 
         <span class="k">for</span> <span class="n">split</span><span class="p">,</span> <span class="n">arrdict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">arrdict</span><span class="p">:</span>
-                <span class="n">arrdict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">arrdict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span></div>
+                <span class="n">arrdict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">arrdict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">return</span></div>
 
 
 <div class="viewcode-block" id="Database.make_random_split">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_random_split">[docs]</a>
-    <span class="k">def</span> <span class="nf">make_random_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">split_size</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">make_random_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">split_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make a random split using self.random_state to select items.</span>
 
-<span class="sd">        :param evaluation_mode: String naming the split, can be anything, but &#39;train&#39;, &#39;valid&#39;, and &#39;test&#39; are special.s</span>
+<span class="sd">        :param split_name: String naming the split, can be anything, but &#39;train&#39;, &#39;valid&#39;, and &#39;test&#39; are special.</span>
 <span class="sd">        :param split_size: int (number of items) or float&lt;1, fraction of samples.</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -273,12 +284,28 @@
 
         <span class="n">split_indices</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_explicit_split</span><span class="p">(</span><span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">split_indices</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_explicit_split</span><span class="p">(</span><span class="n">split_name</span><span class="p">,</span> <span class="n">split_indices</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Database.make_trainvalidtest_split">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_trainvalidtest_split">[docs]</a>
-    <span class="k">def</span> <span class="nf">make_trainvalidtest_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">,</span> <span class="n">valid_size</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">make_trainvalidtest_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">valid_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make a split for train, valid, and test out of any remaining unsplit entries in the database.</span>
+<span class="sd">        The size is specified in terms of test and valid splits; the train split will be the remainder.</span>
+
+<span class="sd">        If you wish to specify precise rows for each split, see `make_explict_split`</span>
+<span class="sd">        or `make_explicit_split_bool`.</span>
+
+<span class="sd">        This function takes keyword-arguments only in order to prevent confusion over which</span>
+<span class="sd">        size is which.</span>
+
+<span class="sd">        The types of both test_size and valid_size parameters must match.</span>
+
+<span class="sd">        :param test_size: int (count) or float (fraction) of data to assign to test split</span>
+<span class="sd">        :param valid_size: int (count) or float (fraction) of data to assign to valid split</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitting_completed</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Database already split!&quot;</span><span class="p">)</span>
 
@@ -287,22 +314,21 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If train or valid size is set as a fraction, then set test_size as a fraction&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">valid_size</span> <span class="o">+</span> <span class="n">test_size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Test fraction (</span><span class="si">{</span><span class="n">test_size</span><span class="si">}</span><span class="s2">) plus valid fraction &quot;</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">valid_size</span><span class="si">}</span><span class="s2">) are greater than 1!&quot;</span>
-                    <span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test fraction (</span><span class="si">{</span><span class="n">test_size</span><span class="si">}</span><span class="s2">) plus valid fraction &quot;</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">valid_size</span><span class="si">}</span><span class="s2">) are greater than 1!&quot;</span><span class="p">)</span>
                 <span class="n">valid_size</span> <span class="o">/=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">test_size</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">make_random_split</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">test_size</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">make_random_split</span><span class="p">(</span><span class="s2">&quot;valid&quot;</span><span class="p">,</span> <span class="n">valid_size</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">split_the_rest</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">split_the_rest</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
+        <span class="k">return</span></div>
 
 
 <div class="viewcode-block" id="Database.make_explicit_split">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_explicit_split">[docs]</a>
-    <span class="k">def</span> <span class="nf">make_explicit_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">split_indices</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">make_explicit_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">split_indices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">        :param evaluation_mode: name for split, typically &#39;train&#39;, &#39;valid&#39;, &#39;test&#39;</span>
+<span class="sd">        :param split_name: name for split, typically &#39;train&#39;, &#39;valid&#39;, &#39;test&#39;</span>
 <span class="sd">        :param split_indices: the indices of the items for the split</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -321,18 +347,18 @@
         <span class="n">where_complement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">complement_mask</span><span class="p">)</span>
 
         <span class="c1"># Split off data, and keep the rest.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">evaluation_mode</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">where_index</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">}</span>
-        <span class="k">if</span> <span class="s2">&quot;split_indices&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">evaluation_mode</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">split_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">where_index</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">}</span>
+        <span class="k">if</span> <span class="s2">&quot;split_indices&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">split_name</span><span class="p">]:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Adding split indices for split: </span><span class="si">{</span><span class="n">evaluation_mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">evaluation_mode</span><span class="p">][</span><span class="s2">&quot;split_indices&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">split_indices</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Adding split indices for split: </span><span class="si">{</span><span class="n">split_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">split_name</span><span class="p">][</span><span class="s2">&quot;split_indices&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">split_indices</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">where_complement</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Arrays for split: </span><span class="si">{</span><span class="n">evaluation_mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">prettyprint_arrays</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">evaluation_mode</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Arrays for split: </span><span class="si">{</span><span class="n">split_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">prettyprint_arrays</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">split_name</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">arrdict_len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span>
@@ -343,28 +369,31 @@
 
 <div class="viewcode-block" id="Database.make_explicit_split_bool">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_explicit_split_bool">[docs]</a>
-    <span class="k">def</span> <span class="nf">make_explicit_split_bool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">split_mask</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">make_explicit_split_bool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                 <span class="n">split_mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">        :param evaluation_mode: name for split, typically &#39;train&#39;, &#39;valid&#39;, &#39;test&#39;</span>
+<span class="sd">        :param split_name: name for split, typically &#39;train&#39;, &#39;valid&#39;, &#39;test&#39;</span>
 <span class="sd">        :param split_mask: a boolean array for where to split</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">split_mask</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">):</span>
+            <span class="n">split_mask</span> <span class="o">=</span> <span class="n">split_mask</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">split_mask</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">split_mask</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mask function contains invalid values. Values found: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">split_mask</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">split_mask</span> <span class="o">=</span> <span class="n">split_mask</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
 
-        <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">][</span><span class="n">split_mask</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">make_explicit_split</span><span class="p">(</span><span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">][</span><span class="n">split_mask</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_explicit_split</span><span class="p">(</span><span class="n">split_name</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
         <span class="k">return</span></div>
 
 
 <div class="viewcode-block" id="Database.split_the_rest">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.split_the_rest">[docs]</a>
-    <span class="k">def</span> <span class="nf">split_the_rest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">make_explicit_split</span><span class="p">(</span><span class="n">evaluation_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">split_the_rest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_explicit_split</span><span class="p">(</span><span class="n">split_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">splitting_completed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span></div>
 
@@ -399,9 +428,9 @@
             <span class="k">for</span> <span class="n">sprime</span><span class="p">,</span> <span class="n">split</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 
                 <span class="k">if</span> <span class="n">sprime</span> <span class="o">==</span> <span class="n">s</span><span class="p">:</span>
-                    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
+                    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
+                    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">write_tensor</span><span class="p">:</span>
                     <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
@@ -442,7 +471,7 @@
             <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">split_prefix</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Split mask for &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; has too many dimensions. Shape: </span><span class="si">{</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;bool&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;bool&quot;</span><span class="p">):</span>
                     <span class="n">mask_vars</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="n">arr</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span> <span class="ow">and</span> <span class="n">arr</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
@@ -456,7 +485,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask_vars</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No split mask detected.&quot;</span><span class="p">)</span>
 
-        <span class="n">masks</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">split_prefix</span><span class="p">):]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">mask_vars</span><span class="p">}</span>
+        <span class="n">masks</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">split_prefix</span><span class="p">)</span> <span class="p">:]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">mask_vars</span><span class="p">}</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Auto-detected splits:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">masks</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
@@ -475,13 +504,15 @@
             <span class="n">mask_counts</span> <span class="o">+=</span> <span class="n">arr</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">mask_counts</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
             <span class="n">set_of_counts</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mask_counts</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; Auto-splitting requires unique split for each item.&quot;</span> <span class="o">+</span>
-                             <span class="sa">f</span><span class="s2">&quot; Items with the following split counts were detected: </span><span class="si">{</span><span class="n">set_of_counts</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot; Auto-splitting requires unique split for each item.&quot;</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot; Items with the following split counts were detected: </span><span class="si">{</span><span class="n">set_of_counts</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
             <span class="k">return</span>
 
-        <span class="n">masks</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">][</span><span class="n">m</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">masks</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">masks</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">][</span><span class="n">m</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">masks</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">masks</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">make_explicit_split</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
 
@@ -497,11 +528,18 @@
 
 <div class="viewcode-block" id="Database.make_generator">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_generator">[docs]</a>
-    <span class="k">def</span> <span class="nf">make_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_type</span><span class="p">,</span> <span class="n">evaluation_mode</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subsample</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">make_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                       <span class="n">split_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                       <span class="n">evaluation_mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                       <span class="n">batch_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="n">subsample</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                       <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Makes a dataloader for the given type of split and evaluation mode of the model.</span>
 
-<span class="sd">        :param split_type: str; &quot;train&quot;, &quot;valid&quot;, or &quot;test&quot; ; selects data to use</span>
+<span class="sd">        In most cases, you do not need to call this function directly as a user.</span>
+
+<span class="sd">        :param split_name: str; &quot;train&quot;, &quot;valid&quot;, or &quot;test&quot; ; selects data to use</span>
 <span class="sd">        :param evaluation_mode: str; &quot;train&quot; or &quot;eval&quot;. Used for whether to shuffle.</span>
 <span class="sd">        :param batch_size: passed to pytorch</span>
 <span class="sd">        :param subsample: fraction to subsample</span>
@@ -511,16 +549,14 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitting_completed</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Database has not yet been split.&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">split_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Split </span><span class="si">{</span><span class="n">split_type</span><span class="si">}</span><span class="s2"> Invalid. Current splits:</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">split_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Split </span><span class="si">{</span><span class="n">split_name</span><span class="si">}</span><span class="s2"> Invalid. Current splits:</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">split_type</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_list</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">split_name</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_list</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">evaluation_mode</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">split_type</span> <span class="o">!=</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;evaluation mode &#39;train&#39; can only be used with training data.&quot;</span> <span class="s2">&quot;(got </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split_type</span><span class="p">)</span>
-                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">split_name</span> <span class="o">!=</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;evaluation mode &#39;train&#39; can only be used with training data.&quot;</span> <span class="s2">&quot;(got </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">split_name</span><span class="p">))</span>
             <span class="n">shuffle</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">elif</span> <span class="n">evaluation_mode</span> <span class="o">==</span> <span class="s2">&quot;eval&quot;</span><span class="p">:</span>
             <span class="n">shuffle</span> <span class="o">=</span> <span class="kc">False</span>
@@ -532,9 +568,7 @@
             <span class="n">n_total</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">n_selected</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_total</span> <span class="o">*</span> <span class="n">subsample</span><span class="p">)</span>
             <span class="n">sampled_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n_total</span><span class="p">))[:</span><span class="n">n_selected</span><span class="p">]</span>
-            <span class="c1"># sampled_indices = torch.rand(data[0].shape[0]) &lt; subsample</span>
             <span class="n">dataset</span> <span class="o">=</span> <span class="n">Subset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">sampled_indices</span><span class="p">)</span>
-            <span class="c1"># data = [a[sampled_indices] for a in data]</span>
 
         <span class="n">generator</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
             <span class="n">dataset</span><span class="p">,</span>
@@ -573,8 +607,8 @@
             <span class="n">n_atoms</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">species_key</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="c1"># Transposes broadcast the result rightwards instead of leftwards.</span>
             <span class="c1"># numpy transpose on higher-order arrays reverses all dimensions.</span>
-            <span class="n">prop</span> <span class="o">=</span> <span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">T</span><span class="o">/</span><span class="n">n_atoms</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-            <span class="n">stat_prop</span> <span class="o">=</span> <span class="p">(</span><span class="n">stat_prop</span><span class="o">.</span><span class="n">T</span><span class="o">/</span><span class="n">n_atoms</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">n_atoms</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">stat_prop</span> <span class="o">=</span> <span class="p">(</span><span class="n">stat_prop</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">n_atoms</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
         <span class="n">mean</span> <span class="o">=</span> <span class="n">stat_prop</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="n">std</span> <span class="o">=</span> <span class="n">stat_prop</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
@@ -583,10 +617,18 @@
 
         <span class="k">return</span> <span class="n">prop</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span>
 
-
 <div class="viewcode-block" id="Database.remove_high_property">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.remove_high_property">[docs]</a>
-    <span class="k">def</span> <span class="nf">remove_high_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">atomwise</span><span class="p">,</span> <span class="n">norm_per_atom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">std_factor</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">norm_axis</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">remove_high_property</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">atomwise</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">norm_per_atom</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">species_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cut</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">std_factor</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">norm_axis</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        For removing outliers from a dataset. Use with caution; do not inadvertently remove outliers from benchmarks!</span>
 
@@ -617,7 +659,7 @@
 
         <span class="k">if</span> <span class="n">std_factor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">prop</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_array_stat_helper</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">species_key</span><span class="p">,</span> <span class="n">atomwise</span><span class="p">,</span> <span class="n">norm_per_atom</span><span class="p">,</span> <span class="n">norm_axis</span><span class="p">)</span>
-            <span class="n">large_property_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">prop</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span><span class="o">/</span><span class="n">std</span> <span class="o">&gt;</span> <span class="n">std_factor</span>
+            <span class="n">large_property_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">prop</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">std</span> <span class="o">&gt;</span> <span class="n">std_factor</span>
             <span class="c1"># Scan over all non-batch indices.</span>
             <span class="n">non_batch_axes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">prop</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
             <span class="n">drop_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">large_property_mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">non_batch_axes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
@@ -629,7 +671,23 @@
 
 <div class="viewcode-block" id="Database.write_h5">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.write_h5">[docs]</a>
-    <span class="k">def</span> <span class="nf">write_h5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">h5path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s1">&#39;species&#39;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">write_h5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">split</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">h5path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">species_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;species&quot;</span><span class="p">,</span>
+                 <span class="n">overwrite</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write this database to the pyanitools h5 format.</span>
+<span class="sd">        See :func:`hippynn.databases.h5_pyanitools.write_h5` for details.</span>
+
+<span class="sd">        Note: This function will error if h5py is not installed.</span>
+
+<span class="sd">        :param split:</span>
+<span class="sd">        :param h5path:</span>
+<span class="sd">        :param species_key:</span>
+<span class="sd">        :param overwrite:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">.h5_pyanitools</span> <span class="kn">import</span> <span class="n">write_h5</span> <span class="k">as</span> <span class="n">write_h5_function</span>
@@ -641,32 +699,40 @@
 
 <div class="viewcode-block" id="Database.write_npz">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.write_npz">[docs]</a>
-    <span class="k">def</span> <span class="nf">write_npz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">record_split_masks</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">compressed</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">split_prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">write_npz</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">record_split_masks</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">compressed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">split_prefix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">return_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param file: str, Path, or file object compatible with np.save</span>
-<span class="sd">        :param record_split_masks: </span>
+<span class="sd">        :param record_split_masks: whether to generate and place masks for the splits into the saved database.</span>
+<span class="sd">        :param compressed: whether to use np.savez_compressed (True) or np.savez</span>
 <span class="sd">        :param overwrite: Whether to accept an existing path. Only used if fname is str or path.</span>
-<span class="sd">        :param split_prefix: optionally change the prefix for the masks computed by the splits.</span>
+<span class="sd">        :param split_prefix: optionally override the prefix for the masks computed by the splits.</span>
 <span class="sd">        :param return_only: if True, ignore the file string and just return the resulting dictionary of numpy arrays.</span>
-<span class="sd">        :return: </span>
+<span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">split_prefix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">split_prefix</span> <span class="o">=</span> <span class="n">_AUTO_SPLIT_PREFIX</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitting_completed</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot write an incompletely split database to npz file.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
-                             <span class="s2">&quot;You can split the rest using `database.split_the_rest(&#39;other_data&#39;)`</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
-                             <span class="s2">&quot;to put the remaining data into a new split named &#39;other_data&#39;&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Cannot write an incompletely split database to npz file.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;You can split the rest using `database.split_the_rest(&#39;other_data&#39;)`</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;to put the remaining data into a new split named &#39;other_data&#39;&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># get combined dictionary of arrays.</span>
-        <span class="n">np_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">sname</span><span class="p">:</span>
-                       <span class="p">{</span><span class="n">arr_name</span><span class="p">:</span> <span class="n">array</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;cpu&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="k">for</span> <span class="n">arr_name</span><span class="p">,</span> <span class="n">array</span> <span class="ow">in</span> <span class="n">split</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-                   <span class="k">for</span> <span class="n">sname</span><span class="p">,</span> <span class="n">split</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">np_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">sname</span><span class="p">:</span> <span class="p">{</span><span class="n">arr_name</span><span class="p">:</span> <span class="n">array</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="k">for</span> <span class="n">arr_name</span><span class="p">,</span> <span class="n">array</span> <span class="ow">in</span> <span class="n">split</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span> <span class="k">for</span> <span class="n">sname</span><span class="p">,</span> <span class="n">split</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
         <span class="c1"># insert split masks if requested.</span>
 
         <span class="k">if</span> <span class="n">record_split_masks</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_split_masks</span><span class="p">(</span><span class="n">dict_to_add_to</span><span class="o">=</span><span class="n">np_dict</span><span class="p">,</span> <span class="n">split_prefix</span><span class="o">=</span><span class="n">split_prefix</span><span class="p">)</span>
-
 
         <span class="c1"># Stack numpy arrays:</span>
         <span class="n">arr_dict</span> <span class="o">=</span> <span class="p">{}</span>
@@ -698,10 +764,12 @@
 
 <div class="viewcode-block" id="Database.sort_by_index">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.sort_by_index">[docs]</a>
-    <span class="k">def</span> <span class="nf">sort_by_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index_name</span><span class="o">=</span><span class="s1">&#39;indices&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">sort_by_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;indices&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
 <span class="sd">        Sort arrays in each split of the database by an index key.</span>
-<span class="sd">         The default is &#39;indices&#39;, also possible is &#39;split_indices&#39;, or any other variable name in the database.</span>
+
+<span class="sd">        The default is &#39;indices&#39;, also possible is &#39;split_indices&#39;, or any other variable name in the database.</span>
 
 <span class="sd">        :param index_name:</span>
 <span class="sd">        :return: None</span>
@@ -716,12 +784,14 @@
 
 <div class="viewcode-block" id="Database.trim_by_species">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.trim_by_species">[docs]</a>
-    <span class="k">def</span> <span class="nf">trim_by_species</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keep_splits_same_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">trim_by_species</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keep_splits_same_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove any excess padding in a database.</span>
+
 <span class="sd">        :param species_key: what array to use to mark atom presence.</span>
-<span class="sd">        :param keep_splits_same_size: true: trim by the minimum amount across splits, false:  trim by the maximum amount for each split.</span>
-<span class="sd">        :return:</span>
+<span class="sd">        :param keep_splits_same_size: true: trim by the minimum amount across splits,</span>
+<span class="sd">          false:  trim by the maximum amount for each split.</span>
+<span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitting_completed</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot trim arrays until splitting has been completed.&quot;</span><span class="p">)</span>
@@ -780,7 +850,12 @@
 
 <div class="viewcode-block" id="Database.get_device">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.get_device">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_device</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_device</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determine what device the database resides on. Raises ValueError if multiple devices are encountered.</span>
+
+<span class="sd">        :return: device.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitting_completed</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Device should not be changed before splitting is complete.&quot;</span><span class="p">)</span>
 
@@ -794,11 +869,15 @@
 
 <div class="viewcode-block" id="Database.make_database_cache">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.Database.make_database_cache">[docs]</a>
-    <span class="k">def</span> <span class="nf">make_database_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;./hippynn_db_cache.npz&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">override_kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">make_database_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./hippynn_db_cache.npz&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">override_kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Database&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Cache the database as-is, and re-open it.</span>
 
 <span class="sd">        Useful for creating an easy restart script if the storage space is available.</span>
+<span class="sd">        The new datatbase will by default inherit the properties of this database.</span>
+
+<span class="sd">        usage:</span>
+<span class="sd">        &gt;&gt;&gt; database = database.make_database_cache()</span>
 
 <span class="sd">        :param file: where to store the database</span>
 <span class="sd">        :param overwrite: whether to overwrite an existing cache file with this name.</span>
@@ -832,18 +911,24 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Writing Cached database to&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">write_npz</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">,</span>
-                       <span class="n">record_split_masks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># allows inheriting of splits from this db.</span>
-                       <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
-                       <span class="n">return_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_npz</span><span class="p">(</span>
+            <span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">,</span> <span class="n">record_split_masks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">return_only</span><span class="o">=</span><span class="kc">False</span>  <span class="c1"># allows inheriting of splits from this db.</span>
+        <span class="p">)</span>
         <span class="c1"># now reload cached file.</span>
         <span class="k">return</span> <span class="n">NPZDatabase</span><span class="p">(</span><span class="o">**</span><span class="n">arguments</span><span class="p">)</span></div>
 </div>
 
 
+
 <div class="viewcode-block" id="compute_index_mask">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.compute_index_mask">[docs]</a>
-<span class="k">def</span> <span class="nf">compute_index_mask</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">index_pool</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">compute_index_mask</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">index_pool</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param indices:</span>
+<span class="sd">    :param index_pool:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">index_pool</span><span class="p">)):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provided indices not in database&quot;</span><span class="p">)</span>
 
@@ -860,9 +945,9 @@
 
 <div class="viewcode-block" id="prettyprint_arrays">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.databases.prettyprint_arrays">[docs]</a>
-<span class="k">def</span> <span class="nf">prettyprint_arrays</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">prettyprint_arrays</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Pretty-print array dictionary</span>
+<span class="sd">    Pretty-print array dictionary.</span>
 <span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">column_format</span> <span class="o">=</span> <span class="s2">&quot;| </span><span class="si">{:&lt;30}</span><span class="s2"> | </span><span class="si">{:&lt;18}</span><span class="s2"> | </span><span class="si">{:&lt;28}</span><span class="s2"> |&quot;</span>

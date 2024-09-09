@@ -54,10 +54,10 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#subpackages">Subpackages</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.html#submodules">Submodules</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">hippynn.pretraining module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.pretraining.calculate_max_system_force"><code class="docutils literal notranslate"><span class="pre">calculate_max_system_force()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.pretraining.calculate_min_dists"><code class="docutils literal notranslate"><span class="pre">calculate_min_dists()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.pretraining.hierarchical_energy_initialization"><code class="docutils literal notranslate"><span class="pre">hierarchical_energy_initialization()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.pretraining.set_e0_values"><code class="docutils literal notranslate"><span class="pre">set_e0_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.pretraining.calculate_min_dists"><code class="docutils literal notranslate"><span class="pre">calculate_min_dists()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.pretraining.calculate_max_system_force"><code class="docutils literal notranslate"><span class="pre">calculate_max_system_force()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.tools.html">hippynn.tools module</a></li>
@@ -100,41 +100,32 @@
 <span id="hippynn-pretraining-module"></span><h1>hippynn.pretraining module<a class="headerlink" href="#module-hippynn.pretraining" title="Link to this heading"></a></h1>
 <p>Things to do before training, i.e. initialization of network and diagnostics.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="hippynn.pretraining.calculate_max_system_force">
-<span class="sig-name descname"><span class="pre">calculate_max_system_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">device</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/pretraining.html#calculate_max_system_force"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.pretraining.calculate_max_system_force" title="Link to this definition"></a></dt>
-<dd><p>Calculates the maximum force magnitude in each system in <code class="docutils literal notranslate"><span class="pre">array_dict</span></code>.</p>
-<p>Example usage for unsplit data:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">max_force</span> <span class="o">=</span> <span class="n">calculate_max_system_force</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">,</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span><span class="s2">&quot;F&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>If the database has been split:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">max_force_train</span> <span class="o">=</span> <span class="n">calculate_max_system_force</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">],</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span><span class="s2">&quot;F&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Example usage to prune out high-force data:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">force_threshold</span> <span class="o">=</span> <span class="o">...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">max_force</span> <span class="o">=</span> <span class="n">calculate_max_system_force</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">,</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span><span class="s2">&quot;F&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">high_force_system</span> <span class="o">=</span> <span class="n">max_force</span> <span class="o">&gt;</span> <span class="n">force_threshold</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span><span class="o">.</span><span class="n">arr_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">v</span><span class="p">[</span><span class="o">~</span><span class="n">high_force_system</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">db</span><span class="o">.</span><span class="n">arr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-</pre></div>
-</div>
+<dt class="sig sig-object py" id="hippynn.pretraining.hierarchical_energy_initialization">
+<span class="sig-name descname"><span class="pre">hierarchical_energy_initialization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainable_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peratom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/pretraining.html#hierarchical_energy_initialization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.pretraining.hierarchical_energy_initialization" title="Link to this definition"></a></dt>
+<dd><p>Computes values for the non-interacting energy using the training data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>array_dict</strong> – dictionary mapping strings to tensors/numpy arrays</p></li>
-<li><p><strong>species_name</strong> – dictionary key for species</p></li>
-<li><p><strong>force-name</strong> – dictionary key for positions</p></li>
-<li><p><strong>device</strong> – Where to perform the computation.</p></li>
-<li><p><strong>batch_size</strong> – batch size to perform evaluation over.</p></li>
+<li><p><strong>energy_module</strong> – HEnergyNode or torch module for energy prediction</p></li>
+<li><p><strong>database</strong> – InterfaceDB object to get training data, required if model contains E0 term</p></li>
+<li><p><strong>trainable_after</strong> – Determines if it should change .requires_grad attribute for the E0 parameters</p></li>
+<li><p><strong>decay_factor</strong> – change initialized weights of further energy layers by <code class="docutils literal notranslate"><span class="pre">df**N</span></code> for layer N</p></li>
+<li><p><strong>encoder</strong> – species encoder, can be auto-identified from energy node</p></li>
+<li><p><strong>energy_name</strong> – name for the energy variable, can be auto-identified from energy node</p></li>
+<li><p><strong>species_name</strong> – name for the species variable, can be auto-identified from energy node</p></li>
+<li><p><strong>peratom</strong></p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p></p>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.pretraining.set_e0_values">
+<span class="sig-name descname"><span class="pre">set_e0_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/pretraining.html#set_e0_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.pretraining.set_e0_values" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hippynn.pretraining.calculate_min_dists">
@@ -185,32 +176,41 @@ if the cell is not specified, open boundaries are used.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="hippynn.pretraining.hierarchical_energy_initialization">
-<span class="sig-name descname"><span class="pre">hierarchical_energy_initialization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainable_after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peratom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/pretraining.html#hierarchical_energy_initialization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.pretraining.hierarchical_energy_initialization" title="Link to this definition"></a></dt>
-<dd><p>Computes values for the non-interacting energy using the training data.</p>
+<dt class="sig sig-object py" id="hippynn.pretraining.calculate_max_system_force">
+<span class="sig-name descname"><span class="pre">calculate_max_system_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">device</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/pretraining.html#calculate_max_system_force"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.pretraining.calculate_max_system_force" title="Link to this definition"></a></dt>
+<dd><p>Calculates the maximum force magnitude in each system in <code class="docutils literal notranslate"><span class="pre">array_dict</span></code>.</p>
+<p>Example usage for unsplit data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">max_force</span> <span class="o">=</span> <span class="n">calculate_max_system_force</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">,</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span><span class="s2">&quot;F&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If the database has been split:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">max_force_train</span> <span class="o">=</span> <span class="n">calculate_max_system_force</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">],</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span><span class="s2">&quot;F&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Example usage to prune out high-force data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">force_threshold</span> <span class="o">=</span> <span class="o">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">max_force</span> <span class="o">=</span> <span class="n">calculate_max_system_force</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">,</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span><span class="s2">&quot;F&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">high_force_system</span> <span class="o">=</span> <span class="n">max_force</span> <span class="o">&gt;</span> <span class="n">force_threshold</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span><span class="o">.</span><span class="n">arr_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">v</span><span class="p">[</span><span class="o">~</span><span class="n">high_force_system</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">db</span><span class="o">.</span><span class="n">arr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</pre></div>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>energy_module</strong> – HEnergyNode or torch module for energy prediction</p></li>
-<li><p><strong>database</strong> – InterfaceDB object to get training data, required if model contains E0 term</p></li>
-<li><p><strong>trainable_after</strong> – Determines if it should change .requires_grad attribute for the E0 parameters</p></li>
-<li><p><strong>decay_factor</strong> – change initialized weights of further energy layers by <code class="docutils literal notranslate"><span class="pre">df**N</span></code> for layer N</p></li>
-<li><p><strong>encoder</strong> – species encoder, can be auto-identified from energy node</p></li>
-<li><p><strong>energy_name</strong> – name for the energy variable, can be auto-identified from energy node</p></li>
-<li><p><strong>species_name</strong> – name for the species variable, can be auto-identified from energy node</p></li>
-<li><p><strong>peratom</strong></p></li>
+<li><p><strong>array_dict</strong> – dictionary mapping strings to tensors/numpy arrays</p></li>
+<li><p><strong>species_name</strong> – dictionary key for species</p></li>
+<li><p><strong>force-name</strong> – dictionary key for positions</p></li>
+<li><p><strong>device</strong> – Where to perform the computation.</p></li>
+<li><p><strong>batch_size</strong> – batch size to perform evaluation over.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
+<dd class="field-even"><p></p>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="hippynn.pretraining.set_e0_values">
-<span class="sig-name descname"><span class="pre">set_e0_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/pretraining.html#set_e0_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.pretraining.set_e0_values" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 </section>
 

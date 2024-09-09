@@ -67,6 +67,12 @@
 <li class="toctree-l7"><a class="reference internal" href="hippynn.layers.pairs.indexing.html">hippynn.layers.pairs.indexing module</a></li>
 <li class="toctree-l7"><a class="reference internal" href="hippynn.layers.pairs.open.html">hippynn.layers.pairs.open module</a></li>
 <li class="toctree-l7 current"><a class="current reference internal" href="#">hippynn.layers.pairs.periodic module</a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer"><code class="docutils literal notranslate"><span class="pre">StaticImagePeriodicPairIndexer</span></code></a><ul>
+<li class="toctree-l9"><a class="reference internal" href="#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer.__init__"><code class="docutils literal notranslate"><span class="pre">StaticImagePeriodicPairIndexer.__init__()</span></code></a></li>
+<li class="toctree-l9"><a class="reference internal" href="#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer.forward"><code class="docutils literal notranslate"><span class="pre">StaticImagePeriodicPairIndexer.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l8"><a class="reference internal" href="#hippynn.layers.pairs.periodic.filter_pairs"><code class="docutils literal notranslate"><span class="pre">filter_pairs()</span></code></a></li>
 <li class="toctree-l8"><a class="reference internal" href="#hippynn.layers.pairs.periodic.PeriodicPairIndexer"><code class="docutils literal notranslate"><span class="pre">PeriodicPairIndexer</span></code></a><ul>
 <li class="toctree-l9"><a class="reference internal" href="#hippynn.layers.pairs.periodic.PeriodicPairIndexer.forward"><code class="docutils literal notranslate"><span class="pre">PeriodicPairIndexer.forward()</span></code></a></li>
 </ul>
@@ -75,12 +81,6 @@
 <li class="toctree-l9"><a class="reference internal" href="#hippynn.layers.pairs.periodic.PeriodicPairIndexerMemory.forward"><code class="docutils literal notranslate"><span class="pre">PeriodicPairIndexerMemory.forward()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l8"><a class="reference internal" href="#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer"><code class="docutils literal notranslate"><span class="pre">StaticImagePeriodicPairIndexer</span></code></a><ul>
-<li class="toctree-l9"><a class="reference internal" href="#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer.__init__"><code class="docutils literal notranslate"><span class="pre">StaticImagePeriodicPairIndexer.__init__()</span></code></a></li>
-<li class="toctree-l9"><a class="reference internal" href="#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer.forward"><code class="docutils literal notranslate"><span class="pre">StaticImagePeriodicPairIndexer.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l8"><a class="reference internal" href="#hippynn.layers.pairs.periodic.filter_pairs"><code class="docutils literal notranslate"><span class="pre">filter_pairs()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -137,6 +137,38 @@
   <section id="module-hippynn.layers.pairs.periodic">
 <span id="hippynn-layers-pairs-periodic-module"></span><h1>hippynn.layers.pairs.periodic module<a class="headerlink" href="#module-hippynn.layers.pairs.periodic" title="Link to this heading"></a></h1>
 <dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StaticImagePeriodicPairIndexer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/periodic.html#StaticImagePeriodicPairIndexer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_PairIndexer</span></code></p>
+<p>Finds Pairs within a given number of images</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/periodic.html#StaticImagePeriodicPairIndexer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonblank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">real_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_real_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cells</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/periodic.html#StaticImagePeriodicPairIndexer.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer.forward" title="Link to this definition"></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.periodic.filter_pairs">
+<span class="sig-name descname"><span class="pre">filter_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distflat</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">addn_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/periodic.html#filter_pairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.periodic.filter_pairs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="hippynn.layers.pairs.periodic.PeriodicPairIndexer">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PeriodicPairIndexer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hard_dist_cutoff</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/periodic.html#PeriodicPairIndexer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.periodic.PeriodicPairIndexer" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_PairIndexer</span></code></p>
@@ -183,38 +215,6 @@ registered hooks while the latter silently ignores them.</p>
 </dd></dl>
 
 </dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StaticImagePeriodicPairIndexer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/periodic.html#StaticImagePeriodicPairIndexer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_PairIndexer</span></code></p>
-<p>Finds Pairs within a given number of images</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/periodic.html#StaticImagePeriodicPairIndexer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer.__init__" title="Link to this definition"></a></dt>
-<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonblank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">real_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_real_atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cells</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/periodic.html#StaticImagePeriodicPairIndexer.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="hippynn.layers.pairs.periodic.filter_pairs">
-<span class="sig-name descname"><span class="pre">filter_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distflat</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">addn_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/periodic.html#filter_pairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.periodic.filter_pairs" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 </section>
 

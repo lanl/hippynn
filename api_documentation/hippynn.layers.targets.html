@@ -67,9 +67,9 @@
 <li class="toctree-l5"><a class="reference internal" href="hippynn.layers.physics.html">hippynn.layers.physics module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.layers.regularization.html">hippynn.layers.regularization module</a></li>
 <li class="toctree-l5 current"><a class="current reference internal" href="#">hippynn.layers.targets module</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.targets.HBondSymmetric"><code class="docutils literal notranslate"><span class="pre">HBondSymmetric</span></code></a><ul>
-<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.targets.HBondSymmetric.__init__"><code class="docutils literal notranslate"><span class="pre">HBondSymmetric.__init__()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.targets.HBondSymmetric.forward"><code class="docutils literal notranslate"><span class="pre">HBondSymmetric.forward()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.targets.HEnergy"><code class="docutils literal notranslate"><span class="pre">HEnergy</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.targets.HEnergy.__init__"><code class="docutils literal notranslate"><span class="pre">HEnergy.__init__()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.targets.HEnergy.forward"><code class="docutils literal notranslate"><span class="pre">HEnergy.forward()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.targets.HCharge"><code class="docutils literal notranslate"><span class="pre">HCharge</span></code></a><ul>
@@ -77,14 +77,14 @@
 <li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.targets.HCharge.forward"><code class="docutils literal notranslate"><span class="pre">HCharge.forward()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.targets.HEnergy"><code class="docutils literal notranslate"><span class="pre">HEnergy</span></code></a><ul>
-<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.targets.HEnergy.__init__"><code class="docutils literal notranslate"><span class="pre">HEnergy.__init__()</span></code></a></li>
-<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.targets.HEnergy.forward"><code class="docutils literal notranslate"><span class="pre">HEnergy.forward()</span></code></a></li>
-</ul>
-</li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.targets.LocalChargeEnergy"><code class="docutils literal notranslate"><span class="pre">LocalChargeEnergy</span></code></a><ul>
 <li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.targets.LocalChargeEnergy.__init__"><code class="docutils literal notranslate"><span class="pre">LocalChargeEnergy.__init__()</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.targets.LocalChargeEnergy.forward"><code class="docutils literal notranslate"><span class="pre">LocalChargeEnergy.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.targets.HBondSymmetric"><code class="docutils literal notranslate"><span class="pre">HBondSymmetric</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.targets.HBondSymmetric.__init__"><code class="docutils literal notranslate"><span class="pre">HBondSymmetric.__init__()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.targets.HBondSymmetric.forward"><code class="docutils literal notranslate"><span class="pre">HBondSymmetric.forward()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -139,58 +139,6 @@
 <span id="hippynn-layers-targets-module"></span><h1>hippynn.layers.targets module<a class="headerlink" href="#module-hippynn.layers.targets" title="Link to this heading"></a></h1>
 <p>Layers for target prediction such as Energy and Charge</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.targets.HBondSymmetric">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HBondSymmetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_sizes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antisymmetric=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_type=&lt;class</span> <span class="pre">'hippynn.layers.hiplayers.InverseSensitivityModule'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_target=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_pairs=True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#HBondSymmetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.HBondSymmetric" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.targets.HBondSymmetric.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_sizes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antisymmetric=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_type=&lt;class</span> <span class="pre">'hippynn.layers.hiplayers.InverseSensitivityModule'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_target=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_pairs=True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#HBondSymmetric.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.HBondSymmetric.__init__" title="Link to this definition"></a></dt>
-<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.targets.HBondSymmetric.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">all_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_dist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#HBondSymmetric.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.HBondSymmetric.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.targets.HCharge">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HCharge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_sizes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_is_interacting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#HCharge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.HCharge" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<p>Predict an atom-level scalar such as charge from local features.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.targets.HCharge.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_sizes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_is_interacting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#HCharge.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.HCharge.__init__" title="Link to this definition"></a></dt>
-<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.targets.HCharge.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">all_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#HCharge.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.HCharge.forward" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>tensors</strong> (<em>all_features a list</em><em> of </em><em>feature</em>)</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>charges, predicted charges summed at each layer, and charge hierarchcality</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="hippynn.layers.targets.HEnergy">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HEnergy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_sizes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_is_interacting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#HEnergy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.HEnergy" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
@@ -224,6 +172,32 @@ registered hooks while the latter silently ignores them.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.targets.HCharge">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HCharge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_sizes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_is_interacting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#HCharge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.HCharge" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Predict an atom-level scalar such as charge from local features.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.targets.HCharge.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_sizes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_is_interacting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#HCharge.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.HCharge.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.targets.HCharge.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">all_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#HCharge.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.HCharge.forward" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tensors</strong> (<em>all_features a list</em><em> of </em><em>feature</em>)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>charges, predicted charges summed at each layer, and charge hierarchcality</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="hippynn.layers.targets.LocalChargeEnergy">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LocalChargeEnergy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_sizes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_is_interacting</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#LocalChargeEnergy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.LocalChargeEnergy" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
@@ -236,6 +210,32 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.layers.targets.LocalChargeEnergy.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_molecules</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#LocalChargeEnergy.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.LocalChargeEnergy.forward" title="Link to this definition"></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.targets.HBondSymmetric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HBondSymmetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_sizes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antisymmetric=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_type=&lt;class</span> <span class="pre">'hippynn.layers.hiplayers.InverseSensitivityModule'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_target=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_pairs=True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#HBondSymmetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.HBondSymmetric" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.targets.HBondSymmetric.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_sizes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antisymmetric=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_type=&lt;class</span> <span class="pre">'hippynn.layers.hiplayers.InverseSensitivityModule'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_target=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_pairs=True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#HBondSymmetric.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.HBondSymmetric.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.targets.HBondSymmetric.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">all_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_dist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#HBondSymmetric.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.HBondSymmetric.forward" title="Link to this definition"></a></dt>
 <dd><p>Define the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">

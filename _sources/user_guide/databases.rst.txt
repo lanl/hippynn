@@ -31,12 +31,45 @@ the [i,j] element of the cell gives the j cartesian coordinate of cell vector i.
 massive difficulties fitting to periodic boundary conditions, you may check the transposed version
 of your cell data, or compute the RDF.
 
+Database Formats and notes
+---------------------------
 
-ASE Objects Database handling
-----------------------------------------------------------
-If your training data is stored as ASE files of any type (.json,.db,.xyz,.traj ... etc.) it can be loaded directly 
-a Database for hippynn.
+Numpy arrays on disk
+........................
+
+see :class:`hippynn.databases.NPZDatabase` (if arrays are stored
+in a `.npz` dictionary) or :class:`hippynn.databases.DirectoryDatabase`
+(if each array is in its own file).
+
+Numpy arrays in memory
+........................
+
+Use the base :class:`hippynn.databases.Database` class directly to initialize
+a database from a dictionary mapping db_names to numpy arrays.
+
+pyanitools H5 files
+........................
+
+See :class:`hippynn.databases.PyAniFileDB` and see :class:`hippynn.databases.PyAniDirectoryDB`.
+
+This format requires ``h5py`` and ``ase`` to be installed.
+
+Snap JSON Format
+........................
+
+See :class:`hippynn.databases.SNAPDirectoryDatabase`. This format requires ``ase`` to be installed.
+
+For more information on this format, see the FitSNAP_ software.
+
+.. _FitSNAP: https://fitsnap.github.io
+
+ASE Database
+........................
+
+If your training data is stored as ASE files of any type,
+(.json,.db,.xyz,.traj ... etc.) it can be loaded directly
+as a Database for hippynn.
 
 The ASE database :class:`~hippynn.databases.AseDatabase` can be loaded with ASE installed.
 
-See ~/examples/ase_db_example.py for a basic example utilzing the class.
+See ~/examples/ase_db_example.py for a basic example utilizing the class.

@@ -53,7 +53,14 @@
 <li class="toctree-l2"><a class="reference internal" href="features.html">hippynn Features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="concepts.html">hippynn Concepts</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Databases</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#ase-objects-database-handling">ASE Objects Database handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#database-formats-and-notes">Database Formats and notes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#numpy-arrays-on-disk">Numpy arrays on disk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#numpy-arrays-in-memory">Numpy arrays in memory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pyanitools-h5-files">pyanitools H5 files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#snap-json-format">Snap JSON Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ase-database">ASE Database</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="loss_graph.html">Model and Loss Graphs</a></li>
@@ -122,12 +129,37 @@ comes first, and the cartesian index comes second. That is similar to <cite>ase<
 the [i,j] element of the cell gives the j cartesian coordinate of cell vector i. If you experience
 massive difficulties fitting to periodic boundary conditions, you may check the transposed version
 of your cell data, or compute the RDF.</p>
-<section id="ase-objects-database-handling">
-<h2>ASE Objects Database handling<a class="headerlink" href="#ase-objects-database-handling" title="Link to this heading"></a></h2>
-<p>If your training data is stored as ASE files of any type (.json,.db,.xyz,.traj … etc.) it can be loaded directly
-a Database for hippynn.</p>
+<section id="database-formats-and-notes">
+<h2>Database Formats and notes<a class="headerlink" href="#database-formats-and-notes" title="Link to this heading"></a></h2>
+<section id="numpy-arrays-on-disk">
+<h3>Numpy arrays on disk<a class="headerlink" href="#numpy-arrays-on-disk" title="Link to this heading"></a></h3>
+<p>see <a class="reference internal" href="../api_documentation/hippynn.databases.html#hippynn.databases.NPZDatabase" title="hippynn.databases.NPZDatabase"><code class="xref py py-class docutils literal notranslate"><span class="pre">hippynn.databases.NPZDatabase</span></code></a> (if arrays are stored
+in a <cite>.npz</cite> dictionary) or <a class="reference internal" href="../api_documentation/hippynn.databases.html#hippynn.databases.DirectoryDatabase" title="hippynn.databases.DirectoryDatabase"><code class="xref py py-class docutils literal notranslate"><span class="pre">hippynn.databases.DirectoryDatabase</span></code></a>
+(if each array is in its own file).</p>
+</section>
+<section id="numpy-arrays-in-memory">
+<h3>Numpy arrays in memory<a class="headerlink" href="#numpy-arrays-in-memory" title="Link to this heading"></a></h3>
+<p>Use the base <a class="reference internal" href="../api_documentation/hippynn.databases.html#hippynn.databases.Database" title="hippynn.databases.Database"><code class="xref py py-class docutils literal notranslate"><span class="pre">hippynn.databases.Database</span></code></a> class directly to initialize
+a database from a dictionary mapping db_names to numpy arrays.</p>
+</section>
+<section id="pyanitools-h5-files">
+<h3>pyanitools H5 files<a class="headerlink" href="#pyanitools-h5-files" title="Link to this heading"></a></h3>
+<p>See <code class="xref py py-class docutils literal notranslate"><span class="pre">hippynn.databases.PyAniFileDB</span></code> and see <code class="xref py py-class docutils literal notranslate"><span class="pre">hippynn.databases.PyAniDirectoryDB</span></code>.</p>
+<p>This format requires <code class="docutils literal notranslate"><span class="pre">h5py</span></code> and <code class="docutils literal notranslate"><span class="pre">ase</span></code> to be installed.</p>
+</section>
+<section id="snap-json-format">
+<h3>Snap JSON Format<a class="headerlink" href="#snap-json-format" title="Link to this heading"></a></h3>
+<p>See <a class="reference internal" href="../api_documentation/hippynn.databases.html#hippynn.databases.SNAPDirectoryDatabase" title="hippynn.databases.SNAPDirectoryDatabase"><code class="xref py py-class docutils literal notranslate"><span class="pre">hippynn.databases.SNAPDirectoryDatabase</span></code></a>. This format requires <code class="docutils literal notranslate"><span class="pre">ase</span></code> to be installed.</p>
+<p>For more information on this format, see the <a class="reference external" href="https://fitsnap.github.io">FitSNAP</a> software.</p>
+</section>
+<section id="ase-database">
+<h3>ASE Database<a class="headerlink" href="#ase-database" title="Link to this heading"></a></h3>
+<p>If your training data is stored as ASE files of any type,
+(.json,.db,.xyz,.traj … etc.) it can be loaded directly
+as a Database for hippynn.</p>
 <p>The ASE database <a class="reference internal" href="../api_documentation/hippynn.databases.html#hippynn.databases.AseDatabase" title="hippynn.databases.AseDatabase"><code class="xref py py-class docutils literal notranslate"><span class="pre">AseDatabase</span></code></a> can be loaded with ASE installed.</p>
-<p>See ~/examples/ase_db_example.py for a basic example utilzing the class.</p>
+<p>See ~/examples/ase_db_example.py for a basic example utilizing the class.</p>
+</section>
 </section>
 </section>
 
