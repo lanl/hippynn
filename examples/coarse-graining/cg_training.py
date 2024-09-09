@@ -21,7 +21,7 @@ from hippynn.tools import active_directory
 
 from repulsive_potential import RepulsivePotentialNode
 
-training_data_file = os.path.join(os.pardir,os.pardir,os.pardir,"datasets","methanol_temp_700_density_1dot03.npz")
+training_data_file = os.path.join(os.pardir,os.pardir,os.pardir,"datasets","cg_methanol_trajectory.npz")
 
 with np.load(training_data_file) as data:
     idx = np.where(data["rdf_values"] > 0.01)[0][0]

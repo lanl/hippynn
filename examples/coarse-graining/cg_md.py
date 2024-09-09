@@ -21,7 +21,7 @@ torch.set_default_dtype(default_dtype)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load initial conditions
-training_data_file = os.path.join(os.pardir,os.pardir,os.pardir,"datasets","methanol_temp_700_density_1dot03.npz")
+training_data_file = os.path.join(os.pardir,os.pardir,os.pardir,"datasets","cg_methanol_trajectory.npz")
 
 with np.load(training_data_file) as data:
     cell = torch.as_tensor(data["cells"][-1], dtype=default_dtype, device=device)[None,...]
@@ -103,7 +103,7 @@ with active_directory("md_results"):
     emdee.run(dt=0.001, n_steps=50000, record_every=50)
 
     data = emdee.get_data()
-    np.savez("cg_trajectory.npz",
+    np.savez("hippynn_cg_trajectory.npz",
         positions = data["positions_position"],
         velocities = data["positions_velocity"],
         masses = data["positions_mass"],
