@@ -10,6 +10,7 @@ Numba kernels use far less memory, but do come with some launching overhead on G
 Cupy kernels only work on the GPU, but are faster than numba.
 Cupy kernels require numba for CPU operations.
 """
+
 import warnings
 from typing import Union
 
@@ -35,25 +36,19 @@ except ImportError:
     pass
 
 try:
+    import torch
     import triton
-    import torch 
+
     device_capability = torch.cuda.get_device_capability()
     if device_capability[0] > 6:
         CUSTOM_KERNELS_AVAILABLE.append("triton")
     else:
-        warnings.warn(
-            f"Triton found but not supported by GPU's compute capability: {device_capability}"
-        )
-except ImportError:
-    pass
-
-        
+        warnings.warn(f"Triton found but not supported by GPU's compute capability: {device_capability}")
 except ImportError:
     pass
 
 if not CUSTOM_KERNELS_AVAILABLE:
-    warnings.warn(
-        "Triton, cupy and numba are not available: Custom kernels will be disabled and performance maybe be degraded.")
+    warnings.warn("Triton, cupy and numba are not available: Custom kernels will be disabled and performance maybe be degraded.")
 
 CUSTOM_KERNELS_ACTIVE = False
 
@@ -86,7 +81,7 @@ def _check_cupy():
     if not cupy.cuda.is_available():
         if torch.cuda.is_available():
             warnings.warn("cupy.cuda.is_available() returned False: Custom kernels will fail on GPU tensors.")
-    
+
 
 def set_custom_kernels(active: Union[bool, str] = True):
     """
@@ -110,7 +105,8 @@ def set_custom_kernels(active: Union[bool, str] = True):
             active = False
         elif active:
             raise RuntimeError(
-                "Triton, numba and cupy were not found. Custom kernels are not available, but they were required by library settings.")
+                "Triton, numba and cupy were not found. Custom kernels are not available, but they were required by library settings."
+            )
     else:
         active = active_map.get(active, active)
 
@@ -138,7 +134,9 @@ def set_custom_kernels(active: Union[bool, str] = True):
         raise RuntimeError(f"Unavailable custom kernel implementation: {active}")
 
     if active == "triton":
-        from .env_triton import envsum as triton_envsum, sensesum as triton_sensesum, featsum as triton_featsum
+        from .env_triton import envsum as triton_envsum
+        from .env_triton import featsum as triton_featsum
+        from .env_triton import sensesum as triton_sensesum
 
         envsum, sensesum, featsum = autograd_wrapper.wrap_envops(triton_envsum, triton_sensesum, triton_featsum)
     elif active == "cupy":

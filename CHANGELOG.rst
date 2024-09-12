@@ -3,8 +3,15 @@
 Breaking changes:
 -----------------
 
-- set_e0_values has been renamed hierarchical_energy_initialization. The old name is
-  still provided but deprecated, and will be removed.
+- ``set_e0_values`` has been renamed to ``hierarchical_energy_initialization``.
+  The old name is still provided but deprecated, and will be removed.
+- The argument ``restore_db`` has been renamed to ``restart_db``. The affected
+  functions are ``load_checkpoint``, ``load_checkpoint_from_cwd``, and
+  ``restore_checkpoint``.
+- ``database.make_trainvalidtest_split`` now only takes keyword arguments to
+  avoid confusions. Use ``make_trainvalidtest_split(test_size=a, valid_size=b)``
+  instead of ``make_trainvalidtest_split(a, b)``.
+
 
 New Features:
 -------------
