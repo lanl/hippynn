@@ -23,6 +23,7 @@ author = "Nicholas Lubbers et al"
 
 # The full version, including alpha/beta/rc tags
 import hippynn
+
 release = hippynn.__version__
 
 # -- General configuration ---------------------------------------------------
@@ -44,10 +45,11 @@ autodoc_default_options = {
     "no-show-inheritance": True,
     "special-members": "__init__",
 }
-autodoc_member_order = 'bysource'
+autodoc_member_order = "bysource"
 
 
 # The following are highly optional, so we mock them for doc purposes.
+# TODO: Can we programmatically get these from our list of optional dependencies?
 autodoc_mock_imports = ["ase", "h5py", "seqm", "schnetpack", "cupy", "lammps", "numba", "triton", "pytorch_lightning", 'scipy']
 add_module_names = False
 
