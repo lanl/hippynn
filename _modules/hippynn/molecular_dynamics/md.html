@@ -77,6 +77,7 @@
              
   <h1>Source code for hippynn.molecular_dynamics.md</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">singledispatchmethod</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
 
@@ -107,26 +108,20 @@
         <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
         <span class="n">model_input_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(),</span>
         <span class="n">updater</span><span class="p">:</span> <span class="n">VariableUpdater</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">dtype</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param name: name for variable</span>
-<span class="sd">        :type name: str</span>
 <span class="sd">        :param data: dictionary of tracked data in the form `value_name: value`</span>
-<span class="sd">        :type data: dict[str, torch.Tensor]</span>
 <span class="sd">        :param model_input_map: dictionary of correspondences between data tracked by Variable</span>
 <span class="sd">            and inputs to the HIP-NN model in the form</span>
 <span class="sd">            `hipnn-db_name: variable-data-key`, defaults to dict()</span>
-<span class="sd">        :type model_input_map: dict[str, str], optional</span>
 <span class="sd">        :param updater: object which will update the data of the Variable</span>
 <span class="sd">            over the course of the MD simulation, defaults to None</span>
-<span class="sd">        :type updater: VariableUpdater, optional</span>
 <span class="sd">        :param device: device on which to keep data, defaults to None</span>
-<span class="sd">        :type device: torch.device, optional</span>
 <span class="sd">        :param dtype: dtype for float type data, defaults to None</span>
-<span class="sd">        :type dtype: torch.dtype, optional</span>
-<span class="sd">        &quot;&quot;&quot;</span>       
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_input_map</span> <span class="o">=</span> <span class="n">model_input_map</span>
@@ -258,25 +253,22 @@
 
 <div class="viewcode-block" id="VariableUpdater.pre_step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.VariableUpdater.pre_step">[docs]</a>
-    <span class="k">def</span> <span class="nf">pre_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">pre_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates to variables performed during each step of MD simulation before HIPNN model evaluation</span>
 
 <span class="sd">        :param dt: timestep</span>
-<span class="sd">        :type dt: float</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="VariableUpdater.post_step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.VariableUpdater.post_step">[docs]</a>
-    <span class="k">def</span> <span class="nf">post_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">model_outputs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">post_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">model_outputs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates to variables performed during each step of MD simulation after HIPNN model evaluation</span>
 
 <span class="sd">        :param dt: timestep</span>
-<span class="sd">        :type dt: float</span>
 <span class="sd">        :param model_outputs: dictionary of HIPNN model outputs</span>
-<span class="sd">        :type model_outputs: dict</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 </div>
 
@@ -322,28 +314,24 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param force_db_name: key which will correspond to the force on the corresponding Variable</span>
 <span class="sd">            in the HIPNN model output dictionary</span>
-<span class="sd">        :type force_db_name: str</span>
 <span class="sd">        :param units_force: amount of eV equal to one in the units used for force output</span>
 <span class="sd">            of HIPNN model (eg. if force output in kcal, units_force =</span>
 <span class="sd">            ase.units.kcal = 2.6114e22 since 2.6114e22 kcal = 1 eV),</span>
 <span class="sd">            by default ase.units.eV = 1, defaults to ase.units.eV</span>
-<span class="sd">        :type units_force: float, optional</span>
 <span class="sd">        :param units_acc: amount of Ang/fs^2 equal to one in the units used for acceleration</span>
 <span class="sd">            in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to ase.units.Ang/(1.0**2)</span>
-<span class="sd">        :type units_acc: float, optional</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">force_key</span> <span class="o">=</span> <span class="n">force_db_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">force_factor</span> <span class="o">=</span> <span class="n">units_force</span> <span class="o">/</span> <span class="n">units_acc</span></div>
 
 
 <div class="viewcode-block" id="VelocityVerlet.pre_step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.VelocityVerlet.pre_step">[docs]</a>
-    <span class="k">def</span> <span class="nf">pre_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">pre_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates to variables performed during each step of MD simulation before HIPNN model evaluation</span>
 
 <span class="sd">        :param dt: timestep</span>
-<span class="sd">        :type dt: float</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;velocity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;velocity&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;acceleration&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;velocity&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">dt</span>
         <span class="k">try</span><span class="p">:</span>
@@ -354,14 +342,12 @@
 
 <div class="viewcode-block" id="VelocityVerlet.post_step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.VelocityVerlet.post_step">[docs]</a>
-    <span class="k">def</span> <span class="nf">post_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">model_outputs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">post_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">model_outputs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates to variables performed during each step of MD simulation after HIPNN model evaluation</span>
 
 <span class="sd">        :param dt: timestep</span>
-<span class="sd">        :type dt: float</span>
 <span class="sd">        :param model_outputs: dictionary of HIPNN model outputs</span>
-<span class="sd">        :type model_outputs: dict</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;force&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_outputs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">force_key</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;force&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mass&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;acceleration&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;force&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mass&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_factor</span>
@@ -390,29 +376,23 @@
         <span class="n">force_db_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">frix</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">units_force</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">eV</span><span class="p">,</span>
-        <span class="n">units_acc</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">Ang</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span>
-        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">units_force</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">eV</span><span class="p">,</span>
+        <span class="n">units_acc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">Ang</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param force_db_name: key which will correspond to the force on the corresponding Variable</span>
 <span class="sd">            in the HIPNN model output dictionary</span>
-<span class="sd">        :type force_db_name: str</span>
 <span class="sd">        :param temperature: temperature for Langevin algorithm</span>
-<span class="sd">        :type temperature: float</span>
 <span class="sd">        :param frix: friction coefficient for Langevin algorithm</span>
-<span class="sd">        :type frix: float</span>
 <span class="sd">        :param units_force: amount of eV equal to one in the units used for force output</span>
 <span class="sd">            of HIPNN model (eg. if force output in kcal, units_force =</span>
 <span class="sd">            ase.units.kcal = 2.6114e22 since 2.6114e22 kcal = 1 eV),</span>
 <span class="sd">            by default ase.units.eV = 1, defaults to ase.units.eV</span>
-<span class="sd">        :type units_force: float, optional</span>
 <span class="sd">        :param units_acc: amount of Ang/fs^2 equal to one in the units used for acceleration</span>
 <span class="sd">            in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to ase.units.Ang/(1.0**2)</span>
-<span class="sd">        :type units_acc: float, optional</span>
 <span class="sd">        :param seed: used to set seed for reproducibility, defaults to None</span>
-<span class="sd">        :type seed: int, optional</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">force_key</span> <span class="o">=</span> <span class="n">force_db_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">force_factor</span> <span class="o">=</span> <span class="n">units_force</span> <span class="o">/</span> <span class="n">units_acc</span>
@@ -426,12 +406,11 @@
 
 <div class="viewcode-block" id="LangevinDynamics.pre_step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.LangevinDynamics.pre_step">[docs]</a>
-    <span class="k">def</span> <span class="nf">pre_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">pre_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates to variables performed during each step of MD simulation before HIPNN model evaluation</span>
 
 <span class="sd">        :param dt: timestep</span>
-<span class="sd">        :type dt: float</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;velocity&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">dt</span>
 
@@ -444,14 +423,13 @@
 
 <div class="viewcode-block" id="LangevinDynamics.post_step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.LangevinDynamics.post_step">[docs]</a>
-    <span class="k">def</span> <span class="nf">post_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">model_outputs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates to variables performed during each step of MD simulation after HIPNN model evaluation</span>
+    <span class="k">def</span> <span class="nf">post_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">model_outputs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates to variables performed during each step of MD simulation after HIPNN model evaluation</span>
 
 <span class="sd">        :param dt: timestep</span>
-<span class="sd">        :type dt: float</span>
 <span class="sd">        :param model_outputs: dictionary of HIPNN model outputs</span>
-<span class="sd">        :type model_outputs: dict</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;force&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_outputs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">force_key</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
@@ -484,19 +462,15 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">variables</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Variable</span><span class="p">],</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">Predictor</span><span class="p">,</span>
-        <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">dtype</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param variables: list of Variable objects which will be tracked during simulation</span>
-<span class="sd">        :type variables: list[Variable]</span>
 <span class="sd">        :param model: HIPNN Predictor</span>
-<span class="sd">        :type model: Predictor</span>
 <span class="sd">        :param device: device to move variables and model to, defaults to None</span>
-<span class="sd">        :type device: torch.device, optional</span>
 <span class="sd">        :param dtype: dtype to convert all float type variable data and model parameters to, defaults to None</span>
-<span class="sd">        :type dtype: torch.dtype, optional</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="n">variables</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
@@ -624,21 +598,17 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;output_</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;output_</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()[</span><span class="mi">0</span><span class="p">]]</span>
-        
 
 <div class="viewcode-block" id="MolecularDynamics.run">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.MolecularDynamics.run">[docs]</a>
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">record_every</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">record_every</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run `n_steps` of MD algorithm.</span>
 
 <span class="sd">        :param dt: timestep</span>
-<span class="sd">        :type dt: float</span>
 <span class="sd">        :param n_steps: number of steps to execute</span>
-<span class="sd">        :type n_steps: int</span>
 <span class="sd">        :param record_every: frequency at which to store the data at a step in memory,</span>
 <span class="sd">            record_every = 1 means every step will be stored, defaults to None</span>
-<span class="sd">        :type record_every: int, optional</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">progress_bar</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_steps</span><span class="p">)):</span>
             <span class="n">model_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>

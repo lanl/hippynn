@@ -82,7 +82,6 @@
 
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">KDTree</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 
 <span class="kn">from</span> <span class="nn">.open</span> <span class="kn">import</span> <span class="n">PairMemory</span>
@@ -223,11 +222,13 @@
 <div class="viewcode-block" id="neighbor_list_kdtree">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.dispatch.html#hippynn.layers.pairs.dispatch.neighbor_list_kdtree">[docs]</a>
 <span class="k">def</span> <span class="nf">neighbor_list_kdtree</span><span class="p">(</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">cell</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Use KD Tree implementation from scipy.spatial to find pairs under periodic boundary conditions </span>
 <span class="sd">    with an orthorhombic cell.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Dev note: Imports are cached, this will only be slow once.</span>
+    <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">KDTree</span>
+
     <span class="c1"># Verify that cell is orthorhombic</span>
     <span class="n">cell_prod</span> <span class="o">=</span> <span class="n">cell</span> <span class="o">@</span> <span class="n">cell</span><span class="o">.</span><span class="n">T</span>
     <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">cell_prod</span> <span class="o">-</span> <span class="n">torch</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">cell_prod</span><span class="p">))):</span>

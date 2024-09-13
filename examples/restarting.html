@@ -141,6 +141,15 @@ the metrics of the experiment so far. This can be seen by breaking down
 <span class="n">train_model</span><span class="p">(</span><span class="o">**</span><span class="n">check</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In release 0.0.4, the <code class="docutils literal notranslate"><span class="pre">restore_db</span></code> argument has been renamed to
+<code class="docutils literal notranslate"><span class="pre">restart_db</span></code> for internal consistence. <code class="docutils literal notranslate"><span class="pre">restore_db</span></code> in all scripts using
+<cite>hippynn &gt; 0.0.3</cite> should be replaced with <code class="docutils literal notranslate"><span class="pre">restart_db</span></code>. The affected
+functions are <code class="docutils literal notranslate"><span class="pre">load_checkpoint</span></code>, <code class="docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">restore_checkpoint</span></code>. If <cite>hippynn &lt;= 0.0.3</cite> is used, please keep the
+original <code class="docutils literal notranslate"><span class="pre">restore_db</span></code> keyword.</p>
+</div>
 <p>If all you want to do is use a previously trained model, here is how to load the model only:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.experiment.serialization</span> <span class="kn">import</span> <span class="n">load_model_from_cwd</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">load_model_from_cwd</span><span class="p">()</span>

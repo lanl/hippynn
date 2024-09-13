@@ -11,7 +11,7 @@ species atomic symbols (whose order must agree with the order of the training hy
 
 Example::
 
-    bundle = load_checkpoint_from_cwd(map_location="cpu", restore_db=False)
+    bundle = load_checkpoint_from_cwd(map_location="cpu", restart_db=False)
     model = bundle["training_modules"].model
     energy_node = model.node_from_name("HEnergy")
     unified = MLIAPInterface(energy_node, ["Al"], model_device=torch.device("cuda"))

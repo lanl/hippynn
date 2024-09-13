@@ -91,7 +91,7 @@
 
 
 <div class="viewcode-block" id="DirectoryDatabase">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.ondisk.html#hippynn.databases.DirectoryDatabase">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.ondisk.html#hippynn.DirectoryDatabase">[docs]</a>
 <span class="k">class</span> <span class="nc">DirectoryDatabase</span><span class="p">(</span><span class="n">Database</span><span class="p">,</span> <span class="n">Restartable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Database stored as NPY files in a directory.</span>
@@ -109,7 +109,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="DirectoryDatabase.__init__">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.ondisk.html#hippynn.databases.DirectoryDatabase.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.ondisk.html#hippynn.DirectoryDatabase.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1">#if allow_unfound:</span>
         <span class="c1">#    raise ValueError(&quot;DirectoryDatabase class does not support allow_unfound argument.&quot;)</span>
@@ -130,7 +130,7 @@
 
 
 <div class="viewcode-block" id="DirectoryDatabase.get_file_dict">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.ondisk.html#hippynn.databases.DirectoryDatabase.get_file_dict">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.ondisk.html#hippynn.DirectoryDatabase.get_file_dict">[docs]</a>
     <span class="k">def</span> <span class="nf">get_file_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">file_list</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
@@ -153,7 +153,7 @@
 
 
 <div class="viewcode-block" id="DirectoryDatabase.load_arrays">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.ondisk.html#hippynn.databases.DirectoryDatabase.load_arrays">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.ondisk.html#hippynn.DirectoryDatabase.load_arrays">[docs]</a>
     <span class="k">def</span> <span class="nf">load_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="n">var_list</span> <span class="o">=</span> <span class="n">inputs</span> <span class="o">+</span> <span class="n">targets</span>
@@ -191,10 +191,10 @@
 
 
 <div class="viewcode-block" id="NPZDatabase">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.ondisk.html#hippynn.databases.NPZDatabase">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.ondisk.html#hippynn.NPZDatabase">[docs]</a>
 <span class="k">class</span> <span class="nc">NPZDatabase</span><span class="p">(</span><span class="n">Database</span><span class="p">,</span> <span class="n">Restartable</span><span class="p">):</span>
 <div class="viewcode-block" id="NPZDatabase.__init__">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.ondisk.html#hippynn.databases.NPZDatabase.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.ondisk.html#hippynn.NPZDatabase.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_arrays</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span><span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
@@ -204,7 +204,7 @@
 
 
 <div class="viewcode-block" id="NPZDatabase.load_arrays">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.ondisk.html#hippynn.databases.NPZDatabase.load_arrays">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.ondisk.html#hippynn.NPZDatabase.load_arrays">[docs]</a>
     <span class="k">def</span> <span class="nf">load_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="n">arr_dict</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>

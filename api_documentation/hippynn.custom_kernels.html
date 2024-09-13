@@ -51,8 +51,31 @@
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="hippynn.html">hippynn API documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.settings"><code class="docutils literal notranslate"><span class="pre">settings</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.active_directory"><code class="docutils literal notranslate"><span class="pre">active_directory()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.hierarchical_energy_initialization"><code class="docutils literal notranslate"><span class="pre">hierarchical_energy_initialization()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint"><code class="docutils literal notranslate"><span class="pre">load_checkpoint()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_model_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_model_from_cwd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.log_terminal"><code class="docutils literal notranslate"><span class="pre">log_terminal()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.reload_settings"><code class="docutils literal notranslate"><span class="pre">reload_settings()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.set_custom_kernels"><code class="docutils literal notranslate"><span class="pre">set_custom_kernels()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.setup_and_train"><code class="docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.setup_training"><code class="docutils literal notranslate"><span class="pre">setup_training()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.test_model"><code class="docutils literal notranslate"><span class="pre">test_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.train_model"><code class="docutils literal notranslate"><span class="pre">train_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.Database"><code class="docutils literal notranslate"><span class="pre">Database</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.DirectoryDatabase"><code class="docutils literal notranslate"><span class="pre">DirectoryDatabase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.GraphModule"><code class="docutils literal notranslate"><span class="pre">GraphModule</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.IdxType"><code class="docutils literal notranslate"><span class="pre">IdxType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.NPZDatabase"><code class="docutils literal notranslate"><span class="pre">NPZDatabase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.Predictor"><code class="docutils literal notranslate"><span class="pre">Predictor</span></code></a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">hippynn.custom_kernels package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.custom_kernels.CUSTOM_KERNELS_AVAILABLE"><code class="docutils literal notranslate"><span class="pre">CUSTOM_KERNELS_AVAILABLE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE"><code class="docutils literal notranslate"><span class="pre">CUSTOM_KERNELS_ACTIVE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.custom_kernels.CustomKernelError"><code class="docutils literal notranslate"><span class="pre">CustomKernelError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.custom_kernels.populate_custom_kernel_availability"><code class="docutils literal notranslate"><span class="pre">populate_custom_kernel_availability()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.custom_kernels.set_custom_kernels"><code class="docutils literal notranslate"><span class="pre">set_custom_kernels()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.custom_kernels.autograd_wrapper.html">hippynn.custom_kernels.autograd_wrapper module</a></li>
@@ -118,15 +141,58 @@
   <section id="module-hippynn.custom_kernels">
 <span id="hippynn-custom-kernels-package"></span><h1>hippynn.custom_kernels package<a class="headerlink" href="#module-hippynn.custom_kernels" title="Link to this heading"></a></h1>
 <p>Custom Kernels for hip-nn interaction sum.</p>
-<p>This module provides implementations in pytorch, numba, and cupy.</p>
-<p>Pytorch implementations take extra memory, but launch faster than numba kernels.</p>
-<p>Numba kernels use far less memory, but do come with some launching overhead on GPUs.</p>
-<p>Cupy kernels only work on the GPU, but are faster than numba.
-Cupy kernels require numba for CPU operations.</p>
+<p>This module provides implementations in pytorch, numba, cupy, and triton.</p>
+<p>Pytorch implementations take extra memory, but launch faster than numba kernels.
+Numba kernels use far less memory, but do come with some launching overhead on GPUs.
+Cupy kernels only work on the GPU, but are faster than numba.
+Cupy kernels require numba for CPU operations.
+Triton custom kernels only work on the GPU, and are generaly faster than CUPY.
+Triton kernels revert to numba or pytorch as available on module import.</p>
+<p>On import, this module attempts to set the custom kernels as specified by the
+user in hippynn.settings.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="hippynn.custom_kernels.CUSTOM_KERNELS_AVAILABLE">
+<span class="sig-name descname"><span class="pre">CUSTOM_KERNELS_AVAILABLE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#hippynn.custom_kernels.CUSTOM_KERNELS_AVAILABLE" title="Link to this definition"></a></dt>
+<dd><p>The set of custom kernels available, based on currently installed packages and hardware.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE">
+<span class="sig-name descname"><span class="pre">CUSTOM_KERNELS_ACTIVE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE" title="Link to this definition"></a></dt>
+<dd><p>The currently active implementation of custom kernels.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="hippynn.custom_kernels.CustomKernelError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CustomKernelError</span></span><a class="reference internal" href="../_modules/hippynn/custom_kernels.html#CustomKernelError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.CustomKernelError" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.custom_kernels.populate_custom_kernel_availability">
+<span class="sig-name descname"><span class="pre">populate_custom_kernel_availability</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels.html#populate_custom_kernel_availability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.populate_custom_kernel_availability" title="Link to this definition"></a></dt>
+<dd><p>Check available imports and populate the list of available custom kernels.</p>
+<p>This function changes the global variable custom_kernels.CUSTOM_KERNELS_AVAILABLE</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="hippynn.custom_kernels.set_custom_kernels">
 <span class="sig-name descname"><span class="pre">set_custom_kernels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels.html#set_custom_kernels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.set_custom_kernels" title="Link to this definition"></a></dt>
 <dd><p>Activate or deactivate custom kernels for interaction.</p>
+<dl class="simple">
+<dt>This function changes the global variables:</dt><dd><ul class="simple">
+<li><p>custom_kernels.envsum</p></li>
+<li><p>custom_kernels.sensum</p></li>
+<li><p>custom_kernels.featsum</p></li>
+<li><p>custom_kernels.CUSTOM_KERNELS_ACTIVE</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>active</strong> – If true, set custom kernels to the best available. If False, turn them off and default to pytorch.

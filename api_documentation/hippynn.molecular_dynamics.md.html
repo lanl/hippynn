@@ -51,6 +51,25 @@
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="hippynn.html">hippynn API documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.settings"><code class="docutils literal notranslate"><span class="pre">settings</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.active_directory"><code class="docutils literal notranslate"><span class="pre">active_directory()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.hierarchical_energy_initialization"><code class="docutils literal notranslate"><span class="pre">hierarchical_energy_initialization()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint"><code class="docutils literal notranslate"><span class="pre">load_checkpoint()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_model_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_model_from_cwd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.log_terminal"><code class="docutils literal notranslate"><span class="pre">log_terminal()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.reload_settings"><code class="docutils literal notranslate"><span class="pre">reload_settings()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.set_custom_kernels"><code class="docutils literal notranslate"><span class="pre">set_custom_kernels()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.setup_and_train"><code class="docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.setup_training"><code class="docutils literal notranslate"><span class="pre">setup_training()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.test_model"><code class="docutils literal notranslate"><span class="pre">test_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.train_model"><code class="docutils literal notranslate"><span class="pre">train_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.Database"><code class="docutils literal notranslate"><span class="pre">Database</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.DirectoryDatabase"><code class="docutils literal notranslate"><span class="pre">DirectoryDatabase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.GraphModule"><code class="docutils literal notranslate"><span class="pre">GraphModule</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.IdxType"><code class="docutils literal notranslate"><span class="pre">IdxType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.NPZDatabase"><code class="docutils literal notranslate"><span class="pre">NPZDatabase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.Predictor"><code class="docutils literal notranslate"><span class="pre">Predictor</span></code></a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.html">hippynn.custom_kernels package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.html">hippynn.databases package</a></li>
@@ -177,15 +196,15 @@ velocity, acceleration, etc…)</p>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – name for variable</p></li>
-<li><p><strong>data</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>torch.Tensor</em><em>]</em>) – dictionary of tracked data in the form <cite>value_name: value</cite></p></li>
-<li><p><strong>model_input_map</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em><em>, </em><em>optional</em>) – dictionary of correspondences between data tracked by Variable
+<li><p><strong>name</strong> – name for variable</p></li>
+<li><p><strong>data</strong> – dictionary of tracked data in the form <cite>value_name: value</cite></p></li>
+<li><p><strong>model_input_map</strong> – dictionary of correspondences between data tracked by Variable
 and inputs to the HIP-NN model in the form
 <cite>hipnn-db_name: variable-data-key</cite>, defaults to dict()</p></li>
-<li><p><strong>updater</strong> (<a class="reference internal" href="#hippynn.molecular_dynamics.md.VariableUpdater" title="hippynn.molecular_dynamics.md.VariableUpdater"><em>VariableUpdater</em></a><em>, </em><em>optional</em>) – object which will update the data of the Variable
+<li><p><strong>updater</strong> – object which will update the data of the Variable
 over the course of the MD simulation, defaults to None</p></li>
-<li><p><strong>device</strong> (<em>torch.device</em><em>, </em><em>optional</em>) – device on which to keep data, defaults to None</p></li>
-<li><p><strong>dtype</strong> (<em>torch.dtype</em><em>, </em><em>optional</em>) – dtype for float type data, defaults to None</p></li>
+<li><p><strong>device</strong> – device on which to keep data, defaults to None</p></li>
+<li><p><strong>dtype</strong> – dtype for float type data, defaults to None</p></li>
 </ul>
 </dd>
 </dl>
@@ -250,24 +269,24 @@ over the course of the MD simulation, defaults to None</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.molecular_dynamics.md.VariableUpdater.pre_step">
-<span class="sig-name descname"><span class="pre">pre_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/md.html#VariableUpdater.pre_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.md.VariableUpdater.pre_step" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pre_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/md.html#VariableUpdater.pre_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.md.VariableUpdater.pre_step" title="Link to this definition"></a></dt>
 <dd><p>Updates to variables performed during each step of MD simulation before HIPNN model evaluation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>dt</strong> (<em>float</em>) – timestep</p>
+<dd class="field-odd"><p><strong>dt</strong> – timestep</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.molecular_dynamics.md.VariableUpdater.post_step">
-<span class="sig-name descname"><span class="pre">post_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_outputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/md.html#VariableUpdater.post_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.md.VariableUpdater.post_step" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">post_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/md.html#VariableUpdater.post_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.md.VariableUpdater.post_step" title="Link to this definition"></a></dt>
 <dd><p>Updates to variables performed during each step of MD simulation after HIPNN model evaluation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dt</strong> (<em>float</em>) – timestep</p></li>
-<li><p><strong>model_outputs</strong> (<em>dict</em>) – dictionary of HIPNN model outputs</p></li>
+<li><p><strong>dt</strong> – timestep</p></li>
+<li><p><strong>model_outputs</strong> – dictionary of HIPNN model outputs</p></li>
 </ul>
 </dd>
 </dl>
@@ -286,7 +305,7 @@ over the course of the MD simulation, defaults to None</p></li>
 <dd><p>Updates to variables performed during each step of MD simulation before HIPNN model evaluation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>dt</strong> (<em>float</em>) – timestep</p>
+<dd class="field-odd"><p><strong>dt</strong> – timestep</p>
 </dd>
 </dl>
 </dd></dl>
@@ -298,8 +317,8 @@ over the course of the MD simulation, defaults to None</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dt</strong> (<em>float</em>) – timestep</p></li>
-<li><p><strong>model_outputs</strong> (<em>dict</em>) – dictionary of HIPNN model outputs</p></li>
+<li><p><strong>dt</strong> – timestep</p></li>
+<li><p><strong>model_outputs</strong> – dictionary of HIPNN model outputs</p></li>
 </ul>
 </dd>
 </dl>
@@ -323,13 +342,13 @@ over the course of the MD simulation, defaults to None</p></li>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>force_db_name</strong> (<em>str</em>) – key which will correspond to the force on the corresponding Variable
+<li><p><strong>force_db_name</strong> – key which will correspond to the force on the corresponding Variable
 in the HIPNN model output dictionary</p></li>
-<li><p><strong>units_force</strong> (<em>float</em><em>, </em><em>optional</em>) – amount of eV equal to one in the units used for force output
+<li><p><strong>units_force</strong> – amount of eV equal to one in the units used for force output
 of HIPNN model (eg. if force output in kcal, units_force =
 ase.units.kcal = 2.6114e22 since 2.6114e22 kcal = 1 eV),
 by default ase.units.eV = 1, defaults to ase.units.eV</p></li>
-<li><p><strong>units_acc</strong> (<em>float</em><em>, </em><em>optional</em>) – amount of Ang/fs^2 equal to one in the units used for acceleration
+<li><p><strong>units_acc</strong> – amount of Ang/fs^2 equal to one in the units used for acceleration
 in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to ase.units.Ang/(1.0**2)</p></li>
 </ul>
 </dd>
@@ -338,24 +357,24 @@ in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to 
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.molecular_dynamics.md.VelocityVerlet.pre_step">
-<span class="sig-name descname"><span class="pre">pre_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/md.html#VelocityVerlet.pre_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.md.VelocityVerlet.pre_step" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pre_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/md.html#VelocityVerlet.pre_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.md.VelocityVerlet.pre_step" title="Link to this definition"></a></dt>
 <dd><p>Updates to variables performed during each step of MD simulation before HIPNN model evaluation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>dt</strong> (<em>float</em>) – timestep</p>
+<dd class="field-odd"><p><strong>dt</strong> – timestep</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.molecular_dynamics.md.VelocityVerlet.post_step">
-<span class="sig-name descname"><span class="pre">post_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_outputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/md.html#VelocityVerlet.post_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.md.VelocityVerlet.post_step" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">post_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/md.html#VelocityVerlet.post_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.md.VelocityVerlet.post_step" title="Link to this definition"></a></dt>
 <dd><p>Updates to variables performed during each step of MD simulation after HIPNN model evaluation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dt</strong> (<em>float</em>) – timestep</p></li>
-<li><p><strong>model_outputs</strong> (<em>dict</em>) – dictionary of HIPNN model outputs</p></li>
+<li><p><strong>dt</strong> – timestep</p></li>
+<li><p><strong>model_outputs</strong> – dictionary of HIPNN model outputs</p></li>
 </ul>
 </dd>
 </dl>
@@ -365,7 +384,7 @@ in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to 
 
 <dl class="py class">
 <dt class="sig sig-object py" id="hippynn.molecular_dynamics.md.LangevinDynamics">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LangevinDynamics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force_db_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units_acc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/md.html#LangevinDynamics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.md.LangevinDynamics" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LangevinDynamics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force_db_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units_force</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units_acc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/md.html#LangevinDynamics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.md.LangevinDynamics" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#hippynn.molecular_dynamics.md.VariableUpdater" title="hippynn.molecular_dynamics.md.VariableUpdater"><code class="xref py py-class docutils literal notranslate"><span class="pre">VariableUpdater</span></code></a></p>
 <p>Implements the Langevin algorithm</p>
 <dl class="py attribute">
@@ -375,21 +394,21 @@ in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to 
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.molecular_dynamics.md.LangevinDynamics.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force_db_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units_force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units_acc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/md.html#LangevinDynamics.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.md.LangevinDynamics.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force_db_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units_force</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units_acc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/md.html#LangevinDynamics.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.md.LangevinDynamics.__init__" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>force_db_name</strong> (<em>str</em>) – key which will correspond to the force on the corresponding Variable
+<li><p><strong>force_db_name</strong> – key which will correspond to the force on the corresponding Variable
 in the HIPNN model output dictionary</p></li>
-<li><p><strong>temperature</strong> (<em>float</em>) – temperature for Langevin algorithm</p></li>
-<li><p><strong>frix</strong> (<em>float</em>) – friction coefficient for Langevin algorithm</p></li>
-<li><p><strong>units_force</strong> (<em>float</em><em>, </em><em>optional</em>) – amount of eV equal to one in the units used for force output
+<li><p><strong>temperature</strong> – temperature for Langevin algorithm</p></li>
+<li><p><strong>frix</strong> – friction coefficient for Langevin algorithm</p></li>
+<li><p><strong>units_force</strong> – amount of eV equal to one in the units used for force output
 of HIPNN model (eg. if force output in kcal, units_force =
 ase.units.kcal = 2.6114e22 since 2.6114e22 kcal = 1 eV),
 by default ase.units.eV = 1, defaults to ase.units.eV</p></li>
-<li><p><strong>units_acc</strong> (<em>float</em><em>, </em><em>optional</em>) – amount of Ang/fs^2 equal to one in the units used for acceleration
+<li><p><strong>units_acc</strong> – amount of Ang/fs^2 equal to one in the units used for acceleration
 in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to ase.units.Ang/(1.0**2)</p></li>
-<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – used to set seed for reproducibility, defaults to None</p></li>
+<li><p><strong>seed</strong> – used to set seed for reproducibility, defaults to None</p></li>
 </ul>
 </dd>
 </dl>
@@ -397,24 +416,24 @@ in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to 
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.molecular_dynamics.md.LangevinDynamics.pre_step">
-<span class="sig-name descname"><span class="pre">pre_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/md.html#LangevinDynamics.pre_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.md.LangevinDynamics.pre_step" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pre_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/md.html#LangevinDynamics.pre_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.md.LangevinDynamics.pre_step" title="Link to this definition"></a></dt>
 <dd><p>Updates to variables performed during each step of MD simulation before HIPNN model evaluation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>dt</strong> (<em>float</em>) – timestep</p>
+<dd class="field-odd"><p><strong>dt</strong> – timestep</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.molecular_dynamics.md.LangevinDynamics.post_step">
-<span class="sig-name descname"><span class="pre">post_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_outputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/md.html#LangevinDynamics.post_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.md.LangevinDynamics.post_step" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">post_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/md.html#LangevinDynamics.post_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.md.LangevinDynamics.post_step" title="Link to this definition"></a></dt>
 <dd><p>Updates to variables performed during each step of MD simulation after HIPNN model evaluation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dt</strong> (<em>float</em>) – timestep</p></li>
-<li><p><strong>model_outputs</strong> (<em>dict</em>) – dictionary of HIPNN model outputs</p></li>
+<li><p><strong>dt</strong> – timestep</p></li>
+<li><p><strong>model_outputs</strong> – dictionary of HIPNN model outputs</p></li>
 </ul>
 </dd>
 </dl>
@@ -433,10 +452,10 @@ in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to 
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>variables</strong> (<em>list</em><em>[</em><a class="reference internal" href="#hippynn.molecular_dynamics.md.Variable" title="hippynn.molecular_dynamics.md.Variable"><em>Variable</em></a><em>]</em>) – list of Variable objects which will be tracked during simulation</p></li>
-<li><p><strong>model</strong> (<a class="reference internal" href="hippynn.graphs.html#hippynn.graphs.Predictor" title="hippynn.graphs.Predictor"><em>Predictor</em></a>) – HIPNN Predictor</p></li>
-<li><p><strong>device</strong> (<em>torch.device</em><em>, </em><em>optional</em>) – device to move variables and model to, defaults to None</p></li>
-<li><p><strong>dtype</strong> (<em>torch.dtype</em><em>, </em><em>optional</em>) – dtype to convert all float type variable data and model parameters to, defaults to None</p></li>
+<li><p><strong>variables</strong> – list of Variable objects which will be tracked during simulation</p></li>
+<li><p><strong>model</strong> – HIPNN Predictor</p></li>
+<li><p><strong>device</strong> – device to move variables and model to, defaults to None</p></li>
+<li><p><strong>dtype</strong> – dtype to convert all float type variable data and model parameters to, defaults to None</p></li>
 </ul>
 </dd>
 </dl>
@@ -478,9 +497,9 @@ in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to 
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dt</strong> (<em>float</em>) – timestep</p></li>
-<li><p><strong>n_steps</strong> (<em>int</em>) – number of steps to execute</p></li>
-<li><p><strong>record_every</strong> (<em>int</em><em>, </em><em>optional</em>) – frequency at which to store the data at a step in memory,
+<li><p><strong>dt</strong> – timestep</p></li>
+<li><p><strong>n_steps</strong> – number of steps to execute</p></li>
+<li><p><strong>record_every</strong> – frequency at which to store the data at a step in memory,
 record_every = 1 means every step will be stored, defaults to None</p></li>
 </ul>
 </dd>

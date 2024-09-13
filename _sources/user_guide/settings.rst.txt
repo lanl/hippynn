@@ -11,6 +11,7 @@ There are four possible sources for settings.
 3. A file specified by the environment variable `HIPPYNN_LOCAL_RC_FILE`
    which is treated the same as the user rc file.
 4. Environment variables prefixed by ``HIPPYNN_``, e.g. ``HIPPYNN_DEFAULT_PLOT_FILETYPE``.
+5. Arguments passed to :func:`hippynn.reload_settings`.
 
 These three sources are checked in order, so that values in later sources overwrite values
 found in earlier sources.

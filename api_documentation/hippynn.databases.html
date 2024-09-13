@@ -51,6 +51,25 @@
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="hippynn.html">hippynn API documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.settings"><code class="docutils literal notranslate"><span class="pre">settings</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.active_directory"><code class="docutils literal notranslate"><span class="pre">active_directory()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.hierarchical_energy_initialization"><code class="docutils literal notranslate"><span class="pre">hierarchical_energy_initialization()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint"><code class="docutils literal notranslate"><span class="pre">load_checkpoint()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_model_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_model_from_cwd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.log_terminal"><code class="docutils literal notranslate"><span class="pre">log_terminal()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.reload_settings"><code class="docutils literal notranslate"><span class="pre">reload_settings()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.set_custom_kernels"><code class="docutils literal notranslate"><span class="pre">set_custom_kernels()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.setup_and_train"><code class="docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.setup_training"><code class="docutils literal notranslate"><span class="pre">setup_training()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.test_model"><code class="docutils literal notranslate"><span class="pre">test_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.train_model"><code class="docutils literal notranslate"><span class="pre">train_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.Database"><code class="docutils literal notranslate"><span class="pre">Database</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.DirectoryDatabase"><code class="docutils literal notranslate"><span class="pre">DirectoryDatabase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.GraphModule"><code class="docutils literal notranslate"><span class="pre">GraphModule</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.IdxType"><code class="docutils literal notranslate"><span class="pre">IdxType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.NPZDatabase"><code class="docutils literal notranslate"><span class="pre">NPZDatabase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.Predictor"><code class="docutils literal notranslate"><span class="pre">Predictor</span></code></a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.html">hippynn.custom_kernels package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">hippynn.databases package</a><ul>
@@ -317,12 +336,16 @@ When adding to self.splits, this function writes tensors.
 it fails pretty strictly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>split_prefix</strong> – None, use default.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>split_prefix</strong> – None, use default.
+If otherwise, use this prefix to determine what arrays are masks.</p></li>
+<li><p><strong>dry_run</strong> – Only validate that existing split masks are correct; don’t perform splitting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
 </dd>
 </dl>
-<p>If otherwise, use this prefix to determine what arrays are masks.
-:param dry_run: Only validate that existing split masks are correct; don’t perform splitting.
-:return:</p>
 </dd></dl>
 
 <dl class="py method">
@@ -373,7 +396,7 @@ the per_atom and atom_var properties are exclusive; they cannot both be true.</p
 <dt class="sig sig-object py" id="hippynn.databases.Database.write_h5">
 <span class="sig-name descname"><span class="pre">write_h5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h5path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'species'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/databases/database.html#Database.write_h5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.databases.Database.write_h5" title="Link to this definition"></a></dt>
 <dd><p>Write this database to the pyanitools h5 format.
-See <code class="xref py py-func docutils literal notranslate"><span class="pre">hippynn.databases.h5_pyanitools.write_h5()</span></code> for details.</p>
+See <a class="reference internal" href="hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.write_h5" title="hippynn.databases.h5_pyanitools.write_h5"><code class="xref py py-func docutils literal notranslate"><span class="pre">hippynn.databases.h5_pyanitools.write_h5()</span></code></a> for details.</p>
 <p>Note: This function will error if h5py is not installed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -748,7 +771,27 @@ Refer to pytorch documentation for details.</p></li>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html">hippynn.databases.h5_pyanitools module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html">hippynn.databases.h5_pyanitools module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniMethods"><code class="docutils literal notranslate"><span class="pre">PyAniMethods</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniMethods.extract_full_file"><code class="docutils literal notranslate"><span class="pre">PyAniMethods.extract_full_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniMethods.determine_key_structure"><code class="docutils literal notranslate"><span class="pre">PyAniMethods.determine_key_structure()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniMethods.process_batches"><code class="docutils literal notranslate"><span class="pre">PyAniMethods.process_batches()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniMethods.filter_arrays"><code class="docutils literal notranslate"><span class="pre">PyAniMethods.filter_arrays()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniFileDB"><code class="docutils literal notranslate"><span class="pre">PyAniFileDB</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniFileDB.__init__"><code class="docutils literal notranslate"><span class="pre">PyAniFileDB.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniFileDB.load_arrays"><code class="docutils literal notranslate"><span class="pre">PyAniFileDB.load_arrays()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniDirectoryDB"><code class="docutils literal notranslate"><span class="pre">PyAniDirectoryDB</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniDirectoryDB.__init__"><code class="docutils literal notranslate"><span class="pre">PyAniDirectoryDB.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniDirectoryDB.load_arrays"><code class="docutils literal notranslate"><span class="pre">PyAniDirectoryDB.load_arrays()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.write_h5"><code class="docutils literal notranslate"><span class="pre">write_h5()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.databases.ondisk.html">hippynn.databases.ondisk module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.databases.ondisk.html#hippynn.databases.ondisk.DirectoryDatabase"><code class="docutils literal notranslate"><span class="pre">DirectoryDatabase</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.ondisk.html#hippynn.databases.ondisk.DirectoryDatabase.__init__"><code class="docutils literal notranslate"><span class="pre">DirectoryDatabase.__init__()</span></code></a></li>

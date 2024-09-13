@@ -77,25 +77,27 @@
              
   <h1>Source code for hippynn.databases.h5_pyanitools</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Read Databases in the ANI H5 format.</span>
 
-<span class="sd">Note: You will need `pyanitools.py` to be importable to import this module.</span>
+<span class="sd">Read Databases in the pyanitools H5 format.</span>
+
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">pyanitools</span>
-
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">h5py</span>  <span class="c1"># If dependency not available then just fail here.</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 
-<span class="kn">from</span> <span class="nn">..tools</span> <span class="kn">import</span> <span class="n">progress_bar</span><span class="p">,</span> <span class="n">np_of_torchdefaultdtype</span>
-<span class="kn">from</span> <span class="nn">..tools</span> <span class="kn">import</span> <span class="n">pad_np_array_to_length_with_zeros</span> <span class="k">as</span> <span class="n">pad_atoms</span>
+<span class="kn">from</span> <span class="nn">ase.data</span> <span class="kn">import</span> <span class="n">atomic_numbers</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Database</span>
 <span class="kn">from</span> <span class="nn">.restarter</span> <span class="kn">import</span> <span class="n">Restartable</span>
 
-<span class="kn">from</span> <span class="nn">ase.data</span> <span class="kn">import</span> <span class="n">atomic_numbers</span>
+<span class="kn">from</span> <span class="nn">..tools</span> <span class="kn">import</span> <span class="n">progress_bar</span><span class="p">,</span> <span class="n">np_of_torchdefaultdtype</span>
+<span class="kn">from</span> <span class="nn">._ani_reader</span> <span class="kn">import</span> <span class="n">AniDataLoader</span><span class="p">,</span> <span class="n">DataPacker</span>
 
 <span class="n">numpy_map_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">)</span>
 
@@ -111,13 +113,13 @@
     <span class="k">def</span> <span class="nf">extract_full_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">):</span>
         <span class="n">n_atoms_max</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">batches</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">pyanitools</span><span class="o">.</span><span class="n">anidataloader</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">AniDataLoader</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="p">)</span>  <span class="c1"># Engine=core reads the entire file at once.</span>
+        <span class="n">sys_counter</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">progress_bar</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Data Groups&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;group&quot;</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">group_size</span><span class="p">()):</span>
             <span class="n">batch_dict</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">if</span> <span class="n">species_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Species key &#39;</span><span class="si">{</span><span class="n">species_key</span><span class="si">}</span><span class="s2">&#39; not found&#39; in file </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">!</span><span class="se">\n</span><span class="s2">&quot;</span>
-                                 <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Found keys: </span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Species key &#39;</span><span class="si">{</span><span class="n">species_key</span><span class="si">}</span><span class="s2">&#39; not found&#39; in file </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">!</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Found keys: </span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="c1"># Filter things we don&#39;t need</span>
                 <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_IGNORE_KEYS</span><span class="p">:</span>
@@ -128,7 +130,7 @@
 
                 <span class="c1"># Special logic for species</span>
                 <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="n">species_key</span><span class="p">:</span>
-                    <span class="c1"># Groups have the same species, broad-cast out the batch axis</span>
+                    <span class="c1"># Groups have the same species, broadcast out the batch axis</span>
                     <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
                     <span class="c1"># If given as strings, map to atomic elements</span>
                     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="nb">type</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">str_</span><span class="p">):</span>
@@ -136,16 +138,18 @@
 
                     <span class="n">n_atoms_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
+                <span class="n">sys_counter</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">batch_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
 
             <span class="n">batches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">batch_dict</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span></div>
+        <span class="n">sys_count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">sys_counter</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>  <span class="c1"># some variables are batch-wise, but most of these should be the same</span>
+        <span class="k">return</span> <span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">sys_count</span></div>
 
 
 <div class="viewcode-block" id="PyAniMethods.determine_key_structure">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniMethods.determine_key_structure">[docs]</a>
-    <span class="k">def</span> <span class="nf">determine_key_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_list</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">determine_key_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_list</span><span class="p">,</span> <span class="n">sys_count</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine what arrays to pad&quot;&quot;&quot;</span>
         <span class="n">batch</span> <span class="o">=</span> <span class="n">batch_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">n_atoms</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="n">species_key</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -164,6 +168,7 @@
         <span class="c1"># dict of which axes need to be padded;</span>
         <span class="c1"># pad if the array size is equal to the number of atoms along a given axis</span>
         <span class="n">padding_scheme</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">batch</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+        <span class="n">shape_scheme</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">bsize</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">bkey</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">batch</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -178,49 +183,60 @@
                     <span class="k">if</span> <span class="n">this_bsize</span> <span class="o">&gt;</span> <span class="n">bsize</span><span class="p">:</span>
                         <span class="n">bsize</span> <span class="o">=</span> <span class="n">this_bsize</span>
                         <span class="n">bkey</span> <span class="o">=</span> <span class="n">k</span>
+            <span class="n">shape_scheme</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">padding_scheme</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+                <span class="n">shape_scheme</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">axis</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_atoms_max</span>
+            <span class="n">shape_scheme</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">sys_count</span>
 
-        <span class="n">padding_scheme</span><span class="p">[</span><span class="s1">&#39;sys_number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">return</span> <span class="n">padding_scheme</span><span class="p">,</span> <span class="n">bkey</span></div>
+        <span class="n">padding_scheme</span><span class="p">[</span><span class="s2">&quot;sys_number&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">padding_scheme</span><span class="p">,</span> <span class="n">shape_scheme</span><span class="p">,</span> <span class="n">bkey</span></div>
 
 
 <div class="viewcode-block" id="PyAniMethods.process_batches">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniMethods.process_batches">[docs]</a>
-    <span class="k">def</span> <span class="nf">process_batches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">process_batches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">sys_count</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">):</span>
 
-        <span class="c1"># Get padding info and batch size key</span>
-        <span class="n">padding_scheme</span><span class="p">,</span> <span class="n">size_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">determine_key_structure</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="n">species_key</span><span class="p">)</span>
+        <span class="c1"># Get padding abd shape info and batch size key</span>
+        <span class="n">padding_scheme</span><span class="p">,</span> <span class="n">shape_scheme</span><span class="p">,</span> <span class="n">size_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">determine_key_structure</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span> <span class="n">sys_count</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="n">species_key</span><span class="p">)</span>
 
-        <span class="c1"># Pad the arrays</span>
-        <span class="n">padded_batches</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">progress_bar</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Processing Batches&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;batch&quot;</span><span class="p">)):</span>
-            <span class="n">pb</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="n">b</span><span class="p">[</span><span class="s1">&#39;sys_number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">i</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">b</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">bsize</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="n">size_key</span><span class="p">])</span>
-                <span class="c1"># Expand species array to fit batch size</span>
-                <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="n">species_key</span><span class="p">:</span>
-
-                    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">bsize</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
-                <span class="c1"># Perform padding as needed</span>
-                <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">padding_scheme</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
-                    <span class="n">v</span> <span class="o">=</span> <span class="n">pad_atoms</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
-                <span class="k">if</span> <span class="mi">0</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">padding_scheme</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">broadcast_to</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="n">bsize</span><span class="p">,</span> <span class="o">*</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
-
-                <span class="n">pb</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
-
-            <span class="n">padded_batches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pb</span><span class="p">)</span>
+        <span class="c1"># add system numbers to the final arrays</span>
+        <span class="n">shape_scheme</span><span class="p">[</span><span class="s2">&quot;sys_number&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">sys_count</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">batches</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;sys_number&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
 
         <span class="n">arr_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">shape</span> <span class="ow">in</span> <span class="n">shape_scheme</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">batches</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
+            <span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">b</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">pb</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">pb</span> <span class="ow">in</span> <span class="n">padded_batches</span><span class="p">])</span>
-            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">ve</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error occured:&quot;</span><span class="p">,</span><span class="n">ve</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Skipping key:&quot;</span><span class="p">,</span><span class="n">k</span><span class="p">)</span>
-                <span class="k">continue</span>
+        <span class="n">sys_start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">progress_bar</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Processing Batches&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;batch&quot;</span><span class="p">)):</span>
+            <span class="c1"># Get batch metadata</span>
+            <span class="n">n_sys</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="n">size_key</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">b</span><span class="p">[</span><span class="s2">&quot;sys_number&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">i</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+            <span class="n">sys_end</span> <span class="o">=</span> <span class="n">sys_start</span> <span class="o">+</span> <span class="n">n_sys</span>
+            <span class="c1"># n_atoms_batch = b[species_key].shape[1]  # don&#39;t need this!</span>
+
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">b</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+                <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="n">species_key</span><span class="p">:</span>
+                    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">n_sys</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+                <span class="c1"># set up slicing for non-batch axes</span>
+                <span class="n">where</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+                <span class="c1"># add batch slicing</span>
+                <span class="n">where</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">sys_start</span><span class="p">,</span> <span class="n">sys_end</span><span class="p">),</span> <span class="o">*</span><span class="n">where</span><span class="p">)</span>
+
+                <span class="c1"># store array!</span>
+                <span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">where</span><span class="p">]</span> <span class="o">=</span> <span class="n">arr</span>
+
+            <span class="n">sys_start</span> <span class="o">+=</span> <span class="n">n_sys</span>
+
+        <span class="k">if</span> <span class="n">sys_start</span> <span class="o">!=</span> <span class="n">sys_count</span><span class="p">:</span>
+            <span class="c1"># Just in case someone tries to change this code later,</span>
+            <span class="c1"># Here is a consistency check.</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of systems was inconsistent: </span><span class="si">{</span><span class="n">sys_start</span><span class="si">}</span><span class="s2"> vs. </span><span class="si">{</span><span class="n">sys_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">arr_dict</span></div>
 
@@ -254,18 +270,38 @@
 <span class="k">class</span> <span class="nc">PyAniFileDB</span><span class="p">(</span><span class="n">Database</span><span class="p">,</span> <span class="n">PyAniMethods</span><span class="p">,</span> <span class="n">Restartable</span><span class="p">):</span>
 <div class="viewcode-block" id="PyAniFileDB.__init__">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniFileDB.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;core&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param file:</span>
+<span class="sd">        :param inputs:</span>
+<span class="sd">        :param targets:</span>
+<span class="sd">        :param args:</span>
+<span class="sd">        :param allow_unfound:</span>
+<span class="sd">        :param species_key:</span>
+<span class="sd">        :param quiet:</span>
+<span class="sd">        :param driver: h5 file driver.</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="n">targets</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">species_key</span> <span class="o">=</span> <span class="n">species_key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">driver</span> <span class="o">=</span> <span class="n">driver</span>
 
         <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_arrays</span><span class="p">(</span><span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">restarter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_restarter</span><span class="p">(</span>
-            <span class="n">file</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">,</span>
+            <span class="n">file</span><span class="p">,</span>
+            <span class="n">inputs</span><span class="p">,</span>
+            <span class="n">targets</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="n">driver</span><span class="o">=</span><span class="n">driver</span><span class="p">,</span>
+            <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span>
+            <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">,</span>
             <span class="n">species_key</span><span class="o">=</span><span class="n">species_key</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -275,8 +311,8 @@
     <span class="k">def</span> <span class="nf">load_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading arrays from&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
-        <span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_full_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span><span class="n">species_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">species_key</span><span class="p">)</span>
-        <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_batches</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span><span class="n">species_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">species_key</span><span class="p">)</span>
+        <span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">sys_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_full_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">species_key</span><span class="p">)</span>
+        <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_batches</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">sys_count</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">species_key</span><span class="p">)</span>
         <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_arrays</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">arr_dict</span></div>
 </div>
@@ -288,19 +324,31 @@
 <span class="k">class</span> <span class="nc">PyAniDirectoryDB</span><span class="p">(</span><span class="n">Database</span><span class="p">,</span> <span class="n">PyAniMethods</span><span class="p">,</span> <span class="n">Restartable</span><span class="p">):</span>
 <div class="viewcode-block" id="PyAniDirectoryDB.__init__">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniDirectoryDB.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">,</span>
-                 <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">directory</span><span class="p">,</span>
+        <span class="n">inputs</span><span class="p">,</span>
+        <span class="n">targets</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">files</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">,</span>
+        <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;core&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">directory</span> <span class="o">=</span> <span class="n">directory</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">files</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="n">targets</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">species_key</span> <span class="o">=</span> <span class="n">species_key</span>
-        <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_arrays</span><span class="p">(</span><span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">,</span><span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">driver</span> <span class="o">=</span> <span class="n">driver</span>
+
+        <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_arrays</span><span class="p">(</span><span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">restarter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_restarter</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span>
-                                             <span class="n">species_key</span><span class="o">=</span><span class="n">species_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restarter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_restarter</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="n">species_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PyAniDirectoryDB.load_arrays">
@@ -322,17 +370,121 @@
 
         <span class="n">file_batches</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">progress_bar</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Data Files&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;file&quot;</span><span class="p">):</span>
-            <span class="n">file_batches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extract_full_file</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">species_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">species_key</span><span class="p">))</span>
+            <span class="n">file_batches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extract_full_file</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">species_key</span><span class="p">))</span>
 
-        <span class="n">data</span><span class="p">,</span> <span class="n">max_atoms_list</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">file_batches</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">,</span> <span class="n">max_atoms_list</span><span class="p">,</span> <span class="n">sys_count</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">file_batches</span><span class="p">)</span>
 
         <span class="n">n_atoms_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_atoms_list</span><span class="p">)</span>
         <span class="n">batches</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">fb</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">fb</span><span class="p">]</span>
+        <span class="n">sys_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">sys_count</span><span class="p">)</span>
 
-        <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_batches</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span><span class="n">species_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">species_key</span><span class="p">)</span>
+        <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_batches</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">sys_count</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">species_key</span><span class="p">)</span>
         <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_arrays</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">arr_dict</span></div>
 </div>
+
+
+
+<div class="viewcode-block" id="write_h5">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.write_h5">[docs]</a>
+<span class="k">def</span> <span class="nf">write_h5</span><span class="p">(</span>
+    <span class="n">database</span><span class="p">:</span> <span class="n">Database</span><span class="p">,</span>
+    <span class="n">split</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">species_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;species&quot;</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param database: Database to use</span>
+<span class="sd">    :param split:  str, None, or True; selects data split to save.</span>
+<span class="sd">     If None, contents of arr_dict are used.</span>
+<span class="sd">     If True, save all splits and save split masks as well.</span>
+<span class="sd">    :param file: where to save the database. if None, does not save the file.</span>
+<span class="sd">    :param species_key:  the key used for system contents (padding and chemical formulas)</span>
+<span class="sd">    :param overwrite:  boolean; enables over-writing of h5 file.</span>
+<span class="sd">    :return: dictionary of pyanitools-format systems.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">split</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">database</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">write_npz</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">record_split_masks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">split</span> <span class="ow">in</span> <span class="n">database</span><span class="o">.</span><span class="n">splits</span><span class="p">:</span>
+        <span class="n">database</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">split</span><span class="p">]</span>
+        <span class="n">database</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">database</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="k">elif</span> <span class="n">split</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">database</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">arr_dict</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown split variable supplied (must be True, None, or str): </span><span class="si">{</span><span class="n">split</span><span class="si">:</span><span class="s2">s</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Overwriting h5 file:&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                <span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;h5path </span><span class="si">{</span><span class="n">file</span><span class="si">:</span><span class="s2">s</span><span class="si">}</span><span class="s2"> exists.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Saving h5 file:&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+        <span class="n">packer</span> <span class="o">=</span> <span class="n">DataPacker</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">packer</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">db_species</span> <span class="o">=</span> <span class="n">database</span><span class="p">[</span><span class="n">species_key</span><span class="p">]</span>
+    <span class="n">total_systems</span> <span class="o">=</span> <span class="n">db_species</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">n_atoms_max</span> <span class="o">=</span> <span class="n">db_species</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># determine which keys have second shape of N atoms</span>
+    <span class="n">is_atom_var</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">k_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">k_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">n_atoms_max</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">k_arr</span> <span class="ow">in</span> <span class="n">database</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="k">del</span> <span class="n">is_atom_var</span><span class="p">[</span><span class="n">species_key</span><span class="p">]</span>  <span class="c1"># species handled separately</span>
+
+    <span class="c1"># Create the data dictionary</span>
+    <span class="c1"># Maps hashes of system chemical formulas to dictionaries of system information.</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">db_mol_species</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">db_species</span><span class="p">):</span>
+        <span class="c1"># We can append the system data to an existing set of system data</span>
+        <span class="n">mol_n_atom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">db_mol_species</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">db_mol_species</span><span class="p">[</span><span class="n">mol_n_atom</span><span class="p">:])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Malformed species row with non-standard padding: </span><span class="si">{</span><span class="n">db_mol_species</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">db_mol_species</span> <span class="o">=</span> <span class="n">db_mol_species</span><span class="p">[:</span><span class="n">mol_n_atom</span><span class="p">]</span>
+        <span class="n">mhash</span> <span class="o">=</span> <span class="nb">hash</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">db_mol_species</span><span class="p">)</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>  <span class="c1"># molecule hash</span>
+
+        <span class="k">if</span> <span class="n">mhash</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="c1"># need to make a new mol entry in the data for this chemical formula</span>
+            <span class="c1"># the mol dictionary maps a data key to the array for that mol.</span>
+            <span class="c1"># The species key has one value, but the other keys can store batch of values.</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="p">{</span><span class="n">species_key</span><span class="p">:</span> <span class="n">db_mol_species</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">k_is_atom_based</span> <span class="ow">in</span> <span class="n">is_atom_var</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">db_arr</span> <span class="o">=</span> <span class="n">database</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">store_arr</span> <span class="o">=</span> <span class="n">db_arr</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span><span class="n">mol_n_atom</span><span class="p">]</span> <span class="k">if</span> <span class="n">k_is_atom_based</span> <span class="k">else</span> <span class="n">db_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">mol</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">store_arr</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">mhash</span><span class="p">]</span> <span class="o">=</span> <span class="n">mol</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If there is already an entry for this chemical formula, append it to the current one</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">mhash</span><span class="p">]</span>
+            <span class="n">mol_species</span> <span class="o">=</span> <span class="n">mol</span><span class="p">[</span><span class="n">species_key</span><span class="p">]</span>
+            <span class="c1"># First sanity check that the mhash hash we are using is unique, or else BAD.</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">db_mol_species</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">mol_species</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="n">db_mol_species</span> <span class="o">==</span> <span class="n">mol_species</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Error. Hash not unique. You should never see this.&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Now append the system to the set of systems with this chemical formula.</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">k_is_atom_based</span> <span class="ow">in</span> <span class="n">is_atom_var</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">db_arr</span> <span class="o">=</span> <span class="n">database</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">store_arr</span> <span class="o">=</span> <span class="n">db_arr</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span><span class="n">mol_n_atom</span><span class="p">]</span> <span class="k">if</span> <span class="n">k_is_atom_based</span> <span class="k">else</span> <span class="n">db_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">mol</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">store_arr</span><span class="p">)</span>
+
+    <span class="c1"># post-process atom variables into arrays and handle strings.</span>
+    <span class="k">for</span> <span class="n">mhash</span><span class="p">,</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">is_atom_var</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">mol</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mol</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">mol</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">unicode_</span><span class="p">):</span>
+                <span class="n">mol</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">mol</span><span class="p">[</span><span class="n">k</span><span class="p">])]</span>
+                <span class="n">mol</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mol</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+    <span class="c1"># Store data</span>
+    <span class="k">if</span> <span class="n">packer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">packer</span><span class="o">.</span><span class="n">store_data</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="o">**</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="n">packer</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
 
 </pre></div>
 
