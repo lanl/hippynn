@@ -31,7 +31,6 @@ release = hippynn.__version__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ["sphinx.ext.autodoc", "sphinx_rtd_theme", "sphinx.ext.viewcode"]
-add_module_names = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -49,8 +48,8 @@ autodoc_member_order = 'bysource'
 
 
 # The following are highly optional, so we mock them for doc purposes.
-autodoc_mock_imports = ["pyanitools", "seqm", "schnetpack", "cupy", "lammps", "numba", "triton", "pytorch_lightning", 'triton', 'scipy']
-
+autodoc_mock_imports = ["ase", "h5py", "seqm", "schnetpack", "cupy", "lammps", "numba", "triton", "pytorch_lightning", 'scipy']
+add_module_names = False
 
 # -- Options for HTML output -------------------------------------------------
 

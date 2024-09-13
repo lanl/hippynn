@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Optional
 from functools import singledispatchmethod
 from copy import copy
 
@@ -25,26 +26,20 @@ class Variable:
         data: dict[str, torch.Tensor],
         model_input_map: dict[str, str] = dict(),
         updater: VariableUpdater = None,
-        device: torch.device = None,
-        dtype: torch.dtype = None,
+        device: Optional[torch.device] = None,
+        dtype: Optional[torch.dtype] = None,
     ) -> None:
         """
         :param name: name for variable
-        :type name: str
         :param data: dictionary of tracked data in the form `value_name: value`
-        :type data: dict[str, torch.Tensor]
         :param model_input_map: dictionary of correspondences between data tracked by Variable
             and inputs to the HIP-NN model in the form
             `hipnn-db_name: variable-data-key`, defaults to dict()
-        :type model_input_map: dict[str, str], optional
         :param updater: object which will update the data of the Variable
             over the course of the MD simulation, defaults to None
-        :type updater: VariableUpdater, optional
         :param device: device on which to keep data, defaults to None
-        :type device: torch.device, optional
         :param dtype: dtype for float type data, defaults to None
-        :type dtype: torch.dtype, optional
-        """       
+        """
         self.name = name
         self.data = data
         self.model_input_map = model_input_map
@@ -164,22 +159,19 @@ class VariableUpdater:
                 )
         self._variable = variable
 
-    def pre_step(self, dt):
+    def pre_step(self, dt: float):
         """Updates to variables performed during each step of MD simulation before HIPNN model evaluation
 
         :param dt: timestep
-        :type dt: float
         """        
         pass
 
-    def post_step(self, dt, model_outputs):
+    def post_step(self, dt: float, model_outputs: dict):
         """Updates to variables performed during each step of MD simulation after HIPNN model evaluation
 
         :param dt: timestep
-        :type dt: float
         :param model_outputs: dictionary of HIPNN model outputs
-        :type model_outputs: dict
-        """        
+        """
         pass
 
 
@@ -210,25 +202,21 @@ class VelocityVerlet(VariableUpdater):
         """
         :param force_db_name: key which will correspond to the force on the corresponding Variable
             in the HIPNN model output dictionary
-        :type force_db_name: str
         :param units_force: amount of eV equal to one in the units used for force output
             of HIPNN model (eg. if force output in kcal, units_force =
             ase.units.kcal = 2.6114e22 since 2.6114e22 kcal = 1 eV),
             by default ase.units.eV = 1, defaults to ase.units.eV
-        :type units_force: float, optional
         :param units_acc: amount of Ang/fs^2 equal to one in the units used for acceleration
             in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to ase.units.Ang/(1.0**2)
-        :type units_acc: float, optional
-        """        
+        """
         self.force_key = force_db_name
         self.force_factor = units_force / units_acc
 
-    def pre_step(self, dt):
+    def pre_step(self, dt: float):
         """Updates to variables performed during each step of MD simulation before HIPNN model evaluation
 
         :param dt: timestep
-        :type dt: float
-        """        
+        """
         self.variable.data["velocity"] = self.variable.data["velocity"] + 0.5 * dt * self.variable.data["acceleration"]
         self.variable.data["position"] = self.variable.data["position"] + self.variable.data["velocity"] * dt
         try:
@@ -236,14 +224,12 @@ class VelocityVerlet(VariableUpdater):
         except KeyError:
             pass
 
-    def post_step(self, dt, model_outputs):
+    def post_step(self, dt: float, model_outputs: dict):
         """Updates to variables performed during each step of MD simulation after HIPNN model evaluation
 
         :param dt: timestep
-        :type dt: float
         :param model_outputs: dictionary of HIPNN model outputs
-        :type model_outputs: dict
-        """        
+        """
         self.variable.data["force"] = model_outputs[self.force_key].to(self.variable.device)
         if len(self.variable.data["force"].shape) == len(self.variable.data["mass"].shape):
             self.variable.data["acceleration"] = self.variable.data["force"].detach() / self.variable.data["mass"] * self.force_factor
@@ -266,29 +252,23 @@ class LangevinDynamics(VariableUpdater):
         force_db_name: str,
         temperature: float,
         frix: float,
-        units_force=ase.units.eV,
-        units_acc=ase.units.Ang / (1.0**2),
-        seed: int = None,
+        units_force: float = ase.units.eV,
+        units_acc: float = ase.units.Ang / (1.0**2),
+        seed: Optional[int] = None,
     ):
         """
         :param force_db_name: key which will correspond to the force on the corresponding Variable
             in the HIPNN model output dictionary
-        :type force_db_name: str
         :param temperature: temperature for Langevin algorithm
-        :type temperature: float
         :param frix: friction coefficient for Langevin algorithm
-        :type frix: float
         :param units_force: amount of eV equal to one in the units used for force output
             of HIPNN model (eg. if force output in kcal, units_force =
             ase.units.kcal = 2.6114e22 since 2.6114e22 kcal = 1 eV),
             by default ase.units.eV = 1, defaults to ase.units.eV
-        :type units_force: float, optional
         :param units_acc: amount of Ang/fs^2 equal to one in the units used for acceleration
             in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to ase.units.Ang/(1.0**2)
-        :type units_acc: float, optional
         :param seed: used to set seed for reproducibility, defaults to None
-        :type seed: int, optional
-        """        
+        """
 
         self.force_key = force_db_name
         self.force_factor = units_force / units_acc
@@ -299,12 +279,11 @@ class LangevinDynamics(VariableUpdater):
         if seed is not None:
             torch.manual_seed(seed)
 
-    def pre_step(self, dt):
+    def pre_step(self, dt:float):
         """Updates to variables performed during each step of MD simulation before HIPNN model evaluation
 
         :param dt: timestep
-        :type dt: float
-        """        
+        """
 
         self.variable.data["position"] = self.variable.data["position"] + self.variable.data["velocity"] * dt
 
@@ -314,14 +293,13 @@ class LangevinDynamics(VariableUpdater):
                 self.variable.data["unwrapped_position"] = self.variable.data["unwrapped_position"] + self.variable.data["velocity"] * dt
             except KeyError:
                 self.variable.data["unwrapped_position"] = copy(self.variable.data["position"])
-    def post_step(self, dt, model_outputs):
-        """Updates to variables performed during each step of MD simulation after HIPNN model evaluation
+    def post_step(self, dt: float, model_outputs: dict):
+        """
+        Updates to variables performed during each step of MD simulation after HIPNN model evaluation
 
         :param dt: timestep
-        :type dt: float
         :param model_outputs: dictionary of HIPNN model outputs
-        :type model_outputs: dict
-        """        
+        """
 
         self.variable.data["force"] = model_outputs[self.force_key].to(self.variable.device)
 
@@ -348,19 +326,15 @@ class MolecularDynamics:
         self,
         variables: list[Variable],
         model: Predictor,
-        device: torch.device = None,
-        dtype: torch.dtype = None,
+        device: Optional[torch.device] = None,
+        dtype: Optional[torch.dtype] = None,
     ):
         """
         :param variables: list of Variable objects which will be tracked during simulation
-        :type variables: list[Variable]
         :param model: HIPNN Predictor
-        :type model: Predictor
         :param device: device to move variables and model to, defaults to None
-        :type device: torch.device, optional
         :param dtype: dtype to convert all float type variable data and model parameters to, defaults to None
-        :type dtype: torch.dtype, optional
-        """        
+        """
 
         self.variables = variables
         self.model = model
@@ -484,19 +458,15 @@ class MolecularDynamics:
                 self._data[f"output_{key}"].append(value.cpu().detach()[0])
             except KeyError:
                 self._data[f"output_{key}"] = [value.cpu().detach()[0]]
-        
 
-    def run(self, dt: float, n_steps: int, record_every: int = None):
+    def run(self, dt: float, n_steps: int, record_every: Optional[int] = None):
         """Run `n_steps` of MD algorithm.
 
         :param dt: timestep
-        :type dt: float
         :param n_steps: number of steps to execute
-        :type n_steps: int
         :param record_every: frequency at which to store the data at a step in memory,
             record_every = 1 means every step will be stored, defaults to None
-        :type record_every: int, optional
-        """        
+        """
 
         for i in progress_bar(range(n_steps)):
             model_outputs = self._step(dt)

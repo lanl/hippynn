@@ -193,7 +193,6 @@ def load_model_from_cwd(map_location=None, model_device=None, **kwargs) -> Graph
     :param model_device: automatically handle device mapping. Defaults to None, defaults to None
     :type model_device: Union[int, str, torch.device], optional
     :return: model with reloaded parameters
-    :rtype: GraphModule
     """
     mapped, model_device = check_mapping_devices(map_location, model_device)
     kwargs["map_location"] = mapped

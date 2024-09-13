@@ -347,7 +347,7 @@ class Database:
         it fails pretty strictly.
 
         :param split_prefix: None, use default.
-        If otherwise, use this prefix to determine what arrays are masks.
+          If otherwise, use this prefix to determine what arrays are masks.
         :param dry_run: Only validate that existing split masks are correct; don't perform splitting.
         :return:
         """
