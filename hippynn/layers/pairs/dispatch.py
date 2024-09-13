@@ -4,7 +4,6 @@ System-by-system pair finders
 
 from itertools import product
 import numpy as np
-from scipy.spatial import KDTree
 import torch
 
 from .open import PairMemory
@@ -137,11 +136,13 @@ def neighbor_list_torch(cutoff: float, coords, cell):
     return pf, ps, pi
 
 def neighbor_list_kdtree(cutoff, coords, cell):
-    '''
+    """
     Use KD Tree implementation from scipy.spatial to find pairs under periodic boundary conditions 
     with an orthorhombic cell.
-    '''
-    
+    """
+    # Dev note: Imports are cached, this will only be slow once.
+    from scipy.spatial import KDTree
+
     # Verify that cell is orthorhombic
     cell_prod = cell @ cell.T
     if torch.count_nonzero(cell_prod - torch.diag(torch.diag(cell_prod))):

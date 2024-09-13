@@ -43,6 +43,14 @@ or to use the default filenames and load from the current directory::
     check = load_checkpoint_from_cwd()
     train_model(**check, callbacks=None, batch_callbacks=None)
 
+.. note::
+   In release 0.0.4, the ``restore_db`` argument has been renamed to
+   ``restart_db`` for internal consistence. ``restore_db`` in all scripts using 
+   `hippynn > 0.0.3` should be replaced with ``restart_db``. The affected
+   functions are ``load_checkpoint``, ``load_checkpoint_from_cwd``, and
+   ``restore_checkpoint``. If `hippynn <= 0.0.3` is used, please keep the
+   original ``restore_db`` keyword.
+
 If all you want to do is use a previously trained model, here is how to load the model only::
 
     from hippynn.experiment.serialization import load_model_from_cwd

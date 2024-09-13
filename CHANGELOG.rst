@@ -3,8 +3,16 @@
 Breaking changes:
 -----------------
 
-- set_e0_values has been renamed hierarchical_energy_initialization. The old name is
-  still provided but deprecated, and will be removed.
+- ``set_e0_values`` has been renamed to ``hierarchical_energy_initialization``.
+  The old name is still provided but deprecated, and will be removed.
+- The argument ``restore_db`` has been renamed to ``restart_db``. The affected
+  functions are ``load_checkpoint``, ``load_checkpoint_from_cwd``, and
+  ``restore_checkpoint``.
+- ``database.make_trainvalidtest_split`` now only takes keyword arguments to
+  avoid confusions. Use ``make_trainvalidtest_split(test_size=a, valid_size=b)``
+  instead of ``make_trainvalidtest_split(a, b)``.
+- Invalid custom kernel specifications are now errors rather than warnings.
+
 
 New Features:
 -------------
@@ -22,6 +30,7 @@ New Features:
 - Added tool to drastically simplify creating ensemble models. The ensemblized graphs
   are compatible with molecular dynamics codes such ASE and LAMMPS.
 - Added the ability to weight different systems/atoms/bonds in a loss function.
+- Added new function to reload library settings.
 
 
 Improvements:
@@ -35,6 +44,9 @@ Improvements:
   using a library setting.
 - Provide tunable regularization of HIP-NN-TS with an epsilon parameter, and
   set the default to use a better value for epsilon.
+- Improved detection of valid custom kernel implementation.
+- Improved computational efficiency of HIP-NN-TS network.
+
 
 
 Bug Fixes:

@@ -22,9 +22,7 @@ def set_devices(
     Evaluation loss is performed on CPU.
 
     :param model: current model on CPU
-    :type model: GraphModule
     :param loss: current loss module on CPU
-    :type loss: GraphModule
     :param evaluator: evaluator
     :type evaluator: Evaluator
     :param optimizer: optimizer with state dictionary on CPU
