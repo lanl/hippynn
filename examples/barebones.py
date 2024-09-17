@@ -85,6 +85,7 @@ with hippynn.tools.active_directory(netname):
             optimizer=torch.optim.Adam,
             max_epochs=100,
             learning_rate=0.001,
+            #device='mps',
         )
         setup_and_train(
             training_modules=training_modules,

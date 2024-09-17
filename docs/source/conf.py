@@ -25,13 +25,15 @@ author = "Nicholas Lubbers et al"
 import hippynn
 
 release = hippynn.__version__
+version = release
 
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc", "sphinx_rtd_theme", "sphinx.ext.viewcode"]
+extensions = ["sphinx.ext.autodoc", "sphinx_rtd_theme", "sphinx.ext.viewcode", 'sphinx.ext.autosummary', 'sphinxcontrib.bibtex']
+bibtex_bibfiles = ['refs.bib']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -41,17 +43,22 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
-autodoc_default_options = {
-    "no-show-inheritance": True,
-    "special-members": "__init__",
-}
-autodoc_member_order = "bysource"
-
 
 # The following are highly optional, so we mock them for doc purposes.
 # TODO: Can we programmatically get these from our list of optional dependencies?
 autodoc_mock_imports = ["ase", "h5py", "seqm", "schnetpack", "cupy", "lammps", "numba", "triton", "pytorch_lightning", 'scipy']
+
+autosummary_imported_members = False
+autosummary_ignore_module_all = True
+autodoc_default_options = {
+    "no-show-inheritance": True,
+    'imported-members': autosummary_imported_members,
+    'ignore-module-all': autosummary_ignore_module_all,
+}
+autodoc_member_order = "bysource"
+
 add_module_names = False
+
 
 # -- Options for HTML output -------------------------------------------------
 

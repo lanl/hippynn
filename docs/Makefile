@@ -8,7 +8,7 @@ SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
 
-APIDOCOPTS = --separate --implicit-namespaces --module-first -d 5 --templatedir source/_templates
+APIDOCOPTS = --separate --implicit-namespaces --module-first -d 1 --templatedir source/_templates/autodoc/
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -18,10 +18,12 @@ help:
 
 apidoc:
 	@sphinx-apidoc $(APIDOCOPTS) -o source/api_documentation ../hippynn
+
 .PHONY: apidoc
 
 cleanapi:
 	@rm source/api_documentation/hippynn*.rst
+	@rm source/api_summary/hippynn*.rst
 .PHONY: cleanapi
 
 # make sure api_doc is always built first
