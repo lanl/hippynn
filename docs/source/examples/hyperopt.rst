@@ -7,24 +7,28 @@ sequentially (with Ax) or parallelly (with Ax and Ray).
 Prerequisites
 -------------
 
-The packages required to perform this task are `Ax`_ and `ray`_.::
+The packages required to perform this task are `Ax`_ and `ray`_.
+::
 
     conda install -c conda-forge "ray < 2.7.0"
-    pip install ax-platform
+    pip install ax-platform!=0.4.1
 
 .. note::
-   The scripts have been tested with `ax-platform 0.3.1` and `ray 2.3.0`, and
-   some previous versions of the two packages. Unfortunately, several changes
+   The scripts have been tested with `ax-platform 0.4.0` and `ray 2.6.3`, and
+   many previous versions of the two packages. Unfortunately, several changes
    made in recent versions of `ray` will break this script. You should install
    `ray < 2.7.0`. ``pip install`` is recommended by the Ax developers even if
    a conda environment is used.
+
+   As of now (Sep 2024), `ax-platform 0.4.1` is broken. See the `issue`_ here.
+   Please avoid this version in your setup.
 
 .. note::
    If you can update this example and scripts to accommodate the changes in the
    latest Ray package, feel free to submit a pull request.
 
-How it works
-------------
+Typical workflow
+----------------
 
 Ax is a package that can perform Bayesian optimization. With the given parameter
 range, a set of initial trials are generated. Then based on the metrics returned
@@ -35,10 +39,12 @@ parameters and then automatically distribute the trials to available resources.
 With this, we can perform asynchronous parallelized hyperparameter optimization.
 
 
-Ax experiments
-^^^^^^^^^^^^^^
+Create an Ax experiment
+^^^^^^^^^^^^^^^^^^^^^^^
 
-You can create a basic Ax experiment this way::
+You can create a basic Ax experiment this way
+
+.. code-block:: python
 
     from ax.service.ax_client import AxClient
     ax_client = AxClient()
@@ -122,9 +128,11 @@ Training function
 ^^^^^^^^^^^^^^^^^
 
 You only need a minimal change to your existing training script to use it with
-Ax. In most case, you just have to wrap the whole script into a function::
+Ax. In most case, you just have to wrap the whole script into a function
 
-    def training(parameter_a, parameter_b, parameter_c, parameter_d):
+.. code-block:: python
+
+    def training(trial_index, parameter_a, parameter_b, parameter_c, parameter_d):
         # set up the network with the parameters
         ...
         network_params = {
@@ -137,14 +145,15 @@ Ax. In most case, you just have to wrap the whole script into a function::
         )
         # train the network 
         # `metric_tracker` contains the losses from HIPPYNN
-        metric_tracker = train_model(
-        training_modules,
-        database,
-        controller,
-        metric_tracker,
-        callbacks=None,
-        batch_callbacks=None,
-        )
+        with hippynn.tools.active_directory(str(trial_index)): 
+            metric_tracker = train_model(
+            training_modules,
+            database,
+            controller,
+            metric_tracker,
+            callbacks=None,
+            batch_callbacks=None,
+            )
         # return the desired metric to Ax, for example, validation loss
         return {
             "Metric": metric_tracker.best_metric_values["valid"]["Loss"]
@@ -154,16 +163,25 @@ Note how we can utilize the parameters passed in and return **Metric** at the
 end. Apparently, we have the freedom to choose different metrics to return here.
 We can even use mathematically expressions to combine some metrics together.
 
+.. note::
+   Ax does NOT create a directory for a trial. If your training function does
+   not take care of the working directory, all results will be saved into the
+   same folder, i.e., `cwd`. To avoid this, the training function need create an
+   unique path for each trial. In this example, we use the `trial_index` to
+   achieve this purpose. With Ray, this step is NOT necessary.
+
 .. _run-sequential-experiments:
 
 Run sequential experiments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Next, we can run the experiments::
+Next, we can run the experiments
+
+.. code-block:: python
 
     for k in range(30):
         parameter, trial_index = ax_client.get_next_trial()
-        ax_client.complete_trial(trial_index=trial_index, raw_data=training(parameter))
+        ax_client.complete_trial(trial_index=trial_index, raw_data=training(trial_index, **parameter))
         # Save experiment to file as JSON file
         ax_client.save_to_json_file(filepath="hyperopt.json")
     data_frame = ax_client.get_trials_data_frame().sort_values("Metric")
@@ -180,13 +198,16 @@ Asynchronous parallelized optimization with Ray
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To use Ray to distribute the trials across GPUs parallelly, a small update is
-needed for the training function::
+needed for the training function
+
+.. code-block:: python
 
     from ray.air import session
 
 
     def training(parameter_a, parameter_b, parameter_c, parameter_d):
         # setup and train are the same
+        # `with hippynn.tools.active_directory() line` is not needed
         ....
         # instead of return, we use `session.report` to communicate with `ray`
         session.report(
@@ -199,7 +220,10 @@ Instead of a simple `return`, we need the `report` method from `ray.air.session`
 to report the final metric to `ray`.
 
 Also, to run the trials, instead of a loop in :ref:`run-sequential-experiments`,
-we have to use the interfaces between the two packages from `ray`::
+we have to use the interfaces between the two packages from `ray`
+
+.. code-block:: python
+
     from ray.tune.experiment.trial import Trial
     from ray.tune.search import ConcurrencyLimiter
     from ray.tune.search.ax import AxSearch
@@ -245,7 +269,9 @@ Relative import
 """""""""""""""
 
 If you save the training function into a separated file and import it into the
-Ray script, one line has to be added before the trials start,::
+Ray script, one line has to be added before the trials start,
+
+.. code-block:: python
 
    ray.init(runtime_env={"working_dir": "."})
 
@@ -260,7 +286,9 @@ When running `ray.tune`, a set of callback functions can be called during the
 process. Ray has a `documentation`_ on the callback functions. You can build
 your own for your convenience. However, here is a callback function to save
 the json and csv files at the end of each trial and handle failed trials, which
-should cover the most basic functionalities.::
+should cover the most basic functionalities.
+
+.. code-block:: python
 
     from ray.tune.logger import JsonLoggerCallback, LoggerCallback
     
@@ -340,7 +368,7 @@ should cover the most basic functionalities.::
             delta = trial.time_completed - trial.time_run_started
             return int(delta.total_seconds())
 
-To use callback functions, simple add a line in `ray.RunConfig`::
+To use callback functions, simple add a line in ``ray.RunConfig``::
 
     ax_logger = AxLogger(ax_client, "hyperopt_ray.json", "hyperopt.csv")
     run_config=air.RunConfig(
@@ -360,19 +388,25 @@ Restart/extend an experiment
 
 Restarting an experiment or adding additional trials to an experiment share the
 same workflow. The key is the json file saved from the experiment. To reload the 
-experiment state::
+experiment state:
 
+.. code-block:: python
+    
     ax_client = AxClient.load_from_json_file(filepath="hyperopt_ray.json")
 
 Then we can pull new parameters from this experiment, and these parameters will
 be generated based on all finished trials. If more trials need to be added to
-this experiment, simply increase `num_samples` in `ray.tune.TuneConfig`::
+this experiment, simply increase `num_samples` in `ray.tune.TuneConfig`:
+
+.. code-block:: python
 
     # this will end the experiment when 20 trials are finished
     tune_config=tune.TuneConfig(search_alg=algo, num_samples=20)
 
 Sometime, you may want to make changes to the experiment itself when reloading
-the experiment, for example, the search space. This can easily achieved by::
+the experiment, for example, the search space. This can easily achieved by
+
+.. code-block:: python
 
     ax_client.set_search_space(
         [
@@ -407,8 +441,10 @@ after the `ax_client` object is reloaded.
    If the original experiment is not created with this option, there is not much
    we can do.
 
-A full example script is provided in the examples (WIP).
+The example scripts with a modified QM7 training are provided in `examples`_.
 
 .. _ray: https://docs.ray.io/en/latest/
 .. _Ax: https://github.com/facebook/Ax
+.. _issue: https://github.com/facebook/Ax/issues/2711
 .. _documentation: https://docs.ray.io/en/latest/tune/tutorials/tune-metrics.html
+.. _examples: https://github.com/lanl/hippynn/tree/development/examples/hyperparameter_optimization
