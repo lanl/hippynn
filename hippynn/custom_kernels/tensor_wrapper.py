@@ -38,8 +38,8 @@ def _numba_gpu_not_found(*args, **kwargs):
 class NumbaCompatibleTensorFunction:
     def __init__(self):
         if numba.cuda.is_available():
-            self.kernel64 = self.make_kernel(numba.float64)
-            self.kernel32 = self.make_kernel(numba.float32)
+            self.kernel64 = None
+            self.kernel32 = None
         else:
             self.kernel64 = _numba_gpu_not_found
             self.kernel32 = _numba_gpu_not_found
@@ -59,8 +59,12 @@ class NumbaCompatibleTensorFunction:
             with numba.cuda.gpus[dev.index]:
                 numba_args = batch_convert_torch_to_numba(*args)
                 if dtype == torch.float64:
+                    if self.kernel64 is None:
+                        self.kernel64 = self.make_kernel(numba.float64)
                     self.kernel64[launch_bounds](*numba_args)
                 elif dtype == torch.float32:
+                    if self.kernel32 is None:
+                        self.kernel32 = self.make_kernel(numba.float32)
                     self.kernel32[launch_bounds](*numba_args)
                 else:
                     raise ValueError("Bad dtype: {}".format(dtype))

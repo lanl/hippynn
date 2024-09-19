@@ -21,6 +21,8 @@ from .device import set_devices
 from .. import tools
 from .assembly import TrainingModules
 from .step_functions import get_step_function
+from ..databases import Database
+
 
 from .. import custom_kernels
 
@@ -101,7 +103,7 @@ class SetupParams:
 
 def setup_and_train(
     training_modules: TrainingModules,
-    database,
+    database: Database,
     setup_params: SetupParams,
     store_all_better=False,
     store_best=True,
@@ -306,9 +308,7 @@ def train_model(
         print("Finishing up...")
     print("Training phase ended.")
 
-    if store_metrics:
-        with open("training_metrics.pkl", "wb") as pfile:
-            pickle.dump(metric_tracker, pfile)
+    torch.save(metric_tracker, "training_metrics.pt")
 
     best_model = metric_tracker.best_model
     if best_model:
@@ -448,6 +448,7 @@ def training_loop(
         qprint("_" * 50)
         qprint("Epoch {}:".format(epoch))
         tools.print_lr(optimizer)
+        qprint("Batch Size:", controller.batch_size)
 
         qprint(flush=True, end="")
 

@@ -1,5 +1,7 @@
 """
-checkpoint and state generation
+Checkpoint and state generation.
+
+As a user, in most cases you will only need the `load` functions here.
 """
 
 from typing import Tuple, Union
@@ -12,7 +14,7 @@ from ..databases.restarter import Restartable
 from ..graphs import GraphModule
 from ..tools import device_fallback
 from .assembly import TrainingModules
-from .controllers import PatienceController
+from .controllers import Controller
 from .device import set_devices
 from .metric_tracker import MetricTracker
 
@@ -21,13 +23,13 @@ DEFAULT_STRUCTURE_FNAME = "experiment_structure.pt"
 
 def create_state(
     model: GraphModule,
-    controller: PatienceController,
+    controller: Controller,
     metric_tracker: MetricTracker,
 ) -> dict:
     """Create an experiment state dictionary.
 
     :param model: current model
-    :param controller: patience controller
+    :param controller:  controller
     :param metric_tracker: current metrics
     :return: dictionary containing experiment state.
     :rtype: dict
@@ -43,7 +45,7 @@ def create_state(
 def create_structure_file(
     training_modules: TrainingModules,
     database: Database,
-    controller: PatienceController,
+    controller: Controller,
     fname=DEFAULT_STRUCTURE_FNAME,
 ) -> None:
     """
@@ -51,7 +53,7 @@ def create_structure_file(
 
     :param training_modules: contains model, controller, and loss
     :param database: database for training
-    :param controller: patience controller
+    :param controller: controller
     :param fname: filename to save the checkpoint
 
     :return: None
@@ -138,7 +140,7 @@ def load_checkpoint(
 
     :param structure_fname: name of the structure file
     :param state_fname: name of the state file
-    :param restart_db: restore database or not, defaults to True
+    :param restart_db: restore database or not, defaults to False
     :param map_location: device mapping argument for ``torch.load``, defaults to None
     :param model_device: automatically handle device mapping. Defaults to None, defaults to None
     :return: experiment structure
@@ -191,7 +193,6 @@ def load_model_from_cwd(map_location=None, model_device=None, **kwargs) -> Graph
     :param model_device: automatically handle device mapping. Defaults to None, defaults to None
     :type model_device: Union[int, str, torch.device], optional
     :return: model with reloaded parameters
-    :rtype: GraphModule
     """
     mapped, model_device = check_mapping_devices(map_location, model_device)
     kwargs["map_location"] = mapped

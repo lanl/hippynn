@@ -50,7 +50,8 @@ def compute_evaluation_order(all_nodes):
 
     evaluation_inputs_list = []
     evaluation_outputs_list = []
-    unsatisfied_nodes = all_nodes.copy()
+    # need to sort to get stable results between runs/processes.
+    unsatisfied_nodes = list(sorted(all_nodes, key=lambda node: node.name))
     satisfied_nodes = set()
     n = -1
     while len(unsatisfied_nodes) > 0:

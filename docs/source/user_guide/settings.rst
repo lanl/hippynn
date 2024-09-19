@@ -11,6 +11,7 @@ There are four possible sources for settings.
 3. A file specified by the environment variable `HIPPYNN_LOCAL_RC_FILE`
    which is treated the same as the user rc file.
 4. Environment variables prefixed by ``HIPPYNN_``, e.g. ``HIPPYNN_DEFAULT_PLOT_FILETYPE``.
+5. Arguments passed to :func:`hippynn.reload_settings`.
 
 These three sources are checked in order, so that values in later sources overwrite values
 found in earlier sources.
@@ -31,7 +32,7 @@ The following settings are available:
      - Dynamic
    * - PROGRESS
      - Progress bars function during training, evaluation, and prediction
-     - tqdm, none
+     - tqdm, none, or floating point string specifying default update rate in seconds (default 1).
      - tqdm
      - Yes, but assign this to a generator-wrapper such as ``tqdm.tqdm``, or with a python ``None`` to disable. The wrapper must accept ``tqdm`` arguments, although it technically doesn't have to do anything with them.
    * - DEFAULT_PLOT_FILETYPE
@@ -69,3 +70,8 @@ The following settings are available:
      - float between 0 and 1
      - 1.0
      - no
+   * - TIMEPLOT_AUTOSCALING
+     - If True, only provide log-scaled plots of training quantities over time if warranted by the data. If False, always produce all plots in linear, log, and loglog scales.
+     - bool
+     - True
+     - yes

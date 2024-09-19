@@ -1,6 +1,8 @@
 """
 Base database functionality from dictionary of numpy arrays
 """
+
+from typing import Union
 import warnings
 import numpy as np
 import torch
@@ -13,6 +15,7 @@ from torch.utils.data import DataLoader, TensorDataset, Subset
 
 _AUTO_SPLIT_PREFIX = "split_mask_"
 
+
 class Database:
     """
     Class for holding a pytorch dataset, splitting it, generating dataloaders, etc."
@@ -20,17 +23,18 @@ class Database:
 
     def __init__(
         self,
-        arr_dict,
-        inputs,
-        targets,
-        seed,
-        test_size=None,
-        valid_size=None,
-        num_workers=0,
-        pin_memory=True,
-        allow_unfound=False,
-        auto_split=False,
-        device=None,
+        arr_dict: dict[str, np.ndarray],
+        inputs: list[str],
+        targets: list[str],
+        seed: [int, np.random.RandomState, tuple],
+        test_size: Union[float, int] = None,
+        valid_size: Union[float, int] = None,
+        num_workers: int = 0,
+        pin_memory: bool = True,
+        allow_unfound: bool = False,
+        auto_split: bool = False,
+        device: torch.device = None,
+        dataloader_kwargs: dict[str, object] = None,
         quiet=False,
     ):
         """
@@ -47,10 +51,13 @@ class Database:
         :param allow_unfound: If true, skip checking if the needed inputs and targets are found.
            This allows setting inputs=None and/or targets=None.
         :param auto_split: If true, look for keys like "split_*" to make initial splits from. See write_npz() method.
+        :param device: if set, move the dataset to this device after splitting.
+        :param dataloader_kwargs: dictionary, passed to pytorch dataloaders in addition to num_workers, pin_memory.
+           Refer to pytorch documentation for details.
         :param quiet: If True, print little or nothing while loading.
         """
 
-        # Restartable Children of this class should change this after super().__init__ .
+        # Restartable Children of this class should change this after calling super().__init__() .
         self.restarter = NoRestart()
 
         self.inputs = inputs
@@ -69,10 +76,11 @@ class Database:
             _var_list = self.var_list
         except RuntimeError:
             if not quiet:
-                print("Database inputs and/or targets not specified. "
-                      "The database will not be checked against and model inputs and targets (db_info).")
+                print(
+                    "Database inputs and/or targets not specified. "
+                    "The database will not be checked against and model inputs and targets (db_info)."
+                )
             _var_list = []
-
 
         for k in _var_list:
             if k not in arr_dict and k not in ("indices", "split_indices"):
@@ -107,13 +115,15 @@ class Database:
 
         if self.auto_split:
             if test_size is not None or valid_size is not None:
-                warnings.warn(f"Auto split was set but test and valid size was also set."
-                              f" Ignoring supplied test and validation sizes ({test_size} and {valid_size}.")
+                warnings.warn(
+                    f"Auto split was set but test and valid size was also set."
+                    f" Ignoring supplied test and validation sizes ({test_size} and {valid_size}."
+                )
             self.make_automatic_splits()
 
         if test_size is not None or valid_size is not None:
             if test_size is None or valid_size is None:
-                raise ValueError("Both test and valid size must be set for auto-splitting based on fractions")
+                raise ValueError("Both test_size and valid_size must be set for splitting when creating a database.")
             else:
                 self.make_trainvalidtest_split(test_size=test_size, valid_size=valid_size)
 
@@ -122,6 +132,8 @@ class Database:
                 raise ValueError("Device cannot be set in constructor unless automatic split provided.")
             else:
                 self.send_to_device(device)
+
+        self.dataloader_kwargs = dataloader_kwargs.copy() if dataloader_kwargs else {}
 
     def __len__(self):
         return arrdict_len(self.arr_dict)
@@ -134,10 +146,15 @@ class Database:
             raise RuntimeError(f"Database inputs not defined, set {Database}.targets.")
         return self.inputs + self.targets
 
-    def send_to_device(self, device=None):
+    def send_to_device(self, device: torch.device = None):
         """
         Move the database to an accelerator device if possible.
         In some circumstances this can accelerate training.
+
+        .. Note::
+           If the database is moved to a GPU,
+           pin_memory will be set to False
+           and num_workers will be set to 0.
 
         :param device: device to move to, if None, try to auto-detect.
         :return:
@@ -159,11 +176,13 @@ class Database:
         for split, arrdict in self.splits.items():
             for k in arrdict:
                 arrdict[k] = arrdict[k].to(device)
+        return
 
-    def make_random_split(self, evaluation_mode, split_size):
+    def make_random_split(self, split_name: str, split_size: Union[int, float]):
         """
+        Make a random split using self.random_state to select items.
 
-        :param evaluation_mode: String naming the split, can be anything, but 'train', 'valid', and 'test' are special.s
+        :param split_name: String naming the split, can be anything, but 'train', 'valid', and 'test' are special.
         :param split_size: int (number of items) or float<1, fraction of samples.
         :return:
         """
@@ -177,9 +196,25 @@ class Database:
 
         split_indices.sort()
 
-        return self.make_explicit_split(evaluation_mode, split_indices)
+        return self.make_explicit_split(split_name, split_indices)
 
-    def make_trainvalidtest_split(self, test_size, valid_size):
+    def make_trainvalidtest_split(self, *, test_size: Union[int, float], valid_size: Union[int, float]):
+        """
+        Make a split for train, valid, and test out of any remaining unsplit entries in the database.
+        The size is specified in terms of test and valid splits; the train split will be the remainder.
+
+        If you wish to specify precise rows for each split, see `make_explict_split`
+        or `make_explicit_split_bool`.
+
+        This function takes keyword-arguments only in order to prevent confusion over which
+        size is which.
+
+        The types of both test_size and valid_size parameters must match.
+
+        :param test_size: int (count) or float (fraction) of data to assign to test split
+        :param valid_size: int (count) or float (fraction) of data to assign to valid split
+        :return: None
+        """
         if self.splitting_completed:
             raise RuntimeError("Database already split!")
 
@@ -188,19 +223,18 @@ class Database:
                 raise ValueError("If train or valid size is set as a fraction, then set test_size as a fraction")
             else:
                 if valid_size + test_size > 1:
-                    raise ValueError(
-                        f"Test fraction ({test_size}) plus valid fraction " f"({valid_size}) are greater than 1!"
-                    )
+                    raise ValueError(f"Test fraction ({test_size}) plus valid fraction " f"({valid_size}) are greater than 1!")
                 valid_size /= 1 - test_size
 
         self.make_random_split("test", test_size)
         self.make_random_split("valid", valid_size)
         self.split_the_rest("train")
+        return
 
-    def make_explicit_split(self, evaluation_mode, split_indices):
+    def make_explicit_split(self, split_name:str, split_indices: np.ndarray):
         """
 
-        :param evaluation_mode: name for split, typically 'train', 'valid', 'test'
+        :param split_name: name for split, typically 'train', 'valid', 'test'
         :param split_indices: the indices of the items for the split
         :return:
         """
@@ -219,18 +253,18 @@ class Database:
         where_complement = np.where(complement_mask)
 
         # Split off data, and keep the rest.
-        self.splits[evaluation_mode] = {k: torch.from_numpy(self.arr_dict[k][where_index]) for k in self.arr_dict}
-        if "split_indices" not in self.splits[evaluation_mode]:
+        self.splits[split_name] = {k: torch.from_numpy(self.arr_dict[k][where_index]) for k in self.arr_dict}
+        if "split_indices" not in self.splits[split_name]:
             if not self.quiet:
-                print(f"Adding split indices for split: {evaluation_mode}")
-            self.splits[evaluation_mode]["split_indices"] = torch.arange(len(split_indices), dtype=torch.int64)
+                print(f"Adding split indices for split: {split_name}")
+            self.splits[split_name]["split_indices"] = torch.arange(len(split_indices), dtype=torch.int64)
 
         for k, v in self.arr_dict.items():
             self.arr_dict[k] = v[where_complement]
 
         if not self.quiet:
-            print(f"Arrays for split: {evaluation_mode}")
-            prettyprint_arrays(self.splits[evaluation_mode])
+            print(f"Arrays for split: {split_name}")
+            prettyprint_arrays(self.splits[split_name])
 
         if arrdict_len(self.arr_dict) == 0:
             if not self.quiet:
@@ -238,25 +272,28 @@ class Database:
             self.splitting_completed = True
         return
 
-    def make_explicit_split_bool(self, evaluation_mode, split_mask):
+    def make_explicit_split_bool(self, split_name: str,
+                                 split_mask: Union[np.ndarray, torch.tensor]):
         """
 
-        :param evaluation_mode: name for split, typically 'train', 'valid', 'test'
+        :param split_name: name for split, typically 'train', 'valid', 'test'
         :param split_mask: a boolean array for where to split
         :return:
         """
+        if isinstance(split_mask, torch.tensor):
+            split_mask = split_mask.numpy()
         if split_mask.dtype != np.bool_:
             if not np.isin(split_mask, [0, 1]).all():
                 raise ValueError(f"Mask function contains invalid values. Values found: {np.unique(split_mask)}")
             else:
                 split_mask = split_mask.astype(np.bool_)
 
-        indices = self.arr_dict['indices'][split_mask]
-        self.make_explicit_split(evaluation_mode, indices)
+        indices = self.arr_dict["indices"][split_mask]
+        self.make_explicit_split(split_name, indices)
         return
 
-    def split_the_rest(self, evaluation_mode):
-        self.make_explicit_split(evaluation_mode, self.arr_dict["indices"])
+    def split_the_rest(self, split_name: str):
+        self.make_explicit_split(split_name, self.arr_dict["indices"])
         self.splitting_completed = True
         return
 
@@ -288,9 +325,9 @@ class Database:
             for sprime, split in self.splits.items():
 
                 if sprime == s:
-                    mask = np.ones_like(split['indices'], dtype=np.bool_)
+                    mask = np.ones_like(split["indices"], dtype=np.bool_)
                 else:
-                    mask = np.zeros_like(split['indices'], dtype=np.bool_)
+                    mask = np.zeros_like(split["indices"], dtype=np.bool_)
 
                 if write_tensor:
                     mask = torch.as_tensor(mask)
@@ -310,7 +347,7 @@ class Database:
         it fails pretty strictly.
 
         :param split_prefix: None, use default.
-        If otherwise, use this prefix to determine what arrays are masks.
+          If otherwise, use this prefix to determine what arrays are masks.
         :param dry_run: Only validate that existing split masks are correct; don't perform splitting.
         :return:
         """
@@ -328,7 +365,7 @@ class Database:
             if k.startswith(split_prefix):
                 if arr.ndim != 1:
                     raise ValueError(f"Split mask for '{k}' has too many dimensions. Shape: {arr.shape=}")
-                if arr.dtype == np.dtype('bool'):
+                if arr.dtype == np.dtype("bool"):
                     mask_vars.add(k)
                 elif arr.dtype is np.int and arr.ndim == 1:
                     if np.isin(arr, [0, 1]).all():
@@ -342,7 +379,7 @@ class Database:
         if not len(mask_vars):
             raise ValueError("No split mask detected.")
 
-        masks = {k[len(split_prefix):]: self.arr_dict[k].astype(bool) for k in mask_vars}
+        masks = {k[len(split_prefix) :]: self.arr_dict[k].astype(bool) for k in mask_vars}
 
         if not self.quiet:
             print("Auto-detected splits:", list(masks.keys()))
@@ -361,13 +398,15 @@ class Database:
             mask_counts += arr.astype(int)
         if not (mask_counts == 1).all():
             set_of_counts = set(mask_counts)
-            raise ValueError(f" Auto-splitting requires unique split for each item." +
-                             f" Items with the following split counts were detected: {set_of_counts}")
+            raise ValueError(
+                f" Auto-splitting requires unique split for each item."
+                + f" Items with the following split counts were detected: {set_of_counts}"
+            )
 
         if dry_run:
             return
 
-        masks = {k: self.arr_dict['indices'][m] for k, m in masks.items()}
+        masks = {k: self.arr_dict["indices"][m] for k, m in masks.items()}
         for k, m in masks.items():
             self.make_explicit_split(k, m)
 
@@ -380,11 +419,18 @@ class Database:
 
         return
 
-    def make_generator(self, split_type, evaluation_mode, batch_size=None, subsample=False):
+    def make_generator(self,
+                       split_name: str,
+                       evaluation_mode: str,
+                       batch_size: Union[int, None] = None,
+                       subsample: Union[float, bool] = False
+                       ):
         """
         Makes a dataloader for the given type of split and evaluation mode of the model.
 
-        :param split_type: str; "train", "valid", or "test" ; selects data to use
+        In most cases, you do not need to call this function directly as a user.
+
+        :param split_name: str; "train", "valid", or "test" ; selects data to use
         :param evaluation_mode: str; "train" or "eval". Used for whether to shuffle.
         :param batch_size: passed to pytorch
         :param subsample: fraction to subsample
@@ -394,16 +440,14 @@ class Database:
         if not self.splitting_completed:
             raise ValueError("Database has not yet been split.")
 
-        if split_type not in self.splits:
-            raise ValueError(f"Split {split_type} Invalid. Current splits:{list(self.splits.keys())}")
+        if split_name not in self.splits:
+            raise ValueError(f"Split {split_name} Invalid. Current splits:{list(self.splits.keys())}")
 
-        data = [self.splits[split_type][k] for k in self.var_list]
+        data = [self.splits[split_name][k] for k in self.var_list]
 
         if evaluation_mode == "train":
-            if split_type != "train":
-                raise ValueError(
-                    "evaluation mode 'train' can only be used with training data." "(got {})".format(split_type)
-                )
+            if split_name != "train":
+                raise ValueError("evaluation mode 'train' can only be used with training data." "(got {})".format(split_name))
             shuffle = True
         elif evaluation_mode == "eval":
             shuffle = False
@@ -415,9 +459,7 @@ class Database:
             n_total = data[0].shape[0]
             n_selected = int(n_total * subsample)
             sampled_indices = torch.argsort(torch.rand(n_total))[:n_selected]
-            # sampled_indices = torch.rand(data[0].shape[0]) < subsample
             dataset = Subset(dataset, sampled_indices)
-            # data = [a[sampled_indices] for a in data]
 
         generator = DataLoader(
             dataset,
@@ -425,6 +467,7 @@ class Database:
             shuffle=shuffle,
             pin_memory=self.pin_memory,
             num_workers=self.num_workers,
+            **self.dataloader_kwargs,
         )
 
         return generator
@@ -454,8 +497,8 @@ class Database:
             n_atoms = (self.arr_dict[species_key] > 0).sum(axis=1)
             # Transposes broadcast the result rightwards instead of leftwards.
             # numpy transpose on higher-order arrays reverses all dimensions.
-            prop = (prop.T/n_atoms).T
-            stat_prop = (stat_prop.T/n_atoms).T
+            prop = (prop.T / n_atoms).T
+            stat_prop = (stat_prop.T / n_atoms).T
 
         mean = stat_prop.mean()
         std = stat_prop.std()
@@ -464,8 +507,16 @@ class Database:
 
         return prop, mean, std
 
-
-    def remove_high_property(self, key, atomwise, norm_per_atom=False, species_key=None, cut=None, std_factor=10, norm_axis=None):
+    def remove_high_property(
+        self,
+        key: str,
+        atomwise: bool,
+        norm_per_atom: bool = False,
+        species_key: str = None,
+        cut: Union[float, None] = None,
+        std_factor: Union[float, None] = 10,
+        norm_axis: Union[int, None] = None,
+    ):
         """
         For removing outliers from a dataset. Use with caution; do not inadvertently remove outliers from benchmarks!
 
@@ -496,7 +547,7 @@ class Database:
 
         if std_factor is not None:
             prop, mean, std = self._array_stat_helper(key, species_key, atomwise, norm_per_atom, norm_axis)
-            large_property_mask = np.abs(prop - mean)/std > std_factor
+            large_property_mask = np.abs(prop - mean) / std > std_factor
             # Scan over all non-batch indices.
             non_batch_axes = tuple(range(1, prop.ndim))
             drop_mask = np.sum(large_property_mask, axis=non_batch_axes) > 0
@@ -505,7 +556,23 @@ class Database:
                 print(f"Removed {drop_mask.astype(int).sum()} outlier systems in variable {key} due to std. factor.")
                 self.make_explicit_split(f"failed_std_fac_{key}", indices)
 
-    def write_h5(self, split=None, h5path=None, species_key='species', overwrite=False):
+    def write_h5(self,
+                 split: Union[str, None] = None,
+                 h5path: Union[str, None] = None,
+                 species_key: str = "species",
+                 overwrite:bool = False):
+        """
+        Write this database to the pyanitools h5 format.
+        See :func:`hippynn.databases.h5_pyanitools.write_h5` for details.
+
+        Note: This function will error if h5py is not installed.
+
+        :param split:
+        :param h5path:
+        :param species_key:
+        :param overwrite:
+        :return:
+        """
 
         try:
             from .h5_pyanitools import write_h5 as write_h5_function
@@ -514,32 +581,40 @@ class Database:
 
         return write_h5_function(self, split=split, file=h5path, species_key=species_key, overwrite=overwrite)
 
-    def write_npz(self, file: str, record_split_masks: bool = True, overwrite: bool = False, split_prefix=None, return_only=False):
+    def write_npz(
+        self,
+        file: str,
+        record_split_masks: bool = True,
+        compressed: bool = True,
+        overwrite: bool = False,
+        split_prefix: Union[str, None] = None,
+        return_only: bool = False,
+    ):
         """
         :param file: str, Path, or file object compatible with np.save
-        :param record_split_masks: 
+        :param record_split_masks: whether to generate and place masks for the splits into the saved database.
+        :param compressed: whether to use np.savez_compressed (True) or np.savez
         :param overwrite: Whether to accept an existing path. Only used if fname is str or path.
-        :param split_prefix: optionally change the prefix for the masks computed by the splits.
+        :param split_prefix: optionally override the prefix for the masks computed by the splits.
         :param return_only: if True, ignore the file string and just return the resulting dictionary of numpy arrays.
-        :return: 
+        :return:
         """
         if split_prefix is None:
             split_prefix = _AUTO_SPLIT_PREFIX
         if not self.splitting_completed:
-            raise ValueError("Cannot write an incompletely split database to npz file.\n" +
-                             "You can split the rest using `database.split_the_rest('other_data')`\n" +
-                             "to put the remaining data into a new split named 'other_data'")
+            raise ValueError(
+                "Cannot write an incompletely split database to npz file.\n"
+                + "You can split the rest using `database.split_the_rest('other_data')`\n"
+                + "to put the remaining data into a new split named 'other_data'"
+            )
 
         # get combined dictionary of arrays.
-        np_dict = {sname:
-                       {arr_name: array.to('cpu').numpy() for arr_name, array in split.items()}
-                   for sname, split in self.splits.items()}
+        np_dict = {sname: {arr_name: array.to("cpu").numpy() for arr_name, array in split.items()} for sname, split in self.splits.items()}
 
         # insert split masks if requested.
 
         if record_split_masks:
             self.add_split_masks(dict_to_add_to=np_dict, split_prefix=split_prefix)
-
 
         # Stack numpy arrays:
         arr_dict = {}
@@ -561,14 +636,19 @@ class Database:
             if file.exists() and not overwrite:
                 raise FileExistsError(f"File exists: {file}")
 
-        np.savez_compressed(file, **arr_dict)
+        if compressed:
+            np.savez_compressed(file, **arr_dict)
+        else:
+            np.savez(file, **arr_dict)
 
         return arr_dict
 
-    def sort_by_index(self, index_name='indices'):
+    def sort_by_index(self, index_name: str = "indices"):
         """
+
         Sort arrays in each split of the database by an index key.
-         The default is 'indices', also possible is 'split_indices', or any other variable name in the database.
+
+        The default is 'indices', also possible is 'split_indices', or any other variable name in the database.
 
         :param index_name:
         :return: None
@@ -580,12 +660,14 @@ class Database:
             for k, v in split.items():
                 split[k] = v[ind_order]
 
-    def trim_by_species(self, species_key: str, keep_splits_same_size: bool =True):
+    def trim_by_species(self, species_key: str, keep_splits_same_size: bool = True):
         """
         Remove any excess padding in a database.
+
         :param species_key: what array to use to mark atom presence.
-        :param keep_splits_same_size: true: trim by the minimum amount across splits, false:  trim by the maximum amount for each split.
-        :return:
+        :param keep_splits_same_size: true: trim by the minimum amount across splits,
+          false:  trim by the maximum amount for each split.
+        :return: None
         """
         if not self.splitting_completed:
             raise ValueError("Cannot trim arrays until splitting has been completed.")
@@ -641,7 +723,12 @@ class Database:
 
         return
 
-    def get_device(self):
+    def get_device(self) -> torch.device:
+        """
+        Determine what device the database resides on. Raises ValueError if multiple devices are encountered.
+
+        :return: device.
+        """
         if not self.splitting_completed:
             raise ValueError("Device should not be changed before splitting is complete.")
 
@@ -652,11 +739,15 @@ class Database:
         device = devices.pop()
         return device
 
-    def make_database_cache(self, file="./hippynn_db_cache.npz", overwrite=False, **override_kwargs):
+    def make_database_cache(self, file: str = "./hippynn_db_cache.npz", overwrite: bool = False, **override_kwargs) -> "Database":
         """
         Cache the database as-is, and re-open it.
 
         Useful for creating an easy restart script if the storage space is available.
+        The new datatbase will by default inherit the properties of this database.
+
+        usage:
+        >>> database = database.make_database_cache()
 
         :param file: where to store the database
         :param overwrite: whether to overwrite an existing cache file with this name.
@@ -690,14 +781,20 @@ class Database:
         if not self.quiet:
             print("Writing Cached database to", file)
 
-        self.write_npz(file=file,
-                       record_split_masks=True,  # allows inheriting of splits from this db.
-                       overwrite=overwrite,
-                       return_only=False)
+        self.write_npz(
+            file=file, record_split_masks=True, overwrite=overwrite, return_only=False  # allows inheriting of splits from this db.
+        )
         # now reload cached file.
         return NPZDatabase(**arguments)
 
-def compute_index_mask(indices, index_pool):
+
+def compute_index_mask(indices: np.ndarray, index_pool: np.ndarray) -> np.ndarray:
+    """
+
+    :param indices:
+    :param index_pool:
+    :return:
+    """
     if not np.all(np.isin(indices, index_pool)):
         raise ValueError("Provided indices not in database")
 
@@ -711,9 +808,9 @@ def compute_index_mask(indices, index_pool):
     return index_mask
 
 
-def prettyprint_arrays(arr_dict):
+def prettyprint_arrays(arr_dict: dict[str: np.ndarray]):
     """
-    Pretty-print array dictionary
+    Pretty-print array dictionary.
     :return: None
     """
     column_format = "| {:<30} | {:<18} | {:<28} |"
