@@ -32,8 +32,17 @@ from .experiment import setup_and_train, train_model, setup_training,\
     test_model, load_model_from_cwd, load_checkpoint, load_checkpoint_from_cwd
 
 # Other subpackages
-from . import molecular_dynamics
-from . import optimizer
+
+
+try:
+    import ase
+    has_ase = True
+except ImportError:
+    has_ase = False
+
+if has_ase:
+    from . import molecular_dynamics
+    from . import optimizer
 
 # Custom Kernels
 from . import custom_kernels

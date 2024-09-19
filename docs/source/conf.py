@@ -46,8 +46,22 @@ exclude_patterns = []
 
 # The following are highly optional, so we mock them for doc purposes.
 # TODO: Can we programmatically get these from our list of optional dependencies?
-autodoc_mock_imports = ["ase", "h5py", "seqm", "schnetpack", "cupy", "lammps", "numba", "triton", "pytorch_lightning", 'scipy']
+autodoc_mock_imports = [
+    "ase",
+    "matplotlib",
+    "h5py",
+    "seqm",
+    "schnetpack",
+    "cupy",
+    "lammps",
+    "numba",
+    "triton",
+    "pytorch_lightning",
+    "scipy",
+    "graphviz",
+]
 
+# Autodoc options
 autosummary_imported_members = False
 autosummary_ignore_module_all = True
 autodoc_default_options = {
