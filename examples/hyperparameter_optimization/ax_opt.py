@@ -19,6 +19,7 @@ sys.path.append(os.getcwd())
 """
     B-Opt tuning for HIPNN using AX.
 
+    Originally developed by Sakib Matin (LANL) and modified by Xinyang Li (LANL).
 """
 
 import json
@@ -31,7 +32,11 @@ from QM7_ax_example import training
 import hippynn
 
 warnings.warn(
-    """Make sure to modify the dataset path in QM7_ax_example.py before running this example. For this test (Ax sequential optimization), a relative path can be used. The work directory for each trial will be ./test_ax/index. If the dataset is in ./dataset, the relative path should be ../../dataset. However, an absolute path is strongly recommended."""
+    "\nMake sure to modify the dataset path in QM7_ax_example.py before running this example.\n"
+    "For this test (Ax sequential optimization), a relative path can be used.\n"
+    "The work directory for each trial will be ./test_ax/index.\n"
+    "If the dataset is in ./dataset, the relative path should be ../../dataset.\n"
+    "However, an absolute path is strongly recommended."
 )
 
 

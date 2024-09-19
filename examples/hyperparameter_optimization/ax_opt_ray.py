@@ -22,6 +22,7 @@ sys.path.append(os.getcwd())
 """
     Hyperparameter tuning for HIPNN using AX and Ray.
 
+    Developed by Xinyang Li (LANL) based on the Ax script.
 """
 
 import shutil
@@ -141,7 +142,8 @@ class AxLogger(LoggerCallback):
 if __name__ == "__main__":
 
     warnings.warn(
-        """Make sure to modify the dataset path in QM7_ax_example.py before running this example. For this test (Ray parallelized optimization), you MUST provide an absolute path to the dataset"""
+        "\nMake sure to modify the dataset path in QM7_ax_example.py before running this example.\n"
+        "For this test (Ray parallelized optimization), you MUST provide an absolute path to the dataset."
     )
 
     if len(sys.argv) == 2:
