@@ -483,11 +483,7 @@ class MolecularDynamics:
             try:
                 self._data[f"output_{key}"].append(value.cpu().detach()[0])
             except KeyError:
-                self._data[f"output_{key}"] = [value.cpu().detach()[0]]
-        
-            for key, value in variable._data.items():
-                print(variable.name, key, value.shape)
-        
+                self._data[f"output_{key}"] = [value.cpu().detach()[0]]     
 
     def run(self, dt: float, n_steps: int, record_every: int = None):
         """Run `n_steps` of MD algorithm.
