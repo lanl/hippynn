@@ -15,11 +15,11 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
       with:
-        python-version: "3.9"
+        python-version: "3.12"
 
     - name: Install dependencies and package
       run: >-
-        pip3 install -U sphinx sphinx_rtd_theme graphviz ase torch --extra-index-url https://download.pytorch.org/whl/cpu && pip install .
+        python -m pip install .[docs] --extra-index-url https://download.pytorch.org/whl/cpu
 
     - name: Build docs
       run: |
