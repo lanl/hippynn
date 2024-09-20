@@ -12,14 +12,13 @@ Requirements:
 
 Optional Dependencies:
     * triton_ (recommended, for improved GPU performance)
-    * numba_ (recommended for improved CPU performance)
+    * numba_ (recommended, for improved CPU/GPU performance)
     * cupy_ (alternative for accelerating GPU performance)
     * ASE_ (for usage with ase and other misc. features)
     * matplotlib_ (for plotting)
     * tqdm_ (for progress bars)
     * graphviz_ (for visualizing model graphs)
     * h5py_ (for loading ani-h5 datasets)
-    * pyanitools_ (for loading ani-h5 datasets)
     * pytorch-lightning_ (for distributed training)
 
 Interfacing codes:
@@ -37,7 +36,6 @@ Interfacing codes:
 .. _matplotlib: https://matplotlib.org
 .. _graphviz: https://github.com/xflr6/graphviz
 .. _h5py:  https://www.h5py.org/
-.. _pyanitools: https://github.com/atomistic-ml/ani-al/tree/master/readers/lib
 .. _ASE: https://wiki.fysik.dtu.dk/ase/
 .. _LAMMPS: https://www.lammps.org/
 .. _PYSEQM: https://github.com/lanl/PYSEQM
@@ -48,31 +46,40 @@ Interfacing codes:
 Installation Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Conda
------
-Install using conda::
+We recommend installation from source, although you can also get hippynn
+from conda and pypi, see below. A base installation of hippynn only requires
+pytorch (`installation instructions <pytorch_install_>`_) and
+numpy (`installation instructions <numpy_install_>`_).
+We recommend you install these first using your package manager of choice,
+then proceed to install hippynn.
 
-    conda install -c conda-forge hippynn
 
-Pip
----
-Install using pip::
+Installing hippynn from source
+------------------------------
 
-    pip install hippynn
+Installing hippynn from source is an easy process.
+hippynn is written in pure python, so you will not need to worry about
+having compilers or interpreters for additional languages.
 
-Install from source:
---------------------
+.. _pytorch_install: https://pytorch.org/get-started/locally/
+.. _numpy_install: https://numpy.org/install/
 
 Clone the hippynn_ repository and navigate into it, e.g.::
 
     $ git clone https://github.com/lanl/hippynn.git
     $ cd hippynn
+    $ pip install -e .
 
+The ``-e`` specifies an editable install, that is, python will import hippynn from
+the current directory, which will allow you to tinker with hippynn if you so choose.
 
+If numpy and pytorch are not currently installed, this command will install them using `pip`.
 
-Dependencies using conda
-........................
+Once hippynn is installed, you can proceed to add optional packages as needed for
+various extended functionality.
 
+Install Optional Dependencies using conda
+******************************************
 Install dependencies from conda using recommended channels::
 
     $ conda install -c pytorch -c conda-forge --file conda_requirements.txt
@@ -81,24 +88,55 @@ Install dependencies from conda using recommended channels::
   If you wish to do a cpu-only install, you may need to comment
   out ``cupy`` from the conda_requirements.txt file.
 
-Dependencies using pip
-.......................
+Install Optional Dependencies using pip
+******************************************
 
-Minimum dependencies using pip::
-
-    $ pip install -e .
-
-If you feel like tinkering, do an editable install::
+Pip will have already checked for the minimum requirements when you performed::
 
     $ pip install -e .
+
 
 If you would like to get all optional dependencies from pip::
 
     $ pip install -e .[full]
 
+On a recent mac with zsh instead of bash, this command must be escaped as::
 
-Notes
------
+    % pip install -e .\[full\]
+
+Install hippynn from Conda
+--------------------------
+Install using conda::
+
+    $ conda install -c conda-forge hippynn
+
+Install hippynn from Pip
+------------------------
+Minimal Install using pip::
+
+    $ pip install hippynn
+
+All optional dependencies with pip::
+
+    $ pip install hippynn[full]
+
+On a recent mac with zsh instead of bash, this command must be escaped as::
+
+    % pip install hippynn\[full\]
+
+
+Note on installing cupy with conda
+-----------------------------------
+
+When using conda, sometimes both pytorch and cupy try to install cuda toolkit components,
+but using different and conflicting mechanisms. If you encounter difficulties with using
+a GPU after installing cupy, we recommend trying uninstalling it from conda and installing
+it from pypi. `Link to cupy installation instructions <cupy_install>`_
+
+.. _cupy_install: https://docs.cupy.dev/en/stable/install.html#installing-cupy-from-pypi
+
+Misc. Notes
+-----------
 
 - Install dependencies with pip from requirements.txt .
 - Install dependencies with conda from conda_requirements.txt .

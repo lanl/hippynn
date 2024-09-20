@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
@@ -6,24 +8,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hyperparameter optimization with Ax and Ray &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=66b59bf7" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=c9d3d048"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c9d3d048"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="User Guide" href="../user_guide/index.html" />
-    <link rel="prev" title="Pytorch Lightning module" href="lightning.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -37,6 +33,9 @@
           <a href="../index.html" class="icon icon-home">
             hippynn
           </a>
+              <div class="version">
+                0+unknown
+              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -45,45 +44,44 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../what_is_hippynn.html">What is hippynn?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">How to install hippynn</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="minimal_workflow.html">Minimal Workflow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="controller.html">Controller</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting.html">Plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="predictor.html">Predictor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ensembles.html">Ensembling Models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="periodic.html">Periodic Boundary Conditions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="forces.html">Force Training</a></li>
-<li class="toctree-l2"><a class="reference internal" href="restarting.html">Restarting training</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ase_calculator.html">ASE Calculators</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mliap_unified.html">LAMMPS interface</a></li>
-<li class="toctree-l2"><a class="reference internal" href="excited_states.html">Non-Adiabiatic Excited States</a></li>
-<li class="toctree-l2"><a class="reference internal" href="weighted_loss.html">Weighted/Masked Loss Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lightning.html">Pytorch Lightning module</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Hyperparameter optimization with Ax and Ray</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#typical-workflow">Typical workflow</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#create-an-ax-experiment">Create an Ax experiment</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#training-function">Training function</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#run-sequential-experiments">Run sequential experiments</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#asynchronous-parallelized-optimization-with-ray">Asynchronous parallelized optimization with Ray</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#advanced-details">Advanced details</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#relative-import">Relative import</a></li>
-<li class="toctree-l5"><a class="reference internal" href="#callbacks-for-ray">Callbacks for Ray</a></li>
-<li class="toctree-l5"><a class="reference internal" href="#restart-extend-an-experiment">Restart/extend an experiment</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Research articles using hippynn</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/features.html">hippynn Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/concepts.html">hippynn Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/databases.html">Databases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/loss_graph.html">Model and Loss Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/units.html">Units in hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/ckernels.html">Custom Kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/settings.html">Library Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/custom_nodes.html">Creating Custom Node Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="minimal_workflow.html">Minimal Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller.html">Controller</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="predictor.html">Predictor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ensembles.html">Ensembling Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="periodic.html">Periodic Boundary Conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forces.html">Force Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="restarting.html">Restarting training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ase_calculator.html">ASE Calculators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mliap_unified.html">LAMMPS interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="excited_states.html">Non-Adiabiatic Excited States</a></li>
+<li class="toctree-l1"><a class="reference internal" href="weighted_loss.html">Weighted/Masked Loss Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lightning.html">Pytorch Lightning module</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_documentation/hippynn.html">Full API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_summary/hippynn.html">API Summary Pages</a></li>
 </ul>
 
         </div>
@@ -96,19 +94,15 @@
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content">
+        <div class="rst-content style-external-links">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
       <li class="breadcrumb-item active">Hyperparameter optimization with Ax and Ray</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/examples/hyperopt.rst.txt" rel="nofollow"> View page source</a>
       </li>
-  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
-        <a href="lightning.html" class="btn btn-neutral float-left" title="Pytorch Lightning module" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../user_guide/index.html" class="btn btn-neutral float-right" title="User Guide" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-  </div>
+  </ul>
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -535,10 +529,7 @@ scripts are developed by <a class="reference external" href="https://github.com/
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="lightning.html" class="btn btn-neutral float-left" title="Pytorch Lightning module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../user_guide/index.html" class="btn btn-neutral float-right" title="User Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
@@ -558,7 +549,7 @@ scripts are developed by <a class="reference external" href="https://github.com/
   </div>
   <script>
       jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
+          SphinxRtdTheme.Navigation.enable(false);
       });
   </script> 
 
