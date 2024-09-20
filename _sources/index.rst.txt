@@ -48,6 +48,7 @@ We hope you enjoy your stay.
     examples/excited_states
     examples/weighted_loss
     examples/lightning
+    examples/hyperopt
 
 
 ..
