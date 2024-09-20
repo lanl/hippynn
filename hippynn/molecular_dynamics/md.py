@@ -196,19 +196,23 @@ class VelocityVerlet(VariableUpdater):
     def __init__(
         self,
         force_db_name: str,
-        units_force: float = ase.units.eV,
-        units_acc: float = ase.units.Ang / (1.0**2),
+        units_force: float = None,
+        units_acc: float = None,
     ):
         """
         :param force_db_name: key which will correspond to the force on the corresponding Variable
             in the HIPNN model output dictionary
         :param units_force: amount of eV equal to one in the units used for force output
-            of HIPNN model (eg. if force output in kcal, units_force =
-            ase.units.kcal = 2.6114e22 since 2.6114e22 kcal = 1 eV),
-            by default ase.units.eV = 1, defaults to ase.units.eV
+            of HIPNN model (eg. if force output in kcal/mol/A, units_force =
+            ase.units.kcal/ase.units.mol/ase.units.Ang ~=.0434 since .0434 kcal ~= 1 eV),
+            by default ase.units.eV = 1, defaults to ase.units.eV / ase.units.Ang
         :param units_acc: amount of Ang/fs^2 equal to one in the units used for acceleration
             in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to ase.units.Ang/(1.0**2)
         """
+        if units_force is None:
+            units_force = ase.units.eV / ase.units.Ang
+        if units_acc is None:
+            units_acc = ase.units.Ang / (1.0**2)
         self.force_key = force_db_name
         self.force_factor = units_force / units_acc
 
@@ -252,8 +256,8 @@ class LangevinDynamics(VariableUpdater):
         force_db_name: str,
         temperature: float,
         frix: float,
-        units_force: float = ase.units.eV,
-        units_acc: float = ase.units.Ang / (1.0**2),
+        units_force: float = None,
+        units_acc: float = None,
         seed: Optional[int] = None,
     ):
         """
@@ -262,13 +266,17 @@ class LangevinDynamics(VariableUpdater):
         :param temperature: temperature for Langevin algorithm
         :param frix: friction coefficient for Langevin algorithm
         :param units_force: amount of eV equal to one in the units used for force output
-            of HIPNN model (eg. if force output in kcal, units_force =
-            ase.units.kcal = 2.6114e22 since 2.6114e22 kcal = 1 eV),
-            by default ase.units.eV = 1, defaults to ase.units.eV
+            of HIPNN model (eg. if force output in kcal/mol/A, units_force =
+            ase.units.kcal/ase.units.mol/ase.units.Ang ~=.0434 since .0434 kcal ~= 1 eV),
+            by default ase.units.eV = 1, defaults to ase.units.eV / ase.units.Ang
         :param units_acc: amount of Ang/fs^2 equal to one in the units used for acceleration
             in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to ase.units.Ang/(1.0**2)
         :param seed: used to set seed for reproducibility, defaults to None
         """
+        if units_force is None:
+            units_force = ase.units.eV / ase.units.Ang
+        if units_acc is None:
+            units_acc = ase.units.Ang / (1.0**2)
 
         self.force_key = force_db_name
         self.force_factor = units_force / units_acc

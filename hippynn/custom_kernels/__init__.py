@@ -13,15 +13,13 @@ Triton kernels revert to numba or pytorch as available on module import.
 On import, this module attempts to set the custom kernels as specified by the
 user in hippynn.settings.
 
-.. py:data:: CUSTOM_KERNELS_AVAILABLE
-   :type: list[str]
 
-   The set of custom kernels available, based on currently installed packages and hardware.
 
-.. py:data:: CUSTOM_KERNELS_ACTIVE
-   :type: str
+.. .. autofunction:: envsum
 
-   The currently active implementation of custom kernels.
+.. .. autofunction:: sensesum
+
+.. .. autofunction:: featsum
 
 """
 import warnings
@@ -81,9 +79,6 @@ def populate_custom_kernel_availability():
             pass
 
 
-    if not CUSTOM_KERNELS_AVAILABLE:
-        warnings.warn(
-            "Triton, cupy and numba are not available: Custom kernels will be disabled and performance maybe be degraded.")
     return CUSTOM_KERNELS_AVAILABLE
 
 def _check_numba():
@@ -119,10 +114,10 @@ def set_custom_kernels(active: Union[bool, str] = True):
     Activate or deactivate custom kernels for interaction.
 
     This function changes the global variables:
-        - custom_kernels.envsum
-        - custom_kernels.sensum
-        - custom_kernels.featsum
-        - custom_kernels.CUSTOM_KERNELS_ACTIVE
+        - :func:`hippynn.custom_kernels.envsum`
+        - :func:`hippynn.custom_kernels.sensum`
+        - :func:`hippynn.custom_kernels.featsum`
+        - :data:`hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE`
 
     :param active: If true, set custom kernels to the best available. If False, turn them off and default to pytorch.
        If "triton", "numba" or "cupy", use those implementations explicitly. If "auto", use best available.
@@ -137,6 +132,12 @@ def set_custom_kernels(active: Union[bool, str] = True):
         raise CustomKernelError(f"Unrecognized custom kernel implementation: {active}")
 
     if not CUSTOM_KERNELS_AVAILABLE:
+        if active == "auto":
+            warnings.warn(
+                "triton, cupy and numba are not available: "
+                "Custom kernels will be disabled and performance may be degraded.\n"
+                "To silence this warning, set HIPPYNN_USE_CUSTOM_KERNELS=False", stacklevel=2)
+
         if active in ("auto", "pytorch"):  # These are equivalent to "false" when custom kernels are not available.
             active = False
         elif active:
@@ -199,15 +200,18 @@ def set_custom_kernels(active: Union[bool, str] = True):
     CUSTOM_KERNELS_ACTIVE = active
     return
 
-CUSTOM_KERNELS_AVAILABLE = []
+
+CUSTOM_KERNELS_AVAILABLE = []  #: List of available kernel implementations based on currently installed packages..
 
 _POSSIBLE_CUSTOM_KERNELS = [True, False, "triton", "numba", "cupy", "pytorch", "auto"]
 
 try_custom_kernels = settings.USE_CUSTOM_KERNELS
 
-CUSTOM_KERNELS_ACTIVE = None
+CUSTOM_KERNELS_ACTIVE = None #: Which custom kernel implementation is currently active.
 
-envsum, sensesum, featsum = None, None, None
+envsum = None  #: See :func:`hippynn.custom_kernels.env_pytorch.envsum` for more information.
+sensesum = None  #: See :func:`hippynn.custom_kernels.env_pytorch.sensesum` for more information.
+featsum = None  #: See :func:`hippynn.custom_kernels.env_pytorch.featsum` for more information.
 
 try:
     populate_custom_kernel_availability()
@@ -215,7 +219,8 @@ try:
 except CustomKernelError as eee:
     raise
 except Exception as ee:
-    warnings.warn(f"Custom kernels are disabled due to an expected error:\n\t{ee}", stacklevel=2)
+    warnings.warn(f"Custom kernels are disabled due to an unexpected error:\n"
+                  f"\t{ee}", stacklevel=2)
     del ee
 
     envsum = env_pytorch.envsum

@@ -58,31 +58,40 @@ Interfaces to other codes
 - PYSEQM: Use ``PYSEQM`` calculations as nodes in a graph.
 - LAMMPS: Use models from ``hippynn`` in LAMMPS via the MLIAP Unified interface.
 
-Installation
-============
+Installation Instructions
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Clone this repository and navigate into it.
+We recommend installation from source, although you can also get hippynn
+from conda and pypi, see below. A base installation of hippynn only requires
+pytorch (`installation instructions <pytorch_install_>`_) and
+numpy (`installation instructions <numpy_install_>`_).
+We recommend you install these first using your package manager of choice,
+then proceed to install hippynn.
 
-Dependencies using conda:
--------------------------
+.. _pytorch_install: https://pytorch.org/get-started/locally/
+.. _numpy_install: https://numpy.org/install/
 
-- Run ``conda install -c pytorch -c conda-forge --file conda_requirements.txt``
 
-Dependencies using pip:
------------------------
-- Run ``pip install .``
-- If you fee like tinkering, do an editable install: ``pip install -e .``
-- You can install using all optional dependencies from pip with: ``pip install -e .[full]``
+Install hippynn from source:
+----------------------------
 
-Notes
------
+For detailed instructions, see `the documentation section on installation <doc_install>`_.
 
-- Install dependencies with pip from requirements.txt .
-- Install dependencies with conda from conda_requirements.txt .
-- If you don't want pip to install them, conda install from file before installing ``hippynn``.
-  You may want to use -c pytorch for the pytorch channel.
-  For ase and cupy, you probably want to use -c conda-forge.
-- Optional dependencies are in optional_dependencies.txt
+.. _doc_install: https://lanl.github.io/hippynn/installation.html
+
+Clone the hippynn_ repository and navigate into it, e.g.::
+
+    $ git clone https://github.com/lanl/hippynn.git
+    $ cd hippynn
+    $ pip install -e .
+
+The ``-e`` specifies an editable install, that is, python will import hippynn from
+the current directory, which will allow you to tinker with hippynn if you so choose.
+
+If numpy and pytorch are not currently installed, this command will install them using `pip`.
+
+Once hippynn is installed, you can proceed to add optional packages as needed for
+various extended functionality.
 
 Documentation
 =============

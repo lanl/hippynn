@@ -4,7 +4,7 @@ import numpy as np
 import warnings
 import torch
 
-from ase.calculators.calculator import compare_atoms, PropertyNotImplementedError, Calculator # Calculator is required to allow HIPNN to be used with ASE Mixing Calculators
+from ase.calculators.calculator import compare_atoms, PropertyNotImplementedError, Calculator
 
 from hippynn.graphs import find_relatives, find_unique_relative, get_subgraph, copy_subgraph, replace_node, GraphModule
 from hippynn.graphs.gops import check_link_consistency

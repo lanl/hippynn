@@ -16,11 +16,15 @@
 {%- set name = pkgname.split('.')[-1] %}
 
 {%- if is_namespace %}
-{{- [name, "namespace"] | join(" ") | e | heading }}
+{{- [name, ""] | join(" ") | e | heading }}
 {% else %}
-{{- [name, "package"] | join(" ") | e | heading }}
+{{- [name, ""] | join(" ") | e | heading }}
 {%- endif %}
-Documentation for ``{{pkgname}}`` package.
+
+
+Full Documentation for ``{{pkgname}}`` package.
+:doc:`Click here for a summary page. </api_summary/{{pkgname}}>`
+
 {{""}}
 
 {%- if modulefirst and not is_namespace %}
