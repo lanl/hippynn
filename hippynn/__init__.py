@@ -7,16 +7,22 @@ The hippynn python package.
 
 
 """
+# Dev note: imports of submodules reflect dependency of submodules.
 
 from . import _version
 __version__ = _version.get_versions()['version']
 
-# Tools should not have any dependencies on internal packages.
-from . import tools
-from .tools import active_directory, log_terminal
 
 # Configuration settings
 from ._settings_setup import settings, reload_settings
+
+# Tools should not have any dependencies on internal packages besides settings.
+from . import tools
+from .tools import active_directory, log_terminal
+
+# Custom Kernels
+from . import custom_kernels
+from .custom_kernels import set_custom_kernels
 
 # Pytorch modules
 from . import layers
@@ -49,10 +55,6 @@ else:
     del ase
     from . import molecular_dynamics
     from . import optimizer
-
-# Custom Kernels
-from . import custom_kernels
-from .custom_kernels import set_custom_kernels
 
 from . import pretraining
 from .pretraining import hierarchical_energy_initialization
