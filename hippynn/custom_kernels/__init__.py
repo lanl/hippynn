@@ -134,8 +134,8 @@ def set_custom_kernels(active: Union[bool, str] = True):
     if not CUSTOM_KERNELS_AVAILABLE:
         if active == "auto":
             warnings.warn(
-                "Triton, cupy and numba are not available: "
-                "Custom kernels will be disabled and performance maybe be degraded.\n"
+                "triton, cupy and numba are not available: "
+                "Custom kernels will be disabled and performance may be degraded.\n"
                 "To silence this warning, set HIPPYNN_USE_CUSTOM_KERNELS=False", stacklevel=2)
 
         if active in ("auto", "pytorch"):  # These are equivalent to "false" when custom kernels are not available.
