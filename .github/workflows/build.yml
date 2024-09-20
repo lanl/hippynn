@@ -24,6 +24,20 @@ jobs:
       run: >-
         python -m build
 
+    - name: Install minimal pytorch
+      run: >-
+        # This is done separately with CPU instructions
+        # to avoid installing extra libraries (e.g. cuda)
+        python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+    - name: Install hippynn
+      run: >-
+        python -m pip install .
+
+    - name: Check import hippynn
+      run: >-
+        python -c "import hippynn"
+
     - name: Install documentation dependencies
       run: >-
         python -m pip install .[docs]
