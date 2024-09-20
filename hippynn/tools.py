@@ -1,6 +1,9 @@
 """
-Misc helpful functions which are not part of the library organization per se.
+Misc. helpful functions which are not part of the library organization per se.
+
 """
+# Dev Note: functions placed here should not have any dependency on internal
+# hippynn packages. This is the place for misc. pytorch/numpy/pure-python code.
 import sys, os, traceback
 import collections
 import contextlib

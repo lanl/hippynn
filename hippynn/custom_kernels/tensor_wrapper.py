@@ -9,10 +9,12 @@ from .fast_convert import batch_convert_torch_to_numba
 
 
 def via_numpy(func):
-    """Decorator for piping a function through
+    """
+    Decorator for piping a function through
     numpy arrays, and then giving the result back to torch.
-    A bit of non-riguous testing showed that this adds overhead
-    on the order of microseconds."""
+    """
+    #  Dev note: A bit of non-rigorous testing showed that this adds overhead
+    #  on the order of microseconds.
 
     @functools.wraps(func)
     def wrapped(*args):

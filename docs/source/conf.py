@@ -22,6 +22,8 @@ copyright = "2019, Los Alamos National Laboratory"
 author = "Nicholas Lubbers et al"
 
 # The full version, including alpha/beta/rc tags
+import os
+os.environ['HIPPYNN_USE_CUSTOM_KERNELS'] = "False"
 import hippynn
 
 release = hippynn.__version__
@@ -44,7 +46,9 @@ templates_path = ["_templates"]
 exclude_patterns = []
 
 
-# The following are highly optional, so we mock them for doc purposes.
+# Autodoc options
+
+# The following are optional, so we mock them for doc purposes.
 # TODO: Can we programmatically get these from our list of optional dependencies?
 autodoc_mock_imports = [
     "ase",
@@ -52,33 +56,36 @@ autodoc_mock_imports = [
     "h5py",
     "seqm",
     "schnetpack",
+    "triton",
+    "numba",
     "cupy",
     "lammps",
-    "numba",
-    "triton",
     "pytorch_lightning",
     "scipy",
     "graphviz",
 ]
 
-# Autodoc options
-autosummary_imported_members = False
-autosummary_ignore_module_all = True
 autodoc_default_options = {
     "no-show-inheritance": True,
-    'imported-members': autosummary_imported_members,
-    'ignore-module-all': autosummary_ignore_module_all,
+    # ignore-module-all is FALSE by default, which we currently prefer.
+    # note to the future:
+    #   don't -set- ignore-module-all to False, as it will still include the directive argument.
 }
-autodoc_member_order = "bysource"
-
+autodoc_member_order = 'groupwise'
 add_module_names = False
+
+# Autosummary Options
+autosummary_mock_imports = autodoc_mock_imports
+autosummary_imported_members = False
+autosummary_ignore_module_all = True  # This is intentionally different from autodoc config.
 
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
+
+# Just test to error if this doesn't exist.
 import sphinx_rtd_theme
 
 html_theme = "sphinx_rtd_theme"
@@ -86,6 +93,8 @@ html_theme_options = {
     "navigation_depth": -1,
     "prev_next_buttons_location": "both",
     "navigation_with_keys": True,
+    "sticky_navigation": False,
+    "style_external_links": True,
 }
 
 

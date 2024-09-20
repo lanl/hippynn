@@ -20,3 +20,6 @@ A simple plot maker would look like this::
     training_modules,db_info = assemble_for_training(train_loss, validation_losses, plot_maker=plot_maker)
 
 The plot maker is thus passed to `assemble_for_training` and attached to the model evaluator.
+
+Note that :mod:`hippynn.plotting` is only available if matplotlib is installed.
+

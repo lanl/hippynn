@@ -22,17 +22,21 @@ apidoc:
 .PHONY: apidoc
 
 cleanapi:
-	@rm source/api_documentation/hippynn*.rst
-	@rm source/api_summary/hippynn*.rst
+	@echo "Removing generated API files..."
+	@rm -f source/api_documentation/hippynn*.rst
+	@rm -f source/api_summary/hippynn*.rst
 .PHONY: cleanapi
 
 # make sure api_doc is always built first
 html_all: apidoc html
 .PHONY: html_all
 
+clean_all: cleanapi clean
+.PHONY: clean_all
+
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	@$(SPHINXBUILD)  -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 

@@ -11,6 +11,10 @@ The hippynn python package.
 from . import _version
 __version__ = _version.get_versions()['version']
 
+# Tools should not have any dependencies on internal packages.
+from . import tools
+from .tools import active_directory, log_terminal
+
 # Configuration settings
 from ._settings_setup import settings, reload_settings
 
@@ -31,16 +35,18 @@ from . import experiment
 from .experiment import setup_and_train, train_model, setup_training,\
     test_model, load_model_from_cwd, load_checkpoint, load_checkpoint_from_cwd
 
-# Other subpackages
+try:
+    from . import plotting
+except ImportError:
+    pass  # Don't have matplotlib.
 
-
+# Submodules that require ase
 try:
     import ase
-    has_ase = True
 except ImportError:
-    has_ase = False
-
-if has_ase:
+    pass
+else:
+    del ase
     from . import molecular_dynamics
     from . import optimizer
 
@@ -50,9 +56,6 @@ from .custom_kernels import set_custom_kernels
 
 from . import pretraining
 from .pretraining import hierarchical_energy_initialization
-
-from . import tools
-from .tools import active_directory, log_terminal
 
 # The order is adjusted to put functions after objects in the documentation.
 _dir = dir()

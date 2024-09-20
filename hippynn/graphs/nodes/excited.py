@@ -1,3 +1,6 @@
+"""
+Nodes for excited state modeling.
+"""
 from typing import Tuple
 import torch
 
@@ -6,7 +9,6 @@ from .. import IdxType, find_unique_relative
 from .base import AutoKw, SingleNode, ExpandParents, MultiNode
 from .loss import _BaseCompareLoss
 from .tags import Energies, HAtomRegressor, Network, AtomIndexer
-from ...layers import physics as physics_layers
 
 
 class NACRNode(AutoKw, SingleNode):

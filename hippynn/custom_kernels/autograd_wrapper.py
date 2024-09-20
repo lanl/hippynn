@@ -7,7 +7,7 @@ import threading
 from contextlib import contextmanager
 
 _DEVICE_CONTEXT_LOCK = threading.Lock()
-_DEVICE_TIMEOUT = 10  # if custom kernels have locked for 10S, throw an error
+_DEVICE_TIMEOUT = 10  # if custom kernels have locked for 10s, throw an error
 
 
 @contextmanager
@@ -18,6 +18,7 @@ def _lock_device(tensor):
     :param tensor:
     :return:
     """
+
     acquired = _DEVICE_CONTEXT_LOCK.acquire(timeout=_DEVICE_TIMEOUT)
 
     if not acquired:

@@ -105,7 +105,7 @@ On a recent mac with zsh instead of bash, this command must be escaped as::
     % pip install -e .\[full\]
 
 Install hippynn from Conda
-------------------
+--------------------------
 Install using conda::
 
     $ conda install -c conda-forge hippynn
