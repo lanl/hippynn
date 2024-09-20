@@ -24,4 +24,4 @@ For runnable example scripts, see `the examples at the hippynn github repository
     excited_states
     weighted_loss
     lightning
-
+    hyperopt

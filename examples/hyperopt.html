@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hyperparameter optimization with Ax and Ray &mdash; hippynn 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=c9d3d048"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="User Guide" href="../user_guide/index.html" />
+    <link rel="prev" title="Pytorch Lightning module" href="lightning.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="minimal_workflow.html">Minimal Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="controller.html">Controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="predictor.html">Predictor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ensembles.html">Ensembling Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="periodic.html">Periodic Boundary Conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="forces.html">Force Training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restarting.html">Restarting training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ase_calculator.html">ASE Calculators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mliap_unified.html">LAMMPS interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="excited_states.html">Non-Adiabiatic Excited States</a></li>
+<li class="toctree-l2"><a class="reference internal" href="weighted_loss.html">Weighted/Masked Loss Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lightning.html">Pytorch Lightning module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Hyperparameter optimization with Ax and Ray</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#typical-workflow">Typical workflow</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#create-an-ax-experiment">Create an Ax experiment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#training-function">Training function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#run-sequential-experiments">Run sequential experiments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#asynchronous-parallelized-optimization-with-ray">Asynchronous parallelized optimization with Ray</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#advanced-details">Advanced details</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#relative-import">Relative import</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#callbacks-for-ray">Callbacks for Ray</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#restart-extend-an-experiment">Restart/extend an experiment</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_documentation/hippynn.html">hippynn API documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
+      <li class="breadcrumb-item active">Hyperparameter optimization with Ax and Ray</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/hyperopt.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="lightning.html" class="btn btn-neutral float-left" title="Pytorch Lightning module" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../user_guide/index.html" class="btn btn-neutral float-right" title="User Guide" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="hyperparameter-optimization-with-ax-and-ray">
+<h1>Hyperparameter optimization with Ax and Ray<a class="headerlink" href="#hyperparameter-optimization-with-ax-and-ray" title="Link to this heading"></a></h1>
+<p>Here is an example of how you can perform hyperparameter optimization
+sequentially (with Ax) or in parallel (with Ax and Ray).</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<p>The packages required to perform this task are <a class="reference external" href="https://github.com/facebook/Ax">Ax</a> and <a class="reference external" href="https://docs.ray.io/en/latest/">ray</a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="s2">&quot;ray &lt; 2.7.0&quot;</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="n">ax</span><span class="o">-</span><span class="n">platform</span><span class="o">!=</span><span class="mf">0.4.1</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The scripts have been tested with <cite>ax-platform 0.4.0</cite> and <cite>ray 2.6.3</cite>, and
+many previous versions of the two packages. Unfortunately, several changes
+made in recent versions of <cite>ray</cite> will break this script. You should install
+<cite>ray &lt; 2.7.0</cite>. <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> is recommended by the Ax developers even if
+a conda environment is used.</p>
+<p>As of now (Sep 2024), <cite>ax-platform 0.4.1</cite> is broken. See the <a class="reference external" href="https://github.com/facebook/Ax/issues/2711">issue</a> here.
+Please avoid this version in your setup.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you can update this example and scripts to accommodate the changes in the
+latest Ray package, feel free to submit a pull request.</p>
+</div>
+</section>
+<section id="typical-workflow">
+<h2>Typical workflow<a class="headerlink" href="#typical-workflow" title="Link to this heading"></a></h2>
+<p>Ax is a package that can perform Bayesian optimization. With the given parameter
+range, a set of initial trials is generated. Then based on the metrics returned
+from these trials, new test parameters are generated. By default, this Ax
+workflow can only be performed sequentially. We can combine Ray and Ax to
+utilize multiple GPUs on the same node. Ray interfaces with Ax to pull trial
+parameters and then automatically distribute the trials to available resources.
+With this, we can perform an asynchronous parallelized hyperparameter
+optimization.</p>
+<section id="create-an-ax-experiment">
+<h3>Create an Ax experiment<a class="headerlink" href="#create-an-ax-experiment" title="Link to this heading"></a></h3>
+<p>You can create a basic Ax experiment this way</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ax.service.ax_client</span> <span class="kn">import</span> <span class="n">AxClient</span>
+<span class="n">ax_client</span> <span class="o">=</span> <span class="n">AxClient</span><span class="p">()</span>
+<span class="n">ax_client</span><span class="o">.</span><span class="n">create_experiment</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;hyper_opt&quot;</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;parameter_a&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;fixed&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;value_type&quot;</span><span class="p">:</span> <span class="s2">&quot;float&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;parameter_b&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;range&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;value_type&quot;</span><span class="p">:</span> <span class="s2">&quot;int&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;bounds&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">40</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;parameter_c&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;choice&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;bounds&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">70</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;parameter_d&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;range&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;value_type&quot;</span><span class="p">:</span> <span class="s2">&quot;float&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;bounds&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.001</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="s2">&quot;log_scale&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">],</span>
+    <span class="n">objectives</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;Metric&quot;</span><span class="p">:</span> <span class="n">ObjectiveProperties</span><span class="p">(</span><span class="n">minimize</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="p">},</span>
+    <span class="n">parameter_constraints</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;parameter_b &lt;= parameter_c&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Here we create an Ax experiment called “hyper_opt”, with 4 parameters,
+<cite>parameter_a</cite>, <cite>parameter_b</cite>, <cite>parameter_c</cite>, and <cite>parameter_d</cite>. Our goal is to
+minimize a metric called “Metric”.</p>
+<p>A few crucial things to note:</p>
+<ul>
+<li><p>You can give a range, choice, or fixed value to each parameter. You might want
+to specify the data type as well. A fixed parameter makes sense here because
+you can do the optimization with only a subset of parameters without the need
+to modify your training function.</p></li>
+<li><p>Constraints can be applied to the search space like the example shows, but
+there is no easy way to achieve a constraint that contains mathematical
+expressions (for example, <cite>parameter_a &lt; 2 * parameter_b</cite>).</p></li>
+<li><p>For each experiment, Ax will generate a dictionary as the input of the
+training function. The dictionary will look like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;parameter_a&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>
+    <span class="s2">&quot;parameter_b&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+    <span class="s2">&quot;parameter_c&quot;</span><span class="p">:</span> <span class="mi">40</span><span class="p">,</span>
+    <span class="s2">&quot;parameter_d&quot;</span><span class="p">:</span> <span class="mf">0.2</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>As such, the training function must be able to take a dictionary as the input
+(as a single dictionary or keyword arguments) and use these values to set up
+the training.</p>
+</li>
+<li><p>The <cite>objectives</cite> keyword argument takes a dictionary of variables. The keys of
+the dictionary <strong>MUST</strong> exist in the dictionary returned from the training
+function. In this example, the training function must return a dictionary
+like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="p">{</span>
+    <span class="o">...</span>
+    <span class="s2">&quot;Metric&quot;</span><span class="p">:</span> <span class="n">metric</span><span class="p">,</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The above two points will become more clear when we go through the training
+function.</p>
+</li>
+</ul>
+</section>
+<section id="training-function">
+<h3>Training function<a class="headerlink" href="#training-function" title="Link to this heading"></a></h3>
+<p>You only need a minimal change to your existing training script to use it with
+Ax. In most cases, you just have to wrap the whole script into a function</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">training</span><span class="p">(</span><span class="n">trial_index</span><span class="p">,</span> <span class="n">parameter_a</span><span class="p">,</span> <span class="n">parameter_b</span><span class="p">,</span> <span class="n">parameter_c</span><span class="p">,</span> <span class="n">parameter_d</span><span class="p">):</span>
+    <span class="c1"># set up the network with the parameters</span>
+    <span class="o">...</span>
+    <span class="n">network_params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="o">...</span>
+        <span class="s2">&quot;parameter_a&quot;</span><span class="p">:</span> <span class="n">parameter_a</span><span class="p">,</span>
+        <span class="o">...</span>
+    <span class="p">}</span>
+    <span class="n">network</span> <span class="o">=</span> <span class="n">networks</span><span class="o">.</span><span class="n">Hipnn</span><span class="p">(</span>
+        <span class="s2">&quot;hipnn_model&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">positions</span><span class="p">),</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="n">network_params</span>
+    <span class="p">)</span>
+    <span class="c1"># train the network</span>
+    <span class="c1"># `metric_tracker` contains the losses from HIPPYNN</span>
+    <span class="k">with</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">active_directory</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">trial_index</span><span class="p">)):</span>
+        <span class="n">metric_tracker</span> <span class="o">=</span> <span class="n">train_model</span><span class="p">(</span>
+        <span class="n">training_modules</span><span class="p">,</span>
+        <span class="n">database</span><span class="p">,</span>
+        <span class="n">controller</span><span class="p">,</span>
+        <span class="n">metric_tracker</span><span class="p">,</span>
+        <span class="n">callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">batch_callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="c1"># return the desired metric to Ax, for example, validation loss</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;Metric&quot;</span><span class="p">:</span> <span class="n">metric_tracker</span><span class="o">.</span><span class="n">best_metric_values</span><span class="p">[</span><span class="s2">&quot;valid&quot;</span><span class="p">][</span><span class="s2">&quot;Loss&quot;</span><span class="p">]</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>Note how we can utilize the parameters passed in and return <strong>Metric</strong> at the
+end. Apparently, we have the freedom to choose different metrics to return here.
+We can even use mathematical expressions to combine some metrics together.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Ax does NOT create a directory for a trial. If your training function does
+not take care of the working directory, all results will be saved into the
+same folder, i.e., <cite>cwd</cite>. To avoid this, the training function needs to create
+a unique path for each trial. In this example, we use the <cite>trial_index</cite> to
+achieve this purpose. With Ray, this step is NOT necessary.</p>
+</div>
+</section>
+<section id="run-sequential-experiments">
+<span id="id1"></span><h3>Run sequential experiments<a class="headerlink" href="#run-sequential-experiments" title="Link to this heading"></a></h3>
+<p>Next, we can run the experiments</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">30</span><span class="p">):</span>
+    <span class="n">parameter</span><span class="p">,</span> <span class="n">trial_index</span> <span class="o">=</span> <span class="n">ax_client</span><span class="o">.</span><span class="n">get_next_trial</span><span class="p">()</span>
+    <span class="n">ax_client</span><span class="o">.</span><span class="n">complete_trial</span><span class="p">(</span><span class="n">trial_index</span><span class="o">=</span><span class="n">trial_index</span><span class="p">,</span> <span class="n">raw_data</span><span class="o">=</span><span class="n">training</span><span class="p">(</span><span class="n">trial_index</span><span class="p">,</span> <span class="o">**</span><span class="n">parameter</span><span class="p">))</span>
+    <span class="c1"># Save the experiment as a JSON file</span>
+    <span class="n">ax_client</span><span class="o">.</span><span class="n">save_to_json_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="s2">&quot;hyperopt.json&quot;</span><span class="p">)</span>
+<span class="n">data_frame</span> <span class="o">=</span> <span class="n">ax_client</span><span class="o">.</span><span class="n">get_trials_data_frame</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;Metric&quot;</span><span class="p">)</span>
+<span class="n">data_frame</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;hyperopt.csv&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For example, we will run 30 trials here and the results will be saved into a
+json file and a CSV file. The JSON file will contain all the details of the
+trials, which can be used to restart the experiment or add additional trials to
+the experiment. As it contains too many details to be human-friendly, we save a
+more human-friendly CSV that only contains the trial indices, parameters, and
+metrics.</p>
+</section>
+<section id="asynchronous-parallelized-optimization-with-ray">
+<h3>Asynchronous parallelized optimization with Ray<a class="headerlink" href="#asynchronous-parallelized-optimization-with-ray" title="Link to this heading"></a></h3>
+<p>To use Ray to distribute the trials across GPUs parallelly, a small update is
+needed for the training function</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ray.air</span> <span class="kn">import</span> <span class="n">session</span>
+
+
+<span class="k">def</span> <span class="nf">training</span><span class="p">(</span><span class="n">parameter_a</span><span class="p">,</span> <span class="n">parameter_b</span><span class="p">,</span> <span class="n">parameter_c</span><span class="p">,</span> <span class="n">parameter_d</span><span class="p">):</span>
+    <span class="c1"># setup and train are the same</span>
+    <span class="c1"># `with hippynn.tools.active_directory() line` is not needed</span>
+    <span class="o">....</span>
+    <span class="c1"># instead of return, we use `session.report` to communicate with `ray`</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">report</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;Metric&quot;</span><span class="p">:</span> <span class="n">metric_tracker</span><span class="o">.</span><span class="n">best_metric_values</span><span class="p">[</span><span class="s2">&quot;valid&quot;</span><span class="p">][</span><span class="s2">&quot;Loss&quot;</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Instead of a simple <cite>return</cite>, we need the <cite>report</cite> method from <cite>ray.air.session</cite>
+to report the final metric to <cite>ray</cite>.</p>
+<p>Also, to run the trials, instead of a loop in <a class="reference internal" href="#run-sequential-experiments"><span class="std std-ref">Run sequential experiments</span></a>,
+we have to use the interfaces between the two packages from <cite>ray</cite></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ray.tune.experiment.trial</span> <span class="kn">import</span> <span class="n">Trial</span>
+<span class="kn">from</span> <span class="nn">ray.tune.search</span> <span class="kn">import</span> <span class="n">ConcurrencyLimiter</span>
+<span class="kn">from</span> <span class="nn">ray.tune.search.ax</span> <span class="kn">import</span> <span class="n">AxSearch</span>
+
+<span class="c1"># to make sure ray loads local packages correctly</span>
+<span class="n">ray</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">runtime_env</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;working_dir&quot;</span><span class="p">:</span> <span class="s2">&quot;.&quot;</span><span class="p">})</span>
+
+<span class="n">algo</span> <span class="o">=</span> <span class="n">AxSearch</span><span class="p">(</span><span class="n">ax_client</span><span class="o">=</span><span class="n">ax_client</span><span class="p">)</span>
+<span class="c1"># 4 GPUs available</span>
+<span class="n">algo</span> <span class="o">=</span> <span class="n">ConcurrencyLimiter</span><span class="p">(</span><span class="n">algo</span><span class="p">,</span> <span class="n">max_concurrent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">tuner</span> <span class="o">=</span> <span class="n">tune</span><span class="o">.</span><span class="n">Tuner</span><span class="p">(</span>
+    <span class="c1"># assign 1 GPU for one trial</span>
+    <span class="n">tune</span><span class="o">.</span><span class="n">with_resources</span><span class="p">(</span><span class="n">training</span><span class="p">,</span> <span class="n">resources</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;gpu&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}),</span>
+    <span class="c1"># run 10 trials</span>
+    <span class="n">tune_config</span><span class="o">=</span><span class="n">tune</span><span class="o">.</span><span class="n">TuneConfig</span><span class="p">(</span><span class="n">search_alg</span><span class="o">=</span><span class="n">algo</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
+    <span class="c1"># configuration of ray</span>
+    <span class="n">run_config</span><span class="o">=</span><span class="n">air</span><span class="o">.</span><span class="n">RunConfig</span><span class="p">(</span>
+        <span class="c1"># all results will be saved in a subfolder inside the &quot;test&quot; folder</span>
+        <span class="n">of</span> <span class="n">the</span> <span class="n">current</span> <span class="n">working</span> <span class="n">directory</span>
+        <span class="n">local_dir</span><span class="o">=</span><span class="s2">&quot;./test&quot;</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">log_to_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+<span class="c1"># run the trials</span>
+<span class="n">tuner</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+<span class="c1"># save the results as the end</span>
+<span class="c1"># to save the file after each trial, a callback is needed</span>
+<span class="c1"># see advanced details</span>
+<span class="n">ax_client</span><span class="o">.</span><span class="n">save_to_json_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="s2">&quot;hyperopt.json&quot;</span><span class="p">)</span>
+<span class="n">data_frame</span> <span class="o">=</span> <span class="n">ax_client</span><span class="o">.</span><span class="n">get_trials_data_frame</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;Metric&quot;</span><span class="p">)</span>
+<span class="n">data_frame</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;hyperopt.csv&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is all you need. The results will be saved in the path of
+<cite>./test/{trial_function_name}_{timestamp}</cite>. Each trial will be saved within a
+subfolder named
+<cite>{trial_function_name}_{random_id}_{index}_{truncated_parameters}</cite>.</p>
+</section>
+<section id="advanced-details">
+<h3>Advanced details<a class="headerlink" href="#advanced-details" title="Link to this heading"></a></h3>
+<section id="relative-import">
+<h4>Relative import<a class="headerlink" href="#relative-import" title="Link to this heading"></a></h4>
+<p>If you save the training function into a separate file and import it into the
+Ray script, one line has to be added before the trials start,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ray</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">runtime_env</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;working_dir&quot;</span><span class="p">:</span> <span class="s2">&quot;.&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>assuming the current directory (“.”) contains the training and Ray script.
+Without this line, Ray will NOT be able to find the training script and import
+the training function.</p>
+</section>
+<section id="callbacks-for-ray">
+<h4>Callbacks for Ray<a class="headerlink" href="#callbacks-for-ray" title="Link to this heading"></a></h4>
+<p>When running <cite>ray.tune</cite>, a set of callback functions can be called during the
+process. Ray has a <a class="reference external" href="https://docs.ray.io/en/latest/tune/tutorials/tune-metrics.html">documentation</a> on the callback functions. You can build
+your own for your convenience. However, here is a callback function to save
+the JSON and CSV files at the end of each trial and handle failed trials, which
+should cover the most basic functionalities.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ray.tune.logger</span> <span class="kn">import</span> <span class="n">JsonLoggerCallback</span><span class="p">,</span> <span class="n">LoggerCallback</span>
+
+<span class="k">class</span> <span class="nc">AxLogger</span><span class="p">(</span><span class="n">LoggerCallback</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax_client</span><span class="p">:</span> <span class="n">AxClient</span><span class="p">,</span> <span class="n">JSON_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">csv_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A logger callback to save the progress to a JSON file after every trial ends.</span>
+<span class="sd">        Similar to running `ax_client.save_to_json_file` every iteration in sequential</span>
+<span class="sd">        searches.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ax_client (AxClient): ax client to save</span>
+<span class="sd">            json_name (str): name for the JSON file. Append a path if you want to save the \</span>
+<span class="sd">                JSON file to somewhere other than cwd.</span>
+<span class="sd">            csv_name (str): name for the CSV file. Append a path if you want to save the \</span>
+<span class="sd">                CSV file to somewhere other than cwd.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax_client</span> <span class="o">=</span> <span class="n">ax_client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">json</span> <span class="o">=</span> <span class="n">json_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">csv</span> <span class="o">=</span> <span class="n">csv_name</span>
+
+    <span class="k">def</span> <span class="nf">log_trial_end</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">Trial</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">runtime</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">failed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax_client</span><span class="o">.</span><span class="n">save_to_json_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">json</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">json</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">trial</span><span class="o">.</span><span class="n">local_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">json</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax_client</span><span class="o">.</span><span class="n">get_trials_data_frame</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;Metric&quot;</span><span class="p">)</span>
+            <span class="n">data_frame</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">csv</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">csv</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">trial</span><span class="o">.</span><span class="n">local_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">csv</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">failed</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;failed&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;finished&quot;</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;AX trial </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">. Final loss: </span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">. Time taken&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">runtime</span><span class="si">}</span><span class="s2"> seconds. Location directory: </span><span class="si">{</span><span class="n">trial</span><span class="o">.</span><span class="n">logdir</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">on_trial_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">trials</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Trial</span><span class="p">],</span> <span class="n">trial</span><span class="p">:</span> <span class="n">Trial</span><span class="p">,</span> <span class="o">**</span><span class="n">info</span><span class="p">):</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">trial</span><span class="o">.</span><span class="n">experiment_tag</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">ax_trial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax_client</span><span class="o">.</span><span class="n">get_trial</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+        <span class="n">ax_trial</span><span class="o">.</span><span class="n">mark_abandoned</span><span class="p">(</span><span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Error encountered&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_trial_end</span><span class="p">(</span>
+            <span class="n">trial</span><span class="p">,</span> <span class="nb">id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;not available&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_runtime</span><span class="p">(</span><span class="n">ax_trial</span><span class="p">),</span> <span class="kc">True</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">on_trial_complete</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">trials</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="s2">&quot;Trial&quot;</span><span class="p">],</span> <span class="n">trial</span><span class="p">:</span> <span class="n">Trial</span><span class="p">,</span> <span class="o">**</span><span class="n">info</span>
+    <span class="p">):</span>
+        <span class="c1"># trial.trial_id is the random id generated by ray, not ax</span>
+        <span class="c1"># the default experiment_tag starts with ax&#39; trial index</span>
+        <span class="c1"># but this workaround is totally fragile, as users can</span>
+        <span class="c1"># customize the tag or folder name</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">trial</span><span class="o">.</span><span class="n">experiment_tag</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">ax_trial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax_client</span><span class="o">.</span><span class="n">get_trial</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+        <span class="n">failed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">ax_trial</span><span class="o">.</span><span class="n">objective_mean</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="s2">&quot;not available&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">loss</span><span class="p">):</span>
+                <span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="s2">&quot;not available&quot;</span>
+        <span class="k">if</span> <span class="n">failed</span><span class="p">:</span>
+            <span class="n">ax_trial</span><span class="o">.</span><span class="n">mark_failed</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_trial_end</span><span class="p">(</span>
+            <span class="n">trial</span><span class="p">,</span> <span class="nb">id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_runtime</span><span class="p">(</span><span class="n">ax_trial</span><span class="p">),</span> <span class="n">failed</span>
+        <span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">calculate_runtime</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">AXTrial</span><span class="p">):</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">time_completed</span> <span class="o">-</span> <span class="n">trial</span><span class="o">.</span><span class="n">time_run_started</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">delta</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>To use callback functions, simple add a line in <code class="docutils literal notranslate"><span class="pre">ray.RunConfig</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ax_logger</span> <span class="o">=</span> <span class="n">AxLogger</span><span class="p">(</span><span class="n">ax_client</span><span class="p">,</span> <span class="s2">&quot;hyperopt_ray.json&quot;</span><span class="p">,</span> <span class="s2">&quot;hyperopt.csv&quot;</span><span class="p">)</span>
+<span class="n">run_config</span><span class="o">=</span><span class="n">air</span><span class="o">.</span><span class="n">RunConfig</span><span class="p">(</span>
+    <span class="n">local_dir</span><span class="o">=</span><span class="s2">&quot;./test&quot;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">ax_logger</span><span class="p">,</span> <span class="n">JsonLoggerCallback</span><span class="p">()],</span>
+    <span class="n">log_to_file</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="restart-extend-an-experiment">
+<h4>Restart/extend an experiment<a class="headerlink" href="#restart-extend-an-experiment" title="Link to this heading"></a></h4>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Due to the complexity of handling the individual trial path with Ray, it is
+not possible to restart unfinished trials at this moment.</p>
+</div>
+<p>Restarting an experiment or adding additional trials to an experiment shares the
+same workflow. The key is the JSON file saved from the experiment. To reload the
+experiment state:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ax_client</span> <span class="o">=</span> <span class="n">AxClient</span><span class="o">.</span><span class="n">load_from_json_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="s2">&quot;hyperopt_ray.json&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then we can pull new parameters from this experiment, and these parameters will
+be generated based on all finished trials. If more trials need to be added to
+this experiment, simply increase <cite>num_samples</cite> in <cite>ray.tune.TuneConfig</cite>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># this will end the experiment when 20 trials are finished</span>
+<span class="n">tune_config</span><span class="o">=</span><span class="n">tune</span><span class="o">.</span><span class="n">TuneConfig</span><span class="p">(</span><span class="n">search_alg</span><span class="o">=</span><span class="n">algo</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Sometimes, you may want to make changes to the experiment itself when reloading
+the experiment, for example, the search space. This can easily achieved by</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ax_client</span><span class="o">.</span><span class="n">set_search_space</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;parameter_b&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;fixed&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;value_type&quot;</span><span class="p">:</span> <span class="s2">&quot;int&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;parameter_c&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;choice&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">50</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>after the <cite>ax_client</cite> object is reloaded.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To use the <cite>ax_client.set_search_space</cite> method, the original experiment must
+be created with <cite>immutable_search_space_and_opt_config=False</cite>, i.e.,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ax_client</span><span class="o">.</span><span class="n">create_experiment</span><span class="p">(</span>
+    <span class="o">...</span>
+    <span class="n">immutable_search_space_and_opt_config</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="o">...</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>If the original experiment is not created with this option, there is not much
+we can do.</p>
+</div>
+<p>The example scripts with a modified QM7 training script are provided in
+<a class="reference external" href="https://github.com/lanl/hippynn/tree/development/examples/hyperparameter_optimization">examples</a>. This tutorial is contributed by <a class="reference external" href="https://github.com/tautomer">Xinyang Li</a> and the examples
+scripts are developed by <a class="reference external" href="https://github.com/sakibmatin">Sakib Matin</a> and <a class="reference external" href="https://github.com/tautomer">Xinyang Li</a>.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="lightning.html" class="btn btn-neutral float-left" title="Pytorch Lightning module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../user_guide/index.html" class="btn btn-neutral float-right" title="User Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
