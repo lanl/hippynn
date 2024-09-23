@@ -515,7 +515,7 @@ def main(args=None):
             for sys_type, repetitions in gpu_speed_tests.items():
                 params = TEST_PARAMS[sys_type]
                 print("-" * 80)
-                print("Giga systems:", params)
+                print(f"{sys_type} systems:", params)
                 tester.check_speed(
                     n_repetitions=repetitions,
                     data_size=params,
