@@ -451,6 +451,7 @@ def main(args=None):
     compare_against = args.compare_against
     test_gpu = not args.no_test_gpu
     test_cpu = not args.no_test_cpu
+    speed = not args.no_speed
     correctness = not args.no_correctness
 
     if torch.cuda.is_available() and test_gpu:
@@ -467,37 +468,38 @@ def main(args=None):
         if correctness:
             tester.check_correctness(device=torch.device("cuda"), n_large=n_large_gpu)
 
-        if use_verylarge_gpu:
-            if use_ultra:
+        if speed:
+            if use_verylarge_gpu:
+                if use_ultra:
 
+                    print("-" * 80)
+                    print("Giga systems:", TEST_GIGA_PARAMS)
+                    tester.check_speed(
+                        n_repetitions=20, data_size=TEST_GIGA_PARAMS, device=torch.device("cuda"), compare_against=compare_against
+                    )
+                    print("-" * 80)
+                    print("Ultra systems:", TEST_ULTRA_PARAMS)
+                    tester.check_speed(
+                        n_repetitions=20, data_size=TEST_ULTRA_PARAMS, device=torch.device("cuda"), compare_against=compare_against
+                    )
                 print("-" * 80)
-                print("Giga systems:", TEST_GIGA_PARAMS)
-                tester.check_speed(
-                    n_repetitions=20, data_size=TEST_GIGA_PARAMS, device=torch.device("cuda"), compare_against=compare_against
-                )
+                print("Mega systems:", TEST_MEGA_PARAMS)
+                tester.check_speed(n_repetitions=20, data_size=TEST_MEGA_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
+            else:
+                print("Numba indicates less than 30GB free GPU memory -- skipping mega system test")
+            if use_large_gpu:
                 print("-" * 80)
-                print("Ultra systems:", TEST_ULTRA_PARAMS)
-                tester.check_speed(
-                    n_repetitions=20, data_size=TEST_ULTRA_PARAMS, device=torch.device("cuda"), compare_against=compare_against
-                )
-            print("-" * 80)
-            print("Mega systems:", TEST_MEGA_PARAMS)
-            tester.check_speed(n_repetitions=20, data_size=TEST_MEGA_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
-        else:
-            print("Numba indicates less than 30GB free GPU memory -- skipping mega system test")
-        if use_large_gpu:
-            print("-" * 80)
-            print("Large systems:", TEST_LARGE_PARAMS)
-            tester.check_speed(n_repetitions=20, data_size=TEST_LARGE_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
-        else:
-            print("Numba indicates less than 2GB free GPU memory -- skipping large system test")
+                print("Large systems:", TEST_LARGE_PARAMS)
+                tester.check_speed(n_repetitions=20, data_size=TEST_LARGE_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
+            else:
+                print("Numba indicates less than 2GB free GPU memory -- skipping large system test")
 
-        print("-" * 80)
-        print("Medium systems:", TEST_MEDIUM_PARAMS)
-        tester.check_speed(n_repetitions=100, data_size=TEST_MEDIUM_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
-        print("-" * 80)
-        print("Small systems:", TEST_SMALL_PARAMS)
-        tester.check_speed(n_repetitions=100, data_size=TEST_SMALL_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
+            print("-" * 80)
+            print("Medium systems:", TEST_MEDIUM_PARAMS)
+            tester.check_speed(n_repetitions=100, data_size=TEST_MEDIUM_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
+            print("-" * 80)
+            print("Small systems:", TEST_SMALL_PARAMS)
+            tester.check_speed(n_repetitions=100, data_size=TEST_SMALL_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
 
     else:
         if not args.no_test_gpu:
@@ -506,19 +508,21 @@ def main(args=None):
             print("Skipped GPU tests.")
 
     if test_cpu:
-        print("Running CPU tests")
+        print("Running CPU tests.")
         if correctness:
             tester.check_correctness(n_large=args.n_large)
 
-        print("-" * 80)
-        print("Large systems:", TEST_LARGE_PARAMS)
-        tester.check_speed(n_repetitions=10, compare_against=compare_against)
-        print("-" * 80)
-        print("Medium systems:", TEST_MEDIUM_PARAMS)
-        tester.check_speed(n_repetitions=100, data_size=TEST_MEDIUM_PARAMS, compare_against=compare_against)
-        print("-" * 80)
-        print("Small systems:", TEST_SMALL_PARAMS)
-        tester.check_speed(n_repetitions=100, compare_against=compare_against, data_size=TEST_SMALL_PARAMS)
+        if speed:
+            print("Testing CPU speed.")
+            print("-" * 80)
+            print("Large systems:", TEST_LARGE_PARAMS)
+            tester.check_speed(n_repetitions=10, compare_against=compare_against)
+            print("-" * 80)
+            print("Medium systems:", TEST_MEDIUM_PARAMS)
+            tester.check_speed(n_repetitions=100, data_size=TEST_MEDIUM_PARAMS, compare_against=compare_against)
+            print("-" * 80)
+            print("Small systems:", TEST_SMALL_PARAMS)
+            tester.check_speed(n_repetitions=100, compare_against=compare_against, data_size=TEST_SMALL_PARAMS)
     else:
         print("Skipped CPU tests.")
 
@@ -546,12 +550,14 @@ def parse_args():
         default=5,
         help="""
     Number of times to check correctness of forward pass. Set this to a large number (e.g. 200) to
-    stress-test a new implementation against corner-cases.""",
+    stress-test a new implementation against corner-cases.
+    """,
     )
 
-    parser.add_argument("--no-test-cpu", action="store_true", default=False, help="Set to false to skip CPU tests.")
-    parser.add_argument("--no-test-gpu", action="store_true", default=False, help="Set to false to skip GPU tests.")
-    parser.add_argument("--no-correctness", action="store_true", default=False, help="Set to false to skip GPU tests.")
+    parser.add_argument("--no-test-cpu", action="store_true", default=False, help="Flag to skip CPU tests.")
+    parser.add_argument("--no-test-gpu", action="store_true", default=False, help="Flag to skip GPU tests.")
+    parser.add_argument("--no-speed", action="store_true", default=False, help="Flag to skip speed tests.")
+    parser.add_argument("--no-correctness", action="store_true", default=False, help="Flag to skip correctness tests.")
 
     args = parser.parse_args()
     return args

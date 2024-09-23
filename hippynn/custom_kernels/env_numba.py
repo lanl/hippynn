@@ -1,6 +1,14 @@
 """
 Numba implementation of envsum operations.
 """
+# Dev note for the future: Do not attempt the `atexit` call:
+# >>> atexit.register(numba.cuda.close)
+# Causes segfault on program exit on some systems.
+# Probably due to both numba and torch trying to finalize the GPU.
+# Leaving this note here in case anyone is tempted to try it in the future.
+# (At one point in history, this was the right strategy.)
+import warnings
+import torch
 import numba
 import numba.cuda
 import numpy as np
@@ -9,8 +17,11 @@ from .utils import resort_pairs_cached
 from .tensor_wrapper import via_numpy, NumbaCompatibleTensorFunction
 from .autograd_wrapper import MessagePassingKernels
 
-# Very basic implementation.
-# While simple, it beats a set of pytorch operations simply by using far less memory.
+
+if not numba.cuda.is_available():
+    if torch.cuda.is_available():
+        warnings.warn("Numba is installed but numba.cuda.is_available() returned False. "
+                      "Custom kernels will most likely fail on GPU tensors. ")
 
 # conventions:
 # pidx  : index of pair
@@ -18,7 +29,6 @@ from .autograd_wrapper import MessagePassingKernels
 # psidx : index of second atom in pair (sender)
 # fidx  : index of feature
 # nidx  : index of sensitivity (nu)
-
 
 # Kernel which sums sensitivities and features to get environment.
 # Numpy core signature: (p,n),(a,f),(p),(p),(a,n,f)

@@ -1,14 +1,14 @@
 """
-CuPy implementation of envsum custom kernels for GPU.
+Cupy implementation of envsum custom kernels for GPU.
 """
-# Dev Note: CPU implementation of these ops is still done by numba.
-# As such, numba is still required and calls to CPU ops must
-# obey the same API as the numba implementations.
-# To get rid of this, one will have to factor out the
-#
-
+import warnings
 import torch
 import cupy
+
+if not cupy.cuda.is_available():
+    if torch.cuda.is_available():
+        warnings.warn("Cupy is installed but cupy.cuda.is_available() returned False. "
+                      "Custom kernels will most likely fail on GPU tensors. ")
 
 # If numba is available, this implementation will default to numba on CPU. If not, use vanilla pytorch.
 try:

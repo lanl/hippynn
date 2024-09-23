@@ -31,6 +31,15 @@ Depending on your available packages, you may have the following options:
 Note that triton and cupy kernels will fall back to numba on CPU if possible, followed by pytorch.
 
 """
+# Dev notes:
+# For a new implmentation, make a new MessagePassingKernels object in your implementation file.
+# This will register your implementation with the system.
+# Then do the following:
+#   - Add your implementation name to _POSSIBLE_CUSTOM_KERNELS
+#   - Add an import block for the file to the populate_custom_kernels() function.
+# If your custom kernel has constraints on what devices or hardware configurations are possible,
+# the have your module raise an ImportError. You may also want to use
+# warnings.warn to warn the user of why the implementation is not available.
 import warnings
 from typing import Union
 import torch
@@ -58,7 +67,6 @@ def populate_custom_kernel_availability():
     # Look for CPU-capable kernels.
     try:
         import numba
-        _check_numba()
         from . import env_numba
     except ImportError:
         pass
@@ -72,60 +80,19 @@ def populate_custom_kernel_availability():
     if torch.cuda.is_available():
         try:
             import cupy
-            _check_cupy()
             from . import env_cupy
         except ImportError:
             pass
 
         try:
             import triton
-            if torch.cuda.is_available():
-                device_capability = torch.cuda.get_device_capability()
-                if device_capability[0] > 6:
-                    CUSTOM_KERNELS_AVAILABLE.append("triton")
-                else:
-                    warnings.warn(
-                        f"Triton found but not supported by GPU's compute capability: {device_capability}"
-                    )
+            # Note: Device capability check is located in env_triton now.
+            from . import env_triton
         except ImportError:
             pass
 
-
-
-
-    from .autograd_wrapper import MessagePassingKernels
-
     CUSTOM_KERNELS_AVAILABLE = list(MessagePassingKernels.get_available_implementations())
-
     return CUSTOM_KERNELS_AVAILABLE
-
-def _check_numba():
-    import numba.cuda
-    import torch
-
-    if not numba.cuda.is_available():
-        if torch.cuda.is_available():
-            warnings.warn("numba.cuda.is_available() returned False: Custom kernels will fail on GPU tensors.")
-        return True
-    else:
-        # atexit.register(numba.cuda.close)
-        # Dev note for the future: Do not attempt the above `atexit` call!
-        # Causes segfault on program exit on some systems.
-        # Probably due to both numba and torch trying to finalize the GPU.
-        # Leaving this note here in case anyone is tempted to try it in the future.
-        # (At one point this was the right strategy...)
-        return False
-
-
-def _check_cupy():
-    import cupy
-    import numba
-    import torch
-
-    if not cupy.cuda.is_available():
-        if torch.cuda.is_available():
-            warnings.warn("cupy.cuda.is_available() returned False: Custom kernels will fail on GPU tensors.")
-    return
 
 
 def set_custom_kernels(active: Union[bool, str] = True) -> str:
