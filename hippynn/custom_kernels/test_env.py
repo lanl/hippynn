@@ -156,6 +156,7 @@ TEST_PARAMS = dict(
 
 # A class for testing the correctness and speed of the kernels function implementations.
 
+
 class EnvOpsTester:
     def __init__(self, name: str, suspicious_deviation: int = 0.5):
         implementation = MessagePassingKernels.get_implementation(name)
@@ -302,7 +303,6 @@ class EnvOpsTester:
         self.check_allclose_once(device=device, randomize_order=True)
         print("Passed random pair order test...")
 
-
         print("Checking gradients {} times...".format(n_grad))
         self.check_all_grad(repeats=n_grad, device=device)
         print("Passed gradient checks!")
@@ -320,8 +320,8 @@ class EnvOpsTester:
         comp_sensesum = comparison_impl.sensesum
         comp_featsum = comparison_impl.featsum
 
-        te, ts, tf = (TimerHolder(f"{self.name}_{name}",device=device) for name in ("Envsum", "Sensesum", "Featsum"))
-        tne, tns, tnf = (TimerHolder(f"{compare_against}_{name}",device=device) for name in ("Envsum", "Sensesum", "Featsum"))
+        te, ts, tf = (TimerHolder(f"{self.name}_{name}", device=device) for name in ("Envsum", "Sensesum", "Featsum"))
+        tne, tns, tnf = (TimerHolder(f"{compare_against}_{name}", device=device) for name in ("Envsum", "Sensesum", "Featsum"))
 
         print(f"Repetitions: {n_repetitions}")
         with torch.autograd.no_grad():
@@ -409,9 +409,8 @@ class TimerHolder:
             "mean": self.mean_elapsed,
             "median": self.median_elapsed,
             "individual": [t.elapsed for t in self.snippets],
-            "device": self.device
+            "device": self.device,
         }
-
 
 
 class TimedSnippet:
