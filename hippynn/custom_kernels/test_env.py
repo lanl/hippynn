@@ -8,7 +8,6 @@ import numpy as np
 import torch
 
 from . import env_pytorch
-from . import autograd_wrapper
 from .utils import clear_pair_cache
 
 from .autograd_wrapper import MessagePassingKernels
@@ -113,7 +112,7 @@ def get_simulated_data(
     # pair_first[0] = pair_first[-1]
     # pair_second[0] = pair_second[-1]
 
-    # NOTE: These fake sensitivities are NONSYMMETRIC, that is, j->i does not mean i->j,
+    # NOTE: These synthetic sensitivities are NONSYMMETRIC, that is, j->i does not mean i->j,
     # and also does not mean that the value of the sensitivity is the same
     # even when i<->j.
 
@@ -163,6 +162,7 @@ class EnvOpsTester:
         self.envsum = implementation.envsum
         self.sensesum = implementation.sensesum
         self.featsum = implementation.featsum
+        self.name = name
 
         self.tol_f64 = dict(atol=1e-8, rtol=1e-5)
         self.tol_f32 = dict(atol=1e-5, rtol=1e-5)  # Absolute tolerance a bit fuzzier for float32.
@@ -320,10 +320,10 @@ class EnvOpsTester:
         comp_sensesum = comparison_impl.sensesum
         comp_featsum = comparison_impl.featsum
 
-        te, ts, tf = (TimerHolder(name) for name in ("Envsum", "Sensesum", "Featsum"))
-        tne, tns, tnf = (TimerHolder("{}_{}".format(compare_against, name)) for name in ("Envsum", "Sensesum", "Featsum"))
+        te, ts, tf = (TimerHolder(f"{self.name}_{name}",device=device) for name in ("Envsum", "Sensesum", "Featsum"))
+        tne, tns, tnf = (TimerHolder(f"{compare_against}_{name}",device=device) for name in ("Envsum", "Sensesum", "Featsum"))
 
-        print("Repetitions: {}".format(n_repetitions))
+        print(f"Repetitions: {n_repetitions}")
         with torch.autograd.no_grad():
             # Warming up by running on data of this specific size
             sense, feat, pfirst, psecond = get_simulated_data(**data_size, dtype=torch.float32, device=device)
@@ -365,7 +365,9 @@ class EnvOpsTester:
         print("Overall {} time: {}".format(compare_against, tnsum))
         print("Overall time now: {}".format(tsum))
         print("Overall speedup: {}".format(tnsum / tsum))
-        return [tne, tns, tnf], [te, ts, tf]
+        new_results = [t.to_dict() for t in [tne, tns, tnf]]
+        compare_results = [t.to_dict() for t in [te, ts, tf]]
+        return new_results, compare_results
 
 
 def safe_synchronize():
@@ -375,9 +377,13 @@ def safe_synchronize():
 
 
 class TimerHolder:
-    def __init__(self, name=None):
+    def __init__(self, name, device):
         self.snippets = []
         self.name = name
+        if device.type == "cuda":
+            self.device = torch.cuda.get_device_name(device)
+        else:
+            self.device = device.type
 
     def add(self):
         t = TimedSnippet()
@@ -395,6 +401,17 @@ class TimerHolder:
     @property
     def median_elapsed(self):
         return np.median([t.elapsed for t in self.snippets])
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "count": len(self.snippets),
+            "mean": self.mean_elapsed,
+            "median": self.median_elapsed,
+            "individual": [t.elapsed for t in self.snippets],
+            "device": self.device
+        }
+
 
 
 class TimedSnippet:
@@ -551,7 +568,7 @@ def parse_args():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("implementation", type=str, help="Implementation to test.")
-    parser.add_argument("--seed", type=int, default=0, help="name for run")
+    parser.add_argument("--seed", type=int, default=0, help="Seed")
 
     parser.add_argument(
         "--compare-against",
@@ -574,10 +591,8 @@ def parse_args():
     )
 
     parser.add_argument("--accelerator", type=str, default="cuda", help="Device to treat as the GPU.")
-
     parser.add_argument("--no-test-cpu", action="store_true", default=False, help="Flag to skip CPU tests.")
     parser.add_argument("--no-test-gpu", action="store_true", default=False, help="Flag to skip GPU tests.")
-
     parser.add_argument("--no-speed", action="store_true", default=False, help="Flag to skip speed tests.")
     parser.add_argument("--no-correctness", action="store_true", default=False, help="Flag to skip correctness tests.")
 
