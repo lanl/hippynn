@@ -1,5 +1,7 @@
 """
-This module implements a version of converting
+This module implements a version of converting from pytorch tensors
+to numba DeviceNDArrays that skips much of the indirection that takes place
+in the numba implementation.
 
 Note: This is not entirely API safe as numba has
 not exposed all of these functions directly.

@@ -3,7 +3,7 @@ Pure pytorch implementation of envsum operations
 """
 import torch
 
-
+from .autograd_wrapper import MessagePassingKernels
 # TODO: Does resort_pairs_cached give enough to allow direct construction of CSR?
 
 
@@ -119,3 +119,12 @@ def featsum(env, sense, pair_first, pair_second):
 
     feat = torch.mm(sparse_sense, env.reshape(n_atoms * n_nu, n_feat))
     return feat
+
+
+sparse_kernels = MessagePassingKernels(
+    "sparse",
+    envsum,
+    sensesum,
+    featsum,
+)
+

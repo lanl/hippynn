@@ -9,6 +9,8 @@ from . import env_pytorch
 from . import autograd_wrapper
 from .utils import clear_pair_cache
 
+from .autograd_wrapper import MessagePassingKernels
+
 import warnings
 
 
@@ -249,8 +251,8 @@ class Envops_tester:
             sense_g = self.sensesum(env, feat, pfirst, psecond)
             feat_g = self.featsum(env, sense, pfirst, psecond)
         except Exception as ee:
-            raise ValueError("Failed an operation on data with zero pairs") from ee
-        print("Passed zero-pair check")
+            raise ValueError("Failed an operation on data with zero pairs!") from ee
+        print("Passed zero-pair check.")
 
     def check_forward_noerr(self, device=torch.device("cpu")):
 
@@ -261,7 +263,7 @@ class Envops_tester:
         env = self.envsum(sense, feat, pfirst, psecond)
         sense_g = self.sensesum(env, feat, pfirst, psecond)
         feat_g = self.featsum(env, sense, pfirst, psecond)
-        print("Passed forward execution check")
+        print("Passed forward execution check.")
 
     def all_close_witherror(self, r1, r2):
         r1 = r1.data.cpu().numpy()
@@ -326,30 +328,10 @@ class Envops_tester:
 
     def check_speed(self, n_repetitions=10, device=torch.device("cpu"), data_size=TEST_LARGE_PARAMS, compare_against="pytorch"):
 
-        if compare_against.lower() == "pytorch":
-            comp_envsum = env_pytorch.envsum
-            comp_sensesum = env_pytorch.sensesum
-            comp_featsum = env_pytorch.featsum
-        elif compare_against.lower() == "numba":
-            comp_envsum = env_numba.new_envsum
-            comp_sensesum = env_numba.new_sensesum
-            comp_featsum = env_numba.new_featsum
-        elif compare_against.lower() == "cupy":
-            comp_envsum = env_cupy.cupy_envsum
-            comp_sensesum = env_cupy.cupy_sensesum
-            comp_featsum = env_cupy.cupy_featsum
-        elif compare_against.lower() == "triton":
-            comp_envsum = env_triton.envsum
-            comp_sensesum = env_triton.sensesum
-            comp_featsum = env_triton.featsum
-        elif compare_against.lower() == "sparse":
-            comp_envsum = env_sparse.envsum
-            comp_sensesum = env_sparse.sensesum
-            comp_featsum = env_sparse.featsum
-
-
-        else:
-            raise ValueError("Unknown implementation to comapre against:'{}'".format(compare_against))
+        comparison_impl = MessagePassingKernels.get_implementation(compare_against)
+        comp_envsum = comparison_impl.envsum_impl
+        comp_sensesum = comparison_impl.sensesum_impl
+        comp_featsum = comparison_impl.featsum_impl
 
         te, ts, tf = (TimerHolder(name) for name in ("Envsum", "Sensesum", "Featsum"))
         tne, tns, tnf = (TimerHolder("{}_{}".format(compare_against, name)) for name in ("Envsum", "Sensesum", "Featsum"))
@@ -446,7 +428,7 @@ class TimedSnippet:
         return self.end - self.start
 
 
-def main(env_impl, sense_impl, feat_impl, args=None):
+def main(args=None):
 
     if args is None:
         # calling without arguments looks for them from command line
@@ -458,10 +440,12 @@ def main(env_impl, sense_impl, feat_impl, args=None):
         args = SimpleNamespace(**args)
 
     np.random.seed(args.seed)
+
+    implementation = MessagePassingKernels.get_implementation(args.implementation)
     tester = Envops_tester(
-        env_impl,
-        sense_impl,
-        feat_impl,
+        implementation.envsum_impl,
+        implementation.sensesum_impl,
+        implementation.featsum_impl,
     )
 
     compare_against = args.compare_against
@@ -543,6 +527,7 @@ def parse_args():
     import argparse
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("implementation", type=str, help="Implementation to test.")
     parser.add_argument("--seed", type=int, default=0, help="name for run")
 
     parser.add_argument(
@@ -550,7 +535,9 @@ def parse_args():
         type=str,
         default="pytorch",
         help="""
-    implementation to compare speed with. Options are: pytorch, numba, cupy, triton""",
+    Implementation to compare speed with. Options are: pytorch, numba, cupy, triton
+    Correctness is always compared against pytorch.
+    """,
     )
 
     parser.add_argument(
@@ -569,3 +556,5 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+if __name__ == "__main__":
+    main()

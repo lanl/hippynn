@@ -7,7 +7,7 @@ as explained in the :doc:`/user_guide/ckernels` section of the documentation.
 """
 import torch
 from torch import Tensor
-
+from .autograd_wrapper import MessagePassingKernels
 
 def envsum(sensitivities: Tensor, features: Tensor, pair_first: Tensor, pair_second: Tensor) -> Tensor:
     """
@@ -76,3 +76,22 @@ def featsum(env, sense, pair_first, pair_second):
     feat = torch.zeros(n_atoms, n_feat, device=env.device, dtype=env.dtype)
     feat.index_add_(0, pair_second, pair_feat)
     return feat
+
+
+
+pytorch_kernels = MessagePassingKernels(
+    "pytorch",
+    envsum,
+    sensesum,
+    featsum,
+    wrap=False,  # Important distinction!
+)
+
+pytorch_wrapped_kernels = MessagePassingKernels(
+    "pytorch_wrapped",
+    envsum,
+    sensesum,
+    featsum,
+    wrap=True,  # Important distinction!
+)
+

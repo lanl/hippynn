@@ -7,6 +7,7 @@ import numpy as np
 
 from .utils import resort_pairs_cached
 from .tensor_wrapper import via_numpy, NumbaCompatibleTensorFunction
+from .autograd_wrapper import MessagePassingKernels
 
 # Very basic implementation.
 # While simple, it beats a set of pytorch operations simply by using far less memory.
@@ -281,3 +282,10 @@ class WrappedFeatsum(NumbaCompatibleTensorFunction):
 new_envsum = WrappedEnvsum()
 new_sensesum = WrappedSensesum()
 new_featsum = WrappedFeatsum()
+
+numba_kernels = MessagePassingKernels(
+    "numba",
+    new_envsum,
+    new_sensesum,
+    new_featsum,
+)
