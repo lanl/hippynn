@@ -154,27 +154,8 @@ TEST_PARAMS = dict(
     giga=TEST_GIGA_PARAMS,
 )
 
-# reference implementation
 
-
-def test_pytorch_reference():
-    sense, feat, pfirst, psecond = get_simulated_data(**TEST_TINY_PARAMS, dtype=torch.float64)
-    sense.requires_grad_(True)
-    feat.requires_grad_(True)
-    env = env_pytorch.envsum(sense, feat, pfirst, psecond)
-    pt_gradsense, pt_gradfeat = torch.autograd.grad(env.sum(), [sense, feat])
-    sense.requires_grad_(False)
-    feat.requires_grad_(False)
-    ref_gradsense = env_pytorch.sensesum(torch.ones_like(env), feat, pfirst, psecond)
-    ref_gradfeat = env_pytorch.featsum(torch.ones_like(env), sense, pfirst, psecond)
-
-    # Note: Numerical differences
-    assert torch.allclose(pt_gradsense, ref_gradsense, atol=1e-15, rtol=1e-15)
-    assert torch.allclose(pt_gradfeat, ref_gradfeat, atol=1e-15, rtol=1e-15)
-
-
-# A class for testing the correctness of the kernels functions.
-
+# A class for testing the correctness and speed of the kernels function implementations.
 
 class EnvOpsTester:
     def __init__(self, name: str, suspicious_deviation: int = 0.5):
@@ -319,6 +300,8 @@ class EnvOpsTester:
         self.check_empty(device=device)  # this is now covered in autograd wrapper...
 
         self.check_allclose_once(device=device, randomize_order=True)
+        print("Passed random pair order test...")
+
 
         print("Checking gradients {} times...".format(n_grad))
         self.check_all_grad(repeats=n_grad, device=device)
@@ -333,9 +316,9 @@ class EnvOpsTester:
     def check_speed(self, n_repetitions=10, device=torch.device("cpu"), data_size=TEST_LARGE_PARAMS, compare_against="pytorch"):
 
         comparison_impl = MessagePassingKernels.get_implementation(compare_against)
-        comp_envsum = comparison_impl.envsum_impl
-        comp_sensesum = comparison_impl.sensesum_impl
-        comp_featsum = comparison_impl.featsum_impl
+        comp_envsum = comparison_impl.envsum
+        comp_sensesum = comparison_impl.sensesum
+        comp_featsum = comparison_impl.featsum
 
         te, ts, tf = (TimerHolder(name) for name in ("Envsum", "Sensesum", "Featsum"))
         tne, tns, tnf = (TimerHolder("{}_{}".format(compare_against, name)) for name in ("Envsum", "Sensesum", "Featsum"))
@@ -371,7 +354,7 @@ class EnvOpsTester:
                     self.sensesum(env, feat, pfirst, psecond)
                 with tf.add():
                     self.featsum(env, sense, pfirst, psecond)
-        print()  # Newline to terminate the ... printing
+        print()  # Newline to terminate the '...' printing
         for t in [tne, tns, tnf] + [te, ts, tf]:
             print("Mean {} time: {} Median: {}".format(t.name, t.mean_elapsed, t.median_elapsed))
         for tn, t in zip([tne, tns, tnf], [te, ts, tf]):
@@ -513,29 +496,54 @@ def main(args=None):
             gpu_speed_tests.pop("mega", None)
             print("Numba indicates less than 30GB free GPU memory -- skipping mega system test")
 
+        # Note: base pytorch implementation will error on ultra configurations.
         use_ultra = (not correctness) and use_verylarge_gpu and (compare_against.lower() != "pytorch")
         if use_ultra:
-            gpu_speed_tests = dict(ultra=20, **gpu_speed_tests)
+            gpu_speed_tests = dict(giga=20, ultra=20, **gpu_speed_tests)
 
         if correctness:
             n_large_gpu = args.n_large if use_large_gpu else 0
             tester.check_correctness(device=device, n_large=n_large_gpu)
+        else:
+            print("Skipped correctness checks.")
 
         if speed:
             speed_test_loop(tester, gpu_speed_tests, device=device, compare_against=compare_against)
-
-    else:  # Device not available, see above!
+        else:
+            print("Skipped speed tests.")
+    else:
         print("Skipped GPU tests.")
 
     if test_cpu:
         print("Running CPU tests.")
         if correctness:
             tester.check_correctness(n_large=args.n_large)
+        else:
+            print("Skipped correctness checks.")
 
         if speed:
             speed_test_loop(tester, speed_tests, device=torch.device("cpu"), compare_against=compare_against)
+        else:
+            print("Skipped speed tests.")
     else:
         print("Skipped CPU tests.")
+
+
+# reference implementation
+def test_pytorch_reference():
+    sense, feat, pfirst, psecond = get_simulated_data(**TEST_TINY_PARAMS, dtype=torch.float64)
+    sense.requires_grad_(True)
+    feat.requires_grad_(True)
+    env = env_pytorch.envsum(sense, feat, pfirst, psecond)
+    pt_gradsense, pt_gradfeat = torch.autograd.grad(env.sum(), [sense, feat])
+    sense.requires_grad_(False)
+    feat.requires_grad_(False)
+    ref_gradsense = env_pytorch.sensesum(torch.ones_like(env), feat, pfirst, psecond)
+    ref_gradfeat = env_pytorch.featsum(torch.ones_like(env), sense, pfirst, psecond)
+
+    # Note: Numerical differences
+    assert torch.allclose(pt_gradsense, ref_gradsense, atol=1e-15, rtol=1e-15)
+    assert torch.allclose(pt_gradfeat, ref_gradfeat, atol=1e-15, rtol=1e-15)
 
 
 def parse_args():
