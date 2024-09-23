@@ -22,6 +22,8 @@ def parse_args():
     for param_type in TEST_PARAMS.keys():
         parser.add_argument(f"--{param_type}", type=int, default=0, help=f"Count for param type {param_type}")
 
+    parser.add_argument(f"--test-all-count", type=int, default=0, help=f"Apply m inimumcount for all param types.")
+
     parser.add_argument("--accelerator", type=str, default="cuda", help="Device to use.")
     parser.add_argument("--file", type=str, default="speed_tests.json", help="Where to store results.")
     parser.add_argument("--overwrite", default=False, action="store_true", help="Whether to overwrite.")
@@ -34,7 +36,14 @@ def main(args=None):
     if args is None:
         args = parse_args()
 
+    default = args.test_all_count
+    if default > 0:
+        for k in TEST_PARAMS:
+            setattr(args, k, default)
+
     test_spec = {k: count for k in TEST_PARAMS if (count := getattr(args, k, 0)) > 0}
+    print(TEST_PARAMS.keys())
+    print(test_spec)
     results = {}
 
     implementations = args.implementations
