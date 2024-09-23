@@ -35,8 +35,9 @@ except ImportError:
     env_sparse = None
 
 
-def get_simulated_data(n_molecules, n_atoms, atom_prob, n_features, n_nu, printinfo=False, dtype=None, device=torch.device("cpu"),
-                       randomize_order=False):
+def get_simulated_data(
+    n_molecules, n_atoms, atom_prob, n_features, n_nu, printinfo=False, dtype=None, device=torch.device("cpu"), randomize_order=False
+):
     """
     Get semi-realistic test data for hipnn.
     n_molecules : number of molecules in the batch
@@ -150,7 +151,7 @@ TEST_PARAMS = dict(
     large=TEST_LARGE_PARAMS,
     mega=TEST_MEGA_PARAMS,
     ultra=TEST_ULTRA_PARAMS,
-    giga=TEST_GIGA_PARAMS
+    giga=TEST_GIGA_PARAMS,
 )
 
 # reference implementation
@@ -172,12 +173,11 @@ def test_pytorch_reference():
     assert torch.allclose(pt_gradfeat, ref_gradfeat, atol=1e-15, rtol=1e-15)
 
 
-
 # A class for testing the correctness of the kernels functions.
 
 
 class EnvOpsTester:
-    def __init__(self, name: str, suspicious_deviation: int =0.5):
+    def __init__(self, name: str, suspicious_deviation: int = 0.5):
         implementation = MessagePassingKernels.get_implementation(name)
         self.envsum = implementation.envsum
         self.sensesum = implementation.sensesum
@@ -222,11 +222,12 @@ class EnvOpsTester:
         else:
             params = TEST_TINY_PARAMS
 
-        sense, feat, pfirst, psecond = get_simulated_data(**params,
-                                                          dtype=torch.float32,
-                                                          device=device,
-                                                          randomize_order=randomize_order,
-                                                          )
+        sense, feat, pfirst, psecond = get_simulated_data(
+            **params,
+            dtype=torch.float32,
+            device=device,
+            randomize_order=randomize_order,
+        )
 
         n_atoms, n_features = feat.shape
         n_pairs, n_nu = sense.shape
@@ -261,9 +262,7 @@ class EnvOpsTester:
 
     def check_forward_noerr(self, device=torch.device("cpu")):
 
-        sense, feat, pfirst, psecond = get_simulated_data(**TEST_TINY_PARAMS,
-                                                          dtype=torch.float64,
-                                                          device=device)
+        sense, feat, pfirst, psecond = get_simulated_data(**TEST_TINY_PARAMS, dtype=torch.float64, device=device)
 
         env = self.envsum(sense, feat, pfirst, psecond)
         sense_g = self.sensesum(env, feat, pfirst, psecond)
@@ -391,6 +390,7 @@ def safe_synchronize():
         torch.cuda.synchronize()
     return
 
+
 class TimerHolder:
     def __init__(self, name=None):
         self.snippets = []
@@ -431,6 +431,17 @@ class TimedSnippet:
         return self.end - self.start
 
 
+def speed_test_loop(tester: EnvOpsTester, speed_test_spec: dict, device: torch.device, compare_against: str):
+    all_results = {}
+    for sys_type, repetitions in speed_test_spec.items():
+        params = TEST_PARAMS[sys_type]
+        print("-" * 80)
+        print(f"{sys_type} systems:", params)
+        results = tester.check_speed(n_repetitions=repetitions, data_size=params, device=device, compare_against=compare_against)
+        all_results[sys_type] = results
+    return results
+
+
 def main(args=None):
 
     if args is None:
@@ -444,19 +455,17 @@ def main(args=None):
 
     np.random.seed(args.seed)
 
-
     tester = EnvOpsTester(name=args.implementation)
-
 
     test_gpu = not args.no_test_gpu
     device = torch.device(args.accelerator)
     if test_gpu:
         device_type = device.type
-        if device_type == 'cuda':
+        if device_type == "cuda":
             available = torch.cuda.is_available()
-        elif device_type == 'mps':
+        elif device_type == "mps":
             available = torch.backends.mps.is_available()
-        elif device_type == 'cpu':
+        elif device_type == "cpu":
             raise ValueError("Accelerator cannot be set to 'cpu'.")
         else:
             available = True  # hopefully...
@@ -485,22 +494,23 @@ def main(args=None):
             free_mem, total_mem = torch.cuda.memory.mem_get_info()
             del total_mem
         else:
-            free_mem = 0 # Don't assume we are super fast, I guess.
+            free_mem = 0  # Don't assume we are super fast, I guess.
 
+        # More than 2GB memory, we can run large systems
         use_large_gpu = free_mem > 2**31
         if not use_large_gpu:
             print("Torch indicates less than 2GB free GPU memory -- skipping large system test")
-            del gpu_speed_tests['large']
+            del gpu_speed_tests["large"]
         else:
             gpu_speed_tests["large"] = 20
 
-
+        # More than 30GB memory, we can run mega and ultra tests
         use_verylarge_gpu = free_mem > 30 * (2**30)
         if use_verylarge_gpu:
-            gpu_speed_tests.pop('mega')
+            gpu_speed_tests.pop("mega")
             gpu_speed_tests = dict(mega=20, **gpu_speed_tests)
         else:
-            gpu_speed_tests.pop('mega', None)
+            gpu_speed_tests.pop("mega", None)
             print("Numba indicates less than 30GB free GPU memory -- skipping mega system test")
 
         use_ultra = (not correctness) and use_verylarge_gpu and (compare_against.lower() != "pytorch")
@@ -512,16 +522,8 @@ def main(args=None):
             tester.check_correctness(device=device, n_large=n_large_gpu)
 
         if speed:
-            for sys_type, repetitions in gpu_speed_tests.items():
-                params = TEST_PARAMS[sys_type]
-                print("-" * 80)
-                print(f"{sys_type} systems:", params)
-                tester.check_speed(
-                    n_repetitions=repetitions,
-                    data_size=params,
-                    device=device,
-                    compare_against=compare_against
-                )
+            speed_test_loop(tester, gpu_speed_tests, device=device, compare_against=compare_against)
+
     else:  # Device not available, see above!
         print("Skipped GPU tests.")
 
@@ -531,16 +533,7 @@ def main(args=None):
             tester.check_correctness(n_large=args.n_large)
 
         if speed:
-            for sys_type, repetitions in speed_tests.items():
-                params = TEST_PARAMS[sys_type]
-                print("-" * 80)
-                print(f"{sys_type.title()} systems:", params)
-                tester.check_speed(
-                    n_repetitions=repetitions,
-                    data_size=params,
-                    device=torch.device("cpu"),
-                    compare_against=compare_against
-                )
+            speed_test_loop(tester, speed_tests, device=torch.device("cpu"), compare_against=compare_against)
     else:
         print("Skipped CPU tests.")
 
@@ -572,7 +565,7 @@ def parse_args():
     """,
     )
 
-    parser.add_argument("--accelerator", type=str, default='cuda', help="Device to treat as the GPU.")
+    parser.add_argument("--accelerator", type=str, default="cuda", help="Device to treat as the GPU.")
 
     parser.add_argument("--no-test-cpu", action="store_true", default=False, help="Flag to skip CPU tests.")
     parser.add_argument("--no-test-gpu", action="store_true", default=False, help="Flag to skip GPU tests.")
@@ -582,6 +575,7 @@ def parse_args():
 
     args = parser.parse_args()
     return args
+
 
 if __name__ == "__main__":
     # Ensure nothing is going wrong with reference sensesum and featsum
