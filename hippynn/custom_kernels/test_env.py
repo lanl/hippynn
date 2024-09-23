@@ -497,6 +497,7 @@ def main(args=None):
 
         use_verylarge_gpu = free_mem > 30 * (2**30)
         if use_verylarge_gpu:
+            gpu_speed_tests.pop('mega')
             gpu_speed_tests = dict(mega=20, **gpu_speed_tests)
         else:
             gpu_speed_tests.pop('mega', None)
