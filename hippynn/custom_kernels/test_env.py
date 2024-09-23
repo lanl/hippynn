@@ -1,18 +1,17 @@
 """
 Test module for verifying implementation correctness against pytorch.
 """
+import warnings
+import time
+
 import numpy as np
 import torch
-import time
 
 from . import env_pytorch
 from . import autograd_wrapper
 from .utils import clear_pair_cache
 
 from .autograd_wrapper import MessagePassingKernels
-
-import warnings
-
 
 try:
     from . import env_numba
@@ -29,7 +28,6 @@ try:
 except ImportError:
     warnings.warn("triton implementation not importable.")
     env_triton = None
-
 try:
     from . import env_sparse
 except ImportError:
@@ -145,6 +143,15 @@ TEST_LARGE_PARAMS = dict(n_molecules=1000, n_atoms=30, atom_prob=0.7, n_features
 TEST_MEGA_PARAMS = dict(n_molecules=500, n_atoms=30, atom_prob=0.7, n_features=128, n_nu=100)
 TEST_ULTRA_PARAMS = dict(n_molecules=500, n_atoms=30, atom_prob=0.7, n_features=128, n_nu=320)
 TEST_GIGA_PARAMS = dict(n_molecules=32, n_atoms=30, atom_prob=0.7, n_features=512, n_nu=320)
+TEST_PARAMS = dict(
+    tiny=TEST_TINY_PARAMS,
+    small=TEST_SMALL_PARAMS,
+    medium=TEST_MEDIUM_PARAMS,
+    large=TEST_LARGE_PARAMS,
+    mega=TEST_MEGA_PARAMS,
+    ultra=TEST_ULTRA_PARAMS,
+    giga=TEST_GIGA_PARAMS
+)
 
 # reference implementation
 
@@ -160,24 +167,22 @@ def test_pytorch_reference():
     ref_gradsense = env_pytorch.sensesum(torch.ones_like(env), feat, pfirst, psecond)
     ref_gradfeat = env_pytorch.featsum(torch.ones_like(env), sense, pfirst, psecond)
 
-    assert torch.allclose(pt_gradsense, ref_gradsense)
-    assert torch.allclose(pt_gradfeat, ref_gradfeat)
-    assert (pt_gradsense == ref_gradsense).all()
-    assert (pt_gradfeat == ref_gradfeat).all()
+    # Note: Numerical differences
+    assert torch.allclose(pt_gradsense, ref_gradsense, atol=1e-15, rtol=1e-15)
+    assert torch.allclose(pt_gradfeat, ref_gradfeat, atol=1e-15, rtol=1e-15)
 
-
-test_pytorch_reference()
-del test_pytorch_reference
 
 
 # A class for testing the correctness of the kernels functions.
 
 
-class Envops_tester:
-    def __init__(self, envsum_raw, sensesum_raw, featsum_raw, suspicious_deviation=0.5):
-        self.envsum, self.sensesum, self.featsum, *_ = autograd_wrapper.wrap_envops(
-            envsum_impl=envsum_raw, sensesum_impl=sensesum_raw, featsum_impl=featsum_raw
-        )
+class EnvOpsTester:
+    def __init__(self, name: str, suspicious_deviation: int =0.5):
+        implementation = MessagePassingKernels.get_implementation(name)
+        self.envsum = implementation.envsum
+        self.sensesum = implementation.sensesum
+        self.featsum = implementation.featsum
+
         self.tol_f64 = dict(atol=1e-8, rtol=1e-5)
         self.tol_f32 = dict(atol=1e-5, rtol=1e-5)  # Absolute tolerance a bit fuzzier for float32.
         self.suspicious_deviation = suspicious_deviation
@@ -252,7 +257,7 @@ class Envops_tester:
             feat_g = self.featsum(env, sense, pfirst, psecond)
         except Exception as ee:
             raise ValueError("Failed an operation on data with zero pairs!") from ee
-        print("Passed zero-pair check.")
+        print("Passed zero-pair check!")
 
     def check_forward_noerr(self, device=torch.device("cpu")):
 
@@ -263,7 +268,7 @@ class Envops_tester:
         env = self.envsum(sense, feat, pfirst, psecond)
         sense_g = self.sensesum(env, feat, pfirst, psecond)
         feat_g = self.featsum(env, sense, pfirst, psecond)
-        print("Passed forward execution check.")
+        print("Passed forward execution check!")
 
     def all_close_witherror(self, r1, r2):
         r1 = r1.data.cpu().numpy()
@@ -378,9 +383,7 @@ class Envops_tester:
         print("Overall {} time: {}".format(compare_against, tnsum))
         print("Overall time now: {}".format(tsum))
         print("Overall speedup: {}".format(tnsum / tsum))
-        return  # prof
-
-
+        return [tne, tns, tnf], [te, ts, tf]
 
 
 def safe_synchronize():
@@ -441,71 +444,85 @@ def main(args=None):
 
     np.random.seed(args.seed)
 
-    implementation = MessagePassingKernels.get_implementation(args.implementation)
-    tester = Envops_tester(
-        implementation.envsum_impl,
-        implementation.sensesum_impl,
-        implementation.featsum_impl,
-    )
 
-    compare_against = args.compare_against
+    tester = EnvOpsTester(name=args.implementation)
+
+
     test_gpu = not args.no_test_gpu
+    device = torch.device(args.accelerator)
+    if test_gpu:
+        device_type = device.type
+        if device_type == 'cuda':
+            available = torch.cuda.is_available()
+        elif device_type == 'mps':
+            available = torch.backends.mps.is_available()
+        elif device_type == 'cpu':
+            raise ValueError("Accelerator cannot be set to 'cpu'.")
+        else:
+            available = True  # hopefully...
+
+        if not available:
+            print(f"Backend {device_type} not available, skipping GPU tests.")
+            test_gpu = False
+
     test_cpu = not args.no_test_cpu
     speed = not args.no_speed
+    compare_against = args.compare_against
+    if speed:
+        # just so that we error early if a bad name is specified.
+        compare_impl = MessagePassingKernels.get_implementation(args.compare_against)
     correctness = not args.no_correctness
 
-    if torch.cuda.is_available() and test_gpu:
-        print("Running GPU tests")
-        free_mem, total_mem = torch.cuda.memory.mem_get_info()
+    # Standard test numbers.
+    speed_tests = dict(mega=3, large=5, medium=100, small=100)
+    # if compare_against == 'pytorch':
+    #     del speed_tests['mega']  # This takes about 15s/iteration on CPU
+
+    if test_gpu:
+        print("Running GPU tests.")
+        gpu_speed_tests = speed_tests.copy()
+        if torch.cuda.is_available():
+            free_mem, total_mem = torch.cuda.memory.mem_get_info()
+            del total_mem
+        else:
+            free_mem = 0 # Don't assume we are super fast, I guess.
 
         use_large_gpu = free_mem > 2**31
+        if not use_large_gpu:
+            print("Torch indicates less than 2GB free GPU memory -- skipping large system test")
+            del gpu_speed_tests['large']
+        else:
+            gpu_speed_tests["large"] = 20
+
+
         use_verylarge_gpu = free_mem > 30 * (2**30)
+        if use_verylarge_gpu:
+            gpu_speed_tests = dict(mega=20, **gpu_speed_tests)
+        else:
+            gpu_speed_tests.pop('mega', None)
+            print("Numba indicates less than 30GB free GPU memory -- skipping mega system test")
 
         use_ultra = (not correctness) and use_verylarge_gpu and (compare_against.lower() != "pytorch")
-
-        n_large_gpu = args.n_large if use_large_gpu else 0
+        if use_ultra:
+            gpu_speed_tests = dict(ultra=20, **gpu_speed_tests)
 
         if correctness:
-            tester.check_correctness(device=torch.device("cuda"), n_large=n_large_gpu)
+            n_large_gpu = args.n_large if use_large_gpu else 0
+            tester.check_correctness(device=device, n_large=n_large_gpu)
 
         if speed:
-            if use_verylarge_gpu:
-                if use_ultra:
-
-                    print("-" * 80)
-                    print("Giga systems:", TEST_GIGA_PARAMS)
-                    tester.check_speed(
-                        n_repetitions=20, data_size=TEST_GIGA_PARAMS, device=torch.device("cuda"), compare_against=compare_against
-                    )
-                    print("-" * 80)
-                    print("Ultra systems:", TEST_ULTRA_PARAMS)
-                    tester.check_speed(
-                        n_repetitions=20, data_size=TEST_ULTRA_PARAMS, device=torch.device("cuda"), compare_against=compare_against
-                    )
+            for sys_type, repetitions in gpu_speed_tests.items():
+                params = TEST_PARAMS[sys_type]
                 print("-" * 80)
-                print("Mega systems:", TEST_MEGA_PARAMS)
-                tester.check_speed(n_repetitions=20, data_size=TEST_MEGA_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
-            else:
-                print("Numba indicates less than 30GB free GPU memory -- skipping mega system test")
-            if use_large_gpu:
-                print("-" * 80)
-                print("Large systems:", TEST_LARGE_PARAMS)
-                tester.check_speed(n_repetitions=20, data_size=TEST_LARGE_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
-            else:
-                print("Numba indicates less than 2GB free GPU memory -- skipping large system test")
-
-            print("-" * 80)
-            print("Medium systems:", TEST_MEDIUM_PARAMS)
-            tester.check_speed(n_repetitions=100, data_size=TEST_MEDIUM_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
-            print("-" * 80)
-            print("Small systems:", TEST_SMALL_PARAMS)
-            tester.check_speed(n_repetitions=100, data_size=TEST_SMALL_PARAMS, device=torch.device("cuda"), compare_against=compare_against)
-
-    else:
-        if not args.no_test_gpu:
-            print("Cuda not available, not running GPU tests.")
-        else:
-            print("Skipped GPU tests.")
+                print("Giga systems:", params)
+                tester.check_speed(
+                    n_repetitions=repetitions,
+                    data_size=params,
+                    device=device,
+                    compare_against=compare_against
+                )
+    else:  # Device not available, see above!
+        print("Skipped GPU tests.")
 
     if test_cpu:
         print("Running CPU tests.")
@@ -513,16 +530,16 @@ def main(args=None):
             tester.check_correctness(n_large=args.n_large)
 
         if speed:
-            print("Testing CPU speed.")
-            print("-" * 80)
-            print("Large systems:", TEST_LARGE_PARAMS)
-            tester.check_speed(n_repetitions=10, compare_against=compare_against)
-            print("-" * 80)
-            print("Medium systems:", TEST_MEDIUM_PARAMS)
-            tester.check_speed(n_repetitions=100, data_size=TEST_MEDIUM_PARAMS, compare_against=compare_against)
-            print("-" * 80)
-            print("Small systems:", TEST_SMALL_PARAMS)
-            tester.check_speed(n_repetitions=100, compare_against=compare_against, data_size=TEST_SMALL_PARAMS)
+            for sys_type, repetitions in speed_tests.items():
+                params = TEST_PARAMS[sys_type]
+                print("-" * 80)
+                print(f"{sys_type.title()} systems:", params)
+                tester.check_speed(
+                    n_repetitions=repetitions,
+                    data_size=params,
+                    device=torch.device("cpu"),
+                    compare_against=compare_against
+                )
     else:
         print("Skipped CPU tests.")
 
@@ -554,8 +571,11 @@ def parse_args():
     """,
     )
 
+    parser.add_argument("--accelerator", type=str, default='cuda', help="Device to treat as the GPU.")
+
     parser.add_argument("--no-test-cpu", action="store_true", default=False, help="Flag to skip CPU tests.")
     parser.add_argument("--no-test-gpu", action="store_true", default=False, help="Flag to skip GPU tests.")
+
     parser.add_argument("--no-speed", action="store_true", default=False, help="Flag to skip speed tests.")
     parser.add_argument("--no-correctness", action="store_true", default=False, help="Flag to skip correctness tests.")
 
@@ -563,4 +583,7 @@ def parse_args():
     return args
 
 if __name__ == "__main__":
+    # Ensure nothing is going wrong with reference sensesum and featsum
+    test_pytorch_reference()
+
     main()

@@ -123,7 +123,7 @@ def set_custom_kernels(active: Union[bool, str] = True) -> str:
         active = active.lower()
 
     if active not in _POSSIBLE_CUSTOM_KERNELS:
-        raise CustomKernelError(f"Unrecognized custom kernel implementation: {active}")
+        raise warnings.warn(f"Non-standard custom kernel implementation: {active}")
 
     # Our goal is that this if-block is to handle the cases for values in the range of
     # [True, "auto"] and turn them into the suitable actual implementation.

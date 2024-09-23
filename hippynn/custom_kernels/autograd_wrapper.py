@@ -128,7 +128,8 @@ def wrap_envops(envsum_impl, sensesum_impl, featsum_impl):
 class MessagePassingKernels:
     _registered_implementations = {}  # Registry for custom kernel implementations.
 
-    def __init__(self, impl_name: str, envsum_impl, sensesum_impl, featsum_impl, wrap=True):
+    def __init__(self, impl_name: str, envsum_impl, sensesum_impl, featsum_impl, wrap=True,
+                 compiler=None,):
         """
         :param impl_name: name for implementation.
         :param envsum_impl: non-autograd-wrapped envsum implementation
@@ -137,9 +138,13 @@ class MessagePassingKernels:
         :param wrap: set to false if implementations are already autograd-capable.
         """
 
+        if compiler is not None:
+            envsum_impl, sensesum_impl, featsum_impl = \
+                map(compiler, (envsum_impl, sensesum_impl, featsum_impl))
+
         self.envsum_impl = envsum_impl
         self.sensesum_impl = sensesum_impl
-        self.featsum_impl =  featsum_impl
+        self.featsum_impl = featsum_impl
 
         if wrap:
             envsum, sensesum, featsum = wrap_envops(envsum_impl, sensesum_impl, featsum_impl)
@@ -173,4 +178,4 @@ class MessagePassingKernels:
 
     @classmethod
     def get_available_implementations(self):
-        return self._registered_implementations.keys()
+        return [k for k in self._registered_implementations.keys() if not k.startswith("_")]

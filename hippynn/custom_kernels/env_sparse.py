@@ -7,7 +7,7 @@ from .autograd_wrapper import MessagePassingKernels
 # TODO: Does resort_pairs_cached give enough to allow direct construction of CSR?
 
 
-def make_sparse_sense(sensitivities, pair_first, pair_second, n_atom):
+def make_sparse_sense(sensitivities, pair_first, pair_second, n_atom: int):
     """
     Construct sensitivities as a sparse matrix with shape
     (n_atoms * n_nu, n_atoms).
@@ -123,8 +123,8 @@ def featsum(env, sense, pair_first, pair_second):
 
 sparse_kernels = MessagePassingKernels(
     "sparse",
-    envsum,
-    sensesum,
-    featsum,
+    envsum, sensesum, featsum,
 )
 
+# Note: no sparse_jit because try/except not supported.
+# to sparse_compile because it won't transpose a matrix??
