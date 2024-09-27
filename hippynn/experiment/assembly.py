@@ -180,10 +180,14 @@ def precompute_pairs(model, database, batch_size=10, device=None, make_dense=Fal
     :param device: where to do the precomputation.
     :param make_dense: return a dense array of pairs. Warning, this can be memory-expensive. However, it is necessary if you
         are going to use num_workers>0 in your dataloaders. If False, the cache is stored as a sparse array.
-    :param n_images: number of images for cache storage, increase this if it fails.
-        However, large values can incur a large memory cost if make_dense is True.
+    :param n_images: number of images for cache storage; increase this if it fails.
+        However, large values can incur a  very large memory cost if make_dense is True.
 
     :return: None-- changes the model graph.
+
+    .. note ::
+       After running pre-compute pairs, your model will expect to load pairs directly from the database,
+       and your database will contain cached pair entries.
 
     Note that the returned model needs to be re-assembled with the new graph for the cache to take effect.
     Example usage:

@@ -7,7 +7,7 @@ as explained in the :doc:`/user_guide/ckernels` section of the documentation.
 """
 import torch
 from torch import Tensor
-from .autograd_wrapper import MessagePassingKernels
+from .registry import MessagePassingKernels
 
 
 def envsum(sensitivities: Tensor, features: Tensor, pair_first: Tensor, pair_second: Tensor) -> Tensor:

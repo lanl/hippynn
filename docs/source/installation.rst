@@ -7,7 +7,7 @@ Requirements
 
 Requirements:
     * Python_ >= 3.9
-    * pytorch_ >= 1.9
+    * pytorch_ >= 2.0
     * numpy_
 
 Optional Dependencies:

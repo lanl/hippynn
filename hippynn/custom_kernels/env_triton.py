@@ -6,7 +6,7 @@ import torch
 import triton
 import triton.language as tl
 from .utils import resort_pairs_cached
-from .autograd_wrapper import MessagePassingKernels
+from .registry import MessagePassingKernels
 
 # If numba is available, this implementation will default to numba on CPU. If not, use vanilla pytorch.
 try:

@@ -16,6 +16,14 @@ class Plotter:
     """
 
     def __init__(self, parents, plt_fn=None, saved=False, shown=False):
+        """
+        Base plotter arguments inherited by all plotters.
+
+        :param parents: nodes reflecting the data required to make the plotter
+        :param plt_fn: a function to use to make the plot
+        :param saved: whether to save the plot to a file
+        :param shown: whether to show the plot using ``plt.show``
+        """
         self.parents = parents
         self.shown = shown
         self.saved = saved

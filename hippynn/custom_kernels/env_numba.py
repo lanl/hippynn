@@ -15,8 +15,7 @@ import numpy as np
 
 from .utils import resort_pairs_cached
 from .tensor_wrapper import via_numpy, NumbaCompatibleTensorFunction
-from .autograd_wrapper import MessagePassingKernels
-
+from .registry import MessagePassingKernels
 
 if not numba.cuda.is_available():
     if torch.cuda.is_available():

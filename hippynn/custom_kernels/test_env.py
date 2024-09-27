@@ -11,7 +11,7 @@ import torch
 from . import env_pytorch
 from .utils import clear_pair_cache
 
-from .autograd_wrapper import MessagePassingKernels
+from .registry import MessagePassingKernels
 
 try:
     from . import env_numba
@@ -36,7 +36,8 @@ except ImportError:
 
 
 def get_simulated_data(
-    n_molecules, n_atoms, atom_prob, n_features, n_nu, printinfo=False, dtype=None, device=torch.device("cpu"), randomize_order=False
+    n_molecules, n_atoms, atom_prob, n_features, n_nu, printinfo=False, dtype=None, device=torch.device("cpu"), randomize_order=False,
+        use_duplicate=False,
 ):
     """
     Get semi-realistic test data for hipnn.
@@ -109,9 +110,11 @@ def get_simulated_data(
         pair_second = pair_second[random_order]
 
     n_pairs = len(pair_first)
+
     # reduplicate for testing if an implementation works with duplicate pairs.
-    # pair_first[0] = pair_first[-1]
-    # pair_second[0] = pair_second[-1]
+    if use_duplicate:
+        pair_first[0] = pair_first[-1]
+        pair_second[0] = pair_second[-1]
 
     # NOTE: These synthetic sensitivities are NONSYMMETRIC, that is, j->i does not mean i->j,
     # and also does not mean that the value of the sensitivity is the same
@@ -297,22 +300,29 @@ class EnvOpsTester:
     def check_correctness(self, n_grad=1, n_small=100, n_large=3, device=torch.device("cpu")):
 
         print("Checking that functions execute...")
+        safe_synchronize()
         self.check_forward_noerr()
 
+        safe_synchronize()
         self.check_empty(device=device)  # this is now covered in autograd wrapper...
 
+        safe_synchronize()
         self.check_allclose_once(device=device, randomize_order=True)
         print("Passed random pair order test...")
 
+        safe_synchronize()
         print("Checking gradients {} times...".format(n_grad))
         self.check_all_grad(repeats=n_grad, device=device)
         print("Passed gradient checks!")
+        safe_synchronize()
         print("Checking forward methods on small data {} times...".format(n_small), flush=True)
         self.check_allclose(repeats=n_small, use_large=False, device=device)
         print("Passed small tensor forward checks!")
+        safe_synchronize()
         print("Checking forward methods on large data {} times...".format(n_large), flush=True)
         self.check_allclose(repeats=n_large, use_large=True, device=device)
         print("Passed large tensor forward checks!")
+
 
     def check_speed(self, n_repetitions=10, device=torch.device("cpu"), data_size=TEST_LARGE_PARAMS, compare_against="pytorch"):
 
@@ -496,7 +506,7 @@ def main(args=None):
             free_mem, total_mem = torch.cuda.memory.mem_get_info()
             del total_mem
         else:
-            free_mem = 0  # Don't assume we are super fast, I guess.
+            free_mem = 0  # Don't assume there is a lot of memory.
 
         # More than 2GB memory, we can run large systems
         use_large_gpu = free_mem > 2**31
@@ -570,7 +580,6 @@ def parse_args():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("implementation", type=str, help="Implementation to test.")
-    parser.add_argument("--seed", type=int, default=0, help="Seed")
 
     parser.add_argument(
         "--compare-against",
@@ -582,6 +591,13 @@ def parse_args():
     """,
     )
 
+    parser.add_argument("--accelerator", type=str, default="cuda", help="Device to treat as the GPU.")
+    parser.add_argument("--no-cpu", action="store_true", default=False, help="Flag to skip CPU tests.")
+    parser.add_argument("--no-gpu", action="store_true", default=False, help="Flag to skip GPU tests.")
+    parser.add_argument("--no-speed", action="store_true", default=False, help="Flag to skip speed tests.")
+    parser.add_argument("--no-correctness", action="store_true", default=False, help="Flag to skip correctness tests.")
+
+    parser.add_argument("--seed", type=int, default=0, help="Seed")
     parser.add_argument(
         "--n_large",
         type=int,
@@ -592,11 +608,6 @@ def parse_args():
     """,
     )
 
-    parser.add_argument("--accelerator", type=str, default="cuda", help="Device to treat as the GPU.")
-    parser.add_argument("--no-test-cpu", action="store_true", default=False, help="Flag to skip CPU tests.")
-    parser.add_argument("--no-test-gpu", action="store_true", default=False, help="Flag to skip GPU tests.")
-    parser.add_argument("--no-speed", action="store_true", default=False, help="Flag to skip speed tests.")
-    parser.add_argument("--no-correctness", action="store_true", default=False, help="Flag to skip correctness tests.")
 
     args = parser.parse_args()
     return args

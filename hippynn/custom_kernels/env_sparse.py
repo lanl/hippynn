@@ -3,7 +3,9 @@ Pure pytorch implementation of envsum operations
 """
 import torch
 
-from .autograd_wrapper import MessagePassingKernels
+from .registry import MessagePassingKernels
+
+
 # TODO: Does resort_pairs_cached give enough to allow direct construction of CSR?
 
 

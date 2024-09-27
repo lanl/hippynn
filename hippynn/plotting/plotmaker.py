@@ -14,6 +14,13 @@ class PlotMaker:
     """
 
     def __init__(self, *plotters, plot_every, save_dir="plots/"):
+        """
+
+        :param plotters: Individual plotters to use.
+        :param plot_every: How often to make plots during training (in epochs)
+        :param save_dir: What directory to store the plots in, relative to the
+         training experiment path.
+        """
         self.plotters = plotters
         self.save_dir = save_dir
         self.plot_every = plot_every

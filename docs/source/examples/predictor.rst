@@ -1,10 +1,10 @@
 Predictor
 =========
 
-The predictor is a simple API for making predictions on an entire database.
+The :class:`~hippynn.graphs.Predictor` is a class for making predictions on an entire database.
 
 Often you'll want to make predictions based on the model. For this,
-use :meth:`Predictor.from_graph`. Let's assume you have a ``GraphModule`` called ``model``::
+use the :meth:`~hippynn.graphs.Predictor.from_graph`. method. Let's assume you have a :class:`~hippynn.GraphModule` called ``model``::
 
     predictor = hippynn.graphs.Predictor.from_graph(model)
 

@@ -12,7 +12,8 @@ import numba.cuda
 import numpy as np
 
 from .tensor_wrapper import NumbaCompatibleTensorFunction, via_numpy
-from .autograd_wrapper import MessagePassingKernels
+from .registry import MessagePassingKernels
+
 
 # conventions:
 # pidx  : index of pair

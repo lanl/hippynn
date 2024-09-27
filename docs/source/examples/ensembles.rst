@@ -21,5 +21,6 @@ The ``ensemble_info`` object provides the counts for the inputs and targets of t
 and the counts of those corresponding quantities across the ensemble members.
 
 A typical use case would be to then build a Predictor or ASE Calculator from the ensemble.
-See :file:`~examples/ensembling_models.py` for a detailed example.
+See `/examples/ensembling_models.py`_ for a detailed example.
 
+.. _/examples/ensembling_models.py: https://github.com/lanl/hippynn/blob/development/examples/ensembling_models.py

@@ -16,19 +16,21 @@ user in hippynn.settings.
 See the :doc:`/user_guide/ckernels` section of the documentation for more information.
 
 Depending on your available packages, you may have the following options:
-    - "pytorch": dense pytorch operations.
-    - "pytorch_wrapped": dense pytorch operations,
-        but autograd-linked rather than using pytorch's autograd.
-    - "sparse": sparse pytorch operations. Can be faster than pure pytorch for large
-        enough systems, and will not require as much memory.
-        May require latest pytorch version. Cannot cover all circumstances; should error
-        if encountering a result that this implementation cannot cover..
-    - "numba": numba implementation of custom kernels, beats pytorch-based kernels.
-    - "cupy": cupy implementation of custom kernels, better than numba
-    - "triton": triton-based custom kernels, uses auto-tuning and the triton compiler.
-        This is usually the best option.
 
-Note that triton and cupy kernels will fall back to numba on CPU if possible, followed by pytorch.
+* "pytorch": dense pytorch operations.
+* "sparse": sparse pytorch operations. Can be faster than pure pytorch for large
+  enough systems, and will not require as much memory.
+  May require latest pytorch version. Cannot cover all circumstances; should error
+  if encountering a result that this implementation cannot cover..
+* "numba": numba implementation of custom kernels, beats pytorch-based kernels.
+* "cupy": cupy implementation of custom kernels, better than numba
+* "triton": triton-based custom kernels, uses auto-tuning and the triton compiler.
+  This is usually the best option.
+
+The available items are stored in the variable :data:`hippynn.custom_kernels.CUSTOM_KERNELS_AVAILABLE`.
+The active implementation is stored in :data:`hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE`.
+
+For more information, see :doc:`/user_guide/ckernels`
 
 """
 # Dev notes:
@@ -44,8 +46,9 @@ import warnings
 from typing import Union
 import torch
 from .. import settings
+from .registry import MessagePassingKernels
 from . import env_pytorch
-from .autograd_wrapper import MessagePassingKernels
+
 
 
 class CustomKernelError(Exception):
@@ -124,7 +127,7 @@ def set_custom_kernels(active: Union[bool, str] = True) -> str:
         active = active.lower()
 
     if active not in _POSSIBLE_CUSTOM_KERNELS:
-        raise warnings.warn(f"Non-standard custom kernel implementation: {active}")
+        raise warnings.warn(f"Using non-standard custom kernel implementation: {active}")
 
     # Our goal is that this if-block is to handle the cases for values in the range of
     # [True, "auto"] and turn them into the suitable actual implementation.
@@ -174,8 +177,7 @@ _POSSIBLE_CUSTOM_KERNELS = (
     "numba",
     "cupy",
     "pytorch",
-    "pytorch_sparse",
-    "pytorch_wrapped",
+    "sparse",
     "auto",  # This means, if possible, use order in _RECOMMENDED_CUSTOM_KERNELS below.
 )
 

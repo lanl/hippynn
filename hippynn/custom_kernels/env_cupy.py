@@ -20,7 +20,7 @@ except ImportError:
 from .env_numba import WrappedEnvsum, WrappedSensesum, WrappedFeatsum
 from .utils import resort_pairs_cached
 
-from .autograd_wrapper import MessagePassingKernels
+from hippynn.custom_kernels import MessagePassingKernels
 
 CUPY_KERNEL_CODE = r"""
 extern "C" __global__

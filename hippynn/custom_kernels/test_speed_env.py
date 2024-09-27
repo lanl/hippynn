@@ -3,7 +3,7 @@ import pathlib
 
 import numpy as np
 import torch
-from .autograd_wrapper import MessagePassingKernels
+from .registry import MessagePassingKernels
 
 from .test_env import TEST_PARAMS, EnvOpsTester
 
@@ -18,6 +18,7 @@ def parse_args():
     parser.add_argument("--all-hidden", action="store_true", default=False, help="Use all implementations, even with _ beginning.")
     parser.add_argument("--all-impl", action="store_true", default=False, help="Use all non-hidden implementations.")
     parser.add_argument("--all-gpu", action="store_true", default=False, help="Use low-mem implementations suitable for GPU.")
+    parser.add_argument("--all-gpu", action="store_true", default=False, help="CPU-capable implementaitons.")
 
     for param_type in TEST_PARAMS.keys():
         parser.add_argument(f"--{param_type}", type=int, default=0, help=f"Count for param type {param_type}")
@@ -52,10 +53,13 @@ def main(args=None):
 
     if args.all_gpu:
         implementations = ["sparse", "numba", "cupy", "triton"]
+    if args.all_cpu:
+        implementations = ["sparse", "pytorch", "numba"]
+
     if args.all_impl:
         implementations = MessagePassingKernels.get_available_implementations()
     if args.all_hidden:
-        implementations = MessagePassingKernels._registered_implementations
+        implementations = MessagePassingKernels.get_available_implementations(hidden=True)
 
     # Error if implementation does not exist.
     for impl in implementations:
