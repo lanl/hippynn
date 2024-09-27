@@ -469,7 +469,7 @@ def main(args=None):
 
     tester = EnvOpsTester(name=args.implementation)
 
-    test_gpu = not args.no_test_gpu
+    test_gpu = not args.no_gpu
     device = torch.device(args.accelerator)
     if test_gpu:
         device_type = device.type
@@ -486,7 +486,7 @@ def main(args=None):
             print(f"Backend {device_type} not available, skipping GPU tests.")
             test_gpu = False
 
-    test_cpu = not args.no_test_cpu
+    test_cpu = not args.no_cpu
     speed = not args.no_speed
     compare_against = args.compare_against
     if speed:
