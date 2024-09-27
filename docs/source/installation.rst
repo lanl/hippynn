@@ -7,7 +7,7 @@ Requirements
 
 Requirements:
     * Python_ >= 3.9
-    * pytorch_ >= 1.9
+    * pytorch_ >= 2.0
     * numpy_
 
 Optional Dependencies:
@@ -20,6 +20,7 @@ Optional Dependencies:
     * graphviz_ (for visualizing model graphs)
     * h5py_ (for loading ani-h5 datasets)
     * pytorch-lightning_ (for distributed training)
+    * opt_einsum_ (backend for accelerating some pytorch expressions)
 
 Interfacing codes:
     * ASE_
@@ -41,7 +42,7 @@ Interfacing codes:
 .. _PYSEQM: https://github.com/lanl/PYSEQM
 .. _pytorch-lightning: https://github.com/Lightning-AI/pytorch-lightning
 .. _hippynn: https://github.com/lanl/hippynn/
-
+.. _opt_einsum: https://github.com/dgasmith/opt_einsum
 
 Installation Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^

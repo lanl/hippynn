@@ -1,3 +1,8 @@
+"""
+
+Utilities for the custom kernels, including pre-sorting the indices.
+
+"""
 import torch
 import threading
 from functools import partial

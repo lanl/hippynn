@@ -7,7 +7,7 @@ import threading
 from contextlib import contextmanager
 
 _DEVICE_CONTEXT_LOCK = threading.Lock()
-_DEVICE_TIMEOUT = 10  # if custom kernels have locked for 10s, throw an error
+_DEVICE_TIMEOUT = 30  # if custom kernels have locked for 10s, throw an error
 
 
 @contextmanager
@@ -123,3 +123,5 @@ def wrap_envops(envsum_impl, sensesum_impl, featsum_impl):
     featsum = AGFeatsum.apply
 
     return envsum, sensesum, featsum
+
+

@@ -14,6 +14,7 @@ Some features of hippynn experiments may not be implemented yet.
 import warnings
 import copy
 from pathlib import Path
+from typing import Optional
 
 import torch
 
@@ -86,7 +87,7 @@ class HippynnLightningModule(pl.LightningModule):
             raise NotImplementedError("Generic args and kwargs not supported.")
 
     @classmethod
-    def from_experiment_setup(cls, training_modules: TrainingModules, database: Database, setup_params: SetupParams, **kwargs):
+    def from_experiment_setup(cls, training_modules: TrainingModules, database: Optional[Database], setup_params: SetupParams, **kwargs):
         """
         Create a lightning module using the same arguments as for :func:`hippynn.experiment.setup_and_train`.
 
@@ -94,7 +95,7 @@ class HippynnLightningModule(pl.LightningModule):
         :param database:
         :param setup_params:
         :param kwargs:
-        :return:
+        :return: lightning_module, database
         """
         training_modules, controller, metric_tracker = setup_training(training_modules, setup_params)
         return cls.from_train_setup(training_modules, database, controller, metric_tracker, **kwargs)
@@ -103,7 +104,7 @@ class HippynnLightningModule(pl.LightningModule):
     def from_train_setup(
         cls,
         training_modules: TrainingModules,
-        database: Database,
+        database: Optional[Database],
         controller: Controller,
         metric_tracker: MetricTracker,
         callbacks=None,
@@ -120,7 +121,7 @@ class HippynnLightningModule(pl.LightningModule):
         :param callbacks:
         :param batch_callbacks:
         :param kwargs:
-        :return:
+        :return: lightning_module, database
         """
 
 
@@ -153,7 +154,10 @@ class HippynnLightningModule(pl.LightningModule):
         if callbacks is not None or batch_callbacks is not None:
             return NotImplemented("arbitrary callbacks are not yet supported with pytorch lightning.")
 
-        return trainer, HippynnDataModule(database, controller.batch_size)
+        if database is not None:
+            database = HippynnDataModule(database, controller.batch_size)
+
+        return trainer, database
 
     def on_save_checkpoint(self, checkpoint) -> None:
         """

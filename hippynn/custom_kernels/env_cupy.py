@@ -1,15 +1,26 @@
 """
-CuPy implementation of envsum custom kernels for GPU.
+Cupy implementation of envsum custom kernels for GPU.
 """
-# Dev Note: CPU implementation of these ops is still done by numba.
-# As such, numba is still required and calls to CPU ops must
-# obey the same API as the numba implementations.
-
+import warnings
 import torch
 import cupy
 
-from hippynn.custom_kernels.env_numba import WrappedEnvsum, WrappedSensesum, WrappedFeatsum
-from hippynn.custom_kernels.utils import resort_pairs_cached
+if not cupy.cuda.is_available():
+    if torch.cuda.is_available():
+        warnings.warn("Cupy is installed but cupy.cuda.is_available() returned False. "
+                      "Custom kernels will most likely fail on GPU tensors. ")
+
+# If numba is available, this implementation will default to numba on CPU. If not, use vanilla pytorch.
+try:
+    from .env_numba import new_envsum as envsum_alternative, new_sensesum as sensesum_alternative, new_featsum as featsum_alternative
+except ImportError:
+    # Load backup implementation for CPU tensors.
+    from .env_pytorch import envsum as envsum_alternative, sensesum as sensesum_alternative, featsum as featsum_alternative
+
+from .env_numba import WrappedEnvsum, WrappedSensesum, WrappedFeatsum
+from .utils import resort_pairs_cached
+
+from hippynn.custom_kernels import MessagePassingKernels
 
 CUPY_KERNEL_CODE = r"""
 extern "C" __global__
@@ -149,16 +160,17 @@ class CupyGPUKernel:
         return out_array
 
 
-class CupyEnvsum(CupyGPUKernel, WrappedEnvsum):
+class CupyEnvsum(CupyGPUKernel):
     _cupy_name = "cupy_envsum"
 
     def __call__(self, sense, feat, pfirst, psecond):
+        dev = sense.device
+        if dev.type == "cpu":
+            return envsum_alternative(sense, feat, pfirst, psecond)
+
         psecond_hold = psecond
         argsort, atom1_ids, atom1_starts, pfirst, (sense, psecond) = resort_pairs_cached(pfirst, [sense, psecond])
         resort_pairs_cached(psecond_hold, [])
-        dev = sense.device
-        if dev.type == "cpu":
-            return self.cpu_kernel(sense, feat, pfirst, psecond, atom1_ids, atom1_starts)
 
         n_pairs, n_nu = sense.shape
         n_atoms, n_feat = feat.shape
@@ -178,8 +190,7 @@ class CupyEnvsum(CupyGPUKernel, WrappedEnvsum):
         shape_args = n_nu, n_feat, n_interact
 
         if n_feat > 512:
-            raise ValueError(f"Numba GPU custom kernels are not compatible with feature sizes greater than 512 (got {n_feat})")
-
+            raise ValueError(f"Cupy GPU custom kernels are not compatible with feature sizes greater than 512 (got {n_feat})")
 
         TPB_MAX = 512
         TPB_X = n_feat
@@ -193,13 +204,13 @@ class CupyEnvsum(CupyGPUKernel, WrappedEnvsum):
         return super().__call__(dtype, BPG, TPB, array_args, shape_args)
 
 
-class CupySensesum(CupyGPUKernel, WrappedSensesum):
+class CupySensesum(CupyGPUKernel):
     _cupy_name = "cupy_sensesum"
 
     def __call__(self, env, feat, pfirst, psecond):
         dev = env.device
         if dev.type == "cpu":
-            return self.cpu_kernel(env, feat, pfirst, psecond)
+            return sensesum_alternative(env, feat, pfirst, psecond)
 
         (n_pairs,) = pfirst.shape
         n_atoms, n_nu, n_feat = env.shape
@@ -210,7 +221,7 @@ class CupySensesum(CupyGPUKernel, WrappedSensesum):
         shape_args = n_pairs, n_nu, n_feat
 
         if n_nu > 512:
-            raise ValueError(f"Numba GPU custom kernels are not compatible with sensitivity sizes greater than 512 (got {n_nu})")
+            raise ValueError(f"Cupy GPU custom kernels are not compatible with sensitivity sizes greater than 512 (got {n_nu})")
 
         TPB_MAX = 512
         TPB_Y = n_nu
@@ -222,16 +233,17 @@ class CupySensesum(CupyGPUKernel, WrappedSensesum):
         return super().__call__(dtype, BPG, TPB, array_args, shape_args)
 
 
-class CupyFeatsum(CupyGPUKernel, WrappedFeatsum):
+class CupyFeatsum(CupyGPUKernel):
     _cupy_name = "cupy_featsum"
 
     def __call__(self, env, sense, pfirst, psecond):
+        dev = env.device
+        if dev.type == "cpu":
+            return featsum_alternative(env, sense, pfirst, psecond)
+
         pfirst_hold = pfirst
         argsort, atom2_ids, atom2_starts, psecond, (sense, pfirst) = resort_pairs_cached(psecond, [sense, pfirst])
         resort_pairs_cached(pfirst_hold, [])
-        dev = env.device
-        if dev.type == "cpu":
-            return self.cpu_kernel(env, sense, pfirst, psecond, atom2_ids, atom2_starts)
 
         (n_pairs,) = pfirst.shape
         n_atoms, n_nu, n_feat = env.shape
@@ -265,3 +277,10 @@ class CupyFeatsum(CupyGPUKernel, WrappedFeatsum):
 cupy_envsum = CupyEnvsum()
 cupy_sensesum = CupySensesum()
 cupy_featsum = CupyFeatsum()
+
+cupy_kernels = MessagePassingKernels(
+    "cupy",
+    cupy_envsum,
+    cupy_sensesum,
+    cupy_featsum,
+)

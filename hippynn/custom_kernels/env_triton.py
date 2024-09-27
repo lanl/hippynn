@@ -1,7 +1,12 @@
+"""
+triton implementation of envsum custom kernels for GPU.
+"""
+import warnings
 import torch
 import triton
 import triton.language as tl
 from .utils import resort_pairs_cached
+from .registry import MessagePassingKernels
 
 # If numba is available, this implementation will default to numba on CPU. If not, use vanilla pytorch.
 try:
@@ -10,11 +15,23 @@ except ImportError:
     # Load backup implementation for CPU tensors.
     from .env_pytorch import envsum as envsum_alternative, sensesum as sensesum_alternative, featsum as featsum_alternative
 
+
+if torch.cuda.is_available():
+    device_capability = torch.cuda.get_device_capability()
+    if not device_capability[0] > 6:
+        msg = f"`triton` package found, but does not support GPU's compute capability: {device_capability}"
+        # First warn, then error, because:
+        # - the warning should be seen by the user.
+        # - The error is caught by the __init__ module and uses this as a signal not to include
+        #   'triton' as an available implementation
+        warnings.warn(msg, stacklevel=2)
+        raise ImportError(msg)
+
+
 def config_pruner(configs, nargs, **kwargs):
     """
     Trims the unnecessary config options based on the sens. and feat. sizes
     """
-    #print("For some reason the config pruner also gets arguments:",kwargs)
     p2_sens_size = triton.next_power_of_2(nargs["sens_size"])
     p2_feat_size = triton.next_power_of_2(nargs["feat_size"])
 
@@ -39,6 +56,7 @@ def config_pruner(configs, nargs, **kwargs):
             num_stages=config.num_stages,
             num_warps=config.num_warps,
         )
+
 
 def get_autotune_config():
     """
@@ -325,3 +343,11 @@ def featsum(env, sense, pfirst, psecond):
     argsort, atom2_ids, atom2_starts, psecond, (sense, pfirst) = resort_pairs_cached(psecond, [sense, pfirst])
     resort_pairs_cached(pfirst_hold, [])  # preemptively sort (probably no-op)
     return featsum_triton(env, sense, pfirst, psecond, atom2_ids, atom2_starts, out_feat=None)
+
+
+triton_kernels = MessagePassingKernels(
+    "triton",
+    envsum,
+    sensesum,
+    featsum,
+)

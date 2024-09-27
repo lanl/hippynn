@@ -88,13 +88,12 @@ def kernel_handler(kernel_string):
     kernel = {
         "0": False,
         "false": False,
-        "pytorch": False,
         "1": True,
         "true": True,
     }.get(kernel_string, kernel_string)
 
-    if kernel not in [True, False, "auto", "triton", "cupy", "numba"]:
-        warnings.warn(f"Unexpected custom kernel setting: {kernel_string}.", stacklevel=3)
+    # This function used to warn about unexpected kernel settings.
+    # Now this is an error which is raised in the custom_kernels module.
 
     return kernel
 
