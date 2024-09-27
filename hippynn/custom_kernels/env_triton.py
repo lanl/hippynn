@@ -19,10 +19,11 @@ except ImportError:
 if torch.cuda.is_available():
     device_capability = torch.cuda.get_device_capability()
     if not device_capability[0] > 6:
-        msg = f"Triton found but not supported by GPU's compute capability: {device_capability}"
-        # first warn, then error, because:
-        # - the warning should be seen by the user,
-        # - the error lets the base module catch the problem.
+        msg = f"`triton` package found, but does not support GPU's compute capability: {device_capability}"
+        # First warn, then error, because:
+        # - the warning should be seen by the user.
+        # - The error is caught by the __init__ module and uses this as a signal not to include
+        #   'triton' as an available implementation
         warnings.warn(msg, stacklevel=2)
         raise ImportError(msg)
 
