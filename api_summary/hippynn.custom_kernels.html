@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>custom_kernels &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=66b59bf7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
 
   
@@ -35,9 +35,6 @@
           <a href="../index.html" class="icon icon-home">
             hippynn
           </a>
-              <div class="version">
-                0+unknown
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -88,12 +85,16 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">custom_kernels</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.autograd_wrapper.html">autograd_wrapper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_pytorch.html">env_pytorch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_sparse.html">env_sparse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.fast_convert.html">fast_convert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.registry.html">registry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html">tensor_wrapper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.utils.html">utils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.autograd_wrapper.html">autograd_wrapper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_pytorch.html">env_pytorch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_sparse.html">env_sparse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.fast_convert.html">fast_convert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.registry.html">registry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html">tensor_wrapper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.utils.html">utils</a></li>
 </ul>
@@ -113,12 +114,16 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">custom_kernels</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.autograd_wrapper.html">autograd_wrapper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_pytorch.html">env_pytorch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_sparse.html">env_sparse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.fast_convert.html">fast_convert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.registry.html">registry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html">tensor_wrapper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.utils.html">utils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.autograd_wrapper.html">autograd_wrapper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_pytorch.html">env_pytorch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_sparse.html">env_sparse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.fast_convert.html">fast_convert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.registry.html">registry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html">tensor_wrapper</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.utils.html">utils</a></li>
 </ul>
@@ -175,7 +180,9 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.autograd_wrapper.html">autograd_wrapper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.env_pytorch.html">env_pytorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.env_sparse.html">env_sparse</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.fast_convert.html">fast_convert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.registry.html">registry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html">tensor_wrapper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.utils.html">utils</a></li>
 </ul>
@@ -191,6 +198,22 @@ Triton custom kernels only work on the GPU, and are generaly faster than CUPY.
 Triton kernels revert to numba or pytorch as available on module import.</p>
 <p>On import, this module attempts to set the custom kernels as specified by the
 user in hippynn.settings.</p>
+<p>See the <a class="reference internal" href="../user_guide/ckernels.html"><span class="doc">Custom Kernels</span></a> section of the documentation for more information.</p>
+<p>Depending on your available packages, you may have the following options:</p>
+<ul class="simple">
+<li><p>“pytorch”: dense pytorch operations.</p></li>
+<li><p>“sparse”: sparse pytorch operations. Can be faster than pure pytorch for large
+enough systems, and will not require as much memory.
+May require latest pytorch version. Cannot cover all circumstances; should error
+if encountering a result that this implementation cannot cover..</p></li>
+<li><p>“numba”: numba implementation of custom kernels, beats pytorch-based kernels.</p></li>
+<li><p>“cupy”: cupy implementation of custom kernels, better than numba</p></li>
+<li><p>“triton”: triton-based custom kernels, uses auto-tuning and the triton compiler.
+This is usually the best option.</p></li>
+</ul>
+<p>The available items are stored in the variable <a class="reference internal" href="../api_documentation/hippynn.custom_kernels.html#hippynn.custom_kernels.CUSTOM_KERNELS_AVAILABLE" title="hippynn.custom_kernels.CUSTOM_KERNELS_AVAILABLE"><code class="xref py py-data docutils literal notranslate"><span class="pre">hippynn.custom_kernels.CUSTOM_KERNELS_AVAILABLE</span></code></a>.
+The active implementation is stored in <a class="reference internal" href="../api_documentation/hippynn.custom_kernels.html#hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE" title="hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE"><code class="xref py py-data docutils literal notranslate"><span class="pre">hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE</span></code></a>.</p>
+<p>For more information, see <a class="reference internal" href="../user_guide/ckernels.html"><span class="doc">Custom Kernels</span></a></p>
 <p class="rubric">Module Attributes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
@@ -200,14 +223,14 @@ user in hippynn.settings.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="../api_documentation/hippynn.custom_kernels.html#hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE" title="hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CUSTOM_KERNELS_ACTIVE</span></code></a></p></td>
 <td><p>Which custom kernel implementation is currently active.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../api_documentation/hippynn.custom_kernels.html#hippynn.custom_kernels.envsum" title="hippynn.custom_kernels.envsum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">envsum</span></code></a>(sensitivities, features, pair_first, ...)</p></td>
-<td><p>Computes outer product of sensitivities of pairs and atom features from pair_second, whilst accumulating them onto indices pair_first.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api_documentation/hippynn.custom_kernels.html#hippynn.custom_kernels.envsum" title="hippynn.custom_kernels.envsum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">envsum</span></code></a>(*args, **kwargs)</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../api_documentation/hippynn.custom_kernels.html#hippynn.custom_kernels.sensesum" title="hippynn.custom_kernels.sensesum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sensesum</span></code></a>(env, features, pair_first, pair_second)</p></td>
-<td><p>Computes product of environment at pair_first with features from pair_second, whilst summing over feature indices.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../api_documentation/hippynn.custom_kernels.html#hippynn.custom_kernels.sensesum" title="hippynn.custom_kernels.sensesum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sensesum</span></code></a>(*args, **kwargs)</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../api_documentation/hippynn.custom_kernels.html#hippynn.custom_kernels.featsum" title="hippynn.custom_kernels.featsum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">featsum</span></code></a>(env, sense, pair_first, pair_second)</p></td>
-<td><p>Compute inner product of sensitivities with environment tensor over atoms from pair_first, while accumulating them on to pair_second.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api_documentation/hippynn.custom_kernels.html#hippynn.custom_kernels.featsum" title="hippynn.custom_kernels.featsum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">featsum</span></code></a>(*args, **kwargs)</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -239,14 +262,20 @@ user in hippynn.settings.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="../api_documentation/hippynn.custom_kernels.env_pytorch.html#module-hippynn.custom_kernels.env_pytorch" title="hippynn.custom_kernels.env_pytorch"><code class="xref py py-obj docutils literal notranslate"><span class="pre">env_pytorch</span></code></a></p></td>
 <td><p>Pure pytorch implementation of envsum operations.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../api_documentation/hippynn.custom_kernels.fast_convert.html#module-hippynn.custom_kernels.fast_convert" title="hippynn.custom_kernels.fast_convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fast_convert</span></code></a></p></td>
-<td><p>This module implements a version of converting</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api_documentation/hippynn.custom_kernels.env_sparse.html#module-hippynn.custom_kernels.env_sparse" title="hippynn.custom_kernels.env_sparse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">env_sparse</span></code></a></p></td>
+<td><p>Pure pytorch implementation of envsum operations</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../api_documentation/hippynn.custom_kernels.fast_convert.html#module-hippynn.custom_kernels.fast_convert" title="hippynn.custom_kernels.fast_convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fast_convert</span></code></a></p></td>
+<td><p>This module implements a version of converting from pytorch tensors to numba DeviceNDArrays that skips much of the indirection that takes place in the numba implementation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../api_documentation/hippynn.custom_kernels.registry.html#module-hippynn.custom_kernels.registry" title="hippynn.custom_kernels.registry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">registry</span></code></a></p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../api_documentation/hippynn.custom_kernels.tensor_wrapper.html#module-hippynn.custom_kernels.tensor_wrapper" title="hippynn.custom_kernels.tensor_wrapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tensor_wrapper</span></code></a></p></td>
 <td><p>Tools for converting between torch and numba-compatible arrays</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../api_documentation/hippynn.custom_kernels.utils.html#module-hippynn.custom_kernels.utils" title="hippynn.custom_kernels.utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">utils</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Utilities for the custom kernels, including pre-sorting the indices.</p></td>
 </tr>
 </tbody>
 </table>

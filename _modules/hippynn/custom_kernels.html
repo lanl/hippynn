@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.custom_kernels &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=66b59bf7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=e3456cac" />
 
   
@@ -32,9 +32,6 @@
           <a href="../../index.html" class="icon icon-home">
             hippynn
           </a>
-              <div class="version">
-                0+unknown
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -124,20 +121,42 @@
 <span class="sd">On import, this module attempts to set the custom kernels as specified by the</span>
 <span class="sd">user in hippynn.settings.</span>
 
+<span class="sd">See the :doc:`/user_guide/ckernels` section of the documentation for more information.</span>
 
+<span class="sd">Depending on your available packages, you may have the following options:</span>
 
-<span class="sd">.. .. autofunction:: envsum</span>
+<span class="sd">* &quot;pytorch&quot;: dense pytorch operations.</span>
+<span class="sd">* &quot;sparse&quot;: sparse pytorch operations. Can be faster than pure pytorch for large</span>
+<span class="sd">  enough systems, and will not require as much memory.</span>
+<span class="sd">  May require latest pytorch version. Cannot cover all circumstances; should error</span>
+<span class="sd">  if encountering a result that this implementation cannot cover..</span>
+<span class="sd">* &quot;numba&quot;: numba implementation of custom kernels, beats pytorch-based kernels.</span>
+<span class="sd">* &quot;cupy&quot;: cupy implementation of custom kernels, better than numba</span>
+<span class="sd">* &quot;triton&quot;: triton-based custom kernels, uses auto-tuning and the triton compiler.</span>
+<span class="sd">  This is usually the best option.</span>
 
-<span class="sd">.. .. autofunction:: sensesum</span>
+<span class="sd">The available items are stored in the variable :data:`hippynn.custom_kernels.CUSTOM_KERNELS_AVAILABLE`.</span>
+<span class="sd">The active implementation is stored in :data:`hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE`.</span>
 
-<span class="sd">.. .. autofunction:: featsum</span>
+<span class="sd">For more information, see :doc:`/user_guide/ckernels`</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># Dev notes:</span>
+<span class="c1"># For a new implmentation, make a new MessagePassingKernels object in your implementation file.</span>
+<span class="c1"># This will register your implementation with the system.</span>
+<span class="c1"># Then do the following:</span>
+<span class="c1">#   - Add your implementation name to _POSSIBLE_CUSTOM_KERNELS</span>
+<span class="c1">#   - Add an import block for the file to the populate_custom_kernels() function.</span>
+<span class="c1"># If your custom kernel has constraints on what devices or hardware configurations are possible,</span>
+<span class="c1"># the have your module raise an ImportError. You may also want to use</span>
+<span class="c1"># warnings.warn to warn the user of why the implementation is not available.</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">settings</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">autograd_wrapper</span><span class="p">,</span> <span class="n">env_pytorch</span>
+<span class="kn">from</span> <span class="nn">.registry</span> <span class="kn">import</span> <span class="n">MessagePassingKernels</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_pytorch</span>
+
 
 
 <div class="viewcode-block" id="CustomKernelError">
@@ -161,188 +180,149 @@
     <span class="c1"># check order for kernels is numba, cupy, triton.</span>
     <span class="k">global</span> <span class="n">CUSTOM_KERNELS_AVAILABLE</span>
 
-    <span class="n">CUSTOM_KERNELS_AVAILABLE</span> <span class="o">=</span> <span class="p">[]</span>
-
+    <span class="c1"># Look for CPU-capable kernels.</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">numba</span>
-
-        <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;numba&quot;</span><span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_numba</span>
+        <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_atomic</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
         <span class="k">pass</span>
 
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_sparse</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># these kernels only work if torch can get to the GPU.</span>
     <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">cupy</span>
-
-            <span class="k">if</span> <span class="s2">&quot;numba&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="p">:</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Cupy was found, but numba was not. Cupy custom kernels not available.&quot;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;cupy&quot;</span><span class="p">)</span>
+            <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_cupy</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="k">pass</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">triton</span>
-            <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
-                <span class="n">device_capability</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">get_device_capability</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">device_capability</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="p">:</span>
-                    <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;triton&quot;</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Triton found but not supported by GPU&#39;s compute capability: </span><span class="si">{</span><span class="n">device_capability</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="p">)</span>
+            <span class="c1"># Note: Device capability check is located in env_triton now.</span>
+            <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_triton</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="k">pass</span>
 
-
+    <span class="n">CUSTOM_KERNELS_AVAILABLE</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">MessagePassingKernels</span><span class="o">.</span><span class="n">get_available_implementations</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">CUSTOM_KERNELS_AVAILABLE</span></div>
 
 
-<span class="k">def</span> <span class="nf">_check_numba</span><span class="p">():</span>
-    <span class="kn">import</span> <span class="nn">numba.cuda</span>
-    <span class="kn">import</span> <span class="nn">torch</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">numba</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;numba.cuda.is_available() returned False: Custom kernels will fail on GPU tensors.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># atexit.register(numba.cuda.close)</span>
-        <span class="c1"># Dev note for the future: Do not attempt the above `atexit` call!</span>
-        <span class="c1"># Causes segfault on program exit on some systems.</span>
-        <span class="c1"># Probably due to both numba and torch trying to finalize the GPU.</span>
-        <span class="c1"># Leaving this note here in case anyone is tempted to try it in the future.</span>
-        <span class="c1"># (At one point this was the right strategy...)</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-
-<span class="k">def</span> <span class="nf">_check_cupy</span><span class="p">():</span>
-    <span class="kn">import</span> <span class="nn">cupy</span>
-    <span class="kn">import</span> <span class="nn">numba</span>
-    <span class="kn">import</span> <span class="nn">torch</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">cupy</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;cupy.cuda.is_available() returned False: Custom kernels will fail on GPU tensors.&quot;</span><span class="p">)</span>
-    <span class="k">return</span>
 
 <div class="viewcode-block" id="set_custom_kernels">
 <a class="viewcode-back" href="../../api_documentation/hippynn.custom_kernels.html#hippynn.set_custom_kernels">[docs]</a>
-<span class="k">def</span> <span class="nf">set_custom_kernels</span><span class="p">(</span><span class="n">active</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">set_custom_kernels</span><span class="p">(</span><span class="n">active</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Activate or deactivate custom kernels for interaction.</span>
 
 <span class="sd">    This function changes the global variables:</span>
 <span class="sd">        - :func:`hippynn.custom_kernels.envsum`</span>
-<span class="sd">        - :func:`hippynn.custom_kernels.sensum`</span>
+<span class="sd">        - :func:`hippynn.custom_kernels.sensesum`</span>
 <span class="sd">        - :func:`hippynn.custom_kernels.featsum`</span>
-<span class="sd">        - :data:`hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE`</span>
 
-<span class="sd">    :param active: If true, set custom kernels to the best available. If False, turn them off and default to pytorch.</span>
-<span class="sd">       If &quot;triton&quot;, &quot;numba&quot; or &quot;cupy&quot;, use those implementations explicitly. If &quot;auto&quot;, use best available.</span>
-<span class="sd">    :return: None</span>
+<span class="sd">    Special non-implementation-name values are:</span>
+<span class="sd">        - True: - Use the best GPU kernel from recommended implementations, error if none are available.</span>
+<span class="sd">        - False: - equivalent to &quot;pytorch&quot;</span>
+<span class="sd">        - &quot;auto&quot;: - Equivalently to True if recommended is available, else equivalent to &quot;pytorch&quot;</span>
+
+<span class="sd">    :param active: implementation name to activate</span>
+<span class="sd">    :return: active, actual implementation selected.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">populate_custom_kernel_availability</span><span class="p">()</span>
+
     <span class="k">global</span> <span class="n">envsum</span><span class="p">,</span> <span class="n">sensesum</span><span class="p">,</span> <span class="n">featsum</span><span class="p">,</span> <span class="n">CUSTOM_KERNELS_ACTIVE</span>
+
+    <span class="k">if</span> <span class="n">active</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">active</span> <span class="o">=</span> <span class="s2">&quot;pytorch&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">active</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">active</span> <span class="o">=</span> <span class="n">active</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">active</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_POSSIBLE_CUSTOM_KERNELS</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">CustomKernelError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unrecognized custom kernel implementation: </span><span class="si">{</span><span class="n">active</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using non-standard custom kernel implementation: </span><span class="si">{</span><span class="n">active</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="p">:</span>
+    <span class="c1"># Our goal is that this if-block is to handle the cases for values in the range of</span>
+    <span class="c1"># [True, &quot;auto&quot;] and turn them into the suitable actual implementation.</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="n">impl</span> <span class="ow">in</span> <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="p">)</span> <span class="k">for</span> <span class="n">impl</span> <span class="ow">in</span> <span class="n">_RECOMMENDED_CUSTOM_KERNELS</span><span class="p">):</span>
+        <span class="c1"># If recommended custom kernels are available,</span>
+        <span class="c1"># then True reverts to &quot;auto&quot; and &quot;False&quot; reverts to &quot;pytorch&quot;.</span>
+        <span class="k">if</span> <span class="n">active</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">active</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span>
+        <span class="k">if</span> <span class="n">active</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">impl_case</span> <span class="ow">in</span> <span class="n">_RECOMMENDED_CUSTOM_KERNELS</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">impl_case</span> <span class="ow">in</span> <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="p">:</span>
+                    <span class="n">active</span> <span class="o">=</span> <span class="n">impl_case</span>
+                    <span class="k">break</span>  <span class="c1"># exit the for loop, we found the best choice.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># In this case, no recommended kernel is available.</span>
+        <span class="c1"># Use pytorch if active==&quot;auto&quot;, and error if active==True.</span>
         <span class="k">if</span> <span class="n">active</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="s2">&quot;triton, cupy and numba are not available: &quot;</span>
                 <span class="s2">&quot;Custom kernels will be disabled and performance may be degraded.</span><span class="se">\n</span><span class="s2">&quot;</span>
                 <span class="s2">&quot;To silence this warning, set HIPPYNN_USE_CUSTOM_KERNELS=False&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">active</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;pytorch&quot;</span><span class="p">):</span>  <span class="c1"># These are equivalent to &quot;false&quot; when custom kernels are not available.</span>
-            <span class="n">active</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">elif</span> <span class="n">active</span><span class="p">:</span>
-            <span class="c1"># The user explicitly set a custom kernel implementation or just True.</span>
+            <span class="n">active</span> <span class="o">=</span> <span class="s2">&quot;pytorch&quot;</span>
+        <span class="k">elif</span> <span class="n">active</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># The user explicitly set a custom kernel implementation to true, but no recommended ones.</span>
             <span class="k">raise</span> <span class="n">CustomKernelError</span><span class="p">(</span>
-                <span class="s2">&quot;Triton, numba and cupy were not found.&quot;</span> <span class="o">+</span>
-                <span class="sa">f</span><span class="s2">&quot;Custom kernels are not available, but they were required by library setting: </span><span class="si">{</span><span class="n">active</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># If custom kernels are available, then &quot;auto&quot; and &quot;pytorch&quot; revert to bool values.</span>
-        <span class="n">active_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;auto&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;pytorch&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
-        <span class="n">active</span> <span class="o">=</span> <span class="n">active_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">active</span><span class="p">,</span> <span class="n">active</span><span class="p">)</span>
+                <span class="s2">&quot;Triton, numba and cupy were not found. &quot;</span> <span class="o">+</span>
+                <span class="sa">f</span><span class="s2">&quot;Recommended custom kernels are not available, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;but they were required by library setting: </span><span class="si">{</span><span class="n">active</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Handle fallback to pytorch kernels.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">active</span><span class="p">:</span>
-        <span class="n">envsum</span> <span class="o">=</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">envsum</span>
-        <span class="n">sensesum</span> <span class="o">=</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">sensesum</span>
-        <span class="n">featsum</span> <span class="o">=</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">featsum</span>
-        <span class="n">CUSTOM_KERNELS_ACTIVE</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">return</span>
-
-    <span class="c1"># Select custom kernel implementation</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">CustomKernelError</span><span class="p">(</span><span class="s2">&quot;Numba was not found. Custom kernels are not available.&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">active</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s2">&quot;triton&quot;</span> <span class="ow">in</span> <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="p">:</span>
-            <span class="n">active</span> <span class="o">=</span> <span class="s2">&quot;triton&quot;</span>
-        <span class="k">elif</span> <span class="s2">&quot;cupy&quot;</span> <span class="ow">in</span> <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="p">:</span>
-            <span class="n">active</span> <span class="o">=</span> <span class="s2">&quot;cupy&quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">active</span> <span class="o">=</span> <span class="s2">&quot;numba&quot;</span>
-
-    <span class="k">if</span> <span class="n">active</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">CUSTOM_KERNELS_AVAILABLE</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">CustomKernelError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unavailable custom kernel implementation: </span><span class="si">{</span><span class="n">active</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">active</span> <span class="o">==</span> <span class="s2">&quot;triton&quot;</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">.env_triton</span> <span class="kn">import</span> <span class="n">envsum</span> <span class="k">as</span> <span class="n">triton_envsum</span><span class="p">,</span> <span class="n">sensesum</span> <span class="k">as</span> <span class="n">triton_sensesum</span><span class="p">,</span> <span class="n">featsum</span> <span class="k">as</span> <span class="n">triton_featsum</span>
-
-        <span class="n">envsum</span><span class="p">,</span> <span class="n">sensesum</span><span class="p">,</span> <span class="n">featsum</span> <span class="o">=</span> <span class="n">autograd_wrapper</span><span class="o">.</span><span class="n">wrap_envops</span><span class="p">(</span><span class="n">triton_envsum</span><span class="p">,</span> <span class="n">triton_sensesum</span><span class="p">,</span> <span class="n">triton_featsum</span><span class="p">)</span>
-
-    <span class="k">elif</span> <span class="n">active</span> <span class="o">==</span> <span class="s2">&quot;cupy&quot;</span><span class="p">:</span>
-        <span class="n">_check_numba</span><span class="p">()</span>
-        <span class="n">_check_cupy</span><span class="p">()</span>
-        <span class="kn">from</span> <span class="nn">.env_cupy</span> <span class="kn">import</span> <span class="n">cupy_envsum</span><span class="p">,</span> <span class="n">cupy_featsum</span><span class="p">,</span> <span class="n">cupy_sensesum</span>
-
-        <span class="n">envsum</span><span class="p">,</span> <span class="n">sensesum</span><span class="p">,</span> <span class="n">featsum</span> <span class="o">=</span> <span class="n">autograd_wrapper</span><span class="o">.</span><span class="n">wrap_envops</span><span class="p">(</span><span class="n">cupy_envsum</span><span class="p">,</span> <span class="n">cupy_sensesum</span><span class="p">,</span> <span class="n">cupy_featsum</span><span class="p">)</span>
-
-    <span class="k">elif</span> <span class="n">active</span> <span class="o">==</span> <span class="s2">&quot;numba&quot;</span><span class="p">:</span>
-        <span class="n">_check_numba</span><span class="p">()</span>
-        <span class="kn">from</span> <span class="nn">.env_numba</span> <span class="kn">import</span> <span class="n">new_envsum</span><span class="p">,</span> <span class="n">new_featsum</span><span class="p">,</span> <span class="n">new_sensesum</span>
-
-        <span class="n">envsum</span><span class="p">,</span> <span class="n">sensesum</span><span class="p">,</span> <span class="n">featsum</span> <span class="o">=</span> <span class="n">autograd_wrapper</span><span class="o">.</span><span class="n">wrap_envops</span><span class="p">(</span><span class="n">new_envsum</span><span class="p">,</span> <span class="n">new_sensesum</span><span class="p">,</span> <span class="n">new_featsum</span><span class="p">)</span>
-
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># We shouldn&#39;t get here except possibly mid-development, but just in case:</span>
-        <span class="c1"># if you add a custom kernel implementation remember to add to this</span>
-        <span class="c1"># dispatch block.</span>
-        <span class="k">raise</span> <span class="n">CustomKernelError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown Implementation: </span><span class="si">{</span><span class="n">active</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
+    <span class="c1"># Ok, finally set the implementation. Note that get_implementation</span>
+    <span class="c1"># will error with type CustomKernelError if not found.</span>
+    <span class="n">kernel_implementation</span> <span class="o">=</span> <span class="n">MessagePassingKernels</span><span class="o">.</span><span class="n">get_implementation</span><span class="p">(</span><span class="n">active</span><span class="p">)</span>
+    <span class="n">envsum</span> <span class="o">=</span> <span class="n">kernel_implementation</span><span class="o">.</span><span class="n">envsum</span>
+    <span class="n">sensesum</span> <span class="o">=</span> <span class="n">kernel_implementation</span><span class="o">.</span><span class="n">sensesum</span>
+    <span class="n">featsum</span> <span class="o">=</span> <span class="n">kernel_implementation</span><span class="o">.</span><span class="n">featsum</span>
     <span class="n">CUSTOM_KERNELS_ACTIVE</span> <span class="o">=</span> <span class="n">active</span>
-    <span class="k">return</span></div>
+
+    <span class="k">return</span> <span class="n">active</span></div>
 
 
 
 <span class="n">CUSTOM_KERNELS_AVAILABLE</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1">#: List of available kernel implementations based on currently installed packages..</span>
 
-<span class="n">_POSSIBLE_CUSTOM_KERNELS</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;triton&quot;</span><span class="p">,</span> <span class="s2">&quot;numba&quot;</span><span class="p">,</span> <span class="s2">&quot;cupy&quot;</span><span class="p">,</span> <span class="s2">&quot;pytorch&quot;</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">]</span>
+<span class="n">_POSSIBLE_CUSTOM_KERNELS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="kc">True</span><span class="p">,</span>
+    <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">&quot;triton&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;numba&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cupy&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;pytorch&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sparse&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;auto&quot;</span><span class="p">,</span>  <span class="c1"># This means, if possible, use order in _RECOMMENDED_CUSTOM_KERNELS below.</span>
+<span class="p">)</span>
+
+<span class="c1"># These are in order of preference! If you change the order, you change the default for &quot;auto&quot;.</span>
+<span class="n">_RECOMMENDED_CUSTOM_KERNELS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;triton&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;numba&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cupy&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">try_custom_kernels</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">USE_CUSTOM_KERNELS</span>
 
-<span class="n">CUSTOM_KERNELS_ACTIVE</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Which custom kernel implementation is currently active.</span>
+<span class="n">CUSTOM_KERNELS_ACTIVE</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Which custom kernel implementation is currently active.</span>
 
 <span class="n">envsum</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: See :func:`hippynn.custom_kernels.env_pytorch.envsum` for more information.</span>
 <span class="n">sensesum</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: See :func:`hippynn.custom_kernels.env_pytorch.sensesum` for more information.</span>
 <span class="n">featsum</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: See :func:`hippynn.custom_kernels.env_pytorch.featsum` for more information.</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="n">populate_custom_kernel_availability</span><span class="p">()</span>
     <span class="n">set_custom_kernels</span><span class="p">(</span><span class="n">try_custom_kernels</span><span class="p">)</span>
 <span class="k">except</span> <span class="n">CustomKernelError</span> <span class="k">as</span> <span class="n">eee</span><span class="p">:</span>
-    <span class="k">raise</span>
+    <span class="k">raise</span>  <span class="c1"># We re-raise custom kernel releated errors.</span>
 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Custom kernels are disabled due to an unexpected error:</span><span class="se">\n</span><span class="s2">&quot;</span>
                   <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="si">{</span><span class="n">ee</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
     <span class="k">del</span> <span class="n">ee</span>
-
+    <span class="c1"># Since we don&#39;t know what caused the error in the above,</span>
+    <span class="c1"># let&#39;s not re-call the function.</span>
     <span class="n">envsum</span> <span class="o">=</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">envsum</span>
     <span class="n">sensesum</span> <span class="o">=</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">sensesum</span>
     <span class="n">featsum</span> <span class="o">=</span> <span class="n">env_pytorch</span><span class="o">.</span><span class="n">featsum</span>

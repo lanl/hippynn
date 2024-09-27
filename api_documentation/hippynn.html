@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=66b59bf7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
 
   
@@ -35,9 +35,6 @@
           <a href="../index.html" class="icon icon-home">
             hippynn
           </a>
-              <div class="version">
-                0+unknown
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -883,24 +880,28 @@ be piped into the terminal.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hippynn.set_custom_kernels">
-<span class="sig-name descname"><span class="pre">set_custom_kernels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels.html#set_custom_kernels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.set_custom_kernels" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_custom_kernels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/hippynn/custom_kernels.html#set_custom_kernels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.set_custom_kernels" title="Link to this definition"></a></dt>
 <dd><p>Activate or deactivate custom kernels for interaction.</p>
 <dl class="simple">
 <dt>This function changes the global variables:</dt><dd><ul class="simple">
 <li><p><a class="reference internal" href="hippynn.custom_kernels.html#hippynn.custom_kernels.envsum" title="hippynn.custom_kernels.envsum"><code class="xref py py-func docutils literal notranslate"><span class="pre">hippynn.custom_kernels.envsum()</span></code></a></p></li>
-<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">hippynn.custom_kernels.sensum()</span></code></p></li>
+<li><p><a class="reference internal" href="hippynn.custom_kernels.html#hippynn.custom_kernels.sensesum" title="hippynn.custom_kernels.sensesum"><code class="xref py py-func docutils literal notranslate"><span class="pre">hippynn.custom_kernels.sensesum()</span></code></a></p></li>
 <li><p><a class="reference internal" href="hippynn.custom_kernels.html#hippynn.custom_kernels.featsum" title="hippynn.custom_kernels.featsum"><code class="xref py py-func docutils literal notranslate"><span class="pre">hippynn.custom_kernels.featsum()</span></code></a></p></li>
-<li><p><a class="reference internal" href="hippynn.custom_kernels.html#hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE" title="hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE"><code class="xref py py-data docutils literal notranslate"><span class="pre">hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE</span></code></a></p></li>
+</ul>
+</dd>
+<dt>Special non-implementation-name values are:</dt><dd><ul class="simple">
+<li><p>True: - Use the best GPU kernel from recommended implementations, error if none are available.</p></li>
+<li><p>False: - equivalent to “pytorch”</p></li>
+<li><p>“auto”: - Equivalently to True if recommended is available, else equivalent to “pytorch”</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>active</strong> – If true, set custom kernels to the best available. If False, turn them off and default to pytorch.
-If “triton”, “numba” or “cupy”, use those implementations explicitly. If “auto”, use best available.</p>
+<dd class="field-odd"><p><strong>active</strong> – implementation name to activate</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
+<dd class="field-even"><p>active, actual implementation selected.</p>
 </dd>
 </dl>
 </dd></dl>

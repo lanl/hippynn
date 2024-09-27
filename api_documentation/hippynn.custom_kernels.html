@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>custom_kernels &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=66b59bf7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
 
   
@@ -35,9 +35,6 @@
           <a href="../index.html" class="icon icon-home">
             hippynn
           </a>
-              <div class="version">
-                0+unknown
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -113,15 +110,17 @@
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE"><code class="docutils literal notranslate"><span class="pre">CUSTOM_KERNELS_ACTIVE</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.custom_kernels.CUSTOM_KERNELS_AVAILABLE"><code class="docutils literal notranslate"><span class="pre">CUSTOM_KERNELS_AVAILABLE</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.autograd_wrapper.html">autograd_wrapper module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_atomic.html">env_atomic module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_cupy.html">env_cupy module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html">env_numba module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_pytorch.html">env_pytorch module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_sparse.html">env_sparse module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.env_triton.html">env_triton module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.fast_convert.html">fast_convert module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.registry.html">registry module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html">tensor_wrapper module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_cupy.html">test_env_cupy module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html">test_env_numba module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env_triton.html">test_env_triton module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_env.html">test_env module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.test_speed_env.html">test_speed_env module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.custom_kernels.utils.html">utils module</a></li>
 </ul>
 </li>
@@ -183,6 +182,22 @@ Triton custom kernels only work on the GPU, and are generaly faster than CUPY.
 Triton kernels revert to numba or pytorch as available on module import.</p>
 <p>On import, this module attempts to set the custom kernels as specified by the
 user in hippynn.settings.</p>
+<p>See the <a class="reference internal" href="../user_guide/ckernels.html"><span class="doc">Custom Kernels</span></a> section of the documentation for more information.</p>
+<p>Depending on your available packages, you may have the following options:</p>
+<ul class="simple">
+<li><p>“pytorch”: dense pytorch operations.</p></li>
+<li><p>“sparse”: sparse pytorch operations. Can be faster than pure pytorch for large
+enough systems, and will not require as much memory.
+May require latest pytorch version. Cannot cover all circumstances; should error
+if encountering a result that this implementation cannot cover..</p></li>
+<li><p>“numba”: numba implementation of custom kernels, beats pytorch-based kernels.</p></li>
+<li><p>“cupy”: cupy implementation of custom kernels, better than numba</p></li>
+<li><p>“triton”: triton-based custom kernels, uses auto-tuning and the triton compiler.
+This is usually the best option.</p></li>
+</ul>
+<p>The available items are stored in the variable <a class="reference internal" href="#hippynn.custom_kernels.CUSTOM_KERNELS_AVAILABLE" title="hippynn.custom_kernels.CUSTOM_KERNELS_AVAILABLE"><code class="xref py py-data docutils literal notranslate"><span class="pre">hippynn.custom_kernels.CUSTOM_KERNELS_AVAILABLE</span></code></a>.
+The active implementation is stored in <a class="reference internal" href="#hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE" title="hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE"><code class="xref py py-data docutils literal notranslate"><span class="pre">hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE</span></code></a>.</p>
+<p>For more information, see <a class="reference internal" href="../user_guide/ckernels.html"><span class="doc">Custom Kernels</span></a></p>
 <dl class="py exception">
 <dt class="sig sig-object py" id="hippynn.custom_kernels.CustomKernelError">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CustomKernelError</span></span><a class="reference internal" href="../_modules/hippynn/custom_kernels.html#CustomKernelError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.CustomKernelError" title="Link to this definition"></a></dt>
@@ -191,13 +206,13 @@ user in hippynn.settings.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hippynn.custom_kernels.envsum">
-<span class="sig-name descname"><span class="pre">envsum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sensitivities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_first</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_second</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/hippynn/custom_kernels/env_pytorch.html#envsum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.envsum" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">envsum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hippynn.custom_kernels.envsum" title="Link to this definition"></a></dt>
 <dd><p>See <a class="reference internal" href="hippynn.custom_kernels.env_pytorch.html#hippynn.custom_kernels.env_pytorch.envsum" title="hippynn.custom_kernels.env_pytorch.envsum"><code class="xref py py-func docutils literal notranslate"><span class="pre">hippynn.custom_kernels.env_pytorch.envsum()</span></code></a> for more information.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hippynn.custom_kernels.featsum">
-<span class="sig-name descname"><span class="pre">featsum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sense</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_second</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels/env_pytorch.html#featsum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.featsum" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">featsum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hippynn.custom_kernels.featsum" title="Link to this definition"></a></dt>
 <dd><p>See <a class="reference internal" href="hippynn.custom_kernels.env_pytorch.html#hippynn.custom_kernels.env_pytorch.featsum" title="hippynn.custom_kernels.env_pytorch.featsum"><code class="xref py py-func docutils literal notranslate"><span class="pre">hippynn.custom_kernels.env_pytorch.featsum()</span></code></a> for more information.</p>
 </dd></dl>
 
@@ -215,43 +230,47 @@ user in hippynn.settings.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hippynn.custom_kernels.sensesum">
-<span class="sig-name descname"><span class="pre">sensesum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_second</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels/env_pytorch.html#sensesum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.sensesum" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sensesum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hippynn.custom_kernels.sensesum" title="Link to this definition"></a></dt>
 <dd><p>See <a class="reference internal" href="hippynn.custom_kernels.env_pytorch.html#hippynn.custom_kernels.env_pytorch.sensesum" title="hippynn.custom_kernels.env_pytorch.sensesum"><code class="xref py py-func docutils literal notranslate"><span class="pre">hippynn.custom_kernels.env_pytorch.sensesum()</span></code></a> for more information.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hippynn.custom_kernels.set_custom_kernels">
-<span class="sig-name descname"><span class="pre">set_custom_kernels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/custom_kernels.html#set_custom_kernels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.set_custom_kernels" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_custom_kernels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">active</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/hippynn/custom_kernels.html#set_custom_kernels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.custom_kernels.set_custom_kernels" title="Link to this definition"></a></dt>
 <dd><p>Activate or deactivate custom kernels for interaction.</p>
 <dl class="simple">
 <dt>This function changes the global variables:</dt><dd><ul class="simple">
 <li><p><a class="reference internal" href="#hippynn.custom_kernels.envsum" title="hippynn.custom_kernels.envsum"><code class="xref py py-func docutils literal notranslate"><span class="pre">hippynn.custom_kernels.envsum()</span></code></a></p></li>
-<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">hippynn.custom_kernels.sensum()</span></code></p></li>
+<li><p><a class="reference internal" href="#hippynn.custom_kernels.sensesum" title="hippynn.custom_kernels.sensesum"><code class="xref py py-func docutils literal notranslate"><span class="pre">hippynn.custom_kernels.sensesum()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#hippynn.custom_kernels.featsum" title="hippynn.custom_kernels.featsum"><code class="xref py py-func docutils literal notranslate"><span class="pre">hippynn.custom_kernels.featsum()</span></code></a></p></li>
-<li><p><a class="reference internal" href="#hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE" title="hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE"><code class="xref py py-data docutils literal notranslate"><span class="pre">hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE</span></code></a></p></li>
+</ul>
+</dd>
+<dt>Special non-implementation-name values are:</dt><dd><ul class="simple">
+<li><p>True: - Use the best GPU kernel from recommended implementations, error if none are available.</p></li>
+<li><p>False: - equivalent to “pytorch”</p></li>
+<li><p>“auto”: - Equivalently to True if recommended is available, else equivalent to “pytorch”</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>active</strong> – If true, set custom kernels to the best available. If False, turn them off and default to pytorch.
-If “triton”, “numba” or “cupy”, use those implementations explicitly. If “auto”, use best available.</p>
+<dd class="field-odd"><p><strong>active</strong> – implementation name to activate</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
+<dd class="field-even"><p>active, actual implementation selected.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE">
-<span class="sig-name descname"><span class="pre">CUSTOM_KERNELS_ACTIVE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">CUSTOM_KERNELS_ACTIVE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pytorch'</span></em><a class="headerlink" href="#hippynn.custom_kernels.CUSTOM_KERNELS_ACTIVE" title="Link to this definition"></a></dt>
 <dd><p>Which custom kernel implementation is currently active.</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="hippynn.custom_kernels.CUSTOM_KERNELS_AVAILABLE">
-<span class="sig-name descname"><span class="pre">CUSTOM_KERNELS_AVAILABLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#hippynn.custom_kernels.CUSTOM_KERNELS_AVAILABLE" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">CUSTOM_KERNELS_AVAILABLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['pytorch',</span> <span class="pre">'sparse']</span></em><a class="headerlink" href="#hippynn.custom_kernels.CUSTOM_KERNELS_AVAILABLE" title="Link to this definition"></a></dt>
 <dd><p>List of available kernel implementations based on currently installed packages..</p>
 </dd></dl>
 
@@ -259,15 +278,17 @@ If “triton”, “numba” or “cupy”, use those implementations explicitly
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.autograd_wrapper.html">autograd_wrapper module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.env_atomic.html">env_atomic module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.env_cupy.html">env_cupy module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.env_numba.html">env_numba module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.env_pytorch.html">env_pytorch module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.env_sparse.html">env_sparse module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.env_triton.html">env_triton module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.fast_convert.html">fast_convert module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.registry.html">registry module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.tensor_wrapper.html">tensor_wrapper module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.test_env_cupy.html">test_env_cupy module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.test_env_numba.html">test_env_numba module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.test_env_triton.html">test_env_triton module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.test_env.html">test_env module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.test_speed_env.html">test_speed_env module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hippynn.custom_kernels.utils.html">utils module</a></li>
 </ul>
 </div>

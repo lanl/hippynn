@@ -117,7 +117,7 @@ Advanced Details
 -  Here are a list of objects and their final device after loading.
 
    .. list-table::
-      :widths: 40 30
+      :widths: 30 70
       :header-rows: 1
 
       * - Objects

@@ -4,14 +4,106 @@ Custom Kernels
 Bottom line up front
 --------------------
 
-We use custom kernels in `hippynn` to accelerate the HIP-NN neural network message passing.
-On the GPU, the best implementation to select is ``triton``, followed by ``cupy``,
-followed by ``numba``. On the CPU, only ``numba`` is available. In general, these
+If possible, install ``triton`` and ``numba``, as they will accelerate HIP-NN networks
+and reduce memory cost on GPU and CPU, respectively.
+
+
+Brief Description
+-----------------
+
+We use custom kernels in hippynn to accelerate the HIP-NN neural network message passing and
+to significantly reduce the amount of memory required in passing messages.
+On the GPU, the best implementation to select is ``"triton"``, followed by ``"cupy"``,
+followed by ``"numba"``. On the CPU, only ``"numba"`` is available. In general, these
 custom kernels are very useful, and the only reasons for them to be off is if are
 if the packages are not available for installation in your environment or if diagnosing
 whether or not a bug could be related to potential misconfiguration of these additional packages.
-``triton`` comes with recent versions of ``pytorch``, so optimistically you may already be
-configured to use the custom kernels.
+``"triton"`` comes with recent versions of ``"pytorch"``, so optimistically you may already be
+configured to use the custom kernels. Finally, there is the ``"sparse"`` implementation, which
+uses torch.sparse functions. This saves memory much as the kernels from external packages,
+however, it does not currently achieve a significant speedup over pytorch.
+
+
+Comparison Table
+----------------
+
+
+.. list-table:: Hippynn Custom Kernels Options Summary
+   :widths: 4 30 3 3 3 3 10 30
+   :header-rows: 1
+
+   * - Name
+     - Description
+     - Low memory
+     - Speedup
+     - CPU
+     - GPU
+     - Required Packages
+     - Notes
+   * - pytorch
+     - Dense operations and index add operations
+     - No
+     - No
+     - Yes
+     - Yes
+     - None
+     - lowest overhead, gauranteed to run, but poorest performance
+       for large data
+   * - triton
+     - CSR-dense with OpenAI's triton compiler
+       using autotuning.
+     - Yes
+     - Excellent
+     - no
+     - yes
+     - triton
+     - Best option for GPU. Does incur some start-up lag due to autotuning.
+   * - numba
+     - CSR-dense hybrid with numba
+     - Yes
+     - Good
+     - Yes
+     - Yes
+     - numba
+     - Best option for CPU; non-CPU implementations fall back to this on CPU when available.
+   * - cupy
+     - CSR-dense hybrid with cupy/C code.
+     - Yes
+     - Great
+     - no
+     - yes
+     - cupy
+     - Direct translation of numba algorithm, but has improved performance.
+   * - sparse
+     - CSR-dense using torch.sparse operations.
+     - Yes
+     - None
+     - Yes
+     - Yes
+     - pytorch>=2.4
+     - Cannot handle all systems, but raises an error on failure.
+
+.. note::
+   Kernels which do not support the CPU fall back to numba if it is available, and
+   to pytorch if it is not.
+
+.. note::
+   Custom Kernels do come with some launch overheads compared to the pytorch implementation.
+   If your workload is small (small batch sizes, networks, and/or small systems)
+   and you're using a GPU, then you may find best performance with kernels set to ``"pytorch"``.
+
+.. note::
+   The sparse implementation is slow for very small workload sizes. At large workload
+   sizes, it is about as fast as pytorch (while using less memory), but still slower
+   than numba.
+
+.. note::
+   The sparse implementation does not handle message-passing where atoms can appear
+   together in two or more sets of pairs due to small systems with periodic boundary conditions.
+
+
+For information on how to set the custom kernels, see :doc:`settings`
+
 
 Detailed Explanation
 --------------------

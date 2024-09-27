@@ -2,11 +2,12 @@ Controller
 ==========
 
 How to define a controller for more customized control of the training process.
-We assume that there is a set of ``training_modules`` assembled and a ``database`` object has been constructed.
+We assume that there is a set of :class:`~hippynn.experiment.assembly.TrainingModules` assembled, called ``training_modules``,
+and a :class:`~hippynn.databases.Database`-like object called ``database`` that has been constructed.
 
 The following snippet shows how to set up a controller using a custom scheduler or optimizer::
 
-    from hippynn.experiment.controllers import RaiseBatchSizeOnPlateau,PatienceController
+    from hippynn.experiment.controllers import RaiseBatchSizeOnPlateau, PatienceController
 
     optimizer = torch.optim.Adam(training_modules.model.parameters(),lr=1e-3)
 

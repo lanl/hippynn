@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn._settings_setup &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=66b59bf7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=e3456cac" />
 
   
@@ -32,9 +32,6 @@
           <a href="../../index.html" class="icon icon-home">
             hippynn
           </a>
-              <div class="version">
-                0+unknown
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -199,13 +196,12 @@
     <span class="n">kernel</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;0&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="s2">&quot;false&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="s2">&quot;pytorch&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="s2">&quot;true&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kernel_string</span><span class="p">,</span> <span class="n">kernel_string</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">kernel</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;triton&quot;</span><span class="p">,</span> <span class="s2">&quot;cupy&quot;</span><span class="p">,</span> <span class="s2">&quot;numba&quot;</span><span class="p">]:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected custom kernel setting: </span><span class="si">{</span><span class="n">kernel_string</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="c1"># This function used to warn about unexpected kernel settings.</span>
+    <span class="c1"># Now this is an error which is raised in the custom_kernels module.</span>
 
     <span class="k">return</span> <span class="n">kernel</span>
 
