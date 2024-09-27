@@ -68,6 +68,7 @@ def populate_custom_kernel_availability():
     try:
         import numba
         from . import env_numba
+        from . import env_atomic
     except ImportError:
         pass
 
@@ -101,7 +102,7 @@ def set_custom_kernels(active: Union[bool, str] = True) -> str:
 
     This function changes the global variables:
         - :func:`hippynn.custom_kernels.envsum`
-        - :func:`hippynn.custom_kernels.sensum`
+        - :func:`hippynn.custom_kernels.sensesum`
         - :func:`hippynn.custom_kernels.featsum`
 
     Special non-implementation-name values are:

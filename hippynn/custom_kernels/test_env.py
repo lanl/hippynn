@@ -1,6 +1,7 @@
 """
 Test module for verifying implementation correctness against pytorch.
 """
+import platform
 import warnings
 import time
 
@@ -382,6 +383,8 @@ class TimerHolder:
         self.name = name
         if device.type == "cuda":
             self.device = torch.cuda.get_device_name(device)
+        elif device.type == "cpu":
+            self.device = platform.processor()
         else:
             self.device = device.type
 

@@ -195,6 +195,9 @@ class InteractLayer(torch.nn.Module):
         # Z: input features
         # E: environment features (S*Z)
 
+        # Q = (VZ) #  torch.mm
+        # E = (QS) #  custom_kernels.featsum
+
         # E = (SZ)
         env_features = custom_kernels.envsum(sense_vals, in_features, pair_first, pair_second)
 
