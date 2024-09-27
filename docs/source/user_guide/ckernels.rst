@@ -29,7 +29,7 @@ Comparison Table
 
 
 .. list-table:: Hippynn Custom Kernels Options Summary
-   :widths: 20 150 15 15 15 15 50 150
+   :widths: 4 30 3 3 3 3 10 30
    :header-rows: 1
 
    * - Name
