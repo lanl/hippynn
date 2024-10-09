@@ -38,7 +38,7 @@ both the energy and location of singlet-triplet excitations in organic materials
 In :cite:t:`habib2023machine`, HIP-NN was used in a dynamical setting to learn
 the dynamics of excitons in nanoparticles. In this mode, the predictions of
 a model produce inputs for the next time step, and training takes place by
-backpropagating through multiple steps of prediction. :cite:t`li2024machine` used
+backpropagating through multiple steps of prediction. :cite:t:`li2024machine` used
 the framework to predict several excited state properties; energy,
 transition dipole, and non-adiabatic coupling vectors were predicted for several
 excited states in a molecular system.
