@@ -17,7 +17,7 @@ class ExternalNeighbors(_PairIndexer):
         n_molecules, n_atoms, _ = coordinates.shape
         atom_coordinates = coordinates.reshape(n_molecules * n_atoms, 3)[real_atoms]
         paircoord = atom_coordinates[pair_second] - atom_coordinates[pair_first] + shifts.to(cell.dtype) @ cell
-        distflat = paircoord.norm(dim=1)
+        distflat = paircoord.norm(dim=-1)
 
         # We filter the lists to only send forward relevant pairs (those with distance under cutoff), improving performance.   
         return filter_pairs(self.hard_dist_cutoff, distflat, pair_first, pair_second, paircoord)

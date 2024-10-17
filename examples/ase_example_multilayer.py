@@ -30,7 +30,7 @@ from ase.lattice.cubic import FaceCenteredCubic
 # Load the files
 try:
     with active_directory("TEST_ALUMINUM_MODEL_MULTILAYER", create=False):
-        bundle = load_checkpoint_from_cwd(map_location='cpu',e)
+        bundle = load_checkpoint_from_cwd(map_location='cpu')
 except FileNotFoundError:
     raise FileNotFoundError("Model not found, run ani_aluminum_example_multilayer.py first!")
 
