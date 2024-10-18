@@ -7,7 +7,7 @@ This module is only available if the `ase` package is installed.
 
 """
 
-from .md import MolecularDynamics, Variable, NullUpdater, VelocityVerlet, LangevinDynamics
+from .md import MolecularDynamics, Variable, NullUpdater, VelocityVerlet, LangevinDynamics, VariableUpdater
 
 
-__all__ = ["MolecularDynamics", "Variable", "NullUpdater", "VelocityVerlet", "LangevinDynamics"]
+__all__ = ["MolecularDynamics", "Variable", "NullUpdater", "VelocityVerlet", "LangevinDynamics", "VariableUpdater"]
