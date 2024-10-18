@@ -46,7 +46,7 @@ Improvements:
   set the default to use a better value for epsilon.
 - Improved detection of valid custom kernel implementation.
 - Improved computational efficiency of HIP-NN-TS network.
-
+- ``StressForceNode`` now also works with batch size greater than 1.
 
 
 Bug Fixes:
