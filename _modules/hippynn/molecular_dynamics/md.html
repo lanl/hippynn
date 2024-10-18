@@ -113,7 +113,6 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">ase</span>
 
 <span class="kn">from</span> <span class="nn">..tools</span> <span class="kn">import</span> <span class="n">progress_bar</span>
 <span class="kn">from</span> <span class="nn">..graphs</span> <span class="kn">import</span> <span class="n">Predictor</span>
@@ -330,23 +329,17 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">force_db_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">units_force</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">units_acc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">units_force</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">units_acc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param force_db_name: key which will correspond to the force on the corresponding Variable</span>
 <span class="sd">            in the HIPNN model output dictionary</span>
-<span class="sd">        :param units_force: amount of eV equal to one in the units used for force output</span>
-<span class="sd">            of HIPNN model (eg. if force output in kcal/mol/A, units_force =</span>
-<span class="sd">            ase.units.kcal/ase.units.mol/ase.units.Ang ~=.0434 since .0434 kcal ~= 1 eV),</span>
-<span class="sd">            by default ase.units.eV = 1, defaults to ase.units.eV / ase.units.Ang</span>
-<span class="sd">        :param units_acc: amount of Ang/fs^2 equal to one in the units used for acceleration</span>
-<span class="sd">            in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to ase.units.Ang/(1.0**2)</span>
+<span class="sd">        :param units_force: force units via ase.units (eg. ase.units.kcal/ase.units.mol/ase.units.Ang),</span>
+<span class="sd">        :param units_acc: acceleration units via ase.units (eg. ase.units.Ang/(ase.units.ps**2)),</span>
+
+<span class="sd">        mass of attached Variable must be in amu</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">units_force</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">units_force</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">eV</span> <span class="o">/</span> <span class="n">ase</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">Ang</span>
-        <span class="k">if</span> <span class="n">units_acc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">units_acc</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">Ang</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">force_key</span> <span class="o">=</span> <span class="n">force_db_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">force_factor</span> <span class="o">=</span> <span class="n">units_force</span> <span class="o">/</span> <span class="n">units_acc</span>
 
@@ -399,8 +392,8 @@
         <span class="n">force_db_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">frix</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">units_force</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">units_acc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">units_force</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">units_acc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -408,19 +401,12 @@
 <span class="sd">            in the HIPNN model output dictionary</span>
 <span class="sd">        :param temperature: temperature for Langevin algorithm</span>
 <span class="sd">        :param frix: friction coefficient for Langevin algorithm</span>
-<span class="sd">        :param units_force: amount of eV equal to one in the units used for force output</span>
-<span class="sd">            of HIPNN model (eg. if force output in kcal/mol/A, units_force =</span>
-<span class="sd">            ase.units.kcal/ase.units.mol/ase.units.Ang ~=.0434 since .0434 kcal ~= 1 eV),</span>
-<span class="sd">            by default ase.units.eV = 1, defaults to ase.units.eV / ase.units.Ang</span>
-<span class="sd">        :param units_acc: amount of Ang/fs^2 equal to one in the units used for acceleration</span>
-<span class="sd">            in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to ase.units.Ang/(1.0**2)</span>
+<span class="sd">        :param units_force: force units via ase.units (eg. ase.units.kcal/ase.units.mol/ase.units.Ang),</span>
+<span class="sd">        :param units_acc: acceleration units via ase.units (eg. ase.units.Ang/(ase.units.ps**2)),</span>
 <span class="sd">        :param seed: used to set seed for reproducibility, defaults to None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">units_force</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">units_force</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">eV</span> <span class="o">/</span> <span class="n">ase</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">Ang</span>
-        <span class="k">if</span> <span class="n">units_acc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">units_acc</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">Ang</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
 
+<span class="sd">        mass of attached Variable must be in amu</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">force_key</span> <span class="o">=</span> <span class="n">force_db_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">force_factor</span> <span class="o">=</span> <span class="n">units_force</span> <span class="o">/</span> <span class="n">units_acc</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">temperature</span>
@@ -447,6 +433,7 @@
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;unwrapped_position&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">])</span></div>
 
+                
 <div class="viewcode-block" id="LangevinDynamics.post_step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.md.html#hippynn.molecular_dynamics.LangevinDynamics.post_step">[docs]</a>
     <span class="k">def</span> <span class="nf">post_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">model_outputs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
