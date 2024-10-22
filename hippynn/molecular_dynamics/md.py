@@ -4,6 +4,7 @@ from functools import singledispatchmethod
 
 import numpy as np
 import torch
+import ase
 
 from ..tools import progress_bar
 from ..graphs import Predictor
