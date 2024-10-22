@@ -148,8 +148,8 @@ class Tracker:
     def print(self, diff_steps=None, data=None):
         time_per_atom_step = self.update(diff_steps, data)
         """Function to print the potential, kinetic and total energy"""
-        atoms.set_positions(np.array(data["position_position"][-1]))
-        atoms.set_velocities(np.array(data["position_velocity"][-1]))
+        atoms.set_positions(np.array(data["position_position"][-1, 0]))
+        atoms.set_velocities(np.array(data["position_velocity"][-1, 0]))
         print(
             "Performance:",
             round(1e6 * time_per_atom_step, 1),
