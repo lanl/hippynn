@@ -12,7 +12,7 @@ Breaking changes:
   avoid confusions. Use ``make_trainvalidtest_split(test_size=a, valid_size=b)``
   instead of ``make_trainvalidtest_split(a, b)``.
 - Invalid custom kernel specifications are now errors rather than warnings.
-
+- Method of specifying units for custom MD algorithms has changed.
 
 New Features:
 -------------

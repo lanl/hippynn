@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Optional
 from functools import singledispatchmethod
-from copy import copy
 
 import numpy as np
 import torch
@@ -196,25 +195,21 @@ class VelocityVerlet(VariableUpdater):
     def __init__(
         self,
         force_db_name: str,
-        units_force: float = None,
-        units_acc: float = None,
+        force_units: Optional[float] = None,
+        position_units: Optional[float] = None,
+        time_units: Optional[float] = None,
     ):
         """
         :param force_db_name: key which will correspond to the force on the corresponding Variable
             in the HIPNN model output dictionary
-        :param units_force: amount of eV equal to one in the units used for force output
-            of HIPNN model (eg. if force output in kcal/mol/A, units_force =
-            ase.units.kcal/ase.units.mol/ase.units.Ang ~=.0434 since .0434 kcal ~= 1 eV),
-            by default ase.units.eV = 1, defaults to ase.units.eV / ase.units.Ang
-        :param units_acc: amount of Ang/fs^2 equal to one in the units used for acceleration
-            in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to ase.units.Ang/(1.0**2)
+        :param force_units: model force units output (in terms of ase.units), defaults to eV/Ang
+        :param position_units: model position units output (in terms of ase.units), defaults to Ang
+        :param time_units: model time units output (in terms of ase.units), defaults to Ang/((amu/eV)**(1/2))
         """
-        if units_force is None:
-            units_force = ase.units.eV / ase.units.Ang
-        if units_acc is None:
-            units_acc = ase.units.Ang / (1.0**2)
         self.force_key = force_db_name
-        self.force_factor = units_force / units_acc
+        self.force_units = (force_units or ase.units.eV/ase.Ang)
+        self.position_units = (position_units or ase.units.Ang)
+        self.time_units = (time_units or ase.units.Ang/((1/ase.units.eV)**(1/2)))
 
     def pre_step(self, dt: float):
         """Updates to variables performed during each step of MD simulation before HIPNN model evaluation
@@ -223,10 +218,13 @@ class VelocityVerlet(VariableUpdater):
         """
         self.variable.data["velocity"] = self.variable.data["velocity"] + 0.5 * dt * self.variable.data["acceleration"]
         self.variable.data["position"] = self.variable.data["position"] + self.variable.data["velocity"] * dt
-        try:
-            _, self.variable.data["position"], *_ = wrap_systems_torch(coords=self.variable.data["position"], cell=self.variable.data["cell"], cutoff=0) # cutoff only used for discarded outputs; can be set arbitrarily
-        except KeyError:
-            pass
+        
+        if "cell" in self.variable.data.keys():
+            _, self.variable.data["position"], *_ = wrap_systems_torch(coords=self.variable.data["position"], cell=self.variable.data["cell"], cutoff=0) # cutoff only impacts unused outputs; can be set arbitrarily
+            try:
+                self.variable.data["unwrapped_position"] = self.variable.data["unwrapped_position"] + self.variable.data["velocity"] * dt
+            except KeyError:
+                self.variable.data["unwrapped_position"] = self.variable.data["position"].clone().detach()
 
     def post_step(self, dt: float, model_outputs: dict):
         """Updates to variables performed during each step of MD simulation after HIPNN model evaluation
@@ -236,10 +234,10 @@ class VelocityVerlet(VariableUpdater):
         """
         self.variable.data["force"] = model_outputs[self.force_key].to(self.variable.device)
         if len(self.variable.data["force"].shape) == len(self.variable.data["mass"].shape):
-            self.variable.data["acceleration"] = self.variable.data["force"].detach() / self.variable.data["mass"] * self.force_factor
+            self.variable.data["acceleration"] = self.variable.data["force"].detach() / self.variable.data["mass"] * self.force_units / (self.position_units / self.time_units**2)
         else:
             self.variable.data["acceleration"] = (
-                self.variable.data["force"].detach() / self.variable.data["mass"][..., None] * self.force_factor
+                self.variable.data["force"].detach() / self.variable.data["mass"][..., None] * self.force_units / (self.position_units / self.time_units**2)
             )
         self.variable.data["velocity"] = self.variable.data["velocity"] + 0.5 * dt * self.variable.data["acceleration"]
 
@@ -256,8 +254,9 @@ class LangevinDynamics(VariableUpdater):
         force_db_name: str,
         temperature: float,
         frix: float,
-        units_force: float = None,
-        units_acc: float = None,
+        force_units: Optional[float] = None,
+        position_units: Optional[float] = None,
+        time_units: Optional[float] = None,
         seed: Optional[int] = None,
     ):
         """
@@ -265,24 +264,19 @@ class LangevinDynamics(VariableUpdater):
             in the HIPNN model output dictionary
         :param temperature: temperature for Langevin algorithm
         :param frix: friction coefficient for Langevin algorithm
-        :param units_force: amount of eV equal to one in the units used for force output
-            of HIPNN model (eg. if force output in kcal/mol/A, units_force =
-            ase.units.kcal/ase.units.mol/ase.units.Ang ~=.0434 since .0434 kcal ~= 1 eV),
-            by default ase.units.eV = 1, defaults to ase.units.eV / ase.units.Ang
-        :param units_acc: amount of Ang/fs^2 equal to one in the units used for acceleration
-            in the corresponding Variable, by default units.Ang/(1.0 ** 2) = 1, defaults to ase.units.Ang/(1.0**2)
+        :param force_units: model force units output (in terms of ase.units), defaults to eV/Ang
+        :param position_units: model position units output (in terms of ase.units), defaults to Ang
+        :param time_units: model time units output (in terms of ase.units), defaults to Ang/((amu/eV)**(1/2))
         :param seed: used to set seed for reproducibility, defaults to None
         """
-        if units_force is None:
-            units_force = ase.units.eV / ase.units.Ang
-        if units_acc is None:
-            units_acc = ase.units.Ang / (1.0**2)
 
         self.force_key = force_db_name
-        self.force_factor = units_force / units_acc
         self.temperature = temperature
         self.frix = frix
-        self.kB = 0.001987204 * self.force_factor
+        self.kB = ase.units.kB
+        self.force_units = (force_units or ase.units.eV/ase.Ang)
+        self.position_units = (position_units or ase.units.Ang)
+        self.time_units = (time_units or ase.units.Ang/((1/ase.units.eV)**(1/2)))
 
         if seed is not None:
             torch.manual_seed(seed)
@@ -300,7 +294,8 @@ class LangevinDynamics(VariableUpdater):
             try:
                 self.variable.data["unwrapped_position"] = self.variable.data["unwrapped_position"] + self.variable.data["velocity"] * dt
             except KeyError:
-                self.variable.data["unwrapped_position"] = copy(self.variable.data["position"])
+                self.variable.data["unwrapped_position"] = self.variable.data["position"].clone().detach()
+
     def post_step(self, dt: float, model_outputs: dict):
         """
         Updates to variables performed during each step of MD simulation after HIPNN model evaluation
@@ -314,7 +309,7 @@ class LangevinDynamics(VariableUpdater):
         if len(self.variable.data["force"].shape) != len(self.variable.data["mass"].shape):
             self.variable.data["mass"] = self.variable.data["mass"][..., None]
 
-        self.variable.data["acceleration"] = self.variable.data["force"].detach() / self.variable.data["mass"] * self.force_factor
+        self.variable.data["acceleration"] = self.variable.data["force"].detach() / self.variable.data["mass"] * self.force_units / (self.position_units / self.time_units**2)
 
         self.variable.data["velocity"] = (
             self.variable.data["velocity"]

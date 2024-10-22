@@ -47,8 +47,9 @@ position_updater = LangevinDynamics(
     force_db_name="forces",
     temperature=700,
     frix=6,
-    units_force=units.kcal / units.mol / units.Ang,
-    units_acc=units.Ang / ((1000 * units.fs)**2),
+    force_units=units.kcal / units.mol / units.Ang,
+    position_units=units.Ang,
+    time_units=units.fs,
     seed=1993,
 )
 positions_variable.updater = position_updater
