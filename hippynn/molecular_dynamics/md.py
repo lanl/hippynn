@@ -204,12 +204,12 @@ class VelocityVerlet(VariableUpdater):
             in the HIPNN model output dictionary
         :param force_units: model force units output (in terms of ase.units), defaults to eV/Ang
         :param position_units: model position units output (in terms of ase.units), defaults to Ang
-        :param time_units: model time units output (in terms of ase.units), defaults to Ang/((amu/eV)**(1/2))
+        :param time_units: model time units output (in terms of ase.units), defaults to fs
         """
         self.force_key = force_db_name
-        self.force_units = (force_units or ase.units.eV/ase.Ang)
+        self.force_units = (force_units or ase.units.eV/ase.units.Ang)
         self.position_units = (position_units or ase.units.Ang)
-        self.time_units = (time_units or ase.units.Ang/((1/ase.units.eV)**(1/2)))
+        self.time_units = (time_units or ase.units.fs)
 
     def pre_step(self, dt: float):
         """Updates to variables performed during each step of MD simulation before HIPNN model evaluation
@@ -266,7 +266,7 @@ class LangevinDynamics(VariableUpdater):
         :param frix: friction coefficient for Langevin algorithm
         :param force_units: model force units output (in terms of ase.units), defaults to eV/Ang
         :param position_units: model position units output (in terms of ase.units), defaults to Ang
-        :param time_units: model time units output (in terms of ase.units), defaults to Ang/((amu/eV)**(1/2))
+        :param time_units: model time units output (in terms of ase.units), defaults to fs
         :param seed: used to set seed for reproducibility, defaults to None
         """
 
@@ -274,9 +274,9 @@ class LangevinDynamics(VariableUpdater):
         self.temperature = temperature
         self.frix = frix
         self.kB = ase.units.kB
-        self.force_units = (force_units or ase.units.eV/ase.Ang)
+        self.force_units = (force_units or ase.units.eV/ase.units.Ang)
         self.position_units = (position_units or ase.units.Ang)
-        self.time_units = (time_units or ase.units.Ang/((1/ase.units.eV)**(1/2)))
+        self.time_units = (time_units or ase.units.fs)
 
         if seed is not None:
             torch.manual_seed(seed)

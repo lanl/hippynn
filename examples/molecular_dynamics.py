@@ -106,7 +106,10 @@ position_variable = Variable(
         "coordinates": "position",
     },
     device=device,
-    updater=VelocityVerlet(force_db_name="force"),
+    updater=VelocityVerlet(
+        force_db_name="force",
+        time_units = 1, # this will use the ASE default time unit 
+    ),
 )
 
 # Define species and cell Variables
