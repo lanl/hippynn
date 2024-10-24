@@ -14,11 +14,18 @@ class ExternalNeighbors(_PairIndexer):
     """
 
     def forward(self, coordinates, real_atoms, shifts, cell, pair_first, pair_second):
-        n_molecules, n_atoms, _ = coordinates.shape
-        atom_coordinates = coordinates.reshape(n_molecules * n_atoms, 3)[real_atoms]
+        if (coordinates.ndim > 3) or (coordinates.ndim == 3 and coordinates.shape[0] != 1):
+            raise ValueError(f"coordinates must have (n,3) or (1,n,3) but has shape {coordinates.shape}")
+        if coordinates.ndim == 3:
+            coordinates = coordinates.squeeze(0)
+        if (cell.ndim > 3) or (cell.ndim == 3 and cell.shape[0] != 1):
+            raise ValueError(f"cell must have (3,3) or (1,3,3) but has shape {cell.shape}")
+        if cell.ndim == 3:
+            cell = cell.squeeze(0)
+            
+        atom_coordinates = coordinates[real_atoms]
         paircoord = atom_coordinates[pair_second] - atom_coordinates[pair_first] + shifts.to(cell.dtype) @ cell
         distflat = paircoord.norm(dim=1)
-
         # We filter the lists to only send forward relevant pairs (those with distance under cutoff), improving performance.   
         return filter_pairs(self.hard_dist_cutoff, distflat, pair_first, pair_second, paircoord)
 

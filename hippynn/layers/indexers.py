@@ -172,10 +172,9 @@ class CellScaleInducer(torch.nn.Module):
     def forward(self, coordinates, cell):
         strain = torch.eye(
             coordinates.shape[2], dtype=coordinates.dtype, device=coordinates.device, requires_grad=True
-        ).unsqueeze(0)
+        ).tile(coordinates.shape[0],1,1)
         strained_coordinates = torch.bmm(coordinates, strain)
-        if cell.dim() == 2:
-            strained_cell = torch.mm(cell, strain.squeeze(0))
+        strained_cell = torch.bmm(cell, strain)
         return strained_coordinates, strained_cell, strain
 
 
