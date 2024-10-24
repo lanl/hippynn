@@ -170,7 +170,6 @@ class CellScaleInducer(torch.nn.Module):
         self.pbc = False
 
     def forward(self, coordinates, cell):
-        print("coordinates", coordinates.shape, "cell", cell.shape)
         strain = torch.eye(
             coordinates.shape[2], dtype=coordinates.dtype, device=coordinates.device, requires_grad=True
         ).tile(coordinates.shape[0],1,1)
