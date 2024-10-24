@@ -145,6 +145,9 @@ def wrap_systems_torch(coords, cell, cutoff: float):
     return inv_cell, wrapped_coords, wrapped_offset.to(torch.int64), n_bounds
 
 def filter_pairs(cutoff, distflat, *addn_features):
+    print(distflat.shape)
+    for feat in addn_features:
+        print(feat.shape)
     filter = distflat < cutoff
     return tuple((array[filter] for array in [distflat, *addn_features]))
 
