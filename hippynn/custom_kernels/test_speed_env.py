@@ -92,10 +92,14 @@ def main(args=None):
                 out0, out1 = tester.check_speed(
                 n_repetitions=count, device=torch.device(args.accelerator), data_size=TEST_PARAMS[k], compare_against=impl)
                 impl_results[k] = dict(tested=out0, comparison=out1)
-            except (torch.OutOfMemoryError, RuntimeError) as toom:
+            except (torch.cuda.OutOfMemoryError, RuntimeError) as toom:
                 print(toom)
-                print("Got out of memory for this test! Attempting to continue.")
+                print("Likely got out of memory for this test! Attempting to continue.")
                 impl_results[k] = "OUT OF MEMORY"
+            except Exception as ee:
+                print(ee)
+                print("Unknown error, but attempting to continue")
+                impl_results[k] = "Unknown Error"
 
     with open(path, "wt") as f:
         json.dump(results, f)
