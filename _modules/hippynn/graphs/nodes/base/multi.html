@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.graphs.nodes.base.multi &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/custom.css?v=e3456cac" />
 
@@ -109,18 +109,18 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">A base node that provides several output tensors.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">....layers.algebra</span> <span class="kn">import</span> <span class="n">Idx</span>
-<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">Node</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">_debprint</span>
-<span class="kn">from</span> <span class="nn">...indextypes</span> <span class="kn">import</span> <span class="n">IdxType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">....layers.algebra</span><span class="w"> </span><span class="kn">import</span> <span class="n">Idx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">Node</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_debprint</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdxType</span>
 
 
 <div class="viewcode-block" id="IndexNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.multi.html#hippynn.graphs.nodes.base.multi.IndexNode">[docs]</a>
-<span class="k">class</span> <span class="nc">IndexNode</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IndexNode</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">):</span>
     <span class="n">_input_names</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;parent&quot;</span><span class="p">,)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">index_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">index_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Index node takes exactly one parent.&quot;</span><span class="p">)</span>
         <span class="n">par</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -135,12 +135,12 @@
 
 <div class="viewcode-block" id="MultiNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.multi.html#hippynn.graphs.nodes.base.multi.MultiNode">[docs]</a>
-<span class="k">class</span> <span class="nc">MultiNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>  <span class="c1"># Multinode</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MultiNode</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>  <span class="c1"># Multinode</span>
     <span class="n">_output_names</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
     <span class="n">_output_index_states</span> <span class="o">=</span> <span class="bp">NotImplemented</span>  <span class="c1"># optional?</span>
     <span class="n">_main_output</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -152,11 +152,11 @@
 
 <div class="viewcode-block" id="MultiNode.set_dbname">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.multi.html#hippynn.graphs.nodes.base.multi.MultiNode.set_dbname">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_dbname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_dbname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">main_output</span><span class="o">.</span><span class="n">set_dbname</span><span class="p">(</span><span class="n">db_name</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="c1"># Enforce _child_index_states has same length as _output_names</span>
         <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_output_index_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">NotImplemented</span><span class="p">:</span>
@@ -176,15 +176,15 @@
                     <span class="s2">&quot;Multi-node output names </span><span class="si">{}</span><span class="s2"> conflict with input names </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                         <span class="bp">cls</span><span class="o">.</span><span class="n">_output_names</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_input_names</span>
                     <span class="p">)</span>
-                <span class="p">)</span> <span class="kn">from</span> <span class="nn">ae</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ae</span>
 
-    <span class="k">def</span> <span class="fm">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">dir_</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__dir__</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">NotImplemented</span><span class="p">:</span>
             <span class="n">dir_</span> <span class="o">=</span> <span class="n">dir_</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_names</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dir_</span>
 
-    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;children&quot;</span><span class="p">,</span> <span class="s2">&quot;_output_names&quot;</span><span class="p">):</span>  <span class="c1"># Guard against recursion</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Attribute </span><span class="si">{}</span><span class="s2"> not yet present.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
         <span class="k">try</span><span class="p">:</span>
@@ -197,7 +197,7 @@
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> object has no attribute &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">item</span><span class="p">))</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">main_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">main_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main_output</span> <span class="ow">is</span> <span class="bp">NotImplemented</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">main_output</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main_output</span><span class="p">)</span></div>

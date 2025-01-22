@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.databases.restarter &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
 
@@ -125,10 +125,10 @@
 
 <div class="viewcode-block" id="Restarter">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.Restarter">[docs]</a>
-<span class="k">class</span> <span class="nc">Restarter</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Restarter</span><span class="p">:</span>
 <div class="viewcode-block" id="Restarter.attempt_restart">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.Restarter.attempt_restart">[docs]</a>
-    <span class="k">def</span> <span class="nf">attempt_restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">attempt_restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">NotImplemented</span></div>
 </div>
 
@@ -136,10 +136,10 @@
 
 <div class="viewcode-block" id="NoRestart">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.NoRestart">[docs]</a>
-<span class="k">class</span> <span class="nc">NoRestart</span><span class="p">(</span><span class="n">Restarter</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NoRestart</span><span class="p">(</span><span class="n">Restarter</span><span class="p">):</span>
 <div class="viewcode-block" id="NoRestart.attempt_restart">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.NoRestart.attempt_restart">[docs]</a>
-    <span class="k">def</span> <span class="nf">attempt_restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">attempt_restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Couldn&#39;t reload database. It might have been generated in-memory.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 </div>
@@ -148,24 +148,24 @@
 
 <div class="viewcode-block" id="RestartDB">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.RestartDB">[docs]</a>
-<span class="k">class</span> <span class="nc">RestartDB</span><span class="p">(</span><span class="n">Restarter</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RestartDB</span><span class="p">(</span><span class="n">Restarter</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cls</span> <span class="o">=</span> <span class="bp">cls</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
-    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">cls_spec</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="o">.</span><span class="vm">__qualname__</span><span class="p">)</span>
         <span class="n">state</span><span class="p">[</span><span class="s2">&quot;cls&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cls_spec</span>
         <span class="k">return</span> <span class="n">state</span>
 
-    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="n">cls_state</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;cls&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cls_state</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
             <span class="n">cls_module</span><span class="p">,</span> <span class="n">cls_name</span> <span class="o">=</span> <span class="n">cls_state</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="kn">import</span> <span class="nn">importlib</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
 
                 <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">cls_module</span><span class="p">)</span>
                 <span class="n">state</span><span class="p">[</span><span class="s2">&quot;cls&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">cls_name</span><span class="p">)</span>
@@ -178,14 +178,14 @@
 
 <div class="viewcode-block" id="RestartDB.attempt_restart">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.RestartDB.attempt_restart">[docs]</a>
-    <span class="k">def</span> <span class="nf">attempt_restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">attempt_restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;restarting&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not restartable due to class error: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">eee</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Exception while attempting to reload the database.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">eee</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Exception while attempting to reload the database.&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">eee</span>
         <span class="k">return</span> <span class="n">db</span></div>
 </div>
 
@@ -193,11 +193,11 @@
 
 <div class="viewcode-block" id="Restartable">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.Restartable">[docs]</a>
-<span class="k">class</span> <span class="nc">Restartable</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Restartable</span><span class="p">:</span>
 <div class="viewcode-block" id="Restartable.make_restarter">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.Restartable.make_restarter">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">make_restarter</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_restarter</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">RestartDB</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 </div>
 

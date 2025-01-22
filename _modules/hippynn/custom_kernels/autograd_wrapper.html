@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.custom_kernels.autograd_wrapper &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
 
@@ -110,17 +110,17 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Wraps non-pytorch implementations for use with pytorch autograd.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">torch.autograd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.autograd</span>
 
-<span class="kn">import</span> <span class="nn">threading</span>
-<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span>
 
 <span class="n">_DEVICE_CONTEXT_LOCK</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
 <span class="n">_DEVICE_TIMEOUT</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># if custom kernels have locked for 10s, throw an error</span>
 
 
 <span class="nd">@contextmanager</span>
-<span class="k">def</span> <span class="nf">_lock_device</span><span class="p">(</span><span class="n">tensor</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_lock_device</span><span class="p">(</span><span class="n">tensor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function locks the torch.cuda.device, which affects how</span>
 <span class="sd">    triton and cupy try to launch their kernels.</span>
@@ -142,7 +142,7 @@
 
 <div class="viewcode-block" id="wrap_envops">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.autograd_wrapper.html#hippynn.custom_kernels.autograd_wrapper.wrap_envops">[docs]</a>
-<span class="k">def</span> <span class="nf">wrap_envops</span><span class="p">(</span><span class="n">envsum_impl</span><span class="p">,</span> <span class="n">sensesum_impl</span><span class="p">,</span> <span class="n">featsum_impl</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">wrap_envops</span><span class="p">(</span><span class="n">envsum_impl</span><span class="p">,</span> <span class="n">sensesum_impl</span><span class="p">,</span> <span class="n">featsum_impl</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param envsum_impl:  non-autograd implementation of envsum</span>
 <span class="sd">    :param sensesum_impl:  non-autograd implementation of sensesum</span>
@@ -150,9 +150,9 @@
 <span class="sd">    :return:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">class</span> <span class="nc">AGEnvsum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">AGEnvsum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
         <span class="nd">@staticmethod</span>
-        <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">):</span>
             <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">pfirst</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">n_pair</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sense</span><span class="o">.</span><span class="n">shape</span>
@@ -165,7 +165,7 @@
             <span class="k">return</span> <span class="n">env</span>
 
         <span class="nd">@staticmethod</span>
-        <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
             <span class="p">(</span>
                 <span class="n">sense</span><span class="p">,</span>
                 <span class="n">feat</span><span class="p">,</span>
@@ -181,9 +181,9 @@
 
             <span class="k">return</span> <span class="n">grad_sense</span><span class="p">,</span> <span class="n">grad_feat</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
-    <span class="k">class</span> <span class="nc">AGSensesum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">AGSensesum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
         <span class="nd">@staticmethod</span>
-        <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">):</span>
             <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">pfirst</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">n_atom0</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat0</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">shape</span>
@@ -196,7 +196,7 @@
             <span class="k">return</span> <span class="n">sense</span>
 
         <span class="nd">@staticmethod</span>
-        <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
             <span class="n">env</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
             <span class="n">needs_gradenv</span><span class="p">,</span> <span class="n">needs_gradfeat</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">needs_input_grad</span>
             <span class="n">needs_gradenv</span> <span class="o">=</span> <span class="n">needs_gradenv</span> <span class="ow">or</span> <span class="kc">None</span>
@@ -205,9 +205,9 @@
             <span class="n">gradfeat</span> <span class="o">=</span> <span class="n">needs_gradfeat</span> <span class="ow">and</span> <span class="n">featsum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">gradenv</span><span class="p">,</span> <span class="n">gradfeat</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
 
-    <span class="k">class</span> <span class="nc">AGFeatsum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">AGFeatsum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
         <span class="nd">@staticmethod</span>
-        <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">):</span>
             <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">pfirst</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_nu0</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">shape</span>
@@ -220,7 +220,7 @@
             <span class="k">return</span> <span class="n">feat</span>
 
         <span class="nd">@staticmethod</span>
-        <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
             <span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pfirst</span><span class="p">,</span> <span class="n">psecond</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
             <span class="n">needs_gradenv</span><span class="p">,</span> <span class="n">needs_gradsense</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">needs_input_grad</span>
             <span class="n">needs_gradenv</span> <span class="o">=</span> <span class="n">needs_gradenv</span> <span class="ow">or</span> <span class="kc">None</span>

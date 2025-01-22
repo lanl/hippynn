@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.optimizer.batch_optimizer &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
 
@@ -106,23 +106,23 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.optimizer.batch_optimizer</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">Atoms</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase</span><span class="w"> </span><span class="kn">import</span> <span class="n">Atoms</span>
 
-<span class="kn">from</span> <span class="nn">..graphs</span> <span class="kn">import</span> <span class="n">Predictor</span>
-<span class="kn">from</span> <span class="nn">.algorithms</span> <span class="kn">import</span> <span class="n">BFGSv3</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">debatch</span><span class="p">,</span> <span class="n">debatch_coords</span>
-<span class="kn">from</span> <span class="nn">..graphs.nodes.physics</span> <span class="kn">import</span> <span class="n">GradientNode</span>
-<span class="kn">from</span> <span class="nn">..graphs</span> <span class="kn">import</span> <span class="n">find_unique_relative</span>
-<span class="kn">from</span> <span class="nn">..graphs.nodes.base.node_functions</span> <span class="kn">import</span> <span class="n">NodeNotFound</span>
-<span class="kn">from</span> <span class="nn">..tools</span> <span class="kn">import</span> <span class="n">device_fallback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..graphs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Predictor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.algorithms</span><span class="w"> </span><span class="kn">import</span> <span class="n">BFGSv3</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">debatch</span><span class="p">,</span> <span class="n">debatch_coords</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..graphs.nodes.physics</span><span class="w"> </span><span class="kn">import</span> <span class="n">GradientNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..graphs</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_unique_relative</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..graphs.nodes.base.node_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NodeNotFound</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">device_fallback</span>
 
 
 <div class="viewcode-block" id="Optimizer">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.batch_optimizer.html#hippynn.optimizer.batch_optimizer.Optimizer">[docs]</a>
-<span class="k">class</span> <span class="nc">Optimizer</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Optimizer</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">model</span><span class="p">,</span>
             <span class="n">algorithm</span><span class="o">=</span><span class="n">BFGSv3</span><span class="p">,</span>
@@ -159,7 +159,7 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">force_node</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="s1">&#39;force&#39;</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,)</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No automatic force node could be found for optimizer.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ee</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No automatic force node could be found for optimizer.&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ee</span>
                 <span class="c1"># TODO even find an energy node if we can and add forces to it?</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">force_node</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">db_name</span> <span class="o">==</span> <span class="n">force_key</span><span class="p">)</span>
@@ -195,7 +195,7 @@
 <span class="s2">                  and moving tensors to cpu, which is slow!&quot;</span>
             <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">padding_number</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">prefix_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">padding_number</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">prefix_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">masks</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -221,7 +221,7 @@
 
 <div class="viewcode-block" id="Optimizer.dump_a_step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.batch_optimizer.html#hippynn.optimizer.batch_optimizer.Optimizer.dump_a_step">[docs]</a>
-    <span class="k">def</span> <span class="nf">dump_a_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numbers</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">padding_number</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">prefix_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dump_a_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numbers</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">padding_number</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">prefix_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">N</span> <span class="o">=</span> <span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">masks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">debatched_numbers</span><span class="p">,</span> <span class="n">debatched_coords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">masks</span> <span class="o">=</span> <span class="n">debatch</span><span class="p">(</span><span class="n">numbers</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">padding_number</span><span class="p">,</span> <span class="n">return_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

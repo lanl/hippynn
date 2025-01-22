@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.pretraining &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=e3456cac" />
 
@@ -110,23 +110,23 @@
 <span class="sd">Things to do before training, i.e. initialization of network and diagnostics.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="kn">from</span> <span class="nn">.graphs</span> <span class="kn">import</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">Predictor</span>
-<span class="kn">from</span> <span class="nn">.graphs.nodes.base</span> <span class="kn">import</span> <span class="n">_BaseNode</span>
-<span class="kn">from</span> <span class="nn">.graphs.nodes.tags</span> <span class="kn">import</span> <span class="n">Encoder</span>
-<span class="kn">from</span> <span class="nn">.graphs.nodes.inputs</span> <span class="kn">import</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">CellNode</span><span class="p">,</span> <span class="n">ForceNode</span>
-<span class="kn">from</span> <span class="nn">.graphs.nodes.pairs</span> <span class="kn">import</span> <span class="n">OpenPairIndexer</span><span class="p">,</span> <span class="n">DynamicPeriodicPairs</span><span class="p">,</span> <span class="n">MinDistNode</span>
-<span class="kn">from</span> <span class="nn">.graphs.nodes.indexers</span> <span class="kn">import</span> <span class="n">acquire_encoding_padding</span><span class="p">,</span> <span class="n">SysMaxOfAtomsNode</span>
-<span class="kn">from</span> <span class="nn">.graphs.nodes.physics</span> <span class="kn">import</span> <span class="n">VecMag</span>
-<span class="kn">from</span> <span class="nn">.networks.hipnn</span> <span class="kn">import</span> <span class="n">compute_hipnn_e0</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.graphs</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">Predictor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.graphs.nodes.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">_BaseNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.graphs.nodes.tags</span><span class="w"> </span><span class="kn">import</span> <span class="n">Encoder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.graphs.nodes.inputs</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">CellNode</span><span class="p">,</span> <span class="n">ForceNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.graphs.nodes.pairs</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenPairIndexer</span><span class="p">,</span> <span class="n">DynamicPeriodicPairs</span><span class="p">,</span> <span class="n">MinDistNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.graphs.nodes.indexers</span><span class="w"> </span><span class="kn">import</span> <span class="n">acquire_encoding_padding</span><span class="p">,</span> <span class="n">SysMaxOfAtomsNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.graphs.nodes.physics</span><span class="w"> </span><span class="kn">import</span> <span class="n">VecMag</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.networks.hipnn</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_hipnn_e0</span>
 
 
 <div class="viewcode-block" id="hierarchical_energy_initialization">
 <a class="viewcode-back" href="../../api_documentation/hippynn.pretraining.html#hippynn.hierarchical_energy_initialization">[docs]</a>
-<span class="k">def</span> <span class="nf">hierarchical_energy_initialization</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">hierarchical_energy_initialization</span><span class="p">(</span>
     <span class="n">energy_module</span><span class="p">,</span>
     <span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">trainable_after</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -188,18 +188,19 @@
     <span class="c1"># Decay layers E1, E2, etc... according to decay_factor</span>
     <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">energy_module</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
         <span class="n">layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span> <span class="o">*=</span> <span class="n">decay_factor</span>
-        <span class="n">layer</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">data</span> <span class="o">*=</span> <span class="n">decay_factor</span>
+        <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">bias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">layer</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">data</span> <span class="o">*=</span> <span class="n">decay_factor</span>
         <span class="n">decay_factor</span> <span class="o">*=</span> <span class="n">decay_factor</span></div>
 
 
 <div class="viewcode-block" id="set_e0_values">
 <a class="viewcode-back" href="../../api_documentation/hippynn.pretraining.html#hippynn.set_e0_values">[docs]</a>
-<span class="k">def</span> <span class="nf">set_e0_values</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_e0_values</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The function set_e0_values is depreciated. Please use the hierarchical_energy_initialization function instead.&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">hierarchical_energy_initialization</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_setup_min_dist_graph</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_setup_min_dist_graph</span><span class="p">(</span>
     <span class="n">species_name</span><span class="p">,</span>
     <span class="n">positions_name</span><span class="p">,</span>
     <span class="n">dist_hard_max</span><span class="p">,</span>
@@ -237,7 +238,7 @@
 
 <div class="viewcode-block" id="calculate_min_dists">
 <a class="viewcode-back" href="../../api_documentation/hippynn.pretraining.html#hippynn.calculate_min_dists">[docs]</a>
-<span class="k">def</span> <span class="nf">calculate_min_dists</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_min_dists</span><span class="p">(</span>
     <span class="n">array_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="n">species_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">positions_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -326,7 +327,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">_setup_max_force_graph</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_setup_max_force_graph</span><span class="p">(</span>
     <span class="n">species_name</span><span class="p">,</span>
     <span class="n">force_name</span><span class="p">,</span>
     <span class="n">species_set</span><span class="p">,</span>
@@ -346,7 +347,7 @@
 
 <div class="viewcode-block" id="calculate_max_system_force">
 <a class="viewcode-back" href="../../api_documentation/hippynn.pretraining.html#hippynn.calculate_max_system_force">[docs]</a>
-<span class="k">def</span> <span class="nf">calculate_max_system_force</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_max_system_force</span><span class="p">(</span>
     <span class="n">array_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="n">species_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">force_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.custom_kernels &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=e3456cac" />
 
@@ -150,25 +150,25 @@
 <span class="c1"># If your custom kernel has constraints on what devices or hardware configurations are possible,</span>
 <span class="c1"># the have your module raise an ImportError. You may also want to use</span>
 <span class="c1"># warnings.warn to warn the user of why the implementation is not available.</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">settings</span>
-<span class="kn">from</span> <span class="nn">.registry</span> <span class="kn">import</span> <span class="n">MessagePassingKernels</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_pytorch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">MessagePassingKernels</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">env_pytorch</span>
 
 
 
 <div class="viewcode-block" id="CustomKernelError">
 <a class="viewcode-back" href="../../api_documentation/hippynn.custom_kernels.html#hippynn.CustomKernelError">[docs]</a>
-<span class="k">class</span> <span class="nc">CustomKernelError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomKernelError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
 
 <div class="viewcode-block" id="populate_custom_kernel_availability">
 <a class="viewcode-back" href="../../api_documentation/hippynn.custom_kernels.html#hippynn.populate_custom_kernel_availability">[docs]</a>
-<span class="k">def</span> <span class="nf">populate_custom_kernel_availability</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">populate_custom_kernel_availability</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check available imports and populate the list of available custom kernels.</span>
 
@@ -182,29 +182,29 @@
 
     <span class="c1"># Look for CPU-capable kernels.</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">import</span> <span class="nn">numba</span>
-        <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_numba</span>
-        <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_atomic</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">numba</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">env_numba</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">env_atomic</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
         <span class="k">pass</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_sparse</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">env_sparse</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
         <span class="k">pass</span>
 
     <span class="c1"># these kernels only work if torch can get to the GPU.</span>
     <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">cupy</span>
-            <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_cupy</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">cupy</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">env_cupy</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="k">pass</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">triton</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">triton</span>
             <span class="c1"># Note: Device capability check is located in env_triton now.</span>
-            <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">env_triton</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">env_triton</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="k">pass</span>
 
@@ -215,7 +215,7 @@
 
 <div class="viewcode-block" id="set_custom_kernels">
 <a class="viewcode-back" href="../../api_documentation/hippynn.custom_kernels.html#hippynn.set_custom_kernels">[docs]</a>
-<span class="k">def</span> <span class="nf">set_custom_kernels</span><span class="p">(</span><span class="n">active</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_custom_kernels</span><span class="p">(</span><span class="n">active</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Activate or deactivate custom kernels for interaction.</span>
 
@@ -243,7 +243,7 @@
         <span class="n">active</span> <span class="o">=</span> <span class="n">active</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">active</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_POSSIBLE_CUSTOM_KERNELS</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using non-standard custom kernel implementation: </span><span class="si">{</span><span class="n">active</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using non-standard custom kernel implementation: </span><span class="si">{</span><span class="n">active</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># Our goal is that this if-block is to handle the cases for values in the range of</span>
     <span class="c1"># [True, &quot;auto&quot;] and turn them into the suitable actual implementation.</span>

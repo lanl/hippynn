@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.interfaces.schnetpack_interface &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
 
@@ -113,23 +113,23 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">schnetpack</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">schnetpack</span>
 <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">ie</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Schnetpack installation is required to use the schnetpack interface.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ie</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Schnetpack installation is required to use the schnetpack interface.&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ie</span>
 
 <span class="kn">import</span> <span class="n">torch</span>
 
-<span class="kn">from</span> <span class="nn">schnetpack</span> <span class="kn">import</span> <span class="n">Properties</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">schnetpack</span><span class="w"> </span><span class="kn">import</span> <span class="n">Properties</span>
 
-<span class="kn">from</span> <span class="nn">...graphs.nodes.base</span> <span class="kn">import</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">AutoKw</span>
-<span class="kn">from</span> <span class="nn">...graphs.nodes.networks</span> <span class="kn">import</span> <span class="n">Network</span>
-<span class="kn">from</span> <span class="nn">...graphs.indextypes</span> <span class="kn">import</span> <span class="n">IdxType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...graphs.nodes.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">AutoKw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...graphs.nodes.networks</span><span class="w"> </span><span class="kn">import</span> <span class="n">Network</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...graphs.indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdxType</span>
 
 
 <div class="viewcode-block" id="SchNetWrapper">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.interfaces.schnetpack_interface.html#hippynn.interfaces.schnetpack_interface.SchNetWrapper">[docs]</a>
-<span class="k">class</span> <span class="nc">SchNetWrapper</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schnet</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SchNetWrapper</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schnet</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">schnet</span> <span class="o">=</span> <span class="n">schnet</span>
         <span class="n">feature_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">dense</span><span class="o">.</span><span class="n">out_features</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">schnet</span><span class="o">.</span><span class="n">interactions</span><span class="p">]</span>
@@ -139,7 +139,7 @@
 
 <div class="viewcode-block" id="SchNetWrapper.forward">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.interfaces.schnetpack_interface.html#hippynn.interfaces.schnetpack_interface.SchNetWrapper.forward">[docs]</a>
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z_arr</span><span class="p">,</span> <span class="n">r_arr</span><span class="p">,</span> <span class="n">nonblank</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z_arr</span><span class="p">,</span> <span class="n">r_arr</span><span class="p">,</span> <span class="n">nonblank</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Wrap a call into the underlying schnet, which uses</span>
 <span class="sd">        dictionaries.</span>
@@ -162,12 +162,12 @@
 
 <div class="viewcode-block" id="SchNetNode">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.interfaces.schnetpack_interface.html#hippynn.interfaces.schnetpack_interface.SchNetNode">[docs]</a>
-<span class="k">class</span> <span class="nc">SchNetNode</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">Network</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SchNetNode</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">Network</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
     <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;positions&quot;</span><span class="p">,</span> <span class="s2">&quot;nonblank&quot;</span>
     <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
     <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">SchNetWrapper</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="n">module_kwargs</span>
             <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_module</span><span class="p">()</span>
@@ -177,7 +177,7 @@
 
 <div class="viewcode-block" id="create_schnetpack_inputs">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.interfaces.schnetpack_interface.html#hippynn.interfaces.schnetpack_interface.create_schnetpack_inputs">[docs]</a>
-<span class="k">def</span> <span class="nf">create_schnetpack_inputs</span><span class="p">(</span><span class="n">z_arr</span><span class="p">,</span> <span class="n">r_arr</span><span class="p">,</span> <span class="n">nonblank</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_schnetpack_inputs</span><span class="p">(</span><span class="n">z_arr</span><span class="p">,</span> <span class="n">r_arr</span><span class="p">,</span> <span class="n">nonblank</span><span class="p">):</span>
 
     <span class="n">dtype</span> <span class="o">=</span> <span class="n">r_arr</span><span class="o">.</span><span class="n">dtype</span>
     <span class="n">device</span> <span class="o">=</span> <span class="n">r_arr</span><span class="o">.</span><span class="n">device</span>

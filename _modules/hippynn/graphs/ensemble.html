@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.graphs.ensemble &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
 
@@ -106,27 +106,27 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.graphs.ensemble</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">collections</span>
-<span class="kn">import</span> <span class="nn">glob</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
 
-<span class="kn">from</span> <span class="nn">..tools</span> <span class="kn">import</span> <span class="n">device_fallback</span><span class="p">,</span> <span class="n">active_directory</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">GraphModule</span><span class="p">,</span> <span class="n">replace_node</span><span class="p">,</span> <span class="n">get_subgraph</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">device_fallback</span><span class="p">,</span> <span class="n">active_directory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphModule</span><span class="p">,</span> <span class="n">replace_node</span><span class="p">,</span> <span class="n">get_subgraph</span>
 
-<span class="kn">from</span> <span class="nn">.indextypes</span> <span class="kn">import</span> <span class="n">get_reduced_index_state</span><span class="p">,</span> <span class="n">index_type_coercion</span>
-<span class="kn">from</span> <span class="nn">.indextypes.reduce_funcs</span> <span class="kn">import</span> <span class="n">db_state_of</span>
-<span class="kn">from</span> <span class="nn">.indextypes.registry</span> <span class="kn">import</span> <span class="n">assign_index_aliases</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_reduced_index_state</span><span class="p">,</span> <span class="n">index_type_coercion</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.indextypes.reduce_funcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">db_state_of</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.indextypes.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">assign_index_aliases</span>
 
-<span class="kn">from</span> <span class="nn">.nodes.base</span> <span class="kn">import</span> <span class="n">_BaseNode</span><span class="p">,</span> <span class="n">InputNode</span>
-<span class="kn">from</span> <span class="nn">.nodes.misc</span> <span class="kn">import</span> <span class="n">EnsembleTarget</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.nodes.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">_BaseNode</span><span class="p">,</span> <span class="n">InputNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.nodes.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnsembleTarget</span>
 
-<span class="kn">from</span> <span class="nn">.gops</span> <span class="kn">import</span> <span class="n">merge_children_recursive</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.gops</span><span class="w"> </span><span class="kn">import</span> <span class="n">merge_children_recursive</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
 
 
 <div class="viewcode-block" id="make_ensemble">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.graphs.make_ensemble">[docs]</a>
-<span class="k">def</span> <span class="nf">make_ensemble</span><span class="p">(</span>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.make_ensemble">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_ensemble</span><span class="p">(</span>
     <span class="n">models</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">targets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
@@ -208,8 +208,8 @@
 <span class="c1"># TODO: Potentially move this function, or part of it, into experiment.serialization?</span>
 <span class="c1"># TODO ; It seems possible that someone might want to load several models without ensembling them.</span>
 <div class="viewcode-block" id="get_graphs">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.graphs.get_graphs">[docs]</a>
-<span class="k">def</span> <span class="nf">get_graphs</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">GraphModule</span><span class="p">,</span> <span class="n">_BaseNode</span><span class="p">]],</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">GraphModule</span><span class="p">]:</span>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.get_graphs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_graphs</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">GraphModule</span><span class="p">,</span> <span class="n">_BaseNode</span><span class="p">]],</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">GraphModule</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Take a simple spec for modeled variables (glob for model directories, list of graphs, list of output nodes)</span>
 <span class="sd">    and convert this into a list of graph modules.</span>
@@ -234,7 +234,7 @@
     <span class="n">device</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="kn">from</span> <span class="nn">..experiment.serialization</span> <span class="kn">import</span> <span class="n">load_model_from_cwd</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">..experiment.serialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_model_from_cwd</span>
 
             <span class="c1"># Get graph from disk</span>
             <span class="k">if</span> <span class="n">device</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -243,7 +243,7 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">model</span> <span class="o">=</span> <span class="n">load_model_from_cwd</span><span class="p">(</span><span class="n">map_location</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-                    <span class="kn">import</span> <span class="nn">warnings</span>
+                    <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
                     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model not found in directory: </span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -263,8 +263,8 @@
 
 
 <div class="viewcode-block" id="identify_targets">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.graphs.identify_targets">[docs]</a>
-<span class="k">def</span> <span class="nf">identify_targets</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">GraphModule</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.identify_targets">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">identify_targets</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">GraphModule</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Internal function for ensembling.</span>
 
@@ -286,8 +286,8 @@
 
 
 <div class="viewcode-block" id="identify_inputs">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.graphs.identify_inputs">[docs]</a>
-<span class="k">def</span> <span class="nf">identify_inputs</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">GraphModule</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.identify_inputs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">identify_inputs</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">GraphModule</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Internal function for ensembling.</span>
 
@@ -308,8 +308,8 @@
 
 
 <div class="viewcode-block" id="collate_inputs">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.graphs.collate_inputs">[docs]</a>
-<span class="k">def</span> <span class="nf">collate_inputs</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">GraphModule</span><span class="p">],</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">_BaseNode</span><span class="p">]]:</span>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.collate_inputs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">collate_inputs</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">GraphModule</span><span class="p">],</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">_BaseNode</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Internal function for ensembling.</span>
 
@@ -333,8 +333,8 @@
 
 
 <div class="viewcode-block" id="collate_targets">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.graphs.collate_targets">[docs]</a>
-<span class="k">def</span> <span class="nf">collate_targets</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">GraphModule</span><span class="p">],</span> <span class="n">targets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">_BaseNode</span><span class="p">]]:</span>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.collate_targets">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">collate_targets</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">GraphModule</span><span class="p">],</span> <span class="n">targets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">_BaseNode</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Internal function for ensembling.</span>
 
@@ -362,8 +362,8 @@
 
 
 <div class="viewcode-block" id="make_ensemble_info">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.graphs.make_ensemble_info">[docs]</a>
-<span class="k">def</span> <span class="nf">make_ensemble_info</span><span class="p">(</span><span class="n">input_classes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">_BaseNode</span><span class="p">]],</span> <span class="n">output_classes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">_BaseNode</span><span class="p">]],</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.make_ensemble_info">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_ensemble_info</span><span class="p">(</span><span class="n">input_classes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">_BaseNode</span><span class="p">]],</span> <span class="n">output_classes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">_BaseNode</span><span class="p">]],</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Internal function for ensembling.</span>
 
@@ -393,8 +393,8 @@
 
 
 <div class="viewcode-block" id="construct_outputs">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.graphs.construct_outputs">[docs]</a>
-<span class="k">def</span> <span class="nf">construct_outputs</span><span class="p">(</span><span class="n">output_classes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">_BaseNode</span><span class="p">]],</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EnsembleTarget</span><span class="p">]:</span>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.construct_outputs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">construct_outputs</span><span class="p">(</span><span class="n">output_classes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">_BaseNode</span><span class="p">]],</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EnsembleTarget</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Internal function for ensembling.</span>
 
@@ -453,8 +453,8 @@
 
 
 <div class="viewcode-block" id="replace_inputs">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.graphs.replace_inputs">[docs]</a>
-<span class="k">def</span> <span class="nf">replace_inputs</span><span class="p">(</span><span class="n">input_classes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">_BaseNode</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">InputNode</span><span class="p">]:</span>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.replace_inputs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">replace_inputs</span><span class="p">(</span><span class="n">input_classes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">_BaseNode</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">InputNode</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Internal function for ensembling.</span>
 
@@ -479,8 +479,8 @@
 
 
 <div class="viewcode-block" id="make_ensemble_graph">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.graphs.make_ensemble_graph">[docs]</a>
-<span class="k">def</span> <span class="nf">make_ensemble_graph</span><span class="p">(</span><span class="n">ensemble_inputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">InputNode</span><span class="p">],</span> <span class="n">ensemble_outputs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EnsembleTarget</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">GraphModule</span><span class="p">:</span>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.ensemble.html#hippynn.make_ensemble_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_ensemble_graph</span><span class="p">(</span><span class="n">ensemble_inputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">InputNode</span><span class="p">],</span> <span class="n">ensemble_outputs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EnsembleTarget</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">GraphModule</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Internal function for ensembling.</span>
 

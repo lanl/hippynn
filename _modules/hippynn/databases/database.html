@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.databases.database &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
 
@@ -110,28 +110,28 @@
 <span class="sd">Base database functionality from dictionary of numpy arrays</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="kn">from</span> <span class="nn">.restarter</span> <span class="kn">import</span> <span class="n">NoRestart</span>
-<span class="kn">from</span> <span class="nn">..tools</span> <span class="kn">import</span> <span class="n">arrdict_len</span><span class="p">,</span> <span class="n">device_fallback</span><span class="p">,</span> <span class="n">unsqueeze_multiple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.restarter</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoRestart</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">arrdict_len</span><span class="p">,</span> <span class="n">device_fallback</span><span class="p">,</span> <span class="n">unsqueeze_multiple</span>
 
-<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">TensorDataset</span><span class="p">,</span> <span class="n">Subset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">TensorDataset</span><span class="p">,</span> <span class="n">Subset</span>
 
 <span class="n">_AUTO_SPLIT_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;split_mask_&quot;</span>
 
 
 <div class="viewcode-block" id="Database">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database">[docs]</a>
-<span class="k">class</span> <span class="nc">Database</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Database</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for holding a pytorch dataset, splitting it, generating dataloaders, etc.&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">arr_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
         <span class="n">inputs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
@@ -245,11 +245,11 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dataloader_kwargs</span> <span class="o">=</span> <span class="n">dataloader_kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">if</span> <span class="n">dataloader_kwargs</span> <span class="k">else</span> <span class="p">{}</span>
 
-    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">arrdict_len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">var_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">var_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Database inputs not defined, set </span><span class="si">{</span><span class="n">Database</span><span class="si">}</span><span class="s2">.inputs.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -258,7 +258,7 @@
 
 <div class="viewcode-block" id="Database.send_to_device">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.send_to_device">[docs]</a>
-    <span class="k">def</span> <span class="nf">send_to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">send_to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Move the database to an accelerator device if possible.</span>
 <span class="sd">        In some circumstances this can accelerate training.</span>
@@ -293,7 +293,7 @@
 
 <div class="viewcode-block" id="Database.make_random_split">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.make_random_split">[docs]</a>
-    <span class="k">def</span> <span class="nf">make_random_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">split_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_random_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">split_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make a random split using self.random_state to select items.</span>
 
@@ -316,7 +316,7 @@
 
 <div class="viewcode-block" id="Database.make_trainvalidtest_split">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.make_trainvalidtest_split">[docs]</a>
-    <span class="k">def</span> <span class="nf">make_trainvalidtest_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">valid_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_trainvalidtest_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">valid_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make a split for train, valid, and test out of any remaining unsplit entries in the database.</span>
 <span class="sd">        The size is specified in terms of test and valid splits; the train split will be the remainder.</span>
@@ -352,7 +352,7 @@
 
 <div class="viewcode-block" id="Database.make_explicit_split">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.make_explicit_split">[docs]</a>
-    <span class="k">def</span> <span class="nf">make_explicit_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">split_indices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_explicit_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">split_indices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param split_name: name for split, typically &#39;train&#39;, &#39;valid&#39;, &#39;test&#39;</span>
@@ -396,7 +396,7 @@
 
 <div class="viewcode-block" id="Database.make_explicit_split_bool">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.make_explicit_split_bool">[docs]</a>
-    <span class="k">def</span> <span class="nf">make_explicit_split_bool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_explicit_split_bool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                                  <span class="n">split_mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
@@ -404,7 +404,7 @@
 <span class="sd">        :param split_mask: a boolean array for where to split</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">split_mask</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">split_mask</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
             <span class="n">split_mask</span> <span class="o">=</span> <span class="n">split_mask</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">split_mask</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">split_mask</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
@@ -419,7 +419,7 @@
 
 <div class="viewcode-block" id="Database.split_the_rest">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.split_the_rest">[docs]</a>
-    <span class="k">def</span> <span class="nf">split_the_rest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">split_the_rest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">make_explicit_split</span><span class="p">(</span><span class="n">split_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">splitting_completed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span></div>
@@ -427,7 +427,7 @@
 
 <div class="viewcode-block" id="Database.add_split_masks">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.add_split_masks">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_split_masks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_to_add_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">split_prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_split_masks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_to_add_to</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">split_prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add split masks to the dataset. This function is used internally before writing databases.</span>
 
@@ -474,7 +474,7 @@
 
 <div class="viewcode-block" id="Database.make_automatic_splits">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.make_automatic_splits">[docs]</a>
-    <span class="k">def</span> <span class="nf">make_automatic_splits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_automatic_splits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Split the database automatically. Since the user specifies this routine,</span>
 <span class="sd">        it fails pretty strictly.</span>
@@ -555,7 +555,7 @@
 
 <div class="viewcode-block" id="Database.make_generator">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.make_generator">[docs]</a>
-    <span class="k">def</span> <span class="nf">make_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                        <span class="n">split_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                        <span class="n">evaluation_mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                        <span class="n">batch_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -609,7 +609,7 @@
         <span class="k">return</span> <span class="n">generator</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_array_stat_helper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">species_key</span><span class="p">,</span> <span class="n">atomwise</span><span class="p">,</span> <span class="n">norm_per_atom</span><span class="p">,</span> <span class="n">norm_axis</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_array_stat_helper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">species_key</span><span class="p">,</span> <span class="n">atomwise</span><span class="p">,</span> <span class="n">norm_per_atom</span><span class="p">,</span> <span class="n">norm_axis</span><span class="p">):</span>
 
         <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
@@ -646,7 +646,7 @@
 
 <div class="viewcode-block" id="Database.remove_high_property">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.remove_high_property">[docs]</a>
-    <span class="k">def</span> <span class="nf">remove_high_property</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_high_property</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">atomwise</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
@@ -698,7 +698,7 @@
 
 <div class="viewcode-block" id="Database.write_h5">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.write_h5">[docs]</a>
-    <span class="k">def</span> <span class="nf">write_h5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_h5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">split</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">h5path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">species_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;species&quot;</span><span class="p">,</span>
@@ -717,16 +717,16 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">.h5_pyanitools</span> <span class="kn">import</span> <span class="n">write_h5</span> <span class="k">as</span> <span class="n">write_h5_function</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">.h5_pyanitools</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_h5</span> <span class="k">as</span> <span class="n">write_h5_function</span>
         <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">ie</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Writing h5 versions of databases not available.&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ie</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Writing h5 versions of databases not available.&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ie</span>
 
         <span class="k">return</span> <span class="n">write_h5_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">h5path</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="n">species_key</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Database.write_npz">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.write_npz">[docs]</a>
-    <span class="k">def</span> <span class="nf">write_npz</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_npz</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">record_split_masks</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -791,7 +791,7 @@
 
 <div class="viewcode-block" id="Database.sort_by_index">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.sort_by_index">[docs]</a>
-    <span class="k">def</span> <span class="nf">sort_by_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;indices&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sort_by_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;indices&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Sort arrays in each split of the database by an index key.</span>
@@ -811,7 +811,7 @@
 
 <div class="viewcode-block" id="Database.trim_by_species">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.trim_by_species">[docs]</a>
-    <span class="k">def</span> <span class="nf">trim_by_species</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keep_splits_same_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trim_by_species</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keep_splits_same_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove any excess padding in a database.</span>
 
@@ -877,7 +877,7 @@
 
 <div class="viewcode-block" id="Database.get_device">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.get_device">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_device</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_device</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Determine what device the database resides on. Raises ValueError if multiple devices are encountered.</span>
 
@@ -896,7 +896,7 @@
 
 <div class="viewcode-block" id="Database.make_database_cache">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.make_database_cache">[docs]</a>
-    <span class="k">def</span> <span class="nf">make_database_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./hippynn_db_cache.npz&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">override_kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Database&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_database_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./hippynn_db_cache.npz&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">override_kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Database&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Cache the database as-is, and re-open it.</span>
 
@@ -911,7 +911,7 @@
 <span class="sd">        :param override_kwargs: passed to NPZDictionary instead of the current database settings.</span>
 <span class="sd">        :return: The new database created from the cache.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">.ondisk</span> <span class="kn">import</span> <span class="n">NPZDatabase</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.ondisk</span><span class="w"> </span><span class="kn">import</span> <span class="n">NPZDatabase</span>
 
         <span class="c1"># first prepare arguments</span>
         <span class="n">arguments</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
@@ -949,7 +949,7 @@
 
 <div class="viewcode-block" id="compute_index_mask">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.compute_index_mask">[docs]</a>
-<span class="k">def</span> <span class="nf">compute_index_mask</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">index_pool</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_index_mask</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">index_pool</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    :param indices:</span>
@@ -972,7 +972,7 @@
 
 <div class="viewcode-block" id="prettyprint_arrays">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.prettyprint_arrays">[docs]</a>
-<span class="k">def</span> <span class="nf">prettyprint_arrays</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">prettyprint_arrays</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pretty-print array dictionary.</span>
 <span class="sd">    :return: None</span>
@@ -980,10 +980,10 @@
     <span class="n">column_format</span> <span class="o">=</span> <span class="s2">&quot;| </span><span class="si">{:&lt;30}</span><span class="s2"> | </span><span class="si">{:&lt;18}</span><span class="s2"> | </span><span class="si">{:&lt;28}</span><span class="s2"> |&quot;</span>
     <span class="n">ncols</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">column_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">printrow</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">printrow</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">column_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">printline</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">printline</span><span class="p">():</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="n">ncols</span><span class="p">)</span>
 
     <span class="n">printline</span><span class="p">()</span>
@@ -997,8 +997,8 @@
 
 <div class="viewcode-block" id="NamedTensorDataset">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.NamedTensorDataset">[docs]</a>
-<span class="k">class</span> <span class="nc">NamedTensorDataset</span><span class="p">(</span><span class="n">TensorDataset</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor_names</span><span class="p">,</span> <span class="o">*</span><span class="n">tensors</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NamedTensorDataset</span><span class="p">(</span><span class="n">TensorDataset</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor_names</span><span class="p">,</span> <span class="o">*</span><span class="n">tensors</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">tensors</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tensor_map</span> <span class="o">=</span> <span class="n">tensor_names</span></div>
 

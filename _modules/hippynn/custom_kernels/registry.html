@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.custom_kernels.registry &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
 
@@ -107,15 +107,15 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.custom_kernels.registry</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">hippynn.custom_kernels.autograd_wrapper</span> <span class="kn">import</span> <span class="n">wrap_envops</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.custom_kernels.autograd_wrapper</span><span class="w"> </span><span class="kn">import</span> <span class="n">wrap_envops</span>
 
 
 <div class="viewcode-block" id="MessagePassingKernels">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.registry.html#hippynn.custom_kernels.registry.MessagePassingKernels">[docs]</a>
-<span class="k">class</span> <span class="nc">MessagePassingKernels</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MessagePassingKernels</span><span class="p">:</span>
     <span class="n">_registered_implementations</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Registry for custom kernel implementations.</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">impl_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">envsum_impl</span><span class="p">,</span> <span class="n">sensesum_impl</span><span class="p">,</span> <span class="n">featsum_impl</span><span class="p">,</span> <span class="n">wrap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">impl_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">envsum_impl</span><span class="p">,</span> <span class="n">sensesum_impl</span><span class="p">,</span> <span class="n">featsum_impl</span><span class="p">,</span> <span class="n">wrap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">compiler</span><span class="o">=</span><span class="kc">None</span><span class="p">,):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param impl_name: name for implementation.</span>
@@ -151,14 +151,14 @@
 <div class="viewcode-block" id="MessagePassingKernels.get_implementation">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.registry.html#hippynn.custom_kernels.registry.MessagePassingKernels.get_implementation">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">get_implementation</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">impl_name</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_implementation</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">impl_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param impl_name:</span>
 <span class="sd">        :return:</span>
 <span class="sd">        :raises CustomKernelError if implementation is not available or known.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">CustomKernelError</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomKernelError</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">impl</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_registered_implementations</span><span class="p">[</span><span class="n">impl_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -169,7 +169,7 @@
 <div class="viewcode-block" id="MessagePassingKernels.get_available_implementations">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.registry.html#hippynn.custom_kernels.registry.MessagePassingKernels.get_available_implementations">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">get_available_implementations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hidden</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_available_implementations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hidden</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the available implementations of the custom kernels.</span>
 

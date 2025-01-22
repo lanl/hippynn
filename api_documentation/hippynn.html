@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
 
@@ -150,6 +150,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#hippynn.load_checkpoint_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hippynn.load_model_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_model_from_cwd()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hippynn.log_terminal"><code class="docutils literal notranslate"><span class="pre">log_terminal()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hippynn.make_ensemble"><code class="docutils literal notranslate"><span class="pre">make_ensemble()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hippynn.reload_settings"><code class="docutils literal notranslate"><span class="pre">reload_settings()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hippynn.set_custom_kernels"><code class="docutils literal notranslate"><span class="pre">set_custom_kernels()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hippynn.setup_and_train"><code class="docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a></li>
@@ -844,6 +845,43 @@ in addition to the usual stdout and stderr.
 The manager yields the file. Writes to the opened file object with
 “with log_terminal(…) as &lt;file&gt;” will not automatically
 be piped into the terminal.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.make_ensemble">
+<span class="sig-name descname"><span class="pre">make_ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ensemble_'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="hippynn.graphs.graph.html#hippynn.graphs.graph.GraphModule" title="hippynn.graphs.graph.GraphModule"><span class="pre">GraphModule</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hippynn/graphs/ensemble.html#make_ensemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.make_ensemble" title="Link to this definition"></a></dt>
+<dd><p>Make an ensemble out of a set of models. The ensemble graph can then be used with a predictor,
+ase graph, or etc.</p>
+<p>The selected nodes to ensemble are classed by the db_name associated with the nodes.</p>
+<p>When using “auto” mode for inputs and outputs:</p>
+<ul class="simple">
+<li><p>The input to the ensemble will be the combined inputs for all models in the ensemble.</p></li>
+<li><p>The output of the ensemble will be the combined outputs for all models.</p></li>
+</ul>
+<p>Otherwise, the set of ensemble inputs is explicitly specified, and errors
+may occur if the requested set of inputs and outputs is not available.</p>
+<p>The result ensemble graph has several outputs, each of which has .mean, .std, and .all
+attributes which reflect the statistics of the models in the ensemble.</p>
+<p>Note that it is not required that all models have the same sets of inputs and outputs.</p>
+<p>If a desired node is automatically ensembled, it probably does not have a db_name.
+A remedy for this is to load the graphs with hippynn.graphs.ensemble.get_graphs, then
+find the requested nodes in the graphs and assign them the db_name. Then pass these
+graphs to make_ensemble.</p>
+<p>For more information on the <cite>models</cite> parameter, see the <a class="reference internal" href="hippynn.graphs.ensemble.html#hippynn.graphs.ensemble.get_graphs" title="hippynn.graphs.ensemble.get_graphs"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_graphs()</span></code></a> function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>models</strong> – list containing str, node, or graphmodule, or str to glob for model directories.</p></li>
+<li><p><strong>targets</strong> – list of db_name strings or the string ‘auto’, which will attempt to infer.</p></li>
+<li><p><strong>inputs</strong> – list of db_name strings of the string ‘auto’, which will attempt to infer.</p></li>
+<li><p><strong>prefix</strong> – specifies the prefix for the db_name of created ensemble nodes.</p></li>
+<li><p><strong>quiet</strong> – whether to print information about the constructed ensemble.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>ensemble GraphModule, (intput_info, output_info)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">

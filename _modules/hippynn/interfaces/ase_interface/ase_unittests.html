@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.interfaces.ase_interface.ase_unittests &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
 
@@ -112,7 +112,7 @@
 
 <div class="viewcode-block" id="ASE_FilterPair_Coulomb_Construct">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.ase_unittests.html#hippynn.interfaces.ase_interface.ase_unittests.ASE_FilterPair_Coulomb_Construct">[docs]</a>
-<span class="k">def</span> <span class="nf">ASE_FilterPair_Coulomb_Construct</span><span class="p">():</span>    
+<span class="k">def</span><span class="w"> </span><span class="nf">ASE_FilterPair_Coulomb_Construct</span><span class="p">():</span>    
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Construct ASE Calculator from a  HIPNN model with multiple PairIndexers and Coulomb Energy Node. </span>
 <span class="sd">    Ensures that graph construction using PairFilter does not break ASE graph. </span>
 
@@ -121,17 +121,17 @@
 <span class="sd">        exception : Caught Exception if ASE calculator build fails.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-    <span class="kn">import</span> <span class="nn">torch</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
     <span class="n">torch</span><span class="o">.</span><span class="n">set_default_dtype</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
     <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s1">&#39;cuda:0&#39;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
     <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">set_device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 
     <span class="c1"># Hippynn imports. </span>
-    <span class="kn">import</span> <span class="nn">hippynn</span>
-    <span class="kn">from</span> <span class="nn">hippynn.graphs</span> <span class="kn">import</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">networks</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">physics</span>
-    <span class="kn">from</span> <span class="nn">hippynn.graphs.nodes</span> <span class="kn">import</span> <span class="n">indexers</span><span class="p">,</span> <span class="n">pairs</span> 
+    <span class="kn">import</span><span class="w"> </span><span class="nn">hippynn</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs</span><span class="w"> </span><span class="kn">import</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">networks</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">physics</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes</span><span class="w"> </span><span class="kn">import</span> <span class="n">indexers</span><span class="p">,</span> <span class="n">pairs</span> 
 
     <span class="n">nacl_species_set</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">17</span><span class="p">]</span> 
     <span class="n">network_params</span> <span class="o">=</span> <span class="p">{</span>
@@ -146,7 +146,7 @@
     <span class="p">}</span>
 
     <span class="c1">### Define Models </span>
-    <span class="kn">from</span> <span class="nn">hippynn.graphs</span> <span class="kn">import</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">networks</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">physics</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs</span><span class="w"> </span><span class="kn">import</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">networks</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">physics</span>
 
     <span class="c1"># Input node (should be shared across both networks)</span>
     <span class="n">species</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">SpeciesNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;Z&quot;</span><span class="p">)</span>
@@ -198,7 +198,7 @@
 
 
     <span class="c1">### Define Loss Graph</span>
-    <span class="kn">from</span> <span class="nn">hippynn.graphs</span> <span class="kn">import</span> <span class="n">loss</span> 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs</span><span class="w"> </span><span class="kn">import</span> <span class="n">loss</span> 
 
     <span class="c1"># All the ACA losses </span>
     <span class="n">rmse_dipole</span> <span class="o">=</span>  <span class="n">loss</span><span class="o">.</span><span class="n">MSELoss</span><span class="o">.</span><span class="n">of_node</span><span class="p">(</span><span class="n">dipole</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
@@ -252,7 +252,7 @@
     <span class="n">model</span> <span class="o">=</span> <span class="n">training_modules</span><span class="o">.</span><span class="n">model</span>
 
     <span class="c1"># Construct a Calculator from model. </span>
-    <span class="kn">from</span> <span class="nn">hippynn.interfaces.ase_interface</span> <span class="kn">import</span> <span class="n">HippynnCalculator</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.interfaces.ase_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">HippynnCalculator</span>
     <span class="n">energy_node</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">node_from_name</span><span class="p">(</span><span class="s1">&#39;add(HEnergy.mol_energy, cEnergy.mol_energies)&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">calc</span> <span class="o">=</span> <span class="n">HippynnCalculator</span><span class="p">(</span><span class="n">energy</span><span class="o">=</span><span class="n">energy_node</span><span class="p">)</span>
@@ -264,10 +264,10 @@
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 
-    <span class="kn">import</span> <span class="nn">unittest</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">unittest</span>
     
-    <span class="k">class</span> <span class="nc">ASE_FilterPICoulombTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">runTest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">ASE_FilterPICoulombTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">runTest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="n">status</span><span class="p">,</span> <span class="n">ex</span> <span class="o">=</span> <span class="n">ASE_FilterPair_Coulomb_Construct</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;ASE Calculator Build Fails with exception : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ex</span><span class="p">))</span>
 

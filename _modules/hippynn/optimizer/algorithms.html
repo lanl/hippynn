@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.optimizer.algorithms &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
 
@@ -111,14 +111,14 @@
 <span class="sd">Abstract optimizers that could be used with other force functions.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">from</span> <span class="nn">torch.nn.functional</span> <span class="kn">import</span> <span class="n">normalize</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="kn">import</span> <span class="n">normalize</span>
 
 
 <div class="viewcode-block" id="GeometryOptimizer">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.GeometryOptimizer">[docs]</a>
-<span class="k">class</span> <span class="nc">GeometryOptimizer</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GeometryOptimizer</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">coords</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_steps</span> <span class="o">=</span> <span class="n">max_steps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_step</span> <span class="o">=</span> <span class="mi">0</span>
@@ -127,19 +127,19 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">stop_signal</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="c1"># __call__ call self.step() method if the current step is less than the max_steps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_step</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_step</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_steps</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">stop_signal</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="nf">_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">coords</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_step</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stop_signal</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;step </span><span class="si">%d</span><span class="s2"> :</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_step</span><span class="p">))</span>
@@ -152,7 +152,7 @@
 <div class="viewcode-block" id="GeometryOptimizer.fmax_criteria">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.GeometryOptimizer.fmax_criteria">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">fmax_criteria</span><span class="p">(</span><span class="n">forces</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fmax_criteria</span><span class="p">(</span><span class="n">forces</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
         <span class="c1"># not all optimizers use fmax as a criteria to stop</span>
         <span class="c1"># but it is a common criteria</span>
         <span class="c1"># forces are in the shape of (batch_size, n_atoms, 3)</span>
@@ -162,7 +162,7 @@
 <div class="viewcode-block" id="GeometryOptimizer.duq">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.GeometryOptimizer.duq">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">duq</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">duq</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
         <span class="c1"># this is useful for batch calculation</span>
         <span class="c1"># (n,) -&gt; (n,1,1)</span>
         <span class="k">return</span> <span class="n">t</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span></div>
@@ -172,12 +172,12 @@
 
 <div class="viewcode-block" id="FIRE">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.FIRE">[docs]</a>
-<span class="k">class</span> <span class="nc">FIRE</span><span class="p">(</span><span class="n">GeometryOptimizer</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FIRE</span><span class="p">(</span><span class="n">GeometryOptimizer</span><span class="p">):</span>
     <span class="c1"># FIRE algorithm for batch of coordinates, forces will be input to step() function</span>
     <span class="c1"># assuming the input coordinates are in the shape of (batch_size, n_atoms, 3)</span>
     <span class="c1"># set dt for each molecule individually</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -212,7 +212,7 @@
 
 <div class="viewcode-block" id="FIRE.reset">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.FIRE.reset">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt_start</span>
@@ -225,7 +225,7 @@
 
 <div class="viewcode-block" id="FIRE.step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.FIRE.step">[docs]</a>
-    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forces</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forces</span><span class="p">):</span>
         <span class="c1"># forces: (batch_size, n_atoms, 3)</span>
 
         <span class="c1"># force projection on velocity</span>
@@ -276,7 +276,7 @@
 
 <div class="viewcode-block" id="FIRE.log">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.FIRE.log">[docs]</a>
-    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;dt: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">))</span>
         <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;v: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">))</span>
         <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;a: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">))</span>
@@ -290,8 +290,8 @@
 
 <div class="viewcode-block" id="NewtonRaphson">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.NewtonRaphson">[docs]</a>
-<span class="k">class</span> <span class="nc">NewtonRaphson</span><span class="p">(</span><span class="n">GeometryOptimizer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">etol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NewtonRaphson</span><span class="p">(</span><span class="n">GeometryOptimizer</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">etol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">max_steps</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">etol</span> <span class="o">=</span> <span class="n">etol</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fmax</span> <span class="o">=</span> <span class="n">fmax</span>
@@ -300,7 +300,7 @@
 
 <div class="viewcode-block" id="NewtonRaphson.reset">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.NewtonRaphson.reset">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_e</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">inf</span></div>
@@ -308,7 +308,7 @@
 
 <div class="viewcode-block" id="NewtonRaphson.step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.NewtonRaphson.step">[docs]</a>
-    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forces</span><span class="p">,</span> <span class="n">energies</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forces</span><span class="p">,</span> <span class="n">energies</span><span class="p">):</span>
         <span class="c1"># assuming energies is in the shape of (batch_size, 1)</span>
 
         <span class="n">fmax_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmax_criteria</span><span class="p">(</span><span class="n">forces</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmax</span><span class="p">)</span>
@@ -334,7 +334,7 @@
 
 <div class="viewcode-block" id="NewtonRaphson.emax_criteria">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.NewtonRaphson.emax_criteria">[docs]</a>
-    <span class="k">def</span> <span class="nf">emax_criteria</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energies</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">emax_criteria</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energies</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">energies</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_e</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">etol</span></div>
 </div>
 
@@ -342,7 +342,7 @@
 
 <div class="viewcode-block" id="BFGSv1">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv1">[docs]</a>
-<span class="k">class</span> <span class="nc">BFGSv1</span><span class="p">(</span><span class="n">GeometryOptimizer</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BFGSv1</span><span class="p">(</span><span class="n">GeometryOptimizer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    BFGS algorithm for batch of coordinates, forces will be input to step() function</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -355,7 +355,7 @@
     <span class="c1">###TODO: BFGS may not be suitable for batch coordinates with zero-paddings</span>
     <span class="c1"># because the Hessian matrix will no longer be positive definite</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">H0</span><span class="o">=</span><span class="mf">70.0</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">H0</span><span class="o">=</span><span class="mf">70.0</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
         <span class="c1"># hyperpamaters H0=70.0 &amp; maxstep=0.2 are learned from ASE implementation</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">max_steps</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">H0</span> <span class="o">=</span> <span class="n">H0</span>  <span class="c1"># initialize Hessian to diagonal matrices with H0</span>
@@ -368,7 +368,7 @@
 
 <div class="viewcode-block" id="BFGSv1.reset">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv1.reset">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -380,7 +380,7 @@
 
 <div class="viewcode-block" id="BFGSv1.step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv1.step">[docs]</a>
-    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forces</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forces</span><span class="p">):</span>
 
         <span class="n">fmax_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmax_criteria</span><span class="p">(</span><span class="n">forces</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmax</span><span class="p">)</span>
         <span class="c1"># if all molecules have forces smaller than fmax, stop the optimization</span>
@@ -418,7 +418,7 @@
 
 <div class="viewcode-block" id="BFGSv1.update_B">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv1.update_B">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_B</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flattened_forces</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_B</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flattened_forces</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">H0</span>
             <span class="k">return</span>
@@ -441,7 +441,7 @@
 
 <div class="viewcode-block" id="BFGSv1.log">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv1.log">[docs]</a>
-    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Hessian: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">))</span>
         <span class="n">message</span> <span class="o">+=</span> <span class="n">extra_message</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
@@ -452,7 +452,7 @@
 
 <div class="viewcode-block" id="BFGSv2">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv2">[docs]</a>
-<span class="k">class</span> <span class="nc">BFGSv2</span><span class="p">(</span><span class="n">GeometryOptimizer</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BFGSv2</span><span class="p">(</span><span class="n">GeometryOptimizer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    batch BFGS algorithm with Moore-Penrose pseudoinverse</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -462,7 +462,7 @@
     <span class="c1"># for convenience, notations follow the wikipedia page:</span>
     <span class="c1"># https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%93Goldfarb%E2%80%93Shanno_algorithm</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">H0</span><span class="o">=</span><span class="mf">70.0</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">H0</span><span class="o">=</span><span class="mf">70.0</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
         <span class="c1"># hyperpamaters H0=70.0 &amp; maxstep=0.2 are learned from ASE implementation</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">max_steps</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">H0</span> <span class="o">=</span> <span class="n">H0</span>  <span class="c1"># initialize Hessian to diagonal matrices with H0</span>
@@ -475,7 +475,7 @@
 
 <div class="viewcode-block" id="BFGSv2.reset">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv2.reset">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">numbers</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">numbers</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -490,7 +490,7 @@
 
 <div class="viewcode-block" id="BFGSv2.step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv2.step">[docs]</a>
-    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forces</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forces</span><span class="p">):</span>
 
         <span class="n">fmax_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmax_criteria</span><span class="p">(</span><span class="n">forces</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmax</span><span class="p">)</span>
         <span class="c1"># if all molecules have forces smaller than fmax, stop the optimization</span>
@@ -527,7 +527,7 @@
 
 <div class="viewcode-block" id="BFGSv2.update_B">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv2.update_B">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_B</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flattened_forces</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_B</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flattened_forces</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">:</span>  <span class="c1"># the initial B mask is bool matrix</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">H0</span>
             <span class="k">return</span>
@@ -550,7 +550,7 @@
 
 <div class="viewcode-block" id="BFGSv2.log">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv2.log">[docs]</a>
-    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Hessian: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">))</span>
         <span class="n">message</span> <span class="o">+=</span> <span class="n">extra_message</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
@@ -561,7 +561,7 @@
 
 <div class="viewcode-block" id="BFGSv3">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv3">[docs]</a>
-<span class="k">class</span> <span class="nc">BFGSv3</span><span class="p">(</span><span class="n">GeometryOptimizer</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BFGSv3</span><span class="p">(</span><span class="n">GeometryOptimizer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    BFGS algorithm for batch of coordinates, forces will be input to step() function</span>
 
@@ -575,7 +575,7 @@
     <span class="c1"># for convenience, notations follow the wikipedia page:</span>
     <span class="c1"># https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%93Goldfarb%E2%80%93Shanno_algorithm</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">H0</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mi">70</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">H0</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mi">70</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
         <span class="c1"># hyperpamaters H0=70.0 &amp; maxstep=0.2 are learned from ASE implementation</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">max_steps</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">H0</span> <span class="o">=</span> <span class="n">H0</span>  <span class="c1"># initialize Hessian to diagonal matrices with H0</span>
@@ -588,7 +588,7 @@
 
 <div class="viewcode-block" id="BFGSv3.reset">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv3.reset">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">numbers</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">numbers</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
 
@@ -605,7 +605,7 @@
 
 <div class="viewcode-block" id="BFGSv3.step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv3.step">[docs]</a>
-    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forces</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forces</span><span class="p">):</span>
 
         <span class="n">fmax_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmax_criteria</span><span class="p">(</span><span class="n">forces</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmax</span><span class="p">)</span>
         <span class="c1"># if all molecules have forces smaller than fmax, stop the optimization</span>
@@ -643,7 +643,7 @@
 
 <div class="viewcode-block" id="BFGSv3.update_Binv">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv3.update_Binv">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_Binv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flattened_forces</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_Binv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flattened_forces</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Binv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># the initial B mask is bool matrix</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Binv</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Binv_mask</span>
             <span class="c1"># after the first update, we no longer need to save the boolean Binv_mask, but we need to save</span>
@@ -670,7 +670,7 @@
 
 <div class="viewcode-block" id="BFGSv3.log">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv3.log">[docs]</a>
-    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Binv: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Binv</span><span class="p">))</span>
         <span class="n">message</span> <span class="o">+=</span> <span class="n">extra_message</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>

@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Model and Loss Graphs &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
 
@@ -124,7 +124,7 @@ of a Node. <code class="docutils literal notranslate"><span class="pre">.pred</s
 the corresponding value in the database. This value is found by looking at the <code class="docutils literal notranslate"><span class="pre">db_name</span></code> string.
 name of the Node.</p>
 <p>It is usually sufficient to begin forming a loss graph using the static method <code class="docutils literal notranslate"><span class="pre">of_node</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.graphs</span> <span class="kn">import</span> <span class="n">loss</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs</span><span class="w"> </span><span class="kn">import</span> <span class="n">loss</span>
 <span class="n">mae_energy</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">MAELoss</span><span class="o">.</span><span class="n">of_node</span><span class="p">(</span><span class="n">molecule_energy</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -141,7 +141,7 @@ on the CPU. Then the validation loss graphs is applied to the entire set of data
 expensive so long as the loss graph does not contain any complex operatinos. But one could
 desire to do some forms of post-processing in the loss graph. For example, calculating the
 per-atom energy in the loss can be accomplished as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.graphs</span> <span class="kn">import</span> <span class="n">physics</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs</span><span class="w"> </span><span class="kn">import</span> <span class="n">physics</span>
 <span class="n">pred_per_atom</span> <span class="o">=</span> <span class="n">physics</span><span class="o">.</span><span class="n">PerAtom</span><span class="p">(</span><span class="s2">&quot;PeratomPredicted&quot;</span><span class="p">,(</span><span class="n">molecule_energy</span><span class="o">.</span><span class="n">pred</span><span class="p">,</span><span class="n">species</span><span class="o">.</span><span class="n">true</span><span class="p">))</span>
 <span class="n">true_per_atom</span> <span class="o">=</span> <span class="n">physics</span><span class="o">.</span><span class="n">PerAtom</span><span class="p">(</span><span class="s2">&quot;PeratomTrue&quot;</span><span class="p">,(</span><span class="n">molecule_energy</span><span class="o">.</span><span class="n">true</span><span class="p">,</span><span class="n">species</span><span class="o">.</span><span class="n">true</span><span class="p">))</span>
 <span class="n">mae_per_atom</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">MAELoss</span><span class="p">(</span><span class="n">pred_per_atom</span><span class="p">,</span><span class="n">true_per_atom</span><span class="p">)</span>

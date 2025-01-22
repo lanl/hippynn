@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.experiment.assembly &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
 
@@ -109,14 +109,14 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Assembling graphs for a training run</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 
-<span class="kn">from</span> <span class="nn">hippynn.graphs</span> <span class="kn">import</span> <span class="n">GraphModule</span><span class="p">,</span> <span class="n">get_subgraph</span><span class="p">,</span> <span class="n">find_unique_relative</span>
-<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.base</span> <span class="kn">import</span> <span class="n">InputNode</span><span class="p">,</span> <span class="n">LossInputNode</span><span class="p">,</span> <span class="n">LossPredNode</span><span class="p">,</span> <span class="n">LossTrueNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphModule</span><span class="p">,</span> <span class="n">get_subgraph</span><span class="p">,</span> <span class="n">find_unique_relative</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">InputNode</span><span class="p">,</span> <span class="n">LossInputNode</span><span class="p">,</span> <span class="n">LossPredNode</span><span class="p">,</span> <span class="n">LossTrueNode</span>
 
-<span class="kn">from</span> <span class="nn">hippynn.experiment.evaluator</span> <span class="kn">import</span> <span class="n">Evaluator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.experiment.evaluator</span><span class="w"> </span><span class="kn">import</span> <span class="n">Evaluator</span>
 
 <span class="n">TrainingModules</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;TrainingModules&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;loss&quot;</span><span class="p">,</span> <span class="s2">&quot;evaluator&quot;</span><span class="p">))</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -128,7 +128,7 @@
 
 <div class="viewcode-block" id="generate_database_info">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.assembly.html#hippynn.experiment.generate_database_info">[docs]</a>
-<span class="k">def</span> <span class="nf">generate_database_info</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_database_info</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct db info from input nodes and target nodes.</span>
 <span class="sd">    :param inputs: list of input nodes</span>
@@ -170,7 +170,7 @@
 
 <div class="viewcode-block" id="build_loss_modules">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.assembly.html#hippynn.experiment.build_loss_modules">[docs]</a>
-<span class="k">def</span> <span class="nf">build_loss_modules</span><span class="p">(</span><span class="n">training_loss</span><span class="p">,</span> <span class="n">validation_losses</span><span class="p">,</span> <span class="n">network_outputs</span><span class="p">,</span> <span class="n">database_inputs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_loss_modules</span><span class="p">(</span><span class="n">training_loss</span><span class="p">,</span> <span class="n">validation_losses</span><span class="p">,</span> <span class="n">network_outputs</span><span class="p">,</span> <span class="n">database_inputs</span><span class="p">):</span>
     <span class="n">network_outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">pred</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">network_outputs</span><span class="p">]</span>
     <span class="n">database_inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">true</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">database_inputs</span><span class="p">]</span>
     <span class="n">all_inputs</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">network_outputs</span><span class="p">,</span> <span class="o">*</span><span class="n">database_inputs</span><span class="p">)</span>
@@ -185,7 +185,7 @@
 
 <div class="viewcode-block" id="determine_out_in_targ">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.assembly.html#hippynn.experiment.determine_out_in_targ">[docs]</a>
-<span class="k">def</span> <span class="nf">determine_out_in_targ</span><span class="p">(</span><span class="o">*</span><span class="n">nodes_required_for_loss</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">determine_out_in_targ</span><span class="p">(</span><span class="o">*</span><span class="n">nodes_required_for_loss</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param nodes_required_for_loss: train nodes and validation nodes</span>
 <span class="sd">    :return: lists of needed network inputs, network outputs, and database targets</span>
@@ -214,7 +214,7 @@
 
 <div class="viewcode-block" id="assemble_for_training">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.assembly.html#hippynn.experiment.assemble_for_training">[docs]</a>
-<span class="k">def</span> <span class="nf">assemble_for_training</span><span class="p">(</span><span class="n">train_loss</span><span class="p">,</span> <span class="n">validation_losses</span><span class="p">,</span> <span class="n">validation_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_maker</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">assemble_for_training</span><span class="p">(</span><span class="n">train_loss</span><span class="p">,</span> <span class="n">validation_losses</span><span class="p">,</span> <span class="n">validation_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_maker</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param train_loss: LossNode</span>
 <span class="sd">    :param validation_losses: dict of (name:loss_node) or list of LossNodes.</span>
@@ -285,15 +285,15 @@
 
 
 <span class="n">_PAIRCACHE_DB_NAME</span> <span class="o">=</span> <span class="s2">&quot;AutoPrecomputedPairs&quot;</span>
-<span class="kn">from</span> <span class="nn">..graphs.nodes</span> <span class="kn">import</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">indexers</span><span class="p">,</span> <span class="n">base</span>
-<span class="kn">from</span> <span class="nn">..graphs</span> <span class="kn">import</span> <span class="n">Predictor</span><span class="p">,</span> <span class="n">gops</span><span class="p">,</span> <span class="n">inputs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..graphs.nodes</span><span class="w"> </span><span class="kn">import</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">indexers</span><span class="p">,</span> <span class="n">base</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..graphs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Predictor</span><span class="p">,</span> <span class="n">gops</span><span class="p">,</span> <span class="n">inputs</span>
 
 <span class="n">_PAIRCACHE_COMPATIBLE_COMPUTERS</span> <span class="o">=</span> <span class="p">{</span><span class="n">pairs</span><span class="o">.</span><span class="n">NumpyDynamicPairs</span><span class="p">,</span> <span class="n">pairs</span><span class="o">.</span><span class="n">PeriodicPairIndexer</span><span class="p">,</span> <span class="n">pairs</span><span class="o">.</span><span class="n">DynamicPeriodicPairs</span><span class="p">}</span>
 
 
 <div class="viewcode-block" id="precompute_pairs">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.assembly.html#hippynn.experiment.precompute_pairs">[docs]</a>
-<span class="k">def</span> <span class="nf">precompute_pairs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">make_dense</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_images</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">precompute_pairs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">make_dense</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_images</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    :param model: Assembled GraphModule involving a PairIndexer</span>

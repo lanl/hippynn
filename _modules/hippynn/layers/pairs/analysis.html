@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.layers.pairs.analysis &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
 
@@ -109,13 +109,13 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Modules for analyzing pair-valued data</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 
 <div class="viewcode-block" id="RDFBins">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.analysis.html#hippynn.layers.pairs.analysis.RDFBins">[docs]</a>
-<span class="k">class</span> <span class="nc">RDFBins</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">species_set</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RDFBins</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">species_set</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">bins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Bins must not be None!&quot;</span><span class="p">)</span>
@@ -126,7 +126,7 @@
 
 <div class="viewcode-block" id="RDFBins.bin_info">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.analysis.html#hippynn.layers.pairs.analysis.RDFBins.bin_info">[docs]</a>
-    <span class="k">def</span> <span class="nf">bin_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bin_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Note: widths don&#39;t make perfect sense for non-evenly-spaced bins.</span>
         <span class="n">centers</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="n">widths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -135,7 +135,7 @@
 
 <div class="viewcode-block" id="RDFBins.forward">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.analysis.html#hippynn.layers.pairs.analysis.RDFBins.forward">[docs]</a>
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">one_hot</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">one_hot</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
         <span class="n">n_species</span> <span class="o">=</span> <span class="n">one_hot</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">n_bins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
 
@@ -154,7 +154,7 @@
 
 <div class="viewcode-block" id="min_dist_info">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.analysis.html#hippynn.layers.pairs.analysis.min_dist_info">[docs]</a>
-<span class="k">def</span> <span class="nf">min_dist_info</span><span class="p">(</span><span class="n">rij_list</span><span class="p">,</span> <span class="n">j_list</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">min_dist_info</span><span class="p">(</span><span class="n">rij_list</span><span class="p">,</span> <span class="n">j_list</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
     <span class="n">n_atoms</span> <span class="o">=</span> <span class="n">rij_list</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">dev</span> <span class="o">=</span> <span class="n">rij_list</span><span class="o">.</span><span class="n">device</span>
 
@@ -194,10 +194,10 @@
 
 <div class="viewcode-block" id="MinDistModule">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.analysis.html#hippynn.layers.pairs.analysis.MinDistModule">[docs]</a>
-<span class="k">class</span> <span class="nc">MinDistModule</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MinDistModule</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <div class="viewcode-block" id="MinDistModule.forward">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.analysis.html#hippynn.layers.pairs.analysis.MinDistModule.forward">[docs]</a>
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rmag_list</span><span class="p">,</span> <span class="n">j_list</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rmag_list</span><span class="p">,</span> <span class="n">j_list</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">min_dist_info</span><span class="p">(</span><span class="n">rmag_list</span><span class="p">,</span> <span class="n">j_list</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span></div>
 </div>
 

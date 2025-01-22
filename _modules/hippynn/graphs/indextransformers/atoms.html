@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.graphs.indextransformers.atoms &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
 
@@ -109,11 +109,11 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Nodes for atom index state conversion</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">find_unique_relative</span>
-<span class="kn">from</span> <span class="nn">..indextypes</span> <span class="kn">import</span> <span class="n">register_index_transformer</span><span class="p">,</span> <span class="n">IdxType</span><span class="p">,</span> <span class="n">_debprint</span> <span class="k">as</span> <span class="n">idx_debprint</span>
-<span class="kn">from</span> <span class="nn">..nodes.base.node_functions</span> <span class="kn">import</span> <span class="n">NodeOperationError</span>
-<span class="kn">from</span> <span class="nn">..nodes.indexers</span> <span class="kn">import</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">,</span> <span class="n">AtomReIndexer</span><span class="p">,</span> <span class="n">AtomDeIndexer</span>
-<span class="kn">from</span> <span class="nn">..nodes.inputs</span> <span class="kn">import</span> <span class="n">SpeciesNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_unique_relative</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_index_transformer</span><span class="p">,</span> <span class="n">IdxType</span><span class="p">,</span> <span class="n">_debprint</span> <span class="k">as</span> <span class="n">idx_debprint</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..nodes.base.node_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NodeOperationError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..nodes.indexers</span><span class="w"> </span><span class="kn">import</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">,</span> <span class="n">AtomReIndexer</span><span class="p">,</span> <span class="n">AtomDeIndexer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..nodes.inputs</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpeciesNode</span>
 
 
 <span class="c1"># TODO: Rewrite so it can use non-one-hot-encodings?</span>
@@ -122,7 +122,7 @@
 <div class="viewcode-block" id="idx_molatom_atom">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.atoms.html#hippynn.graphs.indextransformers.atoms.idx_molatom_atom">[docs]</a>
 <span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">idx_molatom_atom</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">idx_molatom_atom</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
     <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;auto-generating indexing for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
 
     <span class="n">funrel</span> <span class="o">=</span> <span class="n">find_unique_relative</span>  <span class="c1"># Abbreviation because we so many calls in this function.</span>
@@ -161,7 +161,7 @@
 <div class="viewcode-block" id="idx_atom_molatom">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.atoms.html#hippynn.graphs.indextransformers.atoms.idx_atom_molatom">[docs]</a>
 <span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">idx_atom_molatom</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">idx_atom_molatom</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">origin_node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="p">(</span><span class="n">node</span><span class="p">,)</span>

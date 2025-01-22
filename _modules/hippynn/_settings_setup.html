@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn._settings_setup &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=e3456cac" />
 
@@ -115,14 +115,14 @@
 <span class="c1"># the semantics of the models or training.</span>
 <span class="c1"># The custom kernels may have very slight effects</span>
 <span class="c1"># due to numerical differences.</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">configparser</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">configparser</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
 
-<span class="kn">from</span> <span class="nn">distutils.util</span> <span class="kn">import</span> <span class="n">strtobool</span>
-<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">SimpleNamespace</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">distutils.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">strtobool</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleNamespace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
 
 <span class="c1"># Significant strings</span>
 <span class="n">SECTION_NAME</span> <span class="o">=</span> <span class="s2">&quot;GLOBALS&quot;</span>
@@ -133,16 +133,16 @@
 <span class="n">DEFAULT_PROGRESS</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># this gets set to a tqdm object if possible</span>
 <span class="n">TQDM_PROGRESS</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># the best progress bar from tqdm, if available.</span>
 
-<span class="k">def</span> <span class="nf">setup_tqdm</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">setup_tqdm</span><span class="p">():</span>
     <span class="k">global</span> <span class="n">TQDM_PROGRESS</span>
     <span class="k">global</span> <span class="n">DEFAULT_PROGRESS</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">tqdm.contrib</span> <span class="kn">import</span> <span class="n">tqdm_auto</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">tqdm.contrib</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm_auto</span>
 
         <span class="n">TQDM_PROGRESS</span> <span class="o">=</span> <span class="n">tqdm_auto</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
             <span class="n">TQDM_PROGRESS</span> <span class="o">=</span> <span class="n">tqdm</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
@@ -155,7 +155,7 @@
 
 <span class="c1"># Setting handlers: Take an input str or other value and return the appropriate value.</span>
 
-<span class="k">def</span> <span class="nf">progress_handler</span><span class="p">(</span><span class="n">prog_setting</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">]):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">progress_handler</span><span class="p">(</span><span class="n">prog_setting</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function for handling the progress bar settings.</span>
 
@@ -185,7 +185,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">kernel_handler</span><span class="p">(</span><span class="n">kernel_string</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">kernel_handler</span><span class="p">(</span><span class="n">kernel_string</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    :param kernel_string:</span>
@@ -206,7 +206,7 @@
     <span class="k">return</span> <span class="n">kernel</span>
 
 
-<span class="k">def</span> <span class="nf">bool_or_strtobool</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bool_or_strtobool</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">key</span>
     <span class="k">else</span><span class="p">:</span>
@@ -239,7 +239,7 @@
 
 <div class="viewcode-block" id="reload_settings">
 <a class="viewcode-back" href="../../api_documentation/hippynn.html#hippynn.reload_settings">[docs]</a>
-<span class="k">def</span> <span class="nf">reload_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">reload_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Attempt to reload the hippynn library settings.</span>
 
@@ -298,7 +298,7 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">handler</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Value </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> for setting </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> is invalid&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ee</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Value </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> for setting </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> is invalid&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ee</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration source </span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2"> contains invalid variables (</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">). These will be ignored.&quot;</span><span class="p">)</span>
 

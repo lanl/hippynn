@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hyperparameter optimization with Ax and Ray &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
 
@@ -167,7 +167,7 @@ optimization.</p>
 <section id="create-an-ax-experiment">
 <h3>Create an Ax experiment<a class="headerlink" href="#create-an-ax-experiment" title="Link to this heading"></a></h3>
 <p>You can create a basic Ax experiment this way</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ax.service.ax_client</span> <span class="kn">import</span> <span class="n">AxClient</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ax.service.ax_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">AxClient</span>
 <span class="n">ax_client</span> <span class="o">=</span> <span class="n">AxClient</span><span class="p">()</span>
 <span class="n">ax_client</span><span class="o">.</span><span class="n">create_experiment</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;hyper_opt&quot;</span><span class="p">,</span>
@@ -252,7 +252,7 @@ function.</p>
 <h3>Training function<a class="headerlink" href="#training-function" title="Link to this heading"></a></h3>
 <p>You only need a minimal change to your existing training script to use it with
 Ax. In most cases, you just have to wrap the whole script into a function</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">training</span><span class="p">(</span><span class="n">trial_index</span><span class="p">,</span> <span class="n">parameter_a</span><span class="p">,</span> <span class="n">parameter_b</span><span class="p">,</span> <span class="n">parameter_c</span><span class="p">,</span> <span class="n">parameter_d</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">training</span><span class="p">(</span><span class="n">trial_index</span><span class="p">,</span> <span class="n">parameter_a</span><span class="p">,</span> <span class="n">parameter_b</span><span class="p">,</span> <span class="n">parameter_c</span><span class="p">,</span> <span class="n">parameter_d</span><span class="p">):</span>
     <span class="c1"># set up the network with the parameters</span>
     <span class="o">...</span>
     <span class="n">network_params</span> <span class="o">=</span> <span class="p">{</span>
@@ -315,10 +315,10 @@ metrics.</p>
 <h3>Asynchronous parallelized optimization with Ray<a class="headerlink" href="#asynchronous-parallelized-optimization-with-ray" title="Link to this heading"></a></h3>
 <p>To use Ray to distribute the trials across GPUs parallelly, a small update is
 needed for the training function</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ray.air</span> <span class="kn">import</span> <span class="n">session</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ray.air</span><span class="w"> </span><span class="kn">import</span> <span class="n">session</span>
 
 
-<span class="k">def</span> <span class="nf">training</span><span class="p">(</span><span class="n">parameter_a</span><span class="p">,</span> <span class="n">parameter_b</span><span class="p">,</span> <span class="n">parameter_c</span><span class="p">,</span> <span class="n">parameter_d</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">training</span><span class="p">(</span><span class="n">parameter_a</span><span class="p">,</span> <span class="n">parameter_b</span><span class="p">,</span> <span class="n">parameter_c</span><span class="p">,</span> <span class="n">parameter_d</span><span class="p">):</span>
     <span class="c1"># setup and train are the same</span>
     <span class="c1"># `with hippynn.tools.active_directory() line` is not needed</span>
     <span class="o">....</span>
@@ -334,9 +334,9 @@ needed for the training function</p>
 to report the final metric to <cite>ray</cite>.</p>
 <p>Also, to run the trials, instead of a loop in <a class="reference internal" href="#run-sequential-experiments"><span class="std std-ref">Run sequential experiments</span></a>,
 we have to use the interfaces between the two packages from <cite>ray</cite></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ray.tune.experiment.trial</span> <span class="kn">import</span> <span class="n">Trial</span>
-<span class="kn">from</span> <span class="nn">ray.tune.search</span> <span class="kn">import</span> <span class="n">ConcurrencyLimiter</span>
-<span class="kn">from</span> <span class="nn">ray.tune.search.ax</span> <span class="kn">import</span> <span class="n">AxSearch</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ray.tune.experiment.trial</span><span class="w"> </span><span class="kn">import</span> <span class="n">Trial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray.tune.search</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConcurrencyLimiter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ray.tune.search.ax</span><span class="w"> </span><span class="kn">import</span> <span class="n">AxSearch</span>
 
 <span class="c1"># to make sure ray loads local packages correctly</span>
 <span class="n">ray</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">runtime_env</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;working_dir&quot;</span><span class="p">:</span> <span class="s2">&quot;.&quot;</span><span class="p">})</span>
@@ -393,10 +393,10 @@ process. Ray has a <a class="reference external" href="https://docs.ray.io/en/la
 your own for your convenience. However, here is a callback function to save
 the JSON and CSV files at the end of each trial and handle failed trials, which
 should cover the most basic functionalities.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ray.tune.logger</span> <span class="kn">import</span> <span class="n">JsonLoggerCallback</span><span class="p">,</span> <span class="n">LoggerCallback</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ray.tune.logger</span><span class="w"> </span><span class="kn">import</span> <span class="n">JsonLoggerCallback</span><span class="p">,</span> <span class="n">LoggerCallback</span>
 
-<span class="k">class</span> <span class="nc">AxLogger</span><span class="p">(</span><span class="n">LoggerCallback</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax_client</span><span class="p">:</span> <span class="n">AxClient</span><span class="p">,</span> <span class="n">JSON_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">csv_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AxLogger</span><span class="p">(</span><span class="n">LoggerCallback</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax_client</span><span class="p">:</span> <span class="n">AxClient</span><span class="p">,</span> <span class="n">JSON_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">csv_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A logger callback to save the progress to a JSON file after every trial ends.</span>
 <span class="sd">        Similar to running `ax_client.save_to_json_file` every iteration in sequential</span>
@@ -413,7 +413,7 @@ should cover the most basic functionalities.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">json</span> <span class="o">=</span> <span class="n">json_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">csv</span> <span class="o">=</span> <span class="n">csv_name</span>
 
-    <span class="k">def</span> <span class="nf">log_trial_end</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_trial_end</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">Trial</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">runtime</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">failed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ax_client</span><span class="o">.</span><span class="n">save_to_json_file</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">json</span><span class="p">)</span>
@@ -433,7 +433,7 @@ should cover the most basic functionalities.</p>
             <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">runtime</span><span class="si">}</span><span class="s2"> seconds. Location directory: </span><span class="si">{</span><span class="n">trial</span><span class="o">.</span><span class="n">logdir</span><span class="si">}</span><span class="s2">.&quot;</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">on_trial_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">trials</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Trial</span><span class="p">],</span> <span class="n">trial</span><span class="p">:</span> <span class="n">Trial</span><span class="p">,</span> <span class="o">**</span><span class="n">info</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_trial_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">trials</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Trial</span><span class="p">],</span> <span class="n">trial</span><span class="p">:</span> <span class="n">Trial</span><span class="p">,</span> <span class="o">**</span><span class="n">info</span><span class="p">):</span>
         <span class="nb">id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">trial</span><span class="o">.</span><span class="n">experiment_tag</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="n">ax_trial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax_client</span><span class="o">.</span><span class="n">get_trial</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
         <span class="n">ax_trial</span><span class="o">.</span><span class="n">mark_abandoned</span><span class="p">(</span><span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Error encountered&quot;</span><span class="p">)</span>
@@ -441,7 +441,7 @@ should cover the most basic functionalities.</p>
             <span class="n">trial</span><span class="p">,</span> <span class="nb">id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;not available&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_runtime</span><span class="p">(</span><span class="n">ax_trial</span><span class="p">),</span> <span class="kc">True</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">on_trial_complete</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_trial_complete</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">trials</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="s2">&quot;Trial&quot;</span><span class="p">],</span> <span class="n">trial</span><span class="p">:</span> <span class="n">Trial</span><span class="p">,</span> <span class="o">**</span><span class="n">info</span>
     <span class="p">):</span>
         <span class="c1"># trial.trial_id is the random id generated by ray, not ax</span>
@@ -467,7 +467,7 @@ should cover the most basic functionalities.</p>
         <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">calculate_runtime</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">AXTrial</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_runtime</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">AXTrial</span><span class="p">):</span>
         <span class="n">delta</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">time_completed</span> <span class="o">-</span> <span class="n">trial</span><span class="o">.</span><span class="n">time_run_started</span>
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">delta</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
 </pre></div>

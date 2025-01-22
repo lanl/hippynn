@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.databases.h5_pyanitools &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
 
@@ -112,35 +112,35 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">collections</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="kn">import</span> <span class="nn">h5py</span>  <span class="c1"># If dependency not available then just fail here.</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">h5py</span>  <span class="c1"># If dependency not available then just fail here.</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="kn">from</span> <span class="nn">ase.data</span> <span class="kn">import</span> <span class="n">atomic_numbers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">atomic_numbers</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Database</span>
-<span class="kn">from</span> <span class="nn">.restarter</span> <span class="kn">import</span> <span class="n">Restartable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">Database</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.restarter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Restartable</span>
 
-<span class="kn">from</span> <span class="nn">..tools</span> <span class="kn">import</span> <span class="n">progress_bar</span><span class="p">,</span> <span class="n">np_of_torchdefaultdtype</span>
-<span class="kn">from</span> <span class="nn">._ani_reader</span> <span class="kn">import</span> <span class="n">AniDataLoader</span><span class="p">,</span> <span class="n">DataPacker</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">progress_bar</span><span class="p">,</span> <span class="n">np_of_torchdefaultdtype</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._ani_reader</span><span class="w"> </span><span class="kn">import</span> <span class="n">AniDataLoader</span><span class="p">,</span> <span class="n">DataPacker</span>
 
 <span class="n">numpy_map_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="PyAniMethods">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniMethods">[docs]</a>
-<span class="k">class</span> <span class="nc">PyAniMethods</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PyAniMethods</span><span class="p">:</span>
     <span class="n">_IGNORE_KEYS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;Jnames&quot;</span><span class="p">)</span>
 
     <span class="c1"># Note: assumes that all data files have &#39;coordinates&#39;.</span>
 <div class="viewcode-block" id="PyAniMethods.extract_full_file">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniMethods.extract_full_file">[docs]</a>
-    <span class="k">def</span> <span class="nf">extract_full_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_full_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">):</span>
         <span class="n">n_atoms_max</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">batches</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">AniDataLoader</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="p">)</span>  <span class="c1"># Engine=core reads the entire file at once.</span>
@@ -179,7 +179,7 @@
 
 <div class="viewcode-block" id="PyAniMethods.determine_key_structure">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniMethods.determine_key_structure">[docs]</a>
-    <span class="k">def</span> <span class="nf">determine_key_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_list</span><span class="p">,</span> <span class="n">sys_count</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">determine_key_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_list</span><span class="p">,</span> <span class="n">sys_count</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine what arrays to pad&quot;&quot;&quot;</span>
         <span class="n">batch</span> <span class="o">=</span> <span class="n">batch_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">n_atoms</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="n">species_key</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -193,7 +193,7 @@
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">determine_key_structure</span><span class="p">(</span><span class="n">batch_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">species_key</span><span class="o">=</span><span class="n">species_key</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">RecursionError</span> <span class="k">as</span> <span class="n">re</span><span class="p">:</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Automatic detection of arrays is only compatible with datasets of at least 6 atoms -- this is not supported.&quot;</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">re</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">re</span>
 
         <span class="c1"># dict of which axes need to be padded;</span>
         <span class="c1"># pad if the array size is equal to the number of atoms along a given axis</span>
@@ -224,7 +224,7 @@
 
 <div class="viewcode-block" id="PyAniMethods.process_batches">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniMethods.process_batches">[docs]</a>
-    <span class="k">def</span> <span class="nf">process_batches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">sys_count</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_batches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">sys_count</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">):</span>
 
         <span class="c1"># Get padding abd shape info and batch size key</span>
         <span class="n">padding_scheme</span><span class="p">,</span> <span class="n">shape_scheme</span><span class="p">,</span> <span class="n">size_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">determine_key_structure</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span> <span class="n">sys_count</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="n">species_key</span><span class="p">)</span>
@@ -273,7 +273,7 @@
 
 <div class="viewcode-block" id="PyAniMethods.filter_arrays">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniMethods.filter_arrays">[docs]</a>
-    <span class="k">def</span> <span class="nf">filter_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr_dict</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr_dict</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Arrays found: &quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">arr_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 
@@ -297,8 +297,8 @@
 
 <div class="viewcode-block" id="PyAniFileDB">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniFileDB">[docs]</a>
-<span class="k">class</span> <span class="nc">PyAniFileDB</span><span class="p">(</span><span class="n">Database</span><span class="p">,</span> <span class="n">PyAniMethods</span><span class="p">,</span> <span class="n">Restartable</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;core&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PyAniFileDB</span><span class="p">(</span><span class="n">Database</span><span class="p">,</span> <span class="n">PyAniMethods</span><span class="p">,</span> <span class="n">Restartable</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;core&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param file:</span>
@@ -335,7 +335,7 @@
 
 <div class="viewcode-block" id="PyAniFileDB.load_arrays">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniFileDB.load_arrays">[docs]</a>
-    <span class="k">def</span> <span class="nf">load_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading arrays from&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
         <span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">sys_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_full_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">species_key</span><span class="p">)</span>
@@ -348,8 +348,8 @@
 
 <div class="viewcode-block" id="PyAniDirectoryDB">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniDirectoryDB">[docs]</a>
-<span class="k">class</span> <span class="nc">PyAniDirectoryDB</span><span class="p">(</span><span class="n">Database</span><span class="p">,</span> <span class="n">PyAniMethods</span><span class="p">,</span> <span class="n">Restartable</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PyAniDirectoryDB</span><span class="p">(</span><span class="n">Database</span><span class="p">,</span> <span class="n">PyAniMethods</span><span class="p">,</span> <span class="n">Restartable</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">directory</span><span class="p">,</span>
         <span class="n">inputs</span><span class="p">,</span>
@@ -377,7 +377,7 @@
 
 <div class="viewcode-block" id="PyAniDirectoryDB.load_arrays">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniDirectoryDB.load_arrays">[docs]</a>
-    <span class="k">def</span> <span class="nf">load_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">:</span>
             <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">]</span>
@@ -411,7 +411,7 @@
 
 <div class="viewcode-block" id="write_h5">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.write_h5">[docs]</a>
-<span class="k">def</span> <span class="nf">write_h5</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_h5</span><span class="p">(</span>
     <span class="n">database</span><span class="p">:</span> <span class="n">Database</span><span class="p">,</span>
     <span class="n">split</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

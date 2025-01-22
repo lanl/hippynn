@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Restarting training &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
 
@@ -126,7 +126,7 @@ so far as measured by validation performance.</p>
 the metrics of the experiment so far. This can be seen by breaking down
 <a class="reference internal" href="../api_documentation/hippynn.experiment.html#hippynn.experiment.setup_and_train" title="hippynn.experiment.setup_and_train"><code class="xref py py-func docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a> into its component steps,
 <a class="reference internal" href="../api_documentation/hippynn.experiment.html#hippynn.experiment.setup_training" title="hippynn.experiment.setup_training"><code class="xref py py-func docutils literal notranslate"><span class="pre">setup_training()</span></code></a>, and <a class="reference internal" href="../api_documentation/hippynn.experiment.routines.html#hippynn.experiment.routines.train_model" title="hippynn.experiment.routines.train_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">train_model()</span></code></a>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.experiment</span> <span class="kn">import</span> <span class="n">setup_training</span><span class="p">,</span> <span class="n">train_model</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.experiment</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup_training</span><span class="p">,</span> <span class="n">train_model</span>
 <span class="n">training_modules</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">=</span> <span class="n">setup_training</span><span class="p">(</span>
     <span class="n">training_modules</span><span class="o">=</span><span class="n">training_modules</span><span class="p">,</span>
     <span class="n">setup_params</span><span class="o">=</span><span class="n">experiment_params</span><span class="p">,</span>
@@ -144,13 +144,13 @@ the metrics of the experiment so far. This can be seen by breaking down
 <section id="simple-restart">
 <h2>Simple restart<a class="headerlink" href="#simple-restart" title="Link to this heading"></a></h2>
 <p>To restart training later, you can use the following:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.experiment.serialization</span> <span class="kn">import</span> <span class="n">load_checkpoint</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.experiment.serialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_checkpoint</span>
 <span class="n">check</span> <span class="o">=</span> <span class="n">load_checkpoint</span><span class="p">(</span><span class="s2">&quot;./experiment_structure.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;./best_checkpoint.pt&quot;</span><span class="p">)</span>
 <span class="n">train_model</span><span class="p">(</span><span class="o">**</span><span class="n">check</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>or to use the default filenames and load from the current directory:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.experiment.serialization</span> <span class="kn">import</span> <span class="n">load_checkpoint_from_cwd</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.experiment.serialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_checkpoint_from_cwd</span>
 <span class="n">check</span> <span class="o">=</span> <span class="n">load_checkpoint_from_cwd</span><span class="p">()</span>
 <span class="n">train_model</span><span class="p">(</span><span class="o">**</span><span class="n">check</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </pre></div>
@@ -165,7 +165,7 @@ functions are <code class="docutils literal notranslate"><span class="pre">load_
 original <code class="docutils literal notranslate"><span class="pre">restore_db</span></code> keyword.</p>
 </div>
 <p>If all you want to do is use a previously trained model, here is how to load the model only:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.experiment.serialization</span> <span class="kn">import</span> <span class="n">load_model_from_cwd</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.experiment.serialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_model_from_cwd</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">load_model_from_cwd</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -182,7 +182,7 @@ If this keyword is specified, <code class="docutils literal notranslate"><span c
 tensors to the correct device. To perform cross-device loading, use the <code class="docutils literal notranslate"><span class="pre">model_device</span></code>
 argument to <a class="reference internal" href="../api_documentation/hippynn.experiment.serialization.html#hippynn.experiment.serialization.load_checkpoint_from_cwd" title="hippynn.experiment.serialization.load_checkpoint_from_cwd"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code></a>
 or <a class="reference internal" href="../api_documentation/hippynn.experiment.serialization.html#hippynn.experiment.serialization.load_checkpoint" title="hippynn.experiment.serialization.load_checkpoint"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_checkpoint()</span></code></a>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hippynn.experiment.serialization</span> <span class="kn">import</span> <span class="n">load_checkpoint_from_cwd</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.experiment.serialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_checkpoint_from_cwd</span>
 <span class="n">check</span> <span class="o">=</span> <span class="n">load_checkpoint_from_cwd</span><span class="p">(</span><span class="n">model_device</span><span class="o">=</span><span class="s1">&#39;cuda:0&#39;</span><span class="p">)</span>
 <span class="n">train_model</span><span class="p">(</span><span class="o">**</span><span class="n">check</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </pre></div>

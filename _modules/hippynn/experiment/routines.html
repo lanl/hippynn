@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.experiment.routines &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
 
@@ -111,34 +111,35 @@
 <span class="sd">Routines for setting up and performing training</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">collections</span>
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">timeit</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">timeit</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
-<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">serialization</span>
-<span class="kn">from</span> <span class="nn">.metric_tracker</span> <span class="kn">import</span> <span class="n">MetricTracker</span>
-<span class="kn">from</span> <span class="nn">.controllers</span> <span class="kn">import</span> <span class="n">Controller</span><span class="p">,</span> <span class="n">is_scheduler_like</span>
-<span class="kn">from</span> <span class="nn">.device</span> <span class="kn">import</span> <span class="n">set_devices</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">tools</span>
-<span class="kn">from</span> <span class="nn">.assembly</span> <span class="kn">import</span> <span class="n">TrainingModules</span>
-<span class="kn">from</span> <span class="nn">.step_functions</span> <span class="kn">import</span> <span class="n">get_step_function</span>
-<span class="kn">from</span> <span class="nn">..databases</span> <span class="kn">import</span> <span class="n">Database</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">serialization</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.metric_tracker</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetricTracker</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span><span class="p">,</span> <span class="n">is_scheduler_like</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.device</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_devices</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">tools</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.assembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrainingModules</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.step_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_step_function</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..databases</span><span class="w"> </span><span class="kn">import</span> <span class="n">Database</span>
 
 
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">custom_kernels</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">custom_kernels</span>
 
 
 <div class="viewcode-block" id="SetupParams">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.routines.html#hippynn.SetupParams">[docs]</a>
 <span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">SetupParams</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SetupParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param stopping_key:  name of validation metric for stopping</span>
 <span class="sd">    :param controller: Optional -- Controller object for LR scheduling and ending experiment.</span>
@@ -187,7 +188,7 @@
         <span class="s2">&quot;fraction_train_eval&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_batch_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">eval_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="p">,</span> <span class="n">Controller</span><span class="p">):</span>
@@ -214,7 +215,7 @@
 
 <div class="viewcode-block" id="setup_and_train">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.routines.html#hippynn.setup_and_train">[docs]</a>
-<span class="k">def</span> <span class="nf">setup_and_train</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">setup_and_train</span><span class="p">(</span>
     <span class="n">training_modules</span><span class="p">:</span> <span class="n">TrainingModules</span><span class="p">,</span>
     <span class="n">database</span><span class="p">:</span> <span class="n">Database</span><span class="p">,</span>
     <span class="n">setup_params</span><span class="p">:</span> <span class="n">SetupParams</span><span class="p">,</span>
@@ -264,7 +265,7 @@
 
 <div class="viewcode-block" id="setup_training">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.routines.html#hippynn.setup_training">[docs]</a>
-<span class="k">def</span> <span class="nf">setup_training</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">setup_training</span><span class="p">(</span>
     <span class="n">training_modules</span><span class="p">:</span> <span class="n">TrainingModules</span><span class="p">,</span>
     <span class="n">setup_params</span><span class="p">:</span> <span class="n">SetupParams</span><span class="p">,</span>
 <span class="p">):</span>
@@ -333,7 +334,7 @@
 
 <div class="viewcode-block" id="train_model">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.routines.html#hippynn.train_model">[docs]</a>
-<span class="k">def</span> <span class="nf">train_model</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">train_model</span><span class="p">(</span>
     <span class="n">training_modules</span><span class="p">,</span>
     <span class="n">database</span><span class="p">,</span>
     <span class="n">controller</span><span class="p">,</span>
@@ -456,7 +457,7 @@
 
 <div class="viewcode-block" id="test_model">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.routines.html#hippynn.test_model">[docs]</a>
-<span class="k">def</span> <span class="nf">test_model</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">when</span><span class="p">,</span> <span class="n">metric_tracker</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_model</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">when</span><span class="p">,</span> <span class="n">metric_tracker</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Tests the model on the database according to the model_evaluator metrics.</span>
 <span class="sd">    If a plot_maker is attached to the model evaluator, it will make plots.</span>
@@ -476,10 +477,22 @@
     <span class="k">if</span> <span class="n">metric_tracker</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">metric_tracker</span> <span class="o">=</span> <span class="n">MetricTracker</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">loss_names</span><span class="p">,</span> <span class="n">stopping_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
+    <span class="c1"># Determine splits which are complete and can be evaluated:</span>
+    <span class="n">evaluatable_splits</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">required_variables</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">database</span><span class="o">.</span><span class="n">inputs</span> <span class="o">+</span> <span class="n">database</span><span class="o">.</span><span class="n">targets</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">sname</span><span class="p">,</span> <span class="n">split</span> <span class="ow">in</span> <span class="n">database</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="n">split</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">required_variables</span><span class="p">):</span>
+            <span class="n">evaluatable_splits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">missing_arrays</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">required_variables</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">split</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Database contains split &#39;</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">&#39; which&quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot; cannot be evaluated because it does not contain the&quot;</span>
+                          <span class="sa">f</span><span class="s2">&quot; required quantities: </span><span class="si">{</span><span class="n">missing_arrays</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
     <span class="c1"># A little dance to make sure train, valid, test always come first, when present.</span>
     <span class="n">basic_splits</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;valid&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">]</span>
-    <span class="n">basic_splits</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">basic_splits</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">database</span><span class="o">.</span><span class="n">splits</span><span class="p">]</span>
-    <span class="n">splits</span> <span class="o">=</span> <span class="n">basic_splits</span> <span class="o">+</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">database</span><span class="o">.</span><span class="n">splits</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">basic_splits</span><span class="p">]</span>
+    <span class="n">basic_splits</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">basic_splits</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">evaluatable_splits</span><span class="p">]</span>
+    <span class="n">splits</span> <span class="o">=</span> <span class="n">basic_splits</span> <span class="o">+</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">evaluatable_splits</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">basic_splits</span><span class="p">]</span>
 
     <span class="n">evaluation_data</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
         <span class="p">(</span>
@@ -496,7 +509,7 @@
 
 <div class="viewcode-block" id="training_loop">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.routines.html#hippynn.training_loop">[docs]</a>
-<span class="k">def</span> <span class="nf">training_loop</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">training_loop</span><span class="p">(</span>
     <span class="n">training_modules</span><span class="p">:</span> <span class="n">TrainingModules</span><span class="p">,</span>
     <span class="n">database</span><span class="p">,</span>
     <span class="n">controller</span><span class="p">:</span> <span class="n">Controller</span><span class="p">,</span>

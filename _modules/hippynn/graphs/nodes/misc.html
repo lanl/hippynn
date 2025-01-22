@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.graphs.nodes.misc &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
 
@@ -109,20 +109,20 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Nodes not otherwise categorized.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">..indextypes</span> <span class="kn">import</span> <span class="n">IdxType</span>
-<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">ExpandParents</span>
-<span class="kn">from</span> <span class="nn">...layers</span> <span class="kn">import</span> <span class="n">indexers</span> <span class="k">as</span> <span class="n">index_modules</span><span class="p">,</span> <span class="n">algebra</span> <span class="k">as</span> <span class="n">algebra_modules</span>
-<span class="kn">from</span> <span class="nn">..indextypes</span> <span class="kn">import</span> <span class="n">elementwise_compare_reduce</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdxType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">ExpandParents</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">indexers</span> <span class="k">as</span> <span class="n">index_modules</span><span class="p">,</span> <span class="n">algebra</span> <span class="k">as</span> <span class="n">algebra_modules</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">elementwise_compare_reduce</span>
 
 <div class="viewcode-block" id="StrainInducer">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.misc.html#hippynn.graphs.nodes.misc.StrainInducer">[docs]</a>
-<span class="k">class</span> <span class="nc">StrainInducer</span><span class="p">(</span><span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StrainInducer</span><span class="p">(</span><span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
     <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;cell&quot;</span>
     <span class="n">_output_names</span> <span class="o">=</span> <span class="s2">&quot;strained_coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;strained_cell&quot;</span><span class="p">,</span> <span class="s2">&quot;strain&quot;</span>
     <span class="n">_output_index_states</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
     <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">index_modules</span><span class="o">.</span><span class="n">CellScaleInducer</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">position</span><span class="p">,</span> <span class="n">cell</span> <span class="o">=</span> <span class="n">parents</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_output_index_states</span> <span class="o">=</span> <span class="n">position</span><span class="o">.</span><span class="n">_index_state</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">NotFound</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">NotFound</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -131,18 +131,18 @@
 
 <div class="viewcode-block" id="ListNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.misc.html#hippynn.graphs.nodes.misc.ListNode">[docs]</a>
-<span class="k">class</span> <span class="nc">ListNode</span><span class="p">(</span><span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ListNode</span><span class="p">(</span><span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
     <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;features&quot;</span>
     <span class="n">_output_names</span> <span class="o">=</span> <span class="s2">&quot;wrapped_features&quot;</span>
     <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">algebra_modules</span><span class="o">.</span><span class="n">ListMod</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="EnsembleTarget">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.misc.html#hippynn.graphs.nodes.misc.EnsembleTarget">[docs]</a>
-<span class="k">class</span> <span class="nc">EnsembleTarget</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">EnsembleTarget</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
     <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">algebra_modules</span><span class="o">.</span><span class="n">EnsembleTarget</span>
     <span class="n">_input_names</span> <span class="o">=</span> <span class="bp">NotImplemented</span>  <span class="c1"># NotImplemented tells __init_subclass__ that we will fill this in later.</span>
     <span class="n">_output_names</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span>
@@ -150,7 +150,7 @@
     <span class="n">_parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
     <span class="n">_parent_expander</span><span class="o">.</span><span class="n">require_compatible_idx_states</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
 
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
 

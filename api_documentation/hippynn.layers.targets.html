@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>targets module &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
 
@@ -94,6 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_model_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_model_from_cwd()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.log_terminal"><code class="docutils literal notranslate"><span class="pre">log_terminal()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.make_ensemble"><code class="docutils literal notranslate"><span class="pre">make_ensemble()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.reload_settings"><code class="docutils literal notranslate"><span class="pre">reload_settings()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.set_custom_kernels"><code class="docutils literal notranslate"><span class="pre">set_custom_kernels()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.setup_and_train"><code class="docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a></li>
@@ -114,6 +115,10 @@
 <li class="toctree-l3"><a class="reference internal" href="hippynn.layers.physics.html">physics module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.layers.regularization.html">regularization module</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">targets module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.targets.AtomizationEnergy"><code class="docutils literal notranslate"><span class="pre">AtomizationEnergy</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.targets.AtomizationEnergy.forward"><code class="docutils literal notranslate"><span class="pre">AtomizationEnergy.forward()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.targets.HBondSymmetric"><code class="docutils literal notranslate"><span class="pre">HBondSymmetric</span></code></a><ul>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.targets.HBondSymmetric.forward"><code class="docutils literal notranslate"><span class="pre">HBondSymmetric.forward()</span></code></a></li>
 </ul>
@@ -180,6 +185,26 @@
 <p>Full Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.layers.targets</span></code> module.
 <a class="reference internal" href="../api_summary/hippynn.layers.targets.html"><span class="doc">Click here for a summary page.</span></a></p>
 <p id="module-hippynn.layers.targets">Layers for target prediction such as Energy and Charge</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.targets.AtomizationEnergy">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AtomizationEnergy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_sizes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#AtomizationEnergy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.AtomizationEnergy" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.targets.AtomizationEnergy.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">all_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vacuum_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_molecules</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#AtomizationEnergy.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.AtomizationEnergy.forward" title="Link to this definition"></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="hippynn.layers.targets.HBondSymmetric">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HBondSymmetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_sizes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_soft_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_hard_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antisymmetric=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity_type=&lt;class</span> <span class="pre">'hippynn.layers.hiplayers.InverseSensitivityModule'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_target=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_pairs=True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/targets.html#HBondSymmetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.targets.HBondSymmetric" title="Link to this definition"></a></dt>

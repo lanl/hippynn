@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.custom_kernels.env_sparse &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
 
@@ -110,9 +110,9 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Pure pytorch implementation of envsum operations</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="kn">from</span> <span class="nn">.registry</span> <span class="kn">import</span> <span class="n">MessagePassingKernels</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">MessagePassingKernels</span>
 
 
 <span class="c1"># TODO: Does resort_pairs_cached give enough to allow direct construction of CSR?</span>
@@ -120,7 +120,7 @@
 
 <div class="viewcode-block" id="make_sparse_sense">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_sparse.html#hippynn.custom_kernels.env_sparse.make_sparse_sense">[docs]</a>
-<span class="k">def</span> <span class="nf">make_sparse_sense</span><span class="p">(</span><span class="n">sensitivities</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">n_atom</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_sparse_sense</span><span class="p">(</span><span class="n">sensitivities</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">n_atom</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct sensitivities as a sparse matrix with shape</span>
 <span class="sd">    (n_atoms * n_nu, n_atoms).</span>
@@ -158,7 +158,7 @@
 
 <div class="viewcode-block" id="envsum">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_sparse.html#hippynn.custom_kernels.env_sparse.envsum">[docs]</a>
-<span class="k">def</span> <span class="nf">envsum</span><span class="p">(</span><span class="n">sensitivities</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">envsum</span><span class="p">(</span><span class="n">sensitivities</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">):</span>
     <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sensitivities</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">n_atom</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">shape</span>
 
@@ -173,7 +173,7 @@
 
 <div class="viewcode-block" id="sensesum">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_sparse.html#hippynn.custom_kernels.env_sparse.sensesum">[docs]</a>
-<span class="k">def</span> <span class="nf">sensesum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sensesum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    Sparse sensesum implementation uses a sparsity matrix</span>
@@ -216,7 +216,7 @@
             <span class="sa">f</span><span class="s2">&quot;Sensitivity values shape changed. Likely more than one pair entry &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;connecting the same atoms. The &#39;sparse&#39; implementation custom kernels do not support &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;pair lists containing duplicate items. &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;Input shape: </span><span class="si">{</span><span class="n">n_pair</span><span class="si">}</span><span class="s2"> Output shape: </span><span class="si">{</span><span class="n">sense_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">n_nu</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ee</span>
+            <span class="sa">f</span><span class="s2">&quot;Input shape: </span><span class="si">{</span><span class="n">n_pair</span><span class="si">}</span><span class="s2"> Output shape: </span><span class="si">{</span><span class="n">sense_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">n_nu</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ee</span>
 
     <span class="n">sense_values</span> <span class="o">=</span> <span class="n">sense_values</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
@@ -232,7 +232,7 @@
 
 <div class="viewcode-block" id="featsum">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_sparse.html#hippynn.custom_kernels.env_sparse.featsum">[docs]</a>
-<span class="k">def</span> <span class="nf">featsum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">featsum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">sense</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">):</span>
     <span class="n">n_atoms</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">shape</span>
 
     <span class="n">sparse_sense</span> <span class="o">=</span> <span class="n">make_sparse_sense</span><span class="p">(</span><span class="n">sense</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">)</span>

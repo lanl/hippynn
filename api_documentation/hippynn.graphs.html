@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>graphs &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
 
@@ -94,6 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_model_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_model_from_cwd()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.log_terminal"><code class="docutils literal notranslate"><span class="pre">log_terminal()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.make_ensemble"><code class="docutils literal notranslate"><span class="pre">make_ensemble()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.reload_settings"><code class="docutils literal notranslate"><span class="pre">reload_settings()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.set_custom_kernels"><code class="docutils literal notranslate"><span class="pre">set_custom_kernels()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.setup_and_train"><code class="docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a></li>
@@ -422,7 +423,7 @@ you have finished your graph-level operations.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hippynn.graphs.find_relatives">
-<span class="sig-name descname"><span class="pre">find_relatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_or_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">why_desc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'&lt;purpose</span> <span class="pre">not</span> <span class="pre">specified&gt;'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/node_functions.html#find_relatives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.find_relatives" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">find_relatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_or_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ancestors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descendants</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">why_desc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'&lt;purpose</span> <span class="pre">not</span> <span class="pre">specified&gt;'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/node_functions.html#find_relatives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.find_relatives" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -432,6 +433,8 @@ you have finished your graph-level operations.</p>
 <li><p>type spec to be used with <cite>isinstance</cite>.</p></li>
 </ol>
 </p></li>
+<li><p><strong>ancestors</strong> – whether to search ancestors of the node set</p></li>
+<li><p><strong>descendants</strong> – whether to search descendants of the node set</p></li>
 <li><p><strong>why_desc</strong> – If a node cannot be found satisfying the constraint, raise an error with this message.</p></li>
 </ul>
 </dd>
@@ -443,7 +446,7 @@ you have finished your graph-level operations.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hippynn.graphs.find_unique_relative">
-<span class="sig-name descname"><span class="pre">find_unique_relative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_or_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">why_desc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'&lt;purpose</span> <span class="pre">not</span> <span class="pre">specified&gt;'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/node_functions.html#find_unique_relative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.find_unique_relative" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">find_unique_relative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_or_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ancestor_fallback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">why_desc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'&lt;purpose</span> <span class="pre">not</span> <span class="pre">specified&gt;'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/node_functions.html#find_unique_relative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.find_unique_relative" title="Link to this definition"></a></dt>
 <dd><p>Look for a unique parent or child node type in the graph connected to the starting node.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -454,6 +457,9 @@ you have finished your graph-level operations.</p>
 <li><p>type to be used with <cite>isinstance</cite>.</p></li>
 </ol>
 </p></li>
+<li><p><strong>ancestor_fallback</strong> – This sets whether or not a unique relative in only the ancestors is acceptable.
+If set to true, and multiple nodes are found, the search will be run
+again with only the ancestors of the initial node set.</p></li>
 <li><p><strong>why_desc</strong> – specification of error message</p></li>
 </ul>
 </dd>
@@ -470,11 +476,15 @@ If more than one node is found, a NodeambiguityError is raised.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hippynn.graphs.get_connected_nodes">
-<span class="sig-name descname"><span class="pre">get_connected_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/node_functions.html#get_connected_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.get_connected_nodes" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_connected_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ancestors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descendants</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/node_functions.html#get_connected_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.get_connected_nodes" title="Link to this definition"></a></dt>
 <dd><p>Recursively return nodes connected to the specified node_set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>node_set</strong> – iterable collection of nodes (list, tuple, set,…)</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_set</strong> – iterable collection of nodes (list, tuple, set,…)</p></li>
+<li><p><strong>ancestors</strong> – whether to search ancestors of the node set</p></li>
+<li><p><strong>descendants</strong> – whether to search descendants of the node set</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>set of nodes with some relationship to the input set.</p>

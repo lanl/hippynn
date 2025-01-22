@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.graphs.nodes.base.algebra &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/custom.css?v=e3456cac" />
 
@@ -110,105 +110,106 @@
 <span class="sd">Machinery for nodes to support native python operators</span>
 <span class="sd">such as addition, multiplication, subtraction.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">functools</span>
-<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">operator</span>
 
-<span class="kn">from</span> <span class="nn">...indextypes</span> <span class="kn">import</span> <span class="n">IdxType</span><span class="p">,</span> <span class="n">get_reduced_index_state</span><span class="p">,</span> <span class="n">elementwise_compare_reduce</span>
-<span class="kn">from</span> <span class="nn">.node_functions</span> <span class="kn">import</span> <span class="n">_BaseNode</span>
-<span class="kn">from</span> <span class="nn">....layers</span> <span class="kn">import</span> <span class="n">algebra</span> <span class="k">as</span> <span class="n">algebra_mods</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdxType</span><span class="p">,</span> <span class="n">get_reduced_index_state</span><span class="p">,</span> <span class="n">elementwise_compare_reduce</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.node_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">_BaseNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">....layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">algebra</span> <span class="k">as</span> <span class="n">algebra_mods</span>
 
 
 <div class="viewcode-block" id="wrap_as_node">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.algebra.html#hippynn.graphs.nodes.base.algebra.wrap_as_node">[docs]</a>
-<span class="k">def</span> <span class="nf">wrap_as_node</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">wrap_as_node</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">main_output</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">_BaseNode</span><span class="p">)</span> <span class="k">else</span> <span class="n">ValueNode</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="coerces_values_to_nodes">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.algebra.html#hippynn.graphs.nodes.base.algebra.coerces_values_to_nodes">[docs]</a>
-<span class="k">def</span> <span class="nf">coerces_values_to_nodes</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">coerces_values_to_nodes</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Wraps non-nodes as ValueNodes.&quot;&quot;&quot;</span>
 
     <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">newfunc</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">newfunc</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">wrap_as_node</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">newfunc</span></div>
 
 
 
-<span class="k">class</span> <span class="nc">_CombNode</span><span class="p">(</span><span class="n">_BaseNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_CombNode</span><span class="p">(</span><span class="n">_BaseNode</span><span class="p">):</span>
     <span class="nd">@coerces_values_to_nodes</span>
-    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">AddNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
 
     <span class="nd">@coerces_values_to_nodes</span>
-    <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">SubNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
 
     <span class="nd">@coerces_values_to_nodes</span>
-    <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">MulNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
 
     <span class="nd">@coerces_values_to_nodes</span>
-    <span class="k">def</span> <span class="fm">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">DivNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
 
     <span class="nd">@coerces_values_to_nodes</span>
-    <span class="k">def</span> <span class="fm">__pow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__pow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">PowNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
 
     <span class="nd">@coerces_values_to_nodes</span>
-    <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">AddNode</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@coerces_values_to_nodes</span>
-    <span class="k">def</span> <span class="fm">__rsub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__rsub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">SubNode</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@coerces_values_to_nodes</span>
-    <span class="k">def</span> <span class="fm">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">MulNode</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@coerces_values_to_nodes</span>
-    <span class="k">def</span> <span class="fm">__rtruediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__rtruediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">DivNode</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@coerces_values_to_nodes</span>
-    <span class="k">def</span> <span class="fm">__rpow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__rpow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">DivNode</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__invert__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__invert__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">InvNode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__pos__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__pos__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="fm">__neg__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__neg__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">NegNode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ValueNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.algebra.html#hippynn.graphs.nodes.base.algebra.ValueNode">[docs]</a>
-<span class="k">class</span> <span class="nc">ValueNode</span><span class="p">(</span><span class="n">_CombNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ValueNode</span><span class="p">(</span><span class="n">_CombNode</span><span class="p">):</span>
     <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Value(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_converted</span> <span class="o">=</span> <span class="n">convert</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="p">(),</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ValueNode.auto_module">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.algebra.html#hippynn.graphs.nodes.base.algebra.ValueNode.auto_module">[docs]</a>
-    <span class="k">def</span> <span class="nf">auto_module</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">algebra_mods</span><span class="o">.</span><span class="n">ValueMod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">auto_module</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">algebra_mods</span><span class="o">.</span><span class="n">ValueMod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_converted</span><span class="p">)</span></div>
 </div>
 
 
 
-<span class="k">class</span> <span class="nc">_PredefinedOp</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_PredefinedOp</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">op</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">torch_module</span> <span class="o">=</span> <span class="n">algebra_mods</span><span class="o">.</span><span class="n">LambdaModule</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
@@ -217,8 +218,8 @@
 
 <div class="viewcode-block" id="UnaryNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.algebra.html#hippynn.graphs.nodes.base.algebra.UnaryNode">[docs]</a>
-<span class="k">class</span> <span class="nc">UnaryNode</span><span class="p">(</span><span class="n">_PredefinedOp</span><span class="p">,</span> <span class="n">_CombNode</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_node</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">UnaryNode</span><span class="p">(</span><span class="n">_PredefinedOp</span><span class="p">,</span> <span class="n">_CombNode</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_node</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classname</span><span class="p">,</span> <span class="n">in_node</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">in_node</span><span class="p">,),</span> <span class="n">module</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">in_node</span><span class="o">.</span><span class="n">_index_state</span></div>
@@ -227,24 +228,24 @@
 
 <div class="viewcode-block" id="InvNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.algebra.html#hippynn.graphs.nodes.base.algebra.InvNode">[docs]</a>
-<span class="k">class</span> <span class="nc">InvNode</span><span class="p">(</span><span class="n">UnaryNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">invert</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InvNode</span><span class="p">(</span><span class="n">UnaryNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">invert</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
 
 <div class="viewcode-block" id="NegNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.algebra.html#hippynn.graphs.nodes.base.algebra.NegNode">[docs]</a>
-<span class="k">class</span> <span class="nc">NegNode</span><span class="p">(</span><span class="n">UnaryNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">neg</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NegNode</span><span class="p">(</span><span class="n">UnaryNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">neg</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
 
 <div class="viewcode-block" id="BinNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.algebra.html#hippynn.graphs.nodes.base.algebra.BinNode">[docs]</a>
-<span class="k">class</span> <span class="nc">BinNode</span><span class="p">(</span><span class="n">_PredefinedOp</span><span class="p">,</span> <span class="n">_CombNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BinNode</span><span class="p">(</span><span class="n">_PredefinedOp</span><span class="p">,</span> <span class="n">_CombNode</span><span class="p">):</span>
     <span class="n">_classname</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
         <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span> <span class="n">right</span><span class="o">.</span><span class="n">main_output</span>
         <span class="n">idxstate</span> <span class="o">=</span> <span class="n">get_reduced_index_state</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
         <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">elementwise_compare_reduce</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
@@ -256,35 +257,35 @@
 
 <div class="viewcode-block" id="AddNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.algebra.html#hippynn.graphs.nodes.base.algebra.AddNode">[docs]</a>
-<span class="k">class</span> <span class="nc">AddNode</span><span class="p">(</span><span class="n">BinNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AddNode</span><span class="p">(</span><span class="n">BinNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
 
 <div class="viewcode-block" id="SubNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.algebra.html#hippynn.graphs.nodes.base.algebra.SubNode">[docs]</a>
-<span class="k">class</span> <span class="nc">SubNode</span><span class="p">(</span><span class="n">BinNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">sub</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SubNode</span><span class="p">(</span><span class="n">BinNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">sub</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
 
 <div class="viewcode-block" id="MulNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.algebra.html#hippynn.graphs.nodes.base.algebra.MulNode">[docs]</a>
-<span class="k">class</span> <span class="nc">MulNode</span><span class="p">(</span><span class="n">BinNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">mul</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MulNode</span><span class="p">(</span><span class="n">BinNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">mul</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
 
 <div class="viewcode-block" id="DivNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.algebra.html#hippynn.graphs.nodes.base.algebra.DivNode">[docs]</a>
-<span class="k">class</span> <span class="nc">DivNode</span><span class="p">(</span><span class="n">BinNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">truediv</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DivNode</span><span class="p">(</span><span class="n">BinNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">truediv</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
 
 <div class="viewcode-block" id="PowNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.algebra.html#hippynn.graphs.nodes.base.algebra.PowNode">[docs]</a>
-<span class="k">class</span> <span class="nc">PowNode</span><span class="p">(</span><span class="n">BinNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">pow</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PowNode</span><span class="p">(</span><span class="n">BinNode</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">pow</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
@@ -298,11 +299,11 @@
 <span class="c1"># broadcasting behavior.</span>
 <div class="viewcode-block" id="AtLeast2D">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.algebra.html#hippynn.graphs.nodes.base.algebra.AtLeast2D">[docs]</a>
-<span class="k">class</span> <span class="nc">AtLeast2D</span><span class="p">(</span><span class="n">_BaseNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AtLeast2D</span><span class="p">(</span><span class="n">_BaseNode</span><span class="p">):</span>
     <span class="n">torch_module</span> <span class="o">=</span> <span class="n">algebra_mods</span><span class="o">.</span><span class="n">AtLeast2D</span><span class="p">()</span>
     <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">NotFound</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;AtLeast2D can only have 1 parent, got </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parents</span><span class="p">)))</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.experiment.evaluator &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
 
@@ -109,14 +109,14 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Evaluating network performance over a dataset</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">from</span> <span class="nn">hippynn.tools</span> <span class="kn">import</span> <span class="n">device_fallback</span><span class="p">,</span> <span class="n">progress_bar</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">device_fallback</span><span class="p">,</span> <span class="n">progress_bar</span>
 
 
 <div class="viewcode-block" id="Evaluator">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.evaluator.html#hippynn.experiment.evaluator.Evaluator">[docs]</a>
-<span class="k">class</span> <span class="nc">Evaluator</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">evaluation_loss</span><span class="p">,</span> <span class="n">evaluation_loss_names</span><span class="p">,</span> <span class="n">plot_maker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_every</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">db_info</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Evaluator</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">evaluation_loss</span><span class="p">,</span> <span class="n">evaluation_loss_names</span><span class="p">,</span> <span class="n">plot_maker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_every</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">db_info</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param model: ``GraphModule``. The model to evaluate .</span>
@@ -141,12 +141,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">model_device</span> <span class="o">=</span> <span class="n">device_fallback</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">var_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">var_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_info</span><span class="p">[</span><span class="s2">&quot;inputs&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_info</span><span class="p">[</span><span class="s2">&quot;targets&quot;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="Evaluator.evaluate">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.evaluator.html#hippynn.experiment.evaluator.Evaluator.evaluate">[docs]</a>
-    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generator</span><span class="p">,</span> <span class="n">eval_type</span><span class="p">,</span> <span class="n">when</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generator</span><span class="p">,</span> <span class="n">eval_type</span><span class="p">,</span> <span class="n">when</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct metrics and activate plotter on a dataloader.</span>
 <span class="sd">        Note: the model is performed on whatever device it resides on.</span>

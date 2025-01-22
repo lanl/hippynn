@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.interfaces.pyseqm_interface.callback &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
 
@@ -106,18 +106,18 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.interfaces.pyseqm_interface.callback</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">hippynn.experiment</span> <span class="kn">import</span> <span class="n">serialization</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.experiment</span><span class="w"> </span><span class="kn">import</span> <span class="n">serialization</span>
 
 <span class="n">time_stamps</span> <span class="o">=</span> <span class="p">[</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()]</span>
 
 <span class="c1"># callback function for update scf eps along epochs</span>
 <div class="viewcode-block" id="update_scf_eps">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.callback.html#hippynn.interfaces.pyseqm_interface.callback.update_scf_eps">[docs]</a>
-<span class="k">def</span> <span class="nf">update_scf_eps</span><span class="p">(</span><span class="n">seqm</span><span class="p">,</span> <span class="n">decay_factor</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span> <span class="n">minimal</span><span class="o">=</span><span class="mf">27.2114e-6</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_scf_eps</span><span class="p">(</span><span class="n">seqm</span><span class="p">,</span> <span class="n">decay_factor</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span> <span class="n">minimal</span><span class="o">=</span><span class="mf">27.2114e-6</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">better_model</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;from callback update_scf_eps&quot;</span><span class="p">)</span>
             <span class="n">p0</span> <span class="o">=</span> <span class="n">seqm</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">hamiltonian</span><span class="o">.</span><span class="n">eps</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
@@ -136,8 +136,8 @@
 
 <div class="viewcode-block" id="update_scf_backward_eps">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.callback.html#hippynn.interfaces.pyseqm_interface.callback.update_scf_backward_eps">[docs]</a>
-<span class="k">def</span> <span class="nf">update_scf_backward_eps</span><span class="p">(</span><span class="n">seqm</span><span class="p">,</span> <span class="n">decay_factor</span><span class="o">=</span><span class="mf">0.96</span><span class="p">,</span> <span class="n">minimal</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_scf_backward_eps</span><span class="p">(</span><span class="n">seqm</span><span class="p">,</span> <span class="n">decay_factor</span><span class="o">=</span><span class="mf">0.96</span><span class="p">,</span> <span class="n">minimal</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">better_model</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;from callback update_scf_backward_eps&quot;</span><span class="p">)</span>
             <span class="n">p0</span> <span class="o">=</span> <span class="n">seqm</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">hamiltonian</span><span class="o">.</span><span class="n">scf_backward_eps</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
@@ -156,10 +156,10 @@
 
 <div class="viewcode-block" id="save_and_stop_after">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.callback.html#hippynn.interfaces.pyseqm_interface.callback.save_and_stop_after">[docs]</a>
-<span class="k">def</span> <span class="nf">save_and_stop_after</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_and_stop_after</span><span class="p">(</span>
     <span class="n">training_modules</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">metric_tracker</span><span class="p">,</span> <span class="n">store_all_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">store_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">queue_time</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
 <span class="p">):</span>
-    <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">):</span>
         <span class="n">time_stamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
         <span class="n">n_epochs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">time_stamps</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="n">time_epoch</span> <span class="o">=</span> <span class="p">[</span><span class="n">time_stamps</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">time_stamps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_epochs</span><span class="p">)]</span>

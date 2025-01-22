@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.graphs.indextypes.registry &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
 
@@ -114,10 +114,10 @@
 <span class="sd">The index transformers do not live here because they are themselves</span>
 <span class="sd">nodes, and this package should be minimally dependent on the nodes themselves.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_debprint</span>
-<span class="kn">from</span> <span class="nn">.type_def</span> <span class="kn">import</span> <span class="n">IdxType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_debprint</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.type_def</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdxType</span>
 
 <span class="c1"># fmt: off</span>
 <span class="n">_db_index_states</span> <span class="o">=</span> <span class="p">{</span>
@@ -174,7 +174,7 @@
 
 <div class="viewcode-block" id="clear_index_cache">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.registry.html#hippynn.graphs.indextypes.clear_index_cache">[docs]</a>
-<span class="k">def</span> <span class="nf">clear_index_cache</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">clear_index_cache</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Remove any cached index types for nodes.</span>
 
@@ -193,7 +193,7 @@
 
 <div class="viewcode-block" id="assign_index_aliases">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.registry.html#hippynn.graphs.indextypes.assign_index_aliases">[docs]</a>
-<span class="k">def</span> <span class="nf">assign_index_aliases</span><span class="p">(</span><span class="o">*</span><span class="n">nodes</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">assign_index_aliases</span><span class="p">(</span><span class="o">*</span><span class="n">nodes</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Store the input set of nodes in the index cache as index aliases of each other.</span>
 
@@ -230,7 +230,7 @@
 
 <div class="viewcode-block" id="register_index_transformer">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.registry.html#hippynn.graphs.indextypes.register_index_transformer">[docs]</a>
-<span class="k">def</span> <span class="nf">register_index_transformer</span><span class="p">(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_index_transformer</span><span class="p">(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decorator for registering a transformer from one IdxType to another.</span>
 
@@ -261,12 +261,12 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_index_dispatch_table</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Index dispatch for (</span><span class="si">{}</span><span class="s2">)-&gt;(</span><span class="si">{}</span><span class="s2">) already defined!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">))</span>
 
         <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-        <span class="k">def</span> <span class="nf">wrapped</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">wrapped</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="n">idxcache_info</span> <span class="o">=</span> <span class="p">(</span><span class="n">output_idxstate</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">idxcache_info</span> <span class="ow">in</span> <span class="n">_index_cache</span><span class="p">:</span>
                 <span class="n">output_node</span> <span class="o">=</span> <span class="n">_index_cache</span><span class="p">[</span><span class="n">idxcache_info</span><span class="p">]</span>
@@ -302,7 +302,7 @@
 
     <span class="c1"># register no-op transformer</span>
     <span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span> <span class="n">idxt</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">scalar_promote</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">__idxt</span><span class="o">=</span><span class="n">idxt</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">scalar_promote</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">__idxt</span><span class="o">=</span><span class="n">idxt</span><span class="p">):</span>
         <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> Allowing view of Scalar </span><span class="si">{}</span><span class="s2"> as type </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">__idxt</span><span class="p">))</span>
 
         <span class="c1"># Node index transformers (see #register_index_transformer) return</span>
@@ -311,7 +311,7 @@
         <span class="c1"># behavior and passes the node through unchanged.</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="n">node</span><span class="p">,</span>  <span class="c1"># Parents are defined as a tuple</span>
 
-        <span class="k">def</span> <span class="nf">passthrough_node_factory</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">passthrough_node_factory</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">):</span>
             <span class="p">(</span><span class="n">node</span><span class="p">,)</span> <span class="o">=</span> <span class="n">parents</span>  <span class="c1"># Unwrap the tuple</span>
             <span class="k">return</span> <span class="n">node</span>
 

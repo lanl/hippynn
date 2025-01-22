@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.databases.SNAPJson &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=e3456cac" />
 
@@ -109,22 +109,22 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Load database from SNAP format.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">json</span><span class="o">,</span> <span class="nn">glob</span><span class="o">,</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span><span class="o">,</span><span class="w"> </span><span class="nn">glob</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">Database</span>
-<span class="kn">from</span> <span class="nn">.restarter</span> <span class="kn">import</span> <span class="n">Restartable</span>
-<span class="kn">from</span> <span class="nn">..tools</span> <span class="kn">import</span> <span class="n">pad_np_array_to_length_with_zeros</span> <span class="k">as</span> <span class="n">padax</span>
-<span class="kn">from</span> <span class="nn">..tools</span> <span class="kn">import</span> <span class="n">progress_bar</span><span class="p">,</span> <span class="n">np_of_torchdefaultdtype</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.database</span><span class="w"> </span><span class="kn">import</span> <span class="n">Database</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.restarter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Restartable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">pad_np_array_to_length_with_zeros</span> <span class="k">as</span> <span class="n">padax</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">progress_bar</span><span class="p">,</span> <span class="n">np_of_torchdefaultdtype</span>
 
-<span class="kn">from</span> <span class="nn">ase.data</span> <span class="kn">import</span> <span class="n">chemical_symbols</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">chemical_symbols</span>
 
 
 <div class="viewcode-block" id="SNAPDirectoryDatabase">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.SNAPJson.html#hippynn.databases.SNAPJson.SNAPDirectoryDatabase">[docs]</a>
-<span class="k">class</span> <span class="nc">SNAPDirectoryDatabase</span><span class="p">(</span><span class="n">Database</span><span class="p">,</span> <span class="n">Restartable</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SNAPDirectoryDatabase</span><span class="p">(</span><span class="n">Database</span><span class="p">,</span> <span class="n">Restartable</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">directory</span><span class="p">,</span>
         <span class="n">inputs</span><span class="p">,</span>
@@ -165,7 +165,7 @@
 
 <div class="viewcode-block" id="SNAPDirectoryDatabase.load_arrays">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.SNAPJson.html#hippynn.databases.SNAPJson.SNAPDirectoryDatabase.load_arrays">[docs]</a>
-    <span class="k">def</span> <span class="nf">load_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
@@ -194,7 +194,7 @@
 
 <div class="viewcode-block" id="SNAPDirectoryDatabase.filter_arrays">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.SNAPJson.html#hippynn.databases.SNAPJson.SNAPDirectoryDatabase.filter_arrays">[docs]</a>
-    <span class="k">def</span> <span class="nf">filter_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr_dict</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr_dict</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Arrays found: &quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">arr_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 
@@ -215,7 +215,7 @@
 
 <div class="viewcode-block" id="SNAPDirectoryDatabase.extract_snap_file">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.SNAPJson.html#hippynn.databases.SNAPJson.SNAPDirectoryDatabase.extract_snap_file">[docs]</a>
-    <span class="k">def</span> <span class="nf">extract_snap_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_snap_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rt&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">jf</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_comments</span><span class="p">):</span>
                 <span class="n">comment</span> <span class="o">=</span> <span class="n">jf</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
@@ -236,7 +236,7 @@
 
 <div class="viewcode-block" id="SNAPDirectoryDatabase.process_configs">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.SNAPJson.html#hippynn.databases.SNAPJson.SNAPDirectoryDatabase.process_configs">[docs]</a>
-    <span class="k">def</span> <span class="nf">process_configs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configs</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_configs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configs</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">):</span>
 
         <span class="n">arr_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">all_keys</span> <span class="o">=</span> <span class="s2">&quot;AtomTypes&quot;</span><span class="p">,</span> <span class="s2">&quot;Energy&quot;</span><span class="p">,</span> <span class="s2">&quot;Forces&quot;</span><span class="p">,</span> <span class="s2">&quot;Lattice&quot;</span><span class="p">,</span> <span class="s2">&quot;Positions&quot;</span><span class="p">,</span> <span class="s2">&quot;Group&quot;</span><span class="p">,</span> <span class="s2">&quot;FileName&quot;</span><span class="p">,</span> <span class="s2">&quot;SubConfig&quot;</span>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>hippynn.interfaces.pyseqm_interface.mlseqm &mdash; hippynn 0+unknown documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
 
@@ -106,20 +106,20 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.interfaces.pyseqm_interface.mlseqm</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">from</span> <span class="nn">seqm.basics</span> <span class="kn">import</span> <span class="n">Energy</span><span class="p">,</span> <span class="n">Force</span><span class="p">,</span> <span class="n">parameterlist</span>
-<span class="kn">from</span> <span class="nn">seqm.seqm_functions.constants</span> <span class="kn">import</span> <span class="n">Constants</span>
-<span class="kn">from</span> <span class="nn">seqm.seqm_functions.parameters</span> <span class="kn">import</span> <span class="n">params</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.base</span> <span class="kn">import</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">SingleNode</span>
-<span class="kn">from</span> <span class="nn">hippynn.graphs.indextypes</span> <span class="kn">import</span> <span class="n">IdxType</span>
-<span class="kn">from</span> <span class="nn">hippynn.graphs.nodes.inputs</span> <span class="kn">import</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">SpeciesNode</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">seqm.basics</span><span class="w"> </span><span class="kn">import</span> <span class="n">Energy</span><span class="p">,</span> <span class="n">Force</span><span class="p">,</span> <span class="n">parameterlist</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">seqm.seqm_functions.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">seqm.seqm_functions.parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">params</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">SingleNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdxType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.inputs</span><span class="w"> </span><span class="kn">import</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">SpeciesNode</span>
 
 
 <div class="viewcode-block" id="MLSEQM">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.mlseqm.html#hippynn.interfaces.pyseqm_interface.mlseqm.MLSEQM">[docs]</a>
-<span class="k">class</span> <span class="nc">MLSEQM</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seqm_parameters</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MLSEQM</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seqm_parameters</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">learned</span> <span class="o">=</span> <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;learned&quot;</span><span class="p">]</span>  <span class="c1"># parameters for each real atom</span>
         <span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;Hf_flag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># true: Hf, false: Etot-Eiso</span>
@@ -144,7 +144,7 @@
 
 <div class="viewcode-block" id="MLSEQM.save">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.mlseqm.html#hippynn.interfaces.pyseqm_interface.mlseqm.MLSEQM.save">[docs]</a>
-    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fdir</span><span class="o">=</span><span class="s2">&quot;./MLSEQM/&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fdir</span><span class="o">=</span><span class="s2">&quot;./MLSEQM/&quot;</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fdir</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;mkdir </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fdir</span><span class="p">)</span>
         <span class="n">fn</span> <span class="o">=</span> <span class="n">fdir</span> <span class="o">+</span> <span class="s2">&quot;parameters_&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">+</span> <span class="s2">&quot;_MOPAC.csv&quot;</span>
@@ -167,7 +167,7 @@
 
 <div class="viewcode-block" id="MLSEQM.forward">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.mlseqm.html#hippynn.interfaces.pyseqm_interface.mlseqm.MLSEQM.forward">[docs]</a>
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">species</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">species</span><span class="p">):</span>
         <span class="n">cond</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
         <span class="n">Z</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="n">cond</span><span class="p">]</span>
         <span class="n">learned_parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -198,7 +198,7 @@
 
 <div class="viewcode-block" id="MLSEQM_Node">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.mlseqm.html#hippynn.interfaces.pyseqm_interface.mlseqm.MLSEQM_Node">[docs]</a>
-<span class="k">class</span> <span class="nc">MLSEQM_Node</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MLSEQM_Node</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
     <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;Positions&quot;</span><span class="p">,</span> <span class="s2">&quot;Species&quot;</span>
     <span class="n">_output_names</span> <span class="o">=</span> <span class="p">(</span>
         <span class="s2">&quot;mol_energy&quot;</span><span class="p">,</span>
@@ -216,7 +216,7 @@
     <span class="n">_output_index_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">_output_names</span><span class="p">)</span>
     <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">MLSEQM</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">seqm_parameters</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">seqm_parameters</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">seqm_parameters</span><span class="o">=</span><span class="n">seqm_parameters</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
