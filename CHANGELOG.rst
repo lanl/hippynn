@@ -32,6 +32,7 @@ New Features:
 - Added the ability to weight different systems/atoms/bonds in a loss function.
 - Added new function to reload library settings.
 - Added atomization-consistent node which exactly constrains their predictions in a dissociated limit.
+- Added node to split by species. Can be used to calculate or plot loss by species.
 
 
 Improvements:
