@@ -32,7 +32,8 @@ New Features:
 - Added the ability to weight different systems/atoms/bonds in a loss function.
 - Added new function to reload library settings.
 - Added atomization-consistent node which exactly constrains their predictions in a dissociated limit.
-
+- New ASELangevinDynamics updater for MD module. Implements the algorithm used by ASE. Different from 
+  older LangevinDynamics updater. Expected to be more numerically stable. 
 
 Improvements:
 -------------
