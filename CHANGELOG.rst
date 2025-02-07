@@ -58,6 +58,9 @@ Bug Fixes:
 - Fixed error when LAMMPS interface is in kokkos mode and the kokkos device was set to CPU.
 - MLIAPInterface objects
 - Fixed bug with RDF computer automatic initialization.
+- KDTreeNeighbors finds at most one pair for each set of points. If pair cutoff is more than half
+  the length of one of the cell sides, it will fail to identify all of the pairs. Added error if
+  this occurs.
 
 0.0.3
 =======
