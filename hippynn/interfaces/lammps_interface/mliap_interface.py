@@ -1,4 +1,6 @@
 """
+Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
 Interface for creating LAMMPS MLIAP Unified models.
 """
 import pickle
@@ -20,6 +22,7 @@ from hippynn.graphs.nodes.indexers import PaddingIndexer
 from hippynn.graphs.nodes.physics import GradientNode, VecMag
 from hippynn.graphs.nodes.inputs import SpeciesNode
 from hippynn.graphs.nodes.pairs import PairFilter
+import hippynn.layers.hiplayers
 
 
 class MLIAPInterface(MLIAPUnified):
@@ -64,6 +67,7 @@ class MLIAPInterface(MLIAPUnified):
         self.compute_dtype = compute_dtype
         self.graph.to(compute_dtype)
 
+
     def compute_gradients(self, data):
         pass
 
@@ -82,6 +86,9 @@ class MLIAPInterface(MLIAPUnified):
         :return None
         This function writes results to the input `data`.
         """
+        if hippynn.settings.PYTORCH_GPU_MEM_FRAC < 1.0:
+            torch.cuda.set_per_process_memory_fraction(hippynn.settings.PYTORCH_GPU_MEM_FRAC)
+
         nlocal = self.as_tensor(data.nlistatoms)
         if nlocal.item() > 0:
             # If there are no local atoms, do nothing
@@ -98,12 +105,43 @@ class MLIAPInterface(MLIAPUnified):
                 pair_j = self.empty_tensor(0).type(torch.int64)
                 rij = self.empty_tensor([0, 3]).type(self.compute_dtype)
 
+            #Add pre-forward hooks and post-backwards hooks for message passing
+            #comms to interaction layers in graph
+            hipnn_types = [hippynn.graphs.nodes.networks.Hipnn,
+                           hippynn.graphs.nodes.networks.HipnnVec,
+                           hippynn.graphs.nodes.networks.HipnnQuad]
+            hipnn_nodes = [n for n in self.graph.forward_output_list 
+                              if type(n) in hipnn_types ] 
+
+            found_first=False
+            for hipnn in hipnn_nodes:
+                for block in hipnn.torch_module.blocks:
+                    for module in [m.base_layer for m in block]:
+                        #The first ineraction layer does not need the
+                        #forward_pre_hook nor the backward hook since the first
+                        #input layer are positions of ghosts which are already
+                        #known. Exchanging these inputs anyway should not affect
+                        #the answer.
+                        if issubclass(type(module),hippynn.layers.hiplayers.InteractLayer):
+                            if not found_first:
+                                #Don't add hooks to first layer, they're unnecessary
+                                found_first = True
+                                continue
+
+                            module.mliap_data = data
+
+                            if not any( [h.__name__ == "comms_forward_pre_hook" for h in module._forward_pre_hooks.values()] ):
+                                module.register_forward_pre_hook(comms_forward_pre_hook)
+                            if not any( [h.__name__ == "comms_backward_hook" for h in module._backward_hooks.values()] ):
+                                module.register_full_backward_hook(comms_backward_hook)
+
             if self.distance_unit is not None:
                 rij = self.dist_unit * rij
 
             # note your sign for rij might need to be +1 or -1, depending on how your implementation works
             inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
             atom_energy, total_energy, fij = self.graph(*inputs)
+
             # Test if we are using lammps-kokkos or not. Is there a more clear way to do that?
             using_kokkos = "kokkos" in data.__class__.__module__.lower()
             if using_kokkos:
@@ -167,6 +205,54 @@ class MLIAPInterface(MLIAPUnified):
 
         self.species_set = self.species_set.to(self.model_device)
         self.graph.to(self.model_device)
+
+def comms_forward_pre_hook(module, args):# -> None or modified input
+    """
+    :param module: Torch Module for Interaction Layer
+    :param args: list of arguments intercepted from module's forward, features input missing features in ghosts
+    :return modded_args: list of arguments passed on to forward now with ghost inputs
+    Invokes blocking MPI exchanges within LAMMPS to retrieve ghost inputs
+    """
+    local_in_features = args[0]
+
+    global_in_features = local_in_features #We can modify in-place in the forward_pre_hook
+
+    module.mliap_data.forward_exchange(local_in_features,global_in_features,
+                                       local_in_features.shape[1])
+
+    modded_args = (global_in_features,) + args[1:]
+
+    return modded_args
+
+def comms_backward_hook(module, grad_input, grad_output):
+    """
+    :param module: Torch Module for Interaction Layer
+    :param grad_input: Gradient (of atom energies) with respect to inputs of forward, only features missing comms.  
+    :param grad_output: list of arguments intercepted from module's forward, missing ghost inputs
+    :return modded_grad_input: Gradient with respect to inputs now with comms.
+    Invokes blocking MPI exchanges within LAMMPS to retrieve ghost inputs
+
+    The gradient with respect to the input features in grad_input contains
+    contributions to gradients for other ranks within this rank's ghosts and is
+    missing contributions to this rank's owned atoms on other ranks. After
+    comms, modded_grad_input will have zero'ed out the ghosts (sent to other
+    processors) and added gradient contributions from other rank's ghosts into
+    this rank's owned atoms.
+    """
+
+    #Only the gradients with respect to the first input need changes
+    local_grad_in_features = grad_input[0]
+
+    #Can't modify in-place in backward_hook
+    global_grad_in_features = local_grad_in_features.detach().clone() # Copy entire tensor
+
+    #Comms from ghosts into owned atoms is a "reverse" comms in LAMMPS
+    module.mliap_data.reverse_exchange(local_grad_in_features,global_grad_in_features,
+                                        local_grad_in_features.shape[1])
+
+    modded_grad_input = (global_grad_in_features,) + grad_input[1:]
+
+    return modded_grad_input
 
 
 def setup_LAMMPS_graph(energy):
