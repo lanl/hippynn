@@ -211,9 +211,9 @@ class FuzzyHistogrammer(AutoKw, SingleNode):
 
         super().__init__(name, parents, module=module, **kwargs)
 
-class SpeciesIndexed(AutoNoKw, SingleNode, ExpandParents):
+class SpeciesIndexer(AutoNoKw, SingleNode, ExpandParents):
     _input_names = "values", "onehot_encoding"
-    _auto_module_class = index_modules.SpeciesIndex
+    _auto_module_class = index_modules.SpeciesIndexer
     _index_state = IdxType.Atoms
 
     @_parent_expander.match(_BaseNode)

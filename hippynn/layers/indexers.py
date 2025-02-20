@@ -272,7 +272,7 @@ class FuzzyHistogram(torch.nn.Module):
         histo = torch.exp(-((x / self.sigma) ** 2) / 4)
         return torch.flatten(histo, end_dim=1)
     
-class SpeciesIndex(torch.nn.Module):
+class SpeciesIndexer(torch.nn.Module):
     def forward(self, values, onehot_encoding):
         n_species = onehot_encoding.shape[1]
         values_by_species = []
