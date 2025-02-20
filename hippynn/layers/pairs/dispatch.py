@@ -148,10 +148,12 @@ def neighbor_list_kdtree(cutoff, coords, cell):
     if torch.count_nonzero(cell_prod - torch.diag(torch.diag(cell_prod))):
         raise ValueError("KD Tree search only works for orthorhombic cells.")
     
-    # Verify that the cutoff is less than the side lengths of the cell
+    # Verify that the cutoff is less half the shortest cell side length. Otherwise, it is possible to 
+    # have multiple images of the same point be within the cutoff distance of another point. The
+    # current algorithm is unable to handle this. 
     cell_side_lengths = torch.sqrt(torch.diag(cell_prod))
-    if (cutoff >= cell_side_lengths).any():
-        raise ValueError(f"Cutoff value ({cutoff}) must be less than the cell slide lengths ({cell_side_lengths}).")
+    if (cutoff >= cell_side_lengths/2).any():
+        raise ValueError(f"Cutoff value ({cutoff}) must be less than half the shortest cell side length ({cell_side_lengths.min()}).")
     
     if torch.count_nonzero(cell - torch.diag(torch.diag(cell))):
         # Transform via isometry to a basis where cell is a diagonal matrix if it currently is not

@@ -32,8 +32,10 @@ New Features:
 - Added the ability to weight different systems/atoms/bonds in a loss function.
 - Added new function to reload library settings.
 - Added atomization-consistent node which exactly constrains their predictions in a dissociated limit.
+- Added node to split by species. Can be used to calculate or plot loss by species.
 - New ASELangevinDynamics updater for MD module. Implements the algorithm used by ASE. Different from 
   older LangevinDynamics updater. Expected to be more numerically stable. 
+
 
 Improvements:
 -------------
@@ -59,6 +61,9 @@ Bug Fixes:
 - Fixed error when LAMMPS interface is in kokkos mode and the kokkos device was set to CPU.
 - MLIAPInterface objects
 - Fixed bug with RDF computer automatic initialization.
+- KDTreeNeighbors finds at most one pair for each set of points. If pair cutoff is more than half
+  the length of one of the cell sides, it will fail to identify all of the pairs. Added error if
+  this occurs.
 
 0.0.3
 =======
