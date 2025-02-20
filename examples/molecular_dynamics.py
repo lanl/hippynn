@@ -53,16 +53,13 @@ positions_node = model.node_from_name("coordinates")
 energy_node = model.node_from_name("energy")
 force_node = physics.GradientNode("force", (energy_node, positions_node), sign=-1)
 
-# Replace pair-finder with more efficient one so that system can fit on GPU
-old_pairs_node = model.node_from_name("PairIndexer")
-species_node = model.node_from_name("species")
-cell_node = model.node_from_name("cell")
-new_pairs_node = KDTreePairsMemory("PairIndexer", parents=(positions_node, species_node, cell_node), skin=1.0, dist_hard_max=7.5)
-replace_node(old_pairs_node, new_pairs_node)
-
+#create Predictor object
 model = Predictor(inputs=model.input_nodes, outputs=[force_node])
 model.to(device)
 model.to(torch.float64)
+
+# Replace pair-finder with more efficient one so that system can fit on GPU
+model.swap_pairfinder(KDTreePairsMemory, name="PairIndexer", module_kwargs={'skin': 1.0, 'dist_hard_max': 7.5})
 
 # Use ASE to generate initial positions and velocities
 atoms = ase.build.bulk("Al", crystalstructure="fcc", a=4.05, orthorhombic=True)

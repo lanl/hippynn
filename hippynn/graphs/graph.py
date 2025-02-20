@@ -8,8 +8,10 @@ import torch
 
 from .nodes.base.node_functions import _BaseNode
 from .nodes.base import InputNode
+from .nodes.tags import PairIndexer
 
-from . import get_subgraph, compute_evaluation_order
+
+from . import get_subgraph, compute_evaluation_order, replace_node, find_unique_relative
 
 from .. import settings
 
@@ -123,6 +125,23 @@ class GraphModule(torch.nn.Module):
         return "Inputs: {} \n Outputs: {}".format(
             tuple(x.name for x in self.input_nodes), tuple(x.name for x in self.nodes_to_compute)
         )
+    
+    def swap_pairfinder(self, pairfinder, name=None, module_kwargs={}):
+        old_pairfinder = find_unique_relative(self.nodes_to_compute, PairIndexer)
+        new_name = (name or old_pairfinder.name)
+
+        possible_parents = [old_pairfinder.parents, self.input_nodes, tuple(set(old_pairfinder.parents) | set(self.input_nodes))]
+        while True:
+            try:
+                parents = possible_parents.pop(0)
+                new_pairfinder = pairfinder(new_name, parents=parents, **module_kwargs)
+                break
+            except RuntimeError: # could not build graph automatically
+                pass
+            except IndexError: # empty list
+                raise RuntimeError(f"Could not determine parents for new pairfinder automatically. Please specify as an entry in the module_kwargs dictionary parameter.")
+        replace_node(old_pairfinder, new_pairfinder, disconnect_old=True)
+        self.__init__(self.input_nodes, self.nodes_to_compute)
 
     def forward(self, *input_values):
         # Add gradient computation if needed (e.g. for force computation)
