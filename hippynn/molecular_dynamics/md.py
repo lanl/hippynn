@@ -425,18 +425,21 @@ class MolecularDynamics:
         model: Predictor,
         device: Optional[torch.device] = None,
         dtype: Optional[torch.dtype] = None,
+        batch_size: Optional[int] = None
     ):
         """
         :param variables: list of Variable objects which will be tracked during simulation
         :param model: HIPNN Predictor
         :param device: device to move variables and model to, defaults to None
         :param dtype: dtype to convert all float type variable data and model parameters to, defaults to None
+        :param batch_size: batch size passed to model.__call__
         """
 
         self.variables = variables
         self.model = model
         self.device = device
         self.dtype = dtype
+        self.batch_size = batch_size
 
         self._data = dict()
 
@@ -535,6 +538,7 @@ class MolecularDynamics:
             for variable in self.variables
             for hipnn_db_name, variable_key in variable.model_input_map.items()
         }
+        model_inputs['batch_size'] = self.batch_size
 
         model_outputs = self.model(**model_inputs)
 
