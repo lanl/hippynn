@@ -35,7 +35,7 @@ New Features:
 - Added node to split by species. Can be used to calculate or plot loss by species.
 - New ASELangevinDynamics updater for MD module. Implements the algorithm used by ASE. Different from 
   older LangevinDynamics updater. Expected to be more numerically stable. 
-
+- Added batch size to MolecularDynamics class. This is passed to the model during each step.
 
 Improvements:
 -------------
