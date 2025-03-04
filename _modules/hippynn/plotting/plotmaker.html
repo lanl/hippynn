@@ -117,7 +117,7 @@
 
 
 <div class="viewcode-block" id="PlotMaker">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.plotting.html#hippynn.plotting.PlotMaker">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.plotting.plotmaker.html#hippynn.plotting.PlotMaker">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PlotMaker</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The plot maker is responsible for collecting the data for the plotters and executing the plotters.</span>
@@ -137,7 +137,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">torch_module</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="PlotMaker.assemble_module">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.plotting.html#hippynn.plotting.PlotMaker.assemble_module">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.plotting.plotmaker.html#hippynn.plotting.PlotMaker.assemble_module">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">assemble_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_outputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
         <span class="n">model_outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">pred</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">model_outputs</span><span class="p">]</span>
         <span class="n">targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">true</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">]</span>
@@ -153,7 +153,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">plotter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotters</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">plotter</span><span class="o">.</span><span class="n">parents</span><span class="p">]</span>
 
 <div class="viewcode-block" id="PlotMaker.make_plots">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.plotting.html#hippynn.plotting.PlotMaker.make_plots">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.plotting.plotmaker.html#hippynn.plotting.PlotMaker.make_plots">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">sub_location</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">computed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">torch_module</span><span class="p">(</span><span class="o">*</span><span class="n">outputs</span><span class="p">,</span> <span class="o">*</span><span class="n">targets</span><span class="p">)</span>
         <span class="n">remaining_data</span> <span class="o">=</span> <span class="n">computed_data</span>
@@ -177,7 +177,7 @@
 
 
 <div class="viewcode-block" id="PlotMaker.make_full_location">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.plotting.html#hippynn.plotting.PlotMaker.make_full_location">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.plotting.plotmaker.html#hippynn.plotting.PlotMaker.make_full_location">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">make_full_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sub_location</span><span class="p">):</span>
         <span class="n">sub_location</span> <span class="o">=</span> <span class="n">sub_location</span> <span class="k">if</span> <span class="n">sub_location</span> <span class="k">else</span> <span class="s2">&quot;Unspecified&quot;</span>
         <span class="n">location</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_dir</span><span class="p">,</span> <span class="n">sub_location</span><span class="p">)</span>
@@ -189,7 +189,7 @@
 
 
 <div class="viewcode-block" id="PlotMaker.plot_phase">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.plotting.html#hippynn.plotting.PlotMaker.plot_phase">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.plotting.plotmaker.html#hippynn.plotting.PlotMaker.plot_phase">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_phase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction_all_vals</span><span class="p">,</span> <span class="n">target_all_vals</span><span class="p">,</span> <span class="n">when</span><span class="p">,</span> <span class="n">eval_type</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">when</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># If integer, convert to epoch number string IF it is time to plot.</span>
