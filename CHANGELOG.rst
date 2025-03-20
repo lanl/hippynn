@@ -68,6 +68,8 @@ Bug Fixes:
 - KDTreeNeighbors finds at most one pair for each set of points. If pair cutoff is more than half
   the length of one of the cell sides, it will fail to identify all of the pairs. Added error if
   this occurs.
+- In order to remain compatible with the latest PyTorch releases, explicitly set `weights_only=False` 
+  in calls of `torch.load`.
 
 0.0.3
 =======
