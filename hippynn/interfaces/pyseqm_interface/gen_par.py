@@ -27,8 +27,8 @@ class gen_par(torch.nn.Module):
         self.state_file = state_file
         self.par_atom_node_name = par_atom_node_name
         self.seqm_node_name = seqm_node_name
-        structure = torch.load(model_file, map_location=device)
-        state = torch.load(state_file, map_location=device)
+        structure = torch.load(model_file, map_location=device, weights_only=False)
+        state = torch.load(state_file, map_location=device, weights_only=False)
         structure["training_modules"][0].load_state_dict(state["model"])
         structure["controller"].load_state_dict(state["controller"])
         self.model = structure["training_modules"][0]
