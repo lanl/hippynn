@@ -3,7 +3,6 @@ import torch
 torch.set_default_dtype(torch.float32)
 
 from hippynn.experiment.serialization import load_checkpoint_from_cwd
-from hippynn.graphs.nodes.base.algebra import AddNode
 from hippynn.tools import active_directory, device_fallback
 
 from hippynn.interfaces.lammps_interface import MLIAPInterface
@@ -17,7 +16,7 @@ def save_model_for_lammps(model_folder, mliap_filename = "mliap_unified_hippynn.
         henergy_node = model.node_from_name("HEnergy")
         repulse_node = model.node_from_name("repulse")
 
-        atom_energies = AddNode(henergy_node.atom_energies, repulse_node.atom_energies)
+        atom_energies = henergy_node.atom_energies + repulse_node.atom_energies
 
         species_names = ["MeOH"]
 

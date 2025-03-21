@@ -9,7 +9,6 @@ from hippynn.experiment.assembly import assemble_for_training
 from hippynn.experiment.controllers import RaiseBatchSizeOnPlateau, PatienceController
 from hippynn.graphs import IdxType
 from hippynn.graphs.nodes import loss
-from hippynn.graphs.nodes.base.algebra import AddNode
 from hippynn.graphs.nodes.indexers import acquire_encoding_padding
 from hippynn.graphs.nodes.inputs import SpeciesNode, PositionsNode, CellNode
 from hippynn.graphs.nodes.networks import HipnnQuad
@@ -79,7 +78,7 @@ repulse = RepulsivePotentialNode(
 )
 
 # Combined energy prediction
-sys_energy = AddNode(henergy.mol_energy, repulse.mol_energy)
+sys_energy = henergy.mol_energy + repulse.mol_energy
 sys_energy.name = "sys_energies"
 sys_energy._index_state = IdxType.Molecules
 
