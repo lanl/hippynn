@@ -482,9 +482,6 @@ def swap_pairfinders(node_or_nodes, new_pairfinder, new_node_name=None, cell_nod
     Finds and replaces existing PairIndexer node with a new one, potentially adjusting its parent nodes
     if needed.
 
-    NOTE: If this function is used to add a CellNode to the computational graph, any existing GraphModule or 
-    Predictor will need to be reinitialized.
-
     :param node_or_nodes: the PairIndexer node to be replaced, or a node or list of nodes connected
     to the unique PairIndexer to be replaced
     :param new_pairfinder: class of new PairIndexer 
@@ -494,8 +491,13 @@ def swap_pairfinders(node_or_nodes, new_pairfinder, new_node_name=None, cell_nod
     exist in computational graph, if None a search of existing nodes will be conducted if a CellNode is 
     needed, defaults to None
     :param module_kwargs: arguments to feed into the new PairIndexer constructor, defaults to {}
-    """
+
+    .. Note::
     
+        If this function is used to add a CellNode to the computational graph, any existing GraphModule or 
+        Predictor will need to be reinitialized.
+    """
+
     from .nodes.tags import PairIndexer, Positions, Species
     from .nodes.inputs import CellNode
 
