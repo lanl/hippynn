@@ -80,7 +80,7 @@ energy = check["training_modules"].model.node_from_name("sys_energy")
 model = Predictor.from_graph(
     check["training_modules"].model,
     additional_outputs=[
-        repulse.mol_energies,
+        repulse.mol_energy,
         energy,
     ],
 )

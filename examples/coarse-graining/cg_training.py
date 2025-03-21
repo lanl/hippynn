@@ -79,7 +79,7 @@ repulse = RepulsivePotentialNode(
 
 # Combined energy prediction
 sys_energy = henergy.mol_energy + repulse.mol_energy
-sys_energy.name = "sys_energies"
+sys_energy.name = "sys_energy"
 sys_energy._index_state = IdxType.Molecules
 
 # Force node

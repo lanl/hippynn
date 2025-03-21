@@ -52,6 +52,7 @@ Improvements:
 - Improved computational efficiency of HIP-NN-TS network.
 - ``StressForceNode`` now also works with batch size greater than 1.
 - Allow testing of splits of arbitrary names using test_model, as long as those splits contain the required variables.
+- Add example of how to use LAMMPS with a hippynn coarse-grained force field to the ``coarse-graining`` example.
 
 
 Bug Fixes:
