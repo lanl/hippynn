@@ -9,7 +9,7 @@ from .nodes.base.algebra import ValueNode
 from .nodes.base.node_functions import NodeNotFound, NodeOperationError
 from .indextypes import soft_index_type_coercion
 
-from . import get_connected_nodes, find_relatives, find_unique_relative
+from . import get_connected_nodes, find_unique_relative
 from ..tools import is_equal_state_dict
 
 
@@ -477,32 +477,42 @@ def vacuum_outputs(node_list, species_set):
 
     return new_nodes
 
-def swap_pairfinders(target, new_pairfinder, cell_node=None, module_kwargs={}):
+def swap_pairfinders(node_or_nodes, new_pairfinder, new_node_name=None, cell_node=None, module_kwargs={}):
+    """
+    Finds and replaces existing PairIndexer node with a new one, potentially adjusting its parent nodes
+    if needed.
+
+    NOTE: If this function is used to add a CellNode to the computational graph, any existing GraphModule or 
+    Predictor will need to be reinitialized.
+
+    :param node_or_nodes: the PairIndexer node to be replaced, or a node or list of nodes connected
+    to the unique PairIndexer to be replaced
+    :param new_pairfinder: class of new PairIndexer 
+    :param new_node_name: name for new PairIndexer node, if None the name of the replaced PairIndexer
+    will be used, defaults to None
+    :param cell_node: should be specified if new PairIndexer requires a CellNode and one does not currently
+    exist in computational graph, if None a search of existing nodes will be conducted if a CellNode is 
+    needed, defaults to None
+    :param module_kwargs: arguments to feed into the new PairIndexer constructor, defaults to {}
+    """
+    
     from .nodes.tags import PairIndexer, Positions, Species
-    from .predictor import Predictor
-    from .graph import GraphModule
-    from .nodes.pairs import PeriodicPairIndexer
     from .nodes.inputs import CellNode
 
-    if isinstance(target, Predictor):
-        graph = target.graph
-    elif isinstance(target, GraphModule):
-        graph = target
+    if isinstance(node_or_nodes, PairIndexer):
+        old_pf = node_or_nodes
     else:
-        graph = None
+        old_pf = find_unique_relative(node_or_nodes, PairIndexer)
 
-    node_list = (graph.nodes_to_compute if graph is not None else target)   
-    old_pfs = find_relatives(node_list, PairIndexer)
+    positions = find_unique_relative(old_pf, Positions)
+    species = find_unique_relative(old_pf, Species)
 
-    for old_pf in old_pfs:
-        positions = find_unique_relative(old_pf, Positions)
-        species = find_unique_relative(old_pf, Species)
-        try:
-            new_pf = new_pairfinder(old_pf.name, parents=(positions, species), **module_kwargs)
-        except RuntimeError:
-            cell = (cell_node or find_unique_relative(old_pf, CellNode))
-            new_pf = new_pairfinder(old_pf.name, parents=(positions, species, cell), **module_kwargs)
-        
-        replace_node(old_pf, new_pf, disconnect_old=True)
-        if graph is not None:
-            graph.__init__(graph.input_nodes, graph.nodes_to_compute)
+    new_node_name = (new_node_name or old_pf.name)
+
+    try:
+        new_pf = new_pairfinder(new_node_name, parents=(positions, species), **module_kwargs)
+    except RuntimeError:
+        cell = (cell_node or find_unique_relative(old_pf, CellNode))
+        new_pf = new_pairfinder(new_node_name, parents=(positions, species, cell), **module_kwargs)
+    
+    replace_node(old_pf, new_pf, disconnect_old=True)
