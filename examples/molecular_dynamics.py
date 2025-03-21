@@ -20,7 +20,7 @@ import ase.build
 from ase import units
 from ase.md.velocitydistribution import MaxwellBoltzmannDistribution
 
-from hippynn.graphs import physics, replace_node
+from hippynn.graphs import physics
 from hippynn.graphs.gops import swap_pairfinders
 from hippynn.graphs.predictor import Predictor
 from hippynn.graphs.nodes.pairs import KDTreePairsMemory

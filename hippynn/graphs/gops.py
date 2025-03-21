@@ -9,7 +9,7 @@ from .nodes.base.algebra import ValueNode
 from .nodes.base.node_functions import NodeNotFound, NodeOperationError
 from .indextypes import soft_index_type_coercion
 
-from . import get_connected_nodes, find_unique_relative
+from . import get_connected_nodes, find_relatives, find_unique_relative
 from ..tools import is_equal_state_dict
 
 
@@ -477,10 +477,12 @@ def vacuum_outputs(node_list, species_set):
 
     return new_nodes
 
-def swap_pairfinders(target, new_pairfinder, module_kwargs={}):
-    from .nodes.tags import PairIndexer
+def swap_pairfinders(target, new_pairfinder, cell_node=None, module_kwargs={}):
+    from .nodes.tags import PairIndexer, Positions, Species
     from .predictor import Predictor
     from .graph import GraphModule
+    from .nodes.pairs import PeriodicPairIndexer
+    from .nodes.inputs import CellNode
 
     if isinstance(target, Predictor):
         graph = target.graph
@@ -490,12 +492,17 @@ def swap_pairfinders(target, new_pairfinder, module_kwargs={}):
         graph = None
 
     node_list = (graph.nodes_to_compute if graph is not None else target)   
-    node_list = get_connected_nodes(node_list)
+    old_pfs = find_relatives(node_list, PairIndexer)
 
-    for old_node in node_list:
-        if isinstance(old_node, PairIndexer):
-            # NOTE: how to best handle new name and finding correct new parents?
-            new_node = new_pairfinder(old_node.name, parents=old_node.parents, **module_kwargs)
-            replace_node(old_node, new_node, disconnect_old=True)
-            if graph is not None:
-                graph.__init__(graph.input_nodes, graph.nodes_to_compute)
+    for old_pf in old_pfs:
+        positions = find_unique_relative(old_pf, Positions)
+        species = find_unique_relative(old_pf, Species)
+        try:
+            new_pf = new_pairfinder(old_pf.name, parents=(positions, species), **module_kwargs)
+        except RuntimeError:
+            cell = (cell_node or find_unique_relative(old_pf, CellNode))
+            new_pf = new_pairfinder(old_pf.name, parents=(positions, species, cell), **module_kwargs)
+        
+        replace_node(old_pf, new_pf, disconnect_old=True)
+        if graph is not None:
+            graph.__init__(graph.input_nodes, graph.nodes_to_compute)
