@@ -36,6 +36,9 @@ New Features:
 - New ASELangevinDynamics updater for MD module. Implements the algorithm used by ASE. Different from 
   older LangevinDynamics updater. Expected to be more numerically stable. 
 - Added batch size to MolecularDynamics class. This is passed to the model during each step.
+- New function ``swap_pairfinder`` to easily find and replace an existing PairIndexer node with a new one, 
+  potentially adjusting its parent nodes if needed. Example of usage in ``molecular_dynamics.py`` example.
+
 
 Improvements:
 -------------
