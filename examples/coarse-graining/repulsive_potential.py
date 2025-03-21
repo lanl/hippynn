@@ -32,20 +32,22 @@ class RepulsivePotential(torch.nn.Module):
 
         self.summer = pairs.MolPairSummer()
 
-    def forward(self, pair_dist, pair_first, mol_index, n_molecules):
-        atom_energies = -1 * self.g * torch.exp(-1 * self.a  * pair_dist)
-        mol_energies = self.summer(atom_energies, mol_index, n_molecules, pair_first)
-        return mol_energies, atom_energies,
+    def forward(self, pair_dist, pair_first, mol_index, n_molecules, n_atoms_max):
+        pair_energies = -1 * self.g * torch.exp(-1 * self.a  * pair_dist)
+        atom_energies = torch.zeros((n_molecules * n_atoms_max, 1), device=pair_energies.device, dtype=pair_energies.dtype)
+        atom_energies.index_add_(0, pair_first, pair_energies.unsqueeze(-1))
+        mol_energy = self.summer(pair_energies, mol_index, n_molecules, pair_first)
+        return mol_energy, atom_energies
 
 class RepulsivePotentialNode(ExpandParents, AutoKw, MultiNode):
-    _input_names = "pair_dist", "pair_first", "mol_index", "n_molecules"
-    _output_names = "mol_energies", "atom_energies",
+    _input_names = "pair_dist", "pair_first", "mol_index", "n_molecules", "n_atoms_max"
+    _output_names = "mol_energy", "atom_energies",
     _auto_module_class = RepulsivePotential
-    _output_index_states = IdxType.Molecules, IdxType.Pair,
+    _output_index_states = IdxType.Molecules, IdxType.Atoms,
 
     @_parent_expander.match(PairIndexer, AtomIndexer)
     def expansion(self, pairfinder, pidxer, **kwargs):
-        return pairfinder.pair_dist, pairfinder.pair_first, pidxer.mol_index, pidxer.n_molecules
+        return pairfinder.pair_dist, pairfinder.pair_first, pidxer.mol_index, pidxer.n_molecules, pidxer.n_atoms_max
 
     def __init__(self, name, parents, taper_point, strength, dr, perc, module="auto"):
         self.module_kwargs = {
