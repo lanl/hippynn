@@ -122,9 +122,6 @@ class Predictor:
             out_dict[name] = tensor
             out_dict[dbname] = tensor
         return out_dict
-    
-    def swap_pairfinder(self, pairfinder, name=None, module_kwargs={}):
-        self.graph.swap_pairfinder(pairfinder, name, module_kwargs)
 
     def __call__(self, *, node_values=None, single_prediction=False, batch_size=None, **kwargs):
         """

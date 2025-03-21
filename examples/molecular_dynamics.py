@@ -21,6 +21,7 @@ from ase import units
 from ase.md.velocitydistribution import MaxwellBoltzmannDistribution
 
 from hippynn.graphs import physics, replace_node
+from hippynn.graphs.gops import swap_pairfinders
 from hippynn.graphs.predictor import Predictor
 from hippynn.graphs.nodes.pairs import KDTreePairsMemory
 from hippynn.experiment.serialization import load_checkpoint_from_cwd
@@ -59,7 +60,7 @@ model.to(device)
 model.to(torch.float64)
 
 # Replace pair-finder with more efficient one so that system can fit on GPU
-model.swap_pairfinder(KDTreePairsMemory, name="PairIndexer", module_kwargs={'skin': 1.0, 'dist_hard_max': 7.5})
+swap_pairfinders(model, KDTreePairsMemory, module_kwargs={'skin': 1.0, 'dist_hard_max': 7.5})
 
 # Use ASE to generate initial positions and velocities
 atoms = ase.build.bulk("Al", crystalstructure="fcc", a=4.05, orthorhombic=True)

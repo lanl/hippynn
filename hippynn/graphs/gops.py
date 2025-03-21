@@ -8,6 +8,7 @@ from .nodes.base import InputNode, MultiNode
 from .nodes.base.algebra import ValueNode
 from .nodes.base.node_functions import NodeNotFound, NodeOperationError
 from .indextypes import soft_index_type_coercion
+
 from . import get_connected_nodes, find_unique_relative
 from ..tools import is_equal_state_dict
 
@@ -475,3 +476,26 @@ def vacuum_outputs(node_list, species_set):
         replace_node_with_constant(pairs.pair_coord, empty_displacement, "empty_displacements")
 
     return new_nodes
+
+def swap_pairfinders(target, new_pairfinder, module_kwargs={}):
+    from .nodes.tags import PairIndexer
+    from .predictor import Predictor
+    from .graph import GraphModule
+
+    if isinstance(target, Predictor):
+        graph = target.graph
+    elif isinstance(target, GraphModule):
+        graph = target
+    else:
+        graph = None
+
+    node_list = (graph.nodes_to_compute if graph is not None else target)   
+    node_list = get_connected_nodes(node_list)
+
+    for old_node in node_list:
+        if isinstance(old_node, PairIndexer):
+            # NOTE: how to best handle new name and finding correct new parents?
+            new_node = new_pairfinder(old_node.name, parents=old_node.parents, **module_kwargs)
+            replace_node(old_node, new_node, disconnect_old=True)
+            if graph is not None:
+                graph.__init__(graph.input_nodes, graph.nodes_to_compute)
