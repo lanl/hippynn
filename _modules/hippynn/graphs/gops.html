@@ -116,6 +116,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.nodes.base.algebra</span><span class="w"> </span><span class="kn">import</span> <span class="n">ValueNode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.nodes.base.node_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NodeNotFound</span><span class="p">,</span> <span class="n">NodeOperationError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">soft_index_type_coercion</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_connected_nodes</span><span class="p">,</span> <span class="n">find_unique_relative</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_equal_state_dict</span>
 
@@ -618,6 +619,51 @@
         <span class="n">replace_node_with_constant</span><span class="p">(</span><span class="n">pairs</span><span class="o">.</span><span class="n">pair_coord</span><span class="p">,</span> <span class="n">empty_displacement</span><span class="p">,</span> <span class="s2">&quot;empty_displacements&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">new_nodes</span></div>
+
+
+<div class="viewcode-block" id="swap_pairfinders">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.gops.html#hippynn.graphs.swap_pairfinders">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">swap_pairfinders</span><span class="p">(</span><span class="n">node_or_nodes</span><span class="p">,</span> <span class="n">new_pairfinder</span><span class="p">,</span> <span class="n">new_node_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cell_node</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds and replaces existing PairIndexer node with a new one, potentially adjusting its parent nodes</span>
+<span class="sd">    if needed.</span>
+
+<span class="sd">    :param node_or_nodes: the PairIndexer node to be replaced, or a node or list of nodes connected</span>
+<span class="sd">    to the unique PairIndexer to be replaced</span>
+<span class="sd">    :param new_pairfinder: class of new PairIndexer </span>
+<span class="sd">    :param new_node_name: name for new PairIndexer node, if None the name of the replaced PairIndexer</span>
+<span class="sd">    will be used, defaults to None</span>
+<span class="sd">    :param cell_node: should be specified if new PairIndexer requires a CellNode and one does not currently</span>
+<span class="sd">    exist in computational graph, if None a search of existing nodes will be conducted if a CellNode is </span>
+<span class="sd">    needed, defaults to None</span>
+<span class="sd">    :param module_kwargs: arguments to feed into the new PairIndexer constructor, defaults to {}</span>
+
+<span class="sd">    .. Note::</span>
+<span class="sd">    </span>
+<span class="sd">        If this function is used to add a CellNode to the computational graph, any existing GraphModule or </span>
+<span class="sd">        Predictor will need to be reinitialized.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.nodes.tags</span><span class="w"> </span><span class="kn">import</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">Positions</span><span class="p">,</span> <span class="n">Species</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.nodes.inputs</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellNode</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node_or_nodes</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">):</span>
+        <span class="n">old_pf</span> <span class="o">=</span> <span class="n">node_or_nodes</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">old_pf</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">node_or_nodes</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">)</span>
+
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">old_pf</span><span class="p">,</span> <span class="n">Positions</span><span class="p">)</span>
+    <span class="n">species</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">old_pf</span><span class="p">,</span> <span class="n">Species</span><span class="p">)</span>
+
+    <span class="n">new_node_name</span> <span class="o">=</span> <span class="p">(</span><span class="n">new_node_name</span> <span class="ow">or</span> <span class="n">old_pf</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">new_pf</span> <span class="o">=</span> <span class="n">new_pairfinder</span><span class="p">(</span><span class="n">new_node_name</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">species</span><span class="p">),</span> <span class="o">**</span><span class="n">module_kwargs</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+        <span class="n">cell</span> <span class="o">=</span> <span class="p">(</span><span class="n">cell_node</span> <span class="ow">or</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">old_pf</span><span class="p">,</span> <span class="n">CellNode</span><span class="p">))</span>
+        <span class="n">new_pf</span> <span class="o">=</span> <span class="n">new_pairfinder</span><span class="p">(</span><span class="n">new_node_name</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">cell</span><span class="p">),</span> <span class="o">**</span><span class="n">module_kwargs</span><span class="p">)</span>
+    
+    <span class="n">replace_node</span><span class="p">(</span><span class="n">old_pf</span><span class="p">,</span> <span class="n">new_pf</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 </pre></div>
 

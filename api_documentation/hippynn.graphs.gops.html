@@ -132,6 +132,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.replace_node"><code class="docutils literal notranslate"><span class="pre">replace_node()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.replace_node_with_constant"><code class="docutils literal notranslate"><span class="pre">replace_node_with_constant()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.search_by_name"><code class="docutils literal notranslate"><span class="pre">search_by_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.swap_pairfinders"><code class="docutils literal notranslate"><span class="pre">swap_pairfinders()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.gops.vacuum_outputs"><code class="docutils literal notranslate"><span class="pre">vacuum_outputs()</span></code></a></li>
 </ul>
 </li>
@@ -376,6 +377,31 @@ The db_name will be given higher precedence.</p>
 </dl>
 <p>Raises NodeAmbiguityError if more than one node found
 Raises NodeNotFoundError if no nodes found</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.graphs.gops.swap_pairfinders">
+<span class="sig-name descname"><span class="pre">swap_pairfinders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_or_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_pairfinder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_node_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_node</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/gops.html#swap_pairfinders"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.gops.swap_pairfinders" title="Link to this definition"></a></dt>
+<dd><p>Finds and replaces existing PairIndexer node with a new one, potentially adjusting its parent nodes
+if needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node_or_nodes</strong> – the PairIndexer node to be replaced, or a node or list of nodes connected</p>
+</dd>
+</dl>
+<p>to the unique PairIndexer to be replaced
+:param new_pairfinder: class of new PairIndexer 
+:param new_node_name: name for new PairIndexer node, if None the name of the replaced PairIndexer
+will be used, defaults to None
+:param cell_node: should be specified if new PairIndexer requires a CellNode and one does not currently
+exist in computational graph, if None a search of existing nodes will be conducted if a CellNode is 
+needed, defaults to None
+:param module_kwargs: arguments to feed into the new PairIndexer constructor, defaults to {}</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If this function is used to add a CellNode to the computational graph, any existing GraphModule or 
+Predictor will need to be reinitialized.</p>
+</div>
 </dd></dl>
 
 <dl class="py function">
