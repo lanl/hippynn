@@ -215,7 +215,7 @@ class HippynnLightningModule(pl.LightningModule):
             structure_file = structure_file.parent.parent
             structure_file = structure_file.joinpath(serialization.DEFAULT_STRUCTURE_FNAME)
 
-        structure_args = torch.load(structure_file, weights_only=False)
+        structure_args = torch.load(structure_file)
 
         return super().load_from_checkpoint(
             checkpoint_path, map_location=map_location, hparams_file=hparams_file, strict=strict, **structure_args, **kwargs

@@ -123,10 +123,10 @@ def load_saved_tensors(structure_fname: str, state_fname: str, **kwargs) -> Tupl
     """
 
     with open(structure_fname, "rb") as pfile:
-        structure = torch.load(pfile, weights_only=False, **kwargs)
+        structure = torch.load(pfile, **kwargs)
 
     with open(state_fname, "rb") as pfile:
-        state = torch.load(pfile, weights_only=False, **kwargs)
+        state = torch.load(pfile, **kwargs)
     return structure, state
 
 
