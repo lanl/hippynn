@@ -196,7 +196,7 @@ class HippynnLightningModule(pl.LightningModule):
         return
 
     @classmethod
-    def load_from_checkpoint(cls, checkpoint_path, map_location=None, structure_file=None, hparams_file=None, strict=True, **kwargs):
+    def load_from_checkpoint(cls, checkpoint_path, map_location=None, structure_file=None, hparams_file=None, strict=True, weights_only=False, **kwargs):
         """
 
         :param checkpoint_path:
@@ -204,6 +204,7 @@ class HippynnLightningModule(pl.LightningModule):
         :param structure_file:
         :param hparams_file:
         :param strict:
+        :param weights_only:
         :param kwargs:
         :return:
         """
@@ -215,7 +216,7 @@ class HippynnLightningModule(pl.LightningModule):
             structure_file = structure_file.parent.parent
             structure_file = structure_file.joinpath(serialization.DEFAULT_STRUCTURE_FNAME)
 
-        structure_args = torch.load(structure_file)
+        structure_args = torch.load(structure_file, weights_only=weights_only)
 
         return super().load_from_checkpoint(
             checkpoint_path, map_location=map_location, hparams_file=hparams_file, strict=strict, **structure_args, **kwargs
