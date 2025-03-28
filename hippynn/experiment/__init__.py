@@ -22,6 +22,3 @@ try:
     __all__ += ["HippynnLightningModule"]
 except ImportError:
     pass
-
-import torch
-torch.serialization.add_safe_globals([metric_tracker.MetricTracker])
