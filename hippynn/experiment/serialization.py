@@ -113,7 +113,7 @@ def check_mapping_devices(map_location, model_device):
     return map_location, model_device
 
 
-def load_saved_tensors(structure_fname: str, state_fname: str, weights_only=False, **kwargs) -> Tuple[dict, dict]:
+def load_saved_tensors(structure_fname: str, state_fname: str, weights_only: bool = False, **kwargs) -> Tuple[dict, dict]:
     """
     Load torch tensors from file.
 
