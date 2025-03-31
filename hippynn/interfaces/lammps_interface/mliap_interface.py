@@ -1,6 +1,4 @@
 """
-Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-
 Interface for creating LAMMPS MLIAP Unified models.
 """
 import pickle
