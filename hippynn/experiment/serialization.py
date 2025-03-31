@@ -117,6 +117,12 @@ def load_saved_tensors(structure_fname: str, state_fname: str, weights_only: boo
     """
     Load torch tensors from file.
 
+    .. warning::
+       This function uses ``torch.load`` with ``weights_only=False`` by default,
+       which can run arbitrary code from the loaded file. Only use it with files
+       you trust. You can set ``weights_only=True`` for better security, but
+       it may cause loading of the structure file to fail. 
+
     :param structure_fname: name of the structure file
     :param state_fname: name of the state file
     :param weights_only: passed to ``torch.load``
