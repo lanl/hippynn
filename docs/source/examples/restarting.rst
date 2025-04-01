@@ -28,10 +28,10 @@ the metrics of the experiment so far. This can be seen by breaking down
     )
 
 
-Loading models and simple restart
----------------------------------
+Loading models and simple training restart
+------------------------------------------
 
-To reload a saved model, you can use::
+To load a saved model, you can use::
 
     from hippynn.experiment.serialization import load_model_from_cwd
     model = load_model_from_cwd()
