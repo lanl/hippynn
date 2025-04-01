@@ -235,17 +235,24 @@
 
 <div class="viewcode-block" id="load_saved_tensors">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.serialization.html#hippynn.load_saved_tensors">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">load_saved_tensors</span><span class="p">(</span><span class="n">structure_fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">state_fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_saved_tensors</span><span class="p">(</span><span class="n">structure_fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">state_fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">weights_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load torch tensors from file.</span>
 
+<span class="sd">    .. Warning::</span>
+<span class="sd">        This function uses ``torch.load`` with ``weights_only=False`` by default,</span>
+<span class="sd">        which can run arbitrary code from the loaded file. Only use it with files</span>
+<span class="sd">        you trust. You can set ``weights_only=True`` for better security, but</span>
+<span class="sd">        it may cause loading of the structure file to fail. </span>
+
 <span class="sd">    :param structure_fname: name of the structure file</span>
 <span class="sd">    :param state_fname: name of the state file</span>
+<span class="sd">    :param weights_only: passed to ``torch.load``</span>
 <span class="sd">    :return: loaded dictionaries of checkpoint and model parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">structure_fname</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
-        <span class="n">structure</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">pfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">structure</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">pfile</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="n">weights_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">state_fname</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
         <span class="n">state</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">pfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -256,25 +263,32 @@
 <div class="viewcode-block" id="load_checkpoint">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.serialization.html#hippynn.load_checkpoint">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_checkpoint</span><span class="p">(</span>
-    <span class="n">structure_fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">state_fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">restart_db</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="n">structure_fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">state_fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">restart_db</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load checkpoint file from given filename.</span>
 
 <span class="sd">    For details more information on to use this function, see :doc:`/examples/restarting`.</span>
 
+<span class="sd">    .. Warning::</span>
+<span class="sd">        This function uses ``torch.load`` with ``weights_only=False`` by default,</span>
+<span class="sd">        which can run arbitrary code from the loaded file. Only use it with files</span>
+<span class="sd">        you trust. You can set ``weights_only=True`` for better security, but</span>
+<span class="sd">        it may cause loading of the structure file to fail. </span>
+
 <span class="sd">    :param structure_fname: name of the structure file</span>
 <span class="sd">    :param state_fname: name of the state file</span>
 <span class="sd">    :param restart_db: restore database or not, defaults to False</span>
 <span class="sd">    :param map_location: device mapping argument for ``torch.load``, defaults to None</span>
 <span class="sd">    :param model_device: automatically handle device mapping. Defaults to None, defaults to None</span>
+<span class="sd">    :param weights_only: passed to ``torch.load``, defaults to False</span>
 <span class="sd">    :return: experiment structure</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># we need keep the original map_location value for the if</span>
     <span class="n">mapped</span><span class="p">,</span> <span class="n">model_device</span> <span class="o">=</span> <span class="n">check_mapping_devices</span><span class="p">(</span><span class="n">map_location</span><span class="p">,</span> <span class="n">model_device</span><span class="p">)</span>
     <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;map_location&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped</span>
-    <span class="n">structure</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">load_saved_tensors</span><span class="p">(</span><span class="n">structure_fname</span><span class="p">,</span> <span class="n">state_fname</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">structure</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">load_saved_tensors</span><span class="p">(</span><span class="n">structure_fname</span><span class="p">,</span> <span class="n">state_fname</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="n">weights_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="c1"># transfer stuff back to model_device</span>
     <span class="n">structure</span> <span class="o">=</span> <span class="n">restore_checkpoint</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">restart_db</span><span class="o">=</span><span class="n">restart_db</span><span class="p">)</span>
@@ -296,38 +310,54 @@
 
 <div class="viewcode-block" id="load_checkpoint_from_cwd">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.serialization.html#hippynn.load_checkpoint_from_cwd">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">load_checkpoint_from_cwd</span><span class="p">(</span><span class="n">map_location</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_checkpoint_from_cwd</span><span class="p">(</span><span class="n">map_location</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Same as ``load_checkpoint``, but using default filenames.</span>
 
+<span class="sd">    .. Warning::</span>
+<span class="sd">        This function uses ``torch.load`` with ``weights_only=False`` by default,</span>
+<span class="sd">        which can run arbitrary code from the loaded file. Only use it with files</span>
+<span class="sd">        you trust. You can set ``weights_only=True`` for better security, but</span>
+<span class="sd">        it may cause loading of the structure file to fail. </span>
+
 <span class="sd">    :param map_location: device mapping argument for ``torch.load``, defaults to None</span>
 <span class="sd">    :type map_location: Union[str, dict, torch.device, Callable], optional</span>
-<span class="sd">    :param model_device: automatically handle device mapping. Defaults to None, defaults to None</span>
+<span class="sd">    :param model_device: automatically handle device mapping, defaults to None</span>
 <span class="sd">    :type model_device: Union[int, str, torch.device], optional</span>
+<span class="sd">    :param weights_only: passed to ``torch.load``, defaults to False</span>
+<span class="sd">    :type weights_only: bool, optional</span>
 <span class="sd">    :return: experiment structure</span>
 <span class="sd">    :rtype: dict</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">load_checkpoint</span><span class="p">(</span>
-        <span class="n">DEFAULT_STRUCTURE_FNAME</span><span class="p">,</span> <span class="s2">&quot;best_checkpoint.pt&quot;</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">map_location</span><span class="p">,</span> <span class="n">model_device</span><span class="o">=</span><span class="n">model_device</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="n">DEFAULT_STRUCTURE_FNAME</span><span class="p">,</span> <span class="s2">&quot;best_checkpoint.pt&quot;</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">map_location</span><span class="p">,</span> <span class="n">model_device</span><span class="o">=</span><span class="n">model_device</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="n">weights_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="load_model_from_cwd">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.serialization.html#hippynn.load_model_from_cwd">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">load_model_from_cwd</span><span class="p">(</span><span class="n">map_location</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphModule</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_model_from_cwd</span><span class="p">(</span><span class="n">map_location</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphModule</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Only load model from current working directory.</span>
 
+<span class="sd">    .. Warning::</span>
+<span class="sd">        This function uses ``torch.load`` with ``weights_only=False`` by default,</span>
+<span class="sd">        which can run arbitrary code from the loaded file. Only use it with files</span>
+<span class="sd">        you trust. You can set ``weights_only=True`` for better security, but</span>
+<span class="sd">        it may cause loading of the structure file to fail. </span>
+
 <span class="sd">    :param map_location: device mapping argument for ``torch.load``, defaults to None</span>
 <span class="sd">    :type map_location: Union[str, dict, torch.device, Callable], optional</span>
-<span class="sd">    :param model_device: automatically handle device mapping. Defaults to None, defaults to None</span>
+<span class="sd">    :param model_device: automatically handle device mapping, defaults to None</span>
 <span class="sd">    :type model_device: Union[int, str, torch.device], optional</span>
+<span class="sd">    :param weights_only: passed to ``torch.load``, defaults to False</span>
+<span class="sd">    :type weights_only: bool, optional</span>
 <span class="sd">    :return: model with reloaded parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mapped</span><span class="p">,</span> <span class="n">model_device</span> <span class="o">=</span> <span class="n">check_mapping_devices</span><span class="p">(</span><span class="n">map_location</span><span class="p">,</span> <span class="n">model_device</span><span class="p">)</span>
     <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;map_location&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped</span>
-    <span class="n">structure</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">load_saved_tensors</span><span class="p">(</span><span class="s2">&quot;experiment_structure.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;best_model.pt&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">structure</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">load_saved_tensors</span><span class="p">(</span><span class="s2">&quot;experiment_structure.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;best_model.pt&quot;</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="n">weights_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="n">model</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;training_modules&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">model</span>
     <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>

@@ -131,13 +131,21 @@
         <span class="n">par_atom_node_name</span><span class="o">=</span><span class="s2">&quot;SEQM_Atom_Params&quot;</span><span class="p">,</span>
         <span class="n">seqm_node_name</span><span class="o">=</span><span class="s2">&quot;SEQM_Energy&quot;</span><span class="p">,</span>
         <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+        <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        .. Warning::</span>
+<span class="sd">            This function uses ``torch.load`` with ``weights_only=False`` by default,</span>
+<span class="sd">            which can run arbitrary code from the loaded file. Only use it with files</span>
+<span class="sd">            you trust. You can set ``weights_only=True`` for better security, but</span>
+<span class="sd">            it may cause loading of the structure file to fail. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_file</span> <span class="o">=</span> <span class="n">model_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state_file</span> <span class="o">=</span> <span class="n">state_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">par_atom_node_name</span> <span class="o">=</span> <span class="n">par_atom_node_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seqm_node_name</span> <span class="o">=</span> <span class="n">seqm_node_name</span>
-        <span class="n">structure</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_file</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">structure</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_file</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="n">weights_only</span><span class="p">)</span>
         <span class="n">state</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">state_file</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
         <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;training_modules&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">])</span>
         <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;controller&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;controller&quot;</span><span class="p">])</span>
