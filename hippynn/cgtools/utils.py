@@ -6,8 +6,6 @@ def extract_cell_diagonals(arr: np.ndarray):
     Given an array of shape (..., 3, 3) where each 3x3 matrix is expected
     to be diagonal, returns an array of shape (..., 3) containing the diagonal
     elements. Raises a ValueError if any off-diagonal element is non-zero.
-
-    Written with help from ChatGPT o3-mini-high
     """
     if arr.ndim < 2 or arr.shape[-2:] != (3, 3):
         raise ValueError("Input array must have shape (..., 3, 3)")
@@ -15,6 +13,8 @@ def extract_cell_diagonals(arr: np.ndarray):
 
 @jit
 def _extract_diagonals(arr):
+    """Written with help from ChatGPT o3-mini-high"""
+    
     # Compute the flattened shape for the batch of matrices.
     flat_shape = 1
     for s in arr.shape[:-2]:
