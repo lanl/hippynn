@@ -117,11 +117,11 @@ def load_saved_tensors(structure_fname: str, state_fname: str, weights_only: boo
     """
     Load torch tensors from file.
 
-    .. warning::
-       This function uses ``torch.load`` with ``weights_only=False`` by default,
-       which can run arbitrary code from the loaded file. Only use it with files
-       you trust. You can set ``weights_only=True`` for better security, but
-       it may cause loading of the structure file to fail. 
+    .. Warning::
+        This function uses ``torch.load`` with ``weights_only=False`` by default,
+        which can run arbitrary code from the loaded file. Only use it with files
+        you trust. You can set ``weights_only=True`` for better security, but
+        it may cause loading of the structure file to fail. 
 
     :param structure_fname: name of the structure file
     :param state_fname: name of the state file
@@ -144,6 +144,12 @@ def load_checkpoint(
     Load checkpoint file from given filename.
 
     For details more information on to use this function, see :doc:`/examples/restarting`.
+
+    .. Warning::
+        This function uses ``torch.load`` with ``weights_only=False`` by default,
+        which can run arbitrary code from the loaded file. Only use it with files
+        you trust. You can set ``weights_only=True`` for better security, but
+        it may cause loading of the structure file to fail. 
 
     :param structure_fname: name of the structure file
     :param state_fname: name of the state file
@@ -180,6 +186,12 @@ def load_checkpoint_from_cwd(map_location=None, model_device=None, weights_only=
     """
     Same as ``load_checkpoint``, but using default filenames.
 
+    .. Warning::
+        This function uses ``torch.load`` with ``weights_only=False`` by default,
+        which can run arbitrary code from the loaded file. Only use it with files
+        you trust. You can set ``weights_only=True`` for better security, but
+        it may cause loading of the structure file to fail. 
+
     :param map_location: device mapping argument for ``torch.load``, defaults to None
     :type map_location: Union[str, dict, torch.device, Callable], optional
     :param model_device: automatically handle device mapping, defaults to None
@@ -197,6 +209,12 @@ def load_checkpoint_from_cwd(map_location=None, model_device=None, weights_only=
 def load_model_from_cwd(map_location=None, model_device=None, weights_only=False, **kwargs) -> GraphModule:
     """
     Only load model from current working directory.
+
+    .. Warning::
+        This function uses ``torch.load`` with ``weights_only=False`` by default,
+        which can run arbitrary code from the loaded file. Only use it with files
+        you trust. You can set ``weights_only=True`` for better security, but
+        it may cause loading of the structure file to fail. 
 
     :param map_location: device mapping argument for ``torch.load``, defaults to None
     :type map_location: Union[str, dict, torch.device, Callable], optional

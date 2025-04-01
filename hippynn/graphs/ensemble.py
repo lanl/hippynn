@@ -53,6 +53,12 @@ def make_ensemble(
 
     For more information on the `models` parameter, see the :func:`~hippynn.graphs.ensemble.get_graphs` function.
 
+    .. Warning::
+        This function uses ``torch.load`` with ``weights_only=False`` by default,
+        which can run arbitrary code from the loaded file. Only use it with files
+        you trust. You can set ``weights_only=True`` for better security, but
+        it may cause loading of the structure file to fail. 
+
     :param models: list containing str, node, or graphmodule, or str to glob for model directories.
     :param targets: list of db_name strings or the string 'auto', which will attempt to infer.
     :param inputs: list of db_name strings of the string 'auto', which will attempt to infer.
@@ -111,6 +117,12 @@ def get_graphs(models: Union[List[Union[str, GraphModule, _BaseNode]], str], wei
     - node: an output target, which will be converted to a GraphModule with automatically defined inputs.
 
     or a string, which is used with glob to specify the list of strings.
+
+    .. Warning::
+        This function uses ``torch.load`` with ``weights_only=False`` by default,
+        which can run arbitrary code from the loaded file. Only use it with files
+        you trust. You can set ``weights_only=True`` for better security, but
+        it may cause loading of the structure file to fail. 
 
     :param models:
     :param weights_only: passed to ``torch.load``
