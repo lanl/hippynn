@@ -23,6 +23,7 @@ def make_ensemble(
     inputs: List[str] = "auto",
     prefix: str = "ensemble_",
     quiet=False,
+    weights_only=False,
 ) -> Tuple[GraphModule, Tuple[Dict[str, int], Dict[str, int]]]:
 
     """
@@ -52,16 +53,23 @@ def make_ensemble(
 
     For more information on the `models` parameter, see the :func:`~hippynn.graphs.ensemble.get_graphs` function.
 
+    .. Warning::
+        This function uses ``torch.load`` with ``weights_only=False`` by default,
+        which can run arbitrary code from the loaded file. Only use it with files
+        you trust. You can set ``weights_only=True`` for better security, but
+        it may cause loading of the structure file to fail. 
+
     :param models: list containing str, node, or graphmodule, or str to glob for model directories.
     :param targets: list of db_name strings or the string 'auto', which will attempt to infer.
     :param inputs: list of db_name strings of the string 'auto', which will attempt to infer.
     :param prefix: specifies the prefix for the db_name of created ensemble nodes.
     :param quiet: whether to print information about the constructed ensemble.
+    :param weights_only: passed to ``torch.load``
     :return: ensemble GraphModule, (intput_info, output_info)
     """
 
     # Phase 0: Make sure we are dealing with GraphModules
-    graphs: List[GraphModule] = get_graphs(models)
+    graphs: List[GraphModule] = get_graphs(models, weights_only=weights_only)
 
     # Phase 1: Figure out what the ensemble will look like.
     if inputs == "auto":
@@ -96,7 +104,7 @@ def make_ensemble(
 
 # TODO: Potentially move this function, or part of it, into experiment.serialization?
 # TODO ; It seems possible that someone might want to load several models without ensembling them.
-def get_graphs(models: Union[List[Union[str, GraphModule, _BaseNode]], str]) -> List[GraphModule]:
+def get_graphs(models: Union[List[Union[str, GraphModule, _BaseNode]], str], weights_only: bool = False) -> List[GraphModule]:
     """
     Take a simple spec for modeled variables (glob for model directories, list of graphs, list of output nodes)
     and convert this into a list of graph modules.
@@ -110,7 +118,14 @@ def get_graphs(models: Union[List[Union[str, GraphModule, _BaseNode]], str]) -> 
 
     or a string, which is used with glob to specify the list of strings.
 
+    .. Warning::
+        This function uses ``torch.load`` with ``weights_only=False`` by default,
+        which can run arbitrary code from the loaded file. Only use it with files
+        you trust. You can set ``weights_only=True`` for better security, but
+        it may cause loading of the structure file to fail. 
+
     :param models:
+    :param weights_only: passed to ``torch.load``
     :return:
     """
 
@@ -128,7 +143,7 @@ def get_graphs(models: Union[List[Union[str, GraphModule, _BaseNode]], str]) -> 
                 device = device_fallback()
             with active_directory(model, create=False):
                 try:
-                    model = load_model_from_cwd(map_location=device)
+                    model = load_model_from_cwd(map_location=device, weights_only=weights_only)
                 except FileNotFoundError:
                     import warnings
 
