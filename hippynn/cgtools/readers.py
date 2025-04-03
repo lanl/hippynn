@@ -3,33 +3,47 @@
 
 import os
 
-import MDAnalysis as mda
 import numpy as np
+import MDAnalysis as mda
+from MDAnalysis.topology.tables import SYMB2Z, Z2SYMB
 
-def correct_atom_types(universe, name_to_type_dict):
-    for atom in universe.atoms:
-        if atom.name in name_to_type_dict:
-            atom.type = name_to_type_dict[atom.name]
+def get_types(universe):
+    types = np.array(universe.atoms.types)
+    try:
+        types = [int(typ) for typ in types]
+        species_numbers = types
+        species_symbols = [Z2SYMB[num] for num in species_numbers]
+        print(f"Found atom types {np.unique(types)}, which were infered to be atomic numbers. If this is not correct, please rerun the function and pass a `type_correction_dict`. The keys should be of type {type(types[0])}.")
+    except ValueError:
+        species_symbols = types
+        species_numbers = [SYMB2Z[sym] for sym in species_symbols]
+        print(f"Found atom types {np.unique(types)}, which were infered to be chemical symbols. If this is not correct, please rerun the function and pass a `type_correction_dict`. The keys should be of type {type(types[0])}.")
 
-def extract_trajectory_data(topology, trajectory, start=0, stop=None, stride=1, name_to_type_dict=None, mda_universe_kwargs={}):
+        
+    return np.array(species_numbers), np.array(species_symbols)
+
+def extract_trajectory_data(topology, trajectory, start=0, stop=None, stride=1, type_correction_dict=None, mda_universe_kwargs={}):
     """
     Extracts trajectory data using MDAnalysis.
 
     E.g., for Gromacs: extract_trajectory_data(topology="output.gro", trajectory="output.trr")
     E.g., for LAMMPS: extract_trajectory_data(topology="system.data", trajectory="output.lammpstrj")
 
-    .. warning:: If ``types`` cannot be read from the files but ``names`` is available, the types will be 
-     guessed from the names. You can ensure this is done correctly by providing ``name_to_type_dict``. The 
-     masses will then be guessed based on the types. 
-
-    :param str topology: Path to topology file (e.g., 'init.data', 'md.gro').
-    :param str trajectory: Path to trajectory file (e.g., 'traj.lammpstrj', 'md.trr').
-    :param int start: Starting frame index (inclusive). Default is 0.
-    :param int stop: Ending frame index (exclusive). If None, reads until the end.
-    :param int stride: Step size between frames. Default is 1.
-    :param dict name_to_type_dict: Can be provided to assist in the guessing of ``types`` from ``names`` if ``types`` is not available
-    in the provided files. Default is None. 
-    :param dict mda_universe_kwargs: Keywords to feed to MDAnalysis.Universe. Default is {}. 
+    :param topology: Path to topology file (e.g., 'init.data', 'md.gro').
+    :type topology: str
+    :param trajectory: Path to trajectory file (e.g., 'traj.lammpstrj', 'md.trr').
+    :type trajectory: str
+    :param start: Starting frame index (inclusive). Default is 0.
+    :type start: int
+    :param stop: Ending frame index (exclusive). If None, reads until the end.
+    :type stop: int
+    :param stride: Step size between frames. Default is 1.
+    :type stride: int
+    :param type_correction_dict: If types inferred from files are not atomic numbers or symbols, pass {force_field_type: atomic_number} 
+                                 to correct this. The keys' types must Default is None. 
+    :type type_correction_dict: dict(str, int)
+    :param mda_universe_kwargs: Keywords to feed to MDAnalysis.Universe. Default is {}. 
+    :type mda_universe_kwargs: dict
     :returns: Dictionary with keys:
         - positions: ndarray (n_frames, n_atoms, 3)
         - velocities: ndarray or None (n_frames, n_atoms, 3)
@@ -43,14 +57,14 @@ def extract_trajectory_data(topology, trajectory, start=0, stop=None, stride=1, 
 
     # Give it help if trajectory file is a LAMMPS dump file
     _, extension = os.path.splitext(trajectory)
-    if extension == ".lammpstrj" :
+    if extension == ".lammpstrj":
         ext_kwargs = {"format": "LAMMPSDUMP"}
         ext_kwargs.update(mda_universe_kwargs) # allow it to still be overridden by user
         mda_universe_kwargs = ext_kwargs
-    u = mda.Universe(topology, trajectory, **mda_universe_kwargs, to_guess=('types', 'masses'))
+    u = mda.Universe(topology, trajectory, **mda_universe_kwargs)
 
-    if name_to_type_dict is not None:
-        correct_atom_types(u, name_to_type_dict)
+    if type_correction_dict is not None:
+        u.atoms.types = [type_correction_dict[typ] if typ in type_correction_dict.keys() else typ for typ in u.atoms.types]
         u.guess_TopologyAttrs(force_guess=('masses',))
 
     total_frames = len(u.trajectory)
@@ -68,8 +82,9 @@ def extract_trajectory_data(topology, trajectory, start=0, stop=None, stride=1, 
 
     # Static atom info
     masses = u.atoms.masses.astype(np.float32)
-    species = np.array(u.atoms.types)
     mol_ids = u.atoms.resindices.astype(np.int32)
+
+    species_numbers, species_symbols = get_types(u)
 
     # Extract per-frame data
     for i, ts in enumerate(u.trajectory[start:stop:stride]):
@@ -87,6 +102,7 @@ def extract_trajectory_data(topology, trajectory, start=0, stop=None, stride=1, 
         'forces': forces if not np.isnan(forces).all() else None,
         'cells': cells,
         'masses': masses,
-        'species': species,
+        'species_numbers': species_numbers,
+        'species_symbols': species_symbols,
         'mol_ids': mol_ids,
     }
