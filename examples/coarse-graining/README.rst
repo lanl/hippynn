@@ -16,12 +16,14 @@ data from LAMMPS or Gromacs output files. However, it is suggested to try with t
     also be generated at a later time using the script ``save_model_for_lammps.py``. If you don't care to use the 
     potential with LAMMPS, you do not need to mind any of this. 
 2. Running MD with the model:
-    1. With the built-in hippynn MD driver: Run ``cg_md.py``. The resulting trajectory will be saved in 
-       ``hippynn/examples/coarse-graining/md_results``.
-    2. With LAMMPS: You will need to have a LAMMPS installation with the ML-IAP package and python bindings. 
-       Before running LAMMPS, execute the ``write_lammps_data_file.py`` to create a LAMMPS data file from the last 
-       frame of the training data file. This will be saved in the directory ``lammps_md_inputs``. There is already 
-       an example input script in that directory. Move to the directory and run LAMMPS with the provided input file.  
+    1. With the built-in hippynn MD driver: 
+        Run ``cg_md.py``. The resulting trajectory will be saved in 
+        ``hippynn/examples/coarse-graining/md_results``.
+    2. With LAMMPS: 
+        You will need to have a LAMMPS installation with the ML-IAP package and python bindings. 
+        Before running LAMMPS, execute the ``write_lammps_data_file.py`` to create a LAMMPS data file from the last 
+        frame of the training data file. This will be saved in the directory ``lammps_md_inputs``. There is already 
+        an example input script in that directory. Move to the directory and run LAMMPS with the provided input file.  
 
 **Caution**: RepulsivePotentialNode in ``replusive_potential.py`` has been modified. Any CG model trained before this 
 change (3/21/25) will not be compatible with these updates. Please train a new model. Results should not be impacted 
