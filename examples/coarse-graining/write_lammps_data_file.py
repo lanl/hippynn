@@ -42,7 +42,8 @@ def write_lammps_data_from_npz(npz_data_file, tgt_file="system.data", frame=-1):
         raise ValueError("Cell must be specified as a (3,) matrix or as a (3,3) diagonal matrix.")
     
     if velocities is not None:
-        velocities = velocities / 1000 # the velocities are in ps/A but we'll need them in fs/A
+        print("Velocity data has been converted from ps/Ang to fs/Ang.")
+        velocities = velocities / 1000 # the velocities are in ps/A but we'll need them in fs/A. Change as needed
          
     n_beads = positions.shape[0]
 

@@ -5,7 +5,11 @@ import os
 
 import numpy as np
 import MDAnalysis as mda
-from MDAnalysis.topology.tables import SYMB2Z, Z2SYMB
+try:
+    from MDAnalysis.guesser.tables import SYMB2Z, Z2SYMB
+except ImportError:
+    from MDAnalysis.topology.tables import SYMB2Z, Z2SYMB
+
 
 def get_types(universe):
     types = np.array(universe.atoms.types)
