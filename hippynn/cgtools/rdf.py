@@ -1,4 +1,5 @@
 # Calculate RDF and ADF
+# ChatGPT was used in creating these functions
 
 from itertools import combinations_with_replacement
 
@@ -6,10 +7,10 @@ import numpy as np
 from numba import jit
 from scipy.spatial import KDTree
 import torch
-from tqdm.autonotebook import trange
 
+from .pbc_tools import find_mic, extract_multicell_diagonal
 from ..layers.pairs.indexing import padded_neighlist
-from .utils import extract_cell_diagonals, find_mic
+from ..tools import progress_bar
 
 def ensure_positions_cells_compatibility(positions, cells):
     n_frames, _, _ = positions.shape
@@ -31,9 +32,22 @@ def ensure_positions_species_compatibility(positions, species):
     return positions, species
 
 def check_KDTree_compatibility(cells, cutoff):
-    """`cells` must be collapsed to (3,) cell representation"""
+    """`cells` must be collapsed to (3,) cell representations"""
     if (cutoff >= cells/2).any():
         raise ValueError(f"Cutoff value ({cutoff}) must be less than half the shortest cell side length ({cells.min()}).")
+
+def get_KDTree_tree(positions, cell):
+    """`cells` must be collapsed to (3,) cell representations"""
+    positions = positions % cell # coordinates must be inside cell
+
+    # The following three lines are included to prevent an extremely rare but not unseen edge 
+    # case where the modulo operation returns a particle coordinate that is exactly equal to 
+    # the corresponding cell length, causing KDTree to throw an error
+    n_particles = positions.shape[0]
+    tiled_cell = np.tile(cell, (n_particles, 1))
+    positions = np.where(positions == tiled_cell, 0, positions)
+
+    return KDTree(positions, boxsize=cell)
 
 def calculate_rdf(positions: np.ndarray, cutoff: float, cells: np.ndarray = None, species: np.ndarray = None, n_bins: int = 300, lower_cutoff: float = 0):
     """Computes the RDF. If `species` is not provided, also computes species pair specific RDFS. 
@@ -42,7 +56,7 @@ def calculate_rdf(positions: np.ndarray, cutoff: float, cells: np.ndarray = None
     :type positions: np.ndarray
     :param cutoff: Largest pair distance considered.
     :type cutoff: float
-    :param cells: Shape (n_frames, 3, 3) or (3, 3), no PBC if None, defaults to None.
+    :param cells: Shape (n_frames, 3, 3) or None to if no PBC, defaults to None.
     :type cells: np.ndarray or None, optional
     :param species: Shape (n_frames, n_particles) or (n_particles,), defaults to None.
     :type species: np.ndarray or None, optional
@@ -64,7 +78,7 @@ def calculate_rdf(positions: np.ndarray, cutoff: float, cells: np.ndarray = None
     positions, species = ensure_positions_species_compatibility(positions, species)
 
     if cells is not None: 
-        cells = extract_cell_diagonals(cells) 
+        cells = extract_multicell_diagonal(cells)
 
     check_KDTree_compatibility(cells, cutoff=cutoff)
 
@@ -77,9 +91,10 @@ def calculate_rdf(positions: np.ndarray, cutoff: float, cells: np.ndarray = None
         unique_species = np.unique(species)
         counts_running_species = {f"{i}-{j}": np.zeros(n_bins) for i, j in combinations_with_replacement(unique_species, 2)}
 
-    for i in trange(len(positions)):
-        boxsize = (cells[i] if cells is not None else None)
-        tree = KDTree(positions[i], boxsize=boxsize)
+    for i in progress_bar(range(len(positions))):
+        cell = (cells[i] if cells is not None else None)
+
+        tree = get_KDTree_tree(positions[i], cell)
         tree_dict = tree.sparse_distance_matrix(tree, cutoff)
 
         pairs = np.array(list(tree_dict.keys()))
@@ -168,7 +183,7 @@ def calculate_adf(positions, cutoffs, cells=None, species=None):
     :return: A dictionary with keys
         - **f"all-all-all_cutoff_{cutoff}"** (*np.ndarray*): y-values for plotting ADF of all positions for each value `cutoff` in `cutoffs`, shape (180,).
         - **f"{center}-{end1}-{end2}_cutoff_{cutoff}"** (*np.ndarray*): Available only if `species` was provided. y-values for plotting ADF of all angles 
-          with center of type `center` and ends of types `end1` and `end2` for all possible combinations triples of species types, and for each value 
+          with center of type `center` and ends of species `end1` and `end2` for all possible combinations triples of species species, and for each value 
           `cutoff` in `cutoffs`, shape (180,).
     :rtype: dict
     """
@@ -176,8 +191,8 @@ def calculate_adf(positions, cutoffs, cells=None, species=None):
     positions, cells = ensure_positions_cells_compatibility(positions, cells)
     positions, species = ensure_positions_species_compatibility(positions, species)
 
-    if cells is not None:
-        cells = extract_cell_diagonals(cells) 
+    if cells is not None: 
+        cells = extract_multicell_diagonal(cells)
 
     try:
         iter(cutoffs)
@@ -198,16 +213,16 @@ def calculate_adf(positions, cutoffs, cells=None, species=None):
                     adfs[f"{center}-{end1}-{end2}_cutoff_{cutoff}"] = np.zeros((180,))
         
 
-    for i in trange(len(positions)):
-        boxsize = (cells[i] if cells is not None else None)
-        tree = KDTree(positions[i], boxsize=boxsize) 
+    for i in progress_bar(range(len(positions))):
+        cell = (cells[i] if cells is not None else None)
 
+        tree = get_KDTree_tree(positions[i], cell)
         pairs = tree.query_pairs(max(cutoffs), output_type='ndarray')
 
         if len(pairs) == 0:
             continue
 
-        vecs = find_mic(positions[i][pairs[:,0]] - positions[i][pairs[:,1]], cell=boxsize)
+        vecs = find_mic(positions[i][pairs[:,0]] - positions[i][pairs[:,1]], cell=cell)
         vecs = np.array(vecs)
 
         vecs = vecs

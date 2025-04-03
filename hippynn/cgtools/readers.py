@@ -1,4 +1,6 @@
 # Read outputs from LAMMPS, Gromacs
+# ChatGPT was used in creating these functions
+
 import os
 
 import MDAnalysis as mda
@@ -15,8 +17,6 @@ def extract_trajectory_data(topology, trajectory, start=0, stop=None, stride=1, 
 
     E.g., for Gromacs: extract_trajectory_data(topology="output.gro", trajectory="output.trr")
     E.g., for LAMMPS: extract_trajectory_data(topology="system.data", trajectory="output.lammpstrj")
-
-    Written with help from ChatGPT.
 
     .. warning:: If ``types`` cannot be read from the files but ``names`` is available, the types will be 
      guessed from the names. You can ensure this is done correctly by providing ``name_to_type_dict``. The 
@@ -35,9 +35,9 @@ def extract_trajectory_data(topology, trajectory, start=0, stop=None, stride=1, 
         - velocities: ndarray or None (n_frames, n_atoms, 3)
         - forces: ndarray or None (n_frames, n_atoms, 3)
         - cells: ndarray (n_frames, 3, 3)
-        - masses: ndarray (n_frames, n_atoms)
-        - species: ndarray (n_frames, n_atoms)
-        - mol_ids: ndarray (n_frames, n_atoms)
+        - masses: ndarray (n_atoms,)
+        - species: ndarray (n_atoms,)
+        - mol_ids: ndarray (n_atoms,)
     :rtype: dict
     """
 
@@ -67,14 +67,9 @@ def extract_trajectory_data(topology, trajectory, start=0, stop=None, stride=1, 
     cells = np.zeros((n_frames, 3, 3), dtype=np.float32)
 
     # Static atom info
-    base_masses = u.atoms.masses.astype(np.float32)
-    base_species = np.array(u.atoms.types)
-    base_mol_ids = u.atoms.resids.astype(np.int32)
-
-    # Broadcast static info across frames
-    masses = np.tile(base_masses, (n_frames, 1))
-    species = np.tile(base_species, (n_frames, 1))
-    mol_ids = np.tile(base_mol_ids, (n_frames, 1))
+    masses = u.atoms.masses.astype(np.float32)
+    species = np.array(u.atoms.types)
+    mol_ids = u.atoms.resindices.astype(np.int32)
 
     # Extract per-frame data
     for i, ts in enumerate(u.trajectory[start:stop:stride]):
