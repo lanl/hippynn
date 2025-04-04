@@ -22,8 +22,6 @@ def get_types(universe):
         species_symbols = types
         species_numbers = [SYMB2Z[sym] for sym in species_symbols]
         print(f"Found atom types {np.unique(types)}, which were infered to be chemical symbols. If this is not correct, please rerun the function and pass a `type_correction_dict`. The keys should be of type {type(types[0])}.")
-
-        
     return np.array(species_numbers), np.array(species_symbols)
 
 def extract_trajectory_data(topology, trajectory, start=0, stop=None, stride=1, type_correction_dict=None, mda_universe_kwargs={}):
@@ -89,6 +87,12 @@ def extract_trajectory_data(topology, trajectory, start=0, stop=None, stride=1, 
     mol_ids = u.atoms.resindices.astype(np.int32)
 
     species_numbers, species_symbols = get_types(u)
+
+    # Add frame axis to static data
+    masses = np.tile(masses, (n_frames, 1))
+    mol_ids = np.tile(mol_ids, (n_frames, 1))
+    species_numbers = np.tile(species_numbers, (n_frames, 1))
+    species_symbols = np.tile(species_symbols, (n_frames, 1))
 
     # Extract per-frame data
     for i, ts in enumerate(u.trajectory[start:stop:stride]):

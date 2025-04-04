@@ -24,10 +24,12 @@ def ensure_positions_cells_compatibility(positions, cells):
 def ensure_positions_species_compatibility(positions, species):
     n_frames, n_particles, _ = positions.shape
     if species is not None:
-        if species.shape == (n_particles,) or species.shape == (n_particles,1):
+        if species.squeeze().shape == (n_particles,):
             species = np.tile(species, (n_frames, 1))
-        elif len(species) != len(positions):
-            raise ValueError(f"Number of frames in `positions` and `species` do not match. Provided: {len(positions)}, {len(species)}.")
+        elif species.shape[0] != positions.shape[0]:
+            raise ValueError(f"Number of frames in `positions` and `species` do not match. Provided: {positions.shape[0]}, {species.shape[0]}.")
+        elif species.shape[1] != positions.shape[1]:
+            raise ValueError(f"Number of particles in `positions` and `species` do not match. Provided: {positions.shape[1]}, {species.shape[1]}.")
         species = species.reshape(n_frames, n_particles)
     return positions, species
 
@@ -68,9 +70,8 @@ def calculate_rdf(positions: np.ndarray, cutoff: float, cells: np.ndarray = None
     :return: A tuple containng
         - **bin_centers** (*np.ndarray*): x-values for plotting RDF, shape (n_bins,).
         - **rdf** (*np.ndarray*): y-values for plotting RDF, shape (n_bins,).
-        - **species_rdfs** (*dict(str, np.ndarray)*): Only included if `species` is provided. Dictionary where the keys are pairs "i-j" for each
-          pair of species i and j, and the values are the RDF y-values for that species pair. The same x-values 
-          are used for all RDFs.
+        - **species_rdfs** (*dict(str, np.ndarray)*): Only included if `species` is provided. Dictionary where the keys are pairs "rdf_values_i-j" for each
+          pair of species i and j, and the values are the RDF y-values for that species pair. The same x-values are used for all RDFs.
     :rtype: tuple
     """
 
@@ -89,7 +90,7 @@ def calculate_rdf(positions: np.ndarray, cutoff: float, cells: np.ndarray = None
 
     if species is not None:
         unique_species = np.unique(species)
-        counts_running_species = {f"{i}-{j}": np.zeros(n_bins) for i, j in combinations_with_replacement(unique_species, 2)}
+        counts_running_species = {f"rdf_values_{i}-{j}": np.zeros(n_bins) for i, j in combinations_with_replacement(unique_species, 2)}
 
     for i in progress_bar(range(len(positions))):
         cell = (cells[i] if cells is not None else None)
@@ -110,11 +111,11 @@ def calculate_rdf(positions: np.ndarray, cutoff: float, cells: np.ndarray = None
             for j, k in combinations_with_replacement(unique_species, 2):
                 dists_spec = dists[(species[i][pairs[:,0]] == j) & (species[i][pairs[:,1]] == k)]
                 counts, _ = np.histogram(dists_spec, bins=bins)
-                counts_running_species[f'{j}-{k}'] += counts
+                counts_running_species[f'rdf_values_{j}-{k}'] += counts
                 if j!=k:
                     dists_spec = dists[(species[i][pairs[:,0]] == k) & (species[i][pairs[:,1]] == j)]
                     counts, _ = np.histogram(dists_spec, bins=bins)
-                    counts_running_species[f'{j}-{k}'] += counts
+                    counts_running_species[f'rdf_values_{j}-{k}'] += counts
 
     # Overall values to normalize by
     avg_n_pairs = counts_running.sum() / n_timesteps
@@ -133,13 +134,13 @@ def calculate_rdf(positions: np.ndarray, cutoff: float, cells: np.ndarray = None
     if species is not None:
         species_rdfs = dict()
         for j, k in combinations_with_replacement(unique_species, 2):
-            avg_n_pairs = counts_running_species[f'{j}-{k}'].sum() / n_timesteps
+            avg_n_pairs = counts_running_species[f'rdf_values_{j}-{k}'].sum() / n_timesteps
             avg_density = avg_n_pairs / sphere_vol
 
-            avg_counts = counts_running_species[f'{j}-{k}'] / n_timesteps
+            avg_counts = counts_running_species[f'rdf_values_{j}-{k}'] / n_timesteps
             shell_densities = avg_counts / shell_vols
 
-            species_rdfs[f'{j}-{k}'] = shell_densities / avg_density
+            species_rdfs[f'rdf_values_{j}-{k}'] = shell_densities / avg_density
 
     bin_centers = 0.5 * (bins[:-1] + bins[1:])
 
@@ -181,8 +182,8 @@ def calculate_adf(positions, cutoffs, cells=None, species=None):
     :type species: np.ndarray or None, optional
 
     :return: A dictionary with keys
-        - **f"all-all-all_cutoff_{cutoff}"** (*np.ndarray*): y-values for plotting ADF of all positions for each value `cutoff` in `cutoffs`, shape (180,).
-        - **f"{center}-{end1}-{end2}_cutoff_{cutoff}"** (*np.ndarray*): Available only if `species` was provided. y-values for plotting ADF of all angles 
+        - **f"adf_values_all-all-all_cutoff_{cutoff}"** (*np.ndarray*): y-values for plotting ADF of all positions for each value `cutoff` in `cutoffs`, shape (180,).
+        - **f"adf_values_{center}-{end1}-{end2}_cutoff_{cutoff}"** (*np.ndarray*): Available only if `species` was provided. y-values for plotting ADF of all angles 
           with center of type `center` and ends of species `end1` and `end2` for all possible combinations triples of species species, and for each value 
           `cutoff` in `cutoffs`, shape (180,).
     :rtype: dict
@@ -203,14 +204,14 @@ def calculate_adf(positions, cutoffs, cells=None, species=None):
 
     adfs = dict()
     for cutoff in cutoffs:
-        adfs[f"all-all-all_cutoff_{cutoff}"] = np.zeros((180,))
+        adfs[f"adf_values_all-all-all_cutoff_{cutoff}"] = np.zeros((180,))
 
     if species is not None:
         unique_species = np.unique(species)
         for center in unique_species:
             for end1, end2 in combinations_with_replacement(unique_species, 2):
                 for cutoff in cutoffs:
-                    adfs[f"{center}-{end1}-{end2}_cutoff_{cutoff}"] = np.zeros((180,))
+                    adfs[f"adf_values_{center}-{end1}-{end2}_cutoff_{cutoff}"] = np.zeros((180,))
         
 
     for i in progress_bar(range(len(positions))):
@@ -246,7 +247,7 @@ def calculate_adf(positions, cutoffs, cells=None, species=None):
             angles = np.arccos((triples_vec_cutoff[:,0] * triples_vec_cutoff[:,1]).sum(axis=-1)) / np.pi * 180 
             counts, _ = np.histogram(angles, bins=np.arange(0,181,dtype=angles.dtype))
 
-            adfs[f"all-all-all_cutoff_{cutoff}"] += counts
+            adfs[f"adf_values_all-all-all_cutoff_{cutoff}"] += counts
 
         if species is not None:
             for center in unique_species:
@@ -277,7 +278,7 @@ def calculate_adf(positions, cutoffs, cells=None, species=None):
                         angles = np.arccos((triples_ends_cutoff[:,0] * triples_ends_cutoff[:,1]).sum(axis=-1)) / np.pi * 180 
                         counts, _ = np.histogram(angles, bins=np.arange(0,181,dtype=angles.dtype))
 
-                        adfs[f"{center}-{end1}-{end2}_cutoff_{cutoff}"] += counts
+                        adfs[f"adf_values_{center}-{end1}-{end2}_cutoff_{cutoff}"] += counts
 
     for key, value in adfs.items():
         adfs[key] = value / value.sum()
@@ -286,6 +287,6 @@ def calculate_adf(positions, cutoffs, cells=None, species=None):
         for center in unique_species:
             for end1, end2 in combinations_with_replacement(unique_species, 2):
                 for cutoff in cutoffs:
-                    adfs[f"{center}-{end2}-{end1}_cutoff_{cutoff}"] = adfs[f"{center}-{end1}-{end2}_cutoff_{cutoff}"]
+                    adfs[f"adf_values_{center}-{end2}-{end1}_cutoff_{cutoff}"] = adfs[f"adf_values_{center}-{end1}-{end2}_cutoff_{cutoff}"]
         
     return adfs
