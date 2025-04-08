@@ -248,3 +248,21 @@ def recursive_param_count(state_dict, n=0):
         else:
             raise TypeError(f'Unknown type {type(v)=}, value={v}')
     return n
+
+
+try:
+    torch.serialization.add_safe_globals
+    def add_safe_globals(*args,**kwargs):
+        """
+        Backwards-compatible alias of torch.serialization.add_safe_globals
+        """
+        return torch.serialization.add_safe_globals(*args,**kwargs)
+
+except AttributeError:
+    # Older version of pytorch.
+    def add_safe_globals(*args,**kwargs):
+        """
+        Backwards-compatible alias of torch.serialization.add_safe_globals
+        """
+        pass
+

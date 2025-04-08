@@ -4,6 +4,7 @@ Keep track of training metrics over the experiment
 import copy
 import warnings
 import torch
+from hippynn.tools import add_safe_globals
 
 try:
     from hippynn.plotting import plot_all_over_time
@@ -131,7 +132,7 @@ class MetricTracker:
     def plot_over_time(self):
         plot_all_over_time(self.epoch_metric_values, self.epoch_best_metric_values)
 
-torch.serialization.add_safe_globals([MetricTracker])
+add_safe_globals([MetricTracker])
 
 
 # Driver for printing evaluation table results, with * for better entries.
