@@ -144,7 +144,9 @@ class HipnnVec(DefaultNetworkExpansion, AutoKw, Network, SingleNode, _FeatureNod
 
 class HipnnQuad(HipnnVec):
     """
-    Node for HIP-NN-TS neural networks, l=2
+    Node for HIP-NN-TS neural network, l=2
     """
-
     _auto_module_class = network_modules.hipnn.HipnnQuad
+
+class HipHopnn(HipnnVec):
+    _auto_module_class = network_modules.hiphop.HipHopNNModule

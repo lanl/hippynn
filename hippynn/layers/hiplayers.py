@@ -139,7 +139,7 @@ class InteractLayer(torch.nn.Module):
     Hipnn's interaction layer
     """
 
-    def __init__(self, nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module, cusp_reg=None):
+    def __init__(self, nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module):
         """
         Constructor
 
@@ -150,13 +150,9 @@ class InteractLayer(torch.nn.Module):
         :param maxd_soft: maximum distance for initial sensitivities
         :param hard_cutoff: maximum distance for cutoff function
         :param sensitivity_module: class or callable that builds sensitivity functions, should return nn.Module
-        :param cusp_reg: ignored, only provided with compatibility for tensor sensitivity API
         """
         super().__init__()
 
-        if type(self) is InteractLayer and cusp_reg is not None:
-            # Parameter is not used in this class.
-            warnings.warn(f"Parameter `cusp_reg`={cusp_reg} is ignored in this class, and is only provided for API compatibility.")
         self.n_dist = n_dist
         self.nf_in = nf_in
         self.nf_out = nf_out
