@@ -4,14 +4,22 @@ Interaction functions for hip-hop-nn
 import collections
 import itertools
 import torch
-import opt_einsum
 from .hiplayers import InteractLayer
 from .. import custom_kernels
 import warnings
 
+
 from typing import List
 from torch import Tensor
 from typing import Dict
+
+# use opt_einsum when it is available
+try:
+    import opt_einsum
+    shared_intermediates = opt_einsum.shared_intermediates
+except ImportError:
+    from contextlib import nullcontext
+    shared_intermediates = nullcontext
 
 ndim = 3  # spatial dimensions
 
@@ -169,7 +177,7 @@ class TensorExtractor(torch.nn.Module):
     def forward(self, rhats):
         s = v = q = t = None
         s = torch.ones(rhats.shape[0], device=rhats.device, dtype=rhats.dtype).unsqueeze(1)
-        with opt_einsum.shared_intermediates():
+        with shared_intermediates():  # opt_einsum or null, see import logic
             if self.l_max > 0:
                 v = rhats
             if self.l_max > 1:
