@@ -1,3 +1,9 @@
+
+New Features:
+-------------
+
+- Added new network type, HIP-HOP-NN.
+
 0.1.0
 =======
 
