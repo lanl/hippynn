@@ -13,9 +13,11 @@ from typing import Dict
 # use opt_einsum when it is available
 try:
     import opt_einsum
+
     shared_intermediates = opt_einsum.shared_intermediates
 except ImportError:
     from contextlib import nullcontext
+
     shared_intermediates = nullcontext
 
 ndim = 3  # spatial dimensions
@@ -166,10 +168,9 @@ class TensorExtractor(torch.nn.Module):
         super().__init__()
         self.l_max = l_max
         all_pmaps = list(pmaps.values())
-        self.pmaps = torch.nn.ParameterList(all_pmaps[:l_max+1])
+        self.pmaps = torch.nn.ParameterList(all_pmaps[: l_max + 1])
         for p in self.pmaps:
             p.requires_grad_(False)
-
 
     def forward(self, rhats):
         s = v = q = t = None
@@ -319,7 +320,7 @@ class HopInvariantLayer(torch.nn.Module):
     def extra_repr(self):
         return f"{self.n_max=},{self.l_max=}"
 
-    def forward(self,tensor_features):
+    def forward(self, tensor_features):
         s = v = q = t = True
         if self.l_max > 0:
             assert v is not None
@@ -329,5 +330,3 @@ class HopInvariantLayer(torch.nn.Module):
                     assert t is not None
         C = self.cmaps
         return calc_invariants(self.l_max, self.n_max, tensor_features, C)
-
-

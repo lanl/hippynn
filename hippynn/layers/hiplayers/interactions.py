@@ -279,6 +279,7 @@ _invariant_counts = {
     (1, 0): 1,  # Quasi-redundant with HIP-NN
 }
 
+
 class HOPInteractionLayer(InteractLayer):
     def __init__(self, *args, n_max, l_max, group_norm, group_norm_eps, **kwargs):
         super().__init__(*args, **kwargs)
@@ -293,8 +294,7 @@ class HOPInteractionLayer(InteractLayer):
                 warnings.warn(f"If variable n_max==1, l_max>0 is unneeded. ({n_max=},{l_max=})")
         elif n_max > 1:
             if l_max == 0:
-                warnings.warn(f"If variable n_max>1, l_max>1 is required for"
-                              f" non-trivial many-body interactions. ({n_max=},{l_max=})")
+                warnings.warn(f"If variable n_max>1, l_max>1 is required for" f" non-trivial many-body interactions. ({n_max=},{l_max=})")
             if n_max > 2 and l_max == 1:
                 warnings.warn(f"If variable l_max==1, n_max>2 is redundant. ({n_max=},{l_max=})")
 
@@ -304,8 +304,10 @@ class HOPInteractionLayer(InteractLayer):
             raise ValueError(f"HIP-HOP parameters {l_max=},{n_max=} implementation not presently available.")
 
         if n_invariants == 1:
-            warnings.warn(f"Number of invariants is only 1 for HIP-HOP with ({n_max=},{l_max=}); for these settings"
-                          f" it may be preferable to use vanilla HIP-NN.")
+            warnings.warn(
+                f"Number of invariants is only 1 for HIP-HOP with ({n_max=},{l_max=}); for these settings"
+                f" it may be preferable to use vanilla HIP-NN."
+            )
 
         self.n_invariants = n_invariants
         mixing_weights = torch.zeros(self.nf_out, self.n_invariants, self.nf_out)
@@ -333,7 +335,7 @@ class HOPInteractionLayer(InteractLayer):
 
         # apply weights to tensor features
         weights_rs = torch.reshape(self.int_weights.permute(0, 2, 1), (self.n_dist * self.nf_in, self.nf_out))
-        env_rs = env_features.reshape(n_atoms_real*n_tensor_comp, self.n_dist * self.nf_in)
+        env_rs = env_features.reshape(n_atoms_real * n_tensor_comp, self.n_dist * self.nf_in)
         tensor_features = torch.mm(env_rs, weights_rs)
         tensor_features = tensor_features.reshape(n_atoms_real, n_tensor_comp, self.nf_out)
 
@@ -355,7 +357,7 @@ class HOPInteractionLayer(InteractLayer):
         else:
             normalized_invariants = invariants
 
-        normalized_invariants = normalized_invariants.reshape(n_atoms_real, self.nf_out*self.n_invariants)
+        normalized_invariants = normalized_invariants.reshape(n_atoms_real, self.nf_out * self.n_invariants)
 
         # (n_a,n_f*n_i) @ (n_f*n_i,n_f) -> (n_a, n_f)
         mixing_features = normalized_invariants @ self.mixing_weights.reshape(-1, self.nf_out)

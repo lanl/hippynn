@@ -131,4 +131,3 @@ class SensitivityBottleneck(torch.nn.Module):
         base_sense = self.base_sense(distflat)
         reduced_sense = torch.mm(base_sense, self.matching)
         return reduced_sense
-

@@ -8,9 +8,8 @@ class HipHopNNModule(Hipnn):
     _interaction_class = HOPInteractionLayer
     _interaction_kwargs = ("l_max", "n_max", "group_norm", "group_norm_eps")
 
-    def __init__(self, *args,  l_max=3, n_max=4, group_norm=True, group_norm_eps=1e-5, **kwargs):
-        warnings.warn("HIP-HOP-NN is still in a beta state: "
-                      "Details, defaults, and API are still subject to change.")
+    def __init__(self, *args, l_max=3, n_max=4, group_norm=True, group_norm_eps=1e-5, **kwargs):
+        warnings.warn("HIP-HOP-NN is still in a beta state: " "Details, defaults, and API are still subject to change.")
         super().__init__(*args, l_max=l_max, n_max=n_max, group_norm=group_norm, group_norm_eps=group_norm_eps, **kwargs)
         self.l_max = l_max
         self.n_max = n_max
@@ -29,7 +28,7 @@ class HipHopNNModule(Hipnn):
         rhats = pair_coord / pair_dist.unsqueeze(1)
 
         tensor_term_list = self.tensor_extractor(rhats)
-        tensor_term_list = tensor_term_list[:self.l_max + 1]
+        tensor_term_list = tensor_term_list[: self.l_max + 1]
 
         tensor_rhats = torch.cat(tensor_term_list, dim=-1)
 
@@ -47,5 +46,3 @@ class HipHopNNModule(Hipnn):
             output_features.append(features)
 
         return output_features
-
-
