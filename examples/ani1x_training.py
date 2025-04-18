@@ -106,23 +106,30 @@ def load_db(db_info, en_name, force_name, seed, anidata_location, n_workers, use
         database.targets = [x for x in database.targets if x != CCX_EN_NAME]
 
     # compute (approximate) atomization energy by subtracting self energies
-    self_energy = np.vectorize(SELF_ENERGY_APPROX.__getitem__)(database.arr_dict['atomic_numbers'])
-    self_energy = self_energy.sum(axis=1)  # Add up over atoms in system.
+    # Build a lookup tensor for self energies
+    max_z = max(SELF_ENERGY_APPROX.keys()) + 1  # +1 in case max Z is the last index
+    lookup_table = torch.zeros(max_z, dtype=torch.float32)
+    for z, energy in SELF_ENERGY_APPROX.items():
+        lookup_table[z] = energy
+    
+    database.arr_dict['atomic_numbers'] = database.arr_dict['atomic_numbers'].long()
+
+    self_energy = lookup_table[database.arr_dict['atomic_numbers']]
+    self_energy = self_energy.sum(dim=1)    
     database.arr_dict[en_name] = (database.arr_dict[en_name] - self_energy)
     kcalpmol = (ase.units.kcal/ase.units.mol)
     conversion = ase.units.Ha/kcalpmol
-    database.arr_dict[en_name] = database.arr_dict[en_name].astype(np.float32)*conversion
+    database.arr_dict[en_name] = database.arr_dict[en_name].float()*conversion
     if force_name in database.arr_dict:
         database.arr_dict[force_name] = database.arr_dict[force_name]*conversion
     torch.set_default_dtype(torch.float32)
-    database.arr_dict['atomic_numbers'] = database.arr_dict['atomic_numbers'].astype(np.int64)
 
     # Drop indices where computed energy not retrieved.
     if use_ccx_subset:
         filter_name = CCX_EN_NAME
     else:
         filter_name = en_name
-    found_indices = ~np.isnan(database.arr_dict[filter_name])
+    found_indices = ~torch.isnan(database.arr_dict[filter_name])
     database.arr_dict = {k: v[found_indices] for k, v in database.arr_dict.items()}
     database.make_trainvalidtest_split(test_size=0.1, valid_size=0.1)
     return database

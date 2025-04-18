@@ -68,6 +68,10 @@ class PeriodicPairIndexer(ExpandParents, AutoKw, PeriodicPairOutputs, PairIndexe
         parents = self.expand_parents(parents)
         super().__init__(name, parents, module=module, **kwargs)
 
+from ...layers.pairs import periodic 
+class StaticPeriodicPairIndexer(PeriodicPairIndexer):
+    _auto_module_class = periodic.StaticImagePeriodicPairIndexer
+
 class Memory:
     @property
     def skin(self):
