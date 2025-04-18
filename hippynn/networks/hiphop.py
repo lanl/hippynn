@@ -1,7 +1,7 @@
 import warnings
 import torch
 from .hipnn import Hipnn
-from ..layers.hop import HOPInteractionLayer, TensorExtractor
+from ..layers.hiplayers import HOPInteractionLayer, TensorExtractor
 
 
 class HipHopNNModule(Hipnn):
