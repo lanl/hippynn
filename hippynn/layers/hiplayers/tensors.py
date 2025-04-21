@@ -318,7 +318,7 @@ class HopInvariantLayer(torch.nn.Module):
             raise ValueError(f"Bad l: {l_max}")
 
     def extra_repr(self):
-        return f"{self.n_max=},{self.l_max=}"
+        return f"n_max={self.n_max}, l_max={self.l_max}"
 
     def forward(self, tensor_features):
         s = v = q = t = True

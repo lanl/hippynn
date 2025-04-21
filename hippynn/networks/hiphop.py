@@ -15,6 +15,9 @@ class HipHopNNModule(Hipnn):
         self.n_max = n_max
         self.tensor_extractor = TensorExtractor(l_max=l_max)
 
+    def extra_repr(self):
+        return f"n_max={self.n_max}, l_max={self.l_max}"
+
     def forward(self, features, pair_first, pair_second, pair_dist, pair_coord):
         features = features.to(pair_dist.dtype)  # Convert one-hot features to floating point features.
 
