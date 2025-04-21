@@ -1,3 +1,27 @@
+Breaking changes:
+-----------------
+
+- Alterations to data after loading as a hippynn Database but prior to 
+  splitting the data (eg. as in the examples ani_aluminum_example\*.py, 
+  ani1x_training.py, and \*SNAPExample.py) must be performed using 
+  PyTorch rather than NumPy. 
+
+New Features:
+-------------
+
+
+Improvements:
+-------------
+
+- Adjust the Database loader so that data is immediately transformed into
+  PyTorch Tensors, rather than performing this transformation as part of 
+  creating the data splits. 
+
+
+Bug Fixes:
+----------
+
+
 0.1.0
 =======
 
