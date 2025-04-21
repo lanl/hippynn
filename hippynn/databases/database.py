@@ -26,7 +26,7 @@ class Database:
         arr_dict: dict[str, torch.Tensor],
         inputs: list[str],
         targets: list[str],
-        seed: [int, np.random.RandomState, tuple, torch.Generator],
+        seed: [int, torch.Generator],
         test_size: Union[float, int] = None,
         valid_size: Union[float, int] = None,
         num_workers: int = 0,
@@ -41,9 +41,7 @@ class Database:
         :param arr_dict: dictionary mapping strings to numpy arrays
         :param inputs:   list of strings for input db_names
         :param targets:  list of strings for output db_namees
-        :param seed:     int, for random splitting, or "mask" for pre-split.
-            Can also be existing numpy.random.RandomState.
-            Can also be tuple from numpy.random.RandomState.get_state()
+        :param seed:     int, for random splitting, or existing torch.Generator object
         :param test_size: fraction of data to use in test split
         :param valid_size: fraction of data to use in train split
         :param num_workers: passed to pytorch dataloaders
@@ -113,22 +111,9 @@ class Database:
 
         if isinstance(seed, torch.Generator):
             self.random_state = seed
-            self._rng_type = "torch"
-        elif isinstance(seed, np.random.RandomState):
-            self.random_state = seed
-            self._rng_type = "numpy"
-        elif isinstance(seed, tuple):
-            self.random_state = np.random.RandomState()
-            self.random_state.set_state(seed)
-            self._rng_type = "numpy"
         else:
-            try:
-                self.random_state = torch.Generator()
-                self.random_state.manual_seed(seed)
-                self._rng_type = "torch"
-            except Exception: # np.random.RandomState is more permissive with input types than torch.manual_seed
-                self.random_state = np.random.RandomState(seed)
-                self._rng_type = "numpy"
+            self.random_state = torch.Generator()
+            self.random_state.manual_seed(seed)
 
         if self.auto_split:
             if test_size is not None or valid_size is not None:
@@ -209,14 +194,8 @@ class Database:
         if split_size < 1:
             split_size = int(split_size * len(self))
 
-        if self._rng_type == "torch":
-            perm = torch.randperm(len(self.arr_dict["indices"]), generator=self.random_state)
-            split_indices = self.arr_dict["indices"][perm[:split_size]]
-        elif self._rng_type == "numpy":
-            split_indices = self.random_state.choice(self.arr_dict["indices"], size=split_size, replace=False)
-            split_indices = torch.as_tensor(split_indices)
-        else:
-            raise ValueError("Unknown random state type.")
+        perm = torch.randperm(len(self.arr_dict["indices"]), generator=self.random_state)
+        split_indices = self.arr_dict["indices"][perm[:split_size]]
 
         split_indices.sort()
 
@@ -832,8 +811,7 @@ def compute_index_mask(indices: torch.Tensor, index_pool: torch.Tensor) -> torch
     if counts.max() > 1:
         raise ValueError("Split indices have duplicates.")
 
-    indices_set = set(indices.tolist())
-    index_mask = torch.tensor([item.item() in indices_set for item in index_pool], dtype=torch.bool)
+    index_mask = torch.isin(index_pool, indices)
     return index_mask
 
 
