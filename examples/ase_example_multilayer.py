@@ -30,7 +30,6 @@ from ase.lattice.cubic import FaceCenteredCubic
 # Load the files
 try:
     with active_directory("TEST_ALUMINUM_MODEL_MULTILAYER", create=False):
-    # with active_directory("TEST_ALUMINUM_MODEL", create=False):
         bundle = load_checkpoint_from_cwd(map_location='cpu')
 except FileNotFoundError:
     raise FileNotFoundError("Model not found, run ani_aluminum_example_multilayer.py first!")
@@ -96,6 +95,6 @@ class Tracker():
 # Now run the dynamics
 tracker = Tracker(dyn, atoms)
 tracker.print()
-# for i in range(20):  # Run 2 ps
-#     dyn.run(50)  # Run 20 fs
-#     tracker.print()
+for i in range(20):  # Run 2 ps
+    dyn.run(50)  # Run 20 fs
+    tracker.print()
