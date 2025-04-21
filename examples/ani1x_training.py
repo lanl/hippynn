@@ -315,7 +315,7 @@ if __name__ == "__main__":
         "be used regardless.",
     )
     parser.add_argument("--tensor_order", type=int, default=0, help="tensor order $\ell$")
-    parser.add_argument("--tensor_factors", type=int, default=0, help="number of factors used (in HIP-HOP-NN only)")
+    parser.add_argument("--tensor_factors", type=int, default=4, help="number of factors used (in HIP-HOP-NN only)")
     parser.add_argument("--atomization_consistent", type=bool, default=False)
 
     parser.add_argument("--anidata_location", type=str, default="../../../datasets/ani1x_release/ani1x-release.h5")
