@@ -58,7 +58,7 @@ def main(molecule_counts, density):
 
 if __name__ == "__main__":
     molecule_counts = {'choline': 250, 'chloride': 250, 'urea': 500}
-    density = 1.25 # g/cm^3
+    density = 1.178 # g/cm^3
 
     main(molecule_counts, density)
 
