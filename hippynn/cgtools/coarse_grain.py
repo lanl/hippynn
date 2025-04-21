@@ -15,7 +15,7 @@ def validate_nframes_natoms(value, value_name, n_frames, n_atoms):
 def validate_cells(cells, n_frames):
     cells = cells.squeeze()
     if cells.shape == (3, 3):
-        cells = np.tile(cells, (n_frames, 1))
+        cells = np.tile(cells, (n_frames, 1, 1))
     elif cells.shape != (n_frames, 3, 3):
         raise ValueError(f"Unexpected shape found for 'cells'. Expected ({n_frames}, 3, 3) or (3, 3). Found {cells.shape}.")
     return cells
@@ -123,6 +123,12 @@ def cg_one_center_of_mass_pbc(bead_values, bead_masses, frame_cell):
     validate_diagonal_cell(cell=frame_cell)
     mic_dists = find_mic(bead_values[1:] - bead_values[0], cell=frame_cell)
     return np.sum(mic_dists * bead_masses[1:, None], axis=0) / bead_masses.sum() + bead_values[0]
+
+def cg_one_center_of_geometry_pbc(bead_values, frame_cell):
+    """Position center of geometry using PBC"""
+    validate_diagonal_cell(cell=frame_cell)
+    mic_dists = find_mic(bead_values[1:] - bead_values[0], cell=frame_cell)
+    return np.sum(mic_dists, axis=0) / bead_values.shape[0] + bead_values[0]
 
 def cg_one_mass_weighted_average(bead_values, bead_masses):
     """General mass-weighted average (eg. for velocities when using COM position mapping)"""

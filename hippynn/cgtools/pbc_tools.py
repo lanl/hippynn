@@ -16,7 +16,7 @@ def is_diagonal_multicell(multicell, rtol=1e-05, atol=1e-08):
 
 def validate_diagonal_cell(cell=None, multicell=None):
     if (cell is not None and not is_diagonal_cell(cell)) or (multicell is not None and not is_diagonal_multicell(multicell)):
-            raise ValueError("This function only works for orthorhombic cells with lattice vectors on the Cartesian axes, i.e. cells which can be written as a diagonal matrix.")
+        raise ValueError("This function only works for orthorhombic cells with lattice vectors on the Cartesian axes, i.e. cells which can be written as a diagonal matrix.")
     
 def extract_cell_diagonal(cell, check_diagonal=True):
     """use when cell shape is (3, 3)"""
