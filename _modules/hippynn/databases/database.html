@@ -133,10 +133,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">arr_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">arr_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
         <span class="n">inputs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">seed</span><span class="p">:</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">],</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">],</span>
         <span class="n">test_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">valid_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -151,9 +151,7 @@
 <span class="sd">        :param arr_dict: dictionary mapping strings to numpy arrays</span>
 <span class="sd">        :param inputs:   list of strings for input db_names</span>
 <span class="sd">        :param targets:  list of strings for output db_namees</span>
-<span class="sd">        :param seed:     int, for random splitting, or &quot;mask&quot; for pre-split.</span>
-<span class="sd">            Can also be existing numpy.random.RandomState.</span>
-<span class="sd">            Can also be tuple from numpy.random.RandomState.get_state()</span>
+<span class="sd">        :param seed:     int, for random splitting, or existing torch.Generator object</span>
 <span class="sd">        :param test_size: fraction of data to use in test split</span>
 <span class="sd">        :param valid_size: fraction of data to use in train split</span>
 <span class="sd">        :param num_workers: passed to pytorch dataloaders</span>
@@ -178,9 +176,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pin_memory</span> <span class="o">=</span> <span class="n">pin_memory</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auto_split</span> <span class="o">=</span> <span class="n">auto_split</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">arr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Skipping key &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39;: could not convert to tensor (</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="si">}</span><span class="s2">), reason: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All arrays:&quot;</span><span class="p">)</span>
-            <span class="n">prettyprint_arrays</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">)</span>
+            <span class="n">prettyprint_arrays</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">_var_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_list</span>
@@ -193,7 +198,7 @@
             <span class="n">_var_list</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_var_list</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">arr_dict</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;indices&quot;</span><span class="p">,</span> <span class="s2">&quot;split_indices&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;indices&quot;</span><span class="p">,</span> <span class="s2">&quot;split_indices&quot;</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">allow_unfound</span><span class="p">:</span>
                     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Required database quantity &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; not present during database initialization.&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -204,24 +209,21 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span> <span class="ow">and</span> <span class="n">_var_list</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">allow_unfound</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Finished checking input and target arrays; all necessary arrays were found.&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span> <span class="o">=</span> <span class="n">arr_dict</span>
-        <span class="k">if</span> <span class="s2">&quot;indices&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">arr_dict</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;indices&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Database: Using auto-generated data indices&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Database: Using pre-specified data indices.&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">splits</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">seed</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_split</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">test_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">valid_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -307,7 +309,8 @@
         <span class="k">if</span> <span class="n">split_size</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">split_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">split_size</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
-        <span class="n">split_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">split_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">perm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">]),</span> <span class="n">generator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="n">split_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">][</span><span class="n">perm</span><span class="p">[:</span><span class="n">split_size</span><span class="p">]]</span>
 
         <span class="n">split_indices</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
@@ -352,7 +355,7 @@
 
 <div class="viewcode-block" id="Database.make_explicit_split">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.make_explicit_split">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">make_explicit_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">split_indices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_explicit_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split_name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">split_indices</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param split_name: name for split, typically &#39;train&#39;, &#39;valid&#39;, &#39;test&#39;</span>
@@ -370,11 +373,11 @@
 
         <span class="c1"># Precompute the actual integer indices, because indexing with a boolean mask</span>
         <span class="c1"># requires doing this, and we have to index with a boolean several times.</span>
-        <span class="n">where_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">index_mask</span><span class="p">)</span>
-        <span class="n">where_complement</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">complement_mask</span><span class="p">)</span>
+        <span class="n">where_index</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">index_mask</span><span class="p">)</span>
+        <span class="n">where_complement</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">complement_mask</span><span class="p">)</span>
 
         <span class="c1"># Split off data, and keep the rest.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">split_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">where_index</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">split_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">where_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">}</span>
         <span class="k">if</span> <span class="s2">&quot;split_indices&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">split_name</span><span class="p">]:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Adding split indices for split: </span><span class="si">{</span><span class="n">split_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -404,13 +407,14 @@
 <span class="sd">        :param split_mask: a boolean array for where to split</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">split_mask</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
-            <span class="n">split_mask</span> <span class="o">=</span> <span class="n">split_mask</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">split_mask</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">split_mask</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mask function contains invalid values. Values found: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">split_mask</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">split_mask</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">split_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">split_mask</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">split_mask</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">:</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="p">((</span><span class="n">split_mask</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">split_mask</span> <span class="o">==</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mask function contains invalid values. Values found: </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">split_mask</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">split_mask</span> <span class="o">=</span> <span class="n">split_mask</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
+                <span class="n">split_mask</span> <span class="o">=</span> <span class="n">split_mask</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
 
         <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">][</span><span class="n">split_mask</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">make_explicit_split</span><span class="p">(</span><span class="n">split_name</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
@@ -431,8 +435,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add split masks to the dataset. This function is used internally before writing databases.</span>
 
-<span class="sd">        When using the dict_to_add_to parameter, this function writes numpy arrays.</span>
-<span class="sd">        When adding to self.splits, this function writes tensors.</span>
+<span class="sd">        This function writes tensors.</span>
 <span class="sd">        :param dict_to_add_to: where to put the split masks. Default to self.splits.</span>
 <span class="sd">        :param split_prefix: prefix for mask names</span>
 <span class="sd">        :return:</span>
@@ -446,24 +449,18 @@
 
         <span class="k">if</span> <span class="n">dict_to_add_to</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dict_to_add_to</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">splits</span>
-            <span class="n">write_tensor</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">write_tensor</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">mask_name</span> <span class="o">=</span> <span class="n">split_prefix</span> <span class="o">+</span> <span class="n">s</span>
             <span class="k">for</span> <span class="n">sprime</span><span class="p">,</span> <span class="n">split</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 
                 <span class="k">if</span> <span class="n">sprime</span> <span class="o">==</span> <span class="n">s</span><span class="p">:</span>
-                    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
+                    <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
-
-                <span class="k">if</span> <span class="n">write_tensor</span><span class="p">:</span>
-                    <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+                    <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">mask_name</span> <span class="ow">in</span> <span class="n">split</span><span class="p">:</span>
-                    <span class="c1"># Check that the mask is correct and in the np_dict</span>
+                    <span class="c1"># Check that the mask is correct and in the dict</span>
                     <span class="n">old_mask</span> <span class="o">=</span> <span class="n">dict_to_add_to</span><span class="p">[</span><span class="n">sprime</span><span class="p">][</span><span class="n">mask_name</span><span class="p">]</span>
                     <span class="k">if</span> <span class="p">(</span><span class="n">old_mask</span> <span class="o">!=</span> <span class="n">mask</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mask in database did not match existing split structure: </span><span class="si">{</span><span class="n">mask_name</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
@@ -498,16 +495,17 @@
             <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">split_prefix</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Split mask for &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; has too many dimensions. Shape: </span><span class="si">{</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;bool&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">:</span>
                     <span class="n">mask_vars</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">arr</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">int</span> <span class="ow">and</span> <span class="n">arr</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="k">elif</span> <span class="n">arr</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int8</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">int16</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">((</span><span class="n">arr</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">arr</span> <span class="o">==</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
                         <span class="n">mask_vars</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">arr_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+                        <span class="n">arr_values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Integer masks for split contain invalid values: </span><span class="si">{</span><span class="n">arr_values</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed on split </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> Split arrays must be 1-d boolean or (0,1)-valued integer arrays.&quot;</span><span class="p">)</span>
+
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask_vars</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No split mask detected.&quot;</span><span class="p">)</span>
@@ -526,7 +524,7 @@
         <span class="n">n_sys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">lengths</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># Check that masks define a complete split</span>
-        <span class="n">mask_counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_sys</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">mask_counts</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_sys</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">masks</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">mask_counts</span> <span class="o">+=</span> <span class="n">arr</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">mask_counts</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
@@ -614,7 +612,7 @@
         <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">norm_axis</span><span class="p">:</span>
-            <span class="n">prop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">norm_axis</span><span class="p">)</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">norm_axis</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">atomwise</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">norm_per_atom</span><span class="p">:</span>
@@ -631,7 +629,7 @@
             <span class="k">if</span> <span class="n">species_key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;species_key must be given to trim an atom-normalized quantity&quot;</span><span class="p">)</span>
 
-            <span class="n">n_atoms</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">species_key</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">n_atoms</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="n">species_key</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="c1"># Transposes broadcast the result rightwards instead of leftwards.</span>
             <span class="c1"># numpy transpose on higher-order arrays reverses all dimensions.</span>
             <span class="n">prop</span> <span class="o">=</span> <span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">n_atoms</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
@@ -639,7 +637,15 @@
 
         <span class="n">mean</span> <span class="o">=</span> <span class="n">stat_prop</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="n">std</span> <span class="o">=</span> <span class="n">stat_prop</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">std</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">mean</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">is_floating_point</span> <span class="ow">and</span> <span class="n">torch</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">():</span>
+            <span class="n">has_nan</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">std</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">is_floating_point</span> <span class="ow">and</span> <span class="n">torch</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">std</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">():</span>
+            <span class="n">has_nan</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">has_nan</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">has_nan</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Array statistics, </span><span class="si">{</span><span class="n">mean</span><span class="si">=}</span><span class="s2">,</span><span class="si">{</span><span class="n">std</span><span class="si">=}</span><span class="s2"> contain NaN.&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">prop</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span>
@@ -675,10 +681,10 @@
         <span class="k">if</span> <span class="n">cut</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">prop</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_array_stat_helper</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">species_key</span><span class="p">,</span> <span class="n">atomwise</span><span class="p">,</span> <span class="n">norm_per_atom</span><span class="p">,</span> <span class="n">norm_axis</span><span class="p">)</span>
 
-            <span class="n">large_property_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">prop</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">cut</span>
+            <span class="n">large_property_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">prop</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">cut</span>
             <span class="c1"># Scan over all non-batch indices.</span>
             <span class="n">non_batch_axes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">prop</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
-            <span class="n">drop_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">large_property_mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">non_batch_axes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="n">drop_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">large_property_mask</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">non_batch_axes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
             <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">][</span><span class="n">drop_mask</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">drop_mask</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Removed </span><span class="si">{</span><span class="n">drop_mask</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> outlier systems in variable </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> due to static cut.&quot;</span><span class="p">)</span>
@@ -686,10 +692,10 @@
 
         <span class="k">if</span> <span class="n">std_factor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">prop</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_array_stat_helper</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">species_key</span><span class="p">,</span> <span class="n">atomwise</span><span class="p">,</span> <span class="n">norm_per_atom</span><span class="p">,</span> <span class="n">norm_axis</span><span class="p">)</span>
-            <span class="n">large_property_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">prop</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">std</span> <span class="o">&gt;</span> <span class="n">std_factor</span>
+            <span class="n">large_property_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">prop</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">std</span> <span class="o">&gt;</span> <span class="n">std_factor</span>
             <span class="c1"># Scan over all non-batch indices.</span>
             <span class="n">non_batch_axes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">prop</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
-            <span class="n">drop_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">large_property_mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">non_batch_axes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="n">drop_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">large_property_mask</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">non_batch_axes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
             <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr_dict</span><span class="p">[</span><span class="s2">&quot;indices&quot;</span><span class="p">][</span><span class="n">drop_mask</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">drop_mask</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Removed </span><span class="si">{</span><span class="n">drop_mask</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> outlier systems in variable </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> due to std. factor.&quot;</span><span class="p">)</span>
@@ -826,7 +832,7 @@
         <span class="n">split_max_max_atom_size</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">split</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">species_array</span> <span class="o">=</span> <span class="n">split</span><span class="p">[</span><span class="n">species_key</span><span class="p">]</span>
-            <span class="n">max_atoms</span> <span class="o">=</span> <span class="p">(</span><span class="n">species_array</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">max_atoms</span> <span class="o">=</span> <span class="p">(</span><span class="n">species_array</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">max_max_atoms</span> <span class="o">=</span> <span class="n">max_atoms</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
             <span class="n">split_max_max_atom_size</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_max_atoms</span>
             <span class="k">del</span> <span class="n">max_atoms</span><span class="p">,</span> <span class="n">species_array</span><span class="p">,</span> <span class="n">max_max_atoms</span>  <span class="c1"># Marking unneeded.</span>
@@ -949,30 +955,31 @@
 
 <div class="viewcode-block" id="compute_index_mask">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.compute_index_mask">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">compute_index_mask</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">index_pool</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_index_mask</span><span class="p">(</span><span class="n">indices</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">index_pool</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    :param indices:</span>
 <span class="sd">    :param index_pool:</span>
 <span class="sd">    :return:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">index_pool</span><span class="p">)):</span>
+    <span class="n">index_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">index_pool</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="ow">in</span> <span class="n">index_set</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provided indices not in database&quot;</span><span class="p">)</span>
 
-    <span class="n">uniques</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uniques</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">):</span>
+    <span class="n">uniques</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">uniques</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">!=</span> <span class="n">indices</span><span class="o">.</span><span class="n">numel</span><span class="p">():</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Split indices not unique&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">counts</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Split indices have duplicates.&quot;</span><span class="p">)</span>
 
-    <span class="n">index_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">index_pool</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+    <span class="n">index_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">index_pool</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">index_mask</span></div>
 
 
 
 <div class="viewcode-block" id="prettyprint_arrays">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.prettyprint_arrays">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">prettyprint_arrays</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">prettyprint_arrays</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pretty-print array dictionary.</span>
 <span class="sd">    :return: None</span>
@@ -990,6 +997,8 @@
     <span class="n">printrow</span><span class="p">(</span><span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">)</span>
     <span class="n">printline</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">arr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
         <span class="n">printrow</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
     <span class="n">printline</span><span class="p">()</span></div>
 
