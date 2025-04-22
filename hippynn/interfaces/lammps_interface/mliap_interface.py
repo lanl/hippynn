@@ -59,15 +59,21 @@ class MLIAPInterface(MLIAPUnified):
         self.model_device = model_device
         self.energy_unit = energy_unit
         self.distance_unit = distance_unit
-        self._setup_performed = False
-        self.mliap_data = None
-        self.comms_handles = []
 
         # Build the calculator
         self.rcutfac, self.species_set, self.graph = setup_LAMMPS_graph(energy_node)
         self.nparams = sum(p.nelement() for p in self.graph.parameters())
         self.compute_dtype = compute_dtype
         self.graph.to(compute_dtype)
+
+        self.clear_runtime_variables()
+
+    def clear_runtime_variables(self):
+        # Variables that will be populated at run time.
+        self.mliap_data = None
+        self.handles = []
+        self.using_kokkos = None
+        self.memory_set = None
 
 
     def compute_gradients(self, data):
@@ -83,16 +89,24 @@ class MLIAPInterface(MLIAPUnified):
         return torch.empty(dimensions, device=self.model_device)
 
     def perform_setup(self):
-        if self._setup_performed:
-            return
 
-        if settings.PYTORCH_GPU_MEM_FRAC < 1.0:
-            torch.cuda.set_per_process_memory_fraction(settings.PYTORCH_GPU_MEM_FRAC)
+        if self.memory_set is None:
+            if settings.PYTORCH_GPU_MEM_FRAC < 1.0:
+                torch.cuda.set_per_process_memory_fraction(settings.PYTORCH_GPU_MEM_FRAC)
+            self.memory_set = True
 
-        if settings.COMM_FEATURES_LAMMPS:
-            self.install_lammps_comm_hooks()
+        if self.using_kokkos is None:
+            # Test if we are using lammps-kokkos or not. Is there a more clear way to do that?
+            self.using_kokkos = "kokkos" in self.mliap_data.__class__.__module__.lower()
 
-        self._setup_performed = True
+        if settings.COMM_FEATURES_LAMMPS:  # Setting the comm handles is selected
+            if not self.handles:  # no handles have been installed yet
+                if hasattr(self.mliap_data, "forward_exchange"):  # this is a compatible version of lammps
+                    self.install_lammps_comm_hooks()
+                else:
+                    warnings.warn("Lammps feature communication was requested but not available in this "
+                                  "version of lammps.")
+
 
     def install_lammps_comm_hooks(self):
         # Add pre-forward hooks and post-backwards hooks for message passing
@@ -112,10 +126,10 @@ class MLIAPInterface(MLIAPUnified):
                 handle = module.register_full_backward_hook(self.comms_backward_hook)
                 handles.append(handle)
 
-        self.comms_handles += handles
+        self.handles += handles
 
     def uninstall_hooks(self):
-        for handle in self.comms_handles:
+        for handle in self.handles:
             handle.remove()
 
     def comms_forward_pre_hook(self, module, args):  # -> None or modified input
@@ -174,7 +188,7 @@ class MLIAPInterface(MLIAPUnified):
         if nlocal.item() <= 0:
             return
 
-        self.mliap_data = data  # hook data onto the (persistent) object for, e.g., comms hooks.
+        self.mliap_data = data  # hook data onto the (persistent) object for, e.g., comms hooks. This is needed!
         self.perform_setup()
 
         elems = self.as_tensor(data.elems).type(torch.int64).reshape(1, data.ntotal)
@@ -197,12 +211,7 @@ class MLIAPInterface(MLIAPUnified):
         inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
         atom_energy, total_energy, fij = self.graph(*inputs)
 
-        # Test if we are using lammps-kokkos or not. Is there a more clear way to do that?
-        using_kokkos = "kokkos" in data.__class__.__module__.lower()
-        if using_kokkos:
-            return_device = elems.device
-        else:
-            return_device = "cpu"
+
 
         # convert units
         if self.energy_unit is not None:
@@ -213,13 +222,20 @@ class MLIAPInterface(MLIAPUnified):
         if self.distance_unit is not None:
             fij = fij / self.distance_unit
 
+        # Write data back. Kokkos and non-kokkos interfaces have diverged, so slightly different paths.
+        if self.using_kokkos:
+            return_device = elems.device
+        else:
+            return_device = "cpu"
+
         atom_energy = atom_energy.squeeze(1).detach().to(return_device)
         total_energy = total_energy.detach().to(return_device)
+        data.energy = total_energy.item()
 
         f = self.as_tensor(data.f)
         fij = fij.type(f.dtype).detach().to(return_device)
 
-        if not using_kokkos:
+        if not self.using_kokkos:
             # write back to data.eatoms directly.
             fij = fij.numpy()
             data.eatoms = atom_energy.numpy().astype(np.double)
@@ -235,7 +251,6 @@ class MLIAPInterface(MLIAPUnified):
                 else:
                     data.update_pair_forces_gpu(fij)
 
-        data.energy = total_energy.item()
         self.mliap_data = None  # unhook data, see hooking above.
 
     def __getstate__(self):
@@ -259,6 +274,7 @@ class MLIAPInterface(MLIAPUnified):
 
         self.species_set = self.species_set.to(self.model_device)
         self.graph.to(self.model_device)
+        self.clear_runtime_variables()
 
 
 
