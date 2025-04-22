@@ -1,7 +1,6 @@
 """
 Interface for creating LAMMPS MLIAP Unified models.
 """
-import pickle
 import warnings
 
 import numpy as np
@@ -9,19 +8,18 @@ import torch
 
 from lammps.mliap.mliap_unified_abc import MLIAPUnified
 
-import hippynn
-from hippynn.tools import device_fallback
-from hippynn.graphs import find_relatives, find_unique_relative, get_subgraph, copy_subgraph, replace_node, IdxType, GraphModule
-from hippynn.graphs.indextypes import index_type_coercion
-from hippynn.graphs.gops import check_link_consistency
-from hippynn.graphs.nodes.base import InputNode, SingleNode, MultiNode, AutoNoKw, ExpandParents
-from hippynn.graphs.nodes.tags import Encoder, PairIndexer
-from hippynn.graphs.nodes.indexers import PaddingIndexer
-from hippynn.graphs.nodes.physics import GradientNode, VecMag
-from hippynn.graphs.nodes.inputs import SpeciesNode
-from hippynn.graphs.nodes.pairs import PairFilter
-import hippynn.layers.hiplayers
-
+from ...tools import device_fallback
+from ...graphs import find_relatives, find_unique_relative, get_subgraph, copy_subgraph, replace_node, IdxType, GraphModule
+from ...graphs.indextypes import index_type_coercion
+from ...graphs.gops import check_link_consistency
+from ...graphs.nodes.base import InputNode, SingleNode, MultiNode, AutoNoKw, ExpandParents
+from ...graphs.nodes.tags import Encoder, PairIndexer
+from ...graphs.nodes.indexers import PaddingIndexer
+from ...graphs.nodes.physics import GradientNode, VecMag
+from ...graphs.nodes.inputs import SpeciesNode
+from ...graphs.nodes.pairs import PairFilter
+from ... import settings
+from ...graphs.nodes.networks import Hipnn, HipnnVec, HipnnQuad
 
 class MLIAPInterface(MLIAPUnified):
     """
@@ -45,19 +43,21 @@ class MLIAPInterface(MLIAPUnified):
         :param model_device: the device to send torch data to (cpu or cuda)
         :param energy_unit: If present, multiply the result by the given energy units.
             If your model was trained in Hartree and your lammps script will operate in eV,
-            use en_unit = ase.units.Ha = 27.211386024367243
+            use energy_unit = ase.units.Ha = 27.211386024367243
         :param distance_unit: If present, multi input distances by this much as well as dividing into output forces.
             If your model was trained to accept nm as input and lammps uses Angstroms,
-            use dist_unit = ase.units.nm = 10.
+            use distance_unit = ase.units.nm = 10.
         """
         super().__init__()
-        if hippynn.settings.PYTORCH_GPU_MEM_FRAC < 1.0:
-            torch.cuda.set_per_process_memory_fraction(hippynn.settings.PYTORCH_GPU_MEM_FRAC)
+        if settings.PYTORCH_GPU_MEM_FRAC < 1.0:
+            torch.cuda.set_per_process_memory_fraction(settings.PYTORCH_GPU_MEM_FRAC)
         self.element_types = element_types
         self.ndescriptors = ndescriptors
         self.model_device = model_device
         self.energy_unit = energy_unit
         self.distance_unit = distance_unit
+        self._setup_performed = False
+        self.mliap_data = None
 
         # Build the calculator
         self.rcutfac, self.species_set, self.graph = setup_LAMMPS_graph(energy_node)
@@ -75,8 +75,22 @@ class MLIAPInterface(MLIAPUnified):
     def as_tensor(self, array):
         return torch.as_tensor(array, device=self.model_device)
 
-    def empty_tensor(self, dimentions):
-        return torch.empty(dimentions, device=self.model_device)
+    def empty_tensor(self, dimensions):
+        return torch.empty(dimensions, device=self.model_device)
+
+    def perform_setup(self, data):
+        if self._setup_performed:
+            return
+
+        if settings.PYTORCH_GPU_MEM_FRAC < 1.0:
+            torch.cuda.set_per_process_memory_fraction(settings.PYTORCH_GPU_MEM_FRAC)
+
+        if settings.COMM_FEATURES_LAMMPS:
+            handles = install_lammps_comm_hooks(self.graph, self)
+            self.comms_handles = handles
+
+        self._setup_performed = True
+
 
     def compute_forces(self, data):
         """
@@ -84,103 +98,76 @@ class MLIAPInterface(MLIAPUnified):
         :return None
         This function writes results to the input `data`.
         """
-        if hippynn.settings.PYTORCH_GPU_MEM_FRAC < 1.0:
-            torch.cuda.set_per_process_memory_fraction(hippynn.settings.PYTORCH_GPU_MEM_FRAC)
 
+        # If there are no local atoms, do nothing
         nlocal = self.as_tensor(data.nlistatoms)
-        if nlocal.item() > 0:
-            # If there are no local atoms, do nothing
-            elems = self.as_tensor(data.elems).type(torch.int64).reshape(1, data.ntotal)
-            z_vals = self.species_set[elems + 1]
-            npairs = data.npairs
+        if nlocal.item() <= 0:
+            return
 
+        self.mliap_data = data  # hook data onto the (persistent) object for, e.g., comms hooks.
+        self.perform_setup(data)
+
+        elems = self.as_tensor(data.elems).type(torch.int64).reshape(1, data.ntotal)
+        z_vals = self.species_set[elems + 1]
+        npairs = data.npairs
+
+        if npairs > 0:
+            pair_i = self.as_tensor(data.pair_i).type(torch.int64)
+            pair_j = self.as_tensor(data.pair_j).type(torch.int64)
+            rij = self.as_tensor(data.rij).type(self.compute_dtype)
+        else:
+            pair_i = self.empty_tensor(0).type(torch.int64)
+            pair_j = self.empty_tensor(0).type(torch.int64)
+            rij = self.empty_tensor([0, 3]).type(self.compute_dtype)
+
+        if self.distance_unit is not None:
+            rij = self.distance_unit * rij
+
+        # note your sign for rij might need to be +1 or -1, depending on how your implementation works
+        inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
+        atom_energy, total_energy, fij = self.graph(*inputs)
+
+        # Test if we are using lammps-kokkos or not. Is there a more clear way to do that?
+        using_kokkos = "kokkos" in data.__class__.__module__.lower()
+        if using_kokkos:
+            return_device = elems.device
+        else:
+            return_device = "cpu"
+
+        # convert units
+        if self.energy_unit is not None:
+            atom_energy = self.energy_unit * atom_energy
+            total_energy = self.energy_unit * total_energy
+            fij = self.energy_unit * fij
+
+        if self.distance_unit is not None:
+            fij = fij / self.distance_unit
+
+        atom_energy = atom_energy.squeeze(1).detach().to(return_device)
+        total_energy = total_energy.detach().to(return_device)
+
+        f = self.as_tensor(data.f)
+        fij = fij.type(f.dtype).detach().to(return_device)
+
+        if not using_kokkos:
+            # write back to data.eatoms directly.
+            fij = fij.numpy()
+            data.eatoms = atom_energy.numpy().astype(np.double)
             if npairs > 0:
-                pair_i = self.as_tensor(data.pair_i).type(torch.int64)
-                pair_j = self.as_tensor(data.pair_j).type(torch.int64)
-                rij = self.as_tensor(data.rij).type(self.compute_dtype)
-            else:
-                pair_i = self.empty_tensor(0).type(torch.int64)
-                pair_j = self.empty_tensor(0).type(torch.int64)
-                rij = self.empty_tensor([0, 3]).type(self.compute_dtype)
+                data.update_pair_forces(fij)
+        else:
+            # view to data.eatoms using pytorch, and write into the view.
+            eatoms = torch.as_tensor(data.eatoms, device=return_device)
+            eatoms.copy_(atom_energy)
+            if npairs > 0:
+                if return_device == "cpu":
+                    data.update_pair_forces_cpu(fij)
+                else:
+                    data.update_pair_forces_gpu(fij)
 
-            #Add pre-forward hooks and post-backwards hooks for message passing
-            #comms to interaction layers in graph
-            hipnn_types = [hippynn.graphs.nodes.networks.Hipnn,
-                           hippynn.graphs.nodes.networks.HipnnVec,
-                           hippynn.graphs.nodes.networks.HipnnQuad]
-            hipnn_nodes = [n for n in self.graph.forward_output_list 
-                              if type(n) in hipnn_types ] 
+        data.energy = total_energy.item()
+        self.mliap_data = None  # unhook data, see hooking above.
 
-            found_first=False
-            for hipnn in hipnn_nodes:
-                for block in hipnn.torch_module.blocks:
-                    for module in [m.base_layer for m in block]:
-                        #The first ineraction layer does not need the
-                        #forward_pre_hook nor the backward hook since the first
-                        #input layer are positions of ghosts which are already
-                        #known. Exchanging these inputs anyway should not affect
-                        #the answer.
-                        if issubclass(type(module),hippynn.layers.hiplayers.InteractLayer):
-                            if not found_first:
-                                #Don't add hooks to first layer, they're unnecessary
-                                found_first = True
-                                continue
-
-                            module.mliap_data = data
-
-                            if not any( [h.__name__ == "comms_forward_pre_hook" for h in module._forward_pre_hooks.values()] ):
-                                module.register_forward_pre_hook(comms_forward_pre_hook)
-                            if not any( [h.__name__ == "comms_backward_hook" for h in module._backward_hooks.values()] ):
-                                module.register_full_backward_hook(comms_backward_hook)
-
-            if self.distance_unit is not None:
-                rij = self.dist_unit * rij
-
-            # note your sign for rij might need to be +1 or -1, depending on how your implementation works
-            inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
-            atom_energy, total_energy, fij = self.graph(*inputs)
-
-            # Test if we are using lammps-kokkos or not. Is there a more clear way to do that?
-            using_kokkos = "kokkos" in data.__class__.__module__.lower()
-            if using_kokkos:
-                return_device = elems.device
-            else:
-                return_device = "cpu"
-
-            # convert units
-            if self.energy_unit is not None:
-                atom_energy = self.en_unit * atom_energy
-                total_energy = self.en_unit * total_energy
-                fij = self.en_unit * fij
-
-            if self.distance_unit is not None:
-                fij = fij / self.dist_unit
-
-            atom_energy = atom_energy.squeeze(1).detach().to(return_device)
-            total_energy = total_energy.detach().to(return_device)
-
-            f = self.as_tensor(data.f)
-            fij = fij.type(f.dtype).detach().to(return_device)
-
-            # hacky way to detect if we are in kokkos or not.
-
-            if not using_kokkos:
-                # write back to data.eatoms directly.
-                fij = fij.numpy()
-                data.eatoms = atom_energy.numpy().astype(np.double)
-                if npairs > 0:
-                    data.update_pair_forces(fij)
-            else:
-                # view to data.eatoms using pytorch, and write into the view.
-                eatoms = torch.as_tensor(data.eatoms, device=return_device)
-                eatoms.copy_(atom_energy)
-                if npairs > 0:
-                    if return_device == "cpu":
-                        data.update_pair_forces_cpu(fij)
-                    else:
-                        data.update_pair_forces_gpu(fij)
-
-            data.energy = total_energy.item()
 
     def __getstate__(self):
         self.species_set = self.species_set.to(torch.device("cpu"))
@@ -196,61 +183,92 @@ class MLIAPInterface(MLIAPUnified):
             warnings.warn(f"Model device ({self.model_device}) not found, falling back to f{fallback}")
             self.model_device = fallback
 
-        if not hasattr(self, "en_unit"):
-            self.en_unit = None
-        if not hasattr(self, "dist_unit"):
-            self.dist_unit = None
+        if not hasattr(self, "energy_unit"):
+            self.energy_unit = None
+        if not hasattr(self, "distance_unit"):
+            self.distance_unit = None
 
         self.species_set = self.species_set.to(self.model_device)
         self.graph.to(self.model_device)
 
-def comms_forward_pre_hook(module, args):# -> None or modified input
+
+LAMMPS_COMM_MODULES = [Hipnn, HipnnVec, HipnnQuad]
+
+
+def install_lammps_comm_hooks(graph, unified):
+    # Add pre-forward hooks and post-backwards hooks for message passing
+    # comms to interaction layers in graph
+
+    hipnn_modules = [n for n in graph.torch_module.modules() if isinstance(n, LAMMPS_COMM_MODULES)]
+
+    pre_hook, back_hook = make_hooks(unified)
+    handles = []
+    for network in hipnn_modules:
+        # The first interaction layer does not need the
+        # forward_pre_hook nor the backward hook since the first
+        # input layer are positions of ghosts which are already
+        # known. Exchanging these inputs anyway should not affect
+        # the answer.
+        for module in network.interaction_layers[1:]:
+            handle = module.register_forward_pre_hook(pre_hook)
+            handles.append(handle)
+            handle = module.register_full_backward_hook(back_hook)
+            handles.append(handle)
+
+    return handles
+
+
+def make_hooks(unified):
     """
-    :param module: Torch Module for Interaction Layer
-    :param args: list of arguments intercepted from module's forward, features input missing features in ghosts
-    :return modded_args: list of arguments passed on to forward now with ghost inputs
-    Invokes blocking MPI exchanges within LAMMPS to retrieve ghost inputs
+    Builds hooks functions that link back to a given unified object.
+    :param unified:
+    :return:
     """
-    local_in_features = args[0]
+    def comms_forward_pre_hook(module, args): # -> None or modified input
+        """
+        :param module: Torch Module for Interaction Layer
+        :param args: list of arguments intercepted from module's forward, features input missing features in ghosts
+        :return modded_args: list of arguments passed on to forward now with ghost inputs
+        Invokes blocking MPI exchanges within LAMMPS to retrieve ghost inputs
+        """
+        local_in_features, *other_args = args
 
-    global_in_features = local_in_features #We can modify in-place in the forward_pre_hook
+        global_in_features = local_in_features  # We can modify in-place in the forward_pre_hook
 
-    module.mliap_data.forward_exchange(local_in_features,global_in_features,
-                                       local_in_features.shape[1])
+        unified.mliap_data.forward_exchange(local_in_features, global_in_features,
+                                           local_in_features.shape[1])
 
-    modded_args = (global_in_features,) + args[1:]
+        return global_in_features, *other_args
 
-    return modded_args
+    def comms_backward_hook(module, grad_input, grad_output):
+        """
+        :param module: Torch Module for Interaction Layer
+        :param grad_input: Gradient (of atom energies) with respect to inputs of forward, only features missing comms.
+        :param grad_output: list of arguments intercepted from module's forward, missing ghost inputs
+        :return modded_grad_input: Gradient with respect to inputs now with comms.
+        Invokes blocking MPI exchanges within LAMMPS to retrieve ghost inputs
 
-def comms_backward_hook(module, grad_input, grad_output):
-    """
-    :param module: Torch Module for Interaction Layer
-    :param grad_input: Gradient (of atom energies) with respect to inputs of forward, only features missing comms.  
-    :param grad_output: list of arguments intercepted from module's forward, missing ghost inputs
-    :return modded_grad_input: Gradient with respect to inputs now with comms.
-    Invokes blocking MPI exchanges within LAMMPS to retrieve ghost inputs
+        The gradient with respect to the input features in grad_input contains
+        contributions to gradients for other ranks within this rank's ghosts and is
+        missing contributions to this rank's owned atoms on other ranks. After
+        comms, modded_grad_input will have zero'ed out the ghosts (sent to other
+        processors) and added gradient contributions from other rank's ghosts into
+        this rank's owned atoms.
+        """
 
-    The gradient with respect to the input features in grad_input contains
-    contributions to gradients for other ranks within this rank's ghosts and is
-    missing contributions to this rank's owned atoms on other ranks. After
-    comms, modded_grad_input will have zero'ed out the ghosts (sent to other
-    processors) and added gradient contributions from other rank's ghosts into
-    this rank's owned atoms.
-    """
+        # Only the gradients with respect to the first input need changes
+        local_grad_in_features, *rest_grad_in = grad_input
 
-    #Only the gradients with respect to the first input need changes
-    local_grad_in_features = grad_input[0]
+        # Can't modify in-place in backward_hook
+        global_grad_in_features = local_grad_in_features.detach().clone()  # Copy entire tensor
 
-    #Can't modify in-place in backward_hook
-    global_grad_in_features = local_grad_in_features.detach().clone() # Copy entire tensor
+        # Comms from ghosts into owned atoms is a "reverse" comms in LAMMPS
+        unified.mliap_data.reverse_exchange(local_grad_in_features, global_grad_in_features,
+                                            local_grad_in_features.shape[1])
 
-    #Comms from ghosts into owned atoms is a "reverse" comms in LAMMPS
-    module.mliap_data.reverse_exchange(local_grad_in_features,global_grad_in_features,
-                                        local_grad_in_features.shape[1])
+        return global_grad_in_features, *rest_grad_in
 
-    modded_grad_input = (global_grad_in_features,) + grad_input[1:]
-
-    return modded_grad_input
+    return comms_forward_pre_hook, comms_backward_hook
 
 
 def setup_LAMMPS_graph(energy):
@@ -283,13 +301,13 @@ def setup_LAMMPS_graph(energy):
     # Set up graph to accept external pair indices and shifts
 
     in_pair_first = InputNode("pair_first")
-    in_pair_first._index_state = hippynn.graphs.IdxType.Pair
+    in_pair_first._index_state = IdxType.Pair
     in_pair_second = InputNode("pair_second")
-    in_pair_second._index_state = hippynn.graphs.IdxType.Pair
+    in_pair_second._index_state = IdxType.Pair
     in_pair_coord = InputNode("pair_coord")
-    in_pair_coord._index_state = hippynn.graphs.IdxType.Pair
+    in_pair_coord._index_state = IdxType.Pair
     in_nlocal = InputNode("nlocal")
-    in_nlocal._index_state = hippynn.graphs.IdxType.Scalar
+    in_nlocal._index_state = IdxType.Scalar
     pair_dist = VecMag("pair_dist", in_pair_coord)
     mapped_pair_first = ReIndexAtomNode("pair_first_internal", (in_pair_first, inv_real_atoms))
     mapped_pair_second = ReIndexAtomNode("pair_second_internal", (in_pair_second, inv_real_atoms))
