@@ -61,6 +61,7 @@ class MLIAPInterface(MLIAPUnified):
         self.distance_unit = distance_unit
         self._setup_performed = False
         self.mliap_data = None
+        self.comms_handles = []
 
         # Build the calculator
         self.rcutfac, self.species_set, self.graph = setup_LAMMPS_graph(energy_node)
@@ -81,7 +82,7 @@ class MLIAPInterface(MLIAPUnified):
     def empty_tensor(self, dimensions):
         return torch.empty(dimensions, device=self.model_device)
 
-    def perform_setup(self, data):
+    def perform_setup(self):
         if self._setup_performed:
             return
 
@@ -89,8 +90,7 @@ class MLIAPInterface(MLIAPUnified):
             torch.cuda.set_per_process_memory_fraction(settings.PYTORCH_GPU_MEM_FRAC)
 
         if settings.COMM_FEATURES_LAMMPS:
-            handles = self.install_lammps_comm_hooks(self.graph)
-            self.comms_handles = handles
+            self.install_lammps_comm_hooks()
 
         self._setup_performed = True
 
@@ -112,7 +112,11 @@ class MLIAPInterface(MLIAPUnified):
                 handle = module.register_full_backward_hook(self.comms_backward_hook)
                 handles.append(handle)
 
-        return handles
+        self.comms_handles += handles
+
+    def uninstall_hooks(self):
+        for handle in self.comms_handles:
+            handle.remove()
 
     def comms_forward_pre_hook(self, module, args):  # -> None or modified input
         """
@@ -171,7 +175,7 @@ class MLIAPInterface(MLIAPUnified):
             return
 
         self.mliap_data = data  # hook data onto the (persistent) object for, e.g., comms hooks.
-        self.perform_setup(data)
+        self.perform_setup()
 
         elems = self.as_tensor(data.elems).type(torch.int64).reshape(1, data.ntotal)
         z_vals = self.species_set[elems + 1]
