@@ -21,6 +21,9 @@ from ...graphs.nodes.pairs import PairFilter
 from ... import settings
 from ...graphs.nodes.networks import Hipnn, HipnnVec, HipnnQuad
 
+
+LAMMPS_COMM_MODULES = [Hipnn, HipnnVec, HipnnQuad]
+
 class MLIAPInterface(MLIAPUnified):
     """
     Class for creating ML-IAP Unified model based on hippynn graphs.
@@ -86,11 +89,74 @@ class MLIAPInterface(MLIAPUnified):
             torch.cuda.set_per_process_memory_fraction(settings.PYTORCH_GPU_MEM_FRAC)
 
         if settings.COMM_FEATURES_LAMMPS:
-            handles = install_lammps_comm_hooks(self.graph, self)
+            handles = self.install_lammps_comm_hooks(self.graph)
             self.comms_handles = handles
 
         self._setup_performed = True
 
+    def install_lammps_comm_hooks(self):
+        # Add pre-forward hooks and post-backwards hooks for message passing
+        # comms to interaction layers in graph
+        hipnn_modules = [n for n in self.graph.torch_module.modules() if isinstance(n, LAMMPS_COMM_MODULES)]
+
+        handles = []
+        for network in hipnn_modules:
+            # The first interaction layer does not need the
+            # forward_pre_hook nor the backward hook since the first
+            # input layer are positions of ghosts which are already
+            # known. Exchanging these inputs anyway should not affect
+            # the answer.
+            for module in network.interaction_layers[1:]:
+                handle = module.register_forward_pre_hook(self.comms_forward_pre_hook)
+                handles.append(handle)
+                handle = module.register_full_backward_hook(self.comms_backward_hook)
+                handles.append(handle)
+
+        return handles
+
+    def comms_forward_pre_hook(self, module, args):  # -> None or modified input
+        """
+        :param module: Torch Module for Interaction Layer
+        :param args: list of arguments intercepted from module's forward, features input missing features in ghosts
+        :return modded_args: list of arguments passed on to forward now with ghost inputs
+        Invokes blocking MPI exchanges within LAMMPS to retrieve ghost inputs
+        """
+        local_in_features, *other_args = args
+
+        global_in_features = local_in_features  # We can modify in-place in the forward_pre_hook
+
+        self.mliap_data.forward_exchange(local_in_features, global_in_features,
+                                         local_in_features.shape[1])
+
+        return global_in_features, *other_args
+
+    def comms_backward_hook(self, module, grad_input, grad_output):
+        """
+        :param module: Torch Module for Interaction Layer
+        :param grad_input: Gradient (of atom energies) with respect to inputs of forward, only features missing comms.
+        :param grad_output: list of arguments intercepted from module's forward, missing ghost inputs
+        :return modded_grad_input: Gradient with respect to inputs now with comms.
+        Invokes blocking MPI exchanges within LAMMPS to retrieve ghost inputs
+
+        The gradient with respect to the input features in grad_input contains
+        contributions to gradients for other ranks within this rank's ghosts and is
+        missing contributions to this rank's owned atoms on other ranks. After
+        comms, modded_grad_input will have zero'ed out the ghosts (sent to other
+        processors) and added gradient contributions from other rank's ghosts into
+        this rank's owned atoms.
+        """
+
+        # Only the gradients with respect to the first input need changes
+        local_grad_in_features, *rest_grad_in = grad_input
+
+        # Can't modify in-place in backward_hook
+        global_grad_in_features = local_grad_in_features.detach().clone()  # Copy entire tensor
+
+        # Comms from ghosts into owned atoms is a "reverse" comms in LAMMPS
+        self.mliap_data.reverse_exchange(local_grad_in_features, global_grad_in_features,
+                                         local_grad_in_features.shape[1])
+
+        return global_grad_in_features, *rest_grad_in
 
     def compute_forces(self, data):
         """
@@ -191,84 +257,6 @@ class MLIAPInterface(MLIAPUnified):
         self.species_set = self.species_set.to(self.model_device)
         self.graph.to(self.model_device)
 
-
-LAMMPS_COMM_MODULES = [Hipnn, HipnnVec, HipnnQuad]
-
-
-def install_lammps_comm_hooks(graph, unified):
-    # Add pre-forward hooks and post-backwards hooks for message passing
-    # comms to interaction layers in graph
-
-    hipnn_modules = [n for n in graph.torch_module.modules() if isinstance(n, LAMMPS_COMM_MODULES)]
-
-    pre_hook, back_hook = make_hooks(unified)
-    handles = []
-    for network in hipnn_modules:
-        # The first interaction layer does not need the
-        # forward_pre_hook nor the backward hook since the first
-        # input layer are positions of ghosts which are already
-        # known. Exchanging these inputs anyway should not affect
-        # the answer.
-        for module in network.interaction_layers[1:]:
-            handle = module.register_forward_pre_hook(pre_hook)
-            handles.append(handle)
-            handle = module.register_full_backward_hook(back_hook)
-            handles.append(handle)
-
-    return handles
-
-
-def make_hooks(unified):
-    """
-    Builds hooks functions that link back to a given unified object.
-    :param unified:
-    :return:
-    """
-    def comms_forward_pre_hook(module, args): # -> None or modified input
-        """
-        :param module: Torch Module for Interaction Layer
-        :param args: list of arguments intercepted from module's forward, features input missing features in ghosts
-        :return modded_args: list of arguments passed on to forward now with ghost inputs
-        Invokes blocking MPI exchanges within LAMMPS to retrieve ghost inputs
-        """
-        local_in_features, *other_args = args
-
-        global_in_features = local_in_features  # We can modify in-place in the forward_pre_hook
-
-        unified.mliap_data.forward_exchange(local_in_features, global_in_features,
-                                           local_in_features.shape[1])
-
-        return global_in_features, *other_args
-
-    def comms_backward_hook(module, grad_input, grad_output):
-        """
-        :param module: Torch Module for Interaction Layer
-        :param grad_input: Gradient (of atom energies) with respect to inputs of forward, only features missing comms.
-        :param grad_output: list of arguments intercepted from module's forward, missing ghost inputs
-        :return modded_grad_input: Gradient with respect to inputs now with comms.
-        Invokes blocking MPI exchanges within LAMMPS to retrieve ghost inputs
-
-        The gradient with respect to the input features in grad_input contains
-        contributions to gradients for other ranks within this rank's ghosts and is
-        missing contributions to this rank's owned atoms on other ranks. After
-        comms, modded_grad_input will have zero'ed out the ghosts (sent to other
-        processors) and added gradient contributions from other rank's ghosts into
-        this rank's owned atoms.
-        """
-
-        # Only the gradients with respect to the first input need changes
-        local_grad_in_features, *rest_grad_in = grad_input
-
-        # Can't modify in-place in backward_hook
-        global_grad_in_features = local_grad_in_features.detach().clone()  # Copy entire tensor
-
-        # Comms from ghosts into owned atoms is a "reverse" comms in LAMMPS
-        unified.mliap_data.reverse_exchange(local_grad_in_features, global_grad_in_features,
-                                            local_grad_in_features.shape[1])
-
-        return global_grad_in_features, *rest_grad_in
-
-    return comms_forward_pre_hook, comms_backward_hook
 
 
 def setup_LAMMPS_graph(energy):
