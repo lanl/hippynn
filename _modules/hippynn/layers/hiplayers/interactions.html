@@ -1,0 +1,541 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.layers.hiplayers.interactions &mdash; hippynn 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=c9d3d048"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../what_is_hippynn.html">What is hippynn?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../bibliography.html">Research articles using hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/features.html">hippynn Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/concepts.html">hippynn Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/databases.html">Databases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/loss_graph.html">Model and Loss Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/units.html">Units in hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/ckernels.html">Custom Kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/settings.html">Library Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/custom_nodes.html">Creating Custom Node Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/minimal_workflow.html">Minimal Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/controller.html">Controller</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/predictor.html">Predictor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/ensembles.html">Ensembling Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/periodic.html">Periodic Boundary Conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/forces.html">Force Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/restarting.html">Restarting training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/ase_calculator.html">ASE Calculators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/mliap_unified.html">LAMMPS interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/excited_states.html">Non-Adiabiatic Excited States</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/weighted_loss.html">Weighted/Masked Loss Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/lightning.html">Pytorch Lightning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/hyperopt.html">Hyperparameter optimization with Ax and Ray</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/hippynn.html">Full API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_summary/hippynn.html">API Summary Pages</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.layers.hiplayers.interactions</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.layers.hiplayers.interactions</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...</span><span class="w"> </span><span class="kn">import</span> <span class="n">custom_kernels</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.tensors</span><span class="w"> </span><span class="kn">import</span> <span class="n">HopInvariantLayer</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+
+<div class="viewcode-block" id="InteractLayer">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.interactions.html#hippynn.layers.hiplayers.interactions.InteractLayer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">InteractLayer</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Hipnn&#39;s interaction layer</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+
+<span class="sd">        :param nf_in: number of input features</span>
+<span class="sd">        :param nf_out: number of output features</span>
+<span class="sd">        :param n_dist: number of distance sensitivities</span>
+<span class="sd">        :param mind_soft: minimum distance for initial sensitivities</span>
+<span class="sd">        :param maxd_soft: maximum distance for initial sensitivities</span>
+<span class="sd">        :param hard_cutoff: maximum distance for cutoff function</span>
+<span class="sd">        :param sensitivity_module: class or callable that builds sensitivity functions, should return nn.Module</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">=</span> <span class="n">n_dist</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span> <span class="o">=</span> <span class="n">nf_in</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span> <span class="o">=</span> <span class="n">nf_out</span>
+
+        <span class="c1"># Sensitivity module</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sensitivity</span> <span class="o">=</span> <span class="n">sensitivity_module</span><span class="p">(</span><span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">)</span>
+
+        <span class="c1"># Interaction weights</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">int_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">n_dist</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">))</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">xavier_normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">int_weights</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c1"># Self-term and bias</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selfint</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">)</span>  <span class="c1"># includes bias term and self-interactions</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">xavier_normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selfint</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="InteractLayer.regularization_params">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.interactions.html#hippynn.layers.hiplayers.interactions.InteractLayer.regularization_params">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">regularization_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">int_weights</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selfint</span><span class="o">.</span><span class="n">weight</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="InteractLayer.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.interactions.html#hippynn.layers.hiplayers.interactions.InteractLayer.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">dist_pairs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Pytorch Enforced Forward function</span>
+
+<span class="sd">        :param in_features:</span>
+<span class="sd">        :param pair_first:</span>
+<span class="sd">        :param pair_second:</span>
+<span class="sd">        :param dist_pairs:</span>
+<span class="sd">        :return: Interaction output features</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Z&#39; = (VSZ) + (WZ) + b</span>
+        <span class="n">n_atoms_real</span> <span class="o">=</span> <span class="n">in_features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sense_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensitivity</span><span class="p">(</span><span class="n">dist_pairs</span><span class="p">)</span>
+        <span class="c1"># For HIPNN equation, the interaction term is VSZ, which we evaluate as V(E) where E=(SZ)</span>
+        <span class="c1"># V: interaction weights</span>
+        <span class="c1"># S: sensitivities</span>
+        <span class="c1"># Z: input features</span>
+        <span class="c1"># E: environment features (S*Z)</span>
+
+        <span class="c1"># Q = (VZ) #  torch.mm</span>
+        <span class="c1"># E = (QS) #  custom_kernels.featsum</span>
+
+        <span class="c1"># E = (SZ)</span>
+        <span class="n">env_features</span> <span class="o">=</span> <span class="n">custom_kernels</span><span class="o">.</span><span class="n">envsum</span><span class="p">(</span><span class="n">sense_vals</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">)</span>
+
+        <span class="c1"># (VSZ)</span>
+        <span class="n">env_features</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">env_features</span><span class="p">,</span> <span class="p">(</span><span class="n">n_atoms_real</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span><span class="p">))</span>
+        <span class="c1"># The weight permutation can be completely eliminated by reshaping the initialization</span>
+        <span class="n">weights_rs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">int_weights</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">))</span>
+        <span class="c1"># Multiply the environment of each atom by weights</span>
+        <span class="n">features_out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">env_features</span><span class="p">,</span> <span class="n">weights_rs</span><span class="p">)</span>
+
+        <span class="c1"># WZ + B</span>
+        <span class="n">features_out_selfpart</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selfint</span><span class="p">(</span><span class="n">in_features</span><span class="p">)</span>
+
+        <span class="c1"># VSZ + WZ + B</span>
+        <span class="n">features_out_total</span> <span class="o">=</span> <span class="n">features_out</span> <span class="o">+</span> <span class="n">features_out_selfpart</span>
+
+        <span class="k">return</span> <span class="n">features_out_total</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="InteractLayerVec">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.interactions.html#hippynn.layers.hiplayers.interactions.InteractLayerVec">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">InteractLayerVec</span><span class="p">(</span><span class="n">InteractLayer</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">,</span> <span class="n">cusp_reg</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vecscales</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">nf_out</span><span class="p">))</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vecscales</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cusp_reg</span> <span class="o">=</span> <span class="n">cusp_reg</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;cusp_reg&quot;</span><span class="p">):</span>
+            <span class="c1"># The layer was created before the cusp regularization was a parameter.</span>
+            <span class="c1"># Add a patch that if a state dict is loaded in with no cusp parameter,</span>
+            <span class="c1"># use the pre-introduction static value.</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Loading a module which does not contain the &#39;cusp_reg&#39; parameter. &quot;</span>
+                <span class="s2">&quot;In the future, this behavior will cause an error. &quot;</span>
+                <span class="s2">&quot;To avoid this warning, re-save this model to disk. &quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">register_load_state_dict_post_hook</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compatibility_hook</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span>
+
+<div class="viewcode-block" id="InteractLayerVec.compatibility_hook">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.interactions.html#hippynn.layers.hiplayers.interactions.InteractLayerVec.compatibility_hook">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compatibility_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">incompatible_keys</span><span class="p">):</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="n">incompatible_keys</span><span class="o">.</span><span class="n">missing_keys</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="c1"># No need for compatibility!</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Backwards compatibility hook may have failed due to the presence of multiple missing keys!&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_extra_state&quot;</span><span class="p">):</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Python reminder: The mysterious &quot;else&quot; clause of the for loop</span>
+            <span class="c1"># activates when python does not break out of the for loop.</span>
+            <span class="k">return</span>  <span class="c1"># No _extra_state type variable was missing: just return.</span>
+
+        <span class="n">DEPRECATED_CUSP_REG</span> <span class="o">=</span> <span class="mf">1e-30</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Loaded state does not contain &#39;cusp_reg&#39; parameter. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Using deprecated value of 1e-30. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;This compatibility behavior will be removed in the future. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;To avoid this warning, re-save this model.&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_extra_state</span><span class="p">({</span><span class="s2">&quot;cusp_reg&quot;</span><span class="p">:</span> <span class="n">DEPRECATED_CUSP_REG</span><span class="p">})</span>
+        <span class="n">missing</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">m</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="InteractLayerVec.get_extra_state">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.interactions.html#hippynn.layers.hiplayers.interactions.InteractLayerVec.get_extra_state">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_extra_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;cusp_reg&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cusp_reg</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="InteractLayerVec.set_extra_state">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.interactions.html#hippynn.layers.hiplayers.interactions.InteractLayerVec.set_extra_state">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_extra_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cusp_reg</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;cusp_reg&quot;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="InteractLayerVec.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.interactions.html#hippynn.layers.hiplayers.interactions.InteractLayerVec.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">dist_pairs</span><span class="p">,</span> <span class="n">coord_pairs</span><span class="p">):</span>
+
+        <span class="n">n_atoms_real</span> <span class="o">=</span> <span class="n">in_features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sense_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensitivity</span><span class="p">(</span><span class="n">dist_pairs</span><span class="p">)</span>
+
+        <span class="c1"># Sensitivity stacking</span>
+        <span class="n">sense_vec</span> <span class="o">=</span> <span class="n">sense_vals</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">coord_pairs</span> <span class="o">/</span> <span class="n">dist_pairs</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">sense_vec</span> <span class="o">=</span> <span class="n">sense_vec</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">sense_stacked</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">sense_vals</span><span class="p">,</span> <span class="n">sense_vec</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Message passing, stack sensitivities to coalesce custom kernel call.</span>
+        <span class="c1"># shape (n_atoms, n_nu + 3*n_nu, n_feat)</span>
+        <span class="n">env_features_stacked</span> <span class="o">=</span> <span class="n">custom_kernels</span><span class="o">.</span><span class="n">envsum</span><span class="p">(</span><span class="n">sense_stacked</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">)</span>
+        <span class="c1"># shape (n_atoms, 4, n_nu, n_feat)</span>
+        <span class="n">env_features_stacked</span> <span class="o">=</span> <span class="n">env_features_stacked</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span><span class="p">)</span>
+
+        <span class="c1"># separate to tensor components</span>
+        <span class="n">env_features</span><span class="p">,</span> <span class="n">env_features_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">env_features_stacked</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Scalar part</span>
+        <span class="n">env_features</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">env_features</span><span class="p">,</span> <span class="p">(</span><span class="n">n_atoms_real</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span><span class="p">))</span>
+        <span class="n">weights_rs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">int_weights</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">))</span>
+        <span class="n">features_out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">env_features</span><span class="p">,</span> <span class="n">weights_rs</span><span class="p">)</span>
+
+        <span class="c1"># Vector part</span>
+        <span class="n">env_features_vec</span> <span class="o">=</span> <span class="n">env_features_vec</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms_real</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span><span class="p">)</span>
+        <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">env_features_vec</span><span class="p">,</span> <span class="n">weights_rs</span><span class="p">)</span>
+        <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">features_out_vec</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms_real</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">)</span>
+        <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">features_out_vec</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">cusp_reg</span>
+        <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">features_out_vec</span><span class="p">)</span>
+        <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">features_out_vec</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vecscales</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Self interaction</span>
+        <span class="n">features_out_selfpart</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selfint</span><span class="p">(</span><span class="n">in_features</span><span class="p">)</span>
+
+        <span class="n">features_out_total</span> <span class="o">=</span> <span class="n">features_out</span> <span class="o">+</span> <span class="n">features_out_vec</span> <span class="o">+</span> <span class="n">features_out_selfpart</span>
+
+        <span class="k">return</span> <span class="n">features_out_total</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="InteractLayerQuad">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.interactions.html#hippynn.layers.hiplayers.interactions.InteractLayerQuad">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">InteractLayerQuad</span><span class="p">(</span><span class="n">InteractLayerVec</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">,</span> <span class="n">cusp_reg</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">n_dist</span><span class="p">,</span> <span class="n">mind_soft</span><span class="p">,</span> <span class="n">maxd_soft</span><span class="p">,</span> <span class="n">hard_cutoff</span><span class="p">,</span> <span class="n">sensitivity_module</span><span class="p">,</span> <span class="n">cusp_reg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quadscales</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">nf_out</span><span class="p">))</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quadscales</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="c1"># upper indices of flattened 3x3 array minus the (3,3) component</span>
+        <span class="c1"># which is not needed for a traceless tensor</span>
+        <span class="n">upper_ind</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;upper_ind&quot;</span><span class="p">,</span> <span class="n">upper_ind</span><span class="p">,</span> <span class="n">persistent</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Static, not part of module state</span>
+
+<div class="viewcode-block" id="InteractLayerQuad.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.interactions.html#hippynn.layers.hiplayers.interactions.InteractLayerQuad.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">dist_pairs</span><span class="p">,</span> <span class="n">coord_pairs</span><span class="p">):</span>
+
+        <span class="n">n_atoms_real</span> <span class="o">=</span> <span class="n">in_features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sense_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensitivity</span><span class="p">(</span><span class="n">dist_pairs</span><span class="p">)</span>
+
+        <span class="c1">####</span>
+        <span class="c1"># Sensitivity calculations</span>
+        <span class="c1"># scalar: sense_vals</span>
+        <span class="c1"># vector: sense_vec</span>
+        <span class="c1"># quadrupole: sense_quad</span>
+        <span class="n">rhats</span> <span class="o">=</span> <span class="n">coord_pairs</span> <span class="o">/</span> <span class="n">dist_pairs</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">sense_vec</span> <span class="o">=</span> <span class="n">sense_vals</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">rhats</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">sense_vec</span> <span class="o">=</span> <span class="n">sense_vec</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">rhatsquad</span> <span class="o">=</span> <span class="n">rhats</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">rhats</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">rhatsquad</span> <span class="o">=</span> <span class="p">(</span><span class="n">rhatsquad</span> <span class="o">+</span> <span class="n">rhatsquad</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">tr</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">rhatsquad</span><span class="p">,</span> <span class="n">dim1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">3.0</span>  <span class="c1"># Add divide by 3 early to save flops</span>
+        <span class="n">tr</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tr</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">tr</span><span class="o">.</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">rhatsquad</span> <span class="o">=</span> <span class="n">rhatsquad</span> <span class="o">-</span> <span class="n">tr</span>
+        <span class="n">rhatsqflat</span> <span class="o">=</span> <span class="n">rhatsquad</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">)[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_ind</span><span class="p">]</span>  <span class="c1"># Upper-diagonal part</span>
+        <span class="n">sense_quad</span> <span class="o">=</span> <span class="n">sense_vals</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">rhatsqflat</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">sense_quad</span> <span class="o">=</span> <span class="n">sense_quad</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">*</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">sense_stacked</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">sense_vals</span><span class="p">,</span> <span class="n">sense_vec</span><span class="p">,</span> <span class="n">sense_quad</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Message passing, stack sensitivities to coalesce custom kernel call.</span>
+        <span class="c1"># shape (n_atoms, n_nu + 3*n_nu + 5*n_nu, n_feat)</span>
+        <span class="n">env_features_stacked</span> <span class="o">=</span> <span class="n">custom_kernels</span><span class="o">.</span><span class="n">envsum</span><span class="p">(</span><span class="n">sense_stacked</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">)</span>
+        <span class="c1"># shape (n_atoms, 9, n_nu, n_feat)</span>
+        <span class="n">env_features_stacked</span> <span class="o">=</span> <span class="n">env_features_stacked</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span><span class="p">)</span>
+
+        <span class="c1"># separate to tensor components</span>
+        <span class="n">env_features</span><span class="p">,</span> <span class="n">env_features_vec</span><span class="p">,</span> <span class="n">env_features_quad</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">env_features_stacked</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Scalar stuff.</span>
+        <span class="n">env_features</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">env_features</span><span class="p">,</span> <span class="p">(</span><span class="n">n_atoms_real</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span><span class="p">))</span>
+        <span class="n">weights_rs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">int_weights</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">))</span>
+        <span class="n">features_out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">env_features</span><span class="p">,</span> <span class="n">weights_rs</span><span class="p">)</span>
+
+        <span class="c1"># Vector part</span>
+        <span class="c1"># Sensitivity</span>
+        <span class="c1"># Weights</span>
+        <span class="n">env_features_vec</span> <span class="o">=</span> <span class="n">env_features_vec</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms_real</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span><span class="p">)</span>
+        <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">env_features_vec</span><span class="p">,</span> <span class="n">weights_rs</span><span class="p">)</span>
+        <span class="c1"># Norm and scale</span>
+        <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">features_out_vec</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms_real</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">)</span>
+        <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">features_out_vec</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">cusp_reg</span>
+        <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">features_out_vec</span><span class="p">)</span>
+        <span class="n">features_out_vec</span> <span class="o">=</span> <span class="n">features_out_vec</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vecscales</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Quadrupole part</span>
+        <span class="c1"># Sensitivity</span>
+        <span class="c1"># Weights</span>
+        <span class="n">env_features_quad</span> <span class="o">=</span> <span class="n">env_features_quad</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms_real</span> <span class="o">*</span> <span class="mi">5</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span><span class="p">)</span>
+        <span class="n">features_out_quad</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">env_features_quad</span><span class="p">,</span> <span class="n">weights_rs</span><span class="p">)</span>  <span class="c1">##sum v b</span>
+        <span class="n">features_out_quad</span> <span class="o">=</span> <span class="n">features_out_quad</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms_real</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">)</span>
+        <span class="c1"># Norm. (of traceless two-tensor from 5 component representation)</span>
+        <span class="n">quadfirst</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">features_out_quad</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">quadsecond</span> <span class="o">=</span> <span class="n">features_out_quad</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">features_out_quad</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">features_out_quad</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">quadfirst</span> <span class="o">+</span> <span class="n">quadsecond</span><span class="p">)</span>
+        <span class="n">features_out_quad</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">features_out_quad</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">cusp_reg</span><span class="p">)</span>
+        <span class="c1"># Scales</span>
+        <span class="n">features_out_quad</span> <span class="o">=</span> <span class="n">features_out_quad</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">quadscales</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Combine</span>
+        <span class="n">features_out_selfpart</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selfint</span><span class="p">(</span><span class="n">in_features</span><span class="p">)</span>
+
+        <span class="n">features_out_total</span> <span class="o">=</span> <span class="n">features_out</span> <span class="o">+</span> <span class="n">features_out_vec</span> <span class="o">+</span> <span class="n">features_out_quad</span> <span class="o">+</span> <span class="n">features_out_selfpart</span>
+
+        <span class="k">return</span> <span class="n">features_out_total</span></div>
+</div>
+
+
+
+<span class="c1"># n_max, l_max: warning counts for invariants.</span>
+<span class="n">_invariant_counts</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="mi">13</span><span class="p">,</span>
+    <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># Similar to HIP-NN-TS</span>
+    <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Quasi-redundant with HIP-NN</span>
+    <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="mi">7</span><span class="p">,</span>
+    <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># Similar to HIP-NN-TS</span>
+    <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Quasi-redundant with HIP-NN</span>
+    <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># Similar to HIP-NN-TS</span>
+    <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="mi">3</span><span class="p">,</span>  <span class="c1"># Similar to HIP-NN-TS</span>
+    <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># Similar to HIP-NN-TS</span>
+    <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Quasi-redundant with HIP-NN</span>
+    <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Quasi-redundant with HIP-NN</span>
+    <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Quasi-redundant with HIP-NN</span>
+    <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Quasi-redundant with HIP-NN</span>
+    <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Quasi-redundant with HIP-NN</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="HOPInteractionLayer">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.interactions.html#hippynn.layers.hiplayers.interactions.HOPInteractionLayer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HOPInteractionLayer</span><span class="p">(</span><span class="n">InteractLayer</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">n_max</span><span class="p">,</span> <span class="n">l_max</span><span class="p">,</span> <span class="n">group_norm</span><span class="p">,</span> <span class="n">group_norm_eps</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">l_max</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">l_max</span><span class="si">=}</span><span class="s2"> must be a non-negative integer.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n_max</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">n_max</span><span class="si">=}</span><span class="s2"> must be a positive integer.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">n_max</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">l_max</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;If variable n_max==1, l_max&gt;0 is unneeded. (</span><span class="si">{</span><span class="n">n_max</span><span class="si">=}</span><span class="s2">,</span><span class="si">{</span><span class="n">l_max</span><span class="si">=}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">n_max</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">l_max</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;If variable n_max&gt;1, l_max&gt;1 is required for&quot;</span> <span class="sa">f</span><span class="s2">&quot; non-trivial many-body interactions. (</span><span class="si">{</span><span class="n">n_max</span><span class="si">=}</span><span class="s2">,</span><span class="si">{</span><span class="n">l_max</span><span class="si">=}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">n_max</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">l_max</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;If variable l_max==1, n_max&gt;2 is redundant. (</span><span class="si">{</span><span class="n">n_max</span><span class="si">=}</span><span class="s2">,</span><span class="si">{</span><span class="n">l_max</span><span class="si">=}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">n_invariants</span> <span class="o">=</span> <span class="n">_invariant_counts</span><span class="p">[</span><span class="n">n_max</span><span class="p">,</span> <span class="n">l_max</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;HIP-HOP parameters </span><span class="si">{</span><span class="n">l_max</span><span class="si">=}</span><span class="s2">,</span><span class="si">{</span><span class="n">n_max</span><span class="si">=}</span><span class="s2"> implementation not presently available.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n_invariants</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Number of invariants is only 1 for HIP-HOP with (</span><span class="si">{</span><span class="n">n_max</span><span class="si">=}</span><span class="s2">,</span><span class="si">{</span><span class="n">l_max</span><span class="si">=}</span><span class="s2">); for these settings&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; it may be preferable to use vanilla HIP-NN.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_invariants</span> <span class="o">=</span> <span class="n">n_invariants</span>
+        <span class="n">mixing_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_invariants</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">invars</span> <span class="o">=</span> <span class="n">HopInvariantLayer</span><span class="p">(</span><span class="n">n_max</span><span class="o">=</span><span class="n">n_max</span><span class="p">,</span> <span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mixing_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">mixing_weights</span><span class="p">)</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">xavier_normal_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mixing_weights</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">group_norm</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">group_norm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">GroupNorm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_invariants</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_invariants</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">group_norm_eps</span><span class="p">,</span> <span class="n">affine</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">group_norm</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="HOPInteractionLayer.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.interactions.html#hippynn.layers.hiplayers.interactions.HOPInteractionLayer.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">dist_pairs</span><span class="p">,</span> <span class="n">tensor_rhats</span><span class="p">):</span>
+
+        <span class="n">features_out_selfpart</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selfint</span><span class="p">(</span><span class="n">in_features</span><span class="p">)</span>
+
+        <span class="n">n_atoms_real</span> <span class="o">=</span> <span class="n">in_features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">n_pair</span><span class="p">,</span> <span class="n">n_tensor_comp</span> <span class="o">=</span> <span class="n">tensor_rhats</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c1"># set up sensitivity for message passing</span>
+        <span class="n">sense_scalar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensitivity</span><span class="p">(</span><span class="n">dist_pairs</span><span class="p">)</span>
+        <span class="n">sensitivity</span> <span class="o">=</span> <span class="n">sense_scalar</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">tensor_rhats</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">sense_flat</span> <span class="o">=</span> <span class="n">sensitivity</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_pair</span><span class="p">,</span> <span class="n">n_tensor_comp</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span><span class="p">)</span>
+
+        <span class="n">env_features</span> <span class="o">=</span> <span class="n">custom_kernels</span><span class="o">.</span><span class="n">envsum</span><span class="p">(</span><span class="n">sense_flat</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">)</span>
+
+        <span class="c1"># apply weights to tensor features</span>
+        <span class="n">weights_rs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">int_weights</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">))</span>
+        <span class="n">env_rs</span> <span class="o">=</span> <span class="n">env_features</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms_real</span> <span class="o">*</span> <span class="n">n_tensor_comp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_dist</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_in</span><span class="p">)</span>
+        <span class="n">tensor_features</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">env_rs</span><span class="p">,</span> <span class="n">weights_rs</span><span class="p">)</span>
+        <span class="n">tensor_features</span> <span class="o">=</span> <span class="n">tensor_features</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms_real</span><span class="p">,</span> <span class="n">n_tensor_comp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">)</span>
+
+        <span class="c1"># move tensor features to last dimension and compute invariants</span>
+        <span class="c1"># shape n_atom, n_feat, n_tensor</span>
+        <span class="n">tensor_features</span> <span class="o">=</span> <span class="n">tensor_features</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms_real</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">,</span> <span class="n">n_tensor_comp</span><span class="p">)</span>
+
+        <span class="n">invariants</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invars</span><span class="p">(</span><span class="n">tensor_features</span><span class="p">)</span>
+        <span class="n">invariants</span> <span class="o">=</span> <span class="n">invariants</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms_real</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_invariants</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_norm</span><span class="p">:</span>
+            <span class="c1"># Group norm operates on n_batch, n_groups*n_features_per_group,</span>
+            <span class="c1"># so the group index (invariant index) should come first.</span>
+            <span class="n">invariants</span> <span class="o">=</span> <span class="n">invariants</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms_real</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_invariants</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">)</span>
+            <span class="n">normalized_invariants</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_norm</span><span class="p">(</span><span class="n">invariants</span><span class="p">)</span>
+            <span class="c1"># Restore shape/order; Put invariants last again.</span>
+            <span class="n">normalized_invariants</span> <span class="o">=</span> <span class="n">normalized_invariants</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms_real</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_invariants</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">)</span>
+            <span class="n">normalized_invariants</span> <span class="o">=</span> <span class="n">normalized_invariants</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">normalized_invariants</span> <span class="o">=</span> <span class="n">invariants</span>
+
+        <span class="n">normalized_invariants</span> <span class="o">=</span> <span class="n">normalized_invariants</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_atoms_real</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_invariants</span><span class="p">)</span>
+
+        <span class="c1"># (n_a,n_f*n_i) @ (n_f*n_i,n_f) -&gt; (n_a, n_f)</span>
+        <span class="n">mixing_features</span> <span class="o">=</span> <span class="n">normalized_invariants</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">mixing_weights</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nf_out</span><span class="p">)</span>
+
+        <span class="n">total_out</span> <span class="o">=</span> <span class="n">mixing_features</span> <span class="o">+</span> <span class="n">features_out_selfpart</span>
+
+        <span class="k">return</span> <span class="n">total_out</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

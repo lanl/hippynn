@@ -1,0 +1,503 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.layers.hiplayers.tensors &mdash; hippynn 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=c9d3d048"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../what_is_hippynn.html">What is hippynn?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../bibliography.html">Research articles using hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/features.html">hippynn Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/concepts.html">hippynn Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/databases.html">Databases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/loss_graph.html">Model and Loss Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/units.html">Units in hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/ckernels.html">Custom Kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/settings.html">Library Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/custom_nodes.html">Creating Custom Node Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/minimal_workflow.html">Minimal Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/controller.html">Controller</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/predictor.html">Predictor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/ensembles.html">Ensembling Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/periodic.html">Periodic Boundary Conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/forces.html">Force Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/restarting.html">Restarting training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/ase_calculator.html">ASE Calculators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/mliap_unified.html">LAMMPS interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/excited_states.html">Non-Adiabiatic Excited States</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/weighted_loss.html">Weighted/Masked Loss Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/lightning.html">Pytorch Lightning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/hyperopt.html">Hyperparameter optimization with Ax and Ray</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/hippynn.html">Full API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_summary/hippynn.html">API Summary Pages</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.layers.hiplayers.tensors</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.layers.hiplayers.tensors</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Interaction functions for hip-hop-nn</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="c1"># use opt_einsum when it is available</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">opt_einsum</span>
+
+    <span class="n">shared_intermediates</span> <span class="o">=</span> <span class="n">opt_einsum</span><span class="o">.</span><span class="n">shared_intermediates</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">nullcontext</span>
+
+    <span class="n">shared_intermediates</span> <span class="o">=</span> <span class="n">nullcontext</span>
+
+<span class="n">ndim</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># spatial dimensions</span>
+
+
+<div class="viewcode-block" id="trace">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.tensors.html#hippynn.layers.hiplayers.tensors.trace">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">trace</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">axis_1</span><span class="p">,</span> <span class="n">axis_2</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis_1</span><span class="p">,</span> <span class="n">axis_2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="tpl">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.tensors.html#hippynn.layers.hiplayers.tensors.tpl">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tpl</span><span class="p">(</span><span class="n">int_tensor</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">int_tensor</span><span class="o">.</span><span class="n">unbind</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="cartesian_irreducible_mapping">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.tensors.html#hippynn.layers.hiplayers.tensors.cartesian_irreducible_mapping">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cartesian_irreducible_mapping</span><span class="p">(</span><span class="n">ind_order</span><span class="p">):</span>
+    <span class="c1"># First, construct the map from the full cartesian space to a symmetric basis,</span>
+    <span class="c1"># mapping each element from the cartesian space to the sorted version of its indices.</span>
+    <span class="n">input_ind</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">output_ind</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">ndim</span><span class="p">),</span> <span class="n">repeat</span><span class="o">=</span><span class="n">ind_order</span><span class="p">):</span>
+        <span class="n">input_ind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+        <span class="n">output_ind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">ind</span><span class="p">)))</span>
+    <span class="n">out_ind</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">output_ind</span><span class="p">)</span>
+    <span class="n">in_ind</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">input_ind</span><span class="p">)</span>
+
+    <span class="c1"># List of symmetric indices only.</span>
+    <span class="n">needed_ind</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">out_ind</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># Figure out numbering for nonsymmetric indices within the symmetric ones.</span>
+    <span class="c1"># # This step is of somewhat large size, could maybe be reduced with better algorithm.</span>
+    <span class="n">equal</span> <span class="o">=</span> <span class="p">(</span><span class="n">needed_ind</span> <span class="o">==</span> <span class="n">out_ind</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">out_order</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">equal</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># build sparse matrix -&gt; all values are 1</span>
+    <span class="n">ind_comb</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">out_order</span><span class="p">)),</span> <span class="n">out_order</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">xform</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sparse_coo_tensor</span><span class="p">(</span><span class="n">ind_comb</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">out_order</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span><span class="o">.</span><span class="n">to_dense</span><span class="p">()</span>
+    <span class="c1"># This maps symmetric space to d^order space</span>
+    <span class="c1"># shape (d^o, t(o)) where t(o) is the triangular number.</span>
+
+    <span class="c1"># Now we need to build the map from traceless symmetric tensors to symmetric ones.</span>
+
+    <span class="c1"># Which indices are constrained by tracelessness</span>
+    <span class="c1"># Constrained elements are ones that end with 2,2 in the full cartesian space.</span>
+    <span class="c1"># # Again, may use more memory than needed here.</span>
+    <span class="n">constrained_elements</span> <span class="o">=</span> <span class="p">(</span><span class="n">needed_ind</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">constrained_pos</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">constrained_elements</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># Set of indices which are constrained by trace.</span>
+    <span class="n">constrained_ind</span> <span class="o">=</span> <span class="n">needed_ind</span><span class="p">[</span><span class="n">constrained_elements</span><span class="p">]</span>
+
+    <span class="c1"># Which indices are not constrained</span>
+    <span class="n">free_elements</span> <span class="o">=</span> <span class="o">~</span><span class="n">constrained_elements</span>
+    <span class="n">free_pos</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">free_elements</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">ind_order</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># Exception to above which is wrong when only one dimension</span>
+        <span class="n">constrained_ind</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">free_elements</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span>
+
+    <span class="c1"># Now we use regular python b/c it is easier to construct these loops.</span>
+
+    <span class="c1"># Map from the index space to the symmetric basis number.</span>
+    <span class="n">bare_sym_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">tpl</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">needed_ind</span><span class="o">.</span><span class="n">unbind</span><span class="p">(</span><span class="mi">0</span><span class="p">))}</span>
+    <span class="c1"># Map from the index space to traceless symmetric baseless number, but only for values</span>
+    <span class="c1"># that are in both (i.e. not affected by tracelessness)</span>
+    <span class="n">bare_traceless_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">tpl</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">needed_ind</span><span class="p">[</span><span class="n">free_elements</span><span class="p">]</span><span class="o">.</span><span class="n">unbind</span><span class="p">(</span><span class="mi">0</span><span class="p">))}</span>
+
+    <span class="c1"># Map from symmetric indices to traceless ones, but only for values that are in both.</span>
+    <span class="n">sym_traceless_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">bare_sym_map</span><span class="p">[</span><span class="n">x</span><span class="p">]:</span> <span class="n">j</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">bare_traceless_map</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="c1"># Initialize full map in &quot;csr&quot; form based on unconstrained elements.</span>
+    <span class="n">sym_traceless_csr</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sym_traceless_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">sym_traceless_csr</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">v</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="c1"># Extend map for trace-constrained elements</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">map</span><span class="p">(</span><span class="n">tpl</span><span class="p">,</span> <span class="n">constrained_ind</span><span class="p">):</span>
+        <span class="n">x_sym</span> <span class="o">=</span> <span class="n">bare_sym_map</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+        <span class="n">new_sym_vals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Get the two other components x...00 and x_...11 (constraint is on x...22)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">)))</span>
+            <span class="n">aa</span> <span class="o">=</span> <span class="n">bare_sym_map</span><span class="p">[</span><span class="n">a</span><span class="p">]</span>
+            <span class="n">new_sym_vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span>
+
+        <span class="c1"># Write this is in terms of</span>
+        <span class="n">new_traceless_vals</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">new_sym_vals</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">aaa</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sym_traceless_csr</span><span class="p">[</span><span class="n">aa</span><span class="p">]:</span>
+                <span class="n">new_traceless_vals</span><span class="p">[</span><span class="n">aaa</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">v</span>
+        <span class="n">new_traceless_vals</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">new_traceless_vals</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="n">sym_traceless_csr</span><span class="p">[</span><span class="n">x_sym</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">new_traceless_vals</span><span class="p">)</span>
+
+    <span class="c1"># Rewrite in coo form</span>
+    <span class="n">sym_traceless_coo</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">sym_traceless_csr</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+            <span class="n">sym_traceless_coo</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">val</span>
+
+    <span class="c1"># Convert into pytorch tensor</span>
+    <span class="n">ind</span><span class="p">,</span> <span class="n">vals</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="nb">list</span><span class="p">(</span><span class="n">sym_traceless_coo</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">vals</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+    <span class="n">xform2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sparse_coo_tensor</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">vals</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">xform</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ind_order</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="c1"># The full map is simply the map (cartesian index, symmetric) @ (symmetric, sym. traceless)</span>
+    <span class="n">full_xform</span> <span class="o">=</span> <span class="n">xform</span> <span class="o">@</span> <span class="n">xform2</span><span class="o">.</span><span class="n">to_dense</span><span class="p">()</span>
+
+    <span class="c1"># unflatten cartesian set.</span>
+    <span class="n">full_xform</span> <span class="o">=</span> <span class="n">full_xform</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">*</span><span class="p">((</span><span class="n">ndim</span><span class="p">,)</span> <span class="o">*</span> <span class="n">ind_order</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">full_xform</span></div>
+
+
+
+<div class="viewcode-block" id="norm_project">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.tensors.html#hippynn.layers.hiplayers.tensors.norm_project">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">norm_project</span><span class="p">(</span><span class="n">projector</span><span class="p">):</span>
+    <span class="n">rank</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">projector</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">flattened</span> <span class="o">=</span> <span class="n">projector</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="o">**</span><span class="n">rank</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">rank</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">svd</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">flattened</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">normed</span> <span class="o">=</span> <span class="n">svd</span><span class="o">.</span><span class="n">U</span> <span class="o">@</span> <span class="n">svd</span><span class="o">.</span><span class="n">Vh</span>
+    <span class="n">reshaped</span> <span class="o">=</span> <span class="n">normed</span><span class="o">.</span><span class="n">reshape</span><span class="p">(((</span><span class="mi">3</span><span class="p">,)</span> <span class="o">*</span> <span class="n">rank</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">rank</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,)))</span>
+    <span class="k">return</span> <span class="n">reshaped</span></div>
+
+
+
+<div class="viewcode-block" id="pinv_project">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.tensors.html#hippynn.layers.hiplayers.tensors.pinv_project">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">pinv_project</span><span class="p">(</span><span class="n">projector</span><span class="p">):</span>
+    <span class="n">rank</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">projector</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">flattened</span> <span class="o">=</span> <span class="n">projector</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="o">**</span><span class="n">rank</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">rank</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">pinv</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">flattened</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">pinv</span> <span class="o">=</span> <span class="n">pinv</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+        <span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="p">,)</span> <span class="o">*</span> <span class="n">rank</span><span class="p">,</span>
+        <span class="mi">2</span> <span class="o">*</span> <span class="n">rank</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">pinv</span></div>
+
+
+
+<span class="n">c</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">p</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+    <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cartesian_irreducible_mapping</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">())</span>
+    <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pinv_project</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="n">cmaps</span> <span class="o">=</span> <span class="n">c</span>
+<span class="n">pmaps</span> <span class="o">=</span> <span class="n">p</span>
+
+
+<div class="viewcode-block" id="TensorExtractor">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.tensors.html#hippynn.layers.hiplayers.tensors.TensorExtractor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TensorExtractor</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l_max</span><span class="p">,</span> <span class="n">pmaps</span><span class="o">=</span><span class="n">pmaps</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span> <span class="o">=</span> <span class="n">l_max</span>
+        <span class="n">all_pmaps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pmaps</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pmaps</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ParameterList</span><span class="p">(</span><span class="n">all_pmaps</span><span class="p">[:</span> <span class="n">l_max</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmaps</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TensorExtractor.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.tensors.html#hippynn.layers.hiplayers.tensors.TensorExtractor.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rhats</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">v</span> <span class="o">=</span> <span class="n">q</span> <span class="o">=</span> <span class="n">t</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">rhats</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">rhats</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">rhats</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">shared_intermediates</span><span class="p">():</span>  <span class="c1"># opt_einsum or null, see import logic</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">rhats</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">q</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijk,bi,bj-&gt;bk&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmaps</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">rhats</span><span class="p">,</span> <span class="n">rhats</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,bi,bj,bk-&gt;bl&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmaps</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">rhats</span><span class="p">,</span> <span class="n">rhats</span><span class="p">,</span> <span class="n">rhats</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">t</span></div>
+</div>
+
+
+
+<span class="c1"># Note:!! Jitting this function with torch.jit.script does something bad:</span>
+<span class="c1"># the training code slows down over time. (Some kind of leak)</span>
+<span class="c1"># even though it is about 20% faster at first, it is very bad overall.</span>
+<span class="c1"># Compiling does not help.</span>
+<div class="viewcode-block" id="calc_invariants">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.tensors.html#hippynn.layers.hiplayers.tensors.calc_invariants">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">calc_invariants</span><span class="p">(</span><span class="n">l_max</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_max</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">tensor_features</span><span class="p">,</span> <span class="n">C</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tensor</span><span class="p">]):</span>
+    <span class="n">intermediates</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">invariants</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">intermediates</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">invariants</span>
+
+    <span class="n">s</span> <span class="o">=</span> <span class="n">v</span> <span class="o">=</span> <span class="n">q</span> <span class="o">=</span> <span class="n">t</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">l_max</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">tensor_features</span>
+    <span class="k">elif</span> <span class="n">l_max</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">s</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">tensor_features</span><span class="o">.</span><span class="n">split</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">l_max</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">s</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">q</span> <span class="o">=</span> <span class="n">tensor_features</span><span class="o">.</span><span class="n">split</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">l_max</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">s</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">tensor_features</span><span class="o">.</span><span class="n">split</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid l_max:</span><span class="si">{</span><span class="n">l_max</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">l_max</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">n_max</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">I</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">v</span> <span class="o">*</span> <span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># no matmul required</span>
+
+    <span class="n">c2_flat</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">l_max</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">n_max</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># a=im[&#39;a&#39;] = torch.einsum(&#39;bij,bik-&gt;bjk&#39;,q,q) # n = 2</span>
+            <span class="c1"># a=im[&#39;a&#39;] = torch.einsum(&#39;bc,bd,ijc,ikd-&gt;bjk&#39;,q,q,C[2],C[2]) # n = 2</span>
+            <span class="c1"># This is probably not the best way b/c it invovles 3^3 = 27 element arrays</span>
+            <span class="c1"># if we just do q,q outer then we have 25?? maybe not a big deal?</span>
+            <span class="n">c2_perm</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
+            <span class="n">a_half</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">c2_perm</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">a_half</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">a_half</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># I[2] = torch.einsum(&#39;bii-&gt;b&#39;,a) # n=2</span>
+            <span class="c1"># I[2] = torch.einsum(&#39;bii-&gt;b&#39;,a) # No change!</span>
+            <span class="n">I</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n_max</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># I[3] = torch.einsum(&#39;bij,bij-&gt;b&#39;,a,q)</span>
+            <span class="c1"># I[3] = torch.einsum(&#39;bij,bc,ijc-&gt;b&#39;,a,q,C[2])</span>
+            <span class="n">c2_flat</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="n">a2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="n">c2_flat</span><span class="p">)</span>
+            <span class="n">I</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">a2</span> <span class="o">*</span> <span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># c=im[&#39;c&#39;] = torch.einsum(&#39;bij,bi-&gt;bj&#39;,q,v)</span>
+            <span class="c1"># c=im[&#39;c&#39;] = torch.einsum(&#39;bc,bi,ijc-&gt;bj&#39;,q,v,C[2])</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">a_half</span> <span class="o">*</span> <span class="n">v</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># 2 = torch.matmul(q,c2_perm)</span>
+
+            <span class="c1"># I[6] = torch.einsum(&#39;bi,bi-&gt;b&#39;,c,v)</span>
+            <span class="c1"># I[6] = torch.einsum(&#39;bi,bi-&gt;b&#39;,c,v) # No change!</span>
+            <span class="n">I</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># # no matmul required</span>
+
+        <span class="k">if</span> <span class="n">n_max</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="c1"># I[7] = torch.einsum(&#39;bi,bi-&gt;b&#39;,c,c) # no change!</span>
+            <span class="n">I</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># no matmul required</span>
+
+    <span class="k">if</span> <span class="n">l_max</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">n_max</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># b=im[&#39;b&#39;] = torch.einsum(&#39;bijk,bijm-&gt;bkm&#39;,t,t) #n = 2</span>
+            <span class="c1"># b=im[&#39;b&#39;] = torch.einsum(&#39;bc,bd,ijkc,ijmd-&gt;bkm&#39;,t,t,C[3],C[3])</span>
+
+            <span class="c1"># seems very inefficient!! now involves 81 elements</span>
+            <span class="n">c3_perm</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">27</span><span class="p">)</span>
+            <span class="n">b_half</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">c3_perm</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">b_half</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="n">b_half</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+            <span class="c1"># I[4] = torch.einsum(&#39;bii-&gt;b&#39;,b)</span>
+            <span class="c1"># I[4] = torch.einsum(&#39;bii-&gt;b&#39;,b) # no change</span>
+            <span class="n">I</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n_max</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># d=im[&#39;d&#39;] = torch.einsum(&#39;bijk,bi-&gt;bjk&#39;,t,v)</span>
+            <span class="c1"># d=im[&#39;d&#39;] = torch.einsum(&#39;bc,bi,ijkc-&gt;bjk&#39;,t,v,C[3])</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="s2">&quot;d&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">b_half</span> <span class="o">*</span> <span class="n">v</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># I[10] = torch.einsum(&#39;bij,bij-&gt;b&#39;,b,q)</span>
+            <span class="c1"># I[10] = torch.einsum(&#39;bij,bc,ijc-&gt;b&#39;,b,q,C[2])</span>
+            <span class="n">b2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="n">c2_flat</span><span class="p">)</span>  <span class="c1"># flattened b graph</span>
+            <span class="n">I</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">b2</span> <span class="o">*</span> <span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n_max</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="c1"># I[5] = torch.einsum(&#39;bij,bij-&gt;b&#39;,b,b)</span>
+            <span class="c1"># I[5] = torch.einsum(&#39;bij,bij-&gt;b&#39;,b,b) # no change</span>
+            <span class="n">I</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span> <span class="o">*</span> <span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span>
+
+            <span class="c1"># I[8] = torch.einsum(&#39;bi,bj,bij-&gt;b&#39;,v,v,d) # no change</span>
+            <span class="n">I</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">v</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span>
+
+            <span class="c1"># I[9] = torch.einsum(&#39;bi,bj,bij-&gt;b&#39;,v,v,b) # no change</span>
+            <span class="n">I</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">v</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span>
+
+            <span class="c1"># I[11] = torch.einsum(&#39;bij,bij-&gt;b&#39;,b,a) # no change</span>
+            <span class="n">I</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))</span>
+
+            <span class="c1"># e=im[&#39;e&#39;] = torch.einsum(&#39;bijk,bij-&gt;bk&#39;,t,q)</span>
+            <span class="c1"># e=im[&#39;e&#39;] = torch.einsum(&#39;bc,bd,ijkc,ijd-&gt;bk&#39;,t,q,C[3],C[2])</span>
+            <span class="n">c3rs</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">21</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">c3c2</span> <span class="o">=</span> <span class="p">(</span><span class="n">c3rs</span> <span class="o">@</span> <span class="n">c2_flat</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># shape 21,(9x9),5-&gt; 3,7,5</span>
+            <span class="n">c3c2_rs</span> <span class="o">=</span> <span class="n">c3c2</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+            <span class="n">e_half</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">c3c2_rs</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">im</span><span class="p">[</span><span class="s2">&quot;e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">e_half</span> <span class="o">*</span> <span class="n">q</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="c1"># I[12] = torch.einsum(&#39;bi,bi-&gt;b&#39;,e,e)</span>
+            <span class="c1"># I[12] = torch.einsum(&#39;bi,bi-&gt;b&#39;,e,e) # no change</span>
+            <span class="n">I</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span> <span class="o">*</span> <span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">invariants</span> <span class="o">=</span> <span class="p">[</span><span class="n">invariants</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">invariants</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
+
+    <span class="n">invars</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">invariants</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">invars</span></div>
+
+
+
+<div class="viewcode-block" id="HopInvariantLayer">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.tensors.html#hippynn.layers.hiplayers.tensors.HopInvariantLayer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HopInvariantLayer</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_max</span><span class="p">,</span> <span class="n">l_max</span><span class="p">,</span> <span class="n">_cmaps</span><span class="o">=</span><span class="n">cmaps</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span> <span class="o">=</span> <span class="n">l_max</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_max</span> <span class="o">=</span> <span class="n">n_max</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cmaps</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ParameterList</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">_cmaps</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmaps</span><span class="p">:</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_max</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_max</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad n: </span><span class="si">{</span><span class="n">n_max</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad l: </span><span class="si">{</span><span class="n">l_max</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="HopInvariantLayer.extra_repr">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.tensors.html#hippynn.layers.hiplayers.tensors.HopInvariantLayer.extra_repr">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extra_repr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;n_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_max</span><span class="si">}</span><span class="s2">, l_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">l_max</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+<div class="viewcode-block" id="HopInvariantLayer.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.hiplayers.tensors.html#hippynn.layers.hiplayers.tensors.HopInvariantLayer.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor_features</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">v</span> <span class="o">=</span> <span class="n">q</span> <span class="o">=</span> <span class="n">t</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="n">t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmaps</span>
+        <span class="k">return</span> <span class="n">calc_invariants</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">l_max</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_max</span><span class="p">,</span> <span class="n">tensor_features</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>
