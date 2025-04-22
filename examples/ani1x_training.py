@@ -107,21 +107,21 @@ def load_db(db_info, en_name, force_name, seed, anidata_location, n_workers, use
         database.targets = [x for x in database.targets if x != CCX_EN_NAME]
 
     # compute (approximate) atomization energy by subtracting self energies
-    
+
     # Build a lookup tensor for self energies
     max_z = max(SELF_ENERGY_APPROX.keys()) + 1  # +1 in case max Z is the last index
     lookup_table = torch.zeros(max_z, dtype=torch.float32)
     for z, energy in SELF_ENERGY_APPROX.items():
         lookup_table[z] = energy
-    
-    database.arr_dict['atomic_numbers'] = database.arr_dict['atomic_numbers'].long()
 
-    self_energy = lookup_table[database.arr_dict['atomic_numbers']]
-    self_energy = self_energy.sum(dim=1)    
-    database.arr_dict[en_name] = (database.arr_dict[en_name] - self_energy)
-    kcalpmol = (ase.units.kcal/ase.units.mol)
-    conversion = ase.units.Ha/kcalpmol
-    database.arr_dict[en_name] = database.arr_dict[en_name].float()*conversion
+    database.arr_dict["atomic_numbers"] = database.arr_dict["atomic_numbers"].long()
+
+    self_energy = lookup_table[database.arr_dict["atomic_numbers"]]
+    self_energy = self_energy.sum(dim=1)
+    database.arr_dict[en_name] = database.arr_dict[en_name] - self_energy
+    kcalpmol = ase.units.kcal / ase.units.mol
+    conversion = ase.units.Ha / kcalpmol
+    database.arr_dict[en_name] = database.arr_dict[en_name].float() * conversion
 
     if force_name in database.arr_dict:
         database.arr_dict[force_name] = database.arr_dict[force_name] * conversion
