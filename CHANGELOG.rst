@@ -11,6 +11,7 @@ Breaking changes:
 New Features:
 -------------
 
+- Added new network type, HIP-HOP-NN.
 
 Improvements:
 -------------
