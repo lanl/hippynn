@@ -1,137 +1,7 @@
-"""
-Layers for HIP-NN
-"""
-import numpy as np
 import torch
+from ... import custom_kernels
+from .tensors import HopInvariantLayer
 import warnings
-from .. import custom_kernels
-
-from .. import settings
-
-
-def warn_if_under(distance, threshold):
-    if len(distance) == 0:  # no pairs
-        return
-    dmin = distance.min()
-    if dmin < threshold:
-        d_count = distance < threshold
-        d_frac = d_count.to(distance.dtype).mean()
-        d_sum = (d_count.sum() / 2).to(torch.int)
-        warnings.warn(
-            "Provided distances are underneath sensitivity range!\n"
-            f"Minimum distance in current batch: {dmin}\n"
-            f"Threshold distance for warning: {threshold}.\n"
-            f"Fraction of pairs under the threshold: {d_frac}\n"
-            f"Number of pairs under the threshold: {d_sum}"
-        )
-
-
-class CosCutoff(torch.nn.Module):
-    def __init__(self, hard_max_dist):
-        super().__init__()
-        self.hard_max_dist = hard_max_dist
-
-    def forward(self, dist_tensor):
-        cutoff_sense = torch.cos(np.pi / 2 * dist_tensor / self.hard_max_dist) ** 2
-        cutoff_sense = cutoff_sense * (dist_tensor <= self.hard_max_dist).to(cutoff_sense.dtype)
-        return cutoff_sense
-
-
-class SensitivityModule(torch.nn.Module):
-    def __init__(self, hard_max_dist, cutoff_type):
-        super().__init__()
-        self.cutoff = cutoff_type(hard_max_dist)
-        self.hard_max_dist = hard_max_dist
-
-
-class GaussianSensitivityModule(SensitivityModule):
-    def __init__(self, n_dist, min_dist_soft, max_dist_soft, hard_max_dist, cutoff_type=CosCutoff):
-
-        super().__init__(hard_max_dist, cutoff_type)
-        init_mu = 1.0 / torch.linspace(1.0 / max_dist_soft, 1.0 / min_dist_soft, n_dist)
-        self.mu = torch.nn.Parameter(init_mu.unsqueeze(0))
-
-        self.sigma = torch.nn.Parameter(torch.Tensor(n_dist).unsqueeze(0))
-        init_sigma = min_dist_soft * 2 * n_dist  # pulled from theano code
-        self.sigma.data.fill_(init_sigma)
-
-    def forward(self, distflat, warn_low_distances=None):
-        if warn_low_distances is None:
-            warn_low_distances = settings.WARN_LOW_DISTANCES
-        if warn_low_distances:
-            with torch.no_grad():
-                mu, argmin = self.mu.min(dim=1)
-                sig = self.sigma[:, argmin]
-                # Warn if distance is less than the -inside- edge of the shortest sensitivity function
-                thresh = mu + sig
-                warn_if_under(distflat, thresh)
-        distflat_ds = distflat.unsqueeze(1)
-        mu_ds = self.mu
-        sig_ds = self.sigma
-
-        nondim = (distflat_ds**-1 - mu_ds**-1) ** 2 / (sig_ds**-2)
-        base_sense = torch.exp(-0.5 * nondim)
-
-        total_sense = base_sense * self.cutoff(distflat).unsqueeze(1)
-        return total_sense
-
-
-class InverseSensitivityModule(SensitivityModule):
-    def __init__(self, n_dist, min_dist_soft, max_dist_soft, hard_max_dist, cutoff_type=CosCutoff):
-
-        super().__init__(hard_max_dist, cutoff_type)
-        init_mu = torch.Tensor(1.0 / torch.linspace(1.0 / max_dist_soft, 1.0 / min_dist_soft, n_dist))
-        self.mu = torch.nn.Parameter(init_mu.unsqueeze(0))
-        self.sigma = torch.nn.Parameter(torch.Tensor(n_dist).unsqueeze(0))
-        init_sigma = min_dist_soft * 2 * n_dist
-        self.sigma.data.fill_(init_sigma)
-
-    def forward(self, distflat, warn_low_distances=None):
-        if warn_low_distances is None:
-            warn_low_distances = settings.WARN_LOW_DISTANCES
-        if warn_low_distances:
-            with torch.no_grad():
-                # Warn if distance is less than the -inside- edge of the shortest sensitivity function
-                mu, argmin = self.mu.min(dim=1)
-                sig = self.sigma[:, argmin]
-                thresh = (mu**-1 - sig**-1) ** -1
-
-                warn_if_under(distflat, thresh)
-        distflat_ds = distflat.unsqueeze(1)
-
-        nondim = (distflat_ds**-1 - self.mu**-1) ** 2 / (self.sigma**-2)
-        base_sense = torch.exp(-0.5 * nondim)
-
-        total_sense = base_sense * self.cutoff(distflat).unsqueeze(1)
-
-        return total_sense
-
-
-class SensitivityBottleneck(torch.nn.Module):
-    def __init__(
-        self,
-        n_dist,
-        min_soft_dist,
-        max_dist_soft,
-        hard_max_dist,
-        n_dist_bare,
-        cutoff_type=CosCutoff,
-        base_sense=InverseSensitivityModule,
-    ):
-        super().__init__()
-        self.hard_max_dist = hard_max_dist
-
-        self.base_sense = base_sense(n_dist_bare, min_soft_dist, max_dist_soft, hard_max_dist, cutoff_type)
-        self.matching = torch.nn.Parameter(torch.Tensor(n_dist_bare, n_dist))
-
-        self.cutoff = self.base_sense.cutoff
-
-        torch.nn.init.orthogonal_(self.matching.data)
-
-    def forward(self, distflat):
-        base_sense = self.base_sense(distflat)
-        reduced_sense = torch.mm(base_sense, self.matching)
-        return reduced_sense
 
 
 class InteractLayer(torch.nn.Module):
@@ -139,7 +9,7 @@ class InteractLayer(torch.nn.Module):
     Hipnn's interaction layer
     """
 
-    def __init__(self, nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module, cusp_reg=None):
+    def __init__(self, nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module):
         """
         Constructor
 
@@ -150,13 +20,9 @@ class InteractLayer(torch.nn.Module):
         :param maxd_soft: maximum distance for initial sensitivities
         :param hard_cutoff: maximum distance for cutoff function
         :param sensitivity_module: class or callable that builds sensitivity functions, should return nn.Module
-        :param cusp_reg: ignored, only provided with compatibility for tensor sensitivity API
         """
         super().__init__()
 
-        if type(self) is InteractLayer and cusp_reg is not None:
-            # Parameter is not used in this class.
-            warnings.warn(f"Parameter `cusp_reg`={cusp_reg} is ignored in this class, and is only provided for API compatibility.")
         self.n_dist = n_dist
         self.nf_in = nf_in
         self.nf_out = nf_out
@@ -219,7 +85,7 @@ class InteractLayer(torch.nn.Module):
 
 class InteractLayerVec(InteractLayer):
     def __init__(self, nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module, cusp_reg):
-        super().__init__(nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module, cusp_reg)
+        super().__init__(nf_in, nf_out, n_dist, mind_soft, maxd_soft, hard_cutoff, sensitivity_module)
         self.vecscales = torch.nn.Parameter(torch.Tensor(nf_out))
         torch.nn.init.normal_(self.vecscales.data)
         self.cusp_reg = cusp_reg
@@ -391,3 +257,111 @@ class InteractLayerQuad(InteractLayerVec):
         features_out_total = features_out + features_out_vec + features_out_quad + features_out_selfpart
 
         return features_out_total
+
+
+# n_max, l_max: warning counts for invariants.
+_invariant_counts = {
+    (4, 3): 13,
+    (4, 2): 6,
+    (4, 1): 2,  # Similar to HIP-NN-TS
+    (4, 0): 1,  # Quasi-redundant with HIP-NN
+    (3, 3): 7,
+    (3, 2): 5,
+    (3, 1): 2,  # Similar to HIP-NN-TS
+    (3, 0): 1,  # Quasi-redundant with HIP-NN
+    (2, 3): 4,  # Similar to HIP-NN-TS
+    (2, 2): 3,  # Similar to HIP-NN-TS
+    (2, 1): 2,  # Similar to HIP-NN-TS
+    (2, 0): 1,  # Quasi-redundant with HIP-NN
+    (1, 3): 1,  # Quasi-redundant with HIP-NN
+    (1, 2): 1,  # Quasi-redundant with HIP-NN
+    (1, 1): 1,  # Quasi-redundant with HIP-NN
+    (1, 0): 1,  # Quasi-redundant with HIP-NN
+}
+
+
+class HOPInteractionLayer(InteractLayer):
+    def __init__(self, *args, n_max, l_max, group_norm, group_norm_eps, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if l_max < 0:
+            raise ValueError(f"{l_max=} must be a non-negative integer.")
+
+        if n_max <= 0:
+            raise ValueError(f"{n_max=} must be a positive integer.")
+        elif n_max == 1:
+            if l_max > 0:
+                warnings.warn(f"If variable n_max==1, l_max>0 is unneeded. ({n_max=},{l_max=})")
+        elif n_max > 1:
+            if l_max == 0:
+                warnings.warn(f"If variable n_max>1, l_max>1 is required for" f" non-trivial many-body interactions. ({n_max=},{l_max=})")
+            if n_max > 2 and l_max == 1:
+                warnings.warn(f"If variable l_max==1, n_max>2 is redundant. ({n_max=},{l_max=})")
+
+        try:
+            n_invariants = _invariant_counts[n_max, l_max]
+        except KeyError:
+            raise ValueError(f"HIP-HOP parameters {l_max=},{n_max=} implementation not presently available.")
+
+        if n_invariants == 1:
+            warnings.warn(
+                f"Number of invariants is only 1 for HIP-HOP with ({n_max=},{l_max=}); for these settings"
+                f" it may be preferable to use vanilla HIP-NN."
+            )
+
+        self.n_invariants = n_invariants
+        mixing_weights = torch.zeros(self.nf_out, self.n_invariants, self.nf_out)
+        self.invars = HopInvariantLayer(n_max=n_max, l_max=l_max)
+        self.mixing_weights = torch.nn.Parameter(mixing_weights)
+        torch.nn.init.xavier_normal_(self.mixing_weights)
+        if group_norm:
+            self.group_norm = torch.nn.GroupNorm(self.n_invariants, self.n_invariants * self.nf_out, eps=group_norm_eps, affine=True)
+        else:
+            self.group_norm = None
+
+    def forward(self, in_features, pair_first, pair_second, dist_pairs, tensor_rhats):
+
+        features_out_selfpart = self.selfint(in_features)
+
+        n_atoms_real = in_features.shape[0]
+        n_pair, n_tensor_comp = tensor_rhats.shape
+
+        # set up sensitivity for message passing
+        sense_scalar = self.sensitivity(dist_pairs)
+        sensitivity = sense_scalar.unsqueeze(1) * tensor_rhats.unsqueeze(2)
+        sense_flat = sensitivity.reshape(n_pair, n_tensor_comp * self.n_dist)
+
+        env_features = custom_kernels.envsum(sense_flat, in_features, pair_first, pair_second)
+
+        # apply weights to tensor features
+        weights_rs = torch.reshape(self.int_weights.permute(0, 2, 1), (self.n_dist * self.nf_in, self.nf_out))
+        env_rs = env_features.reshape(n_atoms_real * n_tensor_comp, self.n_dist * self.nf_in)
+        tensor_features = torch.mm(env_rs, weights_rs)
+        tensor_features = tensor_features.reshape(n_atoms_real, n_tensor_comp, self.nf_out)
+
+        # move tensor features to last dimension and compute invariants
+        # shape n_atom, n_feat, n_tensor
+        tensor_features = tensor_features.permute(0, 2, 1).reshape(n_atoms_real * self.nf_out, n_tensor_comp)
+
+        invariants = self.invars(tensor_features)
+        invariants = invariants.reshape(n_atoms_real, self.nf_out, self.n_invariants)
+
+        if self.group_norm:
+            # Group norm operates on n_batch, n_groups*n_features_per_group,
+            # so the group index (invariant index) should come first.
+            invariants = invariants.permute(0, 2, 1).reshape(n_atoms_real, self.n_invariants * self.nf_out)
+            normalized_invariants = self.group_norm(invariants)
+            # Restore shape/order; Put invariants last again.
+            normalized_invariants = normalized_invariants.reshape(n_atoms_real, self.n_invariants, self.nf_out)
+            normalized_invariants = normalized_invariants.permute(0, 2, 1)
+        else:
+            normalized_invariants = invariants
+
+        normalized_invariants = normalized_invariants.reshape(n_atoms_real, self.nf_out * self.n_invariants)
+
+        # (n_a,n_f*n_i) @ (n_f*n_i,n_f) -> (n_a, n_f)
+        mixing_features = normalized_invariants @ self.mixing_weights.reshape(-1, self.nf_out)
+
+        total_out = mixing_features + features_out_selfpart
+
+        return total_out

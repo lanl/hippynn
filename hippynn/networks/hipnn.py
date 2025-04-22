@@ -1,8 +1,7 @@
 """
 Implementation of HIPNN.
 """
-
-import numpy as np
+import warnings
 import torch
 
 from typing import Union, List
@@ -65,6 +64,7 @@ class Hipnn(torch.nn.Module):
     """
 
     _interaction_class = InteractLayer
+    _interaction_kwargs = ()  # No extra arguments to regular interaction layer
 
     def __init__(
         self,
@@ -80,7 +80,7 @@ class Hipnn(torch.nn.Module):
         sensitivity_type="inverse",
         resnet=True,
         activation=torch.nn.Softplus,
-        cusp_reg=None,
+        **kwargs,
     ):
         """
 
@@ -98,7 +98,6 @@ class Hipnn(torch.nn.Module):
            'inverse' is what is in hip-nn original paper.
         :param resnet: bool or int, if int, size of internal resnet width
         :param activation: activation function or subclass of nn.module.
-        :param cusp_reg: Used for API compatibility, but ignored in vanilla HIP-NN.
 
         Note: only one of possible_species or n_input_features is needed. If both are supplied,
         they must be consistent with each other.
@@ -174,13 +173,25 @@ class Hipnn(torch.nn.Module):
         else:
             raise TypeError("Invalid sensitivity type:", sensitivity_type)
 
+        interaction_kwargs = {k: kwargs.pop(k) for k in self._interaction_kwargs if k in kwargs}
+
+        if len(kwargs) > 0:
+            warnings.warn(f"Network initialized with unused {kwargs=}")
+
         # Finally, build the network!
         for in_size, out_size, middle_size in zip(self.feature_sizes[:-1], self.feature_sizes[1:], self.nf_middle):
             this_block = torch.nn.ModuleList()
 
             # Add interaction layer
             lay = self._interaction_class(
-                in_size, middle_size, n_sensitivities, dist_soft_min, dist_soft_max, dist_hard_max, sensitivity_type, cusp_reg
+                in_size,
+                middle_size,
+                n_sensitivities,
+                dist_soft_min,
+                dist_soft_max,
+                dist_hard_max,
+                sensitivity_type,
+                **interaction_kwargs,
             )
             if self.resnet:
                 lay = ResNetWrapper(lay, in_size, middle_size, out_size, self.activation)
@@ -247,6 +258,7 @@ class HipnnVec(Hipnn):
     """
 
     _interaction_class = InteractLayerVec
+    _interaction_kwargs = ("cusp_reg",)
 
     def __init__(self, *args, cusp_reg=1e-6, **kwargs):
         # cusp regularization for tensor sensitivity l>0. Defaults to 1e-6.
