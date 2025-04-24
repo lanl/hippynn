@@ -71,9 +71,9 @@ The following settings are available:
      - 1.0
      - no
    * - COMM_FEATURES_LAMMPS
-     - In the Lammps interface,
+     - In the Lammps interface, use message-passing to send network activations (features) and gradients between ranks-reduces computational requirements, but increases communication between ranks.
      - true, false
-     - false
+     - true
      - no
    * - TIMEPLOT_AUTOSCALING
      - If True, only provide log-scaled plots of training quantities over time if warranted by the data. If False, always produce all plots in linear, log, and loglog scales.
