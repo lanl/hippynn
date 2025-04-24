@@ -121,8 +121,9 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">TensorDataset</span><span class="p">,</span> <span class="n">Subset</span>
 
-<span class="n">_AUTO_SPLIT_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;split_mask_&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
 
+<span class="n">_AUTO_SPLIT_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;split_mask_&quot;</span>
 
 <div class="viewcode-block" id="Database">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database">[docs]</a>
@@ -601,6 +602,7 @@
             <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span>
             <span class="n">pin_memory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pin_memory</span><span class="p">,</span>
             <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
+            <span class="n">collate_fn</span><span class="o">=</span><span class="n">sparse_enabled_colate</span><span class="p">,</span>
             <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">dataloader_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -1010,6 +1012,25 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor_names</span><span class="p">,</span> <span class="o">*</span><span class="n">tensors</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">tensors</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tensor_map</span> <span class="o">=</span> <span class="n">tensor_names</span></div>
+
+
+
+<span class="n">collate_map</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">default_collate</span><span class="p">)</span>
+
+<div class="viewcode-block" id="tensor_collate">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.tensor_collate">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tensor_collate</span><span class="p">(</span><span class="n">list_of_tensors</span><span class="p">,</span> <span class="n">collate_fn_map</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">elem</span> <span class="o">=</span> <span class="n">list_of_tensors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">layout</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">strided</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">default_collate</span><span class="p">(</span><span class="n">list_of_tensors</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">list_of_tensors</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+<span class="n">collate_map</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="n">tensor_collate</span>
+
+<div class="viewcode-block" id="sparse_enabled_colate">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.sparse_enabled_colate">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sparse_enabled_colate</span><span class="p">(</span><span class="n">batch</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">_utils</span><span class="o">.</span><span class="n">collate</span><span class="o">.</span><span class="n">collate</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">collate_fn_map</span><span class="o">=</span><span class="n">collate_map</span><span class="p">)</span></div>
 
 </pre></div>
 
