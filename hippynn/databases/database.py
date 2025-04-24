@@ -13,8 +13,9 @@ from ..tools import arrdict_len, device_fallback, unsqueeze_multiple
 
 from torch.utils.data import DataLoader, TensorDataset, Subset
 
-_AUTO_SPLIT_PREFIX = "split_mask_"
+from collections import defaultdict
 
+_AUTO_SPLIT_PREFIX = "split_mask_"
 
 class Database:
     """
@@ -465,6 +466,7 @@ class Database:
             shuffle=shuffle,
             pin_memory=self.pin_memory,
             num_workers=self.num_workers,
+            collate_fn=sparse_enabled_colate,
             **self.dataloader_kwargs,
         )
 
@@ -843,3 +845,16 @@ class NamedTensorDataset(TensorDataset):
     def __init__(self, tensor_names, *tensors):
         super().__init__(*tensors)
         self.tensor_map = tensor_names
+
+
+collate_map = defaultdict(torch.utils.data.default_collate)
+
+def tensor_collate(list_of_tensors, collate_fn_map=None):
+    elem = list_of_tensors[0]
+    if elem.layout == torch.strided:
+        return torch.utils.data.default_collate(list_of_tensors)
+    return torch.stack(list_of_tensors, dim=0)
+collate_map[torch.Tensor] = tensor_collate
+
+def sparse_enabled_colate(batch):
+    return torch.utils.data._utils.collate.collate(batch, collate_fn_map=collate_map)
