@@ -1,6 +1,10 @@
 # ChatGPT was used in creating these functions
 
+import os
+
 import numpy as np
+
+from ..tools import progress_bar
 
 def write_extxyz(filename, positions, species=None, cells=None, velocities=None, forces=None):
     """
@@ -37,8 +41,11 @@ def write_extxyz(filename, positions, species=None, cells=None, velocities=None,
             raise ValueError("forces must be a 3D NumPy array with shape (n_frames, n_particles, 3)")
 
     # --- Write ---
+    if not os.path.splitext(filename)[1]:  # checks if there's an extension
+        filename += '.extxyz'
+
     with open(filename, "w") as f:
-        for t in range(n_frames):
+        for t in progress_bar(range(n_frames)):
             f.write(f"{n_particles}\n")
 
             # Header with Lattice and Properties
