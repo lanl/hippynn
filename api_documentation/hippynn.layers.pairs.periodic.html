@@ -128,6 +128,7 @@
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.periodic.filter_pairs"><code class="docutils literal notranslate"><span class="pre">filter_pairs()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.pairs.periodic.union_indices_2d_masks"><code class="docutils literal notranslate"><span class="pre">union_indices_2d_masks()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -259,6 +260,23 @@ registered hooks while the latter silently ignores them.</p>
 <dt class="sig sig-object py" id="hippynn.layers.pairs.periodic.filter_pairs">
 <span class="sig-name descname"><span class="pre">filter_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distflat</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">addn_features</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/periodic.html#filter_pairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.periodic.filter_pairs" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.periodic.union_indices_2d_masks">
+<span class="sig-name descname"><span class="pre">union_indices_2d_masks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">arrays</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/periodic.html#union_indices_2d_masks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.periodic.union_indices_2d_masks" title="Link to this definition"></a></dt>
+<dd><p>Compute the indices of the union of a list of 2D mask arrays.</p>
+<p>Assume a set of arrays a_1…a_n, each with shape (b,f_1),(b,f_2)…(b,f_n)
+The output is equivalent to broadcasting the combined multiplication:</p>
+<blockquote>
+<div><p>m = a1*a2*a3*a4</p>
+</div></blockquote>
+<p>into shape (b,f_1,f_2,..f_n)  and return <cite>torch.nonzero(m)</cite>.
+However, this function does not materialize the large intermediate array
+of all possible products. It does call nonzero several times which causes
+blocking ops on the GPU, but because they are almost back-to-back
+this is usually not worse than calling nonzero in the first place.</p>
+<p>Performance heuristic note: Provide the arrays in ascending sparsity order.</p>
+</dd></dl>
 
 </section>
 

@@ -164,7 +164,7 @@
     <span class="k">if</span> <span class="n">missing_targets</span><span class="p">:</span>
         <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Missing targets: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">missing_targets</span><span class="p">)</span>
 
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Required quantities for the graph inputs or targets are not mapped to a db name:</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span></div>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Model/Loss configuration requires database quantity to be defined for these factors:</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span></div>
 
 
 
@@ -348,8 +348,8 @@
             <span class="k">raise</span> <span class="n">re</span>
 
     <span class="n">cacheinput</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">PairIndices</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="n">_PAIRCACHE_DB_NAME</span><span class="p">)</span>
-    <span class="n">pos</span> <span class="o">=</span> <span class="n">gops</span><span class="o">.</span><span class="n">find_unique_relative</span><span class="p">(</span><span class="n">pair_indexer</span><span class="p">,</span> <span class="n">inputs</span><span class="o">.</span><span class="n">PositionsNode</span><span class="p">)</span>
-    <span class="n">cell</span> <span class="o">=</span> <span class="n">gops</span><span class="o">.</span><span class="n">find_unique_relative</span><span class="p">(</span><span class="n">pair_indexer</span><span class="p">,</span> <span class="n">inputs</span><span class="o">.</span><span class="n">CellNode</span><span class="p">)</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">pair_indexer</span><span class="o">.</span><span class="n">coordinates</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">pair_indexer</span><span class="o">.</span><span class="n">cell</span>
     <span class="n">atomidx</span> <span class="o">=</span> <span class="n">gops</span><span class="o">.</span><span class="n">find_unique_relative</span><span class="p">(</span><span class="n">pair_indexer</span><span class="p">,</span> <span class="n">indexers</span><span class="o">.</span><span class="n">AtomIndexer</span><span class="p">)</span>
     <span class="n">uncacher</span> <span class="o">=</span> <span class="n">pairs</span><span class="o">.</span><span class="n">PairUncacher</span><span class="p">(</span><span class="s2">&quot;AutoPairUncache&quot;</span><span class="p">,</span>
                                   <span class="p">(</span><span class="n">cacheinput</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">atomidx</span><span class="p">),</span>

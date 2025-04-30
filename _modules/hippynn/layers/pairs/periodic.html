@@ -258,11 +258,69 @@
 
     <span class="k">return</span> <span class="n">inv_cell</span><span class="p">,</span> <span class="n">wrapped_coords</span><span class="p">,</span> <span class="n">wrapped_offset</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span> <span class="n">n_bounds</span>
 
+
 <div class="viewcode-block" id="filter_pairs">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.periodic.html#hippynn.layers.pairs.periodic.filter_pairs">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">filter_pairs</span><span class="p">(</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">distflat</span><span class="p">,</span> <span class="o">*</span><span class="n">addn_features</span><span class="p">):</span>
     <span class="nb">filter</span> <span class="o">=</span> <span class="n">distflat</span> <span class="o">&lt;</span> <span class="n">cutoff</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">array</span><span class="p">[</span><span class="nb">filter</span><span class="p">]</span> <span class="k">for</span> <span class="n">array</span> <span class="ow">in</span> <span class="p">[</span><span class="n">distflat</span><span class="p">,</span> <span class="o">*</span><span class="n">addn_features</span><span class="p">]))</span></div>
+
+
+
+<div class="viewcode-block" id="union_indices_2d_masks">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.periodic.html#hippynn.layers.pairs.periodic.union_indices_2d_masks">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">union_indices_2d_masks</span><span class="p">(</span><span class="o">*</span><span class="n">arrays</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the indices of the union of a list of 2D mask arrays.</span>
+
+<span class="sd">    Assume a set of arrays a_1...a_n, each with shape (b,f_1),(b,f_2)...(b,f_n)</span>
+<span class="sd">    The output is equivalent to broadcasting the combined multiplication:</span>
+<span class="sd">        m = a1*a2*a3*a4</span>
+<span class="sd">    into shape (b,f_1,f_2,..f_n)  and return `torch.nonzero(m)`.</span>
+<span class="sd">    However, this function does not materialize the large intermediate array</span>
+<span class="sd">    of all possible products. It does call nonzero several times which causes</span>
+<span class="sd">    blocking ops on the GPU, but because they are almost back-to-back</span>
+<span class="sd">    this is usually not worse than calling nonzero in the first place.</span>
+
+<span class="sd">    Performance heuristic note: Provide the arrays in ascending sparsity order.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Standalone function, so could be moved to elsewhere if needed.</span>
+
+    <span class="n">n_masks</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">n_masks</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Union function requires masks.&quot;</span><span class="p">)</span>
+        <span class="c1"># Also possible: return zero-length batch indices if passed no masks?</span>
+
+    <span class="n">full_shapes</span> <span class="o">=</span> <span class="p">[</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span> <span class="k">for</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">arrays</span><span class="p">]</span>
+    <span class="n">batch_sizes</span><span class="p">,</span> <span class="n">mask_lengths</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">full_shapes</span><span class="p">)</span>
+
+    <span class="c1"># Validate shapes.</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">batch_sizes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">b</span> <span class="o">==</span> <span class="n">bb</span> <span class="k">for</span> <span class="n">bb</span> <span class="ow">in</span> <span class="n">batch_sizes</span><span class="p">),</span> <span class="s2">&quot;batch broadcasting must be possible.&quot;</span>
+
+    <span class="n">start_mask</span><span class="p">,</span> <span class="o">*</span><span class="n">arrays</span> <span class="o">=</span> <span class="n">arrays</span>
+
+    <span class="c1"># Setup batch and feature indices list for first mask.</span>
+    <span class="n">batch_indices</span><span class="p">,</span> <span class="n">feature_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">start_mask</span><span class="p">,</span> <span class="n">as_tuple</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">feature_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">feature_indices</span><span class="p">]</span>
+
+    <span class="c1"># Eat each additional mask.</span>
+    <span class="k">for</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">arrays</span><span class="p">:</span>
+        <span class="c1"># Compute the needed rows to consider, and where these are nonzero for this mask.</span>
+        <span class="n">arr_rows</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">]</span>
+        <span class="n">new_batch_indices</span><span class="p">,</span> <span class="n">new_feature_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">arr_rows</span><span class="p">,</span> <span class="n">as_tuple</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Update indices by acessing the old value relative to the batch indices just found.</span>
+        <span class="n">feature_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="p">[</span><span class="n">new_batch_indices</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">feature_indices</span><span class="p">]</span>
+        <span class="n">batch_indices</span> <span class="o">=</span> <span class="n">batch_indices</span><span class="p">[</span><span class="n">new_batch_indices</span><span class="p">]</span>
+
+        <span class="c1"># Update feature list with next features</span>
+        <span class="n">feature_indices</span> <span class="o">=</span> <span class="o">*</span><span class="n">feature_indices</span><span class="p">,</span> <span class="n">new_feature_indices</span>
+
+    <span class="k">return</span> <span class="n">batch_indices</span><span class="p">,</span> <span class="o">*</span><span class="n">feature_indices</span></div>
+
 
 
 <div class="viewcode-block" id="PeriodicPairIndexer">
@@ -302,32 +360,52 @@
 
             <span class="c1"># ## make combinator of images ## #</span>
             <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span> <span class="o">=</span> <span class="n">nbounds</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unbind</span><span class="p">()</span>
-            <span class="n">a1</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">a1</span><span class="p">,</span> <span class="n">a1</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cur_device</span><span class="p">)</span>
-            <span class="n">a2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">a2</span><span class="p">,</span> <span class="n">a2</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cur_device</span><span class="p">)</span>
-            <span class="n">a3</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">a3</span><span class="p">,</span> <span class="n">a3</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cur_device</span><span class="p">)</span>
-            <span class="n">combinator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cartesian_prod</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">)</span>
+            <span class="n">a1arr</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">a1</span><span class="p">,</span> <span class="n">a1</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cur_device</span><span class="p">)</span>
+            <span class="n">a2arr</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">a2</span><span class="p">,</span> <span class="n">a2</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cur_device</span><span class="p">)</span>
+            <span class="n">a3arr</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">a3</span><span class="p">,</span> <span class="n">a3</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cur_device</span><span class="p">)</span>
+            <span class="n">combinator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cartesian_prod</span><span class="p">(</span><span class="n">a1arr</span><span class="p">,</span> <span class="n">a2arr</span><span class="p">,</span> <span class="n">a3arr</span><span class="p">)</span>
+            <span class="c1"># shape n_combos, 3</span>
             <span class="c1"># ## end make combinator ## #</span>
 
-            <span class="c1"># Find images valid for each system</span>
-            <span class="n">inrange_images</span> <span class="o">=</span> <span class="p">(</span><span class="n">combinator</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">nbounds</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">combinator</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">nbounds</span><span class="p">)</span>
-            <span class="n">inrange_images</span> <span class="o">=</span> <span class="n">inrange_images</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="c1"># shape (n_sys, n_perm)</span>
-
-            <span class="c1"># Eliminate blank atom pairs, construct indices for them</span>
-            <span class="n">nonblank_pair</span> <span class="o">=</span> <span class="n">nonblank</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">nonblank</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
             <span class="c1"># ## Begin expensive part. ## #</span>
             <span class="c1"># In this zone we aggressively `del` things we don&#39;t need anymore</span>
             <span class="c1"># to allow pytorch to free memory. Delete anything that looks proportional</span>
             <span class="c1"># to the number of pairs. Many variables are proportional to the number of</span>
-            <span class="c1"># &#39;possible&#39; pairs, and all_sparse is proportional to an</span>
-            <span class="c1"># even larger number of (# sys)*(# atoms)^2*(# possible images)</span>
+            <span class="c1"># &#39;possible&#39; pairs when counting which atoms to compare and which image offsets</span>
+            <span class="c1"># to consider.</span>
 
-            <span class="c1"># Start search space here.</span>
-            <span class="c1"># Compute indices of all images for systems and nonblank atoms of those systems</span>
-            <span class="n">all_sparse</span> <span class="o">=</span> <span class="p">(</span><span class="n">inrange_images</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">nonblank_pair</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
-            <span class="n">nb_sys</span><span class="p">,</span> <span class="n">nb_p1</span><span class="p">,</span> <span class="n">nb_p2</span><span class="p">,</span> <span class="n">nb_image</span> <span class="o">=</span> <span class="n">all_sparse</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">as_tuple</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">del</span> <span class="n">all_sparse</span>
+            <span class="c1"># First. we compute the indices of boolean factors that exclude</span>
+            <span class="c1"># combinations of system,atom,atom,image based on padding</span>
+            <span class="c1"># and image size for the corresponding cell.</span>
+            <span class="c1"># Then a helper function makes the product of these boolean factors.</span>
+            <span class="c1"># We call the product of these factors &quot;nb&quot; for &quot;nonblank&quot;</span>
+            <span class="c1"># in that this extends the nonblank concept of</span>
+            <span class="c1"># filtering pairs to the PBC neighbor finder.</span>
+
+            <span class="c1"># Determine which images are required.</span>
+            <span class="c1"># shape n_sys, aa1 = aa1 * n_sys,1 ## aa1 = 2*a1+1</span>
+            <span class="n">nbounds</span> <span class="o">=</span> <span class="n">nbounds</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">in_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">a1arr</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">nbounds</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">a1arr</span> <span class="o">&lt;=</span> <span class="n">nbounds</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="n">in_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">a2arr</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">nbounds</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">a2arr</span> <span class="o">&lt;=</span> <span class="n">nbounds</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="n">in_z</span> <span class="o">=</span> <span class="p">(</span><span class="n">a3arr</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="n">nbounds</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">a3arr</span> <span class="o">&lt;=</span> <span class="n">nbounds</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:])</span>
+
+            <span class="c1"># Compute the product mask of all factors.</span>
+            <span class="c1"># Note for future: We might be able to insert another factor to reduce pair-finding</span>
+            <span class="c1"># costs in large boxes if we can additionally mask out the atoms</span>
+            <span class="c1"># that are not near the edge of the box - requires careful testing.</span>
+            <span class="n">fancy_outs</span> <span class="o">=</span> <span class="n">union_indices_2d_masks</span><span class="p">(</span><span class="n">nonblank</span><span class="p">,</span> <span class="n">nonblank</span><span class="p">,</span> <span class="n">in_x</span><span class="p">,</span> <span class="n">in_y</span><span class="p">,</span> <span class="n">in_z</span><span class="p">)</span>
+            <span class="n">nb_sys</span><span class="p">,</span> <span class="n">nb_p1</span><span class="p">,</span> <span class="n">nb_p2</span><span class="p">,</span> <span class="n">nb_x</span><span class="p">,</span> <span class="n">nb_y</span><span class="p">,</span> <span class="n">nb_z</span> <span class="o">=</span> <span class="n">fancy_outs</span>
+            <span class="c1"># Note, maybe small optimization if we changed order to in_z, in_y, in_x,</span>
+            <span class="c1"># due to common conventions about cells in datasets, however, this does change</span>
+            <span class="c1"># the order of the neighbors.</span>
+
+            <span class="c1"># Compute the index of the image in the combinator.</span>
+            <span class="n">nb_image</span> <span class="o">=</span> <span class="p">(</span><span class="n">nb_x</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">a2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">a3</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="n">nb_y</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">a3</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="n">nb_z</span>
+
+            <span class="c1"># Now, we have the factors of system, atom1, atom2, and image number</span>
+            <span class="c1"># required to find coordinate differences for pairs.</span>
+            <span class="c1"># Next we simply compute the coordinate differences.</span>
 
             <span class="c1"># pair displacements without shifts</span>
             <span class="n">pair_diffcoords</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="n">nb_sys</span><span class="p">,</span> <span class="n">nb_p1</span><span class="p">]</span> <span class="o">-</span> <span class="n">coordinates</span><span class="p">[</span><span class="n">nb_sys</span><span class="p">,</span> <span class="n">nb_p2</span><span class="p">]</span>
