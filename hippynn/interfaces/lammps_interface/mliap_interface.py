@@ -111,7 +111,7 @@ class MLIAPInterface(MLIAPUnified):
     def install_lammps_comm_hooks(self):
         # Add pre-forward hooks and post-backwards hooks for message passing
         # comms to interaction layers in graph
-        hipnn_modules = [n for n in self.graph.torch_module.modules() if isinstance(n, LAMMPS_COMM_MODULES)]
+        hipnn_modules = [n for n in self.graph.modules() if any([isinstance(n,m) for m in LAMMPS_COMM_MODULES]) ]
 
         handles = []
         for network in hipnn_modules:
