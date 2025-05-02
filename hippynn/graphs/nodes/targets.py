@@ -98,14 +98,20 @@ class HBondNode(ExpandParents, AutoKw, MultiNode):
     _output_index_states = IdxType.Pair, IdxType.Pair
     _input_names = "features", "pair_first", "pair_second", "pair_dist"
     _main_output = "bonds"
- 
+
+    @_parent_expander.match(Network)
+    def expand0(self, net, *, purpose, **kwargs):
+        if "feature_sizes" not in self.module_kwargs:
+            self.module_kwargs["feature_sizes"] = net.torch_module.feature_sizes
+        return net,
+
     @_parent_expander.matchlen(1)
-    def expand0(self, features, *, purpose, **kwargs):
+    def expand1(self, features, *, purpose, **kwargs):
         pairfinder = find_unique_relative(features, PairIndexer, why_desc=purpose)
         return features, pairfinder
 
     @_parent_expander.matchlen(2)
-    def expand1(self, features, pairfinder, **kwargs):
+    def expand2(self, features, pairfinder, **kwargs):
         return features.main_output, pairfinder.pair_first, pairfinder.pair_second, pairfinder.pair_dist
 
     def __init__(self, name, parents, module="auto", module_kwargs=None, **kwargs):
