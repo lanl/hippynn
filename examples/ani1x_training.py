@@ -299,10 +299,16 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    from argparse import BooleanOptionalAction
 
     parser.add_argument("--tag", type=str, default="TEST_MODEL_ANI1X", help="name for run")
-    parser.add_argument("--gpu", type=int, default=0, help="which GPU to run on")
-    parser.add_argument("--use_gpu", type=bool, default=False, help="Whether to use GPU")
+    parser.add_argument("--gpu", type=int, default=0, help="which GPU to run on, if any")
+    parser.add_argument(
+        "--use-gpu",
+        action=BooleanOptionalAction,
+        default=torch.cuda.is_available(),
+        help="Whether to use GPU. Defaults to torch.cuda.is_available()",
+    )
 
     parser.add_argument("--seed", type=int, default=0, help="random seed for init and split")
 
@@ -330,7 +336,7 @@ if __name__ == "__main__":
     parser.add_argument("--qm_method", type=str, default="wb97x")
     parser.add_argument("--basis_set", type=str, default="dz")
 
-    parser.add_argument("--force_training", action="store_true", default=True)
+    parser.add_argument("--force_training", action=BooleanOptionalAction, default=True, help="Use force training.")
 
     parser.add_argument("--batch_size", type=int, default=256)
     parser.add_argument("--init_lr", type=float, default=1e-3)
@@ -347,7 +353,7 @@ if __name__ == "__main__":
         " *Note!* This argument will multiply the patience by a factor of 4.",
     )
 
-    parser.add_argument("--noprogress", action="store_true", default=False, help="suppress progress bars")
+    parser.add_argument("--progress", action=BooleanOptionalAction, default=True, help="Whether to use progress bars.")
     parser.add_argument("--n_workers", type=int, default=2, help="workers for pytorch dataloaders")
     args = parser.parse_args()
 
