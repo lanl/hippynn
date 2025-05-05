@@ -64,10 +64,10 @@ def make_model_and_loss(network_params, tensor_model, tensor_order, tensor_facto
 
         import ase.units
 
+        # Stress is natively in eV/atom. We need to apply the conversion factor to kbar.
+        # VASP sign convention for stress is opposite of ASE (which we use).
         kbar = ase.units.GPa / 10
-        # stress is natively in eV/atom. We need to apply the conversion factor to kbar.
-        # VASP sign convention for stress is opposite of everything else, as well.
-        stress = -stress / kbar
+        stress = (-1/kbar) * stress
         stress.db_name = "stress"
 
     energy.mol_energy.db_name = "T"
@@ -119,13 +119,9 @@ def load_db(db_info, delete_fraction, seed, data_location, n_workers):
         for k, v in database.arr_dict.items():
             database.arr_dict[k] = v[:-remove]
 
-    # database.arr_dict['C']=database.arr_dict['C'].permute((0,2,1))
     for sname in ["train", "valid", "test"]:
         mask = database.arr_dict[sname]
         database.make_explicit_split_bool(sname, mask)
-
-    ## Ensure total energies loaded in float64.
-    # torch.set_default_dtype(torch.float64)
 
     return database
 
