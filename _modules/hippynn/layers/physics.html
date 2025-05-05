@@ -159,7 +159,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">StressForce</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pbc</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pbc</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="StressForce.forward">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.StressForce.forward">[docs]</a>
@@ -167,9 +167,11 @@
         <span class="n">total_energy</span> <span class="o">=</span> <span class="n">energy</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
         <span class="n">straingrad</span><span class="p">,</span> <span class="n">grad</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">total_energy</span><span class="p">,</span> <span class="p">[</span><span class="n">strain</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">],</span> <span class="n">create_graph</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pbc</span><span class="p">:</span>
-            <span class="n">stress</span> <span class="o">=</span> <span class="n">straingrad</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+            <span class="n">volume</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+            <span class="n">stress</span> <span class="o">=</span> <span class="n">straingrad</span> <span class="o">/</span> <span class="n">volume</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">stress</span> <span class="o">=</span> <span class="n">straingrad</span>
+
         <span class="k">return</span> <span class="o">-</span><span class="n">grad</span><span class="p">,</span> <span class="n">stress</span></div>
 </div>
 
