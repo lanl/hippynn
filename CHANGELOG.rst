@@ -12,6 +12,9 @@ New Features:
 -------------
 
 - Added new network type, HIP-HOP-NN.
+- Added capability to use LAMMPS-MLIAP comm features to remove the need
+  for extensive halo regions when using multiple interaction layers.
+
 
 Improvements:
 -------------
