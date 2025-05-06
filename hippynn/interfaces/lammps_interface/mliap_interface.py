@@ -18,7 +18,7 @@ from .graph_setup import setup_LAMMPS_graph
 
 
 # specifically for LAMMPS comms
-from ...graphs.nodes.networks import Hipnn, HipnnVec, HipnnQuad
+from ...networks.hipnn import Hipnn, HipnnVec, HipnnQuad
 
 
 LAMMPS_COMM_MODULES = [Hipnn, HipnnVec, HipnnQuad]
