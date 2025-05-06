@@ -2,12 +2,13 @@
 Nodes for indexing information.
 """
 from .tags import Encoder, AtomIndexer
-from .base import SingleNode, AutoNoKw, AutoKw, find_unique_relative, MultiNode, ExpandParents, _BaseNode
+from .base import SingleNode, AutoNoKw, AutoKw, find_unique_relative, MultiNode, ExpandParents, _BaseNode, IndexNode
 from .base.node_functions import NodeNotFound
 from .inputs import SpeciesNode
 
 # Index generating functions need access to appropriately raise this
 from ..indextypes import IdxType
+from ..indextypes.reduce_funcs import index_type_coercion
 from ...layers import indexers as index_modules
 
 
@@ -209,3 +210,35 @@ class FuzzyHistogrammer(AutoKw, SingleNode):
         self.module_kwargs = {"length": length, "vmin": vmin, "vmax": vmax}
 
         super().__init__(name, parents, module=module, **kwargs)
+
+class SpeciesIndexer(AutoNoKw, SingleNode, ExpandParents):
+    _input_names = "values", "onehot_encoding"
+    _auto_module_class = index_modules.SpeciesIndexer
+    _index_state = IdxType.Atoms
+
+    @_parent_expander.match(_BaseNode)
+    def expansion0(self, node_to_index, species_set, **kwargs):
+        atom_node_to_index = index_type_coercion(node_to_index, IdxType.Atoms)
+        onehot = find_unique_relative(atom_node_to_index, OneHotEncoder)
+        self.species_set = species_set or onehot.species_set
+        return atom_node_to_index, onehot.encoding
+
+    # add asserts for parent expansion
+    _parent_expander.assertlen(2)
+    _parent_expander.get_main_outputs()
+    _parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms)
+
+    def __init__(self, name, parents, *args, module="auto", species_set=None, **kwargs):
+        parents = self.expand_parents(parents, species_set=species_set)
+        super().__init__(name, parents, *args, module=module, **kwargs)
+
+        nonzero_species = [species for species in self.species_set if species != 0]
+        self.species_to_idx = {species: idx for idx, species in enumerate(nonzero_species)}
+
+        self.children = tuple(
+            IndexNode(name=f"{name}_{species}", parents=(self,), index=idx, index_state=IdxType.Atoms)
+            for species, idx in self.species_to_idx.items()
+        )
+
+    def with_species_equal(self, z_value):
+        return self.children[self.species_to_idx(z_value)]

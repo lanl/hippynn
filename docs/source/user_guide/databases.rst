@@ -24,11 +24,11 @@ Note that input of bond variables for periodic systems can be ill-defined
 if there are multiple bonds between the same pairs of atoms. This is not yet
 supported.
 
-A note on *cell* variables. The shape of a cell variable should be specified as (n_atoms,3,3).
-There are two common conventions for the cell matrix itself; we use the convention that the basis index
-comes first, and the cartesian index comes second. That is similar to `ase`,
-the [i,j] element of the cell gives the j cartesian coordinate of cell vector i. If you experience
-massive difficulties fitting to periodic boundary conditions, you may check the transposed version
+A note on *cell* variables. The shape of a cell variable should be specified as (n_systems,3,3), as described above.
+It is important to know that there are two common conventions for the cell matrix itself; we use the convention that the basis index
+comes first, and the cartesian index comes second. That is, similar to the ``ase`` package,
+the element ``cell[sys,i,j]`` gives the ``j`` cartesian coordinate of cell vector ``i`` in system ``sys``. If you experience
+massive errors while fitting to periodic boundary conditions, you may check the transposed version
 of your cell data, or compute the RDF.
 
 Database Formats and notes

@@ -20,7 +20,8 @@ import ase.build
 from ase import units
 from ase.md.velocitydistribution import MaxwellBoltzmannDistribution
 
-from hippynn.graphs import physics, replace_node
+from hippynn.graphs import physics
+from hippynn.graphs.gops import swap_pairfinders
 from hippynn.graphs.predictor import Predictor
 from hippynn.graphs.nodes.pairs import KDTreePairsMemory
 from hippynn.experiment.serialization import load_checkpoint_from_cwd
@@ -54,12 +55,11 @@ energy_node = model.node_from_name("energy")
 force_node = physics.GradientNode("force", (energy_node, positions_node), sign=-1)
 
 # Replace pair-finder with more efficient one so that system can fit on GPU
-old_pairs_node = model.node_from_name("PairIndexer")
-species_node = model.node_from_name("species")
-cell_node = model.node_from_name("cell")
-new_pairs_node = KDTreePairsMemory("PairIndexer", parents=(positions_node, species_node, cell_node), skin=1.0, dist_hard_max=7.5)
-replace_node(old_pairs_node, new_pairs_node)
+# This function will find the unique pairfinder linked to `positions_node` and swap it out for the new
+# one specified.
+swap_pairfinders(positions_node, KDTreePairsMemory, module_kwargs={'skin': 1.0, 'dist_hard_max': 7.5})
 
+#create Predictor object
 model = Predictor(inputs=model.input_nodes, outputs=[force_node])
 model.to(device)
 model.to(torch.float64)

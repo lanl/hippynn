@@ -9,7 +9,6 @@ from hippynn.experiment.assembly import assemble_for_training
 from hippynn.experiment.controllers import RaiseBatchSizeOnPlateau, PatienceController
 from hippynn.graphs import IdxType
 from hippynn.graphs.nodes import loss
-from hippynn.graphs.nodes.base.algebra import AddNode
 from hippynn.graphs.nodes.indexers import acquire_encoding_padding
 from hippynn.graphs.nodes.inputs import SpeciesNode, PositionsNode, CellNode
 from hippynn.graphs.nodes.networks import HipnnQuad
@@ -20,6 +19,7 @@ from hippynn.plotting import PlotMaker, Hist2D, SensitivityPlot
 from hippynn.tools import active_directory
 
 from repulsive_potential import RepulsivePotentialNode
+from save_model_for_lammps import save_model_for_lammps
 
 training_data_file = os.path.join(os.pardir,os.pardir,os.pardir,"datasets","cg_methanol_trajectory.npz")
 
@@ -78,15 +78,12 @@ repulse = RepulsivePotentialNode(
 )
 
 # Combined energy prediction
-energy = AddNode(henergy.main_output, repulse.mol_energies)
-energy.name = "energies"
-energy._index_state = IdxType.Molecules
-
-sys_energy = energy.main_output
+sys_energy = henergy.mol_energy + repulse.mol_energy
 sys_energy.name = "sys_energy"
+sys_energy._index_state = IdxType.Molecules
 
 # Force node
-grad = MultiGradientNode("forces", energy, (positions,), signs=-1)
+grad = MultiGradientNode("forces", sys_energy, (positions,), signs=-1)
 force = grad.children[0]
 force.db_name = "forces"
 
@@ -153,10 +150,17 @@ controller = PatienceController(
 experiment_params = SetupParams(controller=controller)
 
 ## Train!
-with active_directory("model"):
+results_folder = "model"
+with active_directory(results_folder):
     metric_tracker = setup_and_train(
         training_modules=training_modules,
         database=database,
         setup_params=experiment_params,
     )
-        
+
+print(f"PyTorch model saved in directory {os.path.abspath(results_folder)}")
+
+try:
+    save_model_for_lammps(model_folder=results_folder)
+except ImportError as e:
+    print(f"Unable to save model as LAMMPS ML-IAP model: {e}.")

@@ -34,7 +34,8 @@ class OneHotSpecies(torch.nn.Module):
         :return: Initial one-hotted features, nonblank atoms
         """
 
-        onehot_species = torch.eye(self.n_species, dtype=torch.bool, device=species.device)[self.species_map[species]]
+        indices = self.species_map[species].to(species.device)
+        onehot_species = torch.eye(self.n_species, dtype=torch.bool, device=species.device)[indices]
         nonblank = ~onehot_species[:, :, 0]
         initial_features = onehot_species[:, :, 1:]  # remove atoms that are 0 in the species map.
 
@@ -271,3 +272,13 @@ class FuzzyHistogram(torch.nn.Module):
         x = values - self.bins
         histo = torch.exp(-((x / self.sigma) ** 2) / 4)
         return torch.flatten(histo, end_dim=1)
+    
+class SpeciesIndexer(torch.nn.Module):
+    def forward(self, values, onehot_encoding):
+        n_species = onehot_encoding.shape[1]
+        values_by_species = []
+        for i in range(n_species):
+            species_mask = onehot_encoding[:,i]
+            species_values = values[species_mask]
+            values_by_species.append(species_values)
+        return values_by_species

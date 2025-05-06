@@ -13,6 +13,12 @@ class HEnergy(torch.nn.Module):
     """
 
     def __init__(self, feature_sizes, first_is_interacting=False, n_target=1):
+        """
+
+        :param feature_sizes: size of features at each level
+        :param first_is_interacting: whether to drop the first set of (non-interacting) features.
+        :param n_target: number of items to regress to.
+        """
 
         super().__init__()
         self.first_is_interacting = first_is_interacting
@@ -238,3 +244,55 @@ class HBondSymmetric(torch.nn.Module):
         return total_bonds, bond_hier
 
 
+class AtomizationEnergy(torch.nn.Module):
+    def __init__(self, feature_sizes, decay_factor=0.01):
+        super().__init__()
+
+        # TODO: Add n_targets and alternative hierarchicality definitions
+        # to this layer and node.
+        feature_sizes = feature_sizes[1:]
+        self.feature_sizes = feature_sizes
+
+
+        self.summer = indexers.MolSummer()
+        self.n_terms = len(feature_sizes)
+        self.layers = torch.nn.ModuleList(torch.nn.Linear(nf, 1, bias=False)
+                                          for nf in feature_sizes)
+
+        for layer in self.layers:
+            layer.weight.data *= decay_factor
+            decay_factor *= decay_factor
+
+        # This is hard-coded for this module, for compatibility with HEnergy
+        # see how this operates in the `forward` method.
+        self.first_is_interacting = True
+
+    def forward(self, all_features, vacuum_features, encoding, mol_index, n_molecules):
+
+        # Don't need the non-interacting features,
+        # they contribute zero total for this layer, by definition the any component would cancel.
+        # this is why we hardcode first_is_interacting in the `__init__` method.
+        vacuum_features = vacuum_features[1:]
+        all_features = all_features[1:]
+
+        # get vacuum features for each atom and subtract them
+        vacuum_energies = sum([lay(x) for x, lay in zip(vacuum_features, self.layers)])
+        encoding = encoding.to(all_features[0].dtype)
+        vacuum_features_eachatom = [encoding @ f for f in vacuum_features]
+        renorm_features = [x - v for x, v in zip(all_features, vacuum_features_eachatom)]
+
+        # Compute!
+        en_terms = [lay(r) for r, lay in zip(renorm_features, self.layers)]
+        total_atomen = sum(en_terms)
+        total_energies = self.summer(total_atomen, mol_index, n_molecules)
+
+        e0 = encoding @ vacuum_energies
+        if self.n_terms > 1:
+            partial_esq = [x ** 2 for x in en_terms]
+            partial_atom_hier = [x / (x + y) for x, y in zip(partial_esq[1:], partial_esq[:-1])]
+            total_atom_hier = sum(x for x in partial_atom_hier)
+            total_hier = self.summer(total_atom_hier, mol_index, n_molecules)
+        else:
+            total_hier = torch.zeros_like(total_energies)
+
+        return total_energies, en_terms, total_hier

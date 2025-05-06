@@ -78,13 +78,14 @@ class _CombNode(_BaseNode):
 class ValueNode(_CombNode):
     _index_state = IdxType.Scalar
 
-    def __init__(self, value):
+    def __init__(self, value, convert=True):
         name = "Value({})".format(str(value))
         self.value = value
+        self._converted = convert
         super().__init__(name, parents=(), module="auto")
 
     def auto_module(self):
-        return algebra_mods.ValueMod(self.value)
+        return algebra_mods.ValueMod(self.value, convert=self._converted)
 
 
 class _PredefinedOp:

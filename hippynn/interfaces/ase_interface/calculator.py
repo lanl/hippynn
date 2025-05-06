@@ -16,7 +16,7 @@ from hippynn.graphs.nodes.pairs import ExternalNeighborIndexer
 from hippynn.graphs.nodes.misc import StrainInducer
 from hippynn.graphs.nodes.physics import CoulombEnergyNode, DipoleNode, StressForceNode
 from hippynn.graphs.nodes.pairs import PairFilter
-
+from hippynn.graphs.nodes.targets import AtomizationEnergyNode
 from hippynn.graphs.nodes.inputs import SpeciesNode, PositionsNode, CellNode
 
 
@@ -26,7 +26,9 @@ import ase.neighborlist
 # This works for orthorhombic boxes and is much faster than ASE...
 
 
-def setup_ASE_graph(energy, charges=None, extra_properties=None):
+def setup_ASE_graph(energy, charges=None, extra_properties=None, species_set=None,indexer=None):
+    if isinstance(energy, AtomizationEnergyNode):
+        energy = energy.create_henergy_equivalent()
 
     if charges is None:
         required_nodes = [energy]
@@ -72,9 +74,11 @@ def setup_ASE_graph(energy, charges=None, extra_properties=None):
     positions = find_unique_relative(new_required, search_fn(PositionsNode, new_subgraph), why_desc=why)
 
     # TODO: is .clone necessary? Or good? Or torch.as_tensor instead?
-    encoder = find_unique_relative(species, search_fn(Encoder, new_subgraph), why_desc=why)
-    species_set = torch.as_tensor(encoder.species_set).to(torch.int64)  # works with lists or tensors
-    indexer = find_unique_relative(species, search_fn(AtomIndexer, new_subgraph), why_desc=why)
+    if species_set is None:
+        encoder = find_unique_relative(species, search_fn(Encoder, new_subgraph), why_desc=why)
+        species_set = torch.as_tensor(encoder.species_set).to(torch.int64)  # works with lists or tensors
+    if indexer is None:
+        indexer = find_unique_relative(species, search_fn(AtomIndexer, new_subgraph), why_desc=why)
     min_radius = max(p.dist_hard_max for p in pair_indexers)
     ###############################################################
 
@@ -214,7 +218,7 @@ class HippynnCalculator(Calculator): # Calculator inheritance required for ASE M
     ASE calculator based on hippynn graphs. Uses ASE neighbor lists. Not suitable for domain decomposition.
     """
 
-    def __init__(self, energy, charges=None, skin=1.0, extra_properties=None, en_unit=None, dist_unit=None):
+    def __init__(self, energy, charges=None, skin=1.0, extra_properties=None, en_unit=None, dist_unit=None, species_set=None, indexer=None):
         """
         :param energy: Node for energy
         :param charges: Node for charges (optional)
@@ -228,7 +232,7 @@ class HippynnCalculator(Calculator): # Calculator inheritance required for ASE M
         """
 
         self.min_radius, self.species_set, self.implemented_properties, self.module, self.pbc = setup_ASE_graph(
-            energy, charges=charges, extra_properties=extra_properties
+            energy, charges=charges, extra_properties=extra_properties, species_set=species_set,indexer=indexer,
         )
         
         self.implemented_properties.append("energy") # Required for using mixing calculators in ASE

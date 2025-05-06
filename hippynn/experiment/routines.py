@@ -5,6 +5,7 @@ Routines for setting up and performing training
 """
 import sys
 import collections
+import warnings
 from dataclasses import dataclass
 import copy
 import timeit
@@ -354,10 +355,22 @@ def test_model(database, evaluator, batch_size, when, metric_tracker=None):
     if metric_tracker is None:
         metric_tracker = MetricTracker(evaluator.loss_names, stopping_key=None)
 
+    # Determine splits which are complete and can be evaluated:
+    evaluatable_splits = []
+    required_variables = set(database.inputs + database.targets)
+    for sname, split in database.splits.items():
+        if all(k in split for k in required_variables):
+            evaluatable_splits.append(sname)
+        else:
+            missing_arrays = set(k for k in required_variables if k not in split)
+            warnings.warn(f"Database contains split '{sname}' which"
+                          f" cannot be evaluated because it does not contain the"
+                          f" required quantities: {missing_arrays}")
+
     # A little dance to make sure train, valid, test always come first, when present.
     basic_splits = ["train", "valid", "test"]
-    basic_splits = [s for s in basic_splits if s in database.splits]
-    splits = basic_splits + [s for s in database.splits if s not in basic_splits]
+    basic_splits = [s for s in basic_splits if s in evaluatable_splits]
+    splits = basic_splits + [s for s in evaluatable_splits if s not in basic_splits]
 
     evaluation_data = collections.OrderedDict(
         (

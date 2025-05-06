@@ -113,17 +113,24 @@ def check_mapping_devices(map_location, model_device):
     return map_location, model_device
 
 
-def load_saved_tensors(structure_fname: str, state_fname: str, **kwargs) -> Tuple[dict, dict]:
+def load_saved_tensors(structure_fname: str, state_fname: str, weights_only: bool = False, **kwargs) -> Tuple[dict, dict]:
     """
     Load torch tensors from file.
 
+    .. Warning::
+        This function uses ``torch.load`` with ``weights_only=False`` by default,
+        which can run arbitrary code from the loaded file. Only use it with files
+        you trust. You can set ``weights_only=True`` for better security, but
+        it may cause loading of the structure file to fail. 
+
     :param structure_fname: name of the structure file
     :param state_fname: name of the state file
+    :param weights_only: passed to ``torch.load``
     :return: loaded dictionaries of checkpoint and model parameters
     """
 
     with open(structure_fname, "rb") as pfile:
-        structure = torch.load(pfile, **kwargs)
+        structure = torch.load(pfile, weights_only=weights_only, **kwargs)
 
     with open(state_fname, "rb") as pfile:
         state = torch.load(pfile, **kwargs)
@@ -131,25 +138,32 @@ def load_saved_tensors(structure_fname: str, state_fname: str, **kwargs) -> Tupl
 
 
 def load_checkpoint(
-    structure_fname: str, state_fname: str, restart_db=False, map_location=None, model_device=None, **kwargs
+    structure_fname: str, state_fname: str, restart_db=False, map_location=None, model_device=None, weights_only=False, **kwargs
 ) -> dict:
     """
     Load checkpoint file from given filename.
 
     For details more information on to use this function, see :doc:`/examples/restarting`.
 
+    .. Warning::
+        This function uses ``torch.load`` with ``weights_only=False`` by default,
+        which can run arbitrary code from the loaded file. Only use it with files
+        you trust. You can set ``weights_only=True`` for better security, but
+        it may cause loading of the structure file to fail. 
+
     :param structure_fname: name of the structure file
     :param state_fname: name of the state file
     :param restart_db: restore database or not, defaults to False
     :param map_location: device mapping argument for ``torch.load``, defaults to None
     :param model_device: automatically handle device mapping. Defaults to None, defaults to None
+    :param weights_only: passed to ``torch.load``, defaults to False
     :return: experiment structure
     """
 
     # we need keep the original map_location value for the if
     mapped, model_device = check_mapping_devices(map_location, model_device)
     kwargs["map_location"] = mapped
-    structure, state = load_saved_tensors(structure_fname, state_fname, **kwargs)
+    structure, state = load_saved_tensors(structure_fname, state_fname, weights_only=weights_only, **kwargs)
 
     # transfer stuff back to model_device
     structure = restore_checkpoint(structure, state, restart_db=restart_db)
@@ -168,35 +182,51 @@ def load_checkpoint(
     return structure
 
 
-def load_checkpoint_from_cwd(map_location=None, model_device=None, **kwargs) -> dict:
+def load_checkpoint_from_cwd(map_location=None, model_device=None, weights_only=False, **kwargs) -> dict:
     """
     Same as ``load_checkpoint``, but using default filenames.
 
+    .. Warning::
+        This function uses ``torch.load`` with ``weights_only=False`` by default,
+        which can run arbitrary code from the loaded file. Only use it with files
+        you trust. You can set ``weights_only=True`` for better security, but
+        it may cause loading of the structure file to fail. 
+
     :param map_location: device mapping argument for ``torch.load``, defaults to None
     :type map_location: Union[str, dict, torch.device, Callable], optional
-    :param model_device: automatically handle device mapping. Defaults to None, defaults to None
+    :param model_device: automatically handle device mapping, defaults to None
     :type model_device: Union[int, str, torch.device], optional
+    :param weights_only: passed to ``torch.load``, defaults to False
+    :type weights_only: bool, optional
     :return: experiment structure
     :rtype: dict
     """
     return load_checkpoint(
-        DEFAULT_STRUCTURE_FNAME, "best_checkpoint.pt", map_location=map_location, model_device=model_device, **kwargs
+        DEFAULT_STRUCTURE_FNAME, "best_checkpoint.pt", map_location=map_location, model_device=model_device, weights_only=weights_only, **kwargs
     )
 
 
-def load_model_from_cwd(map_location=None, model_device=None, **kwargs) -> GraphModule:
+def load_model_from_cwd(map_location=None, model_device=None, weights_only=False, **kwargs) -> GraphModule:
     """
     Only load model from current working directory.
 
+    .. Warning::
+        This function uses ``torch.load`` with ``weights_only=False`` by default,
+        which can run arbitrary code from the loaded file. Only use it with files
+        you trust. You can set ``weights_only=True`` for better security, but
+        it may cause loading of the structure file to fail. 
+
     :param map_location: device mapping argument for ``torch.load``, defaults to None
     :type map_location: Union[str, dict, torch.device, Callable], optional
-    :param model_device: automatically handle device mapping. Defaults to None, defaults to None
+    :param model_device: automatically handle device mapping, defaults to None
     :type model_device: Union[int, str, torch.device], optional
+    :param weights_only: passed to ``torch.load``, defaults to False
+    :type weights_only: bool, optional
     :return: model with reloaded parameters
     """
     mapped, model_device = check_mapping_devices(map_location, model_device)
     kwargs["map_location"] = mapped
-    structure, state = load_saved_tensors("experiment_structure.pt", "best_model.pt", **kwargs)
+    structure, state = load_saved_tensors("experiment_structure.pt", "best_model.pt", weights_only=weights_only, **kwargs)
 
     model = structure["training_modules"].model
     model.load_state_dict(state)

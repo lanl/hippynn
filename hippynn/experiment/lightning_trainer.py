@@ -196,16 +196,24 @@ class HippynnLightningModule(pl.LightningModule):
         return
 
     @classmethod
-    def load_from_checkpoint(cls, checkpoint_path, map_location=None, structure_file=None, hparams_file=None, strict=True, **kwargs):
+    def load_from_checkpoint(cls, checkpoint_path, map_location=None, structure_file=None, hparams_file=None, strict=True, weights_only=False, **kwargs):
         """
-
         :param checkpoint_path:
         :param map_location:
         :param structure_file:
         :param hparams_file:
         :param strict:
+        :param weights_only:
         :param kwargs:
+
+        .. Warning::
+        This function uses ``torch.load`` with ``weights_only=False`` by default,
+        which can run arbitrary code from the loaded file. Only use it with files
+        you trust. You can set ``weights_only=True`` for better security, but
+        it may cause loading of the structure file to fail. 
+
         :return:
+
         """
 
         if structure_file is None:
@@ -215,7 +223,7 @@ class HippynnLightningModule(pl.LightningModule):
             structure_file = structure_file.parent.parent
             structure_file = structure_file.joinpath(serialization.DEFAULT_STRUCTURE_FNAME)
 
-        structure_args = torch.load(structure_file)
+        structure_args = torch.load(structure_file, weights_only=weights_only)
 
         return super().load_from_checkpoint(
             checkpoint_path, map_location=map_location, hparams_file=hparams_file, strict=strict, **structure_args, **kwargs

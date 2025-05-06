@@ -144,9 +144,64 @@ def wrap_systems_torch(coords, cell, cutoff: float):
 
     return inv_cell, wrapped_coords, wrapped_offset.to(torch.int64), n_bounds
 
+
 def filter_pairs(cutoff, distflat, *addn_features):
     filter = distflat < cutoff
     return tuple((array[filter] for array in [distflat, *addn_features]))
+
+
+def union_indices_2d_masks(*arrays):
+    """
+    Compute the indices of the union of a list of 2D mask arrays.
+
+    Assume a set of arrays a_1...a_n, each with shape (b,f_1),(b,f_2)...(b,f_n)
+    The output is equivalent to broadcasting the combined multiplication:
+        m = a1*a2*a3*a4
+    into shape (b,f_1,f_2,..f_n)  and return `torch.nonzero(m)`.
+    However, this function does not materialize the large intermediate array
+    of all possible products. It does call nonzero several times which causes
+    blocking ops on the GPU, but because they are almost back-to-back
+    this is usually not worse than calling nonzero in the first place.
+
+    Performance heuristic note: Provide the arrays in ascending sparsity order.
+
+    """
+    # Standalone function, so could be moved to elsewhere if needed.
+
+    n_masks = len(arrays)
+
+    if n_masks == 0:
+        raise ValueError("Union function requires masks.")
+        # Also possible: return zero-length batch indices if passed no masks?
+
+    full_shapes = [arr.shape for arr in arrays]
+    batch_sizes, mask_lengths = zip(*full_shapes)
+
+    # Validate shapes.
+    b = batch_sizes[0]
+    assert all(b == bb for bb in batch_sizes), "batch broadcasting must be possible."
+
+    start_mask, *arrays = arrays
+
+    # Setup batch and feature indices list for first mask.
+    batch_indices, feature_indices = torch.nonzero(start_mask, as_tuple=True)
+    feature_indices = [feature_indices]
+
+    # Eat each additional mask.
+    for arr in arrays:
+        # Compute the needed rows to consider, and where these are nonzero for this mask.
+        arr_rows = arr[batch_indices]
+        new_batch_indices, new_feature_indices = torch.nonzero(arr_rows, as_tuple=True)
+
+        # Update indices by acessing the old value relative to the batch indices just found.
+        feature_indices = [f[new_batch_indices] for f in feature_indices]
+        batch_indices = batch_indices[new_batch_indices]
+
+        # Update feature list with next features
+        feature_indices = *feature_indices, new_feature_indices
+
+    return batch_indices, *feature_indices
+
 
 class PeriodicPairIndexer(_PairIndexer):
     """
@@ -181,32 +236,52 @@ class PeriodicPairIndexer(_PairIndexer):
 
             # ## make combinator of images ## #
             a1, a2, a3 = nbounds.max(dim=0)[0].unbind()
-            a1 = torch.arange(-a1, a1+1, device=cur_device)
-            a2 = torch.arange(-a2, a2+1, device=cur_device)
-            a3 = torch.arange(-a3, a3+1, device=cur_device)
-            combinator = torch.cartesian_prod(a1, a2, a3)
+            a1arr = torch.arange(-a1, a1+1, device=cur_device)
+            a2arr = torch.arange(-a2, a2+1, device=cur_device)
+            a3arr = torch.arange(-a3, a3+1, device=cur_device)
+            combinator = torch.cartesian_prod(a1arr, a2arr, a3arr)
+            # shape n_combos, 3
             # ## end make combinator ## #
 
-            # Find images valid for each system
-            inrange_images = (combinator.unsqueeze(1) >= -nbounds) & (combinator.unsqueeze(1) <= nbounds)
-            inrange_images = inrange_images.all(dim=2).transpose(0, 1)
-            # shape (n_sys, n_perm)
-
-            # Eliminate blank atom pairs, construct indices for them
-            nonblank_pair = nonblank.unsqueeze(1) * nonblank.unsqueeze(2)
 
             # ## Begin expensive part. ## #
             # In this zone we aggressively `del` things we don't need anymore
             # to allow pytorch to free memory. Delete anything that looks proportional
             # to the number of pairs. Many variables are proportional to the number of
-            # 'possible' pairs, and all_sparse is proportional to an
-            # even larger number of (# sys)*(# atoms)^2*(# possible images)
+            # 'possible' pairs when counting which atoms to compare and which image offsets
+            # to consider.
 
-            # Start search space here.
-            # Compute indices of all images for systems and nonblank atoms of those systems
-            all_sparse = (inrange_images.unsqueeze(1).unsqueeze(2) * nonblank_pair.unsqueeze(3))
-            nb_sys, nb_p1, nb_p2, nb_image = all_sparse.nonzero(as_tuple=True)
-            del all_sparse
+            # First. we compute the indices of boolean factors that exclude
+            # combinations of system,atom,atom,image based on padding
+            # and image size for the corresponding cell.
+            # Then a helper function makes the product of these boolean factors.
+            # We call the product of these factors "nb" for "nonblank"
+            # in that this extends the nonblank concept of
+            # filtering pairs to the PBC neighbor finder.
+
+            # Determine which images are required.
+            # shape n_sys, aa1 = aa1 * n_sys,1 ## aa1 = 2*a1+1
+            nbounds = nbounds.unsqueeze(2)
+            in_x = (a1arr >= -nbounds[:, 0, :]) & (a1arr <= nbounds[:, 0, :])
+            in_y = (a2arr >= -nbounds[:, 1, :]) & (a2arr <= nbounds[:, 1, :])
+            in_z = (a3arr >= -nbounds[:, 2, :]) & (a3arr <= nbounds[:, 2, :])
+
+            # Compute the product mask of all factors.
+            # Note for future: We might be able to insert another factor to reduce pair-finding
+            # costs in large boxes if we can additionally mask out the atoms
+            # that are not near the edge of the box - requires careful testing.
+            fancy_outs = union_indices_2d_masks(nonblank, nonblank, in_x, in_y, in_z)
+            nb_sys, nb_p1, nb_p2, nb_x, nb_y, nb_z = fancy_outs
+            # Note, maybe small optimization if we changed order to in_z, in_y, in_x,
+            # due to common conventions about cells in datasets, however, this does change
+            # the order of the neighbors.
+
+            # Compute the index of the image in the combinator.
+            nb_image = (nb_x*(2*a2+1)*(2*a3+1)) + (nb_y*(2*a3+1)) + nb_z
+
+            # Now, we have the factors of system, atom1, atom2, and image number
+            # required to find coordinate differences for pairs.
+            # Next we simply compute the coordinate differences.
 
             # pair displacements without shifts
             pair_diffcoords = coordinates[nb_sys, nb_p1] - coordinates[nb_sys, nb_p2]
