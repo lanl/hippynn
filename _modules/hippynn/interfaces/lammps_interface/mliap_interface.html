@@ -109,25 +109,28 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Interface for creating LAMMPS MLIAP Unified models.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># builtins</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
+<span class="c1"># base requirements</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
+<span class="c1"># lammps interface class</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lammps.mliap.mliap_unified_abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLIAPUnified</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">hippynn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">device_fallback</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_relatives</span><span class="p">,</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">get_subgraph</span><span class="p">,</span> <span class="n">copy_subgraph</span><span class="p">,</span> <span class="n">replace_node</span><span class="p">,</span> <span class="n">IdxType</span><span class="p">,</span> <span class="n">GraphModule</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">index_type_coercion</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.gops</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_link_consistency</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">InputNode</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">ExpandParents</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.tags</span><span class="w"> </span><span class="kn">import</span> <span class="n">Encoder</span><span class="p">,</span> <span class="n">PairIndexer</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.indexers</span><span class="w"> </span><span class="kn">import</span> <span class="n">PaddingIndexer</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.physics</span><span class="w"> </span><span class="kn">import</span> <span class="n">GradientNode</span><span class="p">,</span> <span class="n">VecMag</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.inputs</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpeciesNode</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.pairs</span><span class="w"> </span><span class="kn">import</span> <span class="n">PairFilter</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.targets</span><span class="w"> </span><span class="kn">import</span> <span class="n">AtomizationEnergyNode</span>
+<span class="c1"># hippynn things.</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">device_fallback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.graph_setup</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup_LAMMPS_graph</span>
+
+
+<span class="c1"># specifically for LAMMPS comms</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...networks.hipnn</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hipnn</span><span class="p">,</span> <span class="n">HipnnVec</span><span class="p">,</span> <span class="n">HipnnQuad</span>
+
+
+<span class="n">LAMMPS_COMM_MODULES</span> <span class="o">=</span> <span class="p">[</span><span class="n">Hipnn</span><span class="p">,</span> <span class="n">HipnnVec</span><span class="p">,</span> <span class="n">HipnnQuad</span><span class="p">]</span>
+
 
 <div class="viewcode-block" id="MLIAPInterface">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface">[docs]</a>
@@ -153,14 +156,14 @@
 <span class="sd">        :param model_device: the device to send torch data to (cpu or cuda)</span>
 <span class="sd">        :param energy_unit: If present, multiply the result by the given energy units.</span>
 <span class="sd">            If your model was trained in Hartree and your lammps script will operate in eV,</span>
-<span class="sd">            use en_unit = ase.units.Ha = 27.211386024367243</span>
+<span class="sd">            use energy_unit = ase.units.Ha = 27.211386024367243</span>
 <span class="sd">        :param distance_unit: If present, multi input distances by this much as well as dividing into output forces.</span>
 <span class="sd">            If your model was trained to accept nm as input and lammps uses Angstroms,</span>
-<span class="sd">            use dist_unit = ase.units.nm = 10.</span>
+<span class="sd">            use distance_unit = ase.units.nm = 10.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">PYTORCH_GPU_MEM_FRAC</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
-            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">set_per_process_memory_fraction</span><span class="p">(</span><span class="n">hippynn</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">PYTORCH_GPU_MEM_FRAC</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PYTORCH_GPU_MEM_FRAC</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">set_per_process_memory_fraction</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PYTORCH_GPU_MEM_FRAC</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">element_types</span> <span class="o">=</span> <span class="n">element_types</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ndescriptors</span> <span class="o">=</span> <span class="n">ndescriptors</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_device</span> <span class="o">=</span> <span class="n">model_device</span>
@@ -172,6 +175,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">nparams</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">nelement</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">compute_dtype</span> <span class="o">=</span> <span class="n">compute_dtype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">compute_dtype</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_runtime_variables</span><span class="p">()</span>
+
+<div class="viewcode-block" id="MLIAPInterface.clear_runtime_variables">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.clear_runtime_variables">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_runtime_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Variables that will be populated at run time.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mliap_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">using_kokkos</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memory_set</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
 
 <div class="viewcode-block" id="MLIAPInterface.compute_gradients">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.compute_gradients">[docs]</a>
@@ -193,8 +209,111 @@
 
 <div class="viewcode-block" id="MLIAPInterface.empty_tensor">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.empty_tensor">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">empty_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimentions</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">dimentions</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_device</span><span class="p">)</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">empty_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_device</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MLIAPInterface.perform_setup">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.perform_setup">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">perform_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">memory_set</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PYTORCH_GPU_MEM_FRAC</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">set_per_process_memory_fraction</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PYTORCH_GPU_MEM_FRAC</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">memory_set</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">using_kokkos</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Test if we are using lammps-kokkos or not. Is there a more clear way to do that?</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">using_kokkos</span> <span class="o">=</span> <span class="s2">&quot;kokkos&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mliap_data</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__module__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">COMM_FEATURES_LAMMPS</span><span class="p">:</span>  <span class="c1"># Setting the comm handles is selected</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">handles</span><span class="p">:</span>  <span class="c1"># no handles have been installed yet</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mliap_data</span><span class="p">,</span> <span class="s2">&quot;forward_exchange&quot;</span><span class="p">):</span>  <span class="c1"># this is a compatible version of lammps</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">install_lammps_comm_hooks</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Lammps feature communication was requested but not available in this &quot;</span>
+                                  <span class="s2">&quot;version of lammps.&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="MLIAPInterface.install_lammps_comm_hooks">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.install_lammps_comm_hooks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">install_lammps_comm_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Add pre-forward hooks and post-backwards hooks for message passing</span>
+        <span class="c1"># comms to interaction layers in graph</span>
+        <span class="n">hipnn_modules</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">modules</span><span class="p">()</span> <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">LAMMPS_COMM_MODULES</span><span class="p">])</span> <span class="p">]</span>
+
+        <span class="n">handles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">network</span> <span class="ow">in</span> <span class="n">hipnn_modules</span><span class="p">:</span>
+            <span class="c1"># The first interaction layer does not need the</span>
+            <span class="c1"># forward_pre_hook nor the backward hook since the first</span>
+            <span class="c1"># input layer are positions of ghosts which are already</span>
+            <span class="c1"># known. Exchanging these inputs anyway should not affect</span>
+            <span class="c1"># the answer.</span>
+            <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">interaction_layers</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">handle</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">register_forward_pre_hook</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comms_forward_pre_hook</span><span class="p">)</span>
+                <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
+                <span class="n">handle</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">register_full_backward_hook</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comms_backward_hook</span><span class="p">)</span>
+                <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">handles</span> <span class="o">+=</span> <span class="n">handles</span></div>
+
+
+<div class="viewcode-block" id="MLIAPInterface.uninstall_hooks">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.uninstall_hooks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">uninstall_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">handle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">handles</span><span class="p">:</span>
+            <span class="n">handle</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MLIAPInterface.comms_forward_pre_hook">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.comms_forward_pre_hook">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">comms_forward_pre_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>  <span class="c1"># -&gt; None or modified input</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param module: Torch Module for Interaction Layer</span>
+<span class="sd">        :param args: list of arguments intercepted from module&#39;s forward, features input missing features in ghosts</span>
+<span class="sd">        :return modded_args: list of arguments passed on to forward now with ghost inputs</span>
+<span class="sd">        Invokes blocking MPI exchanges within LAMMPS to retrieve ghost inputs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">local_in_features</span><span class="p">,</span> <span class="o">*</span><span class="n">other_args</span> <span class="o">=</span> <span class="n">args</span>
+
+        <span class="n">global_in_features</span> <span class="o">=</span> <span class="n">local_in_features</span>  <span class="c1"># We can modify in-place in the forward_pre_hook</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mliap_data</span><span class="o">.</span><span class="n">forward_exchange</span><span class="p">(</span><span class="n">local_in_features</span><span class="p">,</span> <span class="n">global_in_features</span><span class="p">,</span>
+                                         <span class="n">local_in_features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">global_in_features</span><span class="p">,</span> <span class="o">*</span><span class="n">other_args</span></div>
+
+
+<div class="viewcode-block" id="MLIAPInterface.comms_backward_hook">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.MLIAPInterface.comms_backward_hook">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">comms_backward_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">grad_input</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param module: Torch Module for Interaction Layer</span>
+<span class="sd">        :param grad_input: Gradient (of atom energies) with respect to inputs of forward, only features missing comms.</span>
+<span class="sd">        :param grad_output: list of arguments intercepted from module&#39;s forward, missing ghost inputs</span>
+<span class="sd">        :return modded_grad_input: Gradient with respect to inputs now with comms.</span>
+<span class="sd">        Invokes blocking MPI exchanges within LAMMPS to retrieve ghost inputs</span>
+
+<span class="sd">        The gradient with respect to the input features in grad_input contains</span>
+<span class="sd">        contributions to gradients for other ranks within this rank&#39;s ghosts and is</span>
+<span class="sd">        missing contributions to this rank&#39;s owned atoms on other ranks. After</span>
+<span class="sd">        comms, modded_grad_input will have zero&#39;ed out the ghosts (sent to other</span>
+<span class="sd">        processors) and added gradient contributions from other rank&#39;s ghosts into</span>
+<span class="sd">        this rank&#39;s owned atoms.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Only the gradients with respect to the first input need changes</span>
+        <span class="n">local_grad_in_features</span><span class="p">,</span> <span class="o">*</span><span class="n">rest_grad_in</span> <span class="o">=</span> <span class="n">grad_input</span>
+
+        <span class="c1"># Can&#39;t modify in-place in backward_hook</span>
+        <span class="n">global_grad_in_features</span> <span class="o">=</span> <span class="n">local_grad_in_features</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>  <span class="c1"># Copy entire tensor</span>
+
+        <span class="c1"># Comms from ghosts into owned atoms is a &quot;reverse&quot; comms in LAMMPS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mliap_data</span><span class="o">.</span><span class="n">reverse_exchange</span><span class="p">(</span><span class="n">local_grad_in_features</span><span class="p">,</span> <span class="n">global_grad_in_features</span><span class="p">,</span>
+                                         <span class="n">local_grad_in_features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">global_grad_in_features</span><span class="p">,</span> <span class="o">*</span><span class="n">rest_grad_in</span></div>
 
 
 <div class="viewcode-block" id="MLIAPInterface.compute_forces">
@@ -205,69 +324,76 @@
 <span class="sd">        :return None</span>
 <span class="sd">        This function writes results to the input `data`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># If there are no local atoms, do nothing</span>
         <span class="n">nlocal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">nlistatoms</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">nlocal</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># If there are no local atoms, do nothing</span>
-            <span class="n">elems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">elems</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">ntotal</span><span class="p">)</span>
-            <span class="n">z_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">species_set</span><span class="p">[</span><span class="n">elems</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-            <span class="n">npairs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">npairs</span>
+        <span class="k">if</span> <span class="n">nlocal</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">mliap_data</span> <span class="o">=</span> <span class="n">data</span>  <span class="c1"># hook data onto the (persistent) object for, e.g., comms hooks. This is needed!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">perform_setup</span><span class="p">()</span>
+
+        <span class="n">elems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">elems</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">ntotal</span><span class="p">)</span>
+        <span class="n">z_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">species_set</span><span class="p">[</span><span class="n">elems</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">npairs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">npairs</span>
+
+        <span class="k">if</span> <span class="n">npairs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">pair_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pair_i</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+            <span class="n">pair_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pair_j</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+            <span class="n">rij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">rij</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_dtype</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pair_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_tensor</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+            <span class="n">pair_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_tensor</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+            <span class="n">rij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_dtype</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance_unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance_unit</span> <span class="o">*</span> <span class="n">rij</span>
+
+        <span class="c1"># note your sign for rij might need to be +1 or -1, depending on how your implementation works</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">z_vals</span><span class="p">,</span> <span class="n">pair_i</span><span class="p">,</span> <span class="n">pair_j</span><span class="p">,</span> <span class="o">-</span><span class="n">rij</span><span class="p">,</span> <span class="n">nlocal</span><span class="p">]</span>
+        <span class="n">atom_energy</span><span class="p">,</span> <span class="n">total_energy</span><span class="p">,</span> <span class="n">fij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">)</span>
+
+
+
+        <span class="c1"># convert units</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">atom_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_unit</span> <span class="o">*</span> <span class="n">atom_energy</span>
+            <span class="n">total_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_unit</span> <span class="o">*</span> <span class="n">total_energy</span>
+            <span class="n">fij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_unit</span> <span class="o">*</span> <span class="n">fij</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance_unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fij</span> <span class="o">=</span> <span class="n">fij</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance_unit</span>
+
+        <span class="c1"># Write data back. Kokkos and non-kokkos interfaces have diverged, so slightly different paths.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">using_kokkos</span><span class="p">:</span>
+            <span class="n">return_device</span> <span class="o">=</span> <span class="n">elems</span><span class="o">.</span><span class="n">device</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">return_device</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span>
+
+        <span class="n">atom_energy</span> <span class="o">=</span> <span class="n">atom_energy</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">return_device</span><span class="p">)</span>
+        <span class="n">total_energy</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">return_device</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">fij</span> <span class="o">=</span> <span class="n">fij</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">return_device</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">using_kokkos</span><span class="p">:</span>
+            <span class="c1"># write back to data.eatoms directly.</span>
+            <span class="n">fij</span> <span class="o">=</span> <span class="n">fij</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">eatoms</span> <span class="o">=</span> <span class="n">atom_energy</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">npairs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">pair_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pair_i</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-                <span class="n">pair_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pair_j</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-                <span class="n">rij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">rij</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_dtype</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">pair_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_tensor</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-                <span class="n">pair_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_tensor</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-                <span class="n">rij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_dtype</span><span class="p">)</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">update_pair_forces</span><span class="p">(</span><span class="n">fij</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># view to data.eatoms using pytorch, and write into the view.</span>
+            <span class="n">eatoms</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">eatoms</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">return_device</span><span class="p">)</span>
+            <span class="n">eatoms</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">atom_energy</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">npairs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">return_device</span> <span class="o">==</span> <span class="s2">&quot;cpu&quot;</span><span class="p">:</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">update_pair_forces_cpu</span><span class="p">(</span><span class="n">fij</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">update_pair_forces_gpu</span><span class="p">(</span><span class="n">fij</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance_unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">rij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_unit</span> <span class="o">*</span> <span class="n">rij</span>
-
-            <span class="c1"># note your sign for rij might need to be +1 or -1, depending on how your implementation works</span>
-            <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">z_vals</span><span class="p">,</span> <span class="n">pair_i</span><span class="p">,</span> <span class="n">pair_j</span><span class="p">,</span> <span class="o">-</span><span class="n">rij</span><span class="p">,</span> <span class="n">nlocal</span><span class="p">]</span>
-            <span class="n">atom_energy</span><span class="p">,</span> <span class="n">total_energy</span><span class="p">,</span> <span class="n">fij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">)</span>
-            <span class="c1"># Test if we are using lammps-kokkos or not. Is there a more clear way to do that?</span>
-            <span class="n">using_kokkos</span> <span class="o">=</span> <span class="s2">&quot;kokkos&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__module__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">using_kokkos</span><span class="p">:</span>
-                <span class="n">return_device</span> <span class="o">=</span> <span class="n">elems</span><span class="o">.</span><span class="n">device</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">return_device</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span>
-
-            <span class="c1"># convert units</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">atom_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">en_unit</span> <span class="o">*</span> <span class="n">atom_energy</span>
-                <span class="n">total_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">en_unit</span> <span class="o">*</span> <span class="n">total_energy</span>
-                <span class="n">fij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">en_unit</span> <span class="o">*</span> <span class="n">fij</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance_unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">fij</span> <span class="o">=</span> <span class="n">fij</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_unit</span>
-
-            <span class="n">atom_energy</span> <span class="o">=</span> <span class="n">atom_energy</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">return_device</span><span class="p">)</span>
-            <span class="n">total_energy</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">return_device</span><span class="p">)</span>
-
-            <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">f</span><span class="p">)</span>
-            <span class="n">fij</span> <span class="o">=</span> <span class="n">fij</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">return_device</span><span class="p">)</span>
-
-            <span class="c1"># hacky way to detect if we are in kokkos or not.</span>
-
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">using_kokkos</span><span class="p">:</span>
-                <span class="c1"># write back to data.eatoms directly.</span>
-                <span class="n">fij</span> <span class="o">=</span> <span class="n">fij</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
-                <span class="n">data</span><span class="o">.</span><span class="n">eatoms</span> <span class="o">=</span> <span class="n">atom_energy</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">npairs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">data</span><span class="o">.</span><span class="n">update_pair_forces</span><span class="p">(</span><span class="n">fij</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># view to data.eatoms using pytorch, and write into the view.</span>
-                <span class="n">eatoms</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">eatoms</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">return_device</span><span class="p">)</span>
-                <span class="n">eatoms</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">atom_energy</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">npairs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">return_device</span> <span class="o">==</span> <span class="s2">&quot;cpu&quot;</span><span class="p">:</span>
-                        <span class="n">data</span><span class="o">.</span><span class="n">update_pair_forces_cpu</span><span class="p">(</span><span class="n">fij</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">data</span><span class="o">.</span><span class="n">update_pair_forces_gpu</span><span class="p">(</span><span class="n">fij</span><span class="p">)</span>
-
-            <span class="n">data</span><span class="o">.</span><span class="n">energy</span> <span class="o">=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">item</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mliap_data</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># unhook data, see hooking above.</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -284,168 +410,16 @@
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model device (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_device</span><span class="si">}</span><span class="s2">) not found, falling back to f</span><span class="si">{</span><span class="n">fallback</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model_device</span> <span class="o">=</span> <span class="n">fallback</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;en_unit&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">en_unit</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;dist_unit&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dist_unit</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;energy_unit&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">energy_unit</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;distance_unit&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">distance_unit</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">species_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">species_set</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_device</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_device</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_device</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear_runtime_variables</span><span class="p">()</span></div>
 
 
-
-<div class="viewcode-block" id="setup_LAMMPS_graph">
-<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.setup_LAMMPS_graph">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">setup_LAMMPS_graph</span><span class="p">(</span><span class="n">energy</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">    :param energy: energy node for lammps interface</span>
-<span class="sd">    :return: graph for computing from lammps MLIAP unified inputs.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">AtomizationEnergyNode</span><span class="p">):</span>
-        <span class="n">energy</span> <span class="o">=</span> <span class="n">energy</span><span class="o">.</span><span class="n">create_henergy_equivalent</span><span class="p">()</span>
-
-    <span class="n">required_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">energy</span><span class="p">]</span>
-
-    <span class="n">why</span> <span class="o">=</span> <span class="s2">&quot;Generating LAMMPS Calculator interface&quot;</span>
-    <span class="n">subgraph</span> <span class="o">=</span> <span class="n">get_subgraph</span><span class="p">(</span><span class="n">required_nodes</span><span class="p">)</span>
-
-    <span class="n">search_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">targ</span><span class="p">,</span> <span class="n">sg</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">sg</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">targ</span><span class="p">)</span>
-    <span class="n">pair_indexers</span> <span class="o">=</span> <span class="n">find_relatives</span><span class="p">(</span><span class="n">required_nodes</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">PairIndexer</span><span class="p">,</span> <span class="n">subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
-
-    <span class="n">new_required</span><span class="p">,</span> <span class="n">new_subgraph</span> <span class="o">=</span> <span class="n">copy_subgraph</span><span class="p">(</span><span class="n">required_nodes</span><span class="p">,</span> <span class="n">assume_inputed</span><span class="o">=</span><span class="n">pair_indexers</span><span class="p">)</span>
-    <span class="n">pair_indexers</span> <span class="o">=</span> <span class="n">find_relatives</span><span class="p">(</span><span class="n">new_required</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">PairIndexer</span><span class="p">,</span> <span class="n">new_subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
-
-    <span class="n">species</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">new_required</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">new_subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
-
-    <span class="n">encoder</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">Encoder</span><span class="p">,</span> <span class="n">new_subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
-    <span class="n">padding_indexer</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">new_subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
-    <span class="n">inv_real_atoms</span> <span class="o">=</span> <span class="n">padding_indexer</span><span class="o">.</span><span class="n">inv_real_atoms</span>
-
-    <span class="n">species_set</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">encoder</span><span class="o">.</span><span class="n">species_set</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-    <span class="n">min_radius</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">dist_hard_max</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pair_indexers</span><span class="p">)</span>
-
-    <span class="c1">###############################################################</span>
-    <span class="c1"># Set up graph to accept external pair indices and shifts</span>
-
-    <span class="n">in_pair_first</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;pair_first&quot;</span><span class="p">)</span>
-    <span class="n">in_pair_first</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span>
-    <span class="n">in_pair_second</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;pair_second&quot;</span><span class="p">)</span>
-    <span class="n">in_pair_second</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span>
-    <span class="n">in_pair_coord</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;pair_coord&quot;</span><span class="p">)</span>
-    <span class="n">in_pair_coord</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span>
-    <span class="n">in_nlocal</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;nlocal&quot;</span><span class="p">)</span>
-    <span class="n">in_nlocal</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">hippynn</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
-    <span class="n">pair_dist</span> <span class="o">=</span> <span class="n">VecMag</span><span class="p">(</span><span class="s2">&quot;pair_dist&quot;</span><span class="p">,</span> <span class="n">in_pair_coord</span><span class="p">)</span>
-    <span class="n">mapped_pair_first</span> <span class="o">=</span> <span class="n">ReIndexAtomNode</span><span class="p">(</span><span class="s2">&quot;pair_first_internal&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">in_pair_first</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">))</span>
-    <span class="n">mapped_pair_second</span> <span class="o">=</span> <span class="n">ReIndexAtomNode</span><span class="p">(</span><span class="s2">&quot;pair_second_internal&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">in_pair_second</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">))</span>
-
-    <span class="n">new_inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">species</span><span class="p">,</span> <span class="n">in_pair_first</span><span class="p">,</span> <span class="n">in_pair_second</span><span class="p">,</span> <span class="n">in_pair_coord</span><span class="p">,</span> <span class="n">in_nlocal</span><span class="p">]</span>
-
-    <span class="c1"># Construct Filters and replace the existing pair indexers with the</span>
-    <span class="c1"># corresponding new (filtered) node that accepts external pairs of atoms</span>
-    <span class="k">for</span> <span class="n">pi</span> <span class="ow">in</span> <span class="n">pair_indexers</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">pi</span><span class="o">.</span><span class="n">dist_hard_max</span> <span class="o">==</span> <span class="n">min_radius</span><span class="p">:</span>
-            <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">mapped_pair_first</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="o">.</span><span class="n">pair_second</span><span class="p">,</span> <span class="n">mapped_pair_second</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="o">.</span><span class="n">pair_coord</span><span class="p">,</span> <span class="n">in_pair_coord</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="o">.</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">pi</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">mapped_node</span> <span class="o">=</span> <span class="n">PairFilter</span><span class="p">(</span>
-                <span class="s2">&quot;DistanceFilter-LAMMPS&quot;</span><span class="p">,</span>
-                <span class="p">(</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">in_pair_first</span><span class="p">,</span> <span class="n">in_pair_second</span><span class="p">,</span> <span class="n">in_pair_coord</span><span class="p">),</span>
-                <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">pi</span><span class="o">.</span><span class="n">dist_hard_max</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">mapped_node</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="o">.</span><span class="n">pair_second</span><span class="p">,</span> <span class="n">mapped_node</span><span class="o">.</span><span class="n">pair_second</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="o">.</span><span class="n">pair_coord</span><span class="p">,</span> <span class="n">mapped_node</span><span class="o">.</span><span class="n">pair_coord</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="o">.</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">mapped_node</span><span class="o">.</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">pi</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
-
-    <span class="n">energy</span><span class="p">,</span> <span class="o">*</span><span class="n">new_required</span> <span class="o">=</span> <span class="n">new_required</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">atom_energies</span> <span class="o">=</span> <span class="n">energy</span><span class="o">.</span><span class="n">atom_energies</span>
-    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-        <span class="n">atom_energies</span> <span class="o">=</span> <span class="n">energy</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">atom_energies</span> <span class="o">=</span> <span class="n">index_type_coercion</span><span class="p">(</span><span class="n">atom_energies</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-            <span class="s2">&quot;Could not build LAMMPS interface. Pass an object with index type IdxType.Atoms or &quot;</span>
-            <span class="s2">&quot;an object with an `atom_energies` attribute.&quot;</span>
-        <span class="p">)</span>
-
-    <span class="n">local_atom_energy</span> <span class="o">=</span> <span class="n">LocalAtomEnergyNode</span><span class="p">(</span><span class="s2">&quot;local_atom_energy&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">atom_energies</span><span class="p">,</span> <span class="n">in_nlocal</span><span class="p">))</span>
-    <span class="n">grad_rij</span> <span class="o">=</span> <span class="n">GradientNode</span><span class="p">(</span><span class="s2">&quot;grad_rij&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">local_atom_energy</span><span class="o">.</span><span class="n">total_local_energy</span><span class="p">,</span> <span class="n">in_pair_coord</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-
-    <span class="n">implemented_nodes</span> <span class="o">=</span> <span class="n">local_atom_energy</span><span class="o">.</span><span class="n">local_atom_energies</span><span class="p">,</span> <span class="n">local_atom_energy</span><span class="o">.</span><span class="n">total_local_energy</span><span class="p">,</span> <span class="n">grad_rij</span>
-
-    <span class="n">check_link_consistency</span><span class="p">((</span><span class="o">*</span><span class="n">new_inputs</span><span class="p">,</span> <span class="o">*</span><span class="n">implemented_nodes</span><span class="p">))</span>
-    <span class="n">mod</span> <span class="o">=</span> <span class="n">GraphModule</span><span class="p">(</span><span class="n">new_inputs</span><span class="p">,</span> <span class="n">implemented_nodes</span><span class="p">)</span>
-    <span class="n">mod</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-
-    <span class="k">return</span> <span class="n">min_radius</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">species_set</span><span class="p">,</span> <span class="n">mod</span></div>
-
-
-
-<div class="viewcode-block" id="ReIndexAtomMod">
-<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomMod">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ReIndexAtomMod</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<div class="viewcode-block" id="ReIndexAtomMod.forward">
-<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomMod.forward">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_atom_index_array</span><span class="p">,</span> <span class="n">inverse_real_atoms</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">inverse_real_atoms</span><span class="p">[</span><span class="n">raw_atom_index_array</span><span class="p">]</span></div>
-</div>
-
-
-
-<div class="viewcode-block" id="ReIndexAtomNode">
-<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.ReIndexAtomNode">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ReIndexAtomNode</span><span class="p">(</span><span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
-    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;raw_atom_index_array&quot;</span><span class="p">,</span> <span class="s2">&quot;inverse_real_atoms&quot;</span>
-    <span class="n">_main_output</span> <span class="o">=</span> <span class="s2">&quot;total_local_energy&quot;</span>
-    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">ReIndexAtomMod</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_index_state</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="LocalAtomsEnergy">
-<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.LocalAtomsEnergy">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">LocalAtomsEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-
-<div class="viewcode-block" id="LocalAtomsEnergy.forward">
-<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.LocalAtomsEnergy.forward">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_atom_energies</span><span class="p">,</span> <span class="n">nlocal</span><span class="p">):</span>
-        <span class="n">local_atom_energies</span> <span class="o">=</span> <span class="n">all_atom_energies</span><span class="p">[:</span><span class="n">nlocal</span><span class="p">]</span>
-        <span class="n">total_local_energy</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">local_atom_energies</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">local_atom_energies</span><span class="p">,</span> <span class="n">total_local_energy</span></div>
-</div>
-
-
-
-<div class="viewcode-block" id="LocalAtomEnergyNode">
-<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.mliap_interface.html#hippynn.interfaces.lammps_interface.mliap_interface.LocalAtomEnergyNode">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">LocalAtomEnergyNode</span><span class="p">(</span><span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;all_atom_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;nlocal&quot;</span>
-    <span class="n">_output_names</span> <span class="o">=</span> <span class="s2">&quot;local_atom_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;total_local_energy&quot;</span>
-    <span class="n">_main_output</span> <span class="o">=</span> <span class="s2">&quot;total_local_energy&quot;</span>
-    <span class="n">_output_index_states</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
-    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">LocalAtomsEnergy</span>
-
-    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
-    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 </pre></div>
 

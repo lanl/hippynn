@@ -72,7 +72,10 @@
 <li class="toctree-l1"><a class="reference internal" href="forces.html">Force Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="restarting.html">Restarting training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ase_calculator.html">ASE Calculators</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">LAMMPS interface</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">LAMMPS interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#using-lammps-activation-communication">Using LAMMPS activation communication</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="excited_states.html">Non-Adiabiatic Excited States</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weighted_loss.html">Weighted/Masked Loss Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lightning.html">Pytorch Lightning module</a></li>
@@ -149,6 +152,24 @@ Example:</p>
 Here <code class="docutils literal notranslate"><span class="pre">before_loading</span></code> would be a string of commands up to but not including
 the <code class="docutils literal notranslate"><span class="pre">pair_style</span> <span class="pre">mliap</span> <span class="pre">unified</span></code> command in lammps, and <code class="docutils literal notranslate"><span class="pre">after</span> <span class="pre">loading</span></code> would be the commands
 to run including the <code class="docutils literal notranslate"><span class="pre">pair_style</span></code> command and anything to run afterwards.</p>
+<section id="using-lammps-activation-communication">
+<h2>Using LAMMPS activation communication<a class="headerlink" href="#using-lammps-activation-communication" title="Link to this heading"></a></h2>
+<p>When using multiple interaction layers, it is normally necessary to increase the size of the halo region
+so that atoms from neighboring processors can be seen at a distance equal to the total interaction length
+of the model. However, the environment flag HIPPYNN_COMM_FEATURES_LAMMPS allows for hippynn to message-pass
+the activations and their gradients through LAMMPS’s MPI infrastructure and thereby broadcast the neuron
+values to the appropriate halo region, meaning that the halo only has to be as large as a single
+interaction layer. This requires using the kokkos variant of LAMMPS-MLIAP.</p>
+<p>Please note that this does not necessarily guarantee a speed increase. The trade-off of enabling this
+feature is to use more communication per atom, but in reducing the number of atoms that need to be
+communicated as well as the the number of atoms which the neural network needs to be applied to. This
+does mean that the expected memory cost should go down when HIPPYNN_COMM_FEATURES_LAMMPS is active.
+However, whether the simulation is overall faster or slower can depend on many other aspects of
+the simulation setup, such as how it is partitioned across processors, what the structure of the
+model is, and many factors in the underlying hardware.</p>
+<p>For more information, see the <a class="reference external" href="https://docs.lammps.org/pair_mliap.html">LAMMPS mliap documentation</a> and
+the <a class="reference external" href="https://docs.lammps.org/Speed_kokkos.html">LAMMPS kokkos documentation</a></p>
+</section>
 </section>
 
 

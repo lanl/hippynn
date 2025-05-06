@@ -1,0 +1,302 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.interfaces.lammps_interface.graph_setup &mdash; hippynn 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=c9d3d048"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../what_is_hippynn.html">What is hippynn?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../bibliography.html">Research articles using hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/features.html">hippynn Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/concepts.html">hippynn Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/databases.html">Databases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/loss_graph.html">Model and Loss Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/units.html">Units in hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/ckernels.html">Custom Kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/settings.html">Library Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/custom_nodes.html">Creating Custom Node Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/minimal_workflow.html">Minimal Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/controller.html">Controller</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/predictor.html">Predictor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/ensembles.html">Ensembling Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/periodic.html">Periodic Boundary Conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/forces.html">Force Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/restarting.html">Restarting training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/ase_calculator.html">ASE Calculators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/mliap_unified.html">LAMMPS interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/excited_states.html">Non-Adiabiatic Excited States</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/weighted_loss.html">Weighted/Masked Loss Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/lightning.html">Pytorch Lightning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/hyperopt.html">Hyperparameter optimization with Ax and Ray</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/hippynn.html">Full API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_summary/hippynn.html">API Summary Pages</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.interfaces.lammps_interface.graph_setup</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.interfaces.lammps_interface.graph_setup</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">...</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdxType</span><span class="p">,</span> <span class="n">GraphModule</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...graphs</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_subgraph</span><span class="p">,</span> <span class="n">find_relatives</span><span class="p">,</span> <span class="n">copy_subgraph</span><span class="p">,</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">replace_node</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...graphs.gops</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_link_consistency</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...graphs.indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">index_type_coercion</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...graphs.nodes.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">InputNode</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">MultiNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...graphs.nodes.indexers</span><span class="w"> </span><span class="kn">import</span> <span class="n">PaddingIndexer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...graphs.nodes.inputs</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpeciesNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...graphs.nodes.pairs</span><span class="w"> </span><span class="kn">import</span> <span class="n">PairFilter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...graphs.nodes.physics</span><span class="w"> </span><span class="kn">import</span> <span class="n">VecMag</span><span class="p">,</span> <span class="n">GradientNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...graphs.nodes.tags</span><span class="w"> </span><span class="kn">import</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">Encoder</span>
+
+
+<div class="viewcode-block" id="setup_LAMMPS_graph">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.graph_setup.html#hippynn.interfaces.lammps_interface.graph_setup.setup_LAMMPS_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">setup_LAMMPS_graph</span><span class="p">(</span><span class="n">energy</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param energy: energy node for lammps interface</span>
+<span class="sd">    :return: graph for computing from lammps MLIAP unified inputs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">required_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">energy</span><span class="p">]</span>
+
+    <span class="n">why</span> <span class="o">=</span> <span class="s2">&quot;Generating LAMMPS Calculator interface&quot;</span>
+    <span class="n">subgraph</span> <span class="o">=</span> <span class="n">get_subgraph</span><span class="p">(</span><span class="n">required_nodes</span><span class="p">)</span>
+
+    <span class="n">search_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">targ</span><span class="p">,</span> <span class="n">sg</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">sg</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">targ</span><span class="p">)</span>
+    <span class="n">pair_indexers</span> <span class="o">=</span> <span class="n">find_relatives</span><span class="p">(</span><span class="n">required_nodes</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">PairIndexer</span><span class="p">,</span> <span class="n">subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
+
+    <span class="n">new_required</span><span class="p">,</span> <span class="n">new_subgraph</span> <span class="o">=</span> <span class="n">copy_subgraph</span><span class="p">(</span><span class="n">required_nodes</span><span class="p">,</span> <span class="n">assume_inputed</span><span class="o">=</span><span class="n">pair_indexers</span><span class="p">)</span>
+    <span class="n">pair_indexers</span> <span class="o">=</span> <span class="n">find_relatives</span><span class="p">(</span><span class="n">new_required</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">PairIndexer</span><span class="p">,</span> <span class="n">new_subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
+
+    <span class="n">species</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">new_required</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">new_subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
+
+    <span class="n">encoder</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">Encoder</span><span class="p">,</span> <span class="n">new_subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
+    <span class="n">padding_indexer</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">search_fn</span><span class="p">(</span><span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">new_subgraph</span><span class="p">),</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why</span><span class="p">)</span>
+    <span class="n">inv_real_atoms</span> <span class="o">=</span> <span class="n">padding_indexer</span><span class="o">.</span><span class="n">inv_real_atoms</span>
+
+    <span class="n">species_set</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">encoder</span><span class="o">.</span><span class="n">species_set</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="n">min_radius</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">dist_hard_max</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pair_indexers</span><span class="p">)</span>
+
+    <span class="c1">###############################################################</span>
+    <span class="c1"># Set up graph to accept external pair indices and shifts</span>
+
+    <span class="n">in_pair_first</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;pair_first&quot;</span><span class="p">)</span>
+    <span class="n">in_pair_first</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span>
+    <span class="n">in_pair_second</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;pair_second&quot;</span><span class="p">)</span>
+    <span class="n">in_pair_second</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span>
+    <span class="n">in_pair_coord</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;pair_coord&quot;</span><span class="p">)</span>
+    <span class="n">in_pair_coord</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span>
+    <span class="n">in_nlocal</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;nlocal&quot;</span><span class="p">)</span>
+    <span class="n">in_nlocal</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
+    <span class="n">pair_dist</span> <span class="o">=</span> <span class="n">VecMag</span><span class="p">(</span><span class="s2">&quot;pair_dist&quot;</span><span class="p">,</span> <span class="n">in_pair_coord</span><span class="p">)</span>
+    <span class="n">mapped_pair_first</span> <span class="o">=</span> <span class="n">ReIndexAtomNode</span><span class="p">(</span><span class="s2">&quot;pair_first_internal&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">in_pair_first</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">))</span>
+    <span class="n">mapped_pair_second</span> <span class="o">=</span> <span class="n">ReIndexAtomNode</span><span class="p">(</span><span class="s2">&quot;pair_second_internal&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">in_pair_second</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">))</span>
+
+    <span class="n">new_inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">species</span><span class="p">,</span> <span class="n">in_pair_first</span><span class="p">,</span> <span class="n">in_pair_second</span><span class="p">,</span> <span class="n">in_pair_coord</span><span class="p">,</span> <span class="n">in_nlocal</span><span class="p">]</span>
+
+    <span class="c1"># Construct Filters and replace the existing pair indexers with the</span>
+    <span class="c1"># corresponding new (filtered) node that accepts external pairs of atoms</span>
+    <span class="k">for</span> <span class="n">pi</span> <span class="ow">in</span> <span class="n">pair_indexers</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pi</span><span class="o">.</span><span class="n">dist_hard_max</span> <span class="o">==</span> <span class="n">min_radius</span><span class="p">:</span>
+            <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">mapped_pair_first</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="o">.</span><span class="n">pair_second</span><span class="p">,</span> <span class="n">mapped_pair_second</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="o">.</span><span class="n">pair_coord</span><span class="p">,</span> <span class="n">in_pair_coord</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="o">.</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">pi</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mapped_node</span> <span class="o">=</span> <span class="n">PairFilter</span><span class="p">(</span>
+                <span class="s2">&quot;DistanceFilter-LAMMPS&quot;</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">in_pair_first</span><span class="p">,</span> <span class="n">in_pair_second</span><span class="p">,</span> <span class="n">in_pair_coord</span><span class="p">),</span>
+                <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">pi</span><span class="o">.</span><span class="n">dist_hard_max</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">mapped_node</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="o">.</span><span class="n">pair_second</span><span class="p">,</span> <span class="n">mapped_node</span><span class="o">.</span><span class="n">pair_second</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="o">.</span><span class="n">pair_coord</span><span class="p">,</span> <span class="n">mapped_node</span><span class="o">.</span><span class="n">pair_coord</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">replace_node</span><span class="p">(</span><span class="n">pi</span><span class="o">.</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">mapped_node</span><span class="o">.</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">disconnect_old</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">pi</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+
+    <span class="n">energy</span><span class="p">,</span> <span class="o">*</span><span class="n">new_required</span> <span class="o">=</span> <span class="n">new_required</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">atom_energies</span> <span class="o">=</span> <span class="n">energy</span><span class="o">.</span><span class="n">atom_energies</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">atom_energies</span> <span class="o">=</span> <span class="n">energy</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">atom_energies</span> <span class="o">=</span> <span class="n">index_type_coercion</span><span class="p">(</span><span class="n">atom_energies</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s2">&quot;Could not build LAMMPS interface. Pass an object with index type IdxType.Atoms or &quot;</span>
+            <span class="s2">&quot;an object with an `atom_energies` attribute.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">local_atom_energy</span> <span class="o">=</span> <span class="n">LocalAtomEnergyNode</span><span class="p">(</span><span class="s2">&quot;local_atom_energy&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">atom_energies</span><span class="p">,</span> <span class="n">in_nlocal</span><span class="p">))</span>
+    <span class="n">grad_rij</span> <span class="o">=</span> <span class="n">GradientNode</span><span class="p">(</span><span class="s2">&quot;grad_rij&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">local_atom_energy</span><span class="o">.</span><span class="n">total_local_energy</span><span class="p">,</span> <span class="n">in_pair_coord</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">implemented_nodes</span> <span class="o">=</span> <span class="n">local_atom_energy</span><span class="o">.</span><span class="n">local_atom_energies</span><span class="p">,</span> <span class="n">local_atom_energy</span><span class="o">.</span><span class="n">total_local_energy</span><span class="p">,</span> <span class="n">grad_rij</span>
+
+    <span class="n">check_link_consistency</span><span class="p">((</span><span class="o">*</span><span class="n">new_inputs</span><span class="p">,</span> <span class="o">*</span><span class="n">implemented_nodes</span><span class="p">))</span>
+    <span class="n">mod</span> <span class="o">=</span> <span class="n">GraphModule</span><span class="p">(</span><span class="n">new_inputs</span><span class="p">,</span> <span class="n">implemented_nodes</span><span class="p">)</span>
+    <span class="n">mod</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">min_radius</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">species_set</span><span class="p">,</span> <span class="n">mod</span></div>
+
+
+
+<div class="viewcode-block" id="ReIndexAtomMod">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.graph_setup.html#hippynn.interfaces.lammps_interface.graph_setup.ReIndexAtomMod">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ReIndexAtomMod</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="ReIndexAtomMod.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.graph_setup.html#hippynn.interfaces.lammps_interface.graph_setup.ReIndexAtomMod.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_atom_index_array</span><span class="p">,</span> <span class="n">inverse_real_atoms</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">inverse_real_atoms</span><span class="p">[</span><span class="n">raw_atom_index_array</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ReIndexAtomNode">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.graph_setup.html#hippynn.interfaces.lammps_interface.graph_setup.ReIndexAtomNode">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ReIndexAtomNode</span><span class="p">(</span><span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
+    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;raw_atom_index_array&quot;</span><span class="p">,</span> <span class="s2">&quot;inverse_real_atoms&quot;</span>
+    <span class="n">_main_output</span> <span class="o">=</span> <span class="s2">&quot;total_local_energy&quot;</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">ReIndexAtomMod</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_index_state</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="LocalAtomsEnergy">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.graph_setup.html#hippynn.interfaces.lammps_interface.graph_setup.LocalAtomsEnergy">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LocalAtomsEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="LocalAtomsEnergy.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.graph_setup.html#hippynn.interfaces.lammps_interface.graph_setup.LocalAtomsEnergy.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_atom_energies</span><span class="p">,</span> <span class="n">nlocal</span><span class="p">):</span>
+        <span class="n">local_atom_energies</span> <span class="o">=</span> <span class="n">all_atom_energies</span><span class="p">[:</span><span class="n">nlocal</span><span class="p">]</span>
+        <span class="n">total_local_energy</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">local_atom_energies</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">local_atom_energies</span><span class="p">,</span> <span class="n">total_local_energy</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="LocalAtomEnergyNode">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.graph_setup.html#hippynn.interfaces.lammps_interface.graph_setup.LocalAtomEnergyNode">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LocalAtomEnergyNode</span><span class="p">(</span><span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;all_atom_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;nlocal&quot;</span>
+    <span class="n">_output_names</span> <span class="o">=</span> <span class="s2">&quot;local_atom_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;total_local_energy&quot;</span>
+    <span class="n">_main_output</span> <span class="o">=</span> <span class="s2">&quot;total_local_energy&quot;</span>
+    <span class="n">_output_index_states</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
+    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">LocalAtomsEnergy</span>
+
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
+    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

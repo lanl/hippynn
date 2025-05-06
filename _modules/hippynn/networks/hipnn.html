@@ -321,14 +321,14 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">interaction_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">]</span>
+        <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">resnet</span><span class="p">:</span>
+            <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">lay</span><span class="o">.</span><span class="n">base_layer</span> <span class="k">for</span> <span class="n">lay</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">layers</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">sensitivity_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">resnet</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="n">il</span><span class="o">.</span><span class="n">base_layer</span><span class="o">.</span><span class="n">sensitivity</span> <span class="k">for</span> <span class="n">il</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interaction_layers</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="n">il</span><span class="o">.</span><span class="n">sensitivity</span> <span class="k">for</span> <span class="n">il</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interaction_layers</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">il</span><span class="o">.</span><span class="n">sensitivity</span> <span class="k">for</span> <span class="n">il</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interaction_layers</span><span class="p">]</span>
 
 <div class="viewcode-block" id="Hipnn.regularization_params">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hipnn.html#hippynn.networks.hipnn.Hipnn.regularization_params">[docs]</a>
