@@ -208,14 +208,14 @@ class Hipnn(torch.nn.Module):
 
     @property
     def interaction_layers(self):
-        return [block[0] for block in self.blocks]
+        layers = [block[0] for block in self.blocks]
+        if self.resnet:
+            layers = [lay.base_layer for lay in layers]
+        return layers
 
     @property
     def sensitivity_layers(self):
-        if self.resnet:
-            return [il.base_layer.sensitivity for il in self.interaction_layers]
-        else:
-            return [il.sensitivity for il in self.interaction_layers]
+        return [il.sensitivity for il in self.interaction_layers]
 
     def regularization_params(self):
         params = []
