@@ -173,7 +173,10 @@
 
             <span class="n">batches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">batch_dict</span><span class="p">)</span>
 
-        <span class="n">sys_count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">sys_counter</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>  <span class="c1"># some variables are batch-wise, but most of these should be the same</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys_counter</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">sys_count</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sys_count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">sys_counter</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>  <span class="c1"># some variables are batch-wise, but most of these should be the same</span>
         <span class="k">return</span> <span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">sys_count</span></div>
 
 
