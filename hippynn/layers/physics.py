@@ -41,7 +41,7 @@ class StressForce(torch.nn.Module):
 
     def forward(self, energy, strain, coordinates, cell):
         total_energy = energy.sum()
-        straingrad, grad = torch.autograd.grad(total_energy, [strain, coordinates], create_graph=self.training)
+        straingrad, grad = torch.autograd.grad(total_energy, [strain, coordinates], create_graph=True)
         if self.pbc:
             volume = torch.det(cell)
             stress = straingrad / volume.unsqueeze(1).unsqueeze(1)
