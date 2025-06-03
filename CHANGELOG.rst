@@ -6,7 +6,7 @@ Breaking changes:
   ani1x_training.py, and \*SNAPExample.py) must be performed using 
   PyTorch rather than NumPy. 
 - The hippynn Database object and any functions which return this object 
-  now except only an int or a torch.Generator for the ``seed`` argument. 
+  now accept only an int or a torch.Generator for the ``seed`` argument. 
 
 New Features:
 -------------
