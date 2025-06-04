@@ -1,4 +1,32 @@
+Breaking changes:
+-----------------
 
+- Alterations to data after loading as a hippynn Database but prior to 
+  splitting the data (eg. as in the examples ani_aluminum_example\*.py, 
+  ani1x_training.py, and \*SNAPExample.py) must be performed using 
+  PyTorch rather than NumPy. 
+- The hippynn Database object and any functions which return this object 
+  now except only an int or a torch.Generator for the ``seed`` argument. 
+
+New Features:
+-------------
+
+- Added new network type, HIP-HOP-NN.
+
+Improvements:
+-------------
+
+- Adjust the Database loader so that data is immediately transformed into
+  PyTorch Tensors, rather than performing this transformation as part of 
+  creating the data splits. 
+
+
+Bug Fixes:
+----------
+
+
+0.1.0
+=======
 
 Breaking changes:
 -----------------
@@ -68,6 +96,12 @@ Bug Fixes:
 - KDTreeNeighbors finds at most one pair for each set of points. If pair cutoff is more than half
   the length of one of the cell sides, it will fail to identify all of the pairs. Added error if
   this occurs.
+- Starting in PyTorch 2.6, the default value of ``weights_only`` has been changed to ``True``. To maintain compatibility
+  with this release, the ``hippynn`` object ``MetricTracker`` is added the list of objects which PyTorch can load with 
+  ``weights_only=True``. Functions which are intended to load structure files have been updated to explicitly use 
+  ``weights_only=False`` by default. In such cases, the argument ``weights_only`` has been exposed to the user and a 
+  warning message has been added to the function documentation. 
+  
 
 0.0.3
 =======

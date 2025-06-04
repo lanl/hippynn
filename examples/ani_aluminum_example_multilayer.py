@@ -150,9 +150,8 @@ with hippynn.tools.active_directory(netname):
 
         energy_shift = 72  # eV
         arrays = database.arr_dict
-        import numpy as np
 
-        n_atoms = arrays["species"].astype(bool).astype(int).sum(axis=1)
+        n_atoms = arrays["species"].bool().int().sum(dim=1)
         arrays["force"] = arrays["force"] * (ase.units.Hartree / ase.units.eV)
         arrays["energy"] = arrays["energy"] * (ase.units.Hartree / ase.units.eV)
         arrays["energy"] = arrays["energy"] + energy_shift * n_atoms
@@ -165,8 +164,8 @@ with hippynn.tools.active_directory(netname):
         # Set dtypes back
         torch.set_default_dtype(torch.float32)
         for k, v in arrays.items():
-            if v.dtype == np.float64:
-                arrays[k] = v.astype(np.float32)
+            if v.dtype == torch.float64:
+                arrays[k] = v.to(torch.float32)
 
         database.make_trainvalidtest_split(test_size=test_size, valid_size=valid_size)
 

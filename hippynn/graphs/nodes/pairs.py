@@ -253,6 +253,7 @@ class PairUncacher(ExpandParents, AutoNoKw, PairIndexer, MultiNode):
         return sparse, pos, cell, atomidx
 
     @_parent_expander.match(PairCache, PositionsNode, CellNode, AtomIndexer)
+    @_parent_expander.match(_BaseNode, _BaseNode, _BaseNode, AtomIndexer) # Less constrained version
     def expand1(self, sp, r, c, atomidx, *args, purpose, **kwargs):
         ira = atomidx.inv_real_atoms
         nam = atomidx.n_atoms_max

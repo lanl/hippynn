@@ -79,7 +79,7 @@ For detailed instructions, see `the documentation section on installation <doc_i
 
 .. _doc_install: https://lanl.github.io/hippynn/installation.html
 
-Clone the hippynn_ repository and navigate into it, e.g.::
+Clone the hippynn repository and navigate into it, e.g.::
 
     $ git clone https://github.com/lanl/hippynn.git
     $ cd hippynn

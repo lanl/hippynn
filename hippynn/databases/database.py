@@ -13,8 +13,9 @@ from ..tools import arrdict_len, device_fallback, unsqueeze_multiple
 
 from torch.utils.data import DataLoader, TensorDataset, Subset
 
-_AUTO_SPLIT_PREFIX = "split_mask_"
+from collections import defaultdict
 
+_AUTO_SPLIT_PREFIX = "split_mask_"
 
 class Database:
     """
@@ -23,10 +24,10 @@ class Database:
 
     def __init__(
         self,
-        arr_dict: dict[str, np.ndarray],
+        arr_dict: dict[str, torch.Tensor],
         inputs: list[str],
         targets: list[str],
-        seed: [int, np.random.RandomState, tuple],
+        seed: [int, torch.Generator],
         test_size: Union[float, int] = None,
         valid_size: Union[float, int] = None,
         num_workers: int = 0,
@@ -41,9 +42,7 @@ class Database:
         :param arr_dict: dictionary mapping strings to numpy arrays
         :param inputs:   list of strings for input db_names
         :param targets:  list of strings for output db_namees
-        :param seed:     int, for random splitting, or "mask" for pre-split.
-            Can also be existing numpy.random.RandomState.
-            Can also be tuple from numpy.random.RandomState.get_state()
+        :param seed:     int, for random splitting, or existing torch.Generator object
         :param test_size: fraction of data to use in test split
         :param valid_size: fraction of data to use in train split
         :param num_workers: passed to pytorch dataloaders
@@ -68,9 +67,16 @@ class Database:
         self.pin_memory = pin_memory
         self.auto_split = auto_split
 
+        self.arr_dict = {}
+        for k, v in arr_dict.items():
+            try:
+                self.arr_dict[k] = torch.as_tensor(v)
+            except Exception as e:
+                warnings.warn(f"Skipping key '{k}': could not convert to tensor ({type(v)}), reason: {e}")
+
         if not quiet:
             print(f"All arrays:")
-            prettyprint_arrays(arr_dict)
+            prettyprint_arrays(self.arr_dict)
 
         try:
             _var_list = self.var_list
@@ -83,7 +89,7 @@ class Database:
             _var_list = []
 
         for k in _var_list:
-            if k not in arr_dict and k not in ("indices", "split_indices"):
+            if k not in self.arr_dict and k not in ("indices", "split_indices"):
                 if allow_unfound:
                     warnings.warn(f"Required database quantity '{k}' not present during database initialization.")
                 else:
@@ -94,24 +100,21 @@ class Database:
         if not quiet and _var_list and not allow_unfound:
             print("Finished checking input and target arrays; all necessary arrays were found.")
 
-        self.arr_dict = arr_dict
-        if "indices" not in arr_dict:
+        if "indices" not in self.arr_dict:
             if not quiet:
                 print("Database: Using auto-generated data indices")
-            self.arr_dict["indices"] = np.arange(len(self), dtype=int)
+            self.arr_dict["indices"] = torch.arange(len(self), dtype=int)
         else:
             if not quiet:
                 print("Database: Using pre-specified data indices.")
 
         self.splits = {}
 
-        if isinstance(seed, np.random.RandomState):
+        if isinstance(seed, torch.Generator):
             self.random_state = seed
-        elif isinstance(seed, tuple):
-            self.random_state = np.random.RandomState()
-            self.random_state.set_state(seed)
         else:
-            self.random_state = np.random.RandomState(seed=seed)
+            self.random_state = torch.Generator()
+            self.random_state.manual_seed(seed)
 
         if self.auto_split:
             if test_size is not None or valid_size is not None:
@@ -192,7 +195,8 @@ class Database:
         if split_size < 1:
             split_size = int(split_size * len(self))
 
-        split_indices = self.random_state.choice(self.arr_dict["indices"], size=split_size, replace=False)
+        perm = torch.randperm(len(self.arr_dict["indices"]), generator=self.random_state)
+        split_indices = self.arr_dict["indices"][perm[:split_size]]
 
         split_indices.sort()
 
@@ -231,7 +235,7 @@ class Database:
         self.split_the_rest("train")
         return
 
-    def make_explicit_split(self, split_name:str, split_indices: np.ndarray):
+    def make_explicit_split(self, split_name:str, split_indices: torch.Tensor):
         """
 
         :param split_name: name for split, typically 'train', 'valid', 'test'
@@ -249,11 +253,11 @@ class Database:
 
         # Precompute the actual integer indices, because indexing with a boolean mask
         # requires doing this, and we have to index with a boolean several times.
-        where_index = np.where(index_mask)
-        where_complement = np.where(complement_mask)
+        where_index = torch.where(index_mask)
+        where_complement = torch.where(complement_mask)
 
         # Split off data, and keep the rest.
-        self.splits[split_name] = {k: torch.from_numpy(self.arr_dict[k][where_index]) for k in self.arr_dict}
+        self.splits[split_name] = {k: self.arr_dict[k][where_index] for k in self.arr_dict}
         if "split_indices" not in self.splits[split_name]:
             if not self.quiet:
                 print(f"Adding split indices for split: {split_name}")
@@ -280,13 +284,14 @@ class Database:
         :param split_mask: a boolean array for where to split
         :return:
         """
-        if isinstance(split_mask, torch.Tensor):
-            split_mask = split_mask.numpy()
-        if split_mask.dtype != np.bool_:
-            if not np.isin(split_mask, [0, 1]).all():
-                raise ValueError(f"Mask function contains invalid values. Values found: {np.unique(split_mask)}")
+        if isinstance(split_mask, np.ndarray):
+            split_mask = torch.as_tensor(split_mask)
+        if split_mask.dtype != torch.bool:
+            is_valid = ((split_mask == 0) | (split_mask == 1)).all().item()
+            if not is_valid:
+                raise ValueError(f"Mask function contains invalid values. Values found: {torch.unique(split_mask).tolist()}")
             else:
-                split_mask = split_mask.astype(np.bool_)
+                split_mask = split_mask.to(torch.bool)
 
         indices = self.arr_dict["indices"][split_mask]
         self.make_explicit_split(split_name, indices)
@@ -301,8 +306,7 @@ class Database:
         """
         Add split masks to the dataset. This function is used internally before writing databases.
 
-        When using the dict_to_add_to parameter, this function writes numpy arrays.
-        When adding to self.splits, this function writes tensors.
+        This function writes tensors.
         :param dict_to_add_to: where to put the split masks. Default to self.splits.
         :param split_prefix: prefix for mask names
         :return:
@@ -316,24 +320,18 @@ class Database:
 
         if dict_to_add_to is None:
             dict_to_add_to = self.splits
-            write_tensor = True
-        else:
-            write_tensor = False
 
         for s in self.splits.keys():
             mask_name = split_prefix + s
             for sprime, split in self.splits.items():
 
                 if sprime == s:
-                    mask = np.ones_like(split["indices"], dtype=np.bool_)
+                    mask = torch.ones_like(split["indices"], dtype=torch.bool)
                 else:
-                    mask = np.zeros_like(split["indices"], dtype=np.bool_)
-
-                if write_tensor:
-                    mask = torch.as_tensor(mask)
+                    mask = torch.zeros_like(split["indices"], dtype=torch.bool)
 
                 if mask_name in split:
-                    # Check that the mask is correct and in the np_dict
+                    # Check that the mask is correct and in the dict
                     old_mask = dict_to_add_to[sprime][mask_name]
                     if (old_mask != mask).all():
                         raise ValueError(f"Mask in database did not match existing split structure: {mask_name} ")
@@ -365,16 +363,17 @@ class Database:
             if k.startswith(split_prefix):
                 if arr.ndim != 1:
                     raise ValueError(f"Split mask for '{k}' has too many dimensions. Shape: {arr.shape=}")
-                if arr.dtype == np.dtype("bool"):
+                if arr.dtype == torch.bool:
                     mask_vars.add(k)
-                elif arr.dtype is np.int and arr.ndim == 1:
-                    if np.isin(arr, [0, 1]).all():
+                elif arr.dtype in (torch.int8, torch.int16, torch.int32, torch.int64):
+                    if ((arr == 0) | (arr == 1)).all():
                         mask_vars.add(k)
                     else:
-                        arr_values = np.unique(arr)
+                        arr_values = torch.unique(arr).tolist()
                         raise ValueError(f"Integer masks for split contain invalid values: {arr_values}")
                 else:
                     raise ValueError(f"Failed on split {k} Split arrays must be 1-d boolean or (0,1)-valued integer arrays.")
+
 
         if not len(mask_vars):
             raise ValueError("No split mask detected.")
@@ -393,7 +392,7 @@ class Database:
         n_sys = list(lengths)[0]
 
         # Check that masks define a complete split
-        mask_counts = np.zeros(n_sys, dtype=int)
+        mask_counts = torch.zeros(n_sys, dtype=int)
         for k, arr in masks.items():
             mask_counts += arr.astype(int)
         if not (mask_counts == 1).all():
@@ -467,6 +466,7 @@ class Database:
             shuffle=shuffle,
             pin_memory=self.pin_memory,
             num_workers=self.num_workers,
+            collate_fn=sparse_enabled_colate,
             **self.dataloader_kwargs,
         )
 
@@ -477,7 +477,7 @@ class Database:
         prop = self.arr_dict[key]
 
         if norm_axis:
-            prop = np.linalg.norm(prop, axis=norm_axis)
+            prop = torch.norm(prop, dim=norm_axis)
 
         if atomwise:
             if norm_per_atom:
@@ -494,7 +494,7 @@ class Database:
             if species_key is None:
                 raise RuntimeError("species_key must be given to trim an atom-normalized quantity")
 
-            n_atoms = (self.arr_dict[species_key] > 0).sum(axis=1)
+            n_atoms = (self.arr_dict[species_key] > 0).sum(dim=1)
             # Transposes broadcast the result rightwards instead of leftwards.
             # numpy transpose on higher-order arrays reverses all dimensions.
             prop = (prop.T / n_atoms).T
@@ -502,7 +502,15 @@ class Database:
 
         mean = stat_prop.mean()
         std = stat_prop.std()
-        if np.isnan(mean) or np.isnan(std):
+
+        if mean.dtype.is_floating_point and torch.isnan(mean).item():
+            has_nan = True
+        elif std.dtype.is_floating_point and torch.isnan(std).item():
+            has_nan = True
+        else:
+            has_nan = False
+
+        if has_nan:
             warnings.warn(f"Array statistics, {mean=},{std=} contain NaN.", stacklevel=3)
 
         return prop, mean, std
@@ -536,10 +544,10 @@ class Database:
         if cut is not None:
             prop, mean, std = self._array_stat_helper(key, species_key, atomwise, norm_per_atom, norm_axis)
 
-            large_property_mask = np.abs(prop - mean) > cut
+            large_property_mask = torch.abs(prop - mean) > cut
             # Scan over all non-batch indices.
             non_batch_axes = tuple(range(1, prop.ndim))
-            drop_mask = np.sum(large_property_mask, axis=non_batch_axes) > 0
+            drop_mask = torch.sum(large_property_mask, dim=non_batch_axes) > 0
             indices = self.arr_dict["indices"][drop_mask]
             if drop_mask.any():
                 print(f"Removed {drop_mask.astype(int).sum()} outlier systems in variable {key} due to static cut.")
@@ -547,10 +555,10 @@ class Database:
 
         if std_factor is not None:
             prop, mean, std = self._array_stat_helper(key, species_key, atomwise, norm_per_atom, norm_axis)
-            large_property_mask = np.abs(prop - mean) / std > std_factor
+            large_property_mask = torch.abs(prop - mean) / std > std_factor
             # Scan over all non-batch indices.
             non_batch_axes = tuple(range(1, prop.ndim))
-            drop_mask = np.sum(large_property_mask, axis=non_batch_axes) > 0
+            drop_mask = torch.sum(large_property_mask, dim=non_batch_axes) > 0
             indices = self.arr_dict["indices"][drop_mask]
             if drop_mask.any():
                 print(f"Removed {drop_mask.astype(int).sum()} outlier systems in variable {key} due to std. factor.")
@@ -675,7 +683,7 @@ class Database:
         split_max_max_atom_size = {}
         for k, split in self.splits.items():
             species_array = split[species_key]
-            max_atoms = (species_array != 0).sum(axis=1)
+            max_atoms = (species_array != 0).sum(dim=1)
             max_max_atoms = max_atoms.max().item()
             split_max_max_atom_size[k] = max_max_atoms
             del max_atoms, species_array, max_max_atoms  # Marking unneeded.
@@ -788,27 +796,28 @@ class Database:
         return NPZDatabase(**arguments)
 
 
-def compute_index_mask(indices: np.ndarray, index_pool: np.ndarray) -> np.ndarray:
+def compute_index_mask(indices: torch.Tensor, index_pool: torch.Tensor) -> torch.Tensor:
     """
 
     :param indices:
     :param index_pool:
     :return:
     """
-    if not np.all(np.isin(indices, index_pool)):
+    index_set = set(index_pool.tolist())
+    if not all(i.item() in index_set for i in indices):
         raise ValueError("Provided indices not in database")
 
-    uniques, counts = np.unique(indices, return_counts=True)
-    if len(uniques) != len(indices):
+    uniques, counts = torch.unique(indices, return_counts=True)
+    if uniques.numel() != indices.numel():
         raise ValueError("Split indices not unique")
     if counts.max() > 1:
         raise ValueError("Split indices have duplicates.")
 
-    index_mask = np.isin(index_pool, indices)
+    index_mask = torch.isin(index_pool, indices)
     return index_mask
 
 
-def prettyprint_arrays(arr_dict: dict[str: np.ndarray]):
+def prettyprint_arrays(arr_dict: dict[str: torch.Tensor]):
     """
     Pretty-print array dictionary.
     :return: None
@@ -826,6 +835,8 @@ def prettyprint_arrays(arr_dict: dict[str: np.ndarray]):
     printrow("Name", "dtype", "shape")
     printline()
     for key, value in arr_dict.items():
+        if isinstance(value, torch.Tensor):
+            value = value.numpy()
         printrow(key, repr(value.dtype), repr(value.shape))
     printline()
 
@@ -834,3 +845,16 @@ class NamedTensorDataset(TensorDataset):
     def __init__(self, tensor_names, *tensors):
         super().__init__(*tensors)
         self.tensor_map = tensor_names
+
+
+collate_map = defaultdict(torch.utils.data.default_collate)
+
+def tensor_collate(list_of_tensors, collate_fn_map=None):
+    elem = list_of_tensors[0]
+    if elem.layout == torch.strided:
+        return torch.utils.data.default_collate(list_of_tensors)
+    return torch.stack(list_of_tensors, dim=0)
+collate_map[torch.Tensor] = tensor_collate
+
+def sparse_enabled_colate(batch):
+    return torch.utils.data._utils.collate.collate(batch, collate_fn_map=collate_map)
