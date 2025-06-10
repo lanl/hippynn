@@ -7,6 +7,8 @@ Breaking changes:
   PyTorch rather than NumPy. 
 - The hippynn Database object and any functions which return this object 
   now accept only an int or a torch.Generator for the ``seed`` argument. 
+- The arguments on the MD objects LangevinDynamics and ASELangevinDynamics
+  have changed slightly. 
 
 New Features:
 -------------
@@ -26,6 +28,8 @@ Improvements:
 
 Bug Fixes:
 ----------
+- Fix issue with friction coefficient being calculated incorrectly in 
+  LangevinDynamics.
 
 
 0.1.0

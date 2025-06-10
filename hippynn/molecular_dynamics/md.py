@@ -252,7 +252,7 @@ class LangevinDynamics(VariableUpdater):
     def __init__(
         self,
         force_db_name: str,
-        temperature: float,
+        temperature_K: float,
         frix: float,
         force_units: Optional[float] = None,
         position_units: Optional[float] = None,
@@ -273,12 +273,12 @@ class LangevinDynamics(VariableUpdater):
         """
 
         self.force_key = force_db_name
-        self.temperature = temperature
+        self.temperature = temperature_K
         self.frix = frix
-        self.kB = ase.units.kB
         self.force_units = (force_units or ase.units.eV/ase.units.Ang)
         self.position_units = (position_units or ase.units.Ang)
         self.time_units = (time_units or ase.units.fs)
+        self.kB = ase.units.kB / (self.force_units * self.position_units)
 
         if seed is not None:
             torch.manual_seed(seed)
@@ -313,11 +313,18 @@ class LangevinDynamics(VariableUpdater):
 
         self.variable.data["acceleration"] = self.variable.data["force"].detach() / self.variable.data["mass"] * self.force_units / (self.position_units / self.time_units**2)
 
+        frix_term1 = self.frix * self.variable.data["velocity"] * dt
+
+        #              |------units of energy------| |------units of mass-------| |-units cancel-|
+        frix_term2 = 2 * self.kB * self.temperature / self.variable.data["mass"] * dt * self.frix
+        frix_term2 = frix_term2 * (self.force_units * self.time_units) / (self.position_units / self.time_units) # convert units for energy/mass to units for velocity
+        frix_term2 = (frix_term2) ** (1/2)
+
         self.variable.data["velocity"] = (
             self.variable.data["velocity"]
             + dt * self.variable.data["acceleration"]
-            - self.frix * self.variable.data["velocity"] * dt
-            + torch.sqrt(2 * self.kB * self.frix * self.temperature / self.variable.data["mass"] * dt)
+            - frix_term1
+            + frix_term2
             * torch.randn_like(self.variable.data["velocity"], memory_format=torch.contiguous_format)
         )
 
@@ -337,7 +344,7 @@ class ASELangevinDynamics(VariableUpdater):
         position_units: Optional[float] = None,
         time_units: Optional[float] = None,
         fix_cm: Optional[bool] = True,
-        rng: Optional[int] = None,
+        seed: Optional[int] = None,
     ):
         """
         :param force_db_name: key which will correspond to the force on the corresponding Variable
@@ -348,7 +355,7 @@ class ASELangevinDynamics(VariableUpdater):
         :param position_units: model position units output (in terms of ase.units), defaults to Ang
         :param time_units: model time units output (in terms of ase.units), defaults to fs
         :param fix_cm: include adjustment to keep COM fixed, defaults to True
-        :param rng: np.random object, defaults to None
+        :param seed: used to set seed for reproducibility, defaults to None
         mass of attached Variable must be in amu
         """
 
@@ -359,11 +366,10 @@ class ASELangevinDynamics(VariableUpdater):
         self.position_units = (position_units or ase.units.Ang)
         self.time_units = (time_units or ase.units.fs)
         self.fix_cm = fix_cm
+        self.kB = ase.units.kB / (self.force_units * self.position_units)
 
-        if rng is None:
-            self.rng = np.random
-        else:
-            self.rng = rng
+        if seed is not None:
+            torch.manual_seed(seed)
 
 
     def pre_step(self, dt:float):
@@ -374,15 +380,19 @@ class ASELangevinDynamics(VariableUpdater):
         if len(self.variable.data["velocity"].shape) != len(self.variable.data["mass"].shape):
             self.variable.data["mass"] = self.variable.data["mass"].unsqueeze(-1)
 
-        sigma = (2 * self.temperature * ase.units.kB * self.frix / self.time_units / self.variable.data["mass"])**(1/2) * self.time_units**(3/2) / self.position_units
-        self.c1 = dt / 2 - (dt**2) * self.frix / 8
-        self.c2 = dt * self.frix / 2 - (dt**2) * (self.frix**2) / 8
-        self.c3 = (dt**(1/2)) * sigma / 2 - (dt**(1.5)) * self.frix * sigma / 8
+        #          |------units of energy------| |-1/time-| |------units of mass------|
+        sigma = 2 * self.temperature * self.kB * self.frix / self.variable.data["mass"]
+        sigma = sigma * (self.force_units * self.time_units) / (self.position_units / self.time_units) # convert units for energy/mass to units for velocity
+        sigma = (sigma) ** (1/2)
+        
+        self.c1 = dt / 2 - (dt**2) * self.frix / 8 
+        self.c2 = dt * self.frix / 2 - (dt**2) * (self.frix**2) / 8 
+        self.c3 = (dt**(1/2)) * sigma / 2 - (dt**(1.5)) * self.frix * sigma / 8 
         self.c5 = (dt**(1.5)) * sigma / (2 * (3**(1/2)))
         self.c4 = self.frix / 2 * self.c5
 
-        xi = torch.as_tensor(self.rng.standard_normal(size=self.variable.data["velocity"].shape), device=self.variable.data["velocity"].device, dtype=self.variable.data["velocity"].dtype)
-        eta = torch.as_tensor(self.rng.standard_normal(size=self.variable.data["velocity"].shape), device=self.variable.data["velocity"].device, dtype=self.variable.data["velocity"].dtype)
+        xi = torch.randn_like(self.variable.data["velocity"], memory_format=torch.contiguous_format)
+        eta = torch.randn_like(self.variable.data["velocity"], memory_format=torch.contiguous_format)
         self.rnd_pos = self.c5 * eta
         self.rnd_vel = self.c3 * xi - self.c4 * eta
         if self.fix_cm:
