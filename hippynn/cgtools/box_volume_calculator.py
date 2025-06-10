@@ -1,5 +1,5 @@
 # Calculate box shape needed to achieve specified density
-# ChatGPT was used in creating these functions
+# Portions of this code were written with assistance from an LLM
 
 # Avogadro's number (molecules per mole)
 AVOGADRO = 6.022e23

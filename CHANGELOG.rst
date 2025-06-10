@@ -16,7 +16,10 @@ New Features:
 - Added new network type, HIP-HOP-NN.
 - Added capability to use LAMMPS-MLIAP comm features to remove the need
   for extensive halo regions when using multiple interaction layers.
-
+- Enhanced coarse-graining example by adding: example pipeline for processing
+  AA data to use in training CG model, capability to use a species-pair-specific 
+  repulsive potential, extended processing of data from CG MD, and a notebook 
+  for visualizing the repulsive potentials. 
 
 Improvements:
 -------------

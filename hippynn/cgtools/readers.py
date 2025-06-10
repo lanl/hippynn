@@ -1,5 +1,5 @@
 # Read outputs from LAMMPS, Gromacs
-# ChatGPT was used in creating these functions
+# Portions of this code were written with assistance from an LLM
 
 import os
 
