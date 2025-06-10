@@ -25,6 +25,6 @@ data from LAMMPS or Gromacs output files. However, it is suggested to try with t
         frame of the training data file. This will be saved in the directory ``lammps_md_inputs``. There is already 
         an example input script in that directory. Move to the directory and run LAMMPS with the provided input file.  
 
-**Caution**: RepulsivePotentialNode in ``replusive_potential.py`` has been modified. Any CG model trained before this 
+**Caution**: RepulsivePotentialNode in ``repulsive_potential.py`` has been modified. Any CG model trained before this 
 change (3/21/25) will not be compatible with these updates. Please train a new model. Results should not be impacted 
 in any way, besides potential effects of uncontrolled random variables. 

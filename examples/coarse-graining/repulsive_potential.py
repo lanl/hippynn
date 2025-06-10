@@ -69,7 +69,7 @@ class RepulsivePotentialNode(ExpandParents, AutoKw, MultiNode):
 class RepulsivePotentialBySpecies(torch.nn.Module):
     def __init__(self, taper_point, strength, dr, perc):
         '''
-        :param taper_point: 2D NumPy array of shape (max(species), max(species)) where the entry at index [i, j] corresponds to the 
+        :param taper_point: 2D PyTorch tensor of shape (max(species), max(species)) where the entry at index [i, j] corresponds to the 
                              taper point for the repulsive potential between particles of species i and species j. 
         '''
         super().__init__()
