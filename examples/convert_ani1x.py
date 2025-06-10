@@ -1,6 +1,8 @@
 """
 Example script for converting from ANI format to numpy format for training with hippynn.
 
+Note: This script is deprecated as an ani-style h5py reader has been implemented
+within the library. However, this may give a sense of how to build a dataset.
 
 This script was designed for an external dataset available at
 https://doi.org/10.6084/m9.figshare.c.4712477

@@ -6,12 +6,17 @@ Breaking changes:
   ani1x_training.py, and \*SNAPExample.py) must be performed using 
   PyTorch rather than NumPy. 
 - The hippynn Database object and any functions which return this object 
-  now except only an int or a torch.Generator for the ``seed`` argument. 
+  now accept only an int or a torch.Generator for the ``seed`` argument. 
+- The arguments on the MD objects LangevinDynamics and ASELangevinDynamics
+  have changed slightly. 
 
 New Features:
 -------------
 
 - Added new network type, HIP-HOP-NN.
+- Added capability to use LAMMPS-MLIAP comm features to remove the need
+  for extensive halo regions when using multiple interaction layers.
+
 
 Improvements:
 -------------
@@ -23,6 +28,8 @@ Improvements:
 
 Bug Fixes:
 ----------
+- Fix issue with friction coefficient being calculated incorrectly in 
+  LangevinDynamics.
 
 
 0.1.0

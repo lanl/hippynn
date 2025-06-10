@@ -378,7 +378,7 @@ class Database:
         if not len(mask_vars):
             raise ValueError("No split mask detected.")
 
-        masks = {k[len(split_prefix) :]: self.arr_dict[k].astype(bool) for k in mask_vars}
+        masks = {k[len(split_prefix) :]: self.arr_dict[k].to(torch.bool) for k in mask_vars}
 
         if not self.quiet:
             print("Auto-detected splits:", list(masks.keys()))
@@ -394,7 +394,7 @@ class Database:
         # Check that masks define a complete split
         mask_counts = torch.zeros(n_sys, dtype=int)
         for k, arr in masks.items():
-            mask_counts += arr.astype(int)
+            mask_counts += arr.to(int)
         if not (mask_counts == 1).all():
             set_of_counts = set(mask_counts)
             raise ValueError(
@@ -550,7 +550,7 @@ class Database:
             drop_mask = torch.sum(large_property_mask, dim=non_batch_axes) > 0
             indices = self.arr_dict["indices"][drop_mask]
             if drop_mask.any():
-                print(f"Removed {drop_mask.astype(int).sum()} outlier systems in variable {key} due to static cut.")
+                print(f"Removed {drop_mask.to(int).sum()} outlier systems in variable {key} due to static cut.")
                 self.make_explicit_split(f"failed_cut_{key}", indices)
 
         if std_factor is not None:
@@ -561,7 +561,7 @@ class Database:
             drop_mask = torch.sum(large_property_mask, dim=non_batch_axes) > 0
             indices = self.arr_dict["indices"][drop_mask]
             if drop_mask.any():
-                print(f"Removed {drop_mask.astype(int).sum()} outlier systems in variable {key} due to std. factor.")
+                print(f"Removed {drop_mask.to(int).sum()} outlier systems in variable {key} due to std. factor.")
                 self.make_explicit_split(f"failed_std_fac_{key}", indices)
 
     def write_h5(self,
