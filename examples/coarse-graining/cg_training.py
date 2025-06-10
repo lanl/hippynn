@@ -65,180 +65,184 @@ with np.load(training_data_file, allow_pickle=True) as data:
         data["species"] = np.tile(data["species"], (n_frames, 1))
         np.savez()
 
-## Initialize needed nodes for network
-# Network input nodes
-species = SpeciesNode(name="species", db_name="species")
-positions = PositionsNode(name="positions", db_name="positions")
-cells = CellNode(name="cells", db_name="cells")
 
-# Network hyperparameters
-network_params = {
-    "possible_species": [0] + unique_species, # hippynn requires a sentinal/null species of 0
-    "n_features": 128,
-    "n_sensitivities": 20,
-    "dist_soft_min": 2.0,
-    "dist_soft_max": 13.0,
-    "dist_hard_max": 15.0,
-    "n_interaction_layers": 1,
-    "n_atom_layers": 3,
-    "sensitivity_type": "inverse",
-    "resnet": True,
-}
-
-# Species encoder
-enc, pdx = acquire_encoding_padding([species], species_set=[0] + unique_species)
-
-# Pair finder
-pair_finder = KDTreePairsMemory(
-    "pairs",
-    (positions, enc, pdx, cells),
-    dist_hard_max=network_params["dist_hard_max"],
-    skin=0,
-)
-
-# HIP-NN-TS node with l=2
-network = HipnnQuad(
-    "HIPNN", (pdx, pair_finder), module_kwargs=network_params, periodic=True
-)
-
-# Network energy prediction
-henergy = HEnergyNode("HEnergy", parents=(network,))
-
-# Repulsive potential
-repulse = RepulsivePotentialBySpeciesNode(
-    "repulse", 
-    (pair_finder, pdx), 
-    taper_point=repulsive_potential_taper_point,
-    strength=repulsive_potential_strength,
-    dr=0.15,
-    perc=0.05,
-)
-
-# Combined energy prediction
-sys_energy = henergy.mol_energy + repulse.mol_energy
-sys_energy.name = "sys_energy"
-sys_energy._index_state = IdxType.Molecules
-
-# Force node
-grad = MultiGradientNode("forces", sys_energy, (positions,), signs=-1)
-force = grad.children[0]
-force.db_name = "forces"
-
-# Now that we've constructed our model, we'll build the loss metrics
-validation_losses = {}
-
-# This will allow us to calculate losses and make plots of the losses by species
-# split force by species
-force_pred_by_species = SpeciesIndexer("force_by_species_pred", parents=(force.pred,))
-force_true_by_species = SpeciesIndexer("force_by_species_true", parents=(force.true,))
-
-for true_idxed, pred_idxed in zip(force_true_by_species.children, force_pred_by_species.children):
-    species_id = true_idxed.name.split("_")[-1] # Parse the node name to find the species value
-    if species_lookup is not None:
-        species_id = species_lookup.number_to_name(species_id) # get name corresponding to species number
-    validation_losses.update(
-        {
-            f"ForceRMSESpecies{species_id}": loss.MSELoss(pred_idxed, true_idxed) ** (1 / 2),
-            f"ForceMAESpecies{species_id}": loss.MAELoss(pred_idxed, true_idxed),
-            f"ForceRsqSpecies{species_id}": loss.Rsq(pred_idxed, true_idxed),
-        }
-    )
-
-# System-wide losses
-force_rsq = loss.Rsq.of_node(force)
-force_rmse = loss.MSELoss.of_node(force) ** (1 / 2)
-force_mae = loss.MAELoss.of_node(force)
-total_loss = force_rmse + force_mae
-
-validation_losses.update({
-    "ForceRMSE": force_rmse,
-    "ForceMAE": force_mae,
-    "ForceRsq": force_rsq,
-    "TotalLoss": total_loss,
-})
-
-plotters = [
-    Hist2D.compare(force, saved="forces", shown=False),
-    SensitivityPlot(
-        network.torch_module.sensitivity_layers[0], saved="sensitivity", shown=False
-    ),
-]
-
-for true_idxed, pred_idxed in zip(force_true_by_species.children, force_pred_by_species.children):
-    species_id = true_idxed.name.split("_")[-1] # Parse the node name to find the species value
-    if species_lookup is not None:
-        species_id = species_lookup.number_to_name(species_id) # get name corresponding to species number
-    plotters.append(
-        Hist2D(
-            x_var=true_idxed, 
-            y_var=pred_idxed, 
-            xlabel=f"true force, species {species_id}", 
-            ylabel=f"predicted force, species {species_id}", 
-            saved=f"force_species_{species_id.replace(' ', '_')}",
-        )
-    )
-
-plot_maker = PlotMaker(
-    *plotters,
-    plot_every=10,
-)
-
-## Build network
-training_modules, db_info = assemble_for_training(
-    total_loss, validation_losses, plot_maker=plot_maker
-)
-
-## Load training data
-database = NPZDatabase(
-    training_data_file, 
-    seed=0, 
-    **db_info, 
-    valid_size=0.1, 
-    test_size=0.1,
-)
-
-## Set up optimizer
-optimizer = torch.optim.Adam(training_modules.model.parameters(), lr=1e-3)
-
-scheduler = RaiseBatchSizeOnPlateau(
-    optimizer=optimizer,
-    max_batch_size=64,
-    patience=10,
-    factor=0.5,
-)
-
-controller = PatienceController(
-    optimizer=optimizer,
-    scheduler=scheduler,
-    batch_size=1,
-    fraction_train_eval=0.2,
-    eval_batch_size=1,
-    max_epochs=200,
-    termination_patience=20,
-    stopping_key="TotalLoss",
-)
-
-experiment_params = SetupParams(controller=controller)
-
-## Train!
-results_folder = "model"
 with active_directory(results_folder):
-    metric_tracker = setup_and_train(
-        training_modules=training_modules,
-        database=database,
-        setup_params=experiment_params,
-    )
+    with hippynn.tools.log_terminal("training_log.txt", "wt"):
 
-print(f"PyTorch model saved in directory {os.path.abspath(results_folder)}")
+        ## Initialize needed nodes for network
+        # Network input nodes
+        species = SpeciesNode(name="species", db_name="species")
+        positions = PositionsNode(name="positions", db_name="positions")
+        cells = CellNode(name="cells", db_name="cells")
 
-# To save a version to run in LAMMPS, the species names must be ordered corresponding to the 
-# list `possible_species` provided as a network parameter (without the 0)
-if species_lookup is not None:
-    species_names_ordered = [species_lookup.number_to_name(num) for num in unique_species]
-else:
-    species_names_ordered = ["MeOH"] # for methanol example
+        # Network hyperparameters
+        network_params = {
+            "possible_species": [0] + unique_species, # hippynn requires a sentinal/null species of 0
+            "n_features": 128,
+            "n_sensitivities": 20,
+            "dist_soft_min": 2.0,
+            "dist_soft_max": 13.0,
+            "dist_hard_max": 15.0,
+            "n_interaction_layers": 1,
+            "n_atom_layers": 3,
+            "sensitivity_type": "inverse",
+            "resnet": True,
+        }
 
-try:
-    save_model_for_lammps(model_folder=results_folder, species_names_ordered=species_names_ordered)
-except ImportError as e:
-    print(f"Unable to save model as LAMMPS ML-IAP model: {e}.")
+        # Species encoder
+        enc, pdx = acquire_encoding_padding([species], species_set=[0] + unique_species)
+
+        # Pair finder
+        pair_finder = KDTreePairsMemory(
+            "pairs",
+            (positions, enc, pdx, cells),
+            dist_hard_max=network_params["dist_hard_max"],
+            skin=0,
+        )
+
+        # HIP-NN-TS node with l=2
+        network = HipnnQuad(
+            "HIPNN", (pdx, pair_finder), module_kwargs=network_params, periodic=True
+        )
+
+        # Network energy prediction
+        henergy = HEnergyNode("HEnergy", parents=(network,))
+
+        # Repulsive potential
+        repulse = RepulsivePotentialBySpeciesNode(
+            "repulse", 
+            (pair_finder, pdx), 
+            taper_point=repulsive_potential_taper_point,
+            strength=repulsive_potential_strength,
+            dr=0.15,
+            perc=0.05,
+        )
+
+        # Combined energy prediction
+        sys_energy = henergy.mol_energy + repulse.mol_energy
+        sys_energy.name = "sys_energy"
+        sys_energy._index_state = IdxType.Molecules
+
+        # Force node
+        grad = MultiGradientNode("forces", sys_energy, (positions,), signs=-1)
+        force = grad.children[0]
+        force.db_name = "forces"
+
+        # Now that we've constructed our model, we'll build the loss metrics
+        validation_losses = {}
+
+        # This will allow us to calculate losses and make plots of the losses by species
+        # split force by species
+        force_pred_by_species = SpeciesIndexer("force_by_species_pred", parents=(force.pred,))
+        force_true_by_species = SpeciesIndexer("force_by_species_true", parents=(force.true,))
+
+        for true_idxed, pred_idxed in zip(force_true_by_species.children, force_pred_by_species.children):
+            species_id = true_idxed.name.split("_")[-1] # Parse the node name to find the species value
+            if species_lookup is not None:
+                species_id = species_lookup.number_to_name(species_id) # get name corresponding to species number
+            validation_losses.update(
+                {
+                    f"ForceRMSESpecies{species_id}": loss.MSELoss(pred_idxed, true_idxed) ** (1 / 2),
+                    f"ForceMAESpecies{species_id}": loss.MAELoss(pred_idxed, true_idxed),
+                    f"ForceRsqSpecies{species_id}": loss.Rsq(pred_idxed, true_idxed),
+                }
+            )
+
+        # System-wide losses
+        force_rsq = loss.Rsq.of_node(force)
+        force_rmse = loss.MSELoss.of_node(force) ** (1 / 2)
+        force_mae = loss.MAELoss.of_node(force)
+        total_loss = force_rmse + force_mae
+
+        validation_losses.update({
+            "ForceRMSE": force_rmse,
+            "ForceMAE": force_mae,
+            "ForceRsq": force_rsq,
+            "TotalLoss": total_loss,
+        })
+
+        plotters = [
+            Hist2D.compare(force, saved="forces", shown=False),
+            SensitivityPlot(
+                network.torch_module.sensitivity_layers[0], saved="sensitivity", shown=False
+            ),
+        ]
+
+        for true_idxed, pred_idxed in zip(force_true_by_species.children, force_pred_by_species.children):
+            species_id = true_idxed.name.split("_")[-1] # Parse the node name to find the species value
+            if species_lookup is not None:
+                species_id = species_lookup.number_to_name(species_id) # get name corresponding to species number
+            plotters.append(
+                Hist2D(
+                    x_var=true_idxed, 
+                    y_var=pred_idxed, 
+                    xlabel=f"true force, species {species_id}", 
+                    ylabel=f"predicted force, species {species_id}", 
+                    saved=f"force_species_{species_id.replace(' ', '_')}",
+                )
+            )
+
+        plot_maker = PlotMaker(
+            *plotters,
+            plot_every=10,
+        )
+
+        ## Build network
+        training_modules, db_info = assemble_for_training(
+            total_loss, validation_losses, plot_maker=plot_maker
+        )
+
+        ## Load training data
+        database = NPZDatabase(
+            training_data_file, 
+            seed=0, 
+            **db_info, 
+            valid_size=0.1, 
+            test_size=0.1,
+        )
+
+        ## Set up optimizer
+        optimizer = torch.optim.Adam(training_modules.model.parameters(), lr=1e-3)
+
+        scheduler = RaiseBatchSizeOnPlateau(
+            optimizer=optimizer,
+            max_batch_size=64,
+            patience=10,
+            factor=0.5,
+        )
+
+        controller = PatienceController(
+            optimizer=optimizer,
+            scheduler=scheduler,
+            batch_size=1,
+            fraction_train_eval=0.2,
+            eval_batch_size=1,
+            max_epochs=200,
+            termination_patience=20,
+            stopping_key="TotalLoss",
+        )
+
+        experiment_params = SetupParams(controller=controller)
+
+        ## Train!
+        results_folder = "model"
+
+        metric_tracker = setup_and_train(
+            training_modules=training_modules,
+            database=database,
+            setup_params=experiment_params,
+        )
+
+        print(f"PyTorch model saved in directory {os.path.abspath(results_folder)}")
+
+        # To save a version to run in LAMMPS, the species names must be ordered corresponding to the 
+        # list `possible_species` provided as a network parameter (without the 0)
+        if species_lookup is not None:
+            species_names_ordered = [species_lookup.number_to_name(num) for num in unique_species]
+        else:
+            species_names_ordered = ["MeOH"] # for methanol example
+
+        try:
+            save_model_for_lammps(model_folder=results_folder, species_names_ordered=species_names_ordered)
+        except ImportError as e:
+            print(f"Unable to save model as LAMMPS ML-IAP model: {e}.")
