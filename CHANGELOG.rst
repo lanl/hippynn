@@ -16,8 +16,8 @@ New Features:
 - Added new network type, HIP-HOP-NN.
 - Added capability to use LAMMPS-MLIAP comm features to remove the need
   for extensive halo regions when using multiple interaction layers.
-- Addition of a variety of tools to the ``molecular_dynamics`` subpackage 
-  including one for: applying coarse-graining mappings, calculating
+- Adition of a variety of tools to the ``molecular_dynamics`` subpackage 
+  including ones for: applying coarse-graining mappings, calculating
   RDFs and ADFs, reading LAMMPS and Gromacs data into a format usable
   for training ``hippynn`` models, and writing trajectories to .extxyz files
   for visualization.
