@@ -4,7 +4,7 @@ import itertools
 import numpy as np
 import torch
 
-from hippynn.cgtools.misc import SpeciesLookup
+from hippynn.molecular_dynamics.misc import SpeciesLookup
 from hippynn.databases import NPZDatabase
 from hippynn.experiment import SetupParams, setup_and_train
 from hippynn.experiment.assembly import assemble_for_training

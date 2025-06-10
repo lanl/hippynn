@@ -59,7 +59,7 @@ def coarse_grain_all(values, atom_to_bead, coarse_grain_one, masses=None, cells=
     ``coarse_grain_one`` to each bead. Returns the resulting values in an array of shape (n_frames, n_beads, ...) or (n_beads, ...) 
     where the trailing dimensions match the output of ``coarse_grain_one``.
 
-    See examples of pre-defined ``coarse_grain_one`` options in hippynn.cgtools.coarse_grain.
+    See examples of pre-defined ``coarse_grain_one`` options in hippynn.molecular_dynamics.coarse_grain.
 
     :param values: Array of data to coarse-grain. Shape (n_frames, n_atoms, d) if single_frame=False or 
                   (n_atoms, d) if single_frame=True.

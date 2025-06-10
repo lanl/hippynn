@@ -14,8 +14,8 @@ from hippynn.molecular_dynamics.md import (
     MolecularDynamics,
 )
 from hippynn.tools import active_directory, log_terminal
-from hippynn.cgtools.rdf import calculate_rdf
-from hippynn.cgtools.writers import write_extxyz
+from hippynn.molecular_dynamics.rdf import calculate_rdf
+from hippynn.molecular_dynamics.writers import write_extxyz
 
 
 default_dtype=torch.float  
