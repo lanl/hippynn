@@ -18,12 +18,13 @@ from hippynn.graphs.nodes.pairs import KDTreePairsMemory
 from hippynn.graphs.nodes.physics import MultiGradientNode
 from hippynn.graphs.nodes.targets import HEnergyNode
 from hippynn.plotting import PlotMaker, Hist2D, SensitivityPlot
-from hippynn.tools import active_directory
+from hippynn.tools import active_directory, log_terminal
 
 from repulsive_potential import RepulsivePotentialBySpeciesNode
 from save_model_for_lammps import save_model_for_lammps
 
 training_data_file = os.path.join(os.pardir,os.pardir,os.pardir,"datasets","cg_methanol_trajectory.npz")
+training_data_file = os.path.abspath(training_data_file)
 
 with np.load(training_data_file, allow_pickle=True) as data:
     # For the repulsive potential, we need to provide a Tensor where entry [i, j] corresponds 
@@ -65,9 +66,10 @@ with np.load(training_data_file, allow_pickle=True) as data:
         data["species"] = np.tile(data["species"], (n_frames, 1))
         np.savez()
 
+results_folder = "model"
 
 with active_directory(results_folder):
-    with hippynn.tools.log_terminal("training_log.txt", "wt"):
+    with log_terminal("training_log.txt", "wt"):
 
         ## Initialize needed nodes for network
         # Network input nodes
@@ -225,8 +227,6 @@ with active_directory(results_folder):
         experiment_params = SetupParams(controller=controller)
 
         ## Train!
-        results_folder = "model"
-
         metric_tracker = setup_and_train(
             training_modules=training_modules,
             database=database,
@@ -243,6 +243,6 @@ with active_directory(results_folder):
             species_names_ordered = ["MeOH"] # for methanol example
 
         try:
-            save_model_for_lammps(model_folder=results_folder, species_names_ordered=species_names_ordered)
+            save_model_for_lammps(model_folder=".", species_names_ordered=species_names_ordered)
         except ImportError as e:
             print(f"Unable to save model as LAMMPS ML-IAP model: {e}.")
