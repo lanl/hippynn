@@ -20,6 +20,9 @@ torch.set_default_dtype(default_dtype)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# ase.units does not have a unit for picoseconds, so we'll create one
+ps = units.fs * 1000
+
 # Load initial conditions
 training_data_file = os.path.join(os.pardir,os.pardir,os.pardir,"datasets","cg_methanol_trajectory.npz")
 
@@ -45,11 +48,11 @@ positions_variable = Variable(
 
 position_updater = LangevinDynamics(
     force_db_name="forces",
-    temperature=700,
-    frix=6,
-    force_units=units.kcal / units.mol / units.Ang,
-    position_units=units.Ang,
-    time_units=units.fs,
+    temperature_K=700,
+    frix=6, # this should be in 1/ps since the time unit we specify below is ps
+    force_units=units.kcal / units.mol / units.Ang, # this needs to match the training data we used for our HIPNN model
+    position_units=units.Ang, # this needs to match the training data we used for our HIPNN model
+    time_units=ps, # we'll use this because the velocity data is in A/ps. Otherwise, it wouldn't matter as long as we are consistent
     seed=1993,
 )
 positions_variable.updater = position_updater
@@ -100,8 +103,8 @@ with active_directory("md_results"):
         model=model,
     )
 
-    emdee.run(dt=0.001, n_steps=20000)
-    emdee.run(dt=0.001, n_steps=50000, record_every=50)
+    emdee.run(dt=0.001, n_steps=200000) # time units should be whatever was specified in Variable Updater(s). For us that is ps
+    emdee.run(dt=0.001, n_steps=500000, record_every=500)
 
     data = emdee.get_data()
     np.savez("hippynn_cg_trajectory.npz",
