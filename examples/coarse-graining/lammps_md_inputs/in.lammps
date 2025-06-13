@@ -11,12 +11,12 @@ sys.path.append('..')  # Add parent directory to path
 """
 
 pair_style          mliap unified ../model/mliap_unified_hippynn.pt 0
-pair_coeff          * * MeOH
+pair_coeff          * * MeOH    # this must be the same list in the same order of species names used when creating the mliap_unified_hippynn.pt file
 
 neighbor            2.0 bin
 neigh_modify        delay 0 every 1 check yes
     
-timestep            1 # fs
+timestep            1   # fs
 
 thermo_style        custom step vol temp press ke pe etotal 
 thermo              1000

@@ -37,15 +37,17 @@ class MultiGradient(torch.nn.Module):
 class StressForce(torch.nn.Module):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.pbc = False
+        self.pbc = True
 
     def forward(self, energy, strain, coordinates, cell):
         total_energy = energy.sum()
-        straingrad, grad = torch.autograd.grad(total_energy, [strain, coordinates], create_graph=self.training)
+        straingrad, grad = torch.autograd.grad(total_energy, [strain, coordinates], create_graph=True)
         if self.pbc:
-            stress = straingrad / torch.det(cell)
+            volume = torch.det(cell)
+            stress = straingrad / volume.unsqueeze(1).unsqueeze(1)
         else:
             stress = straingrad
+
         return -grad, stress
 
 

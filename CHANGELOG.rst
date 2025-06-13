@@ -6,12 +6,25 @@ Breaking changes:
   ani1x_training.py, and \*SNAPExample.py) must be performed using 
   PyTorch rather than NumPy. 
 - The hippynn Database object and any functions which return this object 
-  now except only an int or a torch.Generator for the ``seed`` argument. 
+  now accept only an int or a torch.Generator for the ``seed`` argument. 
+- The arguments on the MD objects LangevinDynamics and ASELangevinDynamics
+  have changed slightly. 
 
 New Features:
 -------------
 
 - Added new network type, HIP-HOP-NN.
+- Added capability to use LAMMPS-MLIAP comm features to remove the need
+  for extensive halo regions when using multiple interaction layers.
+- Addition of a variety of tools to the ``molecular_dynamics`` subpackage 
+  including ones for: applying coarse-graining mappings, calculating
+  RDFs and ADFs, reading LAMMPS and Gromacs data into a format usable
+  for training ``hippynn`` models, and writing trajectories to .extxyz files
+  for visualization.
+- Enhanced coarse-graining example by adding: example pipeline for processing
+  AA data to use in training CG model, capability to use a species-pair-specific 
+  repulsive potential, extended processing of data from CG MD, and a notebook 
+  for visualizing the repulsive potentials. 
 
 Improvements:
 -------------
@@ -23,6 +36,8 @@ Improvements:
 
 Bug Fixes:
 ----------
+- Fix issue with friction coefficient being calculated incorrectly in 
+  LangevinDynamics.
 
 
 0.1.0

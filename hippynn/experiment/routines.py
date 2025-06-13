@@ -287,6 +287,21 @@ def train_model(
 
     metric_tracker.quiet = quiet
 
+    # Ensure database inputs and targets are available and ordered correctly.
+    db_input_set = set(database.inputs)
+    db_target_set = set(database.targets)
+    evaluator_input_set = set(evaluator.db_info['inputs'])
+    evaluator_target_set = set(evaluator.db_info['targets'])
+
+    if db_input_set != evaluator_input_set:        
+        raise ValueError("Evaluator and database have incompatible input sets: "
+                        f"{db_input_set} vs {evaluator_input_set}")
+    if db_target_set != evaluator_target_set:
+        raise ValueError("Evaluator and database have incompatible target sets: "
+                        f"{db_target_set} vs {evaluator_target_set}")
+    database.inputs = evaluator.db_info['inputs']
+    database.targets = evaluator.db_info['targets']
+
     if store_structure_file:
         serialization.create_structure_file(training_modules, database, controller)
 
