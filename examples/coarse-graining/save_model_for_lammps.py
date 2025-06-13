@@ -7,7 +7,7 @@ from hippynn.tools import active_directory, device_fallback
 
 from hippynn.interfaces.lammps_interface import MLIAPInterface
 
-def save_model_for_lammps(model_folder, mliap_filename = "mliap_unified_hippynn.pt"):
+def save_model_for_lammps(model_folder, species_names_ordered, mliap_filename = "mliap_unified_hippynn.pt"):
     with active_directory(model_folder, create=False):
         bundle = load_checkpoint_from_cwd(map_location='cpu')
 
@@ -18,12 +18,10 @@ def save_model_for_lammps(model_folder, mliap_filename = "mliap_unified_hippynn.
 
         atom_energies = henergy_node.atom_energies + repulse_node.atom_energies
 
-        species_names = ["MeOH"]
-
-        unified = MLIAPInterface(atom_energies, species_names, model_device=device_fallback())
+        unified = MLIAPInterface(atom_energies, species_names_ordered, model_device=device_fallback())
 
         torch.save(unified, mliap_filename)
         print(f"LAMMPS ML-IAP saved at {os.path.abspath(os.path.join(model_folder, mliap_filename))}")
 
 if __name__ == "__main__":
-    save_model_for_lammps("model")
+    save_model_for_lammps("model", species_names_ordered=["MeOH"])

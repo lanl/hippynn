@@ -18,14 +18,20 @@ def write_lammps_data_from_npz(npz_data_file, tgt_file="system.data", frame=-1):
         masses = f['masses']
         positions = f['positions']
         species = f['species']
-        velocities = f['velocities']
+        try:
+            velocities = f['velocities']
+        except KeyError:
+            velocities = None
+            print('NOTE: No velocities specified in input file. LAMMPS will assign velocities of zero by default. Other velocity intializations can also be requested in the LAMMPS input script.')
+            
 
     if frame is not None:
         cell = cells[frame]
         masses = masses[frame]
         positions = positions[frame]
         species = species[frame]
-        velocities = velocities[frame]
+        if velocities is not None:
+            velocities = velocities[frame]
 
     if cell.shape == (3,3):
         if np.allclose(cell, np.diag(np.diag(cell))): # if cell is diagonal matrix
@@ -35,7 +41,9 @@ def write_lammps_data_from_npz(npz_data_file, tgt_file="system.data", frame=-1):
     elif cell.shape != (3,):
         raise ValueError("Cell must be specified as a (3,) matrix or as a (3,3) diagonal matrix.")
     
-    velocities = velocities / 1000 # the velocities are in ps/A but we'll need them in fs/A
+    if velocities is not None:
+        print("Velocity data has been converted from ps/Ang to fs/Ang.")
+        velocities = velocities / 1000 # the velocities are in ps/A but we'll need them in fs/A. Change as needed
          
     n_beads = positions.shape[0]
 
@@ -61,10 +69,11 @@ def write_lammps_data_from_npz(npz_data_file, tgt_file="system.data", frame=-1):
         for i, (type, coords) in enumerate(zip(species.reshape(-1), positions.reshape(-1, 3))):
             t.write(f"{i+1} {type} {coords[0]} {coords[1]} {coords[2]} \n")
 
-        t.write("\nVelocities\n\n")
+        if velocities is not None:
+            t.write("\nVelocities\n\n")
 
-        for i, (type, coords) in enumerate(zip(species.reshape(-1), velocities.reshape(-1, 3))):
-            t.write(f"{i+1} {coords[0]} {coords[1]} {coords[2]} \n")
+            for i, (type, coords) in enumerate(zip(species.reshape(-1), velocities.reshape(-1, 3))):
+                t.write(f"{i+1} {coords[0]} {coords[1]} {coords[2]} \n")
 
     print(f"LAMMPS data input file written to {os.path.abspath(tgt_file)}.")
     return
