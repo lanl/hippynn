@@ -1,0 +1,313 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>coarse_grain module &mdash; hippynn 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c9d3d048"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="md module" href="hippynn.molecular_dynamics.md.html" />
+    <link rel="prev" title="box_volume_calculator module" href="hippynn.molecular_dynamics.box_volume_calculator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../what_is_hippynn.html">What is hippynn?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Research articles using hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/features.html">hippynn Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/concepts.html">hippynn Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/databases.html">Databases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/loss_graph.html">Model and Loss Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/units.html">Units in hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/ckernels.html">Custom Kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/settings.html">Library Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/custom_nodes.html">Creating Custom Node Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/minimal_workflow.html">Minimal Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/controller.html">Controller</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/predictor.html">Predictor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/ensembles.html">Ensembling Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/periodic.html">Periodic Boundary Conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/forces.html">Force Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/restarting.html">Restarting training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/ase_calculator.html">ASE Calculators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/mliap_unified.html">LAMMPS interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/excited_states.html">Non-Adiabiatic Excited States</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/weighted_loss.html">Weighted/Masked Loss Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/lightning.html">Pytorch Lightning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/hyperopt.html">Hyperparameter optimization with Ax and Ray</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="hippynn.html">Full API Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.settings"><code class="docutils literal notranslate"><span class="pre">settings</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.Database"><code class="docutils literal notranslate"><span class="pre">Database</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.DirectoryDatabase"><code class="docutils literal notranslate"><span class="pre">DirectoryDatabase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.GraphModule"><code class="docutils literal notranslate"><span class="pre">GraphModule</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.IdxType"><code class="docutils literal notranslate"><span class="pre">IdxType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.NPZDatabase"><code class="docutils literal notranslate"><span class="pre">NPZDatabase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.Predictor"><code class="docutils literal notranslate"><span class="pre">Predictor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.active_directory"><code class="docutils literal notranslate"><span class="pre">active_directory()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.hierarchical_energy_initialization"><code class="docutils literal notranslate"><span class="pre">hierarchical_energy_initialization()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint"><code class="docutils literal notranslate"><span class="pre">load_checkpoint()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_model_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_model_from_cwd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.log_terminal"><code class="docutils literal notranslate"><span class="pre">log_terminal()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.make_ensemble"><code class="docutils literal notranslate"><span class="pre">make_ensemble()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.reload_settings"><code class="docutils literal notranslate"><span class="pre">reload_settings()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.set_custom_kernels"><code class="docutils literal notranslate"><span class="pre">set_custom_kernels()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.setup_and_train"><code class="docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.setup_training"><code class="docutils literal notranslate"><span class="pre">setup_training()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.test_model"><code class="docutils literal notranslate"><span class="pre">test_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.train_model"><code class="docutils literal notranslate"><span class="pre">train_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.html">custom_kernels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.databases.html">databases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.experiment.html">experiment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.graphs.html">graphs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.interfaces.html">interfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.layers.html">layers</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="hippynn.molecular_dynamics.html">molecular_dynamics</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.molecular_dynamics.box_volume_calculator.html">box_volume_calculator module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">coarse_grain module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.molecular_dynamics.coarse_grain.cg_one_average"><code class="docutils literal notranslate"><span class="pre">cg_one_average()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.molecular_dynamics.coarse_grain.cg_one_center_of_geometry_pbc"><code class="docutils literal notranslate"><span class="pre">cg_one_center_of_geometry_pbc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.molecular_dynamics.coarse_grain.cg_one_center_of_mass_pbc"><code class="docutils literal notranslate"><span class="pre">cg_one_center_of_mass_pbc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.molecular_dynamics.coarse_grain.cg_one_mass_weighted_average"><code class="docutils literal notranslate"><span class="pre">cg_one_mass_weighted_average()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.molecular_dynamics.coarse_grain.cg_one_sum"><code class="docutils literal notranslate"><span class="pre">cg_one_sum()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.molecular_dynamics.coarse_grain.coarse_grain_all"><code class="docutils literal notranslate"><span class="pre">coarse_grain_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.molecular_dynamics.coarse_grain.compute_bead_indices"><code class="docutils literal notranslate"><span class="pre">compute_bead_indices()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.molecular_dynamics.coarse_grain.padded_ndarray_from_list"><code class="docutils literal notranslate"><span class="pre">padded_ndarray_from_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.molecular_dynamics.coarse_grain.validate_bead_species"><code class="docutils literal notranslate"><span class="pre">validate_bead_species()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.molecular_dynamics.coarse_grain.validate_cells"><code class="docutils literal notranslate"><span class="pre">validate_cells()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.molecular_dynamics.coarse_grain.validate_nframes_natoms"><code class="docutils literal notranslate"><span class="pre">validate_nframes_natoms()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.molecular_dynamics.md.html">md module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.molecular_dynamics.misc.html">misc module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.molecular_dynamics.pbc_tools.html">pbc_tools module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.molecular_dynamics.rdf.html">rdf module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.molecular_dynamics.readers.html">readers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.molecular_dynamics.writers.html">writers module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.networks.html">networks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.optimizer.html">optimizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.plotting.html">plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.pretraining.html">pretraining module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.tools.html">tools module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api_summary/hippynn.html">API Summary Pages</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="hippynn.html">hippynn</a></li>
+          <li class="breadcrumb-item"><a href="hippynn.molecular_dynamics.html">molecular_dynamics</a></li>
+      <li class="breadcrumb-item active">coarse_grain module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api_documentation/hippynn.molecular_dynamics.coarse_grain.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="hippynn.molecular_dynamics.box_volume_calculator.html" class="btn btn-neutral float-left" title="box_volume_calculator module" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hippynn.molecular_dynamics.md.html" class="btn btn-neutral float-right" title="md module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="coarse-grain-module">
+<h1>coarse_grain module<a class="headerlink" href="#coarse-grain-module" title="Link to this heading"></a></h1>
+<p>Full Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.molecular_dynamics.coarse_grain</span></code> module.
+<span class="xref std std-doc">Click here for a summary page.</span></p>
+<dl class="py function" id="module-hippynn.molecular_dynamics.coarse_grain">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.coarse_grain.cg_one_average">
+<span class="sig-name descname"><span class="pre">cg_one_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#cg_one_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.coarse_grain.cg_one_average" title="Link to this definition"></a></dt>
+<dd><p>Unweighted average</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.coarse_grain.cg_one_center_of_geometry_pbc">
+<span class="sig-name descname"><span class="pre">cg_one_center_of_geometry_pbc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrap_into_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#cg_one_center_of_geometry_pbc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.coarse_grain.cg_one_center_of_geometry_pbc" title="Link to this definition"></a></dt>
+<dd><p>Position center of geometry using PBC</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.coarse_grain.cg_one_center_of_mass_pbc">
+<span class="sig-name descname"><span class="pre">cg_one_center_of_mass_pbc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead_masses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrap_into_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#cg_one_center_of_mass_pbc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.coarse_grain.cg_one_center_of_mass_pbc" title="Link to this definition"></a></dt>
+<dd><p>Position center of mass using PBC</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.coarse_grain.cg_one_mass_weighted_average">
+<span class="sig-name descname"><span class="pre">cg_one_mass_weighted_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead_masses</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#cg_one_mass_weighted_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.coarse_grain.cg_one_mass_weighted_average" title="Link to this definition"></a></dt>
+<dd><p>General mass-weighted average (eg. for velocities when using COM position mapping)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.coarse_grain.cg_one_sum">
+<span class="sig-name descname"><span class="pre">cg_one_sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#cg_one_sum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.coarse_grain.cg_one_sum" title="Link to this definition"></a></dt>
+<dd><p>Sum of values</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.coarse_grain.coarse_grain_all">
+<span class="sig-name descname"><span class="pre">coarse_grain_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_to_bead</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coarse_grain_one</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masses</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cells</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead_species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">single_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#coarse_grain_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.coarse_grain.coarse_grain_all" title="Link to this definition"></a></dt>
+<dd><p>Apply a user-defined <code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code> function to all beads across all frames.</p>
+<p>The user-supplied function, <code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code>, should take <code class="docutils literal notranslate"><span class="pre">bead_values</span></code> as an argument, which will correspond the the values
+of <code class="docutils literal notranslate"><span class="pre">values</span></code> for one bead in one frame. It can optionally take <code class="docutils literal notranslate"><span class="pre">bead_masses</span></code>, <code class="docutils literal notranslate"><span class="pre">frame_cell</span></code>, <code class="docutils literal notranslate"><span class="pre">bead_atom_species</span></code>, and <code class="docutils literal notranslate"><span class="pre">bead_type</span></code>
+as additional arguments. It should return the coarse_grained version of <code class="docutils literal notranslate"><span class="pre">values</span></code> for the bead given the data provided.</p>
+<p>This function loops over each frame (if single_frame=False) and over each bead (as defined by atom_to_bead) and applies
+<code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code> to each bead. Returns the resulting values in an array of shape (n_frames, n_beads, …) or (n_beads, …) 
+where the trailing dimensions match the output of <code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code>.</p>
+<p>See examples of pre-defined <code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code> options in hippynn.molecular_dynamics.coarse_grain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> – Array of data to coarse-grain. Shape (n_frames, n_atoms, d) if single_frame=False or 
+(n_atoms, d) if single_frame=True.</p></li>
+<li><p><strong>atom_to_bead</strong> – Integer array of shape (n_frames, n_atoms,) or (n_atoms,) mapping each atom to a bead.</p></li>
+<li><p><strong>coarse_grain_one</strong> – Function to coarse-grain one bead’s data.</p></li>
+<li><p><strong>masses</strong> – (Optional) Array of shape (n_frames, n_atoms,) or (n_atoms,) of masses. Values for the current frame/bead passed
+to <code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code> if provided.</p></li>
+<li><p><strong>cells</strong> – (Optional) Array of shape (n_frames, 3, 3) or (3, 3) of cell matrices. The cell for the current frame
+is passed to <code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code> if provided.</p></li>
+<li><p><strong>atom_species</strong> – (Optional) Array of shape (n_frames, n_atoms,) or (n_atoms,) of atom species, defined in any manner 
+you choose. Values for the current frame passed to <code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code> if provided.</p></li>
+<li><p><strong>bead_species</strong> – (Optional) Array of shape (n_frames, max_bead_idx+1,) or (max_bead_idx+1,) where <code class="docutils literal notranslate"><span class="pre">max_bead_idx</span></code>
+is the maximum value in <code class="docutils literal notranslate"><span class="pre">atom_to_bead</span></code>. Values for the current frame/bead passed to <code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code> 
+if provided.</p></li>
+<li><p><strong>single_frame</strong> – (Optional) Use to specify if data arrays contain a frame axis. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array of coarse-grained values. Shape (n_frames, n_beads, …) if single_frame=False or 
+(n_beads, …) if single_frame=True.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.coarse_grain.compute_bead_indices">
+<span class="sig-name descname"><span class="pre">compute_bead_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom_to_bead</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#compute_bead_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.coarse_grain.compute_bead_indices" title="Link to this definition"></a></dt>
+<dd><p>Compute bead indices from an atom-to-bead mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>atom_to_bead</strong> – Array of shape (n_atoms,) mapping each atom to a bead.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple (beads, bead_indices) where:
+- beads is a sorted array of unique bead labels.
+- bead_indices is a dict mapping each bead label to its atom indices.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.coarse_grain.padded_ndarray_from_list">
+<span class="sig-name descname"><span class="pre">padded_ndarray_from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_of_lists</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#padded_ndarray_from_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.coarse_grain.padded_ndarray_from_list" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.coarse_grain.validate_bead_species">
+<span class="sig-name descname"><span class="pre">validate_bead_species</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead_species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_to_bead</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_frames</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#validate_bead_species"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.coarse_grain.validate_bead_species" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.coarse_grain.validate_cells">
+<span class="sig-name descname"><span class="pre">validate_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cells</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_frames</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#validate_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.coarse_grain.validate_cells" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.coarse_grain.validate_nframes_natoms">
+<span class="sig-name descname"><span class="pre">validate_nframes_natoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_frames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_atoms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#validate_nframes_natoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.coarse_grain.validate_nframes_natoms" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="hippynn.molecular_dynamics.box_volume_calculator.html" class="btn btn-neutral float-left" title="box_volume_calculator module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hippynn.molecular_dynamics.md.html" class="btn btn-neutral float-right" title="md module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>
