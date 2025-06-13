@@ -406,6 +406,21 @@
 
     <span class="n">metric_tracker</span><span class="o">.</span><span class="n">quiet</span> <span class="o">=</span> <span class="n">quiet</span>
 
+    <span class="c1"># Ensure database inputs and targets are available and ordered correctly.</span>
+    <span class="n">db_input_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">database</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="n">db_target_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">database</span><span class="o">.</span><span class="n">targets</span><span class="p">)</span>
+    <span class="n">evaluator_input_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">db_info</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">])</span>
+    <span class="n">evaluator_target_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">db_info</span><span class="p">[</span><span class="s1">&#39;targets&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">db_input_set</span> <span class="o">!=</span> <span class="n">evaluator_input_set</span><span class="p">:</span>        
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Evaluator and database have incompatible input sets: &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">db_input_set</span><span class="si">}</span><span class="s2"> vs </span><span class="si">{</span><span class="n">evaluator_input_set</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">db_target_set</span> <span class="o">!=</span> <span class="n">evaluator_target_set</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Evaluator and database have incompatible target sets: &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">db_target_set</span><span class="si">}</span><span class="s2"> vs </span><span class="si">{</span><span class="n">evaluator_target_set</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">database</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">db_info</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">]</span>
+    <span class="n">database</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">db_info</span><span class="p">[</span><span class="s1">&#39;targets&#39;</span><span class="p">]</span>
+
     <span class="k">if</span> <span class="n">store_structure_file</span><span class="p">:</span>
         <span class="n">serialization</span><span class="o">.</span><span class="n">create_structure_file</span><span class="p">(</span><span class="n">training_modules</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">controller</span><span class="p">)</span>
 
