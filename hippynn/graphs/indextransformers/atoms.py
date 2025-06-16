@@ -9,13 +9,18 @@ from ..nodes.inputs import SpeciesNode
 
 
 # TODO: Rewrite so it can use non-one-hot-encodings?
-
+def make_search_nodes(node,hints):
+    if hints is None:
+        return set([node])
+    else:
+        return set([node, *hints])
+    
 
 @register_index_transformer(IdxType.MolAtom, IdxType.Atoms)
 def idx_molatom_atom(node, hints=None):
     purpose = "auto-generating indexing for {}".format(node)
 
-    search_nodes = set([node,*hints])
+    search_nodes = make_search_nodes(node,hints)
 
     funrel = find_unique_relative  # Abbreviation because we so many calls in this function.
     if node.origin_node is None:

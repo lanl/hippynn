@@ -9,27 +9,30 @@ from ..nodes.inputs import SpeciesNode, PositionsNode
 from ..nodes.pairs import PairReIndexer, PairDeIndexer
 from hippynn.graphs.nodes.tags import PairIndexer
 
+from .atoms import make_search_nodes
 
 # TODO: Rewrite so it can use non-one-hot-encodings?
-
 
 @register_index_transformer(IdxType.MolAtomAtom, IdxType.Pair)
 def idx_molatomatom_pair(node, hints=None):
     purpose = "auto-generating indexing for {}".format(node)
 
+    search_nodes = make_search_nodes(node, hints)
+
     funrel = find_unique_relative  # Abbreviation because we so many calls in this function.
     if node.origin_node is None:
         # If we are auto-indexing in the model graph, it should be easy.
-        pair_idx = funrel(node, PairIndexer, why_desc=purpose)
-        pidxer = funrel(node, PaddingIndexer, why_desc=purpose)
+        pair_idx = funrel(search_nodes, PairIndexer, why_desc=purpose)
+        pidxer = funrel(search_nodes, PaddingIndexer, why_desc=purpose)
         idx_debprint("Using reindexer for ", node)
 
     else:
         # If we are auto-indexing in the loss graph, it gets a bit complicated.
 
+        search_nodes = set(n.origin_node for n in search_nodes)
         # The species we link to will be the true version of species, that is, the node where
-        species = funrel(node.origin_node, SpeciesNode, why_desc=purpose).true
-        coordinates = funrel(node.origin_node, PositionsNode, why_desc=purpose).true
+        species = funrel(search_nodes, SpeciesNode, why_desc=purpose).true
+        coordinates = funrel(search_nodes, PositionsNode, why_desc=purpose).true
         try:
             encoder = funrel(species, OneHotEncoder, why_desc=purpose)
         except NodeOperationError as ne:
@@ -78,9 +81,11 @@ def idx_molatomatom_pair(node, hints=None):
 def idx_pair_molatomatom(node, hints=None):
     purpose = "auto-generating indexing for {}".format(node)
 
+    search_nodes = make_search_nodes(node,hints)
+
     if node.origin_node is None:
-        pidx = find_unique_relative(node, PairIndexer, why_desc=purpose)
-        padidx = find_unique_relative(node, PaddingIndexer, why_desc=purpose)
+        pidx = find_unique_relative(search_nodes, PairIndexer, why_desc=purpose)
+        padidx = find_unique_relative(search_nodes, PaddingIndexer, why_desc=purpose)
 
         parents = (
             node,
