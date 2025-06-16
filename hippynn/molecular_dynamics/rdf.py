@@ -4,7 +4,6 @@
 from itertools import combinations_with_replacement
 
 import numpy as np                                   
-from scipy.spatial import KDTree
 import torch
 
 from .pbc_tools import find_mic, extract_multicell_diagonal
@@ -49,6 +48,10 @@ def check_KDTree_compatibility(cells, cutoff):
 
 def get_KDTree_tree(positions, cell):
     """`cells` must be collapsed to (3,) cell representations"""
+
+    # Dev note: Imports are cached, this will only be slow once.
+    from scipy.spatial import KDTree
+
     positions = positions % cell # coordinates must be inside cell
 
     # The following three lines are included to prevent an extremely rare but not unseen edge 
