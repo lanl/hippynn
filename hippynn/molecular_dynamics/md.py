@@ -1,3 +1,7 @@
+'''
+This module is only available if the `ase` package is installed.
+'''
+
 from __future__ import annotations
 from typing import Optional
 from functools import singledispatchmethod
