@@ -9,6 +9,19 @@ from .misc import SpeciesLookup
 from .rdf import calculate_rdf, calculate_adf
 from .writers import write_extxyz
 
+__all__ = [
+    "coarse_grain_all",
+    "cg_one_center_of_mass_pbc",
+    "cg_one_center_of_geometry_pbc",
+    "cg_one_mass_weighted_average",
+    "cg_one_average",
+    "cg_one_sum",
+    "SpeciesLookup",
+    "calculate_rdf",
+    "calculate_adf",
+    "write_extxyz",
+]
+
 try:
     import MDAnalysis
 except ImportError:
@@ -17,6 +30,8 @@ else:
     del MDAnalysis
     from . import readers
     from .readers import extract_trajectory_data
+
+    __all__.extend(["extract_trajectory_data"])
 
 
 try:
@@ -28,24 +43,4 @@ else:
     from . import md
     from .md import MolecularDynamics, Variable, NullUpdater, VelocityVerlet, LangevinDynamics, VariableUpdater
 
-
-__all__ = [
-    "coarse_grain_all",
-    "cg_one_center_of_mass_pbc",
-    "cg_one_center_of_geometry_pbc",
-    "cg_one_mass_weighted_average",
-    "cg_one_average",
-    "cg_one_sum",
-    "MolecularDynamics",
-    "Variable",
-    "NullUpdater",
-    "VelocityVerlet",
-    "LangevinDynamics",
-    "VariableUpdater",
-    "SpeciesLookup",
-    "calculate_rdf",
-    "calculate_adf",
-    "extract_trajectory_data",
-    "write_extxyz",
-]
-
+    __all__.extend(["MolecularDynamics", "Variable", "NullUpdater", "VelocityVerlet", "LangevinDynamics", "VariableUpdater"])
