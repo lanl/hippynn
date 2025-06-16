@@ -14,7 +14,7 @@ from hippynn.graphs.nodes.tags import PairIndexer
 
 
 @register_index_transformer(IdxType.MolAtomAtom, IdxType.Pair)
-def idx_molatomatom_pair(node):
+def idx_molatomatom_pair(node, hints=None):
     purpose = "auto-generating indexing for {}".format(node)
 
     funrel = find_unique_relative  # Abbreviation because we so many calls in this function.
@@ -75,7 +75,7 @@ def idx_molatomatom_pair(node):
 
 
 @register_index_transformer(IdxType.Pair, IdxType.MolAtomAtom)
-def idx_pair_molatomatom(node):
+def idx_pair_molatomatom(node, hints=None):
     purpose = "auto-generating indexing for {}".format(node)
 
     if node.origin_node is None:

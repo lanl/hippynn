@@ -12,7 +12,7 @@ from ..nodes.inputs import SpeciesNode
 
 
 @register_index_transformer(IdxType.MolAtom, IdxType.Atoms)
-def idx_molatom_atom(node):
+def idx_molatom_atom(node, hints=None):
     purpose = "auto-generating indexing for {}".format(node)
 
     funrel = find_unique_relative  # Abbreviation because we so many calls in this function.
@@ -48,7 +48,7 @@ def idx_molatom_atom(node):
 
 
 @register_index_transformer(IdxType.Atoms, IdxType.MolAtom)
-def idx_atom_molatom(node):
+def idx_atom_molatom(node, hints=None):
 
     if node.origin_node is None:
         parents = (node,)
