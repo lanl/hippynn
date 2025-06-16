@@ -112,16 +112,27 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">combinations_with_replacement</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>                                   
-<span class="kn">from</span><span class="w"> </span><span class="nn">numba</span><span class="w"> </span><span class="kn">import</span> <span class="n">jit</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">KDTree</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.pbc_tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_mic</span><span class="p">,</span> <span class="n">extract_multicell_diagonal</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..layers.pairs.indexing</span><span class="w"> </span><span class="kn">import</span> <span class="n">padded_neighlist</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">progress_bar</span>
 
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">numba</span><span class="w"> </span><span class="kn">import</span> <span class="n">jit</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c1"># Dummy jit</span>
+<div class="viewcode-block" id="jit">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.rdf.html#hippynn.molecular_dynamics.jit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">jit</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">func</span>
+        <span class="k">return</span> <span class="n">decorator</span></div>
+
+
+
 <div class="viewcode-block" id="ensure_positions_cells_compatibility">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.rdf.html#hippynn.molecular_dynamics.rdf.ensure_positions_cells_compatibility">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.rdf.html#hippynn.molecular_dynamics.ensure_positions_cells_compatibility">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">ensure_positions_cells_compatibility</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">cells</span><span class="p">):</span>
     <span class="n">n_frames</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">shape</span>
     <span class="k">if</span> <span class="n">cells</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -133,7 +144,7 @@
 
 
 <div class="viewcode-block" id="ensure_positions_species_compatibility">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.rdf.html#hippynn.molecular_dynamics.rdf.ensure_positions_species_compatibility">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.rdf.html#hippynn.molecular_dynamics.ensure_positions_species_compatibility">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">ensure_positions_species_compatibility</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">species</span><span class="p">):</span>
     <span class="n">n_frames</span><span class="p">,</span> <span class="n">n_particles</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">shape</span>
     <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -148,7 +159,7 @@
 
 
 <div class="viewcode-block" id="check_KDTree_compatibility">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.rdf.html#hippynn.molecular_dynamics.rdf.check_KDTree_compatibility">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.rdf.html#hippynn.molecular_dynamics.check_KDTree_compatibility">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">check_KDTree_compatibility</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;`cells` must be collapsed to (3,) cell representations&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">cutoff</span> <span class="o">&gt;=</span> <span class="n">cells</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
@@ -156,9 +167,13 @@
 
 
 <div class="viewcode-block" id="get_KDTree_tree">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.rdf.html#hippynn.molecular_dynamics.rdf.get_KDTree_tree">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.rdf.html#hippynn.molecular_dynamics.get_KDTree_tree">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_KDTree_tree</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">cell</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;`cells` must be collapsed to (3,) cell representations&quot;&quot;&quot;</span>
+
+    <span class="c1"># Dev note: Imports are cached, this will only be slow once.</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">KDTree</span>
+
     <span class="n">positions</span> <span class="o">=</span> <span class="n">positions</span> <span class="o">%</span> <span class="n">cell</span> <span class="c1"># coordinates must be inside cell</span>
 
     <span class="c1"># The following three lines are included to prevent an extremely rare but not unseen edge </span>
@@ -172,7 +187,7 @@
 
 
 <div class="viewcode-block" id="calculate_rdf">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.rdf.html#hippynn.molecular_dynamics.rdf.calculate_rdf">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.rdf.html#hippynn.molecular_dynamics.calculate_rdf">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">calculate_rdf</span><span class="p">(</span><span class="n">positions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">cells</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span> <span class="n">lower_cutoff</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes the RDF. If `species` is not provided, also computes species pair specific RDFS. </span>
 
@@ -269,6 +284,8 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">bin_centers</span><span class="p">,</span> <span class="n">rdf</span><span class="p">)</span> <span class="k">if</span> <span class="n">species</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">bin_centers</span><span class="p">,</span> <span class="n">rdf</span><span class="p">,</span> <span class="n">species_rdfs</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="find_triples">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.rdf.html#hippynn.molecular_dynamics.find_triples">[docs]</a>
 <span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">find_triples</span><span class="p">(</span><span class="n">jlist_pad</span><span class="p">,</span> <span class="n">rijlist_pad</span><span class="p">):</span>
     <span class="n">n_centers</span><span class="p">,</span> <span class="n">max_pairs</span> <span class="o">=</span> <span class="n">jlist_pad</span><span class="o">.</span><span class="n">shape</span>
@@ -289,13 +306,16 @@
                 <span class="n">triples_vec</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">row_vec</span><span class="p">[</span><span class="n">l</span><span class="p">]</span>
                 <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
 
-    <span class="k">return</span> <span class="n">triples</span><span class="p">,</span> <span class="n">triples_vec</span>
+    <span class="k">return</span> <span class="n">triples</span><span class="p">,</span> <span class="n">triples_vec</span></div>
+
 
 <div class="viewcode-block" id="calculate_adf">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.rdf.html#hippynn.molecular_dynamics.rdf.calculate_adf">[docs]</a>
+<a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.rdf.html#hippynn.molecular_dynamics.calculate_adf">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">calculate_adf</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">cutoffs</span><span class="p">,</span> <span class="n">cells</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Computes ADFs for given cutoffs. If `species` is not provided, also computes species triple specific ADFs. </span>
+
+<span class="sd">    This code will be quite slow if numba is not available.</span>
 
 <span class="sd">    :param positions: Shape (n_frames, n_particles, 3).</span>
 <span class="sd">    :type positions: np.ndarray</span>

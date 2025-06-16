@@ -108,6 +108,20 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.interfaces.html">interfaces</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.layers.html">layers</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">molecular_dynamics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.molecular_dynamics.SpeciesLookup"><code class="docutils literal notranslate"><span class="pre">SpeciesLookup</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.molecular_dynamics.SpeciesLookup.name_to_number"><code class="docutils literal notranslate"><span class="pre">SpeciesLookup.name_to_number()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.molecular_dynamics.SpeciesLookup.number_to_name"><code class="docutils literal notranslate"><span class="pre">SpeciesLookup.number_to_name()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.molecular_dynamics.calculate_adf"><code class="docutils literal notranslate"><span class="pre">calculate_adf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.molecular_dynamics.calculate_rdf"><code class="docutils literal notranslate"><span class="pre">calculate_rdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.molecular_dynamics.cg_one_average"><code class="docutils literal notranslate"><span class="pre">cg_one_average()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.molecular_dynamics.cg_one_center_of_geometry_pbc"><code class="docutils literal notranslate"><span class="pre">cg_one_center_of_geometry_pbc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.molecular_dynamics.cg_one_center_of_mass_pbc"><code class="docutils literal notranslate"><span class="pre">cg_one_center_of_mass_pbc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.molecular_dynamics.cg_one_mass_weighted_average"><code class="docutils literal notranslate"><span class="pre">cg_one_mass_weighted_average()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.molecular_dynamics.cg_one_sum"><code class="docutils literal notranslate"><span class="pre">cg_one_sum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.molecular_dynamics.coarse_grain_all"><code class="docutils literal notranslate"><span class="pre">coarse_grain_all()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.molecular_dynamics.write_extxyz"><code class="docutils literal notranslate"><span class="pre">write_extxyz()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.molecular_dynamics.box_volume_calculator.html">box_volume_calculator module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.molecular_dynamics.coarse_grain.html">coarse_grain module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.molecular_dynamics.md.html">md module</a></li>
@@ -159,7 +173,169 @@
   <section id="molecular-dynamics">
 <h1>molecular_dynamics<a class="headerlink" href="#molecular-dynamics" title="Link to this heading"></a></h1>
 <p>Full Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.molecular_dynamics</span></code> package.
-<span class="xref std std-doc">Click here for a summary page.</span></p>
+<a class="reference internal" href="../api_summary/hippynn.molecular_dynamics.html"><span class="doc">Click here for a summary page.</span></a></p>
+<p id="module-hippynn.molecular_dynamics">A range of tools for working with MD data and running MD using hippynn. Includes tools for processing MD data to use 
+for training hippynn models and analyzing MD trajectories, a custom molecular dynamics driver that allows for the 
+design of user-created algorithms, and a suite of functions for applying coarse-graining mappings to all-atom data.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.SpeciesLookup">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SpeciesLookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species_numbers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species_names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/misc.html#SpeciesLookup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.SpeciesLookup" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.SpeciesLookup.name_to_number">
+<span class="sig-name descname"><span class="pre">name_to_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/misc.html#SpeciesLookup.name_to_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.SpeciesLookup.name_to_number" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.SpeciesLookup.number_to_name">
+<span class="sig-name descname"><span class="pre">number_to_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/misc.html#SpeciesLookup.number_to_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.SpeciesLookup.number_to_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.calculate_adf">
+<span class="sig-name descname"><span class="pre">calculate_adf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoffs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cells</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/rdf.html#calculate_adf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.calculate_adf" title="Link to this definition"></a></dt>
+<dd><p>Computes ADFs for given cutoffs. If <cite>species</cite> is not provided, also computes species triple specific ADFs.</p>
+<p>This code will be quite slow if numba is not available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>positions</strong> (<em>np.ndarray</em>) – Shape (n_frames, n_particles, 3).</p></li>
+<li><p><strong>cutoff</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – Maximum arm lengths on angles to consider.</p></li>
+<li><p><strong>cells</strong> (<em>np.ndarray</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Shape (n_frames, 3, 3) or (3, 3), no PBC if None, defaults to None.</p></li>
+<li><p><strong>species</strong> (<em>np.ndarray</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Shape (n_frames, n_particles) or (n_particles,), defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A dictionary with keys
+- <strong>f”adf_values_all-all-all_cutoff_{cutoff}”</strong> (<em>np.ndarray</em>): y-values for plotting ADF of all positions for each value <cite>cutoff</cite> in <cite>cutoffs</cite>, shape (180,).
+- <strong>f”adf_values_{center}-{end1}-{end2}_cutoff_{cutoff}”</strong> (<em>np.ndarray</em>): Available only if <cite>species</cite> was provided. y-values for plotting ADF of all angles</p>
+<blockquote>
+<div><p>with center of type <cite>center</cite> and ends of species <cite>end1</cite> and <cite>end2</cite> for all possible combinations triples of species species, and for each value 
+<cite>cutoff</cite> in <cite>cutoffs</cite>, shape (180,).</p>
+</div></blockquote>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.calculate_rdf">
+<span class="sig-name descname"><span class="pre">calculate_rdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cells</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_cutoff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/rdf.html#calculate_rdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.calculate_rdf" title="Link to this definition"></a></dt>
+<dd><p>Computes the RDF. If <cite>species</cite> is not provided, also computes species pair specific RDFS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>positions</strong> (<em>np.ndarray</em>) – Shape (n_frames, n_particles, 3).</p></li>
+<li><p><strong>cutoff</strong> (<em>float</em>) – Largest pair distance considered.</p></li>
+<li><p><strong>cells</strong> (<em>np.ndarray</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Shape (n_frames, 3, 3) or None to if no PBC, defaults to None.</p></li>
+<li><p><strong>species</strong> (<em>np.ndarray</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Shape (n_frames, n_particles) or (n_particles,), defaults to None.</p></li>
+<li><p><strong>n_bins</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of bins for RDF(s), defaults to 300.</p></li>
+<li><p><strong>lower_cutoff</strong> (<em>float</em><em>, </em><em>optional</em>) – Smallest pair distance considered, defaults to 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A tuple containng
+- <strong>bin_centers</strong> (<em>np.ndarray</em>): x-values for plotting RDF, shape (n_bins,).
+- <strong>rdf</strong> (<em>np.ndarray</em>): y-values for plotting RDF, shape (n_bins,).
+- <strong>species_rdfs</strong> (<em>dict(str, np.ndarray)</em>): Only included if <cite>species</cite> is provided. Dictionary where the keys are pairs “rdf_values_i-j” for each</p>
+<blockquote>
+<div><p>pair of species i and j, and the values are the RDF y-values for that species pair. The same x-values are used for all RDFs.</p>
+</div></blockquote>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.cg_one_average">
+<span class="sig-name descname"><span class="pre">cg_one_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#cg_one_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.cg_one_average" title="Link to this definition"></a></dt>
+<dd><p>Unweighted average</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.cg_one_center_of_geometry_pbc">
+<span class="sig-name descname"><span class="pre">cg_one_center_of_geometry_pbc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrap_into_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#cg_one_center_of_geometry_pbc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.cg_one_center_of_geometry_pbc" title="Link to this definition"></a></dt>
+<dd><p>Position center of geometry using PBC</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.cg_one_center_of_mass_pbc">
+<span class="sig-name descname"><span class="pre">cg_one_center_of_mass_pbc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead_masses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrap_into_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#cg_one_center_of_mass_pbc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.cg_one_center_of_mass_pbc" title="Link to this definition"></a></dt>
+<dd><p>Position center of mass using PBC</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.cg_one_mass_weighted_average">
+<span class="sig-name descname"><span class="pre">cg_one_mass_weighted_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead_masses</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#cg_one_mass_weighted_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.cg_one_mass_weighted_average" title="Link to this definition"></a></dt>
+<dd><p>General mass-weighted average (eg. for velocities when using COM position mapping)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.cg_one_sum">
+<span class="sig-name descname"><span class="pre">cg_one_sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bead_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#cg_one_sum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.cg_one_sum" title="Link to this definition"></a></dt>
+<dd><p>Sum of values</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.coarse_grain_all">
+<span class="sig-name descname"><span class="pre">coarse_grain_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_to_bead</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coarse_grain_one</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masses</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cells</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bead_species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">single_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/coarse_grain.html#coarse_grain_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.coarse_grain_all" title="Link to this definition"></a></dt>
+<dd><p>Apply a user-defined <code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code> function to all beads across all frames.</p>
+<p>The user-supplied function, <code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code>, should take <code class="docutils literal notranslate"><span class="pre">bead_values</span></code> as an argument, which will correspond the the values
+of <code class="docutils literal notranslate"><span class="pre">values</span></code> for one bead in one frame. It can optionally take <code class="docutils literal notranslate"><span class="pre">bead_masses</span></code>, <code class="docutils literal notranslate"><span class="pre">frame_cell</span></code>, <code class="docutils literal notranslate"><span class="pre">bead_atom_species</span></code>, and <code class="docutils literal notranslate"><span class="pre">bead_type</span></code>
+as additional arguments. It should return the coarse_grained version of <code class="docutils literal notranslate"><span class="pre">values</span></code> for the bead given the data provided.</p>
+<p>This function loops over each frame (if single_frame=False) and over each bead (as defined by atom_to_bead) and applies
+<code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code> to each bead. Returns the resulting values in an array of shape (n_frames, n_beads, …) or (n_beads, …) 
+where the trailing dimensions match the output of <code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code>.</p>
+<p>See examples of pre-defined <code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code> options in hippynn.molecular_dynamics.coarse_grain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> – Array of data to coarse-grain. Shape (n_frames, n_atoms, d) if single_frame=False or 
+(n_atoms, d) if single_frame=True.</p></li>
+<li><p><strong>atom_to_bead</strong> – Integer array of shape (n_frames, n_atoms,) or (n_atoms,) mapping each atom to a bead.</p></li>
+<li><p><strong>coarse_grain_one</strong> – Function to coarse-grain one bead’s data.</p></li>
+<li><p><strong>masses</strong> – (Optional) Array of shape (n_frames, n_atoms,) or (n_atoms,) of masses. Values for the current frame/bead passed
+to <code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code> if provided.</p></li>
+<li><p><strong>cells</strong> – (Optional) Array of shape (n_frames, 3, 3) or (3, 3) of cell matrices. The cell for the current frame
+is passed to <code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code> if provided.</p></li>
+<li><p><strong>atom_species</strong> – (Optional) Array of shape (n_frames, n_atoms,) or (n_atoms,) of atom species, defined in any manner 
+you choose. Values for the current frame passed to <code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code> if provided.</p></li>
+<li><p><strong>bead_species</strong> – (Optional) Array of shape (n_frames, max_bead_idx+1,) or (max_bead_idx+1,) where <code class="docutils literal notranslate"><span class="pre">max_bead_idx</span></code>
+is the maximum value in <code class="docutils literal notranslate"><span class="pre">atom_to_bead</span></code>. Values for the current frame/bead passed to <code class="docutils literal notranslate"><span class="pre">coarse_grain_one</span></code> 
+if provided.</p></li>
+<li><p><strong>single_frame</strong> – (Optional) Use to specify if data arrays contain a frame axis. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array of coarse-grained values. Shape (n_frames, n_beads, …) if single_frame=False or 
+(n_beads, …) if single_frame=True.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.write_extxyz">
+<span class="sig-name descname"><span class="pre">write_extxyz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cells</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forces</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/writers.html#write_extxyz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.write_extxyz" title="Link to this definition"></a></dt>
+<dd><p>Write a extended XYZ (.extxyz) file.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>filename (str): Output .extxyz file path.
+positions (np.ndarray): Shape (n_frames, n_particles, 3).
+species (np.ndarray, optional): Shape (n_frames, n_particles,).
+cells (np.ndarray, optional): Shape (n_frames, 3, 3). 
+velocities (np.ndarray, optional): Shape (n_frames, n_particles, 3). 
+forces (np.ndarray, optional): Shape (n_frames, n_particles, 3).</p>
+</dd>
+</dl>
+</dd></dl>
+
 <p>Submodules</p>
 <div class="toctree-wrapper compound">
 <ul>
