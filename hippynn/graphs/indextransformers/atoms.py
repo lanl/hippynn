@@ -20,7 +20,7 @@ def make_search_nodes(node,hints):
 def idx_molatom_atom(node, hints=None):
     purpose = "auto-generating indexing for {}".format(node)
 
-    search_nodes = make_search_nodes(node,hints)
+    search_nodes = make_search_nodes(node, hints)
 
     funrel = find_unique_relative  # Abbreviation because we so many calls in this function.
     if node.origin_node is None:
