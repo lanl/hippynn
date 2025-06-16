@@ -1,5 +1,10 @@
-# Read outputs from LAMMPS, Gromacs
-# Portions of this code were written with assistance from an LLM
+'''
+Read outputs from LAMMPS, Gromacs.
+
+This module is only available if the `MDAnalysis` package is installed.
+'''
+# Portions of this code were written with assistance from an LLM.
+
 
 import os
 

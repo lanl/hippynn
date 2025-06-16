@@ -38,6 +38,7 @@ Bug Fixes:
 ----------
 - Fix issue with friction coefficient being calculated incorrectly in 
   LangevinDynamics.
+- Fix issue with optional dependencies being required by molecular dynamics subpackage
 
 
 0.1.0
