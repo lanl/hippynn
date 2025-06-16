@@ -47,6 +47,9 @@ from . import experiment
 from .experiment import setup_and_train, train_model, setup_training,\
     test_model, load_model_from_cwd, load_checkpoint, load_checkpoint_from_cwd
 
+# Optional imports are dealt with in submodule
+from . import molecular_dynamics
+
 try:
     from . import plotting
 except ImportError:
@@ -59,7 +62,6 @@ except ImportError:
     pass
 else:
     del ase
-    from . import molecular_dynamics
     from . import optimizer
     from .interfaces import ase_interface
 
