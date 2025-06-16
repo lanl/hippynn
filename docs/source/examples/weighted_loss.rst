@@ -6,6 +6,7 @@ If the weights are all either zero- or one- valued, this is effectively the same
 
 The sample weights would likely be stored in the database. Let's assume they have the name "weight_name".
 to construct a weighted loss, we can use the usual ``of_node`` method with a weight argument which is a string::
+    
     weighted_mse_target = hippynn.graphs.loss.WeightedMSELoss.of_node(target, "weight_name")
 
 This is shorthand for creating an :class:`~hippynn.graphs.nodes.base.base.InputNode` with the database index state,
@@ -14,8 +15,11 @@ and then feeding it into the ``of_node`` method::
     sample_weights = hippynn.graphs.inputs.InputNode(db_name="weight_name", index_state=hippynn.graphs.IdxType.Molecules)
     weighted_mse_target = hippynn.graphs.loss.WeightedMSELoss.of_node(target, sample_weights)
 
+You may want to manually create the weight ``InputNode`` if you're re-using the same weights multiple times,
+as it will prevent multiple references to the same quantity.
 We use :class:`~hippynn.graphs.indextypes.IdxType.Molecules` in the case of a system-valued target such as energy.
 In the case of an atom-valued target such as charge, use :class:`~hippynn.graphs.indextypes.IdxType.MolAtom`.
+
 
 
 Mathematically, this will give a loss function
