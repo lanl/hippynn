@@ -4,20 +4,19 @@ Weighted/Masked Loss Functions
 ``hippynn`` also supports floating-point-weighted loss functions.
 If the weights are all either zero- or one- valued, this is effectively the same as training using a mask.
 
-The sample weights would likely be stored in the database. Let's assume they have the name "W".
-We can then create a representation of these weights as input to the problem
-as an :class:`~hippynn.graphs.nodes.base.base.InputNode`::
+The sample weights would likely be stored in the database. Let's assume they have the name "weight_name".
+to construct a weighted loss, we can use the usual ``of_node`` method with a weight argument which is a string::
+    weighted_mse_target = hippynn.graphs.loss.WeightedMSELoss.of_node(target, "weight_name")
 
-    sample_weights = hippynn.graphs.inputs.InputNode(db_name="W",index_state=hippynn.graphs.IdxType.Molecules)
+This is shorthand for creating an :class:`~hippynn.graphs.nodes.base.base.InputNode` with the database index state,
+and then feeding it into the ``of_node`` method::
+
+    sample_weights = hippynn.graphs.inputs.InputNode(db_name="weight_name", index_state=hippynn.graphs.IdxType.Molecules)
+    weighted_mse_target = hippynn.graphs.loss.WeightedMSELoss.of_node(target, sample_weights)
 
 We use :class:`~hippynn.graphs.indextypes.IdxType.Molecules` in the case of a system-valued target such as energy.
 In the case of an atom-valued target such as charge, use :class:`~hippynn.graphs.indextypes.IdxType.MolAtom`.
 
-The weighted loss functions :class:`~hippynn.graphs.nodes.loss.WeightedMSELoss`
-and :class:`~hippynn.graphs.nodes.loss.WeightedMAELoss`
-can then be constructed as follows::
-
-    weighted_mse_target = hippynn.graphs.loss.WeightedMSELoss.of_node(target, sample_weights)
 
 Mathematically, this will give a loss function
 
