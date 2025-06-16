@@ -4,13 +4,22 @@
 from itertools import combinations_with_replacement
 
 import numpy as np                                   
-from numba import jit
 from scipy.spatial import KDTree
 import torch
 
 from .pbc_tools import find_mic, extract_multicell_diagonal
 from ..layers.pairs.indexing import padded_neighlist
 from ..tools import progress_bar
+
+try:
+    from numba import jit
+except ImportError:
+    # Dummy jit
+    def jit(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
+
 
 def ensure_positions_cells_compatibility(positions, cells):
     n_frames, _, _ = positions.shape
@@ -171,6 +180,8 @@ def find_triples(jlist_pad, rijlist_pad):
 def calculate_adf(positions, cutoffs, cells=None, species=None):
     """
     Computes ADFs for given cutoffs. If `species` is not provided, also computes species triple specific ADFs. 
+
+    This code will be quite slow if numba is not available.
 
     :param positions: Shape (n_frames, n_particles, 3).
     :type positions: np.ndarray
