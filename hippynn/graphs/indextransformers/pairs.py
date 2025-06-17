@@ -7,7 +7,7 @@ from ..nodes.base.node_functions import NodeOperationError
 from ..nodes.indexers import PaddingIndexer, OneHotEncoder
 from ..nodes.inputs import SpeciesNode, PositionsNode
 from ..nodes.pairs import PairReIndexer, PairDeIndexer
-from hippynn.graphs.nodes.tags import PairIndexer
+from ..nodes.tags import PairIndexer
 
 from .atoms import make_search_nodes
 
