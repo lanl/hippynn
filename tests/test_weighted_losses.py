@@ -39,5 +39,4 @@ def test_weights_from_string(weight_graph_variables):
     mse_energy_weighted2 = loss.WeightedMSELoss.of_node(henergy, "en_mask")
     mse_force_weighted2 = loss.WeightedMSELoss.of_node(forces, "f_mask")
 
-    raise ValueError()
     
