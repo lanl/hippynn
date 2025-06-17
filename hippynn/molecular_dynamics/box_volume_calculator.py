@@ -34,7 +34,7 @@ def calculate_box_side_length(molecule_counts, density):
         except KeyError:
             raise ValueError(
                 f"Molecule '{molecule}' not found in molar_masses dictionary. Please add an entry for it and try again.\n"
-                + f"Existing molecules: {", ".join(molar_masses.keys())}"
+                + f"Existing molecules: {', '.join(molar_masses.keys())}"
             )
 
     volume = total_mass / density
@@ -48,7 +48,7 @@ def print_results(molecule_counts, density, side_length_ang):
 
     print(f"Box contains:")
     for key, value in molecule_counts.items():
-        print(f"  {key+":":<{max_mol_name_length+3}} {value} molecules")
+        print(f"  {key+':':<{max_mol_name_length+3}} {value} molecules")
     print(f"Density: {density} g/cm^3")
     print(f"Cube side length: {side_length_ang:.2f} Ang")
 

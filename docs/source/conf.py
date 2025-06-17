@@ -63,6 +63,7 @@ autodoc_mock_imports = [
     "pytorch_lightning",
     "scipy",
     "graphviz",
+    "MDAnalysis",
 ]
 
 autodoc_default_options = {

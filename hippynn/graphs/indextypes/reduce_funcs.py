@@ -25,7 +25,7 @@ def dispatch_indexing(input_is, output_is):
     return func
 
 
-def index_type_coercion(node, output_index_state):
+def index_type_coercion(node, output_index_state, hints=None):
     """
     Attempt to convert a node to a given index state.
 
@@ -39,6 +39,8 @@ def index_type_coercion(node, output_index_state):
 
     :param node:  the node to convert
     :param output_index_state: the index state to convert to.
+    :param hints: other nodes which may be searched to find indexing data
+
     :return: a node in the requested index state
     """
     _debprint("Requesting transformation : {} -> {}".format(node.name, output_index_state))
@@ -57,7 +59,7 @@ def index_type_coercion(node, output_index_state):
             outnode = _index_cache[prior_index_ref]
         else:
             _debprint(f"\t No index version found for node {node} type {output_index_state}")
-            outnode = dispatch_indexing(node._index_state, output_index_state)(node)
+            outnode = dispatch_indexing(node._index_state, output_index_state)(node, hints=hints)
 
     else:
         outnode = node
@@ -117,7 +119,7 @@ def elementwise_compare_reduce(*nodes_to_reduce):
         _debprint("Compare reduce on nothing, returning nothing")
         return tuple()
     coerced_type = get_reduced_index_state(*nodes_to_reduce)
-    coerced_nodes = [index_type_coercion(node, coerced_type) for node in nodes_to_reduce]
+    coerced_nodes = [index_type_coercion(node, coerced_type, hints=nodes_to_reduce) for node in nodes_to_reduce]
     _debprint("Coerced:", [x.name for x in coerced_nodes])
     if len(coerced_nodes) == 1:
         return coerced_nodes[0]
