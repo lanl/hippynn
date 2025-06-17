@@ -12,6 +12,7 @@ def neural_network_node(network_parameters):
     network = networks.Hipnn("HIPNN", (species, positions, cell), module_kwargs=network_parameters, periodic=True)
     return network
 
+
 @pytest.fixture
 def network_parameters():
     return {
@@ -28,8 +29,14 @@ def network_parameters():
     }
 
 
-@pytest.mark.parametrize("net_class,",
-                         [networks.Hipnn, networks.HipnnVec, networks.HipnnQuad, networks.HipHopnn]
+@pytest.mark.parametrize(
+    "net_class,",
+    [
+        networks.Hipnn,
+        networks.HipnnVec,
+        networks.HipnnQuad,
+        pytest.param(networks.HipHopnn, marks=pytest.mark.filterwarnings("ignore:.*Beta.*")),
+    ],
 )
 def test_build_network(net_class, network_parameters):
     species = inputs.SpeciesNode(db_name="species")
@@ -39,11 +46,15 @@ def test_build_network(net_class, network_parameters):
     network = net_class("HIPNN", (species, positions, cell), module_kwargs=network_parameters, periodic=True)
     return
 
-@pytest.mark.parametrize("target_cls",
-[targets.HEnergyNode,
- targets.HChargeNode,
- targets.AtomizationEnergyNode,
- ])
+
+@pytest.mark.parametrize(
+    "target_cls",
+    [
+        targets.HEnergyNode,
+        targets.HChargeNode,
+        targets.AtomizationEnergyNode,
+    ],
+)
 def test_build_atom_target(target_cls, neural_network_node):
     target_node = target_cls("target", neural_network_node)
     return
@@ -56,7 +67,5 @@ def test_build_bonds(neural_network_node):
         "dist_hard_max": 5.5,
         "n_dist": 20,
     }
-    bonds = targets.HBondNode("bonds", neural_network_node,
-                              module_kwargs=bond_parameters)
+    bonds = targets.HBondNode("bonds", neural_network_node, module_kwargs=bond_parameters)
     return
-
