@@ -1,4 +1,48 @@
+Breaking changes:
+-----------------
 
+- Alterations to data after loading as a hippynn Database but prior to 
+  splitting the data (eg. as in the examples ani_aluminum_example\*.py, 
+  ani1x_training.py, and \*SNAPExample.py) must be performed using 
+  PyTorch rather than NumPy. 
+- The hippynn Database object and any functions which return this object 
+  now accept only an int or a torch.Generator for the ``seed`` argument. 
+- The arguments on the MD objects LangevinDynamics and ASELangevinDynamics
+  have changed slightly. 
+
+New Features:
+-------------
+
+- Added new network type, HIP-HOP-NN.
+- Added capability to use LAMMPS-MLIAP comm features to remove the need
+  for extensive halo regions when using multiple interaction layers.
+- Addition of a variety of tools to the ``molecular_dynamics`` subpackage 
+  including ones for: applying coarse-graining mappings, calculating
+  RDFs and ADFs, reading LAMMPS and Gromacs data into a format usable
+  for training ``hippynn`` models, and writing trajectories to .extxyz files
+  for visualization.
+- Enhanced coarse-graining example by adding: example pipeline for processing
+  AA data to use in training CG model, capability to use a species-pair-specific 
+  repulsive potential, extended processing of data from CG MD, and a notebook 
+  for visualizing the repulsive potentials. 
+
+Improvements:
+-------------
+
+- Adjust the Database loader so that data is immediately transformed into
+  PyTorch Tensors, rather than performing this transformation as part of 
+  creating the data splits. 
+
+
+Bug Fixes:
+----------
+- Fix issue with friction coefficient being calculated incorrectly in 
+  LangevinDynamics.
+- Fix issue with optional dependencies being required by molecular dynamics subpackage
+
+
+0.1.0
+=======
 
 Breaking changes:
 -----------------
@@ -9,7 +53,7 @@ Breaking changes:
   functions are ``load_checkpoint``, ``load_checkpoint_from_cwd``, and
   ``restore_checkpoint``.
 - ``database.make_trainvalidtest_split`` now only takes keyword arguments to
-  avoid confusions. Use ``make_trainvalidtest_split(test_size=a, valid_size=b)``
+  avoid confusion. Use ``make_trainvalidtest_split(test_size=a, valid_size=b)``
   instead of ``make_trainvalidtest_split(a, b)``.
 - Invalid custom kernel specifications are now errors rather than warnings.
 - Method of specifying units for custom MD algorithms has changed.
@@ -31,6 +75,13 @@ New Features:
   are compatible with molecular dynamics codes such ASE and LAMMPS.
 - Added the ability to weight different systems/atoms/bonds in a loss function.
 - Added new function to reload library settings.
+- Added atomization-consistent node which exactly constrains their predictions in a dissociated limit.
+- Added node to split by species. Can be used to calculate or plot loss by species.
+- New ASELangevinDynamics updater for MD module. Implements the algorithm used by ASE. Different from 
+  older LangevinDynamics updater. Expected to be more numerically stable. 
+- Added batch size to MolecularDynamics class. This is passed to the model during each step.
+- New function ``swap_pairfinder`` to easily find and replace an existing PairIndexer node with a new one, 
+  potentially adjusting its parent nodes if needed. Example of usage in ``molecular_dynamics.py`` example.
 
 
 Improvements:
@@ -47,6 +98,8 @@ Improvements:
 - Improved detection of valid custom kernel implementation.
 - Improved computational efficiency of HIP-NN-TS network.
 - ``StressForceNode`` now also works with batch size greater than 1.
+- Allow testing of splits of arbitrary names using test_model, as long as those splits contain the required variables.
+- Add example of how to use LAMMPS with a hippynn coarse-grained force field to the ``coarse-graining`` example.
 
 
 Bug Fixes:
@@ -56,6 +109,15 @@ Bug Fixes:
 - Fixed error when LAMMPS interface is in kokkos mode and the kokkos device was set to CPU.
 - MLIAPInterface objects
 - Fixed bug with RDF computer automatic initialization.
+- KDTreeNeighbors finds at most one pair for each set of points. If pair cutoff is more than half
+  the length of one of the cell sides, it will fail to identify all of the pairs. Added error if
+  this occurs.
+- Starting in PyTorch 2.6, the default value of ``weights_only`` has been changed to ``True``. To maintain compatibility
+  with this release, the ``hippynn`` object ``MetricTracker`` is added the list of objects which PyTorch can load with 
+  ``weights_only=True``. Functions which are intended to load structure files have been updated to explicitly use 
+  ``weights_only=False`` by default. In such cases, the argument ``weights_only`` has been exposed to the user and a 
+  warning message has been added to the function documentation. 
+  
 
 0.0.3
 =======

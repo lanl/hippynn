@@ -9,29 +9,36 @@ from ..nodes.inputs import SpeciesNode
 
 
 # TODO: Rewrite so it can use non-one-hot-encodings?
-
+def make_search_nodes(node,hints):
+    if hints is None:
+        return set([node])
+    else:
+        return set([node, *hints])
+    
 
 @register_index_transformer(IdxType.MolAtom, IdxType.Atoms)
-def idx_molatom_atom(node):
+def idx_molatom_atom(node, hints=None):
     purpose = "auto-generating indexing for {}".format(node)
+
+    search_nodes = make_search_nodes(node, hints)
 
     funrel = find_unique_relative  # Abbreviation because we so many calls in this function.
     if node.origin_node is None:
         # If we are auto-indexing in the model graph, it should be easy.
         # species = funrel(node, SpeciesNode,
         #                 why_desc=purpose)
-        pidxer = funrel(node, PaddingIndexer, why_desc=purpose)
+        pidxer = funrel(search_nodes, PaddingIndexer, why_desc=purpose)
         idx_debprint("Using reindexer for ", node)
 
     else:
         # If we are auto-indexing in the loss graph, it gets a bit complicated.
-
+        search_nodes = set(n.origin_node for n in search_nodes)
         # The species we link to will be the true version of species, that is, the node where
-        species = funrel(node.origin_node, SpeciesNode, why_desc=purpose).true
+        species = funrel(search_nodes, SpeciesNode, why_desc=purpose).true
         try:
             encoder = funrel(species, OneHotEncoder, why_desc=purpose)
         except NodeOperationError as ne:
-            idx_debprint("Creating new ENCODER")
+            idx_debprint("Creating new encoder in loss graph.")
             # If this fails, something bad has happened -- the loss graph is trying to do something not defined by the
             # model graph
             origin_encoder = funrel(species.origin_node, OneHotEncoder, why_desc=purpose)
@@ -48,7 +55,7 @@ def idx_molatom_atom(node):
 
 
 @register_index_transformer(IdxType.Atoms, IdxType.MolAtom)
-def idx_atom_molatom(node):
+def idx_atom_molatom(node, hints=None):
 
     if node.origin_node is None:
         parents = (node,)

@@ -8,8 +8,10 @@ from .nodes.base import InputNode, MultiNode
 from .nodes.base.algebra import ValueNode
 from .nodes.base.node_functions import NodeNotFound, NodeOperationError
 from .indextypes import soft_index_type_coercion
+
 from . import get_connected_nodes, find_unique_relative
 from ..tools import is_equal_state_dict
+
 
 def get_subgraph(required_nodes):
     """
@@ -286,7 +288,8 @@ def _determine_multinode_child_match(old_node: MultiNode, new_node: MultiNode):
 
 def replace_node_with_constant(node, value, name=None):
     vnode = ValueNode(value)
-    vnode.name = name
+    if name is not None:
+        vnode.name = name
     replace_node(node, vnode)
 
 
@@ -413,3 +416,105 @@ def merge_children(start_nodes):
 
     return new_children
 
+
+def vacuum_outputs(node_list, species_set):
+    """
+
+    :param node_list:
+    :param species_set:
+    :return:
+    """
+    # Dev note: assumes there is exactly one species and positions, and pair finder.
+    # A more robust approach can be made by doing this for each set of these objects.
+    # Dev note: this function is a bit domain specific and may not ultimately belong
+    # in gops.py. As such we collect the domain-oriented imports in this function.
+
+    import torch
+    from .nodes.inputs import SpeciesNode, PositionsNode
+    from .nodes.indexers import Encoder, PaddingIndexer, OneHotEncoder
+    from .nodes.tags import PairIndexer
+
+    species = find_unique_relative(node_list, SpeciesNode)
+    pairs = find_unique_relative(node_list, PairIndexer)
+    positions = find_unique_relative(node_list, PositionsNode)
+    encoder = find_unique_relative(node_list, Encoder)
+    pad_idxer = find_unique_relative(node_list, PaddingIndexer)
+
+    copy_nodes = [*node_list, species, pairs, positions, encoder, pad_idxer]
+    new_nodes, new_subgraph = copy_subgraph(copy_nodes, assume_inputed=[], tag='vacuum')
+
+    *new_nodes, species, pairs, positions, encoder, pad_idxer = new_nodes
+
+    with torch.no_grad():
+        if not isinstance(species_set, torch.Tensor):
+            species_set = torch.as_tensor(species_set, dtype=torch.int64)
+        species_input = species_set.unsqueeze(1)
+        n_species = species_input.shape[0]
+        replace_node_with_constant(species, species_input, name="vacuum_species")
+
+        pos_input = torch.zeros((n_species, 1, 3))
+        replace_node_with_constant(positions, pos_input, name="vacuum_positions")
+
+        empty_int = torch.empty((0,), dtype=torch.int64)
+
+        # further specialize if encoder is OneHotEncoder
+        if isinstance(encoder, OneHotEncoder):
+            species_encoding = torch.eye(n_species, dtype=torch.int64)
+            # Unsqueeze adds atom-wise axis for MolAtom index type.
+            replace_node_with_constant(encoder.encoding, species_encoding.unsqueeze(1), name="vacuum_encoding")
+            replace_node_with_constant(pad_idxer.indexed_features, species_encoding, name="vacuum_indexed_features")
+
+        empty_pairs = ValueNode(empty_int)
+        empty_pairs.name = "empty_pair_indices"
+        for pn in pairs.pair_first, pairs.pair_second:
+            replace_node(pn, empty_pairs)
+
+        empty_float = torch.empty((0,), dtype=torch.get_default_dtype())
+        replace_node_with_constant(pairs.pair_dist, empty_float, "empty_distances")
+
+        empty_displacement = empty_float.unsqueeze(1).expand(-1, 3)
+        replace_node_with_constant(pairs.pair_coord, empty_displacement, "empty_displacements")
+
+    return new_nodes
+
+def swap_pairfinders(node_or_nodes, new_pairfinder, new_node_name=None, cell_node=None, module_kwargs={}):
+    """
+    Finds and replaces existing PairIndexer node with a new one, potentially adjusting its parent nodes
+    if needed.
+
+    :param node_or_nodes: the PairIndexer node to be replaced, or a node or list of nodes connected
+    to the unique PairIndexer to be replaced
+    :param new_pairfinder: class of new PairIndexer 
+    :param new_node_name: name for new PairIndexer node, if None the name of the replaced PairIndexer
+    will be used, defaults to None
+    :param cell_node: should be specified if new PairIndexer requires a CellNode and one does not currently
+    exist in computational graph, if None a search of existing nodes will be conducted if a CellNode is 
+    needed, defaults to None
+    :param module_kwargs: arguments to feed into the new PairIndexer constructor, defaults to {}
+
+    .. Note::
+    
+        If this function is used to add a CellNode to the computational graph, any existing GraphModule or 
+        Predictor will need to be reinitialized.
+    """
+
+    from .nodes.tags import PairIndexer, Positions, Species
+    from .nodes.inputs import CellNode
+
+    if isinstance(node_or_nodes, PairIndexer):
+        old_pf = node_or_nodes
+    else:
+        old_pf = find_unique_relative(node_or_nodes, PairIndexer)
+
+    positions = find_unique_relative(old_pf, Positions)
+    species = find_unique_relative(old_pf, Species)
+
+    new_node_name = (new_node_name or old_pf.name)
+
+    try:
+        new_pf = new_pairfinder(new_node_name, parents=(positions, species), **module_kwargs)
+    except RuntimeError:
+        cell = (cell_node or find_unique_relative(old_pf, CellNode))
+        new_pf = new_pairfinder(new_node_name, parents=(positions, species, cell), **module_kwargs)
+    
+    replace_node(old_pf, new_pf, disconnect_old=True)

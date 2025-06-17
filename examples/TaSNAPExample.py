@@ -124,10 +124,8 @@ with hippynn.tools.active_directory(netname):
             targets=None,
         )
 
-        import numpy as np
-
         arrays = database.arr_dict
-        n_atoms = arrays["Species"].astype(bool).astype(int).sum(axis=1)
+        n_atoms = arrays["Species"].bool().long().sum(dim=1)
         arrays["EnergyPerAtom"] = arrays["Energy"] / n_atoms
 
         # Adds the inputs and targets from the model for the database to laod
@@ -136,11 +134,9 @@ with hippynn.tools.active_directory(netname):
 
         # Set dtypes back
         torch.set_default_dtype(torch.float32)
-        for k, v in arrays.copy().items():
-            if v.dtype == np.float64:
-                arrays[k] = v.astype(np.float32)
-            if v.dtype not in [np.float64, np.float32, np.int64]:
-                del arrays[k]
+        for k,v in arrays.copy().items():
+            if v.dtype == torch.float64:
+                arrays[k] = v.float()
 
         database.make_trainvalidtest_split(test_size=0.2, valid_size=0.4)
         ### End pre-processing

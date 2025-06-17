@@ -185,7 +185,7 @@ for idxt in IdxType:
 
     # register no-op transformer
     @register_index_transformer(IdxType.Scalar, idxt)
-    def scalar_promote(node, *, __idxt=idxt):
+    def scalar_promote(node, *, __idxt=idxt, hints=None):
         _debprint("\t Allowing view of Scalar {} as type {}".format(node, __idxt))
 
         # Node index transformers (see #register_index_transformer) return

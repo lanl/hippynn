@@ -1,0 +1,35 @@
+units               real
+atom_style          atomic
+boundary            p p p
+
+read_data           system.data
+
+# we need to give LAMMPS access to the repulsive potential that's defined in a file in the directory above
+python source here """
+import sys
+sys.path.append('..')  # Add parent directory to path
+"""
+
+pair_style          mliap unified ../model/mliap_unified_hippynn.pt 0
+pair_coeff          * * MeOH    # this must be the same list in the same order of species names used when creating the mliap_unified_hippynn.pt file
+
+neighbor            2.0 bin
+neigh_modify        delay 0 every 1 check yes
+    
+timestep            1   # fs
+
+thermo_style        custom step vol temp press ke pe etotal 
+thermo              1000
+thermo_modify       flush yes
+
+fix                 NVT all nvt temp 700.0 700.0 100.0 
+
+# Equilibration    
+run                 20000
+
+# Production
+dump                trj all custom 50 dump.out id type x y z xu yu zu vx vy vz fx fy fz
+dump_modify         trj sort id
+thermo              50
+
+run                 50000

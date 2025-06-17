@@ -61,7 +61,10 @@ class PyAniMethods:
 
             batches.append(batch_dict)
 
-        sys_count = max(sys_counter.values())  # some variables are batch-wise, but most of these should be the same
+        if len(sys_counter)==0:
+            sys_count=0
+        else:
+            sys_count = max(sys_counter.values())  # some variables are batch-wise, but most of these should be the same
         return batches, n_atoms_max, sys_count
 
     def determine_key_structure(self, batch_list, sys_count, n_atoms_max, species_key="species"):

@@ -1,3 +1,7 @@
+'''
+This module is only available if the `ase` package is installed.
+'''
+
 from __future__ import annotations
 from typing import Optional
 from functools import singledispatchmethod
@@ -252,7 +256,7 @@ class LangevinDynamics(VariableUpdater):
     def __init__(
         self,
         force_db_name: str,
-        temperature: float,
+        temperature_K: float,
         frix: float,
         force_units: Optional[float] = None,
         position_units: Optional[float] = None,
@@ -273,12 +277,12 @@ class LangevinDynamics(VariableUpdater):
         """
 
         self.force_key = force_db_name
-        self.temperature = temperature
+        self.temperature = temperature_K
         self.frix = frix
-        self.kB = ase.units.kB
         self.force_units = (force_units or ase.units.eV/ase.units.Ang)
         self.position_units = (position_units or ase.units.Ang)
         self.time_units = (time_units or ase.units.fs)
+        self.kB = ase.units.kB / (self.force_units * self.position_units)
 
         if seed is not None:
             torch.manual_seed(seed)
@@ -313,13 +317,115 @@ class LangevinDynamics(VariableUpdater):
 
         self.variable.data["acceleration"] = self.variable.data["force"].detach() / self.variable.data["mass"] * self.force_units / (self.position_units / self.time_units**2)
 
+        frix_term1 = self.frix * self.variable.data["velocity"] * dt
+
+        #              |------units of energy------| |------units of mass-------| |-units cancel-|
+        frix_term2 = 2 * self.kB * self.temperature / self.variable.data["mass"] * dt * self.frix
+        frix_term2 = frix_term2 * (self.force_units * self.time_units) / (self.position_units / self.time_units) # convert units for energy/mass to units for velocity
+        frix_term2 = (frix_term2) ** (1/2)
+
         self.variable.data["velocity"] = (
             self.variable.data["velocity"]
             + dt * self.variable.data["acceleration"]
-            - self.frix * self.variable.data["velocity"] * dt
-            + torch.sqrt(2 * self.kB * self.frix * self.temperature / self.variable.data["mass"] * dt)
+            - frix_term1
+            + frix_term2
             * torch.randn_like(self.variable.data["velocity"], memory_format=torch.contiguous_format)
         )
+
+class ASELangevinDynamics(VariableUpdater):
+    """
+    Implements the Langevin algorithm from the ASE codebase
+    """
+
+    required_variable_data = ["position", "velocity", "mass"]
+
+    def __init__(
+        self,
+        force_db_name: str,
+        temperature_K: float,
+        frix: float,
+        force_units: Optional[float] = None,
+        position_units: Optional[float] = None,
+        time_units: Optional[float] = None,
+        fix_cm: Optional[bool] = True,
+        seed: Optional[int] = None,
+    ):
+        """
+        :param force_db_name: key which will correspond to the force on the corresponding Variable
+            in the HIPNN model output dictionary
+        :param temperature_K: temperature for Langevin algorithm in Kelvin
+        :param frix: friction coefficient for Langevin algorithm
+        :param force_units: model force units output (in terms of ase.units), defaults to eV/Ang
+        :param position_units: model position units output (in terms of ase.units), defaults to Ang
+        :param time_units: model time units output (in terms of ase.units), defaults to fs
+        :param fix_cm: include adjustment to keep COM fixed, defaults to True
+        :param seed: used to set seed for reproducibility, defaults to None
+        mass of attached Variable must be in amu
+        """
+
+        self.force_key = force_db_name
+        self.temperature = temperature_K
+        self.frix = frix
+        self.force_units = (force_units or ase.units.eV/ase.units.Ang)
+        self.position_units = (position_units or ase.units.Ang)
+        self.time_units = (time_units or ase.units.fs)
+        self.fix_cm = fix_cm
+        self.kB = ase.units.kB / (self.force_units * self.position_units)
+
+        if seed is not None:
+            torch.manual_seed(seed)
+
+
+    def pre_step(self, dt:float):
+        """Updates to variables performed during each step of MD simulation before HIPNN model evaluation
+        :param dt: timestep
+        """
+
+        if len(self.variable.data["velocity"].shape) != len(self.variable.data["mass"].shape):
+            self.variable.data["mass"] = self.variable.data["mass"].unsqueeze(-1)
+
+        #          |------units of energy------| |-1/time-| |------units of mass------|
+        sigma = 2 * self.temperature * self.kB * self.frix / self.variable.data["mass"]
+        sigma = sigma * (self.force_units * self.time_units) / (self.position_units / self.time_units) # convert units for energy/mass to units for velocity
+        sigma = (sigma) ** (1/2)
+        
+        self.c1 = dt / 2 - (dt**2) * self.frix / 8 
+        self.c2 = dt * self.frix / 2 - (dt**2) * (self.frix**2) / 8 
+        self.c3 = (dt**(1/2)) * sigma / 2 - (dt**(1.5)) * self.frix * sigma / 8 
+        self.c5 = (dt**(1.5)) * sigma / (2 * (3**(1/2)))
+        self.c4 = self.frix / 2 * self.c5
+
+        xi = torch.randn_like(self.variable.data["velocity"], memory_format=torch.contiguous_format)
+        eta = torch.randn_like(self.variable.data["velocity"], memory_format=torch.contiguous_format)
+        self.rnd_pos = self.c5 * eta
+        self.rnd_vel = self.c3 * xi - self.c4 * eta
+        if self.fix_cm:
+            self.rnd_pos -= self.rnd_pos.mean(axis=1)
+            mass = self.variable.data["mass"].clone().detach()
+            self.rnd_vel -= (self.rnd_vel * mass).mean(axis=1) / mass
+
+        self.variable.data["velocity"] += self.c1 * self.variable.data["acceleration"] - self.c2 * self.variable.data["velocity"] + self.rnd_vel        
+        self.variable.data["position"] = self.variable.data["position"] + self.variable.data["velocity"] * dt + self.rnd_pos
+
+        if "cell" in self.variable.data.keys():
+            _, self.variable.data["position"], *_ = wrap_systems_torch(coords=self.variable.data["position"], cell=self.variable.data["cell"], cutoff=0) # cutoff only impacts unused outputs; can be set arbitrarily
+            try:
+                self.variable.data["unwrapped_position"] = self.variable.data["unwrapped_position"] + self.variable.data["velocity"] * dt
+            except KeyError:
+                self.variable.data["unwrapped_position"] = self.variable.data["position"].clone().detach()        
+
+    def post_step(self, dt: float, model_outputs: dict):
+        """
+        Updates to variables performed during each step of MD simulation after HIPNN model evaluation
+        :param dt: timestep
+        :param model_outputs: dictionary of HIPNN model outputs
+        """
+
+        self.variable.data["force"] = model_outputs[self.force_key].to(self.variable.device)
+
+        self.variable.data["acceleration"] = self.variable.data["force"].detach() / self.variable.data["mass"] * self.force_units / (self.position_units / self.time_units**2)
+
+        self.variable.data["velocity"] += self.c1 * self.variable.data["acceleration"] - self.c2 * self.variable.data["velocity"] + self.rnd_vel
 
 
 class MolecularDynamics:
@@ -333,18 +439,21 @@ class MolecularDynamics:
         model: Predictor,
         device: Optional[torch.device] = None,
         dtype: Optional[torch.dtype] = None,
+        batch_size: Optional[int] = None
     ):
         """
         :param variables: list of Variable objects which will be tracked during simulation
         :param model: HIPNN Predictor
         :param device: device to move variables and model to, defaults to None
         :param dtype: dtype to convert all float type variable data and model parameters to, defaults to None
+        :param batch_size: batch size passed to model.__call__
         """
 
         self.variables = variables
         self.model = model
         self.device = device
         self.dtype = dtype
+        self.batch_size = batch_size
 
         self._data = dict()
 
@@ -443,6 +552,7 @@ class MolecularDynamics:
             for variable in self.variables
             for hipnn_db_name, variable_key in variable.model_input_map.items()
         }
+        model_inputs['batch_size'] = self.batch_size
 
         model_outputs = self.model(**model_inputs)
 
@@ -473,7 +583,7 @@ class MolecularDynamics:
             record_every = 1 means every step will be stored, defaults to None
         """
 
-        for i in progress_bar(range(n_steps)):
+        for i in progress_bar(range(n_steps), miniters=np.ceil(n_steps/1000)):
             model_outputs = self._step(dt)
             if record_every is not None and (i + 1) % record_every == 0:
                 self._update_data(model_outputs)

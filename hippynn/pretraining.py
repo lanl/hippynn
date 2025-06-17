@@ -78,7 +78,8 @@ def hierarchical_energy_initialization(
     # Decay layers E1, E2, etc... according to decay_factor
     for layer in energy_module.layers[1:]:
         layer.weight.data *= decay_factor
-        layer.bias.data *= decay_factor
+        if layer.bias is not None:
+            layer.bias.data *= decay_factor
         decay_factor *= decay_factor
 
 def set_e0_values(*args, **kwargs):

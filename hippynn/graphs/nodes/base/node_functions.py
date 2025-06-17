@@ -150,11 +150,14 @@ class NodeNotFound(NodeOperationError):
     pass
 
 
-def get_connected_nodes(node_set):
+def get_connected_nodes(node_set, ancestors=True, descendants=True):
     """
     Recursively return nodes connected to the specified node_set.
 
     :param node_set: iterable collection of nodes (list, tuple, set,...)
+    :param ancestors: whether to search ancestors of the node set
+    :param descendants: whether to search descendants of the node set
+
     :return: set of nodes with some relationship to the input set.
     """
     search_from = set(node_set)
@@ -164,12 +167,14 @@ def get_connected_nodes(node_set):
         for node in search_from.copy():
             search_found.add(node)
             search_from.remove(node)
-            for node_relative in node.get_all_parents():
-                if node_relative not in search_found:
-                    search_from.add(node_relative)
-            for node_relative in node.get_all_children():
-                if node_relative not in search_found:
-                    search_from.add(node_relative)
+            if ancestors:
+                for node_relative in node.get_all_parents():
+                    if node_relative not in search_found:
+                        search_from.add(node_relative)
+            if descendants:
+                for node_relative in node.get_all_children():
+                    if node_relative not in search_found:
+                        search_from.add(node_relative)
     return search_found
 
 
@@ -177,12 +182,14 @@ class NodeAmbiguityError(NodeOperationError):
     pass
 
 
-def find_relatives(node_or_nodes, constraint_key, why_desc=DEFAULT_WHY_DESC):
+def find_relatives(node_or_nodes, constraint_key, ancestors=True, descendants=True, why_desc=DEFAULT_WHY_DESC):
     """
 
     :param node_or_nodes: a node or iterable of nodes to start the search.
     :param constraint_key: 1) callable to filter nodes by or
                         2) type spec to be used with `isinstance`.
+    :param ancestors: whether to search ancestors of the node set
+    :param descendants: whether to search descendants of the node set
     :param why_desc: If a node cannot be found satisfying the constraint, raise an error with this message.
 
     :return: set of nodes related to this node that obey a constraint
@@ -215,7 +222,7 @@ def find_relatives(node_or_nodes, constraint_key, why_desc=DEFAULT_WHY_DESC):
     return candidates
 
 
-def find_unique_relative(node_or_nodes, constraint, why_desc=DEFAULT_WHY_DESC):
+def find_unique_relative(node_or_nodes, constraint, ancestor_fallback=True, why_desc=DEFAULT_WHY_DESC):
     """
     Look for a unique parent or child node type in the graph connected to the starting node.
 
@@ -223,6 +230,10 @@ def find_unique_relative(node_or_nodes, constraint, why_desc=DEFAULT_WHY_DESC):
     :param constraint:
         1. callable to filter nodes by or
         2. type to be used with `isinstance`.
+    :param ancestor_fallback: This sets whether or not a unique relative in only the ancestors is acceptable.
+         If set to true, and multiple nodes are found, the search will be run
+         again with only the ancestors of the initial node set.
+
     :param why_desc: specification of error message
 
     :return: Node compatible with constraint.
@@ -233,6 +244,15 @@ def find_unique_relative(node_or_nodes, constraint, why_desc=DEFAULT_WHY_DESC):
     """
 
     candidates = find_relatives(node_or_nodes, constraint_key=constraint, why_desc=why_desc)
+
+    if ancestor_fallback and len(candidates) > 1:
+        # We wanted a unique node but could not find one. But this fallback
+        # allows us to look only at ancestors and see if that result is unique.
+        candidates = find_relatives(node_or_nodes,
+                                    constraint_key=constraint,
+                                    descendants=False,
+                                    ancestors=True,
+                                    why_desc=why_desc)
 
     if len(candidates) > 1:
         raise NodeAmbiguityError("({}) Ambiguity: Multiple {} nodes found:{}".format(why_desc, constraint, candidates))

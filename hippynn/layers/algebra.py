@@ -47,15 +47,18 @@ class AtLeast2D(torch.nn.Module):
 
 
 class ValueMod(torch.nn.Module):
-    def __init__(self, value):
+    def __init__(self, value, convert=True):
         super().__init__()
-        if not isinstance(value, torch.Tensor):
+        if not isinstance(value, torch.Tensor) and convert:
             value = torch.tensor(value, dtype=torch.get_default_dtype())
 
-        self.register_buffer("value", value)
+        if isinstance(value, torch.Tensor):
+            self.register_buffer("value", value)
+        else:
+            self.value = value
 
     def extra_repr(self):
-        return str(self.value.data)
+        return str(self.value)
 
     def forward(self):
         return self.value

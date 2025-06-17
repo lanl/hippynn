@@ -13,6 +13,7 @@ ensemble_graph, ensemble_info = hippynn.graphs.make_ensemble(model_form)
 # Retrieve the ensemble node which has just been created.
 # The name will be the prefix 'ensemble' followed by the db_name from the ensemble members.
 ensemble_energy = ensemble_graph.node_from_name("ensemble_T")
+ensemble_force = ensemble_graph.node_from_name("ensemble_Grad")
 
 ### Building an ASE calculator for the ensemble
 
@@ -22,7 +23,7 @@ from hippynn.interfaces.ase_interface import HippynnCalculator
 
 # The ensemble node has `mean`, `std`, and `all` outputs.
 energy_node = ensemble_energy.mean
-extra_properties = {"ens_predictions": ensemble_energy.all, "ens_std": ensemble_energy.std}
+extra_properties = {"ens_predictions": ensemble_energy.all, "ens_std": ensemble_energy.std, "force_std":ensemble_force.std}
 calc = HippynnCalculator(energy=energy_node, extra_properties=extra_properties)
 calc.to(device)
 
@@ -54,3 +55,4 @@ output = pred(Z=z_vals, R=r_vals)
 # Print the output of a node using the node or the db_name.
 print(output[ensemble_energy.all])
 print(output["T_all"])
+print(output["Grad_std"])

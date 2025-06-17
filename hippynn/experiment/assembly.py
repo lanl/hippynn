@@ -54,7 +54,7 @@ def generate_database_info(inputs, targets, allow_unfound=False):
     if missing_targets:
         msg += "Missing targets: {}\n".format(missing_targets)
 
-    raise ValueError("Required quantities for the graph inputs or targets are not mapped to a db name:\n{}".format(msg))
+    raise ValueError("Model/Loss configuration requires database quantity to be defined for these factors:\n{}".format(msg))
 
 
 def build_loss_modules(training_loss, validation_losses, network_outputs, database_inputs):
@@ -226,8 +226,8 @@ def precompute_pairs(model, database, batch_size=10, device=None, make_dense=Fal
             raise re
 
     cacheinput = inputs.PairIndices(db_name=_PAIRCACHE_DB_NAME)
-    pos = gops.find_unique_relative(pair_indexer, inputs.PositionsNode)
-    cell = gops.find_unique_relative(pair_indexer, inputs.CellNode)
+    pos = pair_indexer.coordinates
+    cell = pair_indexer.cell
     atomidx = gops.find_unique_relative(pair_indexer, indexers.AtomIndexer)
     uncacher = pairs.PairUncacher("AutoPairUncache",
                                   (cacheinput, pos, cell, atomidx),

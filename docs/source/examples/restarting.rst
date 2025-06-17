@@ -28,10 +28,23 @@ the metrics of the experiment so far. This can be seen by breaking down
     )
 
 
-Simple restart
---------------
+Loading models and simple training restart
+------------------------------------------
 
-To restart training later, you can use the following::
+To load a saved model, you can use::
+
+    from hippynn.experiment.serialization import load_model_from_cwd
+    model = load_model_from_cwd()
+
+The returned ``model`` object will have the original model with the best
+parameters loaded. This can then be used with, for example, the :doc:`/examples/predictor`.
+
+.. warning::
+   Loading a saved model uses ``torch.load`` with ``weights_only=False``, which employs the ``pickle`` 
+   module. It is possible to construct malicious pickle data which will execute arbitrary code during 
+   unpickling. Only load data you trust.
+
+To restart training, you can use the following::
 
     from hippynn.experiment.serialization import load_checkpoint
     check = load_checkpoint("./experiment_structure.pt", "./best_checkpoint.pt")
@@ -51,13 +64,6 @@ or to use the default filenames and load from the current directory::
    ``restore_checkpoint``. If `hippynn <= 0.0.3` is used, please keep the
    original ``restore_db`` keyword.
 
-If all you want to do is use a previously trained model, here is how to load the model only::
-
-    from hippynn.experiment.serialization import load_model_from_cwd
-    model = load_model_from_cwd()
-
-The returned ``model`` object will have the original model with the best
-parameters loaded. This can then be used with, for example, the :doc:`/examples/predictor`.
 
 Cross-device restart
 --------------------

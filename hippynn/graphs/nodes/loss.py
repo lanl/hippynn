@@ -6,7 +6,8 @@ import torch.nn.functional
 
 from ... import settings
 from ..indextypes import IdxType, elementwise_compare_reduce
-from .base import SingleNode
+from ..indextypes.reduce_funcs import db_state_of
+from .base import SingleNode, _BaseNode, InputNode
 from ...layers import algebra as algebra_modules
 from ...layers import regularization as reg_modules
 
@@ -98,7 +99,22 @@ class _WeightedCompareLoss(SingleNode):
         super().__init__(name, (predicted, true, weight), module=None)
     @classmethod
     def of_node(cls, node, weight):
+        """
+        Create a weighted loss comparing the true and predicted to the given `node`. 
+
+        :param node:
+        :param weight: node or str. If str, the weights are assumed to live in the database,
+          and an input node will be constructed with the given str as a db_name.
+        :return new loss node comparing true to predicted using given weights.
+
+        """
+        
         node = node.main_output
+        
+        if isinstance(weight,str):
+            index_state = db_state_of(node._index_state)
+            weight = InputNode(db_name=weight, index_state=index_state)
+            
         true = node.true
         predicted = node.pred
         weight = weight.true

@@ -7,6 +7,6 @@ from ..nodes.indexers import QuadUnpackNode
 
 
 @register_index_transformer(IdxType.QuadPack, IdxType.QuadMol)
-def idx_QuadTriMol(node):
+def idx_QuadTriMol(node, hints=None):
     parents = (node,)
     return parents, QuadUnpackNode
