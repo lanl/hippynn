@@ -226,19 +226,28 @@
     <span class="n">_output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span>
     <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;features&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_dist&quot;</span>
     <span class="n">_main_output</span> <span class="o">=</span> <span class="s2">&quot;bonds&quot;</span>
- 
+
 <div class="viewcode-block" id="HBondNode.expand0">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HBondNode.expand0">[docs]</a>
-    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">matchlen</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">expand0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">pairfinder</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">features</span><span class="p">,</span> <span class="n">pairfinder</span></div>
+    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Network</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">expand0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">&quot;feature_sizes&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">[</span><span class="s2">&quot;feature_sizes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">feature_sizes</span>
+        <span class="k">return</span> <span class="n">net</span><span class="p">,</span></div>
 
 
 <div class="viewcode-block" id="HBondNode.expand1">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HBondNode.expand1">[docs]</a>
+    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">matchlen</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">expand1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">pairfinder</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">features</span><span class="p">,</span> <span class="n">pairfinder</span></div>
+
+
+<div class="viewcode-block" id="HBondNode.expand2">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HBondNode.expand2">[docs]</a>
     <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">matchlen</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">expand1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pairfinder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">expand2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pairfinder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">features</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">pair_second</span><span class="p">,</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">pair_dist</span></div>
 
 
