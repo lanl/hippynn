@@ -202,6 +202,3 @@ pytorch_kernels_compile = MessagePassingKernels(
     envsum, sensesum, featsum,
     compiler=torch.compile,
 )
-
-
-

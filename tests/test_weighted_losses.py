@@ -20,7 +20,7 @@ def weight_graph_variables(network_parameters):
     return henergy, forces
 
 
-def test_weights_from_input(weight_graph_variables):
+def test_weighted_loss_from_input(weight_graph_variables):
     from hippynn.graphs import inputs, loss, IdxType
 
     henergy, forces = weight_graph_variables
@@ -32,7 +32,7 @@ def test_weights_from_input(weight_graph_variables):
     mse_force_weighted = loss.WeightedMSELoss.of_node(forces, force_mask)
 
     
-def test_weights_from_string(weight_graph_variables):
+def test_weighted_loss_string(weight_graph_variables):
     from hippynn.graphs import loss
 
     henergy, forces = weight_graph_variables
