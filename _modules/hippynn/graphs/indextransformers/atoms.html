@@ -117,31 +117,41 @@
 
 
 <span class="c1"># TODO: Rewrite so it can use non-one-hot-encodings?</span>
+<div class="viewcode-block" id="make_search_nodes">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.atoms.html#hippynn.graphs.indextransformers.atoms.make_search_nodes">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_search_nodes</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="n">hints</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">hints</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="n">node</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="n">node</span><span class="p">,</span> <span class="o">*</span><span class="n">hints</span><span class="p">])</span></div>
 
+    
 
 <div class="viewcode-block" id="idx_molatom_atom">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.atoms.html#hippynn.graphs.indextransformers.atoms.idx_molatom_atom">[docs]</a>
 <span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">idx_molatom_atom</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">idx_molatom_atom</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">hints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;auto-generating indexing for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+    <span class="n">search_nodes</span> <span class="o">=</span> <span class="n">make_search_nodes</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">hints</span><span class="p">)</span>
 
     <span class="n">funrel</span> <span class="o">=</span> <span class="n">find_unique_relative</span>  <span class="c1"># Abbreviation because we so many calls in this function.</span>
     <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">origin_node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># If we are auto-indexing in the model graph, it should be easy.</span>
         <span class="c1"># species = funrel(node, SpeciesNode,</span>
         <span class="c1">#                 why_desc=purpose)</span>
-        <span class="n">pidxer</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="n">pidxer</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">search_nodes</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
         <span class="n">idx_debprint</span><span class="p">(</span><span class="s2">&quot;Using reindexer for &quot;</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># If we are auto-indexing in the loss graph, it gets a bit complicated.</span>
-
+        <span class="n">search_nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">origin_node</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">search_nodes</span><span class="p">)</span>
         <span class="c1"># The species we link to will be the true version of species, that is, the node where</span>
-        <span class="n">species</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">origin_node</span><span class="p">,</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span><span class="o">.</span><span class="n">true</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">search_nodes</span><span class="p">,</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span><span class="o">.</span><span class="n">true</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">encoder</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">NodeOperationError</span> <span class="k">as</span> <span class="n">ne</span><span class="p">:</span>
-            <span class="n">idx_debprint</span><span class="p">(</span><span class="s2">&quot;Creating new ENCODER&quot;</span><span class="p">)</span>
+            <span class="n">idx_debprint</span><span class="p">(</span><span class="s2">&quot;Creating new encoder in loss graph.&quot;</span><span class="p">)</span>
             <span class="c1"># If this fails, something bad has happened -- the loss graph is trying to do something not defined by the</span>
             <span class="c1"># model graph</span>
             <span class="n">origin_encoder</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">species</span><span class="o">.</span><span class="n">origin_node</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
@@ -161,7 +171,7 @@
 <div class="viewcode-block" id="idx_atom_molatom">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.atoms.html#hippynn.graphs.indextransformers.atoms.idx_atom_molatom">[docs]</a>
 <span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">idx_atom_molatom</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">idx_atom_molatom</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">hints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">origin_node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="p">(</span><span class="n">node</span><span class="p">,)</span>

@@ -115,31 +115,34 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">..nodes.indexers</span><span class="w"> </span><span class="kn">import</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">OneHotEncoder</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..nodes.inputs</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">PositionsNode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..nodes.pairs</span><span class="w"> </span><span class="kn">import</span> <span class="n">PairReIndexer</span><span class="p">,</span> <span class="n">PairDeIndexer</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.tags</span><span class="w"> </span><span class="kn">import</span> <span class="n">PairIndexer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..nodes.tags</span><span class="w"> </span><span class="kn">import</span> <span class="n">PairIndexer</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">.atoms</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_search_nodes</span>
 
 <span class="c1"># TODO: Rewrite so it can use non-one-hot-encodings?</span>
-
 
 <div class="viewcode-block" id="idx_molatomatom_pair">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.pairs.html#hippynn.graphs.indextransformers.pairs.idx_molatomatom_pair">[docs]</a>
 <span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtomAtom</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">idx_molatomatom_pair</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">idx_molatomatom_pair</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">hints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;auto-generating indexing for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+    <span class="n">search_nodes</span> <span class="o">=</span> <span class="n">make_search_nodes</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">hints</span><span class="p">)</span>
 
     <span class="n">funrel</span> <span class="o">=</span> <span class="n">find_unique_relative</span>  <span class="c1"># Abbreviation because we so many calls in this function.</span>
     <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">origin_node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># If we are auto-indexing in the model graph, it should be easy.</span>
-        <span class="n">pair_idx</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
-        <span class="n">pidxer</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="n">pair_idx</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">search_nodes</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="n">pidxer</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">search_nodes</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
         <span class="n">idx_debprint</span><span class="p">(</span><span class="s2">&quot;Using reindexer for &quot;</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># If we are auto-indexing in the loss graph, it gets a bit complicated.</span>
 
+        <span class="n">search_nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">origin_node</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">search_nodes</span><span class="p">)</span>
         <span class="c1"># The species we link to will be the true version of species, that is, the node where</span>
-        <span class="n">species</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">origin_node</span><span class="p">,</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span><span class="o">.</span><span class="n">true</span>
-        <span class="n">coordinates</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">origin_node</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span><span class="o">.</span><span class="n">true</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">search_nodes</span><span class="p">,</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span><span class="o">.</span><span class="n">true</span>
+        <span class="n">coordinates</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">search_nodes</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span><span class="o">.</span><span class="n">true</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">encoder</span> <span class="o">=</span> <span class="n">funrel</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">NodeOperationError</span> <span class="k">as</span> <span class="n">ne</span><span class="p">:</span>
@@ -188,12 +191,14 @@
 <div class="viewcode-block" id="idx_pair_molatomatom">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.pairs.html#hippynn.graphs.indextransformers.pairs.idx_pair_molatomatom">[docs]</a>
 <span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtomAtom</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">idx_pair_molatomatom</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">idx_pair_molatomatom</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">hints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;auto-generating indexing for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
 
+    <span class="n">search_nodes</span> <span class="o">=</span> <span class="n">make_search_nodes</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="n">hints</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">origin_node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">pidx</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
-        <span class="n">padidx</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="n">pidx</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">search_nodes</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
+        <span class="n">padidx</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">search_nodes</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
 
         <span class="n">parents</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">node</span><span class="p">,</span>

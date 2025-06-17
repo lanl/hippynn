@@ -124,7 +124,11 @@
 <li class="toctree-l3"><a class="reference internal" href="hippynn.molecular_dynamics.misc.html">misc module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.molecular_dynamics.pbc_tools.html">pbc_tools module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.molecular_dynamics.rdf.html">rdf module</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">readers module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">readers module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.molecular_dynamics.readers.extract_trajectory_data"><code class="docutils literal notranslate"><span class="pre">extract_trajectory_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.molecular_dynamics.readers.get_types"><code class="docutils literal notranslate"><span class="pre">get_types()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.molecular_dynamics.writers.html">writers module</a></li>
 </ul>
 </li>
@@ -170,7 +174,50 @@
   <section id="readers-module">
 <h1>readers module<a class="headerlink" href="#readers-module" title="Link to this heading"></a></h1>
 <p>Full Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.molecular_dynamics.readers</span></code> module.
-<span class="xref std std-doc">Click here for a summary page.</span></p>
+<a class="reference internal" href="../api_summary/hippynn.molecular_dynamics.readers.html"><span class="doc">Click here for a summary page.</span></a></p>
+<p id="module-hippynn.molecular_dynamics.readers">Read outputs from LAMMPS, Gromacs.</p>
+<p>This module is only available if the <cite>MDAnalysis</cite> package is installed.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.readers.extract_trajectory_data">
+<span class="sig-name descname"><span class="pre">extract_trajectory_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topology</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trajectory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_correction_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">guess_masses</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mda_universe_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/readers.html#extract_trajectory_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.readers.extract_trajectory_data" title="Link to this definition"></a></dt>
+<dd><p>Extracts trajectory data using MDAnalysis.</p>
+<p>E.g., for Gromacs: extract_trajectory_data(topology=”output.gro”, trajectory=”output.trr”)
+E.g., for LAMMPS: extract_trajectory_data(topology=”system.data”, trajectory=”output.lammpstrj”)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topology</strong> (<em>str</em>) – Path to topology file (e.g., ‘init.data’, ‘md.gro’).</p></li>
+<li><p><strong>trajectory</strong> (<em>str</em>) – Path to trajectory file (e.g., ‘traj.lammpstrj’, ‘md.trr’).</p></li>
+<li><p><strong>start</strong> (<em>int</em>) – Starting frame index (inclusive). Default is 0.</p></li>
+<li><p><strong>stop</strong> (<em>int</em>) – Ending frame index (exclusive). If None, reads until the end.</p></li>
+<li><p><strong>stride</strong> (<em>int</em>) – Step size between frames. Default is 1.</p></li>
+<li><p><strong>type_correction_dict</strong> (<em>dict</em><em>(</em><em>str</em><em>, </em><em>int</em><em>)</em>) – If types inferred from files are not atomic numbers or symbols, pass {force_field_type: atomic_number} 
+to correct this. The keys’ types must Default is None.</p></li>
+<li><p><strong>guess_masses</strong> (<em>bool</em>) – If true, will try to infer masses based on types. Default is True.</p></li>
+<li><p><strong>mda_universe_kwargs</strong> (<em>dict</em>) – Keywords to feed to MDAnalysis.Universe. Default is {}.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary with keys:
+- positions: ndarray (n_frames, n_atoms, 3)
+- velocities: ndarray or None (n_frames, n_atoms, 3)
+- forces: ndarray or None (n_frames, n_atoms, 3)
+- cells: ndarray (n_frames, 3, 3)
+- masses: ndarray or None (n_atoms,)
+- species: ndarray (n_atoms,)
+- mol_ids: ndarray (n_atoms,)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.molecular_dynamics.readers.get_types">
+<span class="sig-name descname"><span class="pre">get_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">universe</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/molecular_dynamics/readers.html#get_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.molecular_dynamics.readers.get_types" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 
 

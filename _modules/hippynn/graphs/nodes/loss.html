@@ -114,7 +114,8 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">...</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdxType</span><span class="p">,</span> <span class="n">elementwise_compare_reduce</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingleNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..indextypes.reduce_funcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">db_state_of</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">_BaseNode</span><span class="p">,</span> <span class="n">InputNode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">algebra</span> <span class="k">as</span> <span class="n">algebra_modules</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">regularization</span> <span class="k">as</span> <span class="n">reg_modules</span>
 
@@ -227,7 +228,22 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">true</span><span class="p">,</span> <span class="n">weight</span><span class="p">),</span> <span class="n">module</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">of_node</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">weight</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a weighted loss comparing the true and predicted to the given `node`. </span>
+
+<span class="sd">        :param node:</span>
+<span class="sd">        :param weight: node or str. If str, the weights are assumed to live in the database,</span>
+<span class="sd">          and an input node will be constructed with the given str as a db_name.</span>
+<span class="sd">        :return new loss node comparing true to predicted using given weights.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main_output</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">weight</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
+            <span class="n">index_state</span> <span class="o">=</span> <span class="n">db_state_of</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">_index_state</span><span class="p">)</span>
+            <span class="n">weight</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">index_state</span><span class="o">=</span><span class="n">index_state</span><span class="p">)</span>
+            
         <span class="n">true</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">true</span>
         <span class="n">predicted</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">pred</span>
         <span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span><span class="o">.</span><span class="n">true</span>
