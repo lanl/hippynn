@@ -170,7 +170,7 @@ old_kernels_jit = MessagePassingKernels(
     compiler=torch.jit.script,
 )
 
-old_kernels_compile = MessagePassingKernels.safe_init(
+old_kernels_compile = MessagePassingKernels(
     "_legacy_compile",
     _envsum_legacy, _sensesum_legacy, _featsum_legacy,
     compiler=torch.compile,
@@ -197,7 +197,7 @@ pytorch_kernels_jit = MessagePassingKernels(
     compiler=torch.jit.script,
 )
 
-pytorch_kernels_compile = MessagePassingKernels.safe_init(
+pytorch_kernels_compile = MessagePassingKernels(
     "pytorch",
     envsum, sensesum, featsum,
     compiler=torch.compile,

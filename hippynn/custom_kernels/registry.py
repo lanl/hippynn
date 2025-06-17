@@ -5,6 +5,24 @@ from hippynn.custom_kernels.autograd_wrapper import wrap_envops
 
 class MessagePassingKernels:
     _registered_implementations = {}  # Registry for custom kernel implementations.
+    def __new__(cls, impl_name: str, envsum_impl, sensesum_impl, featsum_impl, wrap=True,
+                 compiler=None):
+        """
+        __new__ is specialized so handle the case where compilation errors.
+        """
+        if compiler is not None:
+            try:
+                envsum_impl, sensesum_impl, featsum_impl = \
+                    map(compiler, (envsum_impl, sensesum_impl, featsum_impl))
+            except Exception as e:    
+                w = RuntimeWarning(*e.args)
+                w.with_traceback(e.__traceback__)
+                warnings.warn(w)
+                warnings.warn(f"Compilation errored, custom kernel implementation '{impl_name}' will not be available.")
+                return None
+        return super().__new__(cls)
+
+
 
     def __init__(self, impl_name: str, envsum_impl, sensesum_impl, featsum_impl, wrap=True,
                  compiler=None,):
@@ -16,10 +34,7 @@ class MessagePassingKernels:
         :param wrap: set to false if implementations are already autograd-capable.
         """
 
-        if compiler is not None:
-            envsum_impl, sensesum_impl, featsum_impl = \
-                map(compiler, (envsum_impl, sensesum_impl, featsum_impl))
-
+        
         self.envsum_impl = envsum_impl
         self.sensesum_impl = sensesum_impl
         self.featsum_impl = featsum_impl
@@ -38,20 +53,6 @@ class MessagePassingKernels:
             raise ValueError(f"Already have implementation of kernels named {impl_name}!")
         else:
             self._registered_implementations[impl_name] = self
-
-    @classmethod
-    def safe_init(self, impl_name, *args, **kwargs):
-        """Init self, but return None if init fails and raise a warning"""
-        try:
-            out = self.__init__(impl_name, *args, **kwargs)
-        except Exception as e:
-            w = RuntimeWarning(*e.args)
-            w.with_traceback(e.__traceback__)
-            warnings.warn(w)
-            out = None
-
-        self._registered_implementations[impl_name] = out
-        return out
 
     @classmethod
     def get_implementation(cls, impl_name):
