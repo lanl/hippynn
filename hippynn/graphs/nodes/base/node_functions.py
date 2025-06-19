@@ -78,8 +78,13 @@ class _BaseNode:
     def find_unique_relative(self, constraint, why_desc=DEFAULT_WHY_DESC):
         return find_unique_relative(self, constraint, why_desc=why_desc)
 
-    def find_relatives(self, constraint, why_desc=DEFAULT_WHY_DESC):
-        return find_relatives(self, constraint, why_desc=why_desc)
+    def find_relatives(self, constraint, ancestors=True, descendants=True, why_desc=DEFAULT_WHY_DESC):
+        return find_relatives(self, constraint, ancestors=ancestors, descendants=descendants, why_desc=why_desc)
+    
+    def is_in_loss_graph(self, why_desc=DEFAULT_WHY_DESC):
+        """Return whether this node is in the loss graph or the model graph."""
+        return is_in_loss_graph(self, why_desc=why_desc)
+        
 
     def swap_parent(self, old, new):
         if old not in self.parents:
@@ -161,6 +166,10 @@ def get_connected_nodes(node_set, ancestors=True, descendants=True):
     :return: set of nodes with some relationship to the input set.
     """
     search_from = set(node_set)
+
+    if not all(isinstance(this_node, _BaseNode) for this_node in search_from):
+        raise NodeAmbiguityError(f"Function received non-node inputs: {node_set}")
+
     search_found = set()
     # Very naive algorithm, but we don't anticipate large graphs.
     while len(search_from) != 0:
@@ -180,6 +189,7 @@ def get_connected_nodes(node_set, ancestors=True, descendants=True):
 
 class NodeAmbiguityError(NodeOperationError):
     pass
+
 
 
 def find_relatives(node_or_nodes, constraint_key, ancestors=True, descendants=True, why_desc=DEFAULT_WHY_DESC):
@@ -260,3 +270,35 @@ def find_unique_relative(node_or_nodes, constraint, ancestor_fallback=True, why_
     result = candidates.pop()
     _debprint("Found node {} of type {}: {}".format(result, constraint.__name__, why_desc))
     return result
+
+
+def is_in_loss_graph(node_or_nodes, why_desc=DEFAULT_WHY_DESC):
+    """
+    Decide if a node or collection of nodes is in the loss graph.
+    (If not, they are in the model graph)
+    (If neither, raise NodeAmbiguityError)
+
+    .. Warning::
+        If you call this function, it ought to be on a set of nodes assumed in the same graph.
+        If not, be prepared for the case that the question was malformed (mixture) and so ``NodeAmbiguityError`` is raised.
+
+    :param node_or_nodes: a node or iterable of nodes to examine.
+    :param why_desc: optional specification of error message clarifying reason why this was requested.
+
+    :return: boolean
+    """
+
+    from .base import InputNode, LossInputNode
+    inputs_for_nodes = find_relatives(node_or_nodes, InputNode, descendants=False)
+    if any(isinstance(in_node, LossInputNode) for in_node in inputs_for_nodes): 
+        # If any inputs are in the loss graph, we must ensure that they all are, or else
+        # the graph state has been corrupted.
+        if not all(isinstance(in_node, LossInputNode) for in_node in inputs_for_nodes):
+            raise NodeAmbiguityError("This node_or_nodes is both in and out of the loss graph. " \
+                    f"Requested for purpose: {why_desc}")
+        # Graph is not corrupted!
+        return True
+    else:
+        # No inputs were in the loss graph
+        return False
+    

@@ -45,24 +45,38 @@ def temporary_parents(child, parents):
     :return: None
     """
     # Raise error if this is called on an already-build child.
-    # (This function could be refactored to deal with this case.)
-    assert not (
-        hasattr(child, "parents") or hasattr(child, "children")
-    ), "Temporary connection to node requires that it is not initialized."
+    # (This function could be refactored to deal with this case... delicately.)
+    assert not hasattr(child, "children"), \
+        "Temporary connection to node requires that it is not initialized."
 
-    parset = set(parents)  # In case a node has the same parent twice.
+    if hasattr(child, "parents"):
+        old_parents = child.parents
+    else:
+        old_parents = None  # No parents!
+
+    parents_set = set(parents)  # don't iterate over the same thing twice.
+    disconnect_child_set = set()
+    # it is important only to disconnect a parent from this child at the end
+    # if the parent didn't already include the child.
 
     try:
-        for p in parset:
-            p.children = (*p.children, child)
-        child.parents = parents
+        for p in parents_set:
+            if child not in p.children:
+                p.children = (*p.children, child)
+                disconnect_child_set.add(p)
+        child.parents = tuple(parents_set)
         child.children = ()
         yield
     finally:
-        for p in parset:
-            p.children = tuple(c for c in p.children if c is not child)
-        del child.parents
+        for p in disconnect_child_set:
+            p.children = tuple(c for c in p.children if c is not child) 
+        
+        if old_parents is not None: # non-empty
+            child.parents = old_parents
+        else:
+            del child.parents
         del child.children
+    
 
 
 class TupleTypeMismatch(Exception):
@@ -313,20 +327,20 @@ class FormTransformer(FormHandler):
     def __call__(self, node_self, *parents, purpose=None, **kwargs):
         try:
             _assert_tupleform(parents, self.form)
-            _debprint("Expanding form", self.form)
-            _debprint("Input parents:", self.form)
-            _debprint("Match function:", self.fn)
-            if purpose is None:
-                purpose = "{}: Expanding parents {} based on form {}".format(type(self), parents, self.form)
-            with temporary_parents(node_self, parents):
-                # We have to pass self here explicitly because the form handler stores unbound functions.
-                new_parents = self.fn(node_self, *parents, purpose=purpose, **kwargs)
-            return new_parents
         except TupleTypeMismatch:
             _debprint("Didn't pass form!")
             return parents
-        except Exception as ee:
-            raise RuntimeError("Error while transforming {}".format(self.fn.__qualname__)) from ee
+    
+        _debprint("Expanding form", self.form)
+        _debprint("Input parents:", parents)
+        _debprint("Match function:", self.fn)
+        if purpose is None:
+            purpose = "{}: Expanding parents {} based on form {}".format(type(self), parents, self.form)
+        with temporary_parents(node_self, parents):
+            # We have to pass self here explicitly because the form handler stores unbound functions.
+            new_parents = self.fn(node_self, *parents, purpose=purpose, **kwargs)
+        return new_parents
+        ### Note: used to exception chain here, was too verbose.
 
 
 class IndexFormTransformer(FormTransformer):
@@ -477,10 +491,9 @@ class ExpandParents(metaclass=ExpandParentMeta):
             _debprint("\tForm:", form_handler.form)
             _debprint("\t\targs:", parents)
             _debprint("\t\tkwargs:", kwargs)
-            try:
-                # We have to pass self here explicitly because the form handler stores unbound functions,
-                # rather than bound methods.
-                parents = form_handler(self, *parents, purpose=purpose, **kwargs)
-            except Exception as ee:
-                raise RuntimeError("Couldn't build {} automatically".format(type(self))) from ee
+            # We have to pass self here explicitly because the form handler stores unbound functions,
+            # rather than bound methods.
+            ### Note: used to exception chain here, was too verbose.
+            parents = form_handler(self, *parents, purpose=purpose, **kwargs)
+
         return parents

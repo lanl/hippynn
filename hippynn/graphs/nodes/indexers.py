@@ -212,12 +212,28 @@ class FuzzyHistogrammer(AutoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 class SpeciesIndexer(AutoNoKw, SingleNode, ExpandParents):
-    _input_names = "values", "onehot_encoding"
+    """
+    Separate an atom-wise tensor into sub-tensors for each species.
+    """
+    _input_names = "input_values", "onehot_encoding"
     _auto_module_class = index_modules.SpeciesIndexer
     _index_state = IdxType.Atoms
 
+
+    @_parent_expander.match(_BaseNode, _BaseNode)
+    def expansion0(self, node_to_index, hint_node, **kwargs):
+        """
+        For loss-graph quantities, we may need the information about /which/ species to use.
+        """
+        atom_node_to_index = index_type_coercion(node_to_index, IdxType.Atoms, hints=[hint_node])
+
+        return atom_node_to_index,
+
     @_parent_expander.match(_BaseNode)
-    def expansion0(self, node_to_index, species_set, **kwargs):
+    def expansion1(self, node_to_index, species_set, **kwargs):
+        """
+        find onehot encoding.
+        """
         atom_node_to_index = index_type_coercion(node_to_index, IdxType.Atoms)
         onehot = find_unique_relative(atom_node_to_index, OneHotEncoder)
         self.species_set = species_set or onehot.species_set
