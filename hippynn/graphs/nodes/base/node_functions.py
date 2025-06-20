@@ -1,6 +1,10 @@
 """
 Base node definition.
 """
+import warnings
+from typing import Optional, Tuple
+
+import torch
 from .. import _debprint
 
 DEFAULT_WHY_DESC = "<purpose not specified>"
@@ -27,13 +31,13 @@ class _BaseNode:
         if not isinstance(name, str):
             raise TypeError("Node names must be strings. Instead got: {}".format(name))
 
-        self.db_name = db_name
-        self.origin_node = None  # Loss input nodes set this attribute to find references to the model graph
-        self.parents = tuple(parents)
-        self.name = name
-        self._pred = None
-        self._true = None
-        self.children = tuple()
+        self.db_name: Optional[str] = db_name
+        self.origin_node: Optional[_BaseNode] = None  # Loss input nodes set this attribute to find references to the model graph
+        self.parents: Tuple(_BaseNode) = tuple(parents)
+        self.name: str = name
+        self._pred: Optional[_BaseNode] = None
+        self._true: Optional[_BaseNode] = None
+        self.children: Tuple(_BaseNode) = tuple()
         for p in self.parents:
             p.children = p.children + (self,)
 
@@ -43,7 +47,10 @@ class _BaseNode:
             module = self.auto_module()
         # Otherwise, glue the module on
         if module is not None:
-            self.torch_module = module
+            self.torch_module: torch.nn.Module = module
+        else:
+            pass
+            # In this case, the node must represent input tensors.
 
     def set_dbname(self, db_name):
         self.db_name = db_name
@@ -64,16 +71,24 @@ class _BaseNode:
             self._true = self._LossTrueNode(self.name + "-true", origin_node=self, db_name=self.db_name)
         return self._true
 
-    def get_all_parents(self):
-        return self.parents + tuple(pnode for parent in self.parents for pnode in parent.get_all_parents())
+    def get_ancestors(self):
+        """
+        Gets all parents of this node and recursively to input nodes. This node is not included in the output.
+        """
+        return get_connected_nodes(self.parents, ancestors=True, descendants=False)
+        #return self.parents + tuple(pnode for parent in self.parents for pnode in parent.get_all_parents())
 
-    def get_all_children(self):
-        return self.children + tuple(ccnode for child in self.children for ccnode in child.get_all_children())
+    def get_descendants(self):
+        """
+        Gets all children of this node and recursively forward. This node is not included in the output.
+        """
+        return get_connected_nodes(self.children, ancestors=False, descendants=True)
+        #return self.children + tuple(ccnode for child in self.children for ccnode in child.get_all_children())
 
     # Functions that take either a node or a node set can be accessed as attributes.
 
-    def get_all_connected(self):
-        return get_connected_nodes({self})
+    def get_all_connected(self, ancestors=True, descendants=True):
+        return get_connected_nodes({self}, ancestors=ancestors, descendants=descendants)
 
     def find_unique_relative(self, constraint, why_desc=DEFAULT_WHY_DESC):
         return find_unique_relative(self, constraint, why_desc=why_desc)
@@ -159,6 +174,8 @@ def get_connected_nodes(node_set, ancestors=True, descendants=True):
     """
     Recursively return nodes connected to the specified node_set.
 
+    Nodes in the supplied set are are including in the output.
+
     :param node_set: iterable collection of nodes (list, tuple, set,...)
     :param ancestors: whether to search ancestors of the node set
     :param descendants: whether to search descendants of the node set
@@ -166,10 +183,6 @@ def get_connected_nodes(node_set, ancestors=True, descendants=True):
     :return: set of nodes with some relationship to the input set.
     """
     search_from = set(node_set)
-
-    if not all(isinstance(this_node, _BaseNode) for this_node in search_from):
-        raise NodeAmbiguityError(f"Function received non-node inputs: {node_set}")
-
     search_found = set()
     # Very naive algorithm, but we don't anticipate large graphs.
     while len(search_from) != 0:
@@ -177,14 +190,20 @@ def get_connected_nodes(node_set, ancestors=True, descendants=True):
             search_found.add(node)
             search_from.remove(node)
             if ancestors:
-                for node_relative in node.get_all_parents():
+                for node_relative in node.parents:
                     if node_relative not in search_found:
                         search_from.add(node_relative)
             if descendants:
-                for node_relative in node.get_all_children():
+                for node_relative in node.children:
                     if node_relative not in search_found:
                         search_from.add(node_relative)
     return search_found
+
+def get_ancestors(node_set):
+    return get_connected_nodes(node_set, ancestors=True, descendants=False)
+
+def get_descendants(node_set):
+    return get_connected_nodes(node_set, ancestors=False, descendants=True)
 
 
 class NodeAmbiguityError(NodeOperationError):
@@ -217,15 +236,12 @@ def find_relatives(node_or_nodes, constraint_key, ancestors=True, descendants=Tr
         node_or_nodes = [node_or_nodes]
         _debprint("Starting search from single node")
 
-    candidates = {n for n in get_connected_nodes(node_or_nodes) if constraint_key(n)}
-
-    for node in node_or_nodes:
-        if constraint_key(node):
-            candidates.add(node)
+    relatives = get_connected_nodes(node_or_nodes, ancestors=ancestors, descendants=descendants)
+    candidates = {n for n in relatives if constraint_key(n)}
 
     if len(candidates) == 0:
         _debprint("Node not found, all relatives:")
-        for n in get_connected_nodes(node_or_nodes):
+        for n in relatives:
             _debprint(n)
         raise NodeNotFound("({}) Missing: Could not automatically satisfying node in graph.".format(why_desc))
 

@@ -4,16 +4,16 @@ Graph Operations ("gops") that process or transform a set of nodes.
 import collections
 import copy
 
-from .nodes.base import InputNode, MultiNode
+from .nodes.base import InputNode, MultiNode, _BaseNode
 from .nodes.base.algebra import ValueNode
 from .nodes.base.node_functions import NodeNotFound, NodeOperationError
 from .indextypes import soft_index_type_coercion
 
 from . import get_connected_nodes, find_unique_relative
 from ..tools import is_equal_state_dict
+from typing import Collection, List
 
-
-def get_subgraph(required_nodes):
+def get_subgraph(required_nodes: Collection[_BaseNode])->List[_BaseNode]:
     """
     Get the subgraph associated with some target (required) nodes.
 
@@ -23,7 +23,7 @@ def get_subgraph(required_nodes):
     """
 
     required_nodes = list(set(required_nodes))
-    subgraph_nodes = required_nodes + [p for node in required_nodes for p in node.get_all_parents()]
+    subgraph_nodes = required_nodes + [p for node in required_nodes for p in node.get_ancestors()]
 
     subgraph_nodes = subgraph_nodes + [c for mn in subgraph_nodes if isinstance(mn, MultiNode) for c in mn.children]
     # ^-- a note on this:
@@ -199,7 +199,7 @@ def check_link_consistency(node_set):
     )
 
 
-def replace_node(old_node, new_node, disconnect_old=False):
+def replace_node(old_node: _BaseNode, new_node: _BaseNode, disconnect_old=False):
     """
     :param old_node: Node to replace
     :param new_node: Node to insert
@@ -224,7 +224,7 @@ def replace_node(old_node, new_node, disconnect_old=False):
     :return: None
     """
 
-    new_node_requires = set(new_node.get_all_parents())
+    new_node_requires = set(new_node.get_ancestors())
 
     if disconnect_old:
         if old_node in new_node_requires:
