@@ -1,5 +1,9 @@
 import pytest
 
+import torch
+import hippynn
+
+
 @pytest.fixture
 def network_parameters():
     return {
@@ -26,10 +30,11 @@ def bond_parameters():
     }
     return bond_parameters
 
+
 @pytest.fixture()
 def neural_network_node(network_parameters):
     from hippynn.graphs import inputs, networks
-    
+
     species = inputs.SpeciesNode(db_name="species")
     positions = inputs.PositionsNode(db_name="coordinates")
     cell = inputs.CellNode(db_name="cell")
@@ -37,3 +42,15 @@ def neural_network_node(network_parameters):
     network = networks.Hipnn("HIPNN", (species, positions, cell), module_kwargs=network_parameters, periodic=True)
 
     return network
+
+
+@pytest.fixture
+def example_box():
+    n_atom = 7
+    batch_size = 5
+    n_dim = 3
+    l = 2
+    z = torch.ones((batch_size, n_atom), dtype=torch.int64)
+    r = l * torch.rand((batch_size, n_atom, n_dim), dtype=torch.float)
+    c = l * torch.eye(n_dim, dtype=torch.float).unsqueeze(0).expand((batch_size, n_dim, n_dim))
+    return {"species": z, "coordinates": r, "cell": c}  # must match names in neural_network_node
