@@ -3,20 +3,6 @@ import pytest
 from hippynn.graphs import inputs, networks, targets, physics
 
 
-@pytest.fixture
-def network_parameters():
-    return {
-        "possible_species": [0, 1],
-        "n_features": 8,
-        "n_sensitivities": 20,
-        "dist_soft_min": 0.8,
-        "dist_soft_max": 5,
-        "dist_hard_max": 5.5,
-        "n_interaction_layers": 1,
-        "n_atom_layers": 1,
-        "sensitivity_type": "inverse",
-        "resnet": True,
-    }
 
 
 @pytest.fixture()

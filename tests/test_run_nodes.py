@@ -3,8 +3,6 @@ import pytest
 import torch
 import hippynn
 
-from test_build_nodes import neural_network_node, bond_parameters, network_parameters
-
 
 @pytest.fixture
 def example_box():
