@@ -2,7 +2,7 @@
 Nodes for indexing information.
 """
 from .tags import Encoder, AtomIndexer
-from .base import SingleNode, AutoNoKw, AutoKw, find_unique_relative, MultiNode, ExpandParents, _BaseNode, IndexNode
+from .base import SingleNode, AutoNoKw, AutoKw, find_unique_relative, MultiNode, ExpandParents, BaseNode, IndexNode
 from .base.node_functions import NodeNotFound
 from .inputs import SpeciesNode
 
@@ -29,7 +29,7 @@ class OneHotEncoder(AutoKw, Encoder, MultiNode):
         self.species_set = species_set
 
         # Can be passed just a single species node, not a tuple
-        if isinstance(parents, _BaseNode):
+        if isinstance(parents, BaseNode):
             parents = (parents,)
         super().__init__(name, parents, module=module, **kwargs)
 
@@ -141,12 +141,12 @@ class SysMaxOfAtomsNode(ExpandParents, AutoNoKw, SingleNode):
     _index_state = IdxType.Molecules
     _auto_module_class = index_modules.SysMaxOfAtoms
 
-    @_parent_expander.match(_BaseNode)
+    @_parent_expander.match(BaseNode)
     def expansion0(self, node, *, purpose, **kwargs):
         pidxer = find_unique_relative(node, AtomIndexer, why_desc=purpose)
         return node, pidxer
 
-    @_parent_expander.match(_BaseNode, AtomIndexer)
+    @_parent_expander.match(BaseNode, AtomIndexer)
     def expansion1(self, node, pidxer, *, purpose, **kwargs):
         return node, pidxer.mol_index, pidxer.n_molecules
 
@@ -203,7 +203,7 @@ class FuzzyHistogrammer(AutoKw, SingleNode):
 
     def __init__(self, name, parents, length, vmin, vmax, module="auto", **kwargs):
         
-        if isinstance(parents, _BaseNode):
+        if isinstance(parents, BaseNode):
             parents = (parents,)
 
         self._output_index_state = parents[0]._index_state
@@ -220,7 +220,7 @@ class SpeciesIndexer(AutoNoKw, SingleNode, ExpandParents):
     _index_state = IdxType.Atoms
 
 
-    @_parent_expander.match(_BaseNode, _BaseNode)
+    @_parent_expander.match(BaseNode, BaseNode)
     def expansion0(self, node_to_index, hint_node, **kwargs):
         """
         For loss-graph quantities, we may need the information about /which/ species to use.
@@ -229,7 +229,7 @@ class SpeciesIndexer(AutoNoKw, SingleNode, ExpandParents):
 
         return atom_node_to_index,
 
-    @_parent_expander.match(_BaseNode)
+    @_parent_expander.match(BaseNode)
     def expansion1(self, node_to_index, species_set, **kwargs):
         """
         find onehot encoding.

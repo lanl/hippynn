@@ -13,7 +13,7 @@ from .base import (
     ExpandParents,
     MultiNode,
     SingleNode,
-    _BaseNode,
+    BaseNode,
     find_unique_relative,
 )
 from .base.node_functions import NodeNotFound
@@ -47,7 +47,7 @@ class MultiGradientNode(AutoKw, MultiNode):
 
     _auto_module_class = physics_layers.MultiGradient
 
-    def __init__(self, name: str, molecular_energies_parent: _BaseNode, generalized_coordinates_parents: tuple[_BaseNode], signs: tuple[int], module="auto", **kwargs):
+    def __init__(self, name: str, molecular_energies_parent: BaseNode, generalized_coordinates_parents: tuple[BaseNode], signs: tuple[int], module="auto", **kwargs):
         if isinstance(signs, int):
             signs = (signs,)
 
@@ -149,7 +149,7 @@ class ChargePairSetup(ExpandParents):
         positions = find_unique_relative((charges, species), PositionsNode, why_desc=purpose)
         return charges, positions, species
 
-    @_parent_expander.match(Charges, _BaseNode, SpeciesNode)
+    @_parent_expander.match(Charges, BaseNode, SpeciesNode)
     def expansion2(self, charges, pos_or_pair, species, *, purpose, **kwargs):
         encoder, pidxer = acquire_encoding_padding(species, species_set=None, purpose=purpose)
         return charges, pos_or_pair, pidxer
@@ -254,7 +254,7 @@ class VecMag(ExpandParents, AutoNoKw, SingleNode):
     _auto_module_class = physics_layers.VecMag
     _index_state = IdxType.NotFound
 
-    @_parent_expander.match(_BaseNode, _BaseNode)
+    @_parent_expander.match(BaseNode, BaseNode)
     def expansion2(self, vector, helper, *, purpose, **kwargs):
         # This somewhat strange construction allows us to
         # find a padding indexer if the vector is detached from the padding indexer.
@@ -276,12 +276,12 @@ class AtomToMolSummer(ExpandParents, AutoNoKw, SingleNode):
     _auto_module_class = index_layers.MolSummer
     _index_state = IdxType.Molecules
 
-    @_parent_expander.match(_BaseNode)
+    @_parent_expander.match(BaseNode)
     def expansion0(self, features, **kwargs):
         pdxer = find_unique_relative(features, AtomIndexer, why_desc="Generating Molecular summer")
         return features, pdxer
 
-    @_parent_expander.match(_BaseNode, AtomIndexer)
+    @_parent_expander.match(BaseNode, AtomIndexer)
     def expansion1(self, features, pdxer, **kwargs):
         return features, pdxer.mol_index, pdxer.n_molecules
 
@@ -300,17 +300,17 @@ class BondToMolSummmer(ExpandParents, AutoNoKw, SingleNode):
     _auto_module_class = pair_layers.MolPairSummer
     _index_state = IdxType.Molecules
 
-    @_parent_expander.match(_BaseNode)
+    @_parent_expander.match(BaseNode)
     def expansion0(self, features, *, purpose, **kwargs):
         pdxer = find_unique_relative(features, AtomIndexer, why_desc=purpose)
         pair_idxer = find_unique_relative(features, PairIndexer, why_desc=purpose)
         return features, pdxer, pair_idxer
 
-    @_parent_expander.match(_BaseNode, AtomIndexer, PairIndexer)
+    @_parent_expander.match(BaseNode, AtomIndexer, PairIndexer)
     def expansion1(self, features, pdxer, pair_idxer, **kwargs):
         return features, pdxer.mol_index, pdxer.n_molecules, pair_idxer.pair_first
 
-    @_parent_expander.match(_BaseNode, _BaseNode, _BaseNode, _BaseNode, _BaseNode)
+    @_parent_expander.match(BaseNode, BaseNode, BaseNode, BaseNode, BaseNode)
     def expansion2(self, features, mol_index, n_molecules, **kwargs):
         return index_type_coercion(features.main_output, IdxType.Pair), mol_index, n_molecules
 
@@ -324,11 +324,11 @@ class PerAtom(ExpandParents, AutoNoKw, SingleNode):
     _index_state = IdxType.Molecules
     _auto_module_class = physics_layers.PerAtom
 
-    @_parent_expander.match(_BaseNode)
+    @_parent_expander.match(BaseNode)
     def expansion0(self, features, *, purpose, **kwargs):
         return features, find_unique_relative(features, SpeciesNode, purpose)
 
-    @_parent_expander.match(_BaseNode, _BaseNode)
+    @_parent_expander.match(BaseNode, BaseNode)
     def expansion1(self, features, species, **kwargs):
         features = features.main_output
         assert (
@@ -355,20 +355,20 @@ class CombineEnergyNode(Energies, AutoKw, ExpandParents, MultiNode):
     )
     _auto_module_class = physics_layers.CombineEnergy
 
-    @_parent_expander.match(_BaseNode, Energies)
+    @_parent_expander.match(BaseNode, Energies)
     def expansion0(self, energy_1, energy_2, **kwargs):
         return energy_1, energy_2.atom_energies
 
-    @_parent_expander.match(Energies, _BaseNode)
+    @_parent_expander.match(Energies, BaseNode)
     def expansion0(self, energy_1, energy_2, **kwargs):
         return energy_1.atom_energies, energy_2
 
-    @_parent_expander.match(_BaseNode, _BaseNode)
+    @_parent_expander.match(BaseNode, BaseNode)
     def expansion1(self, energy_1, energy_2, **kwargs):
         pdindexer = find_unique_relative([energy_1, energy_2], AtomIndexer, why_desc="Generating CombineEnergies")
         return energy_1, energy_2, pdindexer
 
-    @_parent_expander.match(_BaseNode, _BaseNode, PaddingIndexer)
+    @_parent_expander.match(BaseNode, BaseNode, PaddingIndexer)
     def expansion2(self, energy_1, energy_2, pdindexer, **kwargs):
         return energy_1, energy_2, pdindexer.mol_index, pdindexer.n_molecules
 

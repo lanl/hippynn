@@ -2,7 +2,7 @@
 Nodes for networks.
 """
 from .tags import Encoder, PairIndexer, Network, AtomIndexer
-from .base import _BaseNode, AutoKw, ExpandParents, SingleNode
+from .base import BaseNode, AutoKw, ExpandParents, SingleNode
 from .base.multi import IndexNode
 from .indexers import OneHotEncoder, PaddingIndexer, acquire_encoding_padding
 from .pairs import OpenPairIndexer, PeriodicPairIndexer
@@ -92,7 +92,7 @@ class Hipnn(DefaultNetworkExpansion, AutoKw, Network, SingleNode, _FeatureNodesM
     _index_state = IdxType.Atoms
     _auto_module_class = network_modules.hipnn.Hipnn
 
-    @_parent_expander.match(_BaseNode, PairIndexer)
+    @_parent_expander.match(BaseNode, PairIndexer)
     def expansion2(self, features, pairfinder, **kwargs):
         return features, pairfinder.pair_first, pairfinder.pair_second, pairfinder.pair_dist
 
@@ -121,7 +121,7 @@ class HipnnVec(DefaultNetworkExpansion, AutoKw, Network, SingleNode, _FeatureNod
     _index_state = IdxType.Atoms
     _auto_module_class = network_modules.hipnn.HipnnVec
 
-    @_parent_expander.match(_BaseNode, PairIndexer)
+    @_parent_expander.match(BaseNode, PairIndexer)
     def expansion2(self, features, pairfinder, **kwargs):
         return features, pairfinder.pair_first, pairfinder.pair_second, pairfinder.pair_dist, pairfinder.pair_coord
 

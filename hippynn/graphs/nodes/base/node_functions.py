@@ -10,7 +10,7 @@ from .. import _debprint
 DEFAULT_WHY_DESC = "<purpose not specified>"
 
 
-class _BaseNode:
+class BaseNode:
     _input_names = NotImplemented
     _LossPredNode = None  # Will be set by this child class when it exists
     _LossTrueNode = None  # Same
@@ -32,12 +32,12 @@ class _BaseNode:
             raise TypeError("Node names must be strings. Instead got: {}".format(name))
 
         self.db_name: Optional[str] = db_name
-        self.origin_node: Optional[_BaseNode] = None  # Loss input nodes set this attribute to find references to the model graph
-        self.parents: Tuple(_BaseNode) = tuple(parents)
+        self.origin_node: Optional[BaseNode] = None  # Loss input nodes set this attribute to find references to the model graph
+        self.parents: Tuple(BaseNode) = tuple(parents)
         self.name: str = name
-        self._pred: Optional[_BaseNode] = None
-        self._true: Optional[_BaseNode] = None
-        self.children: Tuple(_BaseNode) = tuple()
+        self._pred: Optional[BaseNode] = None
+        self._true: Optional[BaseNode] = None
+        self.children: Tuple(BaseNode) = tuple()
         for p in self.parents:
             p.children = p.children + (self,)
 
@@ -165,9 +165,12 @@ class _BaseNode:
 class NodeOperationError(Exception):
     pass
 
-
 class NodeNotFound(NodeOperationError):
     pass
+
+class NodeAmbiguityError(NodeOperationError):
+    pass
+
 
 
 def get_connected_nodes(node_set, ancestors=True, descendants=True):
@@ -206,8 +209,6 @@ def get_descendants(node_set):
     return get_connected_nodes(node_set, ancestors=False, descendants=True)
 
 
-class NodeAmbiguityError(NodeOperationError):
-    pass
 
 
 
@@ -232,7 +233,7 @@ def find_relatives(node_or_nodes, constraint_key, ancestors=True, descendants=Tr
     else:
         raise ValueError("constraint must be a type or callable filter function")
 
-    if isinstance(node_or_nodes, _BaseNode):  # if we search from a node, wrap it as a collection
+    if isinstance(node_or_nodes, BaseNode):  # if we search from a node, wrap it as a collection
         node_or_nodes = [node_or_nodes]
         _debprint("Starting search from single node")
 
@@ -318,3 +319,4 @@ def is_in_loss_graph(node_or_nodes, why_desc=DEFAULT_WHY_DESC):
         # No inputs were in the loss graph
         return False
     
+_BaseNode = BaseNode # Backwards compatibility for unpickling prior models

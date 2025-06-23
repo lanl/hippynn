@@ -13,7 +13,7 @@ import functools
 import contextlib
 from .. import _debprint
 
-from . import _BaseNode
+from . import BaseNode
 from ...indextypes import index_type_coercion, elementwise_compare_reduce, get_reduced_index_state
 
 
@@ -167,7 +167,7 @@ class ParentExpander:
         :param length:
         :return:
         """
-        return self.match(*((_BaseNode,) * length))
+        return self.match(*((BaseNode,) * length))
 
     @adds_to_forms
     def assertion(self, *form):
@@ -421,7 +421,7 @@ class FormAssertion(FormHandler):
 class FormAssertLength(FormAssertion):
     def __init__(self, length):
         self.length = length
-        super().__init__((_BaseNode,) * length)
+        super().__init__((BaseNode,) * length)
 
     def add_class_doc(self):
         return f"Asserts that the number of parents is {self.length}"
@@ -484,7 +484,7 @@ class ExpandParents(metaclass=ExpandParentMeta):
             cls.__doc__ = _append_docs(cls)
 
     def expand_parents(self, parents, *, purpose=None, **kwargs):
-        if isinstance(parents, _BaseNode):
+        if isinstance(parents, BaseNode):
             parents = (parents,)
         for form_handler in self._parent_expander:
             _debprint("Processing form:")

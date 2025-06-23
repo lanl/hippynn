@@ -2,12 +2,12 @@
 Base nodes for sublcassing.
 """
 from ... import indextypes
-from .algebra import _CombNode, AtLeast2D
+from .algebra import _NodeAlgebra, AtLeast2D
 
-from .node_functions import _BaseNode
+from .node_functions import BaseNode
 
 
-class Node(_CombNode):
+class Node(_NodeAlgebra):
     pass
 
 
@@ -72,5 +72,5 @@ class LossTrueNode(LossInputNode):
         return self._main_output
 
 
-_BaseNode._LossPredNode = LossPredNode
-_BaseNode._LossTrueNode = LossTrueNode
+BaseNode._LossPredNode = LossPredNode
+BaseNode._LossTrueNode = LossTrueNode

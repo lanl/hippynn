@@ -6,12 +6,12 @@ import functools
 import operator
 
 from ...indextypes import IdxType, get_reduced_index_state, elementwise_compare_reduce
-from .node_functions import _BaseNode
+from .node_functions import BaseNode
 from ....layers import algebra as algebra_mods
 
 
 def wrap_as_node(obj):
-    return obj.main_output if isinstance(obj, _BaseNode) else ValueNode(obj)
+    return obj.main_output if isinstance(obj, BaseNode) else ValueNode(obj)
 
 
 def coerces_values_to_nodes(func):
@@ -24,7 +24,7 @@ def coerces_values_to_nodes(func):
     return newfunc
 
 
-class _CombNode(_BaseNode):
+class _NodeAlgebra(BaseNode):
     @coerces_values_to_nodes
     def __add__(self, other):
         return AddNode(self, other)
@@ -75,7 +75,7 @@ class _CombNode(_BaseNode):
         return NegNode(self)
 
 
-class ValueNode(_CombNode):
+class ValueNode(_NodeAlgebra):
     _index_state = IdxType.Scalar
 
     def __init__(self, value, convert=True):
@@ -96,7 +96,7 @@ class _PredefinedOp:
             cls._classname = op.__name__
 
 
-class UnaryNode(_PredefinedOp, _CombNode):
+class UnaryNode(_PredefinedOp, _NodeAlgebra):
     def __init__(self, in_node):
         name = "{}({})".format(self._classname, in_node)
         super().__init__(name, (in_node,), module=None)
@@ -111,7 +111,7 @@ class NegNode(UnaryNode, op=operator.neg):
     pass
 
 
-class BinNode(_PredefinedOp, _CombNode):
+class BinNode(_PredefinedOp, _NodeAlgebra):
     _classname = None
 
     def __init__(self, left, right):
@@ -150,7 +150,7 @@ class PowNode(BinNode, op=operator.pow):
 # have at least two dimensions.
 # See nodes/loss.py and turn on `debug_loss_broadcast` if you have concerns about
 # broadcasting behavior.
-class AtLeast2D(_BaseNode):
+class AtLeast2D(BaseNode):
     torch_module = algebra_mods.AtLeast2D()
     _index_state = IdxType.NotFound
 

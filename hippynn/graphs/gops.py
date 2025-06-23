@@ -4,7 +4,7 @@ Graph Operations ("gops") that process or transform a set of nodes.
 import collections
 import copy
 
-from .nodes.base import InputNode, MultiNode, _BaseNode
+from .nodes.base import InputNode, MultiNode, BaseNode
 from .nodes.base.algebra import ValueNode
 from .nodes.base.node_functions import NodeNotFound, NodeOperationError
 from .indextypes import soft_index_type_coercion
@@ -13,7 +13,7 @@ from . import get_connected_nodes, find_unique_relative
 from ..tools import is_equal_state_dict
 from typing import Collection, List
 
-def get_subgraph(required_nodes: Collection[_BaseNode])->List[_BaseNode]:
+def get_subgraph(required_nodes: Collection[BaseNode])->List[BaseNode]:
     """
     Get the subgraph associated with some target (required) nodes.
 
@@ -162,7 +162,6 @@ def copy_subgraph(required_nodes, assume_inputed, tag=None):
         if all(p not in n.parents for n in new_subgraph if n not in assume_inputed)
     )
 
-    # print(get_connected_nodes(new_required)) # Prior debug... change to logging?
     return new_required, new_subgraph
 
 
@@ -199,7 +198,7 @@ def check_link_consistency(node_set):
     )
 
 
-def replace_node(old_node: _BaseNode, new_node: _BaseNode, disconnect_old=False):
+def replace_node(old_node: BaseNode, new_node: BaseNode, disconnect_old=False):
     """
     :param old_node: Node to replace
     :param new_node: Node to insert
