@@ -465,7 +465,7 @@ def _append_docs(cls):
 
 
 class ExpandParents(metaclass=ExpandParentMeta):
-    _parent_expander = None
+    _parent_expander: ParentExpander
 
     def __init_subclass__(cls, **kwargs):
         """

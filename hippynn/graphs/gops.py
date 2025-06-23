@@ -4,8 +4,7 @@ Graph Operations ("gops") that process or transform a set of nodes.
 import collections
 import copy
 
-from .nodes.base import InputNode, MultiNode, BaseNode
-from .nodes.base.algebra import ValueNode
+from .nodes.base import InputNode, MultiNode, BaseNode, ValueNode
 from .nodes.base.node_functions import NodeNotFound, NodeOperationError
 from .indextypes import soft_index_type_coercion
 
