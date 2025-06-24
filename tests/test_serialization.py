@@ -18,10 +18,14 @@ def xfail_if_no_models(func):
     return wrapper(func)
 
 
+ignore_relocation = pytest.mark.filterwarnings("ignore:.*relocated to base.py*.")
+
+
 ignore_weights_only_warning = pytest.mark.filterwarnings("ignore:.*weights_only=False*.")
 ignore_cusp_warning = pytest.mark.filterwarnings("ignore:.*'cusp_reg' parameter*.")
 
 
+@ignore_relocation
 @ignore_weights_only_warning
 @ignore_cusp_warning
 @xfail_if_no_models
@@ -38,6 +42,7 @@ def test_load_old():
 
 @ignore_weights_only_warning
 @ignore_cusp_warning
+@ignore_relocation
 @pytest.mark.filterwarnings("ignore:.*underneath sensitivity range*.")
 @xfail_if_no_models
 def test_run_old(example_box):

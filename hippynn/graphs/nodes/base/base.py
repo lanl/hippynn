@@ -2,14 +2,75 @@
 Base nodes for sublcassing.
 """
 from ... import indextypes
-from .algebra import _NodeAlgebra, AtLeast2D
+from .algebra import _NodeAlgebra
 
 from .node_functions import BaseNode
+from .algebra import UnaryNode, BinNode, _AlgebraicNode
+from ....layers import algebra as algebra_mods
 
 
-class Node(_NodeAlgebra):
+
+### Base class and automatically generated nodes. 
+class Node(BaseNode, _NodeAlgebra):
     pass
 
+class ValueNode(Node):
+    _index_state = indextypes.IdxType.Scalar  # By definition abstract values do not have a batch axis.
+    def __init__(self, value, convert=True):
+        name = "Value({})".format(str(value))
+        self.value = value
+        self._converted = convert
+        super().__init__(name, parents=(), module="auto")
+
+    def auto_module(self):
+        return algebra_mods.ValueMod(self.value, convert=self._converted)
+
+
+class InvNode(Node, UnaryNode, _AlgebraicNode, algebraic_operation="invert"):
+    pass
+
+class NegNode(Node, UnaryNode, _AlgebraicNode, algebraic_operation="neg"):
+    pass
+
+class AddNode(Node, BinNode, _AlgebraicNode, algebraic_operation="add"):
+    pass
+
+class SubNode(Node, BinNode, _AlgebraicNode, algebraic_operation="sub"):
+    pass
+
+class MulNode(Node, BinNode, _AlgebraicNode, algebraic_operation="mul"):
+    pass
+
+
+class DivNode(Node, BinNode, _AlgebraicNode, algebraic_operation="truediv"):
+    pass
+
+
+class PowNode(Node, BinNode, _AlgebraicNode, algebraic_operation="pow"):
+    pass
+
+
+# This Node exists to prevent potential broadcasting problems, for example in the loss.
+# Model-based quantities all use a feature index, even if the size is 1,
+# e.g. energy is predicted with shape (n_molecules, 1)
+# This AtLeast2D is then used to wrap things coming from the database so that they will
+# have at least two dimensions.
+# See nodes/loss.py and turn on `debug_loss_broadcast` if you have concerns about
+# broadcasting behavior.
+class AtLeast2D(Node):
+    torch_module = algebra_mods.AtLeast2D()
+    _index_state = indextypes.IdxType.NotFound
+
+    def __init__(self, parents, *args, **kwargs):
+        if len(parents) != 1:
+            raise ValueError("AtLeast2D can only have 1 parent, got {}".format(len(parents)))
+        p = parents[0]
+        self._index_state = p._index_state
+        super().__init__("Atleast2D({})".format(p), parents, *args, module=None, **kwargs)
+        self.origin_node = p.origin_node
+
+
+### Classes for deriving from
 
 class SingleNode(Node):
     pass

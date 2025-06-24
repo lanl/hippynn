@@ -4,9 +4,9 @@ Core classes and functions for nodes
 from .node_functions import get_connected_nodes, get_ancestors, get_descendants, get_connected_nodes, find_relatives, find_unique_relative, is_in_loss_graph
 
 # Basic node classes
-from .base import Node, SingleNode, InputNode, LossInputNode, LossPredNode, LossTrueNode, BaseNode
+from .base import Node, SingleNode, InputNode, LossInputNode, LossPredNode, LossTrueNode, BaseNode, ValueNode
 
-from .algebra import ValueNode
+#from .algebra import ValueNode
 
 # Node that provides multiple outputs
 from .multi import MultiNode, IndexNode
