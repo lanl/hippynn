@@ -34,6 +34,7 @@ class MLIAPInterface(MLIAPUnified):
         energy_node,
         element_types,
         ndescriptors=1,
+        is_ensemble: bool = False,
         model_device=torch.device("cpu"),
         compute_dtype=torch.float32,
         energy_unit: float = None,
@@ -59,14 +60,19 @@ class MLIAPInterface(MLIAPUnified):
         self.model_device = model_device
         self.energy_unit = energy_unit
         self.distance_unit = distance_unit
+        self.is_ensemble = is_ensemble # added
 
         # Build the calculator
-        self.rcutfac, self.species_set, self.graph = setup_LAMMPS_graph(energy_node)
+        #if self.is_ensemble is True:
+        self.rcutfac, self.species_set, self.graph = setup_LAMMPS_graph(energy_node, is_ensemble)
+        
+
         self.nparams = sum(p.nelement() for p in self.graph.parameters())
         self.compute_dtype = compute_dtype
         self.graph.to(compute_dtype)
 
         self.clear_runtime_variables()
+
 
     def clear_runtime_variables(self):
         # Variables that will be populated at run time.
@@ -182,7 +188,8 @@ class MLIAPInterface(MLIAPUnified):
         :return None
         This function writes results to the input `data`.
         """
-
+        
+        #print("in compute forces In lammps_interface/mliap_interface.py :: type(energy_node)", type(self.energy_node))
         # If there are no local atoms, do nothing
         nlocal = self.as_tensor(data.nlistatoms)
         if nlocal.item() <= 0:
@@ -209,7 +216,7 @@ class MLIAPInterface(MLIAPUnified):
 
         # note your sign for rij might need to be +1 or -1, depending on how your implementation works
         inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
-        atom_energy, total_energy, fij = self.graph(*inputs)
+        atom_energy, total_energy, atom_energy_std, fij = self.graph(*inputs)
 
 
 
@@ -228,7 +235,19 @@ class MLIAPInterface(MLIAPUnified):
         else:
             return_device = "cpu"
 
+        print("In lammps_interface/mliap_interface.py :: atom_energy:", atom_energy)
+        #print("In lammps_interface/mliap_interface.py :: atom_energy.shape", atom_energy.shape)
+        #if self.is_ensemble is True:
+        #atom_energy = atom_energy[0].squeeze(1).detach().to(return_device) # added
+        #else:
+        print("In lammps_interface/mliap_interface.py :: type(atom_energy)", type(atom_energy))
         atom_energy = atom_energy.squeeze(1).detach().to(return_device)
+        #print("atom_energy[0].sum =", torch.sum(atom_energy[0]))
+        #print("atom_energy[1] =", atom_energy[1])
+        #print("atom_energy[0] =", atom_energy[0])
+        #atom_energy = torch.sum(atom_energy[0]).squeeze(1).detach().to(return_device)
+        print("atom_energy_std:", atom_energy_std)
+        print("type(atom_energy_std):", type(atom_energy_std))
         total_energy = total_energy.detach().to(return_device)
         data.energy = total_energy.item()
 
@@ -238,7 +257,12 @@ class MLIAPInterface(MLIAPUnified):
         if not self.using_kokkos:
             # write back to data.eatoms directly.
             fij = fij.numpy()
+            print("atom_energy: ", atom_energy)
+            print("type of atom_energy: ", type(atom_energy))
+            print("atom_energy shape: ", atom_energy.shape)
             data.eatoms = atom_energy.numpy().astype(np.double)
+            #data.eatoms_stdev = 
+            #print("data.eatoms:", data.eatoms)
             if npairs > 0:
                 data.update_pair_forces(fij)
         else:
