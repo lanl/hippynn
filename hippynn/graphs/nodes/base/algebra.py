@@ -13,13 +13,12 @@ from .node_functions import BaseNode
 
 
 def wrap_as_node(obj):
-    from .base import ValueNode
-    return obj.main_output if isinstance(obj, BaseNode) else ValueNode(obj)
+    from .base import ValueNode, Node
+    return obj.main_output if isinstance(obj, Node) else ValueNode(obj)
 
 
 def coerces_values_to_nodes(func):
     """Wraps non-nodes as ValueNodes."""
-
     @functools.wraps(func)
     def newfunc(*args):
         return func(*(wrap_as_node(a) for a in args))
@@ -44,29 +43,29 @@ class _NodeAlgebra():
         setattr(_NodeAlgebra, full_name, register_function)
         return 
 
-class _AlgebraicNode():
+class _AlgebraicOperation():
     """Inherit from this to register an algebraic operation with keyword argument algebraic_operation."""
-    def __init_subclass__(cls, *args, algebraic_operation, **kwargs):
+    def __init_subclass__(cls, *args, operation, **kwargs):
         super().__init_subclass__(*args, **kwargs)
 
-        if algebraic_operation not in ALL_OPS_SUPPORTED:
+        if operation not in ALL_OPS_SUPPORTED:
             raise TypeError(f"Operator {op_name!r} not supported!")
 
-        base_function = getattr(operator, algebraic_operation)
+        base_function = getattr(operator, operation)
         register_function = coerces_values_to_nodes(base_function)
-        _NodeAlgebra.register_operation(algebraic_operation, register_function)
+        _NodeAlgebra.register_operation(operation, register_function)
 
-        if algebraic_operation in BINARY_OPS_SUPPORTED:
+        if operation in BINARY_OPS_SUPPORTED:
             
             @functools.wraps(base_function)
             @coerces_values_to_nodes
             def register_function(self, other):
                 return function(other, self)
 
-            _NodeAlgebra.register_operation('r' + algebraic_operation, register_function)
+            _NodeAlgebra.register_operation('r' + operation, register_function)
 
         cls.torch_module = algebra_mods.LambdaModule(base_function)
-        cls._classname = algebraic_operation
+        cls._classname = operation
         return 
 
 
@@ -86,6 +85,9 @@ class BinNode():
         self._index_state = left._index_state
 
 def __getattr__(name: str):
+    """
+    Module-level getattr for finding of old functions.
+    """
     import warnings
     if name.endswith("Node") or name == "AtLeast2D":
         # Backwards compatibility for unpickling prior models
