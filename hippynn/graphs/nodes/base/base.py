@@ -9,7 +9,6 @@ from .algebra import UnaryNode, BinNode, _AlgebraicOperation
 from ....layers import algebra as algebra_mods
 
 
-### Base class and automatically generated nodes. 
 class Node(BaseNode, _NodeAlgebra):
     pass
 
@@ -24,28 +23,26 @@ class ValueNode(Node):
     def auto_module(self):
         return algebra_mods.ValueMod(self.value, convert=self._converted)
 
-
-class InvNode(Node, UnaryNode, _AlgebraicOperation, operation="invert"):
+class InvNode(UnaryNode, Node, _AlgebraicOperation, operation="invert"):
     pass
 
-class NegNode(Node, UnaryNode, _AlgebraicOperation, operation="neg"):
+class NegNode(UnaryNode, Node,  _AlgebraicOperation, operation="neg"):
     pass
 
-class AddNode(Node, BinNode, _AlgebraicOperation, operation="add"):
+class AddNode(BinNode, Node, _AlgebraicOperation, operation="add"):
     pass
 
-class SubNode(Node, BinNode, _AlgebraicOperation, operation="sub"):
+class SubNode(BinNode, Node, _AlgebraicOperation, operation="sub"):
     pass
 
-class MulNode(Node, BinNode, _AlgebraicOperation, operation="mul"):
+class MulNode(BinNode, Node, _AlgebraicOperation, operation="mul"):
+    pass
+
+class DivNode(BinNode, Node, _AlgebraicOperation, operation="truediv"):
     pass
 
 
-class DivNode(Node, BinNode, _AlgebraicOperation, operation="truediv"):
-    pass
-
-
-class PowNode(Node, BinNode, _AlgebraicOperation, operation="pow"):
+class PowNode(BinNode, Node , _AlgebraicOperation, operation="pow"):
     pass
 
 
@@ -67,7 +64,6 @@ class AtLeast2D(Node):
         self._index_state = p._index_state
         super().__init__("Atleast2D({})".format(p), parents, *args, module=None, **kwargs)
         self.origin_node = p.origin_node
-
 
 ### Classes for inheriting from
 

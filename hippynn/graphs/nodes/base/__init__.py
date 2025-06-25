@@ -2,6 +2,7 @@
 Core classes and functions for nodes
 """
 from .node_functions import get_connected_nodes, get_ancestors, get_descendants, get_connected_nodes, find_relatives, find_unique_relative, is_in_loss_graph
+from .node_functions import NodeAmbiguityError, NodeOperationError, NodeNotFound
 
 # Basic node classes
 from .base import Node, SingleNode, InputNode, LossInputNode, LossPredNode, LossTrueNode, BaseNode, ValueNode

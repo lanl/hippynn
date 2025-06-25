@@ -292,6 +292,7 @@ def find_unique_relative(node_or_nodes, constraint, ancestor_fallback=True, why_
 def is_in_loss_graph(node_or_nodes, why_desc=DEFAULT_WHY_DESC):
     """
     Decide if a node or collection of nodes is in the loss graph.
+
     (If not, they are in the model graph)
     (If neither, raise NodeAmbiguityError)
 
@@ -306,7 +307,12 @@ def is_in_loss_graph(node_or_nodes, why_desc=DEFAULT_WHY_DESC):
     """
 
     from .base import InputNode, LossInputNode
-    inputs_for_nodes = find_relatives(node_or_nodes, InputNode, descendants=False)
+    try:
+        inputs_for_nodes = find_relatives(node_or_nodes, InputNode, descendants=False)
+    except NodeNotFound:
+        # In this case, we probably have a tree of pure ValueNodes. We will arbitrarily call this "in the model graph."
+        return False 
+    
     if any(isinstance(in_node, LossInputNode) for in_node in inputs_for_nodes): 
         # If any inputs are in the loss graph, we must ensure that they all are, or else
         # the graph state has been corrupted.

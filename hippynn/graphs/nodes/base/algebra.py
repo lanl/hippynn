@@ -9,7 +9,6 @@ from ....layers import algebra as algebra_mods
 
 
 from ...indextypes import elementwise_compare_reduce
-from .node_functions import BaseNode
 
 
 def wrap_as_node(obj):
@@ -22,7 +21,6 @@ def coerces_values_to_nodes(func):
     @functools.wraps(func)
     def newfunc(*args):
         return func(*(wrap_as_node(a) for a in args))
-
     return newfunc
 
 BINARY_OPS_SUPPORTED = { "add", "sub", "mul", "truediv", "pow"}
@@ -33,36 +31,45 @@ OPS_REMAINING = ALL_OPS_SUPPORTED.copy()
 
 class _NodeAlgebra():
     """Inherit from this to get access to registered algebraic ops."""
-    @classmethod
-    def register_operation(cls, op_name, register_function):
+    @staticmethod
+    def register_operation(operation, cls):
         try:
-            OPS_REMAINING.remove(op_name)
+            OPS_REMAINING.remove(operation)
         except KeyError:
-            raise TypeError(f"Operator {op_name!r} has already been registered!")
-        full_name = "__" + op_name + "__"
-        setattr(_NodeAlgebra, full_name, register_function)
-        return 
+            raise TypeError(f"Operator {operation!r} has already been registered!")
+        full_name = "__" + operation + "__"
+        method = _make_node_method(operation, cls)
+        setattr(_NodeAlgebra, full_name, method)
+        return
 
+def _make_node_method(operation, cls):
+
+    if operation in BINARY_OPS_SUPPORTED:
+        def method(self, other):
+            return cls(self, other)
+    elif operation in REV_BINARY_OPS_SUPPORTED:
+        def method(self, other):
+            return cls(other, self)
+    elif operation in UNARY_OPS_SUPPORTED:
+        def method(self):
+            return cls(self)
+        
+    return coerces_values_to_nodes(method)
+
+    
 class _AlgebraicOperation():
     """Inherit from this to register an algebraic operation with keyword argument algebraic_operation."""
     def __init_subclass__(cls, *args, operation, **kwargs):
         super().__init_subclass__(*args, **kwargs)
 
         if operation not in ALL_OPS_SUPPORTED:
-            raise TypeError(f"Operator {op_name!r} not supported!")
+            raise TypeError(f"Operator {op_name!r} not supported or already registered!")
 
+        _NodeAlgebra.register_operation(operation, cls)
         base_function = getattr(operator, operation)
-        register_function = coerces_values_to_nodes(base_function)
-        _NodeAlgebra.register_operation(operation, register_function)
 
         if operation in BINARY_OPS_SUPPORTED:
-            
-            @functools.wraps(base_function)
-            @coerces_values_to_nodes
-            def register_function(self, other):
-                return function(other, self)
-
-            _NodeAlgebra.register_operation('r' + operation, register_function)
+            _NodeAlgebra.register_operation('r' + operation, cls)
 
         cls.torch_module = algebra_mods.LambdaModule(base_function)
         cls._classname = operation

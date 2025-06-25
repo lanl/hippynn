@@ -26,7 +26,7 @@ def idx_molatom_atom(node, hints=None):
     search_nodes = make_search_nodes(node, hints)
     
     # This 'if' call can raise NodeAmbiguity Error, but we want it to error in that case.
-    if not is_in_loss_graph(search_nodes,why_desc=purpose):
+    if not is_in_loss_graph(search_nodes, why_desc=purpose):
         # If we are auto-indexing in the model graph, it should be easy.
         pidxer = find_unique_relative(search_nodes, PaddingIndexer, why_desc=purpose)
         idx_debprint("Using reindexer for ", node)

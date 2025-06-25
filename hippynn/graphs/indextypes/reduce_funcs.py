@@ -115,14 +115,23 @@ def elementwise_compare_reduce(*nodes_to_reduce):
     :param nodes_to_reduce: nodes to put in a comparable, reduced index state
     :return: node (if single argument) or tuple(nodes) (if multiple arguments)
     """
+    from ..nodes.base import is_in_loss_graph, NodeAmbiguityError
+    
     if len(nodes_to_reduce) == 0:
         _debprint("Compare reduce on nothing, returning nothing")
         return tuple()
-    assert (
-        all(n.is_in_loss_graph() for n in nodes_to_reduce)     # all in loss
-        or                                                  # or
-        all(not n.is_in_loss_graph() for n in nodes_to_reduce) # all in model
-        ),"Combining nodes requires that they are in the same graph type (model or loss), but mixed types were found."
+    
+    try:
+        is_in_loss_graph(nodes_to_reduce) # raises error if node 
+    except NodeAmbiguityError:
+        raise NodeAmbiguityError("Combining nodes requires that they are in the same graph type (model or loss), " \
+        "but mixed types were found.")
+
+    # assert (
+    #     is_in_loss_graph(nodes_to_reduce)#all(n.is_in_loss_graph() for n in nodes_to_reduce)     # all in loss
+    #     or                                                  # or
+    #     is_in_loss_graph(nodes_to_reduce)#all(not n.is_in_loss_graph() for n in nodes_to_reduce) # all in model
+    #     ),"Combining nodes requires that they are in the same graph type (model or loss), but mixed types were found."
     coerced_type = get_reduced_index_state(*nodes_to_reduce)
     coerced_nodes = [index_type_coercion(node, coerced_type, hints=nodes_to_reduce) for node in nodes_to_reduce]
     _debprint("Coerced:", [x.name for x in coerced_nodes])

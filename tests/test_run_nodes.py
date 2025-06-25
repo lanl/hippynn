@@ -4,21 +4,10 @@ import torch
 import hippynn
 
 
-@pytest.fixture
-def example_box():
-    n_atom = 7
-    batch_size = 5
-    n_dim = 3
-    l = 2
-    z = torch.ones((batch_size, n_atom), dtype=torch.int64)
-    r = l * torch.rand((batch_size, n_atom, n_dim), dtype=torch.float)
-    c = l * torch.eye(n_dim, dtype=torch.float).unsqueeze(0).expand((batch_size, n_dim, n_dim))
-    return {"species": z, "coordinates": r, "cell": c}  # must match names in neural_network_node
-
 
 @pytest.fixture
 def example_all_target_nodes(neural_network_node, bond_parameters):
-    from hippynn.graphs import inputs, targets, physics, GraphModule
+    from hippynn.graphs import inputs, targets, physics
 
     network = neural_network_node
     henergy = targets.HEnergyNode("E", network)
@@ -43,6 +32,28 @@ def example_all_target_nodes(neural_network_node, bond_parameters):
 
 
 sensitivity_warning_supression = pytest.mark.filterwarnings("ignore:.*underneath sensitivity range*.")
+
+@pytest.mark.parametrize("operation",["add","sub","mul","truediv","pow"])
+def test_node_algebra(operation):
+    from hippynn.graphs.nodes.base import ValueNode
+    from hippynn.graphs import GraphModule
+    import operator
+    func = getattr(operator, operation)
+    a = 2
+    b = 3
+    out = func(a,b)
+
+    a_val = ValueNode(2)
+    b_val = ValueNode(3)
+    out_val = func(a_val, b_val)
+
+    graph = GraphModule([],[out_val])
+    out_check = graph()[0]
+
+    assert out == out_check, f"Values not equal! {out} {operation} {out_check}"
+    return
+
+
 
 
 @sensitivity_warning_supression
@@ -84,3 +95,4 @@ def test_run_predictor(example_all_target_nodes, example_box):
     predictor = Predictor.from_graph(graph)
 
     outputs = predictor(**example_box)
+
