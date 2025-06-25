@@ -189,6 +189,9 @@ class MLIAPInterface(MLIAPUnified):
         This function writes results to the input `data`.
         """
         
+        if self.is_ensemble:
+            data.uqflag = 1
+
         #print("in compute forces In lammps_interface/mliap_interface.py :: type(energy_node)", type(self.energy_node))
         # If there are no local atoms, do nothing
         nlocal = self.as_tensor(data.nlistatoms)
@@ -235,19 +238,20 @@ class MLIAPInterface(MLIAPUnified):
         else:
             return_device = "cpu"
 
-        print("In lammps_interface/mliap_interface.py :: atom_energy:", atom_energy)
+        #print("In lammps_interface/mliap_interface.py :: atom_energy:", atom_energy)
         #print("In lammps_interface/mliap_interface.py :: atom_energy.shape", atom_energy.shape)
         #if self.is_ensemble is True:
         #atom_energy = atom_energy[0].squeeze(1).detach().to(return_device) # added
         #else:
-        print("In lammps_interface/mliap_interface.py :: type(atom_energy)", type(atom_energy))
+        #print("In lammps_interface/mliap_interface.py :: type(atom_energy)", type(atom_energy))
         atom_energy = atom_energy.squeeze(1).detach().to(return_device)
+        atom_energy_std = atom_energy_std.squeeze(1).detach().to(return_device)
         #print("atom_energy[0].sum =", torch.sum(atom_energy[0]))
         #print("atom_energy[1] =", atom_energy[1])
         #print("atom_energy[0] =", atom_energy[0])
         #atom_energy = torch.sum(atom_energy[0]).squeeze(1).detach().to(return_device)
-        print("atom_energy_std:", atom_energy_std)
-        print("type(atom_energy_std):", type(atom_energy_std))
+        #print("atom_energy_std:", atom_energy_std)
+        #print("type(atom_energy_std):", type(atom_energy_std))
         total_energy = total_energy.detach().to(return_device)
         data.energy = total_energy.item()
 
@@ -257,11 +261,11 @@ class MLIAPInterface(MLIAPUnified):
         if not self.using_kokkos:
             # write back to data.eatoms directly.
             fij = fij.numpy()
-            print("atom_energy: ", atom_energy)
-            print("type of atom_energy: ", type(atom_energy))
-            print("atom_energy shape: ", atom_energy.shape)
+            #print("atom_energy: ", atom_energy)
+            #print("type of atom_energy: ", type(atom_energy))
+            #print("atom_energy shape: ", atom_energy.shape)
             data.eatoms = atom_energy.numpy().astype(np.double)
-            #data.eatoms_stdev = 
+            data.eatoms_stdev = atom_energy_std.numpy().astype(np.double)
             #print("data.eatoms:", data.eatoms)
             if npairs > 0:
                 data.update_pair_forces(fij)

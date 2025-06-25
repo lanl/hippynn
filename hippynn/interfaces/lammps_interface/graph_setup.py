@@ -145,14 +145,14 @@ class LocalAtomsEnergy(torch.nn.Module):
     def forward(self, all_atom_energies, all_atom_energies_stdev, nlocal):
         local_atom_energies = all_atom_energies[:nlocal]
         #print("local_atom_energies:", local_atom_energies.mean)
-        print("type(local_atom_energies):", type(local_atom_energies))
+        #print("type(local_atom_energies):", type(local_atom_energies))
         #print("local_atom_energies[0]", local_atom_energies[0].shape)
         #print("local_atom_energies[1]", local_atom_energies[1].shape)
         #print("local_atom_energies[2]", local_atom_energies[2].shape)
         local_atom_energies_stdev = all_atom_energies_stdev[:nlocal] # added
-        print("type(local_atom_energies_stdev):", type(local_atom_energies_stdev))
+        #print("type(local_atom_energies_stdev):", type(local_atom_energies_stdev))
         total_local_energy = torch.sum(local_atom_energies)
-        print("total_local_energy:", total_local_energy)
+        #print("total_local_energy:", total_local_energy)
         return local_atom_energies, local_atom_energies_stdev, total_local_energy
 
 
