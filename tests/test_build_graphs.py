@@ -6,10 +6,12 @@ import ase
 def xfail_if_no_lammps(func):
     try:
         import lammps
-    except ImportError:
-        wrapper = lambda f: f
-    else:
+    except ImportError:  # missing lammps doesn't raise ImportError per se.  ModuleNotFoundError.
+        # Something went wrong importing!
         wrapper = pytest.mark.xfail(strict=False)
+    else:
+        # Importing
+        wrapper = lambda f: f
     return wrapper(func)
 
 def test_build_training_modules(energy_model):
