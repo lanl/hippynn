@@ -6,7 +6,7 @@ from collections import OrderedDict
 
 import torch
 
-from .nodes.base.node_functions import BaseNode
+from .nodes.base import Node
 from .nodes.base import InputNode
 
 from . import get_subgraph, compute_evaluation_order
@@ -52,7 +52,7 @@ class GraphModule(torch.nn.Module):
                     raise ValueError("Nodes to compute requires an unspecified input:", node)
 
         for x in all_node_list:
-            if not isinstance(x, BaseNode):
+            if not isinstance(x, Node):
                 if not callable(x):
                     raise ValueError("Computational objects must be callable.")
                 else:

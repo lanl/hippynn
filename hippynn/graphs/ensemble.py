@@ -8,7 +8,7 @@ from .indextypes import get_reduced_index_state, index_type_coercion
 from .indextypes.reduce_funcs import db_state_of
 from .indextypes.registry import assign_index_aliases
 
-from .nodes.base import BaseNode, InputNode
+from .nodes.base import Node, InputNode
 from .nodes.misc import EnsembleTarget
 
 from .gops import merge_children_recursive
@@ -82,15 +82,15 @@ def make_ensemble(
         if not quiet:
             print("Identified output quantities:", targets)
 
-    input_classes: Dict[str, List[BaseNode]] = collate_inputs(graphs, inputs)
-    target_classes: Dict[str, List[BaseNode]] = collate_targets(graphs, targets)
+    input_classes: Dict[str, List[Node]] = collate_inputs(graphs, inputs)
+    target_classes: Dict[str, List[Node]] = collate_targets(graphs, targets)
 
     ensemble_info = make_ensemble_info(input_classes, target_classes, quiet=quiet)
 
     # Phase 2 build ensemble graph and GraphModule.
     ensemble_outputs: Dict[str, EnsembleTarget] = construct_outputs(target_classes, prefix=prefix)
-    ensemble_inputs: List[BaseNode] = replace_inputs(input_classes)
-    merged_inputs: List[BaseNode] = merge_children_recursive(ensemble_inputs)
+    ensemble_inputs: List[Node] = replace_inputs(input_classes)
+    merged_inputs: List[Node] = merge_children_recursive(ensemble_inputs)
 
     if not quiet:
         print("Merged the following nodes from the ensemble members:")
@@ -104,7 +104,7 @@ def make_ensemble(
 
 # TODO: Potentially move this function, or part of it, into experiment.serialization?
 # TODO ; It seems possible that someone might want to load several models without ensembling them.
-def get_graphs(models: Union[List[Union[str, GraphModule, BaseNode]], str], weights_only: bool = False) -> List[GraphModule]:
+def get_graphs(models: Union[List[Union[str, GraphModule, Node]], str], weights_only: bool = False) -> List[GraphModule]:
     """
     Take a simple spec for modeled variables (glob for model directories, list of graphs, list of output nodes)
     and convert this into a list of graph modules.
@@ -151,7 +151,7 @@ def get_graphs(models: Union[List[Union[str, GraphModule, BaseNode]], str], weig
                 else:
                     graphs.append(model)
 
-        elif isinstance(model, BaseNode):
+        elif isinstance(model, Node):
             subgraph = get_subgraph([model])
             subgraph_inputs = list({x for x in subgraph if isinstance(x, InputNode)})
             model = GraphModule(subgraph_inputs, [model.main_output])
@@ -202,7 +202,7 @@ def identify_inputs(models: list[GraphModule]) -> set[str]:
     return inputs
 
 
-def collate_inputs(models: list[GraphModule], inputs: List[str]) -> Dict[str, List[BaseNode]]:
+def collate_inputs(models: list[GraphModule], inputs: List[str]) -> Dict[str, List[Node]]:
     """
     Internal function for ensembling.
 
@@ -224,7 +224,7 @@ def collate_inputs(models: list[GraphModule], inputs: List[str]) -> Dict[str, Li
     return input_classes
 
 
-def collate_targets(models: List[GraphModule], targets: List[str]) -> Dict[str, List[BaseNode]]:
+def collate_targets(models: List[GraphModule], targets: List[str]) -> Dict[str, List[Node]]:
     """
     Internal function for ensembling.
 
@@ -250,7 +250,7 @@ def collate_targets(models: List[GraphModule], targets: List[str]) -> Dict[str, 
     return target_classes
 
 
-def make_ensemble_info(input_classes: Dict[str, List[BaseNode]], output_classes: Dict[str, List[BaseNode]], quiet=False):
+def make_ensemble_info(input_classes: Dict[str, List[Node]], output_classes: Dict[str, List[Node]], quiet=False):
     """
     Internal function for ensembling.
 
@@ -278,7 +278,7 @@ def make_ensemble_info(input_classes: Dict[str, List[BaseNode]], output_classes:
     return ensemble_info
 
 
-def construct_outputs(output_classes: Dict[str, List[BaseNode]], prefix: str) -> Dict[str, EnsembleTarget]:
+def construct_outputs(output_classes: Dict[str, List[Node]], prefix: str) -> Dict[str, EnsembleTarget]:
     """
     Internal function for ensembling.
 
@@ -335,7 +335,7 @@ def construct_outputs(output_classes: Dict[str, List[BaseNode]], prefix: str) ->
     return ensemble_outputs
 
 
-def replace_inputs(input_classes: Dict[str, List[BaseNode]]) -> List[InputNode]:
+def replace_inputs(input_classes: Dict[str, List[Node]]) -> List[InputNode]:
     """
     Internal function for ensembling.
 

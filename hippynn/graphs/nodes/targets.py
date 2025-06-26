@@ -4,7 +4,7 @@ Nodes for prediction of variables from network features.
 
 import torch
 
-from .base import MultiNode, AutoKw, ExpandParents, find_unique_relative, BaseNode
+from .base import MultiNode, AutoKw, ExpandParents, find_unique_relative, Node
 from .tags import AtomIndexer, Network, PairIndexer, HAtomRegressor, Charges, Energies, Encoder
 from .indexers import PaddingIndexer
 from ..indextypes import IdxType, index_type_coercion
@@ -77,7 +77,7 @@ class LocalChargeEnergy(Energies, ExpandParents, HAtomRegressor, MultiNode):
     _output_index_states = IdxType.Molecules, IdxType.Atoms
     _auto_module_class = target_modules.LocalChargeEnergy
 
-    @_parent_expander.match(BaseNode, Network)
+    @_parent_expander.match(Node, Network)
     def expansion0(self, charge, network, **kwargs):
         charge = index_type_coercion(charge.main_output, IdxType.Atoms)
         pdxer = find_unique_relative(network, PaddingIndexer)

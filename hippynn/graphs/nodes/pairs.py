@@ -3,7 +3,7 @@ Nodes for finding and manipulating pairs and distances.
 """
 
 from .base.node_functions import NodeNotFound
-from .base import AutoNoKw, AutoKw, ExpandParents, SingleNode, MultiNode, find_unique_relative, BaseNode
+from .base import AutoNoKw, AutoKw, ExpandParents, SingleNode, MultiNode, find_unique_relative, Node
 from .indexers import PaddingIndexer, acquire_encoding_padding, OneHotEncoder
 from .tags import Encoder, PairIndexer, AtomIndexer, PairCache
 from .inputs import PositionsNode, CellNode, SpeciesNode
@@ -131,13 +131,13 @@ class PairReIndexer(ExpandParents, AutoNoKw, SingleNode):
     _auto_module_class = pairs_modules.PairReIndexer
     _index_state = IdxType.Pair
 
-    @_parent_expander.match(BaseNode)
+    @_parent_expander.match(Node)
     def expand0(self, pair_features):
         pad_idx = find_unique_relative(pair_features, PaddingIndexer)
         pair_idx = find_unique_relative(pair_features, PairIndexer)
         return pair_features, pad_idx, pair_idx
 
-    @_parent_expander.match(BaseNode, PaddingIndexer, PairIndexer)
+    @_parent_expander.match(Node, PaddingIndexer, PairIndexer)
     def expand1(self, pair_features, pad_idx, pair_idx):
         return (
             pair_features.main_output,
@@ -174,13 +174,13 @@ class PairDeIndexer(ExpandParents, AutoNoKw, SingleNode):
     _auto_module_class = pairs_modules.PairDeIndexer
     _index_state = IdxType.MolAtomAtom
 
-    @_parent_expander.match(BaseNode)
+    @_parent_expander.match(Node)
     def expand0(self, pair_features):
         pad_idx = find_unique_relative(pair_features, PaddingIndexer)
         pair_idx = find_unique_relative(pair_features, PairIndexer)
         return pair_features, pad_idx, pair_idx
 
-    @_parent_expander.match(BaseNode, PaddingIndexer, PairIndexer)
+    @_parent_expander.match(Node, PaddingIndexer, PairIndexer)
     def expand1(self, pair_features, pad_idx, pair_idx):
         return (
             pair_features.main_output,
@@ -253,7 +253,7 @@ class PairUncacher(ExpandParents, AutoNoKw, PairIndexer, MultiNode):
         return sparse, pos, cell, atomidx
 
     @_parent_expander.match(PairCache, PositionsNode, CellNode, AtomIndexer)
-    @_parent_expander.match(BaseNode, BaseNode, BaseNode, AtomIndexer) # Less constrained version
+    @_parent_expander.match(Node, Node, Node, AtomIndexer) # Less constrained version
     def expand1(self, sp, r, c, atomidx, *args, purpose, **kwargs):
         ira = atomidx.inv_real_atoms
         nam = atomidx.n_atoms_max

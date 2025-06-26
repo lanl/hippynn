@@ -6,7 +6,7 @@ import warnings
 import collections
 
 from hippynn.graphs import GraphModule, get_subgraph, find_unique_relative
-from hippynn.graphs.nodes.base import InputNode, LossInputNode, LossPredNode, LossTrueNode, BaseNode
+from hippynn.graphs.nodes.base import InputNode, LossInputNode, LossPredNode, LossTrueNode, Node
 
 from hippynn.experiment.evaluator import Evaluator
 
@@ -69,7 +69,7 @@ def build_loss_modules(training_loss, validation_losses, network_outputs, databa
     return train_loss_module, valid_loss_module
 
 
-def determine_out_in_targ(*nodes_required_for_loss: BaseNode):
+def determine_out_in_targ(*nodes_required_for_loss: Node):
     """
     :param nodes_required_for_loss: train nodes and validation nodes
     :return: lists of needed network inputs, network outputs, and database targets

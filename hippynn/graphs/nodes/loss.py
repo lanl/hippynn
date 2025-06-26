@@ -7,7 +7,7 @@ import torch.nn.functional
 from ... import settings
 from ..indextypes import IdxType, elementwise_compare_reduce
 from ..indextypes.reduce_funcs import db_state_of
-from .base import SingleNode, BaseNode, InputNode
+from .base import SingleNode, Node, InputNode
 from ...layers import algebra as algebra_modules
 from ...layers import regularization as reg_modules
 

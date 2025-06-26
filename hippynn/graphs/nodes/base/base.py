@@ -4,12 +4,12 @@ Base nodes for sublcassing.
 from ... import indextypes
 from .algebra import _NodeAlgebra
 
-from .node_functions import BaseNode
+from .node_functions import _NodeFunctions
 from .algebra import UnaryNode, BinNode, _AlgebraicOperation
 from ....layers import algebra as algebra_mods
 
 
-class Node(BaseNode, _NodeAlgebra):
+class Node(_NodeFunctions, _NodeAlgebra):
     pass
 
 class ValueNode(Node):
@@ -128,5 +128,5 @@ class LossTrueNode(LossInputNode):
         return self._main_output
 
 
-BaseNode._LossPredNode = LossPredNode
-BaseNode._LossTrueNode = LossTrueNode
+Node._LossPredNode = LossPredNode
+Node._LossTrueNode = LossTrueNode
