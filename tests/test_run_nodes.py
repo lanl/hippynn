@@ -96,3 +96,21 @@ def test_run_predictor(example_all_target_nodes, example_box):
 
     outputs = predictor(**example_box)
 
+
+@sensitivity_warning_supression
+def test_atomization_conversion(example_box, neural_network_node):
+    from hippynn.graphs import targets, base
+
+    energy = targets.AtomizationEnergyNode("HEnergy", neural_network_node, db_name="T")
+
+    hen_equivalent = energy.create_henergy_equivalent()
+
+    input_nodes = energy.find_relatives(base.InputNode)
+    model = hippynn.GraphModule(input_nodes, [energy.mol_energy, hen_equivalent.mol_energy])    
+    
+    args = [example_box[node.db_name] for node in input_nodes]
+    en_1, en_2 = model(*args)    
+
+    assert torch.allclose(en_1,en_2)
+
+    return
