@@ -44,6 +44,13 @@ def neural_network_node(network_parameters):
     return network
 
 
+@pytest.fixture()
+def energy_model(neural_network_node):
+    henergy = hippynn.targets.HEnergyNode("Energy", neural_network_node, db_name="T")
+    return henergy
+
+
+
 @pytest.fixture
 def example_box():
     n_atom = 7
