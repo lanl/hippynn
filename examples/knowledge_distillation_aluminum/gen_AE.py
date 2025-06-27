@@ -1,4 +1,8 @@
 """ 
+    Example scripts for 
+    Teacher-student training improves accuracy and efficiency of machine learning interatomic potentials
+    https://arxiv.org/abs/2502.05379
+
     This is an example script to generate atomic energies using a trained 
     teacher model 
     (example: https://github.com/lanl/hippynn/blob/development/examples/ani_aluminum_example.py),
@@ -86,12 +90,14 @@ def main(args):
         
     # Save all arrays as numpy arrays. 
     fname = "data-from-teacher_Al"
-    np.save(fname+"_Z.npy", Z.cpu().detach().numpy())
-    np.save(fname+"_R.npy", R.cpu().detach().numpy())
-    np.save(fname+"_cell.npy", cell.cpu())
-    np.save(fname+"_T.npy", T)
-    np.save(fname+"_F.npy", F)
-    np.save(fname+"_AE.npy", AE.cpu().detach().numpy())
+    if not os.path.exists(args.aug_target_loc):
+        os.makedir(args.aug_target_loc)
+    np.save(f"{args.aug_target_loc}/{fname}_Z.npy", Z.cpu().detach().numpy())
+    np.save(f"{args.aug_target_loc}/{fname}_R.npy", R.cpu().detach().numpy())
+    np.save(f"{args.aug_target_loc}/{fname}_cell.npy", cell.cpu())
+    np.save(f"{args.aug_target_loc}/{fname}_T.npy", T)
+    np.save(f"{args.aug_target_loc}/{fname}_F.npy", F)
+    np.save(f"{args.aug_target_loc}/{fname}_AE.npy", AE.cpu().detach().numpy())
     
 
 if __name__ == "__main__":
@@ -99,8 +105,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     from argparse import BooleanOptionalAction
     
-    parser.add_argument("--teacher_loc", type=str, help="Location of Teacher Model")
-    parser.add_argument("--data_loc", type=str,help="Data of Location")
+    parser.add_argument("--teacher_loc", type=str, help="Location of Teacher model")
+    parser.add_argument("--data_loc", type=str,help="Location of training data")
+    parser.add_argument("--aug_target_loc", type="str", help="Folder for augmented dataset", nargs="?", default="test_data")
     parser.add_argument(
         "--use-gpu",
         action=BooleanOptionalAction,

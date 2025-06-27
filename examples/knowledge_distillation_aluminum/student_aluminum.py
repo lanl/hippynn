@@ -1,5 +1,7 @@
 """ 
-    Example of Student Model for Knowledge Distillation Workflow.
+    Example of Student Model for Knowledge Distillation Workflow used in
+    Teacher-student training improves accuracy and efficiency of machine learning interatomic potentials
+    https://arxiv.org/abs/2502.05379
     
     Before running this script, you must run 
     `ani_aluminum_example.py` to train the corresponding teacher model,
@@ -9,7 +11,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("tag", type=str, help='Model Name')
 parser.add_argument("seed", type=int, help='Seed for random number generator')
-parser.add_argument("data_loc", type=str, help='Location of Dataset')
+parser.add_argument("data_loc", type=str, help='Location of Augmented dataset. See `gen_AE.py` for further details.')
 args = parser.parse_args()
 
 import torch
