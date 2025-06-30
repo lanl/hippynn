@@ -58,9 +58,6 @@ class MetricTracker:
         self.epoch_best_metric_values = []
         self.quiet = quiet
 
-    @classmethod
-    def from_evaluator(cls, evaluator):
-        return cls(evaluator.metric_names, evaluator.stopping_key)
 
     @property
     def current_epoch(self):
