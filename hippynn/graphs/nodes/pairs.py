@@ -454,7 +454,7 @@ class PaddedNeighborNode(ExpandParents, AutoNoKw, MultiNode):
 class MinDistNode(ExpandParents, AutoNoKw, MultiNode):
     _input_names = "rij_list", "j_list", "mol_index", "atom_index", "inv_real_atoms", "n_atoms_max", "n_molecules"
     _output_names = "min_dist_mol", "mol_locs", "min_dist_atom", "atom_pairlocs"
-    _output_index_states = IdxType.Molecules, IdxType.Molecules, IdxType.Atoms, IdxType.Atoms
+    _output_index_states = IdxType.Systems, IdxType.Systems, IdxType.Atoms, IdxType.Atoms
     _auto_module_class = pairs_modules.MinDistModule
 
     @parent_expander.match(PairIndexer)

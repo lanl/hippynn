@@ -19,7 +19,7 @@ class HEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
     _input_names = "hier_features", "mol_index", "n_molecules"
     _output_names = "mol_energy", "atom_energies", "energy_terms", "hierarchicality", "atom_hier", "mol_hier", "batch_hier"
     _main_output = "mol_energy"
-    _output_index_states = IdxType.Molecules, IdxType.Atoms, None, IdxType.Molecules, IdxType.Atoms, IdxType.Molecules, IdxType.Scalar
+    _output_index_states = IdxType.Systems, IdxType.Atoms, None, IdxType.Systems, IdxType.Atoms, IdxType.Systems, IdxType.Scalar
     _auto_module_class = target_modules.HEnergy
 
     @parent_expander.match(Network)
@@ -74,7 +74,7 @@ class LocalChargeEnergy(Energies, ExpandParents, HAtomRegressor, MultiNode):
     _input_names = "charges", "features", "mol_index", "n_molecules"
     _output_names = "molenergies", "atomenergies"
     _main_output = "molenergies"
-    _output_index_states = IdxType.Molecules, IdxType.Atoms
+    _output_index_states = IdxType.Systems, IdxType.Atoms
     _auto_module_class = target_modules.LocalChargeEnergy
 
     @parent_expander.match(Node, Network)
@@ -123,7 +123,7 @@ class HBondNode(ExpandParents, AutoKw, MultiNode):
 class AtomizationEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
     _input_names = "hier_features", "vac_features", "encoding", "mol_index", "n_molecules"
     _output_names = "mol_energy", "partial_energies", "hierarchicality"
-    _output_index_states = IdxType.Molecules, None, IdxType.Molecules
+    _output_index_states = IdxType.Systems, None, IdxType.Systems
     _main_output = "mol_energy"
     _auto_module_class = target_modules.AtomizationEnergy
 

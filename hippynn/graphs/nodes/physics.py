@@ -110,7 +110,7 @@ class DipoleNode(ChargeMomentNode):
     """
 
     _auto_module_class = physics_layers.Dipole
-    _index_state = IdxType.Molecules
+    _index_state = IdxType.Systems
 
 
 class QuadrupoleNode(ChargeMomentNode):
@@ -178,7 +178,7 @@ class ChargePairSetup(ExpandParents):
 class CoulombEnergyNode(ChargePairSetup, Energies, AutoKw, MultiNode):
     _input_names = "charges", "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules"
     _output_names = "mol_energies", "atom_energies", "atom_voltages"
-    _output_index_states = IdxType.Molecules, IdxType.Atoms, IdxType.Atoms
+    _output_index_states = IdxType.Systems, IdxType.Atoms, IdxType.Atoms
     _main_output = "mol_energies"
     _auto_module_class = physics_layers.CoulombEnergy
 
@@ -210,7 +210,7 @@ class CoulombEnergyNode(ChargePairSetup, Energies, AutoKw, MultiNode):
 class ScreenedCoulombEnergyNode(ChargePairSetup, Energies, AutoKw, MultiNode):
     _input_names = "charges", "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules"
     _output_names = "mol_energies", "atom_energies", "atom_voltages"
-    _output_index_states = IdxType.Molecules, IdxType.Atoms, IdxType.Atoms
+    _output_index_states = IdxType.Systems, IdxType.Atoms, IdxType.Atoms
     _main_output = "mol_energies"
     _auto_module_class = physics_layers.ScreenedCoulombEnergy
 
@@ -274,7 +274,7 @@ class VecMag(ExpandParents, AutoNoKw, SingleNode):
 class AtomToMolSummer(ExpandParents, AutoNoKw, SingleNode):
     _input_names = "features", "mol_index", "n_molecules"
     _auto_module_class = index_layers.MolSummer
-    _index_state = IdxType.Molecules
+    _index_state = IdxType.Systems
 
     @parent_expander.match(Node)
     def expansion0(self, features, **kwargs):
@@ -298,7 +298,7 @@ class AtomToMolSummer(ExpandParents, AutoNoKw, SingleNode):
 class BondToMolSummmer(ExpandParents, AutoNoKw, SingleNode):
     _input_names = "pairfeatures", "mol_index", "n_molecules", "pair_first"
     _auto_module_class = pair_layers.MolPairSummer
-    _index_state = IdxType.Molecules
+    _index_state = IdxType.Systems
 
     @parent_expander.match(Node)
     def expansion0(self, features, *, purpose, **kwargs):
@@ -321,7 +321,7 @@ class BondToMolSummmer(ExpandParents, AutoNoKw, SingleNode):
 
 class PerAtom(ExpandParents, AutoNoKw, SingleNode):
     _input_names = "features", "species"
-    _index_state = IdxType.Molecules
+    _index_state = IdxType.Systems
     _auto_module_class = physics_layers.PerAtom
 
     @parent_expander.match(Node)
@@ -332,7 +332,7 @@ class PerAtom(ExpandParents, AutoNoKw, SingleNode):
     def expansion1(self, features, species, **kwargs):
         features = features.main_output
         assert (
-            features._index_state == IdxType.Molecules
+            features._index_state == IdxType.Systems
         ), "Can only calculate Per Atom averages on Molecular quantities"
         return features, species
 
@@ -350,7 +350,7 @@ class CombineEnergyNode(Energies, AutoKw, ExpandParents, MultiNode):
     _output_names = "mol_energy", "atom_energies"
     _main_output = "mol_energy"
     _output_index_states = (
-        IdxType.Molecules,
+        IdxType.Systems,
         IdxType.Atoms,
     )
     _auto_module_class = physics_layers.CombineEnergy

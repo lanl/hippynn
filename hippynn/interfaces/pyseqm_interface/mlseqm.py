@@ -94,7 +94,7 @@ class MLSEQM_Node(AutoKw, MultiNode):
         "atomic_charge",
     )
     _main_output = "mol_energy"
-    _output_index_states = (IdxType.Molecules,) * len(_output_names)
+    _output_index_states = (IdxType.Systems,) * len(_output_names)
     _auto_module_class = MLSEQM
 
     def __init__(self, name, parents, seqm_parameters, module="auto", **kwargs):

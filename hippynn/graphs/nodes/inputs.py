@@ -18,7 +18,7 @@ class PositionsNode(Positions, InputNode):
 
 
 class CellNode(InputNode):
-    _index_state = IdxType.Molecules
+    _index_state = IdxType.Systems
     input_type_str = "Cells"
 
 class ForceNode(InputNode):
@@ -32,7 +32,7 @@ class InputCharges(Charges, InputNode):
 
 
 class Indices(InputNode):
-    _index_state = IdxType.Molecules
+    _index_state = IdxType.Systems
     input_type_str = "Index"
 
     def __init__(self):
@@ -45,7 +45,7 @@ class PairIndices(PairCache, InputNode):
 
 
 class SplitIndices(InputNode):
-    _index_state = IdxType.Molecules
+    _index_state = IdxType.Systems
     input_type_str = "Index"
 
     def __init__(self):

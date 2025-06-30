@@ -41,7 +41,7 @@ class NACRNode(AutoKw, SingleNode):
             self.module_kwargs.update(module_kwargs)
         charges1, charges2, positions, energy1, energy2 = parents
         positions.requires_grad = True
-        self._index_state = IdxType.Molecules
+        self._index_state = IdxType.Systems
         # self._index_state = positions._index_state
         parents = (
             charges1.main_output,
@@ -83,7 +83,7 @@ class NACRMultiStateNode(AutoKw, SingleNode):
             self.module_kwargs.update(module_kwargs)
         charges, positions, energies = parents
         positions.requires_grad = True
-        self._index_state = IdxType.Molecules
+        self._index_state = IdxType.Systems
         # self._index_state = positions._index_state
         parents = (
             charges.main_output,
@@ -101,7 +101,7 @@ class LocalEnergyNode(Energies, ExpandParents, HAtomRegressor, MultiNode):
     _input_names = "hier_features", "mol_index", "atom index", "n_molecules", "n_atoms_max"
     _output_names = "mol_energy", "atom_energy", "atom_preenergy", "atom_probabilities", "atom_propensities"
     _main_output = "mol_energy"
-    _output_index_states = IdxType.Molecules, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms
+    _output_index_states = IdxType.Systems, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms
     _auto_module_class = excited_layers.LocalEnergy
 
     @parent_expander.match(Network)

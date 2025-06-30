@@ -117,7 +117,7 @@ class AtomDeIndexer(ExpandParents, AutoNoKw, SingleNode):
 
 class QuadUnpackNode(AutoNoKw, SingleNode):
     _auto_module_class = index_modules.QuadUnpack
-    _index_state = IdxType.Molecules
+    _index_state = IdxType.Systems
 
     def __init__(self, name, parents, module="auto", **kwargs):
         super().__init__(name, parents, module=module, **kwargs)
@@ -138,7 +138,7 @@ class FilterBondsOneway(AutoNoKw, SingleNode):
 
 class SysMaxOfAtomsNode(ExpandParents, AutoNoKw, SingleNode):
     _input_names = "var", "mol_index", "n_molecules"
-    _index_state = IdxType.Molecules
+    _index_state = IdxType.Systems
     _auto_module_class = index_modules.SysMaxOfAtoms
 
     @parent_expander.match(Node)
