@@ -31,8 +31,8 @@ class EnsembleTarget(ExpandParents, AutoNoKw, MultiNode):
     _input_names = NotImplemented  # NotImplemented tells __init_subclass__ that we will fill this in later.
     _output_names = "mean", "std", "all"
 
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_compatible_idx_states()
+    parent_expander.get_main_outputs()
+    parent_expander.require_compatible_idx_states()
 
     def __init__(self, name, parents, module="auto"):
 

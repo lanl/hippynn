@@ -23,7 +23,6 @@ from .node_functions import NodeAmbiguityError, NodeOperationError, NodeNotFound
 # Basic node classes
 from .base import Node, SingleNode, InputNode, LossInputNode, LossPredNode, LossTrueNode, ValueNode
 
-#from .algebra import ValueNode
 
 # Node that provides multiple outputs
 from .multi import MultiNode, IndexNode
@@ -36,7 +35,7 @@ def __getattr__(name: str):
     if name == "_BaseNode":
         # Backwards compatibility for unpickling prior models
         warnings.warn(
-            "'BaseNode' is a deprecated class name, please use 'BaseNode'.",
+            "'BaseNode' is a deprecated class name, please use 'Node'.",
             DeprecationWarning,
             stacklevel=2,
         )

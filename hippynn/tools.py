@@ -4,7 +4,7 @@ Misc. helpful functions which are not part of the library organization per se.
 """
 # Dev Note: functions placed here should not have any dependency on internal
 # hippynn packages. This is the place for misc. pytorch/numpy/pure-python code.
-import sys, os, traceback
+import sys, os, traceback, warnings, functools
 import collections
 import contextlib
 
@@ -13,6 +13,7 @@ import torch
 
 from . import settings
 
+from ._deprecations import HippynnNameDeprecation, bundles_deprecated_warnings, handle_deprecations
 
 class TeedFileOutput:
     def __init__(self, *streams):
@@ -119,6 +120,7 @@ def progress_bar(iterable, *args, **kwargs):
         return iterable
     else:
         return settings.PROGRESS(iterable, *args, **kwargs)
+
 
 
 def param_print(module):

@@ -104,6 +104,17 @@ def bool_or_strtobool(key: Union[bool, str]):
     else:
         return strtobool(key)
 
+def deprecation_handler(deprecation_string):
+    deprecation_string = deprecation_string.lower()
+    deprecation_vals = ["simple", "ignore", "all"]
+    
+    if deprecation_string not in deprecation_vals:
+        deprecation_string = default = DEFAULT_SETTINGS['DEPRECATION_WARNINGS'][0]
+        warnings.warn(f"Invalid DEPRECATION_WARNINGS setting: {deprecation_string}. Using default: {default}")
+
+    return deprecation_string
+        
+
 
 # keys: defaults, types, and handlers.
 DEFAULT_SETTINGS = {
@@ -119,6 +130,7 @@ DEFAULT_SETTINGS = {
     "TIMEPLOT_AUTOSCALING": (True, bool_or_strtobool),
     "PYTORCH_GPU_MEM_FRAC": (1.0, float),
     "COMM_FEATURES_LAMMPS": (True, bool_or_strtobool),
+    "DEPRECATION_WARNINGS": ("simple", str)
 }
 
 INITIAL_SETTINGS = {k: handler(default) for k, (default, handler) in DEFAULT_SETTINGS.items()}

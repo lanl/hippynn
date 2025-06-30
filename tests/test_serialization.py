@@ -18,7 +18,7 @@ def xfail_if_no_models(func):
     return wrapper(func)
 
 
-ignore_relocation = pytest.mark.filterwarnings("ignore:.*relocated to base.py*.")
+ignore_relocation = pytest.mark.filterwarnings("ignore:.*HIPPYNN_DEPRECATION_WARNINGS=ignore*.")
 ignore_weights_only_warning = pytest.mark.filterwarnings("ignore:.*weights_only=False*.")
 ignore_cusp_warning = pytest.mark.filterwarnings("ignore:.*'cusp_reg' parameter*.")
 

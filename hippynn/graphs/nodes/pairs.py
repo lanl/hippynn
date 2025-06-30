@@ -15,19 +15,19 @@ class OpenPairIndexer(ExpandParents, PairIndexer, MultiNode):
     _input_names = "coordinates", "nonblank", "real_atoms", "inv_real_atoms"
     _auto_module_class = pairs_modules.OpenPairIndexer
 
-    @_parent_expander.match(PositionsNode, SpeciesNode)
+    @parent_expander.match(PositionsNode, SpeciesNode)
     def expand0(self, pos, spec, *, purpose, **kwargs):
         enc = find_unique_relative(spec, Encoder, why_desc=purpose)
         padidx = find_unique_relative(spec, PaddingIndexer, why_desc=purpose)
         return pos, enc, padidx
 
-    @_parent_expander.match(PositionsNode, Encoder, PaddingIndexer)
+    @parent_expander.match(PositionsNode, Encoder, PaddingIndexer)
     def expand0(self, pos, encode, indexer, **kwargs):
         return pos, encode.nonblank, indexer.real_atoms, indexer.inv_real_atoms
 
-    _parent_expander.assertlen(4)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.MolAtom, None, None, None)
+    parent_expander.assertlen(4)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.MolAtom, None, None, None)
 
     def __init__(self, name, parents, dist_hard_max, module="auto", **kwargs):
         self.dist_hard_max = dist_hard_max
@@ -47,17 +47,17 @@ class PeriodicPairIndexer(ExpandParents, AutoKw, PeriodicPairOutputs, PairIndexe
     _input_names = "coordinates", "nonblank", "real_atoms", "inv_real_atoms", "cell"
     _auto_module_class = pairs_modules.PeriodicPairIndexer
 
-    @_parent_expander.match(PositionsNode, SpeciesNode, CellNode)
+    @parent_expander.match(PositionsNode, SpeciesNode, CellNode)
     def expand0(self, pos, spec, cell, *, purpose, **kwargs):
         enc, padidx = acquire_encoding_padding(spec, species_set=None)
         return pos, enc, padidx, cell
 
-    @_parent_expander.match(PositionsNode, Encoder, PaddingIndexer, CellNode)
+    @parent_expander.match(PositionsNode, Encoder, PaddingIndexer, CellNode)
     def expand1(self, pos, encode, indexer, cell, **kwargs):
         return pos, encode.nonblank, indexer.real_atoms, indexer.inv_real_atoms, cell
 
-    _parent_expander.assertlen(5)
-    _parent_expander.get_main_outputs()
+    parent_expander.assertlen(5)
+    parent_expander.get_main_outputs()
 
     def __init__(self, name, parents, dist_hard_max, module="auto", module_kwargs=None, **kwargs):
         if module_kwargs is None:
@@ -111,9 +111,9 @@ class ExternalNeighborIndexer(ExpandParents, PairIndexer, AutoKw, MultiNode):
     _input_names = "coordinates", "real_atoms", "shifts", "cell", "ext_pair_first", "ext_pair_second"
     _auto_module_class = pairs_modules.ExternalNeighbors
 
-    _parent_expander.get_main_outputs()
-    _parent_expander.assertlen(len(_input_names))
-    _parent_expander.require_idx_states(IdxType.MolAtom, IdxType.MolAtom, None, None, None, None)
+    parent_expander.get_main_outputs()
+    parent_expander.assertlen(len(_input_names))
+    parent_expander.require_idx_states(IdxType.MolAtom, IdxType.MolAtom, None, None, None, None)
 
     def __init__(self, name, parents, hard_dist_cutoff, module="auto", **kwargs):
         self.module_kwargs = {"hard_dist_cutoff": hard_dist_cutoff}
@@ -131,13 +131,13 @@ class PairReIndexer(ExpandParents, AutoNoKw, SingleNode):
     _auto_module_class = pairs_modules.PairReIndexer
     _index_state = IdxType.Pair
 
-    @_parent_expander.match(Node)
+    @parent_expander.match(Node)
     def expand0(self, pair_features):
         pad_idx = find_unique_relative(pair_features, PaddingIndexer)
         pair_idx = find_unique_relative(pair_features, PairIndexer)
         return pair_features, pad_idx, pair_idx
 
-    @_parent_expander.match(Node, PaddingIndexer, PairIndexer)
+    @parent_expander.match(Node, PaddingIndexer, PairIndexer)
     def expand1(self, pair_features, pad_idx, pair_idx):
         return (
             pair_features.main_output,
@@ -147,8 +147,8 @@ class PairReIndexer(ExpandParents, AutoNoKw, SingleNode):
             pair_idx.pair_second,
         )
 
-    _parent_expander.assertlen(5)
-    _parent_expander.get_main_outputs()
+    parent_expander.assertlen(5)
+    parent_expander.get_main_outputs()
 
     def __init__(self, name, parents, module="auto", **kwargs):
         super().__init__(name, parents, module=module, **kwargs)
@@ -174,13 +174,13 @@ class PairDeIndexer(ExpandParents, AutoNoKw, SingleNode):
     _auto_module_class = pairs_modules.PairDeIndexer
     _index_state = IdxType.MolAtomAtom
 
-    @_parent_expander.match(Node)
+    @parent_expander.match(Node)
     def expand0(self, pair_features):
         pad_idx = find_unique_relative(pair_features, PaddingIndexer)
         pair_idx = find_unique_relative(pair_features, PairIndexer)
         return pair_features, pad_idx, pair_idx
 
-    @_parent_expander.match(Node, PaddingIndexer, PairIndexer)
+    @parent_expander.match(Node, PaddingIndexer, PairIndexer)
     def expand1(self, pair_features, pad_idx, pair_idx):
         return (
             pair_features.main_output,
@@ -210,14 +210,14 @@ class PairCacher(ExpandParents, AutoKw, PairCache, SingleNode):
     _auto_module_class = pairs_modules.PairCacher
     _index_state = IdxType.NotFound
 
-    @_parent_expander.match(PairIndexer)
+    @parent_expander.match(PairIndexer)
     def expand0(self, pair_indexer, *args, purpose, **kwargs):
         atomidx = find_unique_relative(pair_indexer, AtomIndexer)
         if "n_images" not in self.module_kwargs:
             self.module_kwargs["n_images"] = pair_indexer.torch_module.n_images
         return pair_indexer, atomidx
 
-    @_parent_expander.match(PairIndexer, AtomIndexer)
+    @parent_expander.match(PairIndexer, AtomIndexer)
     def expand1(self, pair_indexer, atomidx, *args, purpose, **kwargs):
         mi = atomidx.mol_index
         nam = atomidx.n_atoms_max
@@ -229,8 +229,8 @@ class PairCacher(ExpandParents, AutoKw, PairCache, SingleNode):
         poi = pair_indexer.offset_index
         return pf, ps, po, poi, ra, mi, n_molecules, nam
 
-    _parent_expander.assertlen(8)
-    _parent_expander.require_idx_states(IdxType.Pair, IdxType.Pair, None, None, None, None, None, None)
+    parent_expander.assertlen(8)
+    parent_expander.require_idx_states(IdxType.Pair, IdxType.Pair, None, None, None, None, None, None)
 
     def __init__(self, name, parents, module="auto", module_kwargs=None, **kwargs):
         self.module_kwargs = module_kwargs or {}
@@ -245,15 +245,15 @@ class PairUncacher(ExpandParents, AutoNoKw, PairIndexer, MultiNode):
     _auto_module_class = pairs_modules.PairUncacher
     _index_state = IdxType.NotFound
 
-    @_parent_expander.match(PairCache)
+    @parent_expander.match(PairCache)
     def expand0(self, sparse, *args, purpose, **kwargs):
         pos = find_unique_relative(sparse, PositionsNode)
         cell = find_unique_relative(sparse, CellNode)
         atomidx = find_unique_relative(sparse, AtomIndexer)
         return sparse, pos, cell, atomidx
 
-    @_parent_expander.match(PairCache, PositionsNode, CellNode, AtomIndexer)
-    @_parent_expander.match(Node, Node, Node, AtomIndexer) # Less constrained version
+    @parent_expander.match(PairCache, PositionsNode, CellNode, AtomIndexer)
+    @parent_expander.match(Node, Node, Node, AtomIndexer) # Less constrained version
     def expand1(self, sp, r, c, atomidx, *args, purpose, **kwargs):
         ira = atomidx.inv_real_atoms
         nam = atomidx.n_atoms_max
@@ -261,7 +261,7 @@ class PairUncacher(ExpandParents, AutoNoKw, PairIndexer, MultiNode):
         ra = atomidx.real_atoms
         return sp, r, c, ra, ira, nam, n_molecules
 
-    _parent_expander.assertlen(7)
+    parent_expander.assertlen(7)
 
     def __init__(self, name, parents, dist_hard_max, module="auto", **kwargs):
         self.dist_hard_max = dist_hard_max
@@ -274,7 +274,7 @@ class RDFBins(ExpandParents, AutoKw, SingleNode):
     _index_state = None
     _auto_module_class = pairs_modules.RDFBins
 
-    @_parent_expander.match(PositionsNode, SpeciesNode, CellNode)
+    @parent_expander.match(PositionsNode, SpeciesNode, CellNode)
     def expand0(self, pos, spec, cell, *, purpose, dist_hard_max=None, **kwargs):
         """
         Build a default Periodic Pair indexer.
@@ -282,7 +282,7 @@ class RDFBins(ExpandParents, AutoKw, SingleNode):
         pairs = PeriodicPairIndexer("Period Pairs", (pos, spec, cell), dist_hard_max=dist_hard_max)
         return pairs,
 
-    @_parent_expander.match(PositionsNode, SpeciesNode)
+    @parent_expander.match(PositionsNode, SpeciesNode)
     def expand1(self, pos, spec, *, purpose, dist_hard_max=None, **kwargs):
         """
         Builds an open pair indexer.
@@ -290,7 +290,7 @@ class RDFBins(ExpandParents, AutoKw, SingleNode):
         pairs = OpenPairIndexer("Period Pairs", (pos, spec), dist_hard_max=dist_hard_max)
         return pairs,
 
-    @_parent_expander.match(PairIndexer)
+    @parent_expander.match(PairIndexer)
     def expand2(self, pairs, *, purpose, **kwargs):
         """
         Get the encoding and padding associated with a pair indexer.
@@ -299,7 +299,7 @@ class RDFBins(ExpandParents, AutoKw, SingleNode):
         pad = find_unique_relative(pairs, PaddingIndexer)
         return pairs, enc, pad
 
-    @_parent_expander.match(PairIndexer, OneHotEncoder, PaddingIndexer)
+    @parent_expander.match(PairIndexer, OneHotEncoder, PaddingIndexer)
     def expand3(self, pairs, one_hot, pad, *, purpose, **kwargs):
         """
         Expanded the needed children of pairs, encoder, and padding indexer.
@@ -307,8 +307,8 @@ class RDFBins(ExpandParents, AutoKw, SingleNode):
         self.module_kwargs["species_set"] = one_hot.species_set
         return pairs.pair_dist, pairs.pair_first, pairs.pair_second, one_hot.encoding, pad.n_molecules
 
-    _parent_expander.require_idx_states(IdxType.Pair, IdxType.Pair, IdxType.Pair, IdxType.Atoms, None)
-    _parent_expander.assertlen(5)
+    parent_expander.require_idx_states(IdxType.Pair, IdxType.Pair, IdxType.Pair, IdxType.Atoms, None)
+    parent_expander.assertlen(5)
 
     def __init__(self, name, parents, module="auto", bins=None, module_kwargs=None, **kwargs):
         if module_kwargs is None:
@@ -336,7 +336,7 @@ class _DispatchNeighbors(ExpandParents, AutoKw, PeriodicPairOutputs, PairIndexer
     )
     # Needs auto_module_class or explicit module
 
-    @_parent_expander.match(PositionsNode, SpeciesNode, CellNode)
+    @parent_expander.match(PositionsNode, SpeciesNode, CellNode)
     def expand0(self, pos, spec, cell, **kwargs):
         """
         Acquire padding and encoding.
@@ -344,7 +344,7 @@ class _DispatchNeighbors(ExpandParents, AutoKw, PeriodicPairOutputs, PairIndexer
         enc, padidx = acquire_encoding_padding(spec, species_set=None)
         return pos, enc, padidx, cell
 
-    @_parent_expander.match(PositionsNode, Encoder, PaddingIndexer, CellNode)
+    @parent_expander.match(PositionsNode, Encoder, PaddingIndexer, CellNode)
     def expand1(self, pos, encode, indexer, cell, **kwargs):
         """
         Expand needed child nodes of encoder and padding indexer.
@@ -361,9 +361,9 @@ class _DispatchNeighbors(ExpandParents, AutoKw, PeriodicPairOutputs, PairIndexer
             indexer.n_atoms_max,
         )
 
-    _parent_expander.assertlen(8)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.MolAtom, None, None, None, None, None, None, None)
+    parent_expander.assertlen(8)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.MolAtom, None, None, None, None, None, None, None)
 
     def __init__(self, name, parents, dist_hard_max, module="auto", module_kwargs=None, **kwargs):
         self.dist_hard_max = dist_hard_max
@@ -426,7 +426,7 @@ class PaddedNeighborNode(ExpandParents, AutoNoKw, MultiNode):
     _output_index_states = IdxType.Atoms, IdxType.Atoms
     _auto_module_class = pairs_modules.PaddedNeighModule
 
-    @_parent_expander.match(PairIndexer)
+    @parent_expander.match(PairIndexer)
     def expand0(self, pair_finder, **kwargs):
         try:
             # Typically, the first atom tensor will come from
@@ -442,9 +442,9 @@ class PaddedNeighborNode(ExpandParents, AutoNoKw, MultiNode):
 
         return pair_finder.pair_first, pair_finder.pair_second, pair_finder.pair_coord, atom_array
 
-    _parent_expander.assertlen(4)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Pair, IdxType.Pair, IdxType.Pair, IdxType.Atoms)
+    parent_expander.assertlen(4)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.Pair, IdxType.Pair, IdxType.Pair, IdxType.Atoms)
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
@@ -457,7 +457,7 @@ class MinDistNode(ExpandParents, AutoNoKw, MultiNode):
     _output_index_states = IdxType.Molecules, IdxType.Molecules, IdxType.Atoms, IdxType.Atoms
     _auto_module_class = pairs_modules.MinDistModule
 
-    @_parent_expander.match(PairIndexer)
+    @parent_expander.match(PairIndexer)
     def expand0(self, pair_finder, **kwargs):
 
         try:
@@ -467,12 +467,12 @@ class MinDistNode(ExpandParents, AutoNoKw, MultiNode):
 
         return (neigh_list,)
 
-    @_parent_expander.match(PaddedNeighborNode)
+    @parent_expander.match(PaddedNeighborNode)
     def expand1(self, neigh_list, **kwargs):
         pad = neigh_list.find_unique_relative(AtomIndexer)
         return neigh_list, pad
 
-    @_parent_expander.match(PaddedNeighborNode, AtomIndexer)
+    @parent_expander.match(PaddedNeighborNode, AtomIndexer)
     def expand2(self, neigh_list, pad_idxer, **kwargs):
         return (
             neigh_list.rij_list,
@@ -484,9 +484,9 @@ class MinDistNode(ExpandParents, AutoNoKw, MultiNode):
             pad_idxer.n_molecules,
         )
 
-    _parent_expander.assertlen(7)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, None, None, None, None, None)
+    parent_expander.assertlen(7)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, None, None, None, None, None)
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
@@ -497,7 +497,7 @@ class MinDistNode(ExpandParents, AutoNoKw, MultiNode):
 class PairFilter(AutoKw, PairIndexer, ExpandParents, MultiNode):
     _auto_module_class = pairs_modules.FilterDistance
 
-    @_parent_expander.match(PairIndexer)
+    @parent_expander.match(PairIndexer)
     def expand0(self, pair_indexer, purpose):
 
         # During graph construction, every node is connected to its current set of parents. 

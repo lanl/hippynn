@@ -56,11 +56,11 @@ class PaddingIndexer(AtomIndexer, AutoNoKw, ExpandParents, MultiNode):
     _input_names = "encoding", "nonblank"
     _auto_module_class = index_modules.PaddingIndexer
 
-    @_parent_expander.match(Encoder)
+    @parent_expander.match(Encoder)
     def expand0(self, encoder, **kwargs):
         return encoder.encoding, encoder.nonblank
 
-    _parent_expander.assertlen(2)
+    parent_expander.assertlen(2)
 
     def __init__(self, name, parents, *args, **kwargs):
         parents = self.expand_parents(parents)
@@ -75,16 +75,16 @@ class AtomReIndexer(ExpandParents, AutoNoKw, SingleNode):
     _auto_module_class = index_modules.AtomReIndexer
     _index_state = IdxType.Atoms
 
-    @_parent_expander.match(SingleNode)
+    @parent_expander.match(SingleNode)
     def expand0(self, features, *, purpose, **kwargs):
         pad_idx = find_unique_relative(features, PaddingIndexer, why_desc=purpose)
         return features, pad_idx
 
-    @_parent_expander.match(SingleNode, PaddingIndexer)
+    @parent_expander.match(SingleNode, PaddingIndexer)
     def expand1(self, features, pad_idx, **kwargs):
         return features, pad_idx.real_atoms
 
-    _parent_expander.assertlen(2)
+    parent_expander.assertlen(2)
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
@@ -99,16 +99,16 @@ class AtomDeIndexer(ExpandParents, AutoNoKw, SingleNode):
     _auto_module_class = index_modules.AtomDeIndexer
     _index_state = IdxType.MolAtom
 
-    @_parent_expander.matchlen(1)
+    @parent_expander.matchlen(1)
     def expand0(self, features, *, purpose, **kwargs):
         pad_idx = find_unique_relative(features, PaddingIndexer, why_desc=purpose)
         return features, pad_idx.mol_index, pad_idx.atom_index, pad_idx.n_molecules, pad_idx.n_atoms_max
 
-    @_parent_expander.matchlen(2)
+    @parent_expander.matchlen(2)
     def expand0(self, features, mol_index, atom_index, n_mol, n_atom, **kwargs):
         return features.main_output, mol_index, atom_index, n_mol, n_atom
 
-    _parent_expander.assertlen(5)
+    parent_expander.assertlen(5)
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
@@ -141,18 +141,18 @@ class SysMaxOfAtomsNode(ExpandParents, AutoNoKw, SingleNode):
     _index_state = IdxType.Molecules
     _auto_module_class = index_modules.SysMaxOfAtoms
 
-    @_parent_expander.match(Node)
+    @parent_expander.match(Node)
     def expansion0(self, node, *, purpose, **kwargs):
         pidxer = find_unique_relative(node, AtomIndexer, why_desc=purpose)
         return node, pidxer
 
-    @_parent_expander.match(Node, AtomIndexer)
+    @parent_expander.match(Node, AtomIndexer)
     def expansion1(self, node, pidxer, *, purpose, **kwargs):
         return node, pidxer.mol_index, pidxer.n_molecules
 
-    _parent_expander.assertlen(3)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Atoms, None, None)
+    parent_expander.assertlen(3)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.Atoms, None, None)
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
@@ -220,7 +220,7 @@ class SpeciesIndexer(AutoNoKw, SingleNode, ExpandParents):
     _index_state = IdxType.Atoms
 
 
-    @_parent_expander.match(Node, Node)
+    @parent_expander.match(Node, Node)
     def expansion0(self, node_to_index, hint_node, **kwargs):
         """
         For loss-graph quantities, we may need the information about /which/ species to use.
@@ -229,7 +229,7 @@ class SpeciesIndexer(AutoNoKw, SingleNode, ExpandParents):
 
         return atom_node_to_index,
 
-    @_parent_expander.match(Node)
+    @parent_expander.match(Node)
     def expansion1(self, node_to_index, species_set, **kwargs):
         """
         find onehot encoding.
@@ -240,9 +240,9 @@ class SpeciesIndexer(AutoNoKw, SingleNode, ExpandParents):
         return atom_node_to_index, onehot.encoding
 
     # add asserts for parent expansion
-    _parent_expander.assertlen(2)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms)
+    parent_expander.assertlen(2)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms)
 
     def __init__(self, name, parents, *args, module="auto", species_set=None, **kwargs):
         parents = self.expand_parents(parents, species_set=species_set)

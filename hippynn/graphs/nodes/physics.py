@@ -82,22 +82,22 @@ class StressForceNode(AutoNoKw, MultiNode):
 class ChargeMomentNode(ExpandParents, AutoNoKw, SingleNode):
     _input_names = "charges", "positions", "mol_index", "n_molecules"
 
-    @_parent_expander.matchlen(1)
+    @parent_expander.matchlen(1)
     def expansion0(self, charges, *, purpose, **kwargs):
         return charges, find_unique_relative(charges, PositionsNode, why_desc=purpose)
 
-    @_parent_expander.match(Charges, PositionsNode)
+    @parent_expander.match(Charges, PositionsNode)
     def expansion1(self, charges, positions, *, purpose, **kwargs):
         enc, pidxer = acquire_encoding_padding((charges, positions), species_set=None, purpose=purpose)
         return charges, positions, pidxer
 
-    @_parent_expander.match(Charges, PositionsNode, AtomIndexer)
+    @parent_expander.match(Charges, PositionsNode, AtomIndexer)
     def expansion2(self, charges, positions, pdxer, **kwargs):
         return charges, positions, pdxer.mol_index, pdxer.n_molecules
 
-    _parent_expander.assertlen(4)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, None, None)
+    parent_expander.assertlen(4)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, None, None)
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
@@ -130,7 +130,7 @@ class ChargePairSetup(ExpandParents):
         # Raises an error if the pairfinder is not satisfactory.
         return NotImplemented
 
-    @_parent_expander.match(Charges)
+    @parent_expander.match(Charges)
     def expansion0(self, charges, *, purpose, **kwargs):
         try:
             pos_or_pair = find_unique_relative(charges, PairIndexer, why_desc=purpose)
@@ -138,23 +138,23 @@ class ChargePairSetup(ExpandParents):
             pos_or_pair = find_unique_relative(charges, PositionsNode, why_desc=purpose)
         return charges, pos_or_pair
 
-    @_parent_expander.match(Charges, PositionsNode)
-    @_parent_expander.match(Charges, PairIndexer)
+    @parent_expander.match(Charges, PositionsNode)
+    @parent_expander.match(Charges, PairIndexer)
     def expansion1(self, charges, pos_or_pair, *, purpose, **kwargs):
         species = find_unique_relative((pos_or_pair, charges), SpeciesNode, why_desc=purpose)
         return charges, pos_or_pair, species
 
-    @_parent_expander.match(Charges, SpeciesNode)
+    @parent_expander.match(Charges, SpeciesNode)
     def expansion1(self, charges, species, *, purpose, **kwargs):
         positions = find_unique_relative((charges, species), PositionsNode, why_desc=purpose)
         return charges, positions, species
 
-    @_parent_expander.match(Charges, Node, SpeciesNode)
+    @parent_expander.match(Charges, Node, SpeciesNode)
     def expansion2(self, charges, pos_or_pair, species, *, purpose, **kwargs):
         encoder, pidxer = acquire_encoding_padding(species, species_set=None, purpose=purpose)
         return charges, pos_or_pair, pidxer
 
-    @_parent_expander.match(Charges, PositionsNode, PaddingIndexer)
+    @parent_expander.match(Charges, PositionsNode, PaddingIndexer)
     def expansion3(self, charges, positions, pidxer, *, cutoff_distance, **kwargs):
         try:
             pairfinder = find_unique_relative((charges, positions, pidxer), PairIndexer)
@@ -164,15 +164,15 @@ class ChargePairSetup(ExpandParents):
             pairfinder = OpenPairIndexer("PairIndexer", (positions, encoder, pidxer), dist_hard_max=cutoff_distance)
         return charges, pairfinder, pidxer
 
-    @_parent_expander.match(Charges, PairIndexer, AtomIndexer)
+    @parent_expander.match(Charges, PairIndexer, AtomIndexer)
     def expansion4(self, charges, pairfinder, pidxer, *, cutoff_distance, **kwargs):
         self._validate_pairfinder(pairfinder, cutoff_distance)
         pf = pairfinder
         return charges, pf.pair_dist, pf.pair_first, pf.pair_second, pidxer.mol_index, pidxer.n_molecules
 
-    _parent_expander.assertlen(6)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Atoms, *(None,) * 5)
+    parent_expander.assertlen(6)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.Atoms, *(None,) * 5)
 
 
 class CoulombEnergyNode(ChargePairSetup, Energies, AutoKw, MultiNode):
@@ -254,15 +254,15 @@ class VecMag(ExpandParents, AutoNoKw, SingleNode):
     _auto_module_class = physics_layers.VecMag
     _index_state = IdxType.NotFound
 
-    @_parent_expander.match(Node, Node)
+    @parent_expander.match(Node, Node)
     def expansion2(self, vector, helper, *, purpose, **kwargs):
         # This somewhat strange construction allows us to
         # find a padding indexer if the vector is detached from the padding indexer.
         vector, helper = elementwise_compare_reduce(vector, helper)
         return (vector,)
 
-    _parent_expander.assertlen(1)
-    _parent_expander.get_main_outputs()
+    parent_expander.assertlen(1)
+    parent_expander.get_main_outputs()
 
     def __init__(self, name, parents, module="auto", _helper=None, **kwargs):
         parents = self.expand_parents(parents)
@@ -276,18 +276,18 @@ class AtomToMolSummer(ExpandParents, AutoNoKw, SingleNode):
     _auto_module_class = index_layers.MolSummer
     _index_state = IdxType.Molecules
 
-    @_parent_expander.match(Node)
+    @parent_expander.match(Node)
     def expansion0(self, features, **kwargs):
         pdxer = find_unique_relative(features, AtomIndexer, why_desc="Generating Molecular summer")
         return features, pdxer
 
-    @_parent_expander.match(Node, AtomIndexer)
+    @parent_expander.match(Node, AtomIndexer)
     def expansion1(self, features, pdxer, **kwargs):
         return features, pdxer.mol_index, pdxer.n_molecules
 
-    _parent_expander.assertlen(3)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Atoms, None, None)
+    parent_expander.assertlen(3)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.Atoms, None, None)
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
@@ -300,17 +300,17 @@ class BondToMolSummmer(ExpandParents, AutoNoKw, SingleNode):
     _auto_module_class = pair_layers.MolPairSummer
     _index_state = IdxType.Molecules
 
-    @_parent_expander.match(Node)
+    @parent_expander.match(Node)
     def expansion0(self, features, *, purpose, **kwargs):
         pdxer = find_unique_relative(features, AtomIndexer, why_desc=purpose)
         pair_idxer = find_unique_relative(features, PairIndexer, why_desc=purpose)
         return features, pdxer, pair_idxer
 
-    @_parent_expander.match(Node, AtomIndexer, PairIndexer)
+    @parent_expander.match(Node, AtomIndexer, PairIndexer)
     def expansion1(self, features, pdxer, pair_idxer, **kwargs):
         return features, pdxer.mol_index, pdxer.n_molecules, pair_idxer.pair_first
 
-    @_parent_expander.match(Node, Node, Node, Node, Node)
+    @parent_expander.match(Node, Node, Node, Node, Node)
     def expansion2(self, features, mol_index, n_molecules, **kwargs):
         return index_type_coercion(features.main_output, IdxType.Pair), mol_index, n_molecules
 
@@ -324,11 +324,11 @@ class PerAtom(ExpandParents, AutoNoKw, SingleNode):
     _index_state = IdxType.Molecules
     _auto_module_class = physics_layers.PerAtom
 
-    @_parent_expander.match(Node)
+    @parent_expander.match(Node)
     def expansion0(self, features, *, purpose, **kwargs):
         return features, find_unique_relative(features, SpeciesNode, purpose)
 
-    @_parent_expander.match(Node, Node)
+    @parent_expander.match(Node, Node)
     def expansion1(self, features, species, **kwargs):
         features = features.main_output
         assert (
@@ -355,25 +355,25 @@ class CombineEnergyNode(Energies, AutoKw, ExpandParents, MultiNode):
     )
     _auto_module_class = physics_layers.CombineEnergy
 
-    @_parent_expander.match(Node, Energies)
+    @parent_expander.match(Node, Energies)
     def expansion0(self, energy_1, energy_2, **kwargs):
         return energy_1, energy_2.atom_energies
 
-    @_parent_expander.match(Energies, Node)
+    @parent_expander.match(Energies, Node)
     def expansion0(self, energy_1, energy_2, **kwargs):
         return energy_1.atom_energies, energy_2
 
-    @_parent_expander.match(Node, Node)
+    @parent_expander.match(Node, Node)
     def expansion1(self, energy_1, energy_2, **kwargs):
         pdindexer = find_unique_relative([energy_1, energy_2], AtomIndexer, why_desc="Generating CombineEnergies")
         return energy_1, energy_2, pdindexer
 
-    @_parent_expander.match(Node, Node, PaddingIndexer)
+    @parent_expander.match(Node, Node, PaddingIndexer)
     def expansion2(self, energy_1, energy_2, pdindexer, **kwargs):
         return energy_1, energy_2, pdindexer.mol_index, pdindexer.n_molecules
 
-    _parent_expander.assertlen(4)
-    _parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, None, None)
+    parent_expander.assertlen(4)
+    parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, None, None)
 
     def __init__(self, name, parents, module="auto", module_kwargs=None, **kwargs):
         self.module_kwargs = {} if module_kwargs is None else module_kwargs

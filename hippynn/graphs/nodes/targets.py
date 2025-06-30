@@ -22,7 +22,7 @@ class HEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
     _output_index_states = IdxType.Molecules, IdxType.Atoms, None, IdxType.Molecules, IdxType.Atoms, IdxType.Molecules, IdxType.Scalar
     _auto_module_class = target_modules.HEnergy
 
-    @_parent_expander.match(Network)
+    @parent_expander.match(Network)
     def expansion0(self, net, **kwargs):
         if "feature_sizes" not in self.module_kwargs:
             self.module_kwargs["feature_sizes"] = net.torch_module.feature_sizes
@@ -58,7 +58,7 @@ class HChargeNode(Charges, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
     _output_index_states = IdxType.Atoms, None, IdxType.Atoms
     _auto_module_class = target_modules.HCharge
 
-    @_parent_expander.match(Network)
+    @parent_expander.match(Network)
     def expansion0(self, net, **kwargs):
         if "feature_sizes" not in self.module_kwargs:
             self.module_kwargs["feature_sizes"] = net.torch_module.feature_sizes
@@ -77,7 +77,7 @@ class LocalChargeEnergy(Energies, ExpandParents, HAtomRegressor, MultiNode):
     _output_index_states = IdxType.Molecules, IdxType.Atoms
     _auto_module_class = target_modules.LocalChargeEnergy
 
-    @_parent_expander.match(Node, Network)
+    @parent_expander.match(Node, Network)
     def expansion0(self, charge, network, **kwargs):
         charge = index_type_coercion(charge.main_output, IdxType.Atoms)
         pdxer = find_unique_relative(network, PaddingIndexer)
@@ -99,18 +99,18 @@ class HBondNode(ExpandParents, AutoKw, MultiNode):
     _input_names = "features", "pair_first", "pair_second", "pair_dist"
     _main_output = "bonds"
 
-    @_parent_expander.match(Network)
+    @parent_expander.match(Network)
     def expand0(self, net, *, purpose, **kwargs):
         if "feature_sizes" not in self.module_kwargs:
             self.module_kwargs["feature_sizes"] = net.torch_module.feature_sizes
         return net,
 
-    @_parent_expander.matchlen(1)
+    @parent_expander.matchlen(1)
     def expand1(self, features, *, purpose, **kwargs):
         pairfinder = find_unique_relative(features, PairIndexer, why_desc=purpose)
         return features, pairfinder
 
-    @_parent_expander.matchlen(2)
+    @parent_expander.matchlen(2)
     def expand2(self, features, pairfinder, **kwargs):
         return features.main_output, pairfinder.pair_first, pairfinder.pair_second, pairfinder.pair_dist
 
@@ -127,7 +127,7 @@ class AtomizationEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, Mul
     _main_output = "mol_energy"
     _auto_module_class = target_modules.AtomizationEnergy
 
-    @_parent_expander.match(Network)
+    @parent_expander.match(Network)
     def expansion1(self, net, **kwargs):
         from ..gops import vacuum_outputs
         encoder = find_unique_relative(net, Encoder)
@@ -138,16 +138,16 @@ class AtomizationEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, Mul
         vac_net, = vacuum_outputs([net], species_set=species_set)
         return net, vac_net, encoder, pdindexer
 
-    @_parent_expander.match(Network, Network, Encoder, AtomIndexer)
+    @parent_expander.match(Network, Network, Encoder, AtomIndexer)
     def expansion0(self, net, vacuum_net, encoding, pdindexer, **kwargs):
         # Used to be built explicitly because of introduction of multiple encoders.
         # Now fixed by using constants when encoding on the vacuum side.
         # encatom = AtomReIndexer('Encoding[atoms]', (encoding.encoding, pdindexer))
         return net, vacuum_net, encoding.encoding, pdindexer.mol_index, pdindexer.n_molecules,
 
-    _parent_expander.assertlen(5)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(None, None, IdxType.Atoms, None, None)
+    parent_expander.assertlen(5)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(None, None, IdxType.Atoms, None, None)
 
     def __init__(self, name, parents, module='auto', module_kwargs=None, **kwargs):
         self.module_kwargs = {**module_kwargs} if module_kwargs else {}

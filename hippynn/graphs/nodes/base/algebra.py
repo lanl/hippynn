@@ -98,12 +98,12 @@ def __getattr__(name: str):
     import warnings
     if name.endswith("Node") or name == "AtLeast2D":
         # Backwards compatibility for unpickling prior models
-        warnings.warn(
-            f"{name!r} is a deprecated class name, and has likely been relocated to base.py." + \
-            "If you encounter this warning while loading a model, you can re-serialize it to disable the warning.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
         from . import base
-        return getattr(base, name)
+        answer = getattr(base, name) # error if not found.
+        # Warn if found.
+        from ....tools import HippynnNameDeprecation
+        warning = HippynnNameDeprecation.from_single(name, answer, old_module=__name__)
+        warnings.warn(warning, stacklevel=2)
+        return answer
+    
     raise AttributeError(f"module {__name__!r} has no attribute {name}")

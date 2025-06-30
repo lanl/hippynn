@@ -134,9 +134,9 @@ class LocalAtomEnergyNode(AutoNoKw, ExpandParents, MultiNode):
     _output_index_states = None, IdxType.Scalar
     _auto_module_class = LocalAtomsEnergy
 
-    _parent_expander.assertlen(2)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Atoms, IdxType.Scalar)
+    parent_expander.assertlen(2)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.Atoms, IdxType.Scalar)
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)

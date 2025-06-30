@@ -112,7 +112,9 @@ def check_mapping_devices(map_location, model_device):
         map_location = "cpu"
     return map_location, model_device
 
+from hippynn.tools import bundles_deprecated_warnings
 
+@bundles_deprecated_warnings(stacklevel=2)
 def load_saved_tensors(structure_fname: str, state_fname: str, weights_only: bool = False, **kwargs) -> Tuple[dict, dict]:
     """
     Load torch tensors from file.

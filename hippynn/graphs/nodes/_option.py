@@ -39,7 +39,7 @@ class _OptionModule(torch.nn.Module):
 class OptionalMixin(ExpandParents, AutoKw):
     _auto_module_class = _OptionModule
 
-    @_parent_expander.match(SingleNode)
+    @parent_expander.match(SingleNode)
     def _expand0(self, option, *, criteria_map, one_option):
         option_parents = one_option.parents
         assert all(

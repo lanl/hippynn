@@ -80,7 +80,7 @@ Let's take a look  at the full definition of :class:`~hippynn.graphs.nodes.targe
 The parent classes ``Energies`` and ``HAtomRegressor`` do not add any methods, they
 are simply mixin tags so that it is easy to find nodes based on their type. The key
 additional superclass is ``ExpandParents``, which automatically provides the class with
-a ``_parent_expander`` attribute that is an instance of a parent expander.
+a ``parent_expander`` attribute that is an instance of a parent expander.
 We then define a method called (arbitrarily) ``expansion0`` which is decorated by the parent
 expander to be run when the form of the parents matches the given one, in this case,
 a single parent with node type ``Network``. The function does two things.
@@ -110,16 +110,16 @@ Let's take a look at the code for :class:`~hippynn.graphs.nodes.physics.ChargeMo
 
 This is the base class for the Dipole and Quadrupole Nodes. It uses several parent expansion functions:
 
-1. ``@_parent_expander.match()``: Decorates a function to be used by the parent expansion
+1. ``@parent_expander.match()``: Decorates a function to be used by the parent expansion
    if the type is matched. The returned values should be the new set of parents for the node.
    A function doesn't -have- to modify the set of parents.
 
-2. ``_parent_expander.assertlen()``: Assert that there are a given number of parents for the node.
+2. ``parent_expander.assertlen()``: Assert that there are a given number of parents for the node.
 
-3. ``_parent_expander.get_main_outputs()``: If there are any MultiNodes in the parent set,
+3. ``parent_expander.get_main_outputs()``: If there are any MultiNodes in the parent set,
    replace them with their main outputs.
 
-4. ``_parent_expander.require_idx_states()``: Throw an error if the index states of the parents
+4. ``parent_expander.require_idx_states()``: Throw an error if the index states of the parents
    do not match a specific form. Additionally, if the current index state can be converted to
    the needed index state, this conversion will automatically be applied using
    :func:`~hippynn.graphs.indextypes.index_type_coercion`.

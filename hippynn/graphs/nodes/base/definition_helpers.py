@@ -254,7 +254,7 @@ class ParentExpander:
             if issubclass(sup_class, ExpandParents) and sup_class is not ExpandParents
         )
 
-        base_matches = tuple(form for sup_class in relevant_classes for form in sup_class._parent_expander.matches)
+        base_matches = tuple(form for sup_class in relevant_classes for form in sup_class.parent_expander.matches)
 
         _debprint("Bases found for merging:", relevant_classes)
 
@@ -430,7 +430,7 @@ class FormAssertLength(FormAssertion):
         return "FormLengthAssertion({})".format(self.length)
 
 
-# This metaclass inserts the _parent_expander attribute into
+# This metaclass inserts the parent_expander attribute into
 # any class that has this metaclass.
 # Note for developers: The metaclass is needed because
 # the class must be modified before the class definition
@@ -440,7 +440,7 @@ class ExpandParentMeta(type):
     @classmethod
     def __prepare__(mcl, name, bases, **kwargs):
         cls_dict = super(ExpandParentMeta, mcl).__prepare__(name, bases, **kwargs)
-        cls_dict["_parent_expander"] = ParentExpander()
+        cls_dict["parent_expander"] = ParentExpander()
         return cls_dict
 
 
@@ -454,7 +454,7 @@ def _append_docs(cls):
     """
     new_doc = (cls.__doc__ + "\n") if cls.__doc__ else ""
     new_doc += """\n    .. Note::\n       This node has parent expansion, following these procedures.\n\n"""
-    for form_handler in cls._parent_expander:
+    for form_handler in cls.parent_expander:
         add = form_handler.add_class_doc()
         if add:
             new_doc += f"       #. {add}\n"
@@ -465,7 +465,7 @@ def _append_docs(cls):
 
 
 class ExpandParents(metaclass=ExpandParentMeta):
-    _parent_expander: ParentExpander
+    parent_expander: ParentExpander
 
     def __init_subclass__(cls, **kwargs):
         """
@@ -477,16 +477,28 @@ class ExpandParents(metaclass=ExpandParentMeta):
         #  This makes sense because initialization typically
         #  begins with the base class and then is customized or added to
         #  by a derived class.
-        cls._parent_expander._merge(*cls.__mro__)
+        cls.parent_expander._merge(*cls.__mro__)
 
         # If no documentation, do not apply any decorating to the documentation
         if cls.__doc__:
             cls.__doc__ = _append_docs(cls)
 
+    def __getattr__(self, item):
+        if item == "_parent_expander":
+            from ....tools import HippynnNameDeprecation
+            import warnings
+            warning = HippynnNameDeprecation.from_single("_parent_expander", "parent_expander")
+            warnings.warn(warning, stacklevel=2)
+            return self.parent_expander
+        else:
+            return super().__getattr__(item)
+
+            
+
     def expand_parents(self, parents, *, purpose=None, **kwargs):
         if isinstance(parents, Node):
             parents = (parents,)
-        for form_handler in self._parent_expander:
+        for form_handler in self.parent_expander:
             _debprint("Processing form:")
             _debprint("\tForm:", form_handler.form)
             _debprint("\t\targs:", parents)

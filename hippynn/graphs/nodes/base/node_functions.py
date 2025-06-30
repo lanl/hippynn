@@ -1,5 +1,6 @@
 """
-Base node definition.
+Here we define some of the core operations for Nodes in the directed
+acyclic graph associated with a computation.
 """
 import warnings
 from typing import Optional, Tuple
@@ -14,6 +15,9 @@ if typing.TYPE_CHECKING:
     from .base import Node
 
 class _NodeFunctions:
+    """
+    Base Node methods without dynamic algebra behavior.
+    """
     _input_names = NotImplemented
     _LossPredNode = None  # Will be set by this child class when it exists
     _LossTrueNode = None  # Same
@@ -36,11 +40,11 @@ class _NodeFunctions:
 
         self.db_name: Optional[str] = db_name
         self.origin_node: Optional[Node] = None  # Loss input nodes set this attribute to find references to the model graph
-        self.parents: Tuple(Node) = tuple(parents)
+        self.parents: Tuple[Node] = tuple(parents)
         self.name: str = name
         self._pred: Optional[Node] = None
         self._true: Optional[Node] = None
-        self.children: Tuple(Node) = tuple()
+        self.children: Tuple[Node] = tuple()
         for p in self.parents:
             p.children = p.children + (self,)
 

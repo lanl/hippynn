@@ -104,16 +104,16 @@ class LocalEnergyNode(Energies, ExpandParents, HAtomRegressor, MultiNode):
     _output_index_states = IdxType.Molecules, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms
     _auto_module_class = excited_layers.LocalEnergy
 
-    @_parent_expander.match(Network)
+    @parent_expander.match(Network)
     def expansion0(self, net, *, purpose, **kwargs):
         pdindexer = find_unique_relative(net, AtomIndexer, why_desc=purpose)
         return net, pdindexer
 
-    @_parent_expander.match(Network, AtomIndexer)
+    @parent_expander.match(Network, AtomIndexer)
     def expansion1(self, net, pdindexer, **kwargs):
         return net, pdindexer.mol_index, pdindexer.atom_index, pdindexer.n_molecules, pdindexer.n_atoms_max
 
-    _parent_expander.assertlen(5)
+    parent_expander.assertlen(5)
 
     def __init__(self, name, parents, first_is_interacting=False, module="auto", **kwargs):
         parents = self.expand_parents(parents)

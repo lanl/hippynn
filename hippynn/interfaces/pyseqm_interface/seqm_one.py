@@ -158,7 +158,7 @@ class SEQM_One_EnergyNode(ExpandParents, AutoKw, MultiNode):
     _output_index_states = (IdxType.Molecules,) * len(_output_names)
     _auto_module_class = SEQM_One_Energy
 
-    @_parent_expander.match(Network, DensityMatrixNode)
+    @parent_expander.match(Network, DensityMatrixNode)
     def expand0(self, network, single_particle_density_matrix, seqm_parameters, decay_factor=1.0e-2, **kwargs):
 
         n_target_peratom = len(seqm_parameters["learned"])
@@ -177,9 +177,9 @@ class SEQM_One_EnergyNode(ExpandParents, AutoKw, MultiNode):
 
         return par_atom.main_output, positions, species, single_particle_density_matrix
 
-    _parent_expander.assertlen(4)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Atoms, None, None, None)
+    parent_expander.assertlen(4)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.Atoms, None, None, None)
 
     def __init__(self, name, parents, seqm_parameters, decay_factor=1.0e-2, module="auto", **kwargs):
         parents = self.expand_parents(parents, seqm_parameters=seqm_parameters, decay_factor=decay_factor, **kwargs)
