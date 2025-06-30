@@ -22,23 +22,11 @@ from ase.io import iread
 from hippynn.tools import progress_bar
 
 # ----- User parameters -----
-
 sample_size = 100_000 # number of configurations to extract
-# sample_size = -1 # extract all configurations
+# sample_size = 7_732_488 # extract all configurations
 
 extxyz_path = Path('../../datasets/methane.extxyz') # source
 npz_path = Path('../../datasets/methane.npz') # target
-
-# ----- Determine frames to extract -----
-all_frames = 7_732_488
-
-if sample_size == -1:
-    sample_size = all_frames
-    use_all = True
-    sampled_indices = None
-else:
-    use_all = False
-    sampled_indices = set(random.sample(range(all_frames), sample_size))
 
 # ----- Pre-allocate arrays -----
 n_atoms = 5
@@ -55,20 +43,25 @@ reader = iread(extxyz_path, format="extxyz")
 frame = next(reader) # Reading in the first frame will take considerably longer than the rest
 
 print("Reading data", flush=True)
-file_idx = 0
 for i in progress_bar(range(sample_size)):
-    while not use_all and file_idx not in sampled_indices:
-        file_idx += 1
-        frame = next(reader)
     species[i] = frame.get_atomic_numbers()
     positions[i] = frame.get_positions()
     forces[i] = frame.get_forces()
     energies[i] = frame.get_total_energy()
-
+    try:
+        frame = next(reader)
+    except StopIteration:
+        print(f"No more frames in data. {i+1} frames loaded successfully.")
+        species = species[:i+1]
+        positions = positions[:i+1]
+        forces = forces[:i+1]
+        energies = energies[:i+1]
+        break
 
 # positions are in Ang
 forces = forces * 51.422086 * 23.060541  # Hartrees/Bohr --> eV/Ang --> kcal/mol/Ang
 energies = energies * 627.50960  # Hartrees --> kcal/mol
+energies = energies - np.mean(energies)
 
 # ----- Save data -----
 print("Saving data", flush=True)
