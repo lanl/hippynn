@@ -42,11 +42,11 @@ def setup_LAMMPS_graph(energy):
     # Set up graph to accept external pair indices and shifts
 
     in_pair_first = InputNode("pair_first")
-    in_pair_first._index_state = IdxType.Pair
+    in_pair_first._index_state = IdxType.Pairs
     in_pair_second = InputNode("pair_second")
-    in_pair_second._index_state = IdxType.Pair
+    in_pair_second._index_state = IdxType.Pairs
     in_pair_coord = InputNode("pair_coord")
-    in_pair_coord._index_state = IdxType.Pair
+    in_pair_coord._index_state = IdxType.Pairs
     in_nlocal = InputNode("nlocal")
     in_nlocal._index_state = IdxType.Scalar
     pair_dist = VecMag("pair_dist", in_pair_coord)

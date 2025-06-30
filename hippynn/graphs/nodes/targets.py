@@ -95,7 +95,7 @@ class HBondNode(ExpandParents, AutoKw, MultiNode):
 
     _auto_module_class = target_modules.HBondSymmetric
     _output_names = "bonds", "bond_hierarchality"
-    _output_index_states = IdxType.Pair, IdxType.Pair
+    _output_index_states = IdxType.Pairs, IdxType.Pairs
     _input_names = "features", "pair_first", "pair_second", "pair_dist"
     _main_output = "bonds"
 
@@ -183,7 +183,7 @@ class AtomizationEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, Mul
 
         # Alternative hacky way to solve the problem is much simpler.
         for n in new_graph:
-            n._index_state = IdxType.MolAtom
+            n._index_state = IdxType.SysAtom
 
         pred = Predictor(inputs=[], outputs=new_graph)
         outputs = pred()

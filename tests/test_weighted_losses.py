@@ -27,7 +27,7 @@ def test_weighted_loss_from_input(weight_graph_variables):
     henergy, forces = weight_graph_variables
 
     en_mask = inputs.InputNode(db_name="en_mask", index_state=IdxType.Molecules)
-    force_mask = inputs.InputNode(db_name="f_mask", index_state=IdxType.MolAtom)
+    force_mask = inputs.InputNode(db_name="f_mask", index_state=IdxType.SysAtom)
 
     mse_energy_weighted = loss.WeightedMSELoss.of_node(henergy, en_mask)
     mse_force_weighted = loss.WeightedMSELoss.of_node(forces, force_mask)

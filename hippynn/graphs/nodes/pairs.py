@@ -27,7 +27,7 @@ class OpenPairIndexer(ExpandParents, PairIndexer, MultiNode):
 
     parent_expander.assertlen(4)
     parent_expander.get_main_outputs()
-    parent_expander.require_idx_states(IdxType.MolAtom, None, None, None)
+    parent_expander.require_idx_states(IdxType.SysAtom, None, None, None)
 
     def __init__(self, name, parents, dist_hard_max, module="auto", **kwargs):
         self.dist_hard_max = dist_hard_max
@@ -40,7 +40,7 @@ class OpenPairIndexer(ExpandParents, PairIndexer, MultiNode):
 
 class PeriodicPairOutputs:
     _output_names = "pair_dist", "pair_first", "pair_second", "pair_coord", "cell_offsets", "offset_index"
-    _output_index_states = (IdxType.Pair,) * len(_output_names)
+    _output_index_states = (IdxType.Pairs,) * len(_output_names)
 
 
 class PeriodicPairIndexer(ExpandParents, AutoKw, PeriodicPairOutputs, PairIndexer, MultiNode):
@@ -113,7 +113,7 @@ class ExternalNeighborIndexer(ExpandParents, PairIndexer, AutoKw, MultiNode):
 
     parent_expander.get_main_outputs()
     parent_expander.assertlen(len(_input_names))
-    parent_expander.require_idx_states(IdxType.MolAtom, IdxType.MolAtom, None, None, None, None)
+    parent_expander.require_idx_states(IdxType.SysAtom, IdxType.SysAtom, None, None, None, None)
 
     def __init__(self, name, parents, hard_dist_cutoff, module="auto", **kwargs):
         self.module_kwargs = {"hard_dist_cutoff": hard_dist_cutoff}
@@ -129,7 +129,7 @@ class PairReIndexer(ExpandParents, AutoNoKw, SingleNode):
 
     _input_names = "pair_features", "molecule_index", "atom_index", "pair_first", "pair_second"
     _auto_module_class = pairs_modules.PairReIndexer
-    _index_state = IdxType.Pair
+    _index_state = IdxType.Pairs
 
     @parent_expander.match(Node)
     def expand0(self, pair_features):
@@ -172,7 +172,7 @@ class PairDeIndexer(ExpandParents, AutoNoKw, SingleNode):
         "pair_second",
     )
     _auto_module_class = pairs_modules.PairDeIndexer
-    _index_state = IdxType.MolAtomAtom
+    _index_state = IdxType.SysAtomAtom
 
     @parent_expander.match(Node)
     def expand0(self, pair_features):
@@ -230,7 +230,7 @@ class PairCacher(ExpandParents, AutoKw, PairCache, SingleNode):
         return pf, ps, po, poi, ra, mi, n_molecules, nam
 
     parent_expander.assertlen(8)
-    parent_expander.require_idx_states(IdxType.Pair, IdxType.Pair, None, None, None, None, None, None)
+    parent_expander.require_idx_states(IdxType.Pairs, IdxType.Pairs, None, None, None, None, None, None)
 
     def __init__(self, name, parents, module="auto", module_kwargs=None, **kwargs):
         self.module_kwargs = module_kwargs or {}
@@ -241,7 +241,7 @@ class PairCacher(ExpandParents, AutoKw, PairCache, SingleNode):
 class PairUncacher(ExpandParents, AutoNoKw, PairIndexer, MultiNode):
     _input_names = "sparsepairs", "coordinates", "cells", "real_atoms", "inv_real_atoms", "n_atoms_max", "n_molecules"
     _output_names = "pair_dist", "pair_first", "pair_second", "pair_coord", "cell_offsets", "offset_index"
-    _output_index_states = (IdxType.Pair,) * len(_output_names)
+    _output_index_states = (IdxType.Pairs,) * len(_output_names)
     _auto_module_class = pairs_modules.PairUncacher
     _index_state = IdxType.NotFound
 
@@ -307,7 +307,7 @@ class RDFBins(ExpandParents, AutoKw, SingleNode):
         self.module_kwargs["species_set"] = one_hot.species_set
         return pairs.pair_dist, pairs.pair_first, pairs.pair_second, one_hot.encoding, pad.n_molecules
 
-    parent_expander.require_idx_states(IdxType.Pair, IdxType.Pair, IdxType.Pair, IdxType.Atoms, None)
+    parent_expander.require_idx_states(IdxType.Pairs, IdxType.Pairs, IdxType.Pairs, IdxType.Atoms, None)
     parent_expander.assertlen(5)
 
     def __init__(self, name, parents, module="auto", bins=None, module_kwargs=None, **kwargs):
@@ -363,7 +363,7 @@ class _DispatchNeighbors(ExpandParents, AutoKw, PeriodicPairOutputs, PairIndexer
 
     parent_expander.assertlen(8)
     parent_expander.get_main_outputs()
-    parent_expander.require_idx_states(IdxType.MolAtom, None, None, None, None, None, None, None)
+    parent_expander.require_idx_states(IdxType.SysAtom, None, None, None, None, None, None, None)
 
     def __init__(self, name, parents, dist_hard_max, module="auto", module_kwargs=None, **kwargs):
         self.dist_hard_max = dist_hard_max
@@ -444,7 +444,7 @@ class PaddedNeighborNode(ExpandParents, AutoNoKw, MultiNode):
 
     parent_expander.assertlen(4)
     parent_expander.get_main_outputs()
-    parent_expander.require_idx_states(IdxType.Pair, IdxType.Pair, IdxType.Pair, IdxType.Atoms)
+    parent_expander.require_idx_states(IdxType.Pairs, IdxType.Pairs, IdxType.Pairs, IdxType.Atoms)
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
@@ -513,12 +513,12 @@ class PairFilter(AutoKw, PairIndexer, ExpandParents, MultiNode):
         if len(idx_states) != 1:
             raise TypeError(f"Input contains mixed index states: {idx_states}. Input states should only consist of index type pair.")
         idx_state = idx_states.pop()
-        if idx_state != IdxType.Pair:
+        if idx_state != IdxType.Pairs:
             raise TypeError(f"Index state for inputs was {idx_state}, needs to be index type pair.")
         # Validation complete.
         self._output_names = tuple(f"out_{name}" for name in pair_indexer._output_names)
         self._input_names = tuple(f"in_{name}" for name in pair_indexer._output_names)
-        self._output_index_states = (IdxType.Pair,)*len(parents)
+        self._output_index_states = (IdxType.Pairs,)*len(parents)
 
         return parents
 

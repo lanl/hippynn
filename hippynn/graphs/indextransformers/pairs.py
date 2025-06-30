@@ -13,7 +13,7 @@ from .atoms import make_search_nodes
 
 # TODO: Rewrite so it can use non-one-hot-encodings?
 
-@register_index_transformer(IdxType.MolAtomAtom, IdxType.Pair)
+@register_index_transformer(IdxType.SysAtomAtom, IdxType.Pairs)
 def idx_molatomatom_pair(node, hints=None):
     purpose = "auto-generating indexing for {}".format(node)
 
@@ -77,7 +77,7 @@ def idx_molatomatom_pair(node, hints=None):
     return parents, cls
 
 
-@register_index_transformer(IdxType.Pair, IdxType.MolAtomAtom)
+@register_index_transformer(IdxType.Pairs, IdxType.SysAtomAtom)
 def idx_pair_molatomatom(node, hints=None):
     purpose = "auto-generating indexing for {}".format(node)
 

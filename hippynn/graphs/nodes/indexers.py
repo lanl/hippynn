@@ -18,7 +18,7 @@ class OneHotEncoder(AutoKw, Encoder, MultiNode):
     """
 
     _output_names = "encoding", "nonblank"
-    _output_index_states = IdxType.MolAtom, IdxType.MolAtom
+    _output_index_states = IdxType.SysAtom, IdxType.SysAtom
     _auto_module_class = index_modules.OneHotSpecies
 
     def __init__(self, name, parents, species_set, module="auto", **kwargs):
@@ -97,7 +97,7 @@ class AtomDeIndexer(ExpandParents, AutoNoKw, SingleNode):
     """
 
     _auto_module_class = index_modules.AtomDeIndexer
-    _index_state = IdxType.MolAtom
+    _index_state = IdxType.SysAtom
 
     @parent_expander.matchlen(1)
     def expand0(self, features, *, purpose, **kwargs):

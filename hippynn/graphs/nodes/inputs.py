@@ -8,12 +8,12 @@ from .tags import Charges, Positions, Species, PairCache
 
 
 class SpeciesNode(Species, InputNode):
-    _index_state = IdxType.MolAtom
+    _index_state = IdxType.SysAtom
     input_type_str = "Species"
 
 
 class PositionsNode(Positions, InputNode):
-    _index_state = IdxType.MolAtom
+    _index_state = IdxType.SysAtom
     input_type_str = "Positions"
 
 
@@ -22,12 +22,12 @@ class CellNode(InputNode):
     input_type_str = "Cells"
 
 class ForceNode(InputNode):
-    _index_state = IdxType.MolAtom
+    _index_state = IdxType.SysAtom
     input_type_str = "Force"
 
 
 class InputCharges(Charges, InputNode):
-    _index_state = IdxType.MolAtom
+    _index_state = IdxType.SysAtom
     input_type_str = "InputCharges"
 
 

@@ -312,7 +312,7 @@ class BondToMolSummmer(ExpandParents, AutoNoKw, SingleNode):
 
     @parent_expander.match(Node, Node, Node, Node, Node)
     def expansion2(self, features, mol_index, n_molecules, **kwargs):
-        return index_type_coercion(features.main_output, IdxType.Pair), mol_index, n_molecules
+        return index_type_coercion(features.main_output, IdxType.Pairs), mol_index, n_molecules
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)

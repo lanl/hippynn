@@ -21,7 +21,7 @@ class Network:
 
 class PairIndexer:
     _output_names = "pair_dist", "pair_first", "pair_second", "pair_coord"
-    _output_index_states = (IdxType.Pair,) * len(_output_names)
+    _output_index_states = (IdxType.Pairs,) * len(_output_names)
 
 
 class PairCache:

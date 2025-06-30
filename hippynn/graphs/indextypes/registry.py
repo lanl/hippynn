@@ -14,13 +14,13 @@ from .type_def import IdxType
 # fmt: off
 _db_index_states = {
 ### TYPE PREDICTED BY MODEL | DEFAULT TYPE OF STORAGE IN DATABASE
-    IdxType.Molecules       : IdxType.Molecules,
-    IdxType.Atoms           : IdxType.MolAtom,
-    IdxType.MolAtom         : IdxType.MolAtom,
-    IdxType.MolAtomAtom     : IdxType.MolAtomAtom,
+    IdxType.Systems         : IdxType.Systems,
+    IdxType.Atoms           : IdxType.SysAtom,
+    IdxType.SysAtom         : IdxType.SysAtom,
+    IdxType.Pairs           : IdxType.SysAtomAtom,
+    IdxType.SysAtomAtom     : IdxType.SysAtomAtom,
     IdxType.QuadMol         : IdxType.QuadPack,
     IdxType.QuadPack        : IdxType.QuadPack,
-    IdxType.Pair            : IdxType.MolAtomAtom,
     IdxType.Scalar          : IdxType.Scalar,
     IdxType.NotFound        : IdxType.NotFound,
 }
@@ -29,16 +29,16 @@ _db_index_states = {
 elementwise_compare_rules = {
 #### TYPES OF ARGUMENTS TO REDUCE             |   TYPE OF OUTPUTS
     ((IdxType.Scalar,)                        ,   IdxType.Scalar),
-    ((IdxType.Molecules,)                     ,   IdxType.Molecules),
+    ((IdxType.Systems,)                       ,   IdxType.Systems),
     ((IdxType.Atoms,)                         ,   IdxType.Atoms),
-    ((IdxType.MolAtom,)                       ,   IdxType.Atoms),
-    ((IdxType.Atoms, IdxType.MolAtom,)        ,   IdxType.Atoms),
+    ((IdxType.SysAtom,)                       ,   IdxType.Atoms),
+    ((IdxType.Atoms, IdxType.SysAtom,)        ,   IdxType.Atoms),
+    ((IdxType.Pairs,)                         ,   IdxType.Pairs),
+    ((IdxType.Pairs, IdxType.SysAtomAtom,)    ,   IdxType.Pairs),
+    ((IdxType.SysAtomAtom,)                   ,   IdxType.Pairs),
     ((IdxType.QuadMol,)                       ,   IdxType.QuadMol),
     ((IdxType.QuadPack,)                      ,   IdxType.QuadMol),
     ((IdxType.QuadMol, IdxType.QuadPack)      ,   IdxType.QuadMol),
-    ((IdxType.Pair,)                          ,   IdxType.Pair),
-    ((IdxType.Pair, IdxType.MolAtomAtom)      ,   IdxType.Pair),
-    ((IdxType.MolAtomAtom,)                   ,   IdxType.Pair),
     ((IdxType.NotFound,)                      ,   IdxType.NotFound),
 }
 # fmt: on
