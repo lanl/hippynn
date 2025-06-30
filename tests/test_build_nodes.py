@@ -4,7 +4,6 @@ import hippynn
 from hippynn.graphs import networks, targets, physics
 
 
-
 @pytest.mark.parametrize(
     "net_class,",
     [
@@ -16,6 +15,7 @@ from hippynn.graphs import networks, targets, physics
 )
 def test_build_network(net_class, network_parameters):
     from hippynn.graphs import inputs
+
     species = inputs.SpeciesNode(db_name="species")
     positions = inputs.PositionsNode(db_name="coordinates")
     cell = inputs.CellNode(db_name="cell")
@@ -35,7 +35,6 @@ def test_build_network(net_class, network_parameters):
 def test_build_atom_target(target_cls, neural_network_node):
     target_node = target_cls("target", neural_network_node)
     return
-
 
 
 def test_build_bonds(neural_network_node, bond_parameters):
@@ -65,4 +64,3 @@ def test_build_charge_moment(moment_cls, neural_network_node):
     charge = targets.HChargeNode("charge", neural_network_node)
 
     moment = moment_cls("charge_moment", charge)
-

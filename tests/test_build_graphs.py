@@ -3,6 +3,7 @@ import pytest
 import hippynn
 import ase
 
+
 def xfail_if_no_lammps(func):
     try:
         import lammps
@@ -13,6 +14,7 @@ def xfail_if_no_lammps(func):
         # Importing
         wrapper = lambda f: f
     return wrapper(func)
+
 
 def test_build_training_modules(energy_model):
 
@@ -28,8 +30,7 @@ def test_build_training_modules(energy_model):
 def test_build_lammps_interface(energy_model):
     from hippynn.interfaces.lammps_interface import MLIAPInterface
 
-    interface = MLIAPInterface(energy_model,element_types=[1])
-
+    interface = MLIAPInterface(energy_model, element_types=[1])
 
 
 def test_build_ase_interface(energy_model):

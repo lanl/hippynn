@@ -4,7 +4,6 @@ import torch
 import hippynn
 
 
-
 @pytest.fixture
 def example_all_target_nodes(neural_network_node, bond_parameters):
     from hippynn.graphs import inputs, targets, physics
@@ -33,27 +32,27 @@ def example_all_target_nodes(neural_network_node, bond_parameters):
 
 sensitivity_warning_supression = pytest.mark.filterwarnings("ignore:.*underneath sensitivity range*.")
 
-@pytest.mark.parametrize("operation",["add","sub","mul","truediv","pow"])
+
+@pytest.mark.parametrize("operation", ["add", "sub", "mul", "truediv", "pow"])
 def test_node_algebra(operation):
     from hippynn.graphs.nodes.base import ValueNode
     from hippynn.graphs import GraphModule
     import operator
+
     func = getattr(operator, operation)
     a = 2
     b = 3
-    out = func(a,b)
+    out = func(a, b)
 
     a_val = ValueNode(2)
     b_val = ValueNode(3)
     out_val = func(a_val, b_val)
 
-    graph = GraphModule([],[out_val])
+    graph = GraphModule([], [out_val])
     out_check = graph()[0]
 
     assert out == out_check, f"Values not equal! {out} {operation} {out_check}"
     return
-
-
 
 
 @sensitivity_warning_supression
@@ -106,11 +105,11 @@ def test_atomization_conversion(example_box, neural_network_node):
     hen_equivalent = energy.create_henergy_equivalent()
 
     input_nodes = energy.find_relatives(base.InputNode)
-    model = hippynn.GraphModule(input_nodes, [energy.mol_energy, hen_equivalent.mol_energy])    
-    
-    args = [example_box[node.db_name] for node in input_nodes]
-    en_1, en_2 = model(*args)    
+    model = hippynn.GraphModule(input_nodes, [energy.mol_energy, hen_equivalent.mol_energy])
 
-    assert torch.allclose(en_1,en_2)
+    args = [example_box[node.db_name] for node in input_nodes]
+    en_1, en_2 = model(*args)
+
+    assert torch.allclose(en_1, en_2)
 
     return

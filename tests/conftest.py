@@ -50,7 +50,6 @@ def energy_model(neural_network_node):
     return henergy
 
 
-
 @pytest.fixture
 def example_box():
     n_atom = 7
