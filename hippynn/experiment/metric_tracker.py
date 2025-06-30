@@ -38,7 +38,6 @@ class MetricTracker:
         :param metric_names:
         :param stopping_key:
         :param quiet:
-        :param split_names: splits to track.
         """
         if stopping_key not in metric_names and stopping_key is not None:
             raise ValueError("Stopping key {} is not in metric names {}".format(stopping_key, metric_names))

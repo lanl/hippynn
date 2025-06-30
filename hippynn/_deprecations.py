@@ -66,11 +66,10 @@ class HippynnNameDeprecation(DeprecationWarning):
 
 def rewarn(*message_list):
     for m in message_list:
-        warnings.showwarning(
-                        m.message,
-                        m.category,
-                        m.filename,
-                        m.lineno,)
+        warnings.warn_explicit(m.message,
+                               m.category,
+                               m.filename,
+                               m.lineno)
 
 
 @contextlib.contextmanager
