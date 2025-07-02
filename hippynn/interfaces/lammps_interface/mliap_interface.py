@@ -35,6 +35,7 @@ class MLIAPInterface(MLIAPUnified):
         element_types,
         ndescriptors=1,
         is_ensemble: bool = False,
+        extra_properties:dict = None,
         model_device=torch.device("cpu"),
         compute_dtype=torch.float32,
         energy_unit: float = None,
@@ -45,6 +46,9 @@ class MLIAPInterface(MLIAPUnified):
         :param element_types: list of atomic symbols corresponding to element types
         :param ndescriptors: the number of descriptors to report to LAMMPS
         :param model_device: the device to send torch data to (cpu or cuda)
+        :param is_ensemble: indicates whether an ensemble of models is used
+        :param extra_properties: dictionary of names to nodes for additional nodes for the calculator to compute
+
         :param energy_unit: If present, multiply the result by the given energy units.
             If your model was trained in Hartree and your lammps script will operate in eV,
             use energy_unit = ase.units.Ha = 27.211386024367243

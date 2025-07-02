@@ -12,10 +12,11 @@ from ...graphs.nodes.physics import VecMag, GradientNode
 from ...graphs.nodes.tags import PairIndexer, Encoder
 
 
-def setup_LAMMPS_graph(energy, is_ensemble: bool):
+def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool):
     """
 
     :param energy: energy node for lammp energy_stds interface
+    :param extra_properties: dictionary of names to nodes for additional nodes for the calculator to compute
     :param is_ensemble: boolean to check if it is an ensemble
     :return: graph for computing from lammps MLIAP unified inputs.
     """
