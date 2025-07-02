@@ -12,7 +12,7 @@ from ...graphs.nodes.physics import VecMag, GradientNode
 from ...graphs.nodes.tags import PairIndexer, Encoder
 
 
-def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool):
+def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool= False):
     """
 
     :param energy: energy node for lammp energy_stds interface
@@ -22,9 +22,16 @@ def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool)
     """
     
     if is_ensemble is True: 
-        required_nodes = [energy.mean, energy.std] 
+        required_nodes = [energy.mean] #[energy.mean, energy.std] 
     else: 
         required_nodes = [energy]
+
+    if extra_properties is not None:
+        properties = {}
+        for key, value in extra_properties.items():
+            #if hasattr(value, "std"):
+            properties[key] = value #.std
+        required_nodes += list(properties.values())
 
     why = "Generating LAMMPS Calculator interface"
     subgraph = get_subgraph(required_nodes)
@@ -82,7 +89,11 @@ def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool)
             replace_node(pi.pair_dist, mapped_node.pair_dist, disconnect_old=False)
             pi.disconnect()
 
-    energy, energy_stdev, *new_required = new_required
+    if extra_properties is not None:
+        property_names = [f"{key}" for key in properties]
+    
+    #energy,extra_property, *new_required = new_required
+    energy, *extra_property = new_required
     
     try:
         atom_energies = energy.atom_energies.mean
@@ -99,12 +110,29 @@ def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool)
 
     if is_ensemble is True:
         local_atom_energy = LocalAtomExtractorNode("local_atom_energy", (atom_energies, in_nlocal))
-        local_atom_energy_std = LocalAtomExtractorNode("local_atom_energy_std", (energy_stdev, in_nlocal))
+        #local_atom_energy_std = LocalAtomExtractorNode("local_atom_energy_std", (energy_stdev, in_nlocal))
     else:    
         local_atom_energy = LocalAtomExtractorNode("local_atom_energy", (atom_energies, in_nlocal))
+
+    if extra_properties is not None:
+        properties_node = {}
+        for i, value in enumerate(extra_property):
+        #for key, value in extra_property.items():  #properties.items():
+            property_name = property_names[i]
+            properties_node[key] = LocalAtomExtractorNode(f"{property_name}", (value, in_nlocal))
+
+        extra_properies_nodes = list(properties_node.values())
+
+    print("extra_properies_nodes:", extra_properies_nodes)
+
     grad_rij = GradientNode("grad_rij", (local_atom_energy.total_local_value, in_pair_coord), -1)
 
-    implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, local_atom_energy_std.local_atom_values, grad_rij
+    if extra_properties is not None:
+        implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, grad_rij, *tuple(node.local_atom_values for node in extra_properies_nodes)
+        print("in if :: implemented_nodes", implemented_nodes)
+    else:
+        implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, local_atom_energy_std.local_atom_values, grad_rij
+        print("implemented_nodes:", implemented_nodes)
 
     check_link_consistency((*new_inputs, *implemented_nodes))
     mod = GraphModule(new_inputs, implemented_nodes)

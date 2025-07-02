@@ -17,11 +17,12 @@ if __name__ == "__main__":
     except FileNotFoundError:
         raise FileNotFoundError("Model not found, run ani_aluminum_example.py first!")
     
-    graphs, ensemble_graph, ensemble_info = make_ensemble(bundle) #added
+    ensemble_graph, ensemble_info = make_ensemble(bundle) #added
     ensemble_energy = ensemble_graph.node_from_name("ensemble_atomenergies") #added
     ensemble_force = ensemble_graph.node_from_name("ensemble_force") #addedi
     ensemble_energy_all = ensemble_energy.all
-    
+   
+    print("type ensemble energy:", type(ensemble_energy))
     extra_properties = {"energy_std": ensemble_energy.std}
     #unified = MLIAPInterface(ensemble_energy, ["H", "C", "N", "O", "P", "S", "Cl"], model_device=device_fallback())
     unified = MLIAPInterface(ensemble_energy, ["Al"],is_ensemble=True, extra_properties=extra_properties, model_device=device_fallback())

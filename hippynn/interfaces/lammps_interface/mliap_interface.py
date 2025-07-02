@@ -48,7 +48,6 @@ class MLIAPInterface(MLIAPUnified):
         :param model_device: the device to send torch data to (cpu or cuda)
         :param is_ensemble: indicates whether an ensemble of models is used
         :param extra_properties: dictionary of names to nodes for additional nodes for the calculator to compute
-
         :param energy_unit: If present, multiply the result by the given energy units.
             If your model was trained in Hartree and your lammps script will operate in eV,
             use energy_unit = ase.units.Ha = 27.211386024367243
@@ -68,8 +67,10 @@ class MLIAPInterface(MLIAPUnified):
 
         # Build the calculator
         #if self.is_ensemble is True:
-        self.rcutfac, self.species_set, self.graph = setup_LAMMPS_graph(energy_node, is_ensemble)
+        self.rcutfac, self.species_set, self.graph = setup_LAMMPS_graph(energy_node, extra_properties, is_ensemble)
         
+        #if extra_properties is not None:
+        #    self.rcutfac, self.species_set, self.graph_with_extra_properties = setup_LAMMPS_graph(energy_node, extra_properties, is_ensemble)
 
         self.nparams = sum(p.nelement() for p in self.graph.parameters())
         self.compute_dtype = compute_dtype
@@ -186,6 +187,51 @@ class MLIAPInterface(MLIAPUnified):
 
         return global_grad_in_features, *rest_grad_in
 
+    def compute_properties(self, property_name: str, data):
+        """
+        :param property_name:
+        """
+        #general_property = extra_properties[property_name]
+
+        nlocal = self.as_tensor(data.nlistatoms)
+        if nlocal.item() <= 0:
+            return
+
+        self.mliap_data = data  # hook data onto the (persistent) object for, e.g., comms hooks. This is needed!
+        self.perform_setup()
+
+        elems = self.as_tensor(data.elems).type(torch.int64).reshape(1, data.ntotal)
+        z_vals = self.species_set[elems + 1]
+        npairs = data.npairs
+
+        if npairs > 0:
+            pair_i = self.as_tensor(data.pair_i).type(torch.int64)
+            pair_j = self.as_tensor(data.pair_j).type(torch.int64)
+            rij = self.as_tensor(data.rij).type(self.compute_dtype)
+        else:
+            pair_i = self.empty_tensor(0).type(torch.int64)
+            pair_j = self.empty_tensor(0).type(torch.int64)
+            rij = self.empty_tensor([0, 3]).type(self.compute_dtype)
+
+        if self.distance_unit is not None:
+            rij = self.distance_unit * rij
+        # note your sign for rij might need to be +1 or -1, depending on how your implementation works
+        inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
+
+        atom_energy, total_energy, fij, general_property = self.graph(*inputs)
+
+        general_property = general_property.squeeze(1).detach().to(return_device)
+        if not self.using_kokkos:
+            data.general_property = general_property.numpy().astype(np.double)
+        else:
+            # view to data.eatoms using pytorch, and write into the view.
+            eatoms = torch.as_tensor(data.eatoms, device=return_device)
+            
+            general_property = torch.as_tensor(general_property, device=return_device ) 
+            eatoms.copy_(atom_energy)
+        self.mliap_data = None  # unhook data, see hooking above.
+
+
     def compute_forces(self, data):
         """
         :param data: MLIAPData object (provided internally by lammps)
@@ -220,7 +266,7 @@ class MLIAPInterface(MLIAPUnified):
 
         # note your sign for rij might need to be +1 or -1, depending on how your implementation works
         inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
-        atom_energy, total_energy, atom_energy_std, fij = self.graph(*inputs)
+        atom_energy, total_energy, fij, extra = self.graph(*inputs) #[:3]
 
 
 
@@ -246,13 +292,6 @@ class MLIAPInterface(MLIAPUnified):
         #else:
         #print("In lammps_interface/mliap_interface.py :: type(atom_energy)", type(atom_energy))
         atom_energy = atom_energy.squeeze(1).detach().to(return_device)
-        atom_energy_std = atom_energy_std.squeeze(1).detach().to(return_device)
-        #print("atom_energy[0].sum =", torch.sum(atom_energy[0]))
-        #print("atom_energy[1] =", atom_energy[1])
-        #print("atom_energy[0] =", atom_energy[0])
-        #atom_energy = torch.sum(atom_energy[0]).squeeze(1).detach().to(return_device)
-        #print("atom_energy_std:", atom_energy_std)
-        #print("type(atom_energy_std):", type(atom_energy_std))
         total_energy = total_energy.detach().to(return_device)
         data.energy = total_energy.item()
 
@@ -266,7 +305,7 @@ class MLIAPInterface(MLIAPUnified):
             #print("type of atom_energy: ", type(atom_energy))
             #print("atom_energy shape: ", atom_energy.shape)
             data.eatoms = atom_energy.numpy().astype(np.double)
-            data.eatoms_stdev = atom_energy_std.numpy().astype(np.double)
+            #data.eatoms_stdev = atom_energy_std.numpy().astype(np.double)
             #print("data.eatoms:", data.eatoms)
             if npairs > 0:
                 data.update_pair_forces(fij)
