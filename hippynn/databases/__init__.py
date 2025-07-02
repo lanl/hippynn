@@ -23,7 +23,7 @@ except ImportError:
     pass
 
 if has_ase:
-    from ..interfaces.ase_interface import AseDatabase
+    from ..interfaces.ase_interface import AseDatabase, AseDatabaseIterable
     from .SNAPJson import SNAPDirectoryDatabase
     if has_h5:
         from .h5_pyanitools import PyAniFileDB, PyAniDirectoryDB
@@ -31,7 +31,7 @@ if has_ase:
 all_list = ["Database", "DirectoryDatabase", "NPZDatabase"]
 
 if has_ase:
-    all_list += ["AseDatabase", "SNAPDirectoryDatabase"]
+    all_list += ["AseDatabase", "AseDatabaseIterable", "SNAPDirectoryDatabase"]
     if has_h5:
         all_list += ["PyAniFileDB", "PyAniDirectoryDB"]
 __all__ = all_list

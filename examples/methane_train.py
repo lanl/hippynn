@@ -4,8 +4,16 @@ Allen, A. E. A., Shinkle, E., Bujack, R., & Lubbers, N. (2025). Optimal
 invariant bases for atomistic machine learning. arXiv preprint arXiv:2503.23515. 
 https://arxiv.org/abs/2503.23515
 
-Before running this script, you must create the dataset by following
-the instructions in `methane_extract_data.py`.
+BEFORE RUNNING:
+1. Download the file methane.extxyz.gz from https://archive.materialscloud.org/records/kz78r-6nx43
+2. Unzip the file: $ gunzip methane.extxyz.gz
+3. Place the resulting file in a folder called datasets/ at the same level as hippynn/ 
+   or change ``data_src`` below
+
+NOTE: The .extxyz file will be very slow to read, so this script only uses 100,000
+configurations. You can adjust this with the ``data_size`` variable. If you want to 
+run with the full ~7M configurations more than one time, I strongly suggest to convert
+the file into another format (eg., .npz) that will be faster to read in repeatedly.
 """
 
 
@@ -17,6 +25,7 @@ from math import log10
 from itertools import product
 from pathlib import Path
 
+import ase
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -35,8 +44,8 @@ from hippynn.tools import active_directory
 
 # ----- User parameters -----
 seed = 2025
-data_src = Path("../../datasets/methane.npz")
-model_save_folder = Path("TEST_METHANE_MODEL")
+data_src = Path(__file__).parents[2] / "datasets" / "methane.extxyz"
+model_save_folder = Path(__file__).parents[1] / Path("TEST_METHANE_MODEL")
 
 n_epochs = 10_000 # reduce to dececrease the run time of the script
 
@@ -45,13 +54,12 @@ n_epochs = 10_000 # reduce to dececrease the run time of the script
 # network_class = HipnnQuad # HIP-NN-TS, l=2
 network_class = HipHopnn # HIP-HOP model with defaults with n = 4 and l = 3
 
-size_test_set = 80_000
-size_train_val_set = 10_000
+data_size = 100_000
 
 # ----- Construct model -----
 torch.random.manual_seed(seed)
 
-species = inputs.SpeciesNode(name="species", db_name="species")
+species = inputs.SpeciesNode(name="species", db_name="numbers")
 positions = inputs.PositionsNode(name="positions", db_name="positions")
 
 network_params = {
@@ -68,7 +76,7 @@ network_params = {
 network = network_class(
     "network", (species, positions), module_kwargs=network_params
 )
-henergy = targets.HEnergyNode("HEnergy", network, db_name="energies", first_is_interacting=True)
+henergy = targets.HEnergyNode("HEnergy", network, db_name="energy", first_is_interacting=True)
 
 force = physics.GradientNode(
     "forces", (henergy, positions), sign=-1, db_name="forces"
@@ -165,20 +173,15 @@ training_modules, controller, metric_tracker = setup_training(
 )
 
 # ----- Load data -----
-database = hippynn.databases.NPZDatabase(
-    file=data_src,
-    seed=seed,  # Random seed for spliting data
+iterable = ase.io.read(data_src, index=slice(0, data_size))
+database = hippynn.databases.AseDatabaseIterable(
+    iterable=iterable,
+    seed=seed,  
     pin_memory=False,
-    **db_info,  # Adds the inputs and targets db_namesnames from the model as things to load
+    test_size=0.1,
+    valid_size=0.1,
+    **db_info, 
 )
-
-if len(database) < size_test_set + size_train_val_set:
-    raise ValueError(f"Size of database {len(database)} not enough for test split of size {size_test_set} and train/val set {size_train_val_set}.")
-
-database.make_explicit_split("test", torch.arange(size_test_set)) # ensures test set will always be the same
-database.make_random_split("train", int(0.9 * size_train_val_set))
-database.make_random_split("valid", int(0.1 * size_train_val_set))
-database.split_the_rest("unused")
 
 database.send_to_device(device)
 
