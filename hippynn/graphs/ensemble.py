@@ -72,11 +72,6 @@ def make_ensemble(
     graphs: List[GraphModule] = get_graphs(models, weights_only=weights_only)
 
     # Phase 1: Figure out what the ensemble will look like.
-    if inputs == "auto":
-        inputs: set[str] = identify_inputs(graphs)
-        if not quiet:
-            print("Identified input quantities:", inputs)
-
     if targets == "auto":
         targets: set[str] = identify_targets(graphs)
         if not quiet:
@@ -86,6 +81,16 @@ def make_ensemble(
         raise ValueError(f"Targets cannot be empty! (Got {targets!r})")
 
     target_classes: Dict[str, List[Node]] = collate_targets(graphs, targets)
+
+    if inputs == "auto":
+        inputs: set[str] = identify_inputs(graphs)
+        if not quiet:
+            print("Identified input quantities:", inputs)
+
+    if not inputs:
+        raise ValueError(f"Targets cannot be empty! (Got {targets!r})")
+
+
     input_classes: Dict[str, List[Node]] = collate_inputs(graphs, inputs)
 
 
