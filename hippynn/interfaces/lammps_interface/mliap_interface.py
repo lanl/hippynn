@@ -67,12 +67,24 @@ class MLIAPInterface(MLIAPUnified):
 
         if extra_properties is not None:
             self.property_names = [f"{key}" for key in extra_properties]
+
+        
+
         # Build the calculator
         #if self.is_ensemble is True:
         self.rcutfac, self.species_set, self.graph = setup_LAMMPS_graph(energy_node, extra_properties, is_ensemble)
         
         #if extra_properties is not None:
         #    self.rcutfac, self.species_set, self.graph_with_extra_properties = setup_LAMMPS_graph(energy_node, extra_properties, is_ensemble)
+
+        self.input_flag = False
+
+        self.inputs = None
+
+        self.atom_energy = None
+        self.total_energy= None 
+        self.fij = None
+        self.properties = None  
 
         self.nparams = sum(p.nelement() for p in self.graph.parameters())
         self.compute_dtype = compute_dtype
@@ -189,12 +201,11 @@ class MLIAPInterface(MLIAPUnified):
 
         return global_grad_in_features, *rest_grad_in
 
-    def compute_extra_property(self, data, lammps_property_name: str, index: int):
+    def setup_graph_call(self, data):
         """
-        :param lammps_property_name: Property name coming from lammps
-        :param: index: Index of the property name for lammps
+        Calling the graph once such that inits can be set to graphs
+        
         """
-        #general_property = extra_properties[property_name]
 
         if self.using_kokkos:
             raise ValueError("Kokkos not yet implemented")
@@ -224,28 +235,9 @@ class MLIAPInterface(MLIAPUnified):
         if self.distance_unit is not None:
             rij = self.distance_unit * rij
         # note your sign for rij might need to be +1 or -1, depending on how your implementation works
-        inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
-
-        atom_energy, total_energy, fij, *general_property = self.graph(*inputs)
-
-        if not self.using_kokkos:
-            for i, property_name in enumerate(self.property_names):
-                if lammps_property_name == property_name:
-                    data.set_extra_property(index, general_property[i].detach().to(return_device).numpy().astype(np.double))
-                    break
-            else:
-                raise ValueError("Did not find given property")
-            #general_property = general_property.squeeze(1).detach().to(return_device)
-            #data.general_property = general_property.numpy().astype(np.double)
-        else:
-            raise ValueError("Kokkos not yet implemented")
-            # view to data.eatoms using pytorch, and write into the view.
-            #eatoms = torch.as_tensor(data.eatoms, device=return_device)
-            
-            #general_property = torch.as_tensor(general_property, device=return_device ) 
-            #eatoms.copy_(atom_energy)
-        self.mliap_data = None  # unhook data, see hooking above.
-
+        self.inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
+        
+        self.atom_energy, self.total_energy, self.fij, self.properties = self.graph(*inputs) #[:3]
 
     def compute_forces(self, data):
         """
@@ -253,45 +245,15 @@ class MLIAPInterface(MLIAPUnified):
         :return None
         This function writes results to the input `data`.
         """
-        
-        #print("in compute forces In lammps_interface/mliap_interface.py :: type(energy_node)", type(self.energy_node))
-        # If there are no local atoms, do nothing
-        nlocal = self.as_tensor(data.nlistatoms)
-        if nlocal.item() <= 0:
-            return
-
-        self.mliap_data = data  # hook data onto the (persistent) object for, e.g., comms hooks. This is needed!
-        self.perform_setup()
-
-        elems = self.as_tensor(data.elems).type(torch.int64).reshape(1, data.ntotal)
-        z_vals = self.species_set[elems + 1]
-        npairs = data.npairs
-
-        if npairs > 0:
-            pair_i = self.as_tensor(data.pair_i).type(torch.int64)
-            pair_j = self.as_tensor(data.pair_j).type(torch.int64)
-            rij = self.as_tensor(data.rij).type(self.compute_dtype)
-        else:
-            pair_i = self.empty_tensor(0).type(torch.int64)
-            pair_j = self.empty_tensor(0).type(torch.int64)
-            rij = self.empty_tensor([0, 3]).type(self.compute_dtype)
-
-        if self.distance_unit is not None:
-            rij = self.distance_unit * rij
-
-        # note your sign for rij might need to be +1 or -1, depending on how your implementation works
-        inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
-        atom_energy, total_energy, fij, extra = self.graph(*inputs) #[:3]
-
 
         # convert units
         if self.energy_unit is not None:
-            atom_energy = self.energy_unit * atom_energy
-            total_energy = self.energy_unit * total_energy
-            fij = self.energy_unit * fij
+            self.atom_energy = self.energy_unit * self.atom_energy
+            self.total_energy = self.energy_unit * self.total_energy
+            self.fij = self.energy_unit * self.fij
 
         if self.distance_unit is not None:
-            fij = fij / self.distance_unit
+            self.fij = self.fij / self.distance_unit
 
         # Write data back. Kokkos and non-kokkos interfaces have diverged, so slightly different paths.
         if self.using_kokkos:
@@ -299,18 +261,12 @@ class MLIAPInterface(MLIAPUnified):
         else:
             return_device = "cpu"
 
-        #print("In lammps_interface/mliap_interface.py :: atom_energy:", atom_energy)
-        #print("In lammps_interface/mliap_interface.py :: atom_energy.shape", atom_energy.shape)
-        #if self.is_ensemble is True:
-        #atom_energy = atom_energy[0].squeeze(1).detach().to(return_device) # added
-        #else:
-        #print("In lammps_interface/mliap_interface.py :: type(atom_energy)", type(atom_energy))
-        atom_energy = atom_energy.squeeze(1).detach().to(return_device)
-        total_energy = total_energy.detach().to(return_device)
-        data.energy = total_energy.item()
+        atom_energy = self.atom_energy.squeeze(1).detach().to(return_device)
+        total_energy = self.total_energy.detach().to(return_device)
+        data.energy = self.total_energy.item()
 
         f = self.as_tensor(data.f)
-        fij = fij.type(f.dtype).detach().to(return_device)
+        fij = self.fij.type(f.dtype).detach().to(return_device)
 
         if not self.using_kokkos:
             # write back to data.eatoms directly.
@@ -333,6 +289,31 @@ class MLIAPInterface(MLIAPUnified):
                 else:
                     data.update_pair_forces_gpu(fij)
 
+        self.mliap_data = None  # unhook data, see hooking above.
+
+    def compute_extra_property(self, data, lammps_property_name: str, index: int):
+        """
+        :param lammps_property_name: Property name coming from lammps
+        :param: index: Index of the property name for lammps
+        """
+        #general_property = extra_properties[property_name]
+
+        if not self.using_kokkos:
+            for i, property_name in enumerate(self.property_names):
+                if lammps_property_name == property_name:
+                    data.set_extra_property(index, self.properties[i].detach().to(return_device).numpy().astype(np.double))
+                    break
+            else:
+                raise ValueError("Did not find given property")
+            #general_property = general_property.squeeze(1).detach().to(return_device)
+            #data.general_property = general_property.numpy().astype(np.double)
+        else:
+            raise ValueError("Kokkos not yet implemented")
+            # view to data.eatoms using pytorch, and write into the view.
+            #eatoms = torch.as_tensor(data.eatoms, device=return_device)
+            
+            #general_property = torch.as_tensor(general_property, device=return_device ) 
+            #eatoms.copy_(atom_energy)
         self.mliap_data = None  # unhook data, see hooking above.
 
     def __getstate__(self):
