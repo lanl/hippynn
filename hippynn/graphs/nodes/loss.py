@@ -117,7 +117,13 @@ class _WeightedCompareLoss(SingleNode):
             
         true = node.true
         predicted = node.pred
-        weight = weight.true
+
+        if not weight.is_in_loss_graph():
+            if isinstance(weight, InputNode):
+                weight = weight.true  # Weight is pre-defined in database
+            else:
+                weight = weight.pred  # Weight is dynamically calculated
+
         return cls(predicted, true, weight)
 
 class WeightedMSELoss(_WeightedCompareLoss):

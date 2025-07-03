@@ -2,7 +2,7 @@ import collections
 import glob
 
 from ..tools import device_fallback, active_directory
-from . import GraphModule, replace_node, get_subgraph
+from . import GraphModule, replace_node, get_subgraph, find_relatives
 
 from .indextypes import get_reduced_index_state, index_type_coercion
 from .indextypes.reduce_funcs import db_state_of
@@ -82,8 +82,12 @@ def make_ensemble(
         if not quiet:
             print("Identified output quantities:", targets)
 
-    input_classes: Dict[str, List[Node]] = collate_inputs(graphs, inputs)
+    if not targets:
+        raise ValueError(f"Targets cannot be empty! (Got {targets!r})")
+
     target_classes: Dict[str, List[Node]] = collate_targets(graphs, targets)
+    input_classes: Dict[str, List[Node]] = collate_inputs(graphs, inputs)
+
 
     ensemble_info = make_ensemble_info(input_classes, target_classes, quiet=quiet)
 
@@ -236,16 +240,12 @@ def collate_targets(models: List[GraphModule], targets: List[str]) -> Dict[str, 
     """
     target_classes = collections.defaultdict(list)
 
-    for m in models:
-        for n in m.nodes_to_compute:
-            if not hasattr(n, "db_name"):
-                continue
-            if n.db_name is None:
-                continue
-            if n.db_name in targets:
-                target_classes[n.db_name].append(n)
+    all_nodes = [n for model in models for n in model.nodes_to_compute]
 
-    target_classes = dict(target_classes.items())
+    target_classes = {}  # dict
+    for t in targets:
+        found_nodes = find_relatives(all_nodes, lambda n: n.name == t or n.db_name == t)
+        target_classes[t] = list(found_nodes)
 
     return target_classes
 

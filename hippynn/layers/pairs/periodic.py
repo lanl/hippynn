@@ -298,7 +298,7 @@ class PeriodicPairIndexer(_PairIndexer):
             int_offsets = combinator[nb_image]
             nonself_pairs = torch.logical_or(int_offsets.to(torch.bool).any(dim=1), torch.ne(nb_p1, nb_p2))
 
-            # Compute indices of considered pairs relative to MolAtom format.
+            # Compute indices of considered pairs relative to SysAtom format.
             pair_first = atom_index[nb_sys, nb_p1]
             del nb_p1
             pair_second = atom_index[nb_sys, nb_p2]
@@ -320,7 +320,7 @@ class PeriodicPairIndexer(_PairIndexer):
             del int_offsets, close_pairs
             # ## End expensive part ## #
 
-            # This converts the atom index from an index that counts blank atoms (MolAtom) to one that doesn't;
+            # This converts the atom index from an index that counts blank atoms (SysAtom) to one that doesn't;
             # Afterwards it indexes the flat array of atoms in the batch. (Atoms format)
             pair_first = inv_real_atoms[pair_first]
             pair_second = inv_real_atoms[pair_second]

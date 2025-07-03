@@ -4,6 +4,22 @@ import torch
 import hippynn
 
 
+
+from pathlib import Path
+MODEL_DIR = Path(__file__).parents[2] / "collected_models"
+
+
+def xfail_if_no_models(func):
+    if MODEL_DIR.exists():
+        wrapper = lambda f: f
+    else:
+        wrapper = pytest.mark.xfail(strict=False)
+    return wrapper(func)
+
+ignore_relocation = pytest.mark.filterwarnings("ignore:.*HIPPYNN_DEPRECATION_WARNINGS=ignore*.")
+ignore_weights_only_warning = pytest.mark.filterwarnings("ignore:.*weights_only=False*.")
+ignore_cusp_warning = pytest.mark.filterwarnings("ignore:.*'cusp_reg' parameter*.")
+
 @pytest.fixture
 def network_parameters():
     return {

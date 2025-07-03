@@ -1,26 +1,13 @@
-import os
-from pathlib import Path
 import pytest
 
 import hippynn
 
-
 from test_run_nodes import sensitivity_warning_supression
 
-MODEL_DIR = Path(__file__).parents[2] / "collected_models"
+from conftest import xfail_if_no_models, MODEL_DIR
+from conftest import ignore_cusp_warning, ignore_relocation, ignore_weights_only_warning
 
 
-def xfail_if_no_models(func):
-    if MODEL_DIR.exists():
-        wrapper = lambda f: f
-    else:
-        wrapper = pytest.mark.xfail(strict=False)
-    return wrapper(func)
-
-
-ignore_relocation = pytest.mark.filterwarnings("ignore:.*HIPPYNN_DEPRECATION_WARNINGS=ignore*.")
-ignore_weights_only_warning = pytest.mark.filterwarnings("ignore:.*weights_only=False*.")
-ignore_cusp_warning = pytest.mark.filterwarnings("ignore:.*'cusp_reg' parameter*.")
 
 
 @ignore_relocation
@@ -31,7 +18,7 @@ def test_load_old():
     from hippynn.tools import active_directory
     from hippynn.experiment import load_checkpoint_from_cwd
 
-    location = Path("./quad0_b512_int1_p5_GPU0_seed363144")
+    location = "./quad0_b512_int1_p5_GPU0_seed363144"
     with active_directory(MODEL_DIR / location, create=False):
         check = load_checkpoint_from_cwd(map_location="cpu")
 
