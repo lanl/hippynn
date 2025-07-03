@@ -189,12 +189,17 @@ class MLIAPInterface(MLIAPUnified):
 
         return global_grad_in_features, *rest_grad_in
 
-    def compute_extra_properties(self, data, lammps_property_name: str, index: int):
+    def compute_extra_property(self, data, lammps_property_name: str, index: int):
         """
         :param lammps_property_name: Property name coming from lammps
         :param: index: Index of the property name for lammps
         """
         #general_property = extra_properties[property_name]
+
+        if self.using_kokkos:
+            raise ValueError("Kokkos not yet implemented")
+        else:
+            return_device = "cpu"
 
         nlocal = self.as_tensor(data.nlistatoms)
         if nlocal.item() <= 0:
@@ -224,10 +229,12 @@ class MLIAPInterface(MLIAPUnified):
         atom_energy, total_energy, fij, *general_property = self.graph(*inputs)
 
         if not self.using_kokkos:
-            for i, property_name in range(len(self.property_names)):
+            for i, property_name in enumerate(self.property_names):
                 if lammps_property_name == property_name:
-                    data.set_extra_property(index, general_property[i].detach().to(return_device).numpy().astype(np.double)) 
+                    data.set_extra_property(index, general_property[i].detach().to(return_device).numpy().astype(np.double))
                     break
+            else:
+                raise ValueError("Did not find given property")
             #general_property = general_property.squeeze(1).detach().to(return_device)
             #data.general_property = general_property.numpy().astype(np.double)
         else:
