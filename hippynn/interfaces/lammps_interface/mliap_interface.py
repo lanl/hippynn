@@ -237,7 +237,7 @@ class MLIAPInterface(MLIAPUnified):
         # note your sign for rij might need to be +1 or -1, depending on how your implementation works
         self.inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
         
-        self.atom_energy, self.total_energy, self.fij, self.properties = self.graph(*inputs) #[:3]
+        self.atom_energy, self.total_energy, self.fij, *self.properties = self.graph(*self.inputs) #[:3]
 
     def compute_forces(self, data):
         """
@@ -246,7 +246,7 @@ class MLIAPInterface(MLIAPUnified):
         This function writes results to the input `data`.
         """
 
-        setup_graph_call(data)
+        self.setup_graph_call(data)
 
         # convert units
         if self.energy_unit is not None:
@@ -277,15 +277,15 @@ class MLIAPInterface(MLIAPUnified):
             #print("type of atom_energy: ", type(atom_energy))
             #print("atom_energy shape: ", atom_energy.shape)
             data.eatoms = atom_energy.numpy().astype(np.double)
-            #data.eatoms_stdev = atom_energy_std.numpy().astype(np.double)
+            data.eatoms_stdev = self.properties[0].squeeze(1).detach().to(return_device).numpy().astype(np.double)
             #print("data.eatoms:", data.eatoms)
-            if npairs > 0:
+            if data.npairs > 0:
                 data.update_pair_forces(fij)
         else:
             # view to data.eatoms using pytorch, and write into the view.
             eatoms = torch.as_tensor(data.eatoms, device=return_device)
             eatoms.copy_(atom_energy)
-            if npairs > 0:
+            if data.npairs > 0:
                 if return_device == "cpu":
                     data.update_pair_forces_cpu(fij)
                 else:
@@ -299,6 +299,11 @@ class MLIAPInterface(MLIAPUnified):
         :param: index: Index of the property name for lammps
         """
         #general_property = extra_properties[property_name]
+
+        if self.using_kokkos:
+            return_device = elems.device
+        else:
+            return_device = "cpu"
 
         if not self.using_kokkos:
             for i, property_name in enumerate(self.property_names):
