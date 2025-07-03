@@ -246,6 +246,8 @@ class MLIAPInterface(MLIAPUnified):
         This function writes results to the input `data`.
         """
 
+        setup_graph_call(data)
+
         # convert units
         if self.energy_unit is not None:
             self.atom_energy = self.energy_unit * self.atom_energy
