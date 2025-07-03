@@ -32,6 +32,7 @@ pair_coeff	* * Al
 compute  eatom all pe/atom
 compute  eatom_stdev all peStdev/atom
 compute  energy all reduce sum c_eatom
+compute  genralized_property all extraProperty/atom name energy_std dim 1
 
 compute  satom all stress/atom NULL
 compute  str all reduce sum c_satom[1] c_satom[2] c_satom[3]
@@ -51,7 +52,11 @@ dump 4 all custom 1 forces.xyz fx fy fz
 dump_modify 4 sort id 
 dump_modify 4 first yes
 
-dump 3 all custom 1 energy_atoms_uq.xyz id c_eatom c_eatom_stdev
+#dump 3 all custom 1 energy_atoms_uq.xyz id c_eatom c_eatom_stdev
+#dump_modify 4 sort id 
+#dump_modify 4 first yes
+
+dump 3 all custom 1001 eatoms_uq.xyz id c_generalized_property[1]
 dump_modify 4 sort id 
 dump_modify 4 first yes
  
