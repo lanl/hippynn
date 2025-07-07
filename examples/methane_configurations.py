@@ -1,21 +1,26 @@
 """
-This script is designed to accompany 
-Allen, A. E. A., Shinkle, E., Bujack, R., & Lubbers, N. (2025). Optimal 
-invariant bases for atomistic machine learning. arXiv preprint arXiv:2503.23515. 
+This script is designed to accompany
+Allen, A. E. A., Shinkle, E., Bujack, R., & Lubbers, N. (2025). Optimal
+invariant bases for atomistic machine learning. arXiv preprint arXiv:2503.23515.
 https://arxiv.org/abs/2503.23515
+
+In the above paper, a methane dataset of ~7M configurations is used to test the expressive
+capacity of different HIP-NN variants on different sizes of data. We find that for small 
+dataset sizes, different HIP-NN architecture variants produce similar performance. As more 
+data becomes available, HIP-HOP-NN is able to learn far more detail about geometries 
+in the environment, significantly surpassing HIP-NN-TS and HIP-NN. (See Figure 4.)
 
 BEFORE RUNNING:
 1. Download the file methane.extxyz.gz from https://archive.materialscloud.org/records/kz78r-6nx43
 2. Unzip the file: $ gunzip methane.extxyz.gz
-3. Place the resulting file in a folder called datasets/ at the same level as hippynn/ 
+3. Place the resulting file in a folder called datasets/ at the same level as hippynn/
    or change ``data_src`` below
 
-NOTE: The .extxyz file will be very slow to read, so this script only uses 100,000
-configurations. You can adjust this with the ``data_size`` variable. If you want to 
-run with the full ~7M configurations more than one time, I strongly suggest to convert
-the file into another format (eg., .npz) that will be faster to read in repeatedly.
+NOTE: The methane.extxyz file will be very slow to read, so this script only uses 100,000
+configurations. You can adjust this with the ``data_size`` variable. If you want to
+read the methane.extxyz file repeatedly, I strongly suggest to first convert it into
+another format (eg., .npz) that will be faster to read.
 """
-
 
 import shutil
 import os
@@ -47,12 +52,12 @@ seed = 2025
 data_src = Path(__file__).parents[2] / "datasets" / "methane.extxyz"
 model_save_folder = Path(__file__).parents[1] / Path("TEST_METHANE_MODEL")
 
-n_epochs = 10_000 # reduce to dececrease the run time of the script
+n_epochs = 10_000  # reduce to dececrease the run time of the script
 
 # network_class = Hipnn # Original HIP-NN
 # network_class = HipnnVec # HIP-NN-TS, l=1
 # network_class = HipnnQuad # HIP-NN-TS, l=2
-network_class = HipHopnn # HIP-HOP model with defaults with n = 4 and l = 3
+network_class = HipHopnn  # HIP-HOP model with defaults with n = 4 and l = 3
 
 data_size = 100_000
 
@@ -64,23 +69,21 @@ positions = inputs.PositionsNode(name="positions", db_name="positions")
 
 network_params = {
     "possible_species": [0, 1, 6],
-    "n_features": 32,  
+    "n_features": 32,
     "n_sensitivities": 20,
     "dist_soft_min": 0.4,
     "dist_soft_max": 9.0,
     "dist_hard_max": 10.3,  # diagonal of 6x6x6 cube
     "n_interaction_layers": 1,
-    "n_atom_layers": 3,  
+    "n_atom_layers": 3,
 }
 
-network = network_class(
-    "network", (species, positions), module_kwargs=network_params
+network = network_class("network", (species, positions), module_kwargs=network_params)
+henergy = targets.HEnergyNode(
+    "HEnergy", network, db_name="energy", first_is_interacting=True
 )
-henergy = targets.HEnergyNode("HEnergy", network, db_name="energy", first_is_interacting=True)
 
-force = physics.GradientNode(
-    "forces", (henergy, positions), sign=-1, db_name="forces"
-)
+force = physics.GradientNode("forces", (henergy, positions), sign=-1, db_name="forces")
 
 # define loss quantities
 mse_force = loss.MSELoss.of_node(force)
@@ -176,11 +179,11 @@ training_modules, controller, metric_tracker = setup_training(
 iterable = ase.io.read(data_src, index=slice(0, data_size))
 database = hippynn.databases.AseDatabaseIterable(
     iterable=iterable,
-    seed=seed,  
+    seed=seed,
     pin_memory=False,
     test_size=0.1,
     valid_size=0.1,
-    **db_info, 
+    **db_info,
 )
 
 database.send_to_device(device)
@@ -202,4 +205,3 @@ with active_directory(model_save_folder):
         store_every=0,
         quiet=False,
     )
-
