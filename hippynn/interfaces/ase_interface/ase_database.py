@@ -22,6 +22,7 @@ mtime : time (float)
 dipole : molecular dipole (3) vector
 """
 import os
+from pathlib import Path
 
 import numpy as np
 from ase.io import read, iread
@@ -33,74 +34,15 @@ from typing import Union
 from typing import List
 import hippynn.tools
 
-class AseDatabase(Database, Restartable):
-    """
-    Database stored as ase database file(s) in a directory.
 
-    :param directory: directory path where the ase database(s) is stored
-    :param name: name or list of names for files for ase databases.
-
-    This function loads an ase database(s) ({name}.json/.db) OR ({{name}.extxyz,.xyz})
-    variable db_name including all inputs and targets.
-
-    filenames should end with .json, .db, .extxyz, and .xyz, etc; Anything parsable by ase.io.load
-
-
-    Other arguments: See ``Database``.
-
-    See: https://databases.fysik.dtu.dk/ase/ase/db/db.html for documentation
-        on typical columns present in ase database
-    """
-
-    def __init__(self, directory: str, name: Union[str, List[str]], inputs, targets, *args, quiet=False, allow_unfound=False, **kwargs):
-
-        arr_dict = self.load_arrays(directory, name, inputs, targets, quiet=quiet, allow_unfound=allow_unfound)
-        super().__init__(arr_dict, inputs, targets, *args, **kwargs, quiet=quiet, allow_unfound=allow_unfound)
-
-        self.restarter = self.make_restarter(
-            directory,
-            name,
-            inputs,
-            targets,
-            *args,
-            **kwargs,
-            quiet=quiet,
-            allow_unfound=allow_unfound,
-        )
-
-    def load_arrays(self, directory, filename, inputs, targets, quiet=False, allow_unfound=False):
-        """
-        load arrays load ase database into hippynn database arrays
-
-        :param directory: directory where database is stored
-        :param filename: file or path to file from directory
-        :param inputs:
-        :param targets:
-        :param quiet:
-        :param allow_unfound:
-        :return:
-        """
-
+class AseMethods(object):
+    def read_from_iterable(self, iterable, inputs, targets, quiet=False, allow_unfound=False):
         var_list = inputs + targets
-        try:
-            if isinstance(filename, str):
-                db = list(progress_bar(iread(directory+filename,index=":"), desc='configs'))#read(directory + filename, index=":")
-            elif isinstance(filename, (list, np.ndarray)):
-                db = []
-                for name in progress_bar(filename, desc='files'):
-                    temp_db = list(progress_bar(iread(directory + name, index=":"), desc='configs'))
-                    db += temp_db
-        except FileNotFoundError as fee:
-            raise FileNotFoundError(
-                "ERROR: Couldn't find {} ase xyz database."
-                'A solution is to explicitly specify "path" in database_params '.format(directory + filename)
-            ) from fee
-        if not quiet:
-            print("ASE Database found")
+
         record_list = []
         max_n_atom = 0
         max_atoms_record = None
-        for row in db:
+        for row in iterable:
             result_dict = row.__dict__
             for k, v in result_dict["arrays"].items():
                 result_dict[k] = v
@@ -190,3 +132,54 @@ class AseDatabase(Database, Restartable):
             print({k: v.dtype for k, v in arr_dict.items()})
 
         return arr_dict
+    
+
+class AseDatabase(AseMethods, Database, Restartable): 
+    def __init__(self, directory: str, name: Union[str, List[str]], inputs, targets, *args, quiet=False, allow_unfound=False, **kwargs):
+
+        arr_dict = self.load_arrays(directory, name, inputs, targets, quiet=quiet, allow_unfound=allow_unfound)
+        super().__init__(arr_dict, inputs, targets, *args, **kwargs, quiet=quiet, allow_unfound=allow_unfound)
+
+        self.restarter = self.make_restarter(
+            directory,
+            name,
+            inputs,
+            targets,
+            *args,
+            **kwargs,
+            quiet=quiet,
+            allow_unfound=allow_unfound,
+        )
+
+    def load_arrays(self, directory, filename, inputs, targets, quiet=False, allow_unfound=False):
+        directory = Path(directory)
+        try:
+            if isinstance(filename, (str, Path)):
+                filename = Path(filename)
+                db = list(progress_bar(iread(directory/filename,index=":"), desc='configs'))#read(directory + filename, index=":")
+            elif isinstance(filename, (list, np.ndarray)):
+                db = []
+                for name in progress_bar(filename, desc='files'):
+                    name = Path(name)
+                    temp_db = list(progress_bar(iread(directory/name, index=":"), desc='configs'))
+                    db += temp_db
+        except FileNotFoundError as fee:
+            raise FileNotFoundError(
+                "ERROR: Couldn't find {} ase xyz database."
+                'A solution is to explicitly specify "path" in database_params '.format(directory/filename)
+            ) from fee
+        if not quiet:
+            print("ASE Database found")
+
+        return self.read_from_iterable(db, inputs, targets, quiet=quiet, allow_unfound=allow_unfound)
+
+
+class AseDatabaseIterable(AseMethods, Database):
+    def __init__(self, iterable, inputs, targets, *args, quiet=False, allow_unfound=False, **kwargs):
+        arr_dict = self.load_arrays(iterable, inputs, targets, quiet=quiet, allow_unfound=allow_unfound)
+        super().__init__(arr_dict, inputs, targets, *args, **kwargs, quiet=quiet, allow_unfound=allow_unfound)
+
+    def load_arrays(self, iterable, inputs, targets, quiet=False, allow_unfound=False):
+        total = len(iterable) if hasattr(iterable, '__len__') else None
+        db = list(progress_bar(iterable, desc='configs', total=total))
+        return self.read_from_iterable(db, inputs, targets, quiet=quiet, allow_unfound=allow_unfound)

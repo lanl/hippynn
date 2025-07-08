@@ -32,6 +32,9 @@ Improvements:
 - Adjust the Database loader so that data is immediately transformed into
   PyTorch Tensors, rather than performing this transformation as part of 
   creating the data splits. 
+- New variant of ``AseDatabase`` named ``AseDatabaseIterable``. Accepts an 
+  iterable of ``ase.Atoms`` objects (e.g., the result of ``ase.io.read`` 
+  or ``ase.io.iread``).
 
 
 Bug Fixes:
