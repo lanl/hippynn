@@ -130,6 +130,7 @@
 <span class="sd">dipole : molecular dipole (3) vector</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ase.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">read</span><span class="p">,</span> <span class="n">iread</span>
@@ -141,78 +142,19 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">hippynn.tools</span>
 
-<div class="viewcode-block" id="AseDatabase">
-<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.ase_database.html#hippynn.interfaces.ase_interface.AseDatabase">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">AseDatabase</span><span class="p">(</span><span class="n">Database</span><span class="p">,</span> <span class="n">Restartable</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Database stored as ase database file(s) in a directory.</span>
 
-<span class="sd">    :param directory: directory path where the ase database(s) is stored</span>
-<span class="sd">    :param name: name or list of names for files for ase databases.</span>
-
-<span class="sd">    This function loads an ase database(s) ({name}.json/.db) OR ({{name}.extxyz,.xyz})</span>
-<span class="sd">    variable db_name including all inputs and targets.</span>
-
-<span class="sd">    filenames should end with .json, .db, .extxyz, and .xyz, etc; Anything parsable by ase.io.load</span>
-
-
-<span class="sd">    Other arguments: See ``Database``.</span>
-
-<span class="sd">    See: https://databases.fysik.dtu.dk/ase/ase/db/db.html for documentation</span>
-<span class="sd">        on typical columns present in ase database</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-
-        <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_arrays</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">restarter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_restarter</span><span class="p">(</span>
-            <span class="n">directory</span><span class="p">,</span>
-            <span class="n">name</span><span class="p">,</span>
-            <span class="n">inputs</span><span class="p">,</span>
-            <span class="n">targets</span><span class="p">,</span>
-            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-            <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span>
-            <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">,</span>
-        <span class="p">)</span>
-
-<div class="viewcode-block" id="AseDatabase.load_arrays">
-<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.ase_database.html#hippynn.interfaces.ase_interface.AseDatabase.load_arrays">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        load arrays load ase database into hippynn database arrays</span>
-
-<span class="sd">        :param directory: directory where database is stored</span>
-<span class="sd">        :param filename: file or path to file from directory</span>
-<span class="sd">        :param inputs:</span>
-<span class="sd">        :param targets:</span>
-<span class="sd">        :param quiet:</span>
-<span class="sd">        :param allow_unfound:</span>
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
+<div class="viewcode-block" id="AseMethods">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.ase_database.html#hippynn.interfaces.ase_interface.AseMethods">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AseMethods</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="AseMethods.read_from_iterable">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.ase_database.html#hippynn.interfaces.ase_interface.AseMethods.read_from_iterable">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_from_iterable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">var_list</span> <span class="o">=</span> <span class="n">inputs</span> <span class="o">+</span> <span class="n">targets</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">db</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">progress_bar</span><span class="p">(</span><span class="n">iread</span><span class="p">(</span><span class="n">directory</span><span class="o">+</span><span class="n">filename</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;configs&#39;</span><span class="p">))</span><span class="c1">#read(directory + filename, index=&quot;:&quot;)</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
-                <span class="n">db</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">progress_bar</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;files&#39;</span><span class="p">):</span>
-                    <span class="n">temp_db</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">progress_bar</span><span class="p">(</span><span class="n">iread</span><span class="p">(</span><span class="n">directory</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;configs&#39;</span><span class="p">))</span>
-                    <span class="n">db</span> <span class="o">+=</span> <span class="n">temp_db</span>
-        <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">fee</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
-                <span class="s2">&quot;ERROR: Couldn&#39;t find </span><span class="si">{}</span><span class="s2"> ase xyz database.&quot;</span>
-                <span class="s1">&#39;A solution is to explicitly specify &quot;path&quot; in database_params &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">directory</span> <span class="o">+</span> <span class="n">filename</span><span class="p">)</span>
-            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">fee</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ASE Database found&quot;</span><span class="p">)</span>
+
         <span class="n">record_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">max_n_atom</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">max_atoms_record</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">db</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
             <span class="n">result_dict</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="vm">__dict__</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">result_dict</span><span class="p">[</span><span class="s2">&quot;arrays&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">result_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
@@ -302,6 +244,69 @@
             <span class="nb">print</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">dtype</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">arr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
 
         <span class="k">return</span> <span class="n">arr_dict</span></div>
+</div>
+
+    
+
+<div class="viewcode-block" id="AseDatabase">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.ase_database.html#hippynn.interfaces.ase_interface.AseDatabase">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AseDatabase</span><span class="p">(</span><span class="n">AseMethods</span><span class="p">,</span> <span class="n">Database</span><span class="p">,</span> <span class="n">Restartable</span><span class="p">):</span> 
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_arrays</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">restarter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_restarter</span><span class="p">(</span>
+            <span class="n">directory</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="n">inputs</span><span class="p">,</span>
+            <span class="n">targets</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span>
+            <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="AseDatabase.load_arrays">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.ase_database.html#hippynn.interfaces.ase_interface.AseDatabase.load_arrays">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">directory</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="n">db</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">progress_bar</span><span class="p">(</span><span class="n">iread</span><span class="p">(</span><span class="n">directory</span><span class="o">/</span><span class="n">filename</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;configs&#39;</span><span class="p">))</span><span class="c1">#read(directory + filename, index=&quot;:&quot;)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+                <span class="n">db</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">progress_bar</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;files&#39;</span><span class="p">):</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">temp_db</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">progress_bar</span><span class="p">(</span><span class="n">iread</span><span class="p">(</span><span class="n">directory</span><span class="o">/</span><span class="n">name</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;configs&#39;</span><span class="p">))</span>
+                    <span class="n">db</span> <span class="o">+=</span> <span class="n">temp_db</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">fee</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                <span class="s2">&quot;ERROR: Couldn&#39;t find </span><span class="si">{}</span><span class="s2"> ase xyz database.&quot;</span>
+                <span class="s1">&#39;A solution is to explicitly specify &quot;path&quot; in database_params &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">directory</span><span class="o">/</span><span class="n">filename</span><span class="p">)</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">fee</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ASE Database found&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_from_iterable</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AseDatabaseIterable">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.ase_database.html#hippynn.interfaces.ase_interface.AseDatabaseIterable">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AseDatabaseIterable</span><span class="p">(</span><span class="n">AseMethods</span><span class="p">,</span> <span class="n">Database</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_arrays</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AseDatabaseIterable.load_arrays">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.ase_interface.ase_database.html#hippynn.interfaces.ase_interface.AseDatabaseIterable.load_arrays">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterable</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">iterable</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="s1">&#39;__len__&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">db</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">progress_bar</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;configs&#39;</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="n">total</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_from_iterable</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span></div>
 </div>
 
 </pre></div>
