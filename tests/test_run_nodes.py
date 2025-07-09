@@ -4,6 +4,7 @@ import torch
 import hippynn
 from conftest import ignore_sensitivity_warning
 
+
 @pytest.fixture
 def example_all_target_nodes(neural_network_node, bond_parameters):
     from hippynn.graphs import inputs, targets, physics
@@ -28,7 +29,6 @@ def example_all_target_nodes(neural_network_node, bond_parameters):
     quadrupole.index_state = hippynn.graphs.IdxType.Systems  # hack to avoid db_form conversion
 
     return all_targets
-
 
 
 

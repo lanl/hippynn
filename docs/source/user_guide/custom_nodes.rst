@@ -1,3 +1,11 @@
+
+.. comment::
+
+   This file is tied directly to the contents of the file:
+      /tests/test_node_classes.py
+   To edit what appears here, edit that file.
+   Remember to re-run the tests to make sure the example code functions.
+
 Creating Custom Node Types
 ==========================
 
@@ -14,19 +22,28 @@ The very basics
 The basic operation of creating a new hippynn node is not highly complex.
 Let's assume we have a module FooModule that implements some pytorch operations,
 and takes some keyword arguments in constructing that module.
-A simple node could be built as follows::
+A simple node could be built as follows:
 
-    from hippynn.graphs.nodes.base import SingleNode
-    from hippynn.graphs import IdxType
-    class FooNode(SingleNode):
-        _index_state = IdxType.Atom
-        def __init__(self,name,parents,module,**kwargs):
-            super().__init__(name,parents,module=module,**kwargs)
+.. literalinclude:: ../../../tests/test_node_classes.py
+   :language: python
+   :pyobject: test_create_simple_node_class
+   :dedent: 4
+   :start-after: # begin doc snippet
+   :end-before: # end doc snippet
+      
 
 At a basic level, that's it. However, the parents of this node are completely unspecified;
 there is no information about what tensors should go into the FooModule. Note that at this level,
 the module itself is not created when building the node, and a suitable pytorch module
-must be passed in.
+must be passed in. We could thus create this node using something like:
+
+.. literalinclude:: ../../../tests/test_node_classes.py
+   :language: python
+   :pyobject: test_create_simple_node_class
+   :dedent: 4
+   :start-after: # begin usage snippet
+   :end-before: # end usage snippet
+
 
 A MultiNode
 -----------
@@ -36,41 +53,44 @@ module that outputs several outputs. Specify the names of the outputs in the
 ``_output_names`` attribute as a tuple of strings. Additionally, you can
 specify the ``IdxType`` of the outputs so that other nodes can recognize
 what type of information is provided. Here is a stripped-down version of the
-hierarchical energy regression target :class:`~hippynn.graphs.nodes.targets.HEnergyNode`::
+hierarchical energy regression target :class:`~hippynn.graphs.nodes.targets.HEnergyNode`:
 
-    import hippynn.layers.targets as target_modules
-    from hippynn.graphs.nodes import MultiNode
-    from hippynn.graphs.nodes.base.definition_helpers import AutoKw
+.. literalinclude:: ../../../tests/test_node_classes.py
+   :pyobject: test_create_simple_henergy_class
+   :dedent: 4
+   :start-after: # begin doc snippet
+   :end-before: # end doc snippet
 
-    class SimpleHEnergyNode(AutoKw, MultiNode):
-        _input_names = "hier_features", "mol_index", "n_molecules"
-        _output_names = "mol_energy", "atom_energies", "energy_terms", "hierarchicality"
-        _main_output = "mol_energy"
-        _output_index_states = IdxType.Molecules, IdxType.Atoms, None, IdxType.Molecules
-        _auto_module_class = target_modules.HEnergy
 
-        def __init__(self, name, parents, module='auto',module_kwargs=None,**kwargs):
-            self.module_kwargs = module_kwargs
-            super().__init__(name, parents, module=module, **kwargs)
-
-Note that we have added the _input_names tuple as well, this attribute can be set on
-SingleNode and MultiNode classes.
+Note that we have added the input_names tuple as well, this attribute can be set on
+both SingleNode and MultiNode classes.
 
 The ``_main_output`` attribute specifies what tensor to use by default when sending information
 to a child node. This class also makes use of the ``AutoKw`` mix-in for defining a new module
 using keyword arguments. These arguments will be passed to a new instance of the attribute
-``auto_module_class``.
+``auto_module_class``. To use this node, we now only need to supply the arguments for the pytorch module:
+
+.. literalinclude:: ../../../tests/test_node_classes.py
+   :language: python
+   :pyobject: test_create_simple_henergy_class
+   :dedent: 4
+   :start-after: # begin usage snippet
+   :end-before: # end usage snippet
+
+However because the HEnergy nn.Module requires multiple input tensors,
+it is a little bit of work to find the relevant metadata required. 
 
 Parent expansion
 ----------------
 
 The above example works, however, it 1) requires the user to find the appropriate
-input nodes corresponding to ``hier_features``, ``mol_index``, ``n_molecules``, which are
+input nodes corresponding to ``input_features``, ``system_index``, ``n_systems``, which are
 required to run the underlying torch module.
 
-The features will usually come from a network, and the molecule index and number of molecules
-in a batch are processed by the padding indexer. We can use the ``ExpandParents`` class
-to make invoking this node easier.
+The features will usually come from a network, and the system index and number of systems
+in a batch are processed by the padding indexer. We can thus use another feature of hippynn,
+the ``ExpandParents`` class, to simplify construction of the node by making this logic an
+optional step during the construction of the node.
 
 Let's take a look  at the full definition of :class:`~hippynn.graphs.nodes.targets.HEnergyNode`:
 
@@ -96,6 +116,13 @@ a different form is found, the function is skipped. This way if we arise at a co
 model definition where there are multiple AtomIndexers or none whatsoever, but the inputs
 to the node can be provided by some other route, we can always pass the fully specified
 parents of the node, ``hier_features``, ``mol_index``, and ``n_molecules``.
+
+.. literalinclude:: ../../../tests/test_node_classes.py
+   :language: python
+   :pyobject: test_create_full_henergy
+   :dedent: 4
+   :start-after: # begin usage snippet
+   :end-before: # end usage snippet
 
 Adding constraints to possible parents
 --------------------------------------
