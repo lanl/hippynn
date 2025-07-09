@@ -2,7 +2,7 @@ import pytest
 
 import torch
 import hippynn
-
+from conftest import ignore_sensitivity_warning
 
 @pytest.fixture
 def example_all_target_nodes(neural_network_node, bond_parameters):
@@ -30,7 +30,6 @@ def example_all_target_nodes(neural_network_node, bond_parameters):
     return all_targets
 
 
-sensitivity_warning_supression = pytest.mark.filterwarnings("ignore:.*underneath sensitivity range*.")
 
 
 @pytest.mark.parametrize("operation", ["add", "sub", "mul", "truediv", "pow"])
@@ -55,7 +54,7 @@ def test_node_algebra(operation):
     return
 
 
-@sensitivity_warning_supression
+@ignore_sensitivity_warning
 def test_run_targets(example_all_target_nodes, example_box):
     from hippynn.graphs import GraphModule, find_relatives, inputs
 
@@ -83,7 +82,7 @@ def test_build_predictor(example_all_target_nodes):
     predictor = Predictor.from_graph(graph)
 
 
-@sensitivity_warning_supression
+@ignore_sensitivity_warning
 def test_run_predictor(example_all_target_nodes, example_box):
     from hippynn.graphs import GraphModule, Predictor, find_relatives, inputs
 
@@ -96,7 +95,7 @@ def test_run_predictor(example_all_target_nodes, example_box):
     outputs = predictor(**example_box)
 
 
-@sensitivity_warning_supression
+@ignore_sensitivity_warning
 def test_atomization_conversion(example_box, neural_network_node):
     from hippynn.graphs import targets, base
 

@@ -89,7 +89,6 @@ class MulNode(BinNode, SingleNode, _AlgebraicOperation, operation="mul"):
 class DivNode(BinNode, SingleNode, _AlgebraicOperation, operation="truediv"):
     pass
 
-
 class PowNode(BinNode, SingleNode , _AlgebraicOperation, operation="pow"):
     pass
 
@@ -159,3 +158,7 @@ class LossTrueNode(LossInputNode):
         self.index_state = indextypes.reduce_funcs.db_state_of(origin_node.index_state)
         self._main_output = AtLeast2D((self,))
 
+    @property
+    def main_output(self):
+        return self._main_output
+    
