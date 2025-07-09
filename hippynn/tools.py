@@ -13,7 +13,6 @@ import torch
 
 from . import settings
 
-from ._deprecations import HippynnNameDeprecation, bundles_deprecated_warnings, handle_deprecations
 
 class TeedFileOutput:
     def __init__(self, *streams):
@@ -268,3 +267,23 @@ except AttributeError:
         """
         pass
 
+
+class SetStateMixin:
+    """So that you can safely call super().__setstate__()."""
+    def __setstate__(self, state: dict):
+        parent_setstate = getattr(super(), "__setstate__", None)
+        if parent_setstate is not None:
+            parent_setstate(state)
+        else:
+            self.__dict__.update(state)
+
+class GetAttrMixin:
+    """So that you can safely call super().__getattr__()."""
+    def __getattr__(self, name):
+        parent_getattr = getattr(super(), "__getattr__", None)
+        if parent_getattr is not None:
+            return parent_getattr(name)
+        else:
+            raise AttributeError(
+               f"{type(self).__name__!r} object has no attribute {name!r}"
+            )

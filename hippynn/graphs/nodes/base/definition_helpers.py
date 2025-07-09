@@ -361,6 +361,8 @@ class IndexFormTransformer(FormTransformer):
             if idxstate is None:
                 new = node
             else:
+                #if node.index_state is None:
+                #    raise ValueError(f"Hi from {node,node.index_state=} to {idxstate}")
                 new = index_type_coercion(node, idxstate)
             new_parents.append(new)
         return tuple(new_parents)
@@ -485,10 +487,8 @@ class ExpandParents(metaclass=ExpandParentMeta):
 
     def __getattr__(self, item):
         if item == "_parent_expander":
-            from ....tools import HippynnNameDeprecation
-            import warnings
-            warning = HippynnNameDeprecation.from_single("_parent_expander", "parent_expander")
-            warnings.warn(warning, stacklevel=2)
+            from ....tools import warn_name_change
+            warn_name_change("_parent_expander", "parent_expander")
             return self.parent_expander
         else:
             return super().__getattr__(item)

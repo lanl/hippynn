@@ -47,8 +47,8 @@ class SchNetWrapper(torch.nn.Module):
 
 
 class SchNetNode(AutoKw, Network, SingleNode):
-    _input_names = "species", "positions", "nonblank"
-    _index_state = IdxType.Atoms
+    input_names = "species", "positions", "nonblank"
+    index_state = IdxType.Atoms
     _auto_module_class = SchNetWrapper
 
     def __init__(self, name, parents, module="auto", module_kwargs=None):

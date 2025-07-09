@@ -12,7 +12,7 @@ from ...layers import pairs as pairs_modules
 
 
 class OpenPairIndexer(ExpandParents, PairIndexer, MultiNode):
-    _input_names = "coordinates", "nonblank", "real_atoms", "inv_real_atoms"
+    input_names = "coordinates", "nonblank", "real_atoms", "inv_real_atoms"
     _auto_module_class = pairs_modules.OpenPairIndexer
 
     @parent_expander.match(PositionsNode, SpeciesNode)
@@ -39,12 +39,12 @@ class OpenPairIndexer(ExpandParents, PairIndexer, MultiNode):
 
 
 class PeriodicPairOutputs:
-    _output_names = "pair_dist", "pair_first", "pair_second", "pair_coord", "cell_offsets", "offset_index"
-    _output_index_states = (IdxType.Pairs,) * len(_output_names)
+    output_names = "pair_dist", "pair_first", "pair_second", "pair_coord", "cell_offsets", "offset_index"
+    output_index_states = (IdxType.Pairs,) * len(output_names)
 
 
 class PeriodicPairIndexer(ExpandParents, AutoKw, PeriodicPairOutputs, PairIndexer, MultiNode):
-    _input_names = "coordinates", "nonblank", "real_atoms", "inv_real_atoms", "cell"
+    input_names = "coordinates", "nonblank", "real_atoms", "inv_real_atoms", "cell"
     _auto_module_class = pairs_modules.PeriodicPairIndexer
 
     @parent_expander.match(PositionsNode, SpeciesNode, CellNode)
@@ -108,11 +108,11 @@ class PeriodicPairIndexerMemory(PeriodicPairIndexer, Memory):
 
 
 class ExternalNeighborIndexer(ExpandParents, PairIndexer, AutoKw, MultiNode):
-    _input_names = "coordinates", "real_atoms", "shifts", "cell", "ext_pair_first", "ext_pair_second"
+    input_names = "coordinates", "real_atoms", "shifts", "cell", "ext_pair_first", "ext_pair_second"
     _auto_module_class = pairs_modules.ExternalNeighbors
 
     parent_expander.get_main_outputs()
-    parent_expander.assertlen(len(_input_names))
+    parent_expander.assertlen(len(input_names))
     parent_expander.require_idx_states(IdxType.SysAtom, IdxType.SysAtom, None, None, None, None)
 
     def __init__(self, name, parents, hard_dist_cutoff, module="auto", **kwargs):
@@ -124,12 +124,12 @@ class ExternalNeighborIndexer(ExpandParents, PairIndexer, AutoKw, MultiNode):
 class PairReIndexer(ExpandParents, AutoNoKw, SingleNode):
     """
     For re-using index information to convert
-    from IdxType.MolAtomAtom -> IdxType.Pairs
+    from IdxType.SysAtomAtom -> IdxType.Pairs
     """
 
-    _input_names = "pair_features", "molecule_index", "atom_index", "pair_first", "pair_second"
+    input_names = "pair_features", "molecule_index", "atom_index", "pair_first", "pair_second"
     _auto_module_class = pairs_modules.PairReIndexer
-    _index_state = IdxType.Pairs
+    index_state = IdxType.Pairs
 
     @parent_expander.match(Node)
     def expand0(self, pair_features):
@@ -159,11 +159,11 @@ class PairReIndexer(ExpandParents, AutoNoKw, SingleNode):
 
 class PairDeIndexer(ExpandParents, AutoNoKw, SingleNode):
     """
-    For converting from IdxType.Pairs to IdxType.MolAtomAtom
+    For converting from IdxType.Pairs to IdxType.SysAtomAtom
     (Padded form)
     """
 
-    _input_names = (
+    input_names = (
         "pair_features",
         "molecule_index",
         "atom_index",
@@ -172,7 +172,7 @@ class PairDeIndexer(ExpandParents, AutoNoKw, SingleNode):
         "pair_second",
     )
     _auto_module_class = pairs_modules.PairDeIndexer
-    _index_state = IdxType.SysAtomAtom
+    index_state = IdxType.SysAtomAtom
 
     @parent_expander.match(Node)
     def expand0(self, pair_features):
@@ -197,7 +197,7 @@ class PairDeIndexer(ExpandParents, AutoNoKw, SingleNode):
 
 
 class PairCacher(ExpandParents, AutoKw, PairCache, SingleNode):
-    _input_names = (
+    input_names = (
         "pair_first",
         "pair_second",
         "cell_offsets",
@@ -208,7 +208,7 @@ class PairCacher(ExpandParents, AutoKw, PairCache, SingleNode):
         "n_molecules",
     )
     _auto_module_class = pairs_modules.PairCacher
-    _index_state = IdxType.NotFound
+    index_state = IdxType.Unlabeled
 
     @parent_expander.match(PairIndexer)
     def expand0(self, pair_indexer, *args, purpose, **kwargs):
@@ -239,11 +239,11 @@ class PairCacher(ExpandParents, AutoKw, PairCache, SingleNode):
 
 
 class PairUncacher(ExpandParents, AutoNoKw, PairIndexer, MultiNode):
-    _input_names = "sparsepairs", "coordinates", "cells", "real_atoms", "inv_real_atoms", "n_atoms_max", "n_molecules"
-    _output_names = "pair_dist", "pair_first", "pair_second", "pair_coord", "cell_offsets", "offset_index"
-    _output_index_states = (IdxType.Pairs,) * len(_output_names)
+    input_names = "sparsepairs", "coordinates", "cells", "real_atoms", "inv_real_atoms", "n_atoms_max", "n_molecules"
+    output_names = "pair_dist", "pair_first", "pair_second", "pair_coord", "cell_offsets", "offset_index"
+    output_index_states = (IdxType.Pairs,) * len(output_names)
     _auto_module_class = pairs_modules.PairUncacher
-    _index_state = IdxType.NotFound
+    index_state = IdxType.Unlabeled
 
     @parent_expander.match(PairCache)
     def expand0(self, sparse, *args, purpose, **kwargs):
@@ -270,8 +270,8 @@ class PairUncacher(ExpandParents, AutoNoKw, PairIndexer, MultiNode):
 
 
 class RDFBins(ExpandParents, AutoKw, SingleNode):
-    _input_names = "pair_dists", "pair_first", "pair_second", "one_hot", "n_molecules"
-    _index_state = None
+    input_names = "pair_dists", "pair_first", "pair_second", "one_hot", "n_molecules"
+    index_state = IdxType.Scalar # Computes over whole batch.
     _auto_module_class = pairs_modules.RDFBins
 
     @parent_expander.match(PositionsNode, SpeciesNode, CellNode)
@@ -324,7 +324,7 @@ class _DispatchNeighbors(ExpandParents, AutoKw, PeriodicPairOutputs, PairIndexer
     These should be capable of searching all feasible neighbors (no limit on number of images)
     """
 
-    _input_names = (
+    input_names = (
         "coordinates",
         "nonblank",
         "real_atoms",
@@ -418,12 +418,12 @@ class KDTreePairsMemory(_DispatchNeighbors, Memory):
         super().__init__(name, parents, dist_hard_max, module=module, module_kwargs=module_kwargs, **kwargs)
 
 class PaddedNeighborNode(ExpandParents, AutoNoKw, MultiNode):
-    _input_names = "pair_first", "pair_second", "pair_coord"
-    _output_names = (
+    input_names = "pair_first", "pair_second", "pair_coord"
+    output_names = (
         "j_list",
         "rij_list",
     )
-    _output_index_states = IdxType.Atoms, IdxType.Atoms
+    output_index_states = IdxType.Atoms, IdxType.Atoms
     _auto_module_class = pairs_modules.PaddedNeighModule
 
     @parent_expander.match(PairIndexer)
@@ -436,7 +436,7 @@ class PaddedNeighborNode(ExpandParents, AutoNoKw, MultiNode):
         except NodeNotFound:
             # Fall back to finding -any- atom-indexed tensor.
             atom_arrays = pair_finder.find_relatives(
-                lambda node: hasattr(node, "_index_state") and node._index_state == IdxType.Atoms
+                lambda node: hasattr(node, "index_state") and node.index_state == IdxType.Atoms
             )
             atom_array = atom_arrays.pop()
 
@@ -452,9 +452,9 @@ class PaddedNeighborNode(ExpandParents, AutoNoKw, MultiNode):
 
 
 class MinDistNode(ExpandParents, AutoNoKw, MultiNode):
-    _input_names = "rij_list", "j_list", "mol_index", "atom_index", "inv_real_atoms", "n_atoms_max", "n_molecules"
-    _output_names = "min_dist_mol", "mol_locs", "min_dist_atom", "atom_pairlocs"
-    _output_index_states = IdxType.Systems, IdxType.Systems, IdxType.Atoms, IdxType.Atoms
+    input_names = "rij_list", "j_list", "mol_index", "atom_index", "inv_real_atoms", "n_atoms_max", "n_molecules"
+    output_names = "min_dist_mol", "mol_locs", "min_dist_atom", "atom_pairlocs"
+    output_index_states = IdxType.Systems, IdxType.Systems, IdxType.Atoms, IdxType.Atoms
     _auto_module_class = pairs_modules.MinDistModule
 
     @parent_expander.match(PairIndexer)
@@ -503,12 +503,12 @@ class PairFilter(AutoKw, PairIndexer, ExpandParents, MultiNode):
         # During graph construction, every node is connected to its current set of parents. 
         # It is possible that pair_indexer.children can contain itself; an un-initialized PairFilter. 
         # Only initialized PairIndexers are extracted here. 
-        parents = [c for c in pair_indexer.children if hasattr(c, "_index_state")]
+        parents = [c for c in pair_indexer.children if hasattr(c, "index_state")]
 
         # Validate that nothing unexpected has happened.
         # Hopefully this can't fail, but if we update the pair API or someone customizes this aspect of the
         # library, this should catch any problems.
-        idx_states = set(c._index_state for c in parents)
+        idx_states = set(c.index_state for c in parents)
 
         if len(idx_states) != 1:
             raise TypeError(f"Input contains mixed index states: {idx_states}. Input states should only consist of index type pair.")
@@ -516,9 +516,9 @@ class PairFilter(AutoKw, PairIndexer, ExpandParents, MultiNode):
         if idx_state != IdxType.Pairs:
             raise TypeError(f"Index state for inputs was {idx_state}, needs to be index type pair.")
         # Validation complete.
-        self._output_names = tuple(f"out_{name}" for name in pair_indexer._output_names)
-        self._input_names = tuple(f"in_{name}" for name in pair_indexer._output_names)
-        self._output_index_states = (IdxType.Pairs,)*len(parents)
+        self.output_names = tuple(f"out_{name}" for name in pair_indexer.output_names)
+        self.input_names = tuple(f"in_{name}" for name in pair_indexer.output_names)
+        self.output_index_states = (IdxType.Pairs,)*len(parents)
 
         return parents
 

@@ -248,7 +248,7 @@ def replace_node(old_node: Node, new_node: Node, disconnect_old=False):
         # If new node is a multinode, this will ensure we swap the main output in
         new_node = new_node.main_output
         # Convert index state if possible.
-        new_node = soft_index_type_coercion(new_node, old_node._index_state)
+        new_node = soft_index_type_coercion(new_node, old_node.index_state)
 
         # Find children that need replacing
         swap_children = set(old_node.children) - set(new_node_requires)
@@ -270,7 +270,7 @@ def _determine_multinode_child_match(old_node: MultiNode, new_node: MultiNode):
 
     try:
         # Try name-based matching first.
-        matches = {getattr(old_node, name): getattr(new_node, name) for name in new_node._output_names}
+        matches = {getattr(old_node, name): getattr(new_node, name) for name in new_node.output_names}
     except AttributeError:
         # If name-based matching does not work, just match by order.
         matches = {co: cn for co, cn in zip(old_node.children, new_node.children)}
@@ -458,7 +458,7 @@ def vacuum_outputs(node_list, species_set):
         # further specialize if encoder is OneHotEncoder
         if isinstance(encoder, OneHotEncoder):
             species_encoding = torch.eye(n_species, dtype=torch.int64)
-            # Unsqueeze adds atom-wise axis for MolAtom index type.
+            # Unsqueeze adds atom-wise axis for sysatom index type.
             replace_node_with_constant(encoder.encoding, species_encoding.unsqueeze(1), name="vacuum_encoding")
             replace_node_with_constant(pad_idxer.indexed_features, species_encoding, name="vacuum_indexed_features")
 

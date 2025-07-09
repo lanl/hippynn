@@ -60,8 +60,8 @@ def make_ensemble(
         it may cause loading of the structure file to fail. 
 
     :param models: list containing str, node, or graphmodule, or str to glob for model directories.
-    :param targets: list of db_name strings or the string 'auto', which will attempt to infer.
-    :param inputs: list of db_name strings of the string 'auto', which will attempt to infer.
+    :param targets: list of name/db_name strings, or the string 'auto', which will attempt to infer the list.
+    :param inputs: list of name/db_name strings, of the string 'auto', which will attempt to infer the list.
     :param prefix: specifies the prefix for the db_name of created ensemble nodes.
     :param quiet: whether to print information about the constructed ensemble.
     :param weights_only: passed to ``torch.load``
@@ -250,7 +250,7 @@ def collate_targets(models: List[GraphModule], targets: List[str]) -> Dict[str, 
     target_classes = {}  # dict
     for t in targets:
         found_nodes = find_relatives(all_nodes, lambda n: n.name == t or n.db_name == t)
-        target_classes[t] = list(found_nodes)
+        target_classes[t] = list(set(f.main_output for f in found_nodes))
 
     return target_classes
 

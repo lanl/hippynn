@@ -3,7 +3,7 @@ Enum for index states.
 """
 import enum
 import warnings
-from ...tools import HippynnNameDeprecation
+from ..._deprecations import warn_name_change
 
 # fmt: off
 class IdxType(enum.Enum):
@@ -19,16 +19,20 @@ class IdxType(enum.Enum):
     MolAtomAtom = SysAtomAtom     # deprecated name
     QuadMol     = "QuadMol"
     QuadPack    = "QuadPack"      # packed 6-vec of quadrupole, upper triangle
-    NotFound    = "NOT FOUND"
+    Unlabeled   = "Unlabeled"
+    NotFound    = Unlabeled       # Not specified, may treat as any.
+    Other       = "Other"         # Does not conform to an existing indexing scheme; do not coerce.
     
     def __repr__(self): return f"<{self.__class__.__name__}.{self.name}>"
 
     @classmethod
     def _missing_(cls, value):
-        output = cls.__members__.get(value, None)
+        if value == "NOT FOUND":
+            output = output = cls.Unlabeled
+        else:
+            output = cls.__members__.get(value, None)
         if output is not None:
-            warning = HippynnNameDeprecation.from_single(value, output.value, old_module=__name__, new_module=__name__)
-            warnings.warn(warning)
+            warn_name_change(value, output.value, old_module=__name__, new_module=__name__)
         return output
 
 # fmt: on

@@ -16,10 +16,10 @@ class HEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
     Predict a system-level scalar such as energy from a sum over local components.
     """
 
-    _input_names = "hier_features", "mol_index", "n_molecules"
-    _output_names = "mol_energy", "atom_energies", "energy_terms", "hierarchicality", "atom_hier", "mol_hier", "batch_hier"
-    _main_output = "mol_energy"
-    _output_index_states = IdxType.Systems, IdxType.Atoms, None, IdxType.Systems, IdxType.Atoms, IdxType.Systems, IdxType.Scalar
+    input_names = "hier_features", "mol_index", "n_molecules"
+    output_names = "mol_energy", "atom_energies", "energy_terms", "hierarchicality", "atom_hier", "mol_hier", "batch_hier"
+    main_output_name = "mol_energy"
+    output_index_states = IdxType.Systems, IdxType.Atoms, None, IdxType.Systems, IdxType.Atoms, IdxType.Systems, IdxType.Scalar
     _auto_module_class = target_modules.HEnergy
 
     @parent_expander.match(Network)
@@ -52,10 +52,10 @@ class HChargeNode(Charges, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
     Predict an atom-level scalar such as charge from local features.
     """
 
-    _input_names = ("hier_features",)
-    _output_names = "atom_charges", "partial_sums", "charge_hierarchality"
-    _main_output = "atom_charges"
-    _output_index_states = IdxType.Atoms, None, IdxType.Atoms
+    input_names = ("hier_features",)
+    output_names = "atom_charges", "partial_sums", "charge_hierarchality"
+    main_output_name = "atom_charges"
+    output_index_states = IdxType.Atoms, None, IdxType.Atoms
     _auto_module_class = target_modules.HCharge
 
     @parent_expander.match(Network)
@@ -71,10 +71,10 @@ class HChargeNode(Charges, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
 
 
 class LocalChargeEnergy(Energies, ExpandParents, HAtomRegressor, MultiNode):
-    _input_names = "charges", "features", "mol_index", "n_molecules"
-    _output_names = "molenergies", "atomenergies"
-    _main_output = "molenergies"
-    _output_index_states = IdxType.Systems, IdxType.Atoms
+    input_names = "charges", "features", "mol_index", "n_molecules"
+    output_names = "mol_energies", "atom_energies"
+    main_output_name = "mol_energies"
+    output_index_states = IdxType.Systems, IdxType.Atoms
     _auto_module_class = target_modules.LocalChargeEnergy
 
     @parent_expander.match(Node, Network)
@@ -94,10 +94,10 @@ class HBondNode(ExpandParents, AutoKw, MultiNode):
     """
 
     _auto_module_class = target_modules.HBondSymmetric
-    _output_names = "bonds", "bond_hierarchality"
-    _output_index_states = IdxType.Pairs, IdxType.Pairs
-    _input_names = "features", "pair_first", "pair_second", "pair_dist"
-    _main_output = "bonds"
+    output_names = "bonds", "bond_hierarchality"
+    output_index_states = IdxType.Pairs, IdxType.Pairs
+    input_names = "features", "pair_first", "pair_second", "pair_dist"
+    main_output_name = "bonds"
 
     @parent_expander.match(Network)
     def expand0(self, net, *, purpose, **kwargs):
@@ -121,10 +121,10 @@ class HBondNode(ExpandParents, AutoKw, MultiNode):
 
 
 class AtomizationEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
-    _input_names = "hier_features", "vac_features", "encoding", "mol_index", "n_molecules"
-    _output_names = "mol_energy", "partial_energies", "hierarchicality"
-    _output_index_states = IdxType.Systems, None, IdxType.Systems
-    _main_output = "mol_energy"
+    input_names = "hier_features", "vac_features", "encoding", "mol_index", "n_molecules"
+    output_names = "mol_energy", "partial_energies", "hierarchicality"
+    output_index_states = IdxType.Systems, None, IdxType.Systems
+    main_output_name = "mol_energy"
     _auto_module_class = target_modules.AtomizationEnergy
 
     @parent_expander.match(Network)
@@ -165,7 +165,7 @@ class AtomizationEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, Mul
         # copy-out subgraph for vacuum computations.
         new_graph, other_nodes = copy_subgraph(vac_net.feature_nodes, assume_inputed=[])
 
-        # # This builds the graph for de-indexing atom to molatom,
+        # # This builds the graph for de-indexing atom to sysatom,
         # # without having a paddingindexer.
         # # Leaving this as reference in case it becomes necessary to do this later.
         # from .base.algebra import ValueNode
@@ -178,12 +178,12 @@ class AtomizationEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, Mul
         # n_atoms_max = ValueNode(1, convert=False)
         # from ..indextypes.registry import assign_index_aliases
         # for n in new_graph:
-        #     index_node = AtomDeIndexer(f"{n.name}[MolAtom]", (n, mol_index, atom_index, n_molecules, n_atoms_max))
+        #     index_node = AtomDeIndexer(f"{n.name}[SysAtom]", (n, mol_index, atom_index, n_molecules, n_atoms_max))
         #     assign_index_aliases(n, index_node)
 
         # Alternative hacky way to solve the problem is much simpler.
         for n in new_graph:
-            n._index_state = IdxType.SysAtom
+            n.index_state = IdxType.SysAtom
 
         pred = Predictor(inputs=[], outputs=new_graph)
         outputs = pred()

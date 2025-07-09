@@ -100,4 +100,4 @@ def idx_pair_molatomatom(node, hints=None):
         return parents, PairDeIndexer
     else:
         raise NotImplementedError("De-indexing not yet implemented in loss graph")
-        # TODO: refactor out padding indexer creation for loss from the molatom-atom indexer, then re-use it here.
+        # TODO: refactor out padding indexer creation for loss from the sysatom-atom indexer, then re-use it here.

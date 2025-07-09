@@ -17,8 +17,8 @@ class OneHotEncoder(AutoKw, Encoder, MultiNode):
     Node for encoding species as one-hot vectors
     """
 
-    _output_names = "encoding", "nonblank"
-    _output_index_states = IdxType.SysAtom, IdxType.SysAtom
+    output_names = "encoding", "nonblank"
+    output_index_states = IdxType.SysAtom, IdxType.SysAtom
     _auto_module_class = index_modules.OneHotSpecies
 
     def __init__(self, name, parents, species_set, module="auto", **kwargs):
@@ -40,10 +40,10 @@ class OneHotEncoder(AutoKw, Encoder, MultiNode):
 class PaddingIndexer(AtomIndexer, AutoNoKw, ExpandParents, MultiNode):
     """
     Node for building information to convert from
-    MolAtom to Atom index state.
+    SysAtom to Atom index state.
     """
 
-    _output_names = (
+    output_names = (
         "indexed_features",
         "real_atoms",
         "inv_real_atoms",
@@ -52,8 +52,8 @@ class PaddingIndexer(AtomIndexer, AutoNoKw, ExpandParents, MultiNode):
         "n_molecules",
         "n_atoms_max",
     )
-    _output_index_states = IdxType.Atoms, None, None, None, None, None, None  # optional?
-    _input_names = "encoding", "nonblank"
+    output_index_states = IdxType.Atoms, None, None, None, None, None, None  # optional?
+    input_names = "encoding", "nonblank"
     _auto_module_class = index_modules.PaddingIndexer
 
     @parent_expander.match(Encoder)
@@ -69,11 +69,11 @@ class PaddingIndexer(AtomIndexer, AutoNoKw, ExpandParents, MultiNode):
 
 class AtomReIndexer(ExpandParents, AutoNoKw, SingleNode):
     """
-    Node for re-using index information to convert MolAtom->Atom.
+    Node for re-using index information to convert SysAtom->Atom.
     """
 
     _auto_module_class = index_modules.AtomReIndexer
-    _index_state = IdxType.Atoms
+    index_state = IdxType.Atoms
 
     @parent_expander.match(SingleNode)
     def expand0(self, features, *, purpose, **kwargs):
@@ -93,11 +93,11 @@ class AtomReIndexer(ExpandParents, AutoNoKw, SingleNode):
 
 class AtomDeIndexer(ExpandParents, AutoNoKw, SingleNode):
     """
-    Node for converting Atom->MolAtom
+    Node for converting Atom->SysAtom
     """
 
     _auto_module_class = index_modules.AtomDeIndexer
-    _index_state = IdxType.SysAtom
+    index_state = IdxType.SysAtom
 
     @parent_expander.matchlen(1)
     def expand0(self, features, *, purpose, **kwargs):
@@ -117,7 +117,7 @@ class AtomDeIndexer(ExpandParents, AutoNoKw, SingleNode):
 
 class QuadUnpackNode(AutoNoKw, SingleNode):
     _auto_module_class = index_modules.QuadUnpack
-    _index_state = IdxType.Systems
+    index_state = IdxType.Systems
 
     def __init__(self, name, parents, module="auto", **kwargs):
         super().__init__(name, parents, module=module, **kwargs)
@@ -128,8 +128,8 @@ class FilterBondsOneway(AutoNoKw, SingleNode):
     Node which filters the set of pairs to a one-way list.
     """
 
-    _input_names = "input_bonds", "pair_first", "pair_second"
-    _index_state = IdxType.NotFound
+    input_names = "input_bonds", "pair_first", "pair_second"
+    index_state = IdxType.Unlabeled
     _auto_module_class = index_modules.FilterBondsOneway
 
     def __init__(self, name, parents, module="auto", **kwargs):
@@ -137,8 +137,8 @@ class FilterBondsOneway(AutoNoKw, SingleNode):
 
 
 class SysMaxOfAtomsNode(ExpandParents, AutoNoKw, SingleNode):
-    _input_names = "var", "mol_index", "n_molecules"
-    _index_state = IdxType.Systems
+    input_names = "var", "mol_index", "n_molecules"
+    index_state = IdxType.Systems
     _auto_module_class = index_modules.SysMaxOfAtoms
 
     @parent_expander.match(Node)
@@ -198,7 +198,7 @@ class FuzzyHistogrammer(AutoKw, SingleNode):
     :param length: length of vectorized feature
     """
 
-    _input_names = "values"
+    input_names = "values"
     _auto_module_class = index_modules.FuzzyHistogram
 
     def __init__(self, name, parents, length, vmin, vmax, module="auto", **kwargs):
@@ -206,7 +206,7 @@ class FuzzyHistogrammer(AutoKw, SingleNode):
         if isinstance(parents, Node):
             parents = (parents,)
 
-        self._output_index_state = parents[0]._index_state
+        self._output_index_state = parents[0].index_state
         self.module_kwargs = {"length": length, "vmin": vmin, "vmax": vmax}
 
         super().__init__(name, parents, module=module, **kwargs)
@@ -215,9 +215,9 @@ class SpeciesIndexer(AutoNoKw, SingleNode, ExpandParents):
     """
     Separate an atom-wise tensor into sub-tensors for each species.
     """
-    _input_names = "input_values", "onehot_encoding"
+    input_names = "input_values", "onehot_encoding"
     _auto_module_class = index_modules.SpeciesIndexer
-    _index_state = IdxType.Atoms
+    index_state = IdxType.Atoms
 
 
     @parent_expander.match(Node, Node)

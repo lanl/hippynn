@@ -7,6 +7,7 @@ from typing import Optional, Tuple
 
 import torch
 from .. import _debprint
+from ...._deprecations import _DeprecatedNamesMixin
 
 DEFAULT_WHY_DESC = "<purpose not specified>"
 
@@ -14,13 +15,17 @@ import typing
 if typing.TYPE_CHECKING:
     from .base import Node
 
-class _NodeFunctions:
+
+
+class _NodeFunctions(_DeprecatedNamesMixin):
     """
     Base Node methods without dynamic algebra behavior.
     """
-    _input_names = NotImplemented
-    _LossPredNode = None  # Will be set by this child class when it exists
-    _LossTrueNode = None  # Same
+    input_names = NotImplemented
+    
+    _DEPRECATED_NAMES = {
+        "_input_names" : "input_names",
+    }
 
     def __init__(self, name, parents, db_name=None, module=None):
         """
@@ -38,16 +43,17 @@ class _NodeFunctions:
         if not isinstance(name, str):
             raise TypeError("Node names must be strings. Instead got: {}".format(name))
 
-        self.db_name: Optional[str] = db_name
+        self.name: str = name
         self.origin_node: Optional[Node] = None  # Loss input nodes set this attribute to find references to the model graph
         self.parents: Tuple[Node] = tuple(parents)
-        self.name: str = name
-        self._pred: Optional[Node] = None
-        self._true: Optional[Node] = None
         self.children: Tuple[Node] = tuple()
         for p in self.parents:
             p.children = p.children + (self,)
 
+        self._pred: Optional[Node] = None
+        self._true: Optional[Node] = None
+        self.db_name: Optional[str] = db_name # must be set after parents!
+        
         # If specified, trigger automatic module generation
         if module == "auto":
             _debprint("Making auto module for", self.name)
@@ -58,25 +64,6 @@ class _NodeFunctions:
         else:
             pass
             # In this case, the node must represent input tensors.
-
-    def set_dbname(self, db_name):
-        self.db_name = db_name
-        if self._pred is not None:
-            self._pred.db_name = db_name
-        if self._true is not None:
-            self._true.db_name = db_name
-
-    @property
-    def pred(self):
-        if self._pred is None:
-            self._pred = self._LossPredNode(self.name + "-pred", origin_node=self, db_name=self.db_name)
-        return self._pred
-
-    @property
-    def true(self):
-        if self._true is None:
-            self._true = self._LossTrueNode(self.name + "-true", origin_node=self, db_name=self.db_name)
-        return self._true
 
     def get_ancestors(self):
         """
@@ -139,22 +126,42 @@ class _NodeFunctions:
 
     def auto_module(self):
         raise NotImplementedError("Auto module not defined for node {} of type {}".format(self, type(self)))
+    
+
+    ## Properties to implement in concrete nodes.
+
+    def true(self):
+        return NotImplemented
+    
+    def pred(self):
+        return NotImplemented
+    
+    def main_output(self):
+        return NotImplemented    
+    
+    def db_name(self):
+        return NotImplemented
 
     def __dir__(self):
         dir_ = super().__dir__()
         # need to protect against a case where input names are not specified.
         # otherwise dir() will raise an error. Debuggers hate that!
-        if self._input_names is not NotImplemented:
-            dir_ = dir_ + list(self._input_names)
+        if self.input_names is not NotImplemented:
+            dir_ = dir_ + list(self.input_names)
         return dir_
 
     def __getattr__(self, item):
-        if item in ("parents", "_input_names"):  # Guard against recursion
+        
+        if item in ("parents", "input_names"):  # Guard against recursion
             raise AttributeError("Attribute {} not yet present".format(item))
         try:
-            return self.parents[self._input_names.index(item)]
+            return self.parents[self.input_names.index(item)]
         except (AttributeError, ValueError) as ee:
-            raise AttributeError("{} object has no attribute '{}'".format(self.__class__, item))
+            pass
+
+        return super().__getattr__(item)
+        
+
 
     def __repr__(self):
         try:
@@ -162,11 +169,6 @@ class _NodeFunctions:
         except AttributeError:
             name = "UNINITIALIZED"
         return "{}('{}')<{}>".format(self.__class__.__name__, name, hex(id(self)))
-
-    # Overridden by MultiNode, LossInputNode
-    @property
-    def main_output(self):
-        return self
 
 
 class NodeOperationError(Exception):
@@ -184,7 +186,7 @@ def get_connected_nodes(node_set, ancestors=True, descendants=True):
     """
     Recursively return nodes connected to the specified node_set.
 
-    Nodes in the supplied set are are including in the output.
+    Nodes in the supplied set are included in the output.
 
     :param node_set: iterable collection of nodes (list, tuple, set,...)
     :param ancestors: whether to search ancestors of the node set
@@ -214,10 +216,6 @@ def get_ancestors(node_set):
 
 def get_descendants(node_set):
     return get_connected_nodes(node_set, ancestors=False, descendants=True)
-
-
-
-
 
 def find_relatives(node_or_nodes, constraint_key, ancestors=True, descendants=True, why_desc=DEFAULT_WHY_DESC):
     """

@@ -7,12 +7,12 @@ As a user, in most cases you will only need the `load` functions here.
 from typing import Tuple, Union
 
 import torch
-import warnings
 
 from ..databases import Database
 from ..databases.restarter import Restartable
 from ..graphs import GraphModule
 from ..tools import device_fallback
+from .._deprecations import bundles_deprecated_warnings
 from .assembly import TrainingModules
 from .controllers import Controller
 from .device import set_devices
@@ -112,7 +112,6 @@ def check_mapping_devices(map_location, model_device):
         map_location = "cpu"
     return map_location, model_device
 
-from hippynn.tools import bundles_deprecated_warnings
 
 @bundles_deprecated_warnings(stacklevel=2)
 def load_saved_tensors(structure_fname: str, state_fname: str, weights_only: bool = False, **kwargs) -> Tuple[dict, dict]:

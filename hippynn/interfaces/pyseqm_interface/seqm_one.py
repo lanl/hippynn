@@ -142,20 +142,20 @@ from hippynn.graphs.nodes.base import MultiNode, AutoKw, find_unique_relative, E
 
 
 class NotConvergedNode(InputNode):
-    _index_state = IdxType.Systems
+    index_state = IdxType.Systems
     input_type_str = "notconverged"
 
 
 class DensityMatrixNode(InputNode):
-    _index_state = IdxType.Systems
+    index_state = IdxType.Systems
     input_type_str = "single_particle_density_matrix"
 
 
 class SEQM_One_EnergyNode(ExpandParents, AutoKw, MultiNode):
-    _input_names = "par_atom", "Positions", "Species", "single_particle_density_matrix"
-    _output_names = "mol_energy", "Etot_m_Eiso"
-    _main_output = "Etot_m_Eiso"
-    _output_index_states = (IdxType.Systems,) * len(_output_names)
+    input_names = "par_atom", "Positions", "Species", "single_particle_density_matrix"
+    output_names = "mol_energy", "Etot_m_Eiso"
+    main_output_name = "Etot_m_Eiso"
+    output_index_states = (IdxType.Systems,) * len(output_names)
     _auto_module_class = SEQM_One_Energy
 
     @parent_expander.match(Network, DensityMatrixNode)
@@ -188,8 +188,8 @@ class SEQM_One_EnergyNode(ExpandParents, AutoKw, MultiNode):
 
 
 class SEQM_One_AllNode(SEQM_One_EnergyNode):
-    _input_names = "par_atom", "Positions", "Species", "single_particle_density_matrix"
-    _output_names = (
+    input_names = "par_atom", "Positions", "Species", "single_particle_density_matrix"
+    output_names = (
         "mol_energy",
         "Etot_m_Eiso",
         "orbital_energies",
@@ -198,6 +198,6 @@ class SEQM_One_AllNode(SEQM_One_EnergyNode):
         "isolated_atom_energy",
         "atomic_charge",
     )
-    _main_output = "Etot_m_Eiso"
-    _output_index_states = (IdxType.Systems,) * len(_output_names)
+    main_output_name = "Etot_m_Eiso"
+    output_index_states = (IdxType.Systems,) * len(output_names)
     _auto_module_class = SEQM_One_All

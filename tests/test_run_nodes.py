@@ -25,7 +25,7 @@ def example_all_target_nodes(neural_network_node, bond_parameters):
     force_a = physics.GradientNode("F_T", (aenergy, positions), sign=-1)
 
     all_targets = [henergy, aenergy, hcharge, bonds, dipole, quadrupole, force_h, force_a]
-    quadrupole._index_state = hippynn.graphs.IdxType.Systems  # hack to avoid db_form conversion
+    quadrupole.index_state = hippynn.graphs.IdxType.Systems  # hack to avoid db_form conversion
 
     return all_targets
 

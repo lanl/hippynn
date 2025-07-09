@@ -17,7 +17,7 @@ class NACRNode(AutoKw, SingleNode):
     between two states.
     """
 
-    _input_names = "charges i", "charges j", "coordinates", "energy i", "energy j"
+    input_names = "charges i", "charges j", "coordinates", "energy i", "energy j"
     _auto_module_class = excited_layers.NACR
 
     def __init__(self, name: str, parents: Tuple, module="auto", module_kwargs=None, **kwargs):
@@ -41,8 +41,8 @@ class NACRNode(AutoKw, SingleNode):
             self.module_kwargs.update(module_kwargs)
         charges1, charges2, positions, energy1, energy2 = parents
         positions.requires_grad = True
-        self._index_state = IdxType.Systems
-        # self._index_state = positions._index_state
+        self.index_state = IdxType.Systems
+        # self.index_state = positions.index_state
         parents = (
             charges1.main_output,
             charges2.main_output,
@@ -59,7 +59,7 @@ class NACRMultiStateNode(AutoKw, SingleNode):
     between all pairs of states.
     """
 
-    _input_names = "charges", "coordinates", "energies"
+    input_names = "charges", "coordinates", "energies"
     _auto_module_class = excited_layers.NACRMultiState
 
     def __init__(self, name, parents, module="auto", module_kwargs=None, **kwargs):
@@ -83,8 +83,8 @@ class NACRMultiStateNode(AutoKw, SingleNode):
             self.module_kwargs.update(module_kwargs)
         charges, positions, energies = parents
         positions.requires_grad = True
-        self._index_state = IdxType.Systems
-        # self._index_state = positions._index_state
+        self.index_state = IdxType.Systems
+        # self.index_state = positions.index_state
         parents = (
             charges.main_output,
             positions,
@@ -98,10 +98,10 @@ class LocalEnergyNode(Energies, ExpandParents, HAtomRegressor, MultiNode):
     Predict a localized energy, with contributions from implicitly computed atoms.
     """
 
-    _input_names = "hier_features", "mol_index", "atom index", "n_molecules", "n_atoms_max"
-    _output_names = "mol_energy", "atom_energy", "atom_preenergy", "atom_probabilities", "atom_propensities"
-    _main_output = "mol_energy"
-    _output_index_states = IdxType.Systems, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms
+    input_names = "hier_features", "mol_index", "atom index", "n_molecules", "n_atoms_max"
+    output_names = "mol_energy", "atom_energy", "atom_preenergy", "atom_probabilities", "atom_propensities"
+    main_output_name = "mol_energy"
+    output_index_states = IdxType.Systems, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms
     _auto_module_class = excited_layers.LocalEnergy
 
     @parent_expander.match(Network)

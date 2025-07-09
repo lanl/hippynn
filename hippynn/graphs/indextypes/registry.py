@@ -22,7 +22,7 @@ _db_index_states = {
     IdxType.QuadMol         : IdxType.QuadPack,
     IdxType.QuadPack        : IdxType.QuadPack,
     IdxType.Scalar          : IdxType.Scalar,
-    IdxType.NotFound        : IdxType.NotFound,
+    IdxType.Unlabeled        : IdxType.Unlabeled,
 }
 
 
@@ -39,16 +39,15 @@ elementwise_compare_rules = {
     ((IdxType.QuadMol,)                       ,   IdxType.QuadMol),
     ((IdxType.QuadPack,)                      ,   IdxType.QuadMol),
     ((IdxType.QuadMol, IdxType.QuadPack)      ,   IdxType.QuadMol),
-    ((IdxType.NotFound,)                      ,   IdxType.NotFound),
+    ((IdxType.Unlabeled,)                     ,   IdxType.Unlabeled),
 }
 # fmt: on
 
-# Add default rule: (_some_type,scalar) -> _some_type if scalar is not in rule already
+# Add default rule: (*_some_types,scalar) -> _some_type if scalar is not in rule already
 for idxset, idxtarget in elementwise_compare_rules.copy():
     if IdxType.Scalar not in idxset:
         idxset = *idxset, IdxType.Scalar
         elementwise_compare_rules.add((idxset, idxtarget))
-del idxset, idxtarget
 
 # Assemble rules
 elementwise_compare_rules = {frozenset(in_types): out_type for in_types, out_type in elementwise_compare_rules}
@@ -96,11 +95,11 @@ def assign_index_aliases(*nodes):
     # it could be changed.
     
     nodes = set(nodes)
-    state_map = {n._index_state: n for n in nodes}
+    state_map = {n.index_state: n for n in nodes}
     if len(state_map) != len(nodes):
         raise ValueError(f"Input nodes did not each have a unique index state!\n"
                          f"Nodes and corresponding states: \n"
-                         f"\t{[(n, n._index_state) for n in nodes]}")
+                         f"\t{[(n, n.index_state) for n in nodes]}")
 
     for target_state, target_node in state_map.items():
         for n in nodes:

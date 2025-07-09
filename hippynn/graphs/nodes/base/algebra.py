@@ -80,7 +80,7 @@ class UnaryNode():
     def __init__(self, in_node):
         #name = "{}({})".format(self._classname, in_node)
         super().__init__(self._classname, (in_node,), module=None)
-        self._index_state = in_node._index_state
+        self.index_state = in_node.index_state
 
 
 class BinNode():
@@ -89,21 +89,19 @@ class BinNode():
         left, right = elementwise_compare_reduce(left, right)
         #name = "{}({}, {})".format(self._classname, left.name, right.name)
         super().__init__(self._classname, (left, right), module=None)
-        self._index_state = left._index_state
+        self.index_state = left.index_state
 
 def __getattr__(name: str):
     """
     Module-level getattr for finding of old functions.
     """
-    import warnings
     if name.endswith("Node") or name == "AtLeast2D":
         # Backwards compatibility for unpickling prior models
         from . import base
         answer = getattr(base, name) # error if not found.
         # Warn if found.
-        from ....tools import HippynnNameDeprecation
-        warning = HippynnNameDeprecation.from_single(name, answer, old_module=__name__)
-        warnings.warn(warning, stacklevel=2)
+        from ...._deprecations import warn_name_change
+        warn_name_change(name,answer, old_module=__name__, stacklevel=2)
         return answer
     
     raise AttributeError(f"module {__name__!r} has no attribute {name}")

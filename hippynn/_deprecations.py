@@ -2,6 +2,8 @@
 Developer tool for managing deprecation warnings.
 """
 from . import settings
+from itertools import chain
+from .tools import SetStateMixin, GetAttrMixin
 import warnings, contextlib, functools
 
 
@@ -120,3 +122,55 @@ def bundles_deprecated_warnings(wrapped=None, stacklevel=None):
             return wrapped(*args, **kwargs)
 
     return inner
+
+
+def warn_name_change(old, new, old_module=None, new_module=None, stacklevel=2, **kwargs):
+        """
+        """
+        stacklevel +=1
+        warning = HippynnNameDeprecation.from_single(old, new, old_module=old_module, new_module=new_module)
+        warnings.warn(warning, stacklevel=stacklevel, **kwargs)
+
+
+
+class _DeprecatedNamesMixin(SetStateMixin,GetAttrMixin):
+    _DEPRECATED_NAMES: dict[str, str] = {}
+    _DEPRECATED_STATE: dict[str, str] = {}
+
+    def __setattr__(self, name: str, value):
+        if name in self._DEPRECATED_NAMES:
+            new_name = self._DEPRECATED_NAMES[name]
+            warn_name_change(name, new_name)
+            name = new_name
+        super().__setattr__(name, value)
+
+    def __getattr__(self, name):
+        if name in self._DEPRECATED_NAMES:
+            new_name = self._DEPRECATED_NAMES[name]
+            warn_name_change(name, new_name)
+            return getattr(self, new_name)
+        return super().__getattr__(name)
+
+    def __setstate__(self, state: dict):
+        for old_name, new_name in chain(self._DEPRECATED_NAMES.items(), self._DEPRECATED_STATE.items()):
+            if old_name in state:
+                warn_name_change(old_name, new_name)
+                state[new_name] = state.pop(old_name)
+        super().__setstate__(state)
+
+    def __init_subclass__(cls, **kwargs):
+
+        # Here we collect the inherited set of deprecated names.
+        _DEPRECATED_NAMES = {}
+        _DEPRECATED_STATE = {}
+
+        for base_cls in reversed(cls.__mro__):
+            if issubclass(base_cls, _DeprecatedNamesMixin):
+                _DEPRECATED_NAMES.update(base_cls._DEPRECATED_NAMES)
+                _DEPRECATED_STATE.update(base_cls._DEPRECATED_STATE)
+
+
+        cls._DEPRECATED_NAMES = _DEPRECATED_NAMES
+        cls._DEPRECATED_STATE = _DEPRECATED_STATE
+
+        super().__init_subclass__(**kwargs)

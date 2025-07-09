@@ -88,8 +88,8 @@ class Hipnn(DefaultNetworkExpansion, AutoKw, Network, SingleNode, _FeatureNodesM
     Node for HIP-NN neural networks
     """
 
-    _input_names = "input_features", "pair_first", "pair_second", "pair_dist"
-    _index_state = IdxType.Atoms
+    input_names = "input_features", "pair_first", "pair_second", "pair_dist"
+    index_state = IdxType.Unlabeled
     _auto_module_class = network_modules.hipnn.Hipnn
 
     @parent_expander.match(Node, PairIndexer)
@@ -117,8 +117,8 @@ class HipnnVec(DefaultNetworkExpansion, AutoKw, Network, SingleNode, _FeatureNod
     Node for HIP-NN-TS neural network, l=2
     """
 
-    _input_names = "input_features", "pair_first", "pair_second", "pair_dist", "pair_coord"
-    _index_state = IdxType.Atoms
+    input_names = "input_features", "pair_first", "pair_second", "pair_dist", "pair_coord"
+    index_state = IdxType.Unlabeled
     _auto_module_class = network_modules.hipnn.HipnnVec
 
     @parent_expander.match(Node, PairIndexer)
