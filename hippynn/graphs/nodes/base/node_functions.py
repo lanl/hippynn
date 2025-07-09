@@ -52,7 +52,12 @@ class _NodeFunctions(_DeprecatedNamesMixin):
 
         self._pred: Optional[Node] = None
         self._true: Optional[Node] = None
-        self.db_name: Optional[str] = db_name # must be set after parents!
+        
+        # The db_name must be set after parents, _pred, and _true,
+        # because assigning a db_name will assign to the true and pred versions of a node, as well;
+        # this in turn requires having these things as well as the parents to define if they exist or not.
+        self.db_name: Optional[str] = db_name 
+
         
         # If specified, trigger automatic module generation
         if module == "auto":
