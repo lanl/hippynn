@@ -315,7 +315,16 @@ class MLIAPInterface(MLIAPUnified):
             #general_property = general_property.squeeze(1).detach().to(return_device)
             #data.general_property = general_property.numpy().astype(np.double)
         else:
-            raise ValueError("Kokkos not yet implemented")
+            for i, property_name in enumerate(self.property_names):
+                if lammps_property_name == property_name:
+                    # view to data.get_extra_property
+                    property_kokkos = torch.as_tensor(data.get_extra_property(index), device=return_device)
+                    # write into view
+                    property_kokkos.copy_(self.properties[i].detach().to(return_device))
+                    
+                    break
+                else:
+                    raise ValueError(f"property {lammps_property_name} not found")
             # view to data.eatoms using pytorch, and write into the view.
             #eatoms = torch.as_tensor(data.eatoms, device=return_device)
             

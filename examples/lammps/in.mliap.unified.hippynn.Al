@@ -15,10 +15,11 @@ variable nz equal ${nrep}
 
 boundary        p p p
 
-lattice         fcc $a
-region          box block 0 ${nx} 0 ${ny} 0 ${nz}
-create_box      1 box
-create_atoms    1 box
+read_data positions.xyz
+#lattice         fcc $a
+#region          box block 0 ${nx} 0 ${ny} 0 ${nz}
+#create_box      1 box
+#create_atoms    1 box
 
 mass 1 26.981
 
@@ -30,9 +31,9 @@ pair_coeff	* * Al
 # Setup output
 
 compute  eatom all pe/atom
-compute  eatom_stdev all peStdev/atom
+#compute  eatom_stdev all peStdev/atom
 compute  energy all reduce sum c_eatom
-compute  genralized_property all extraProperty/atom name energy_std dim 1
+compute  generalizedProperty all extraProperty/atom name energy_std dim 1
 
 compute  satom all stress/atom NULL
 compute  str all reduce sum c_satom[1] c_satom[2] c_satom[3]
@@ -56,7 +57,7 @@ dump_modify 4 first yes
 #dump_modify 4 sort id 
 #dump_modify 4 first yes
 
-dump 3 all custom 1001 eatoms_uq.xyz id c_generalized_property[1]
+dump 3 all custom 1 eatoms_uq.xyz id c_eatom c_generalizedProperty[1]
 dump_modify 4 sort id 
 dump_modify 4 first yes
  
