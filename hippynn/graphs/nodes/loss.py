@@ -71,6 +71,10 @@ class _BaseCompareLoss(SingleNode):
     index_state = IdxType.Scalar
 
     def __init__(self, predicted, true):
+        
+        predicted = predicted.main_output
+        true = true.main_output
+
         name = "{}({},{})".format(self._classname, predicted.name, true.name)
         predicted, true = elementwise_compare_reduce(predicted, true)
         super().__init__(name, (predicted, true), module=None)

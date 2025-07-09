@@ -32,6 +32,39 @@ def test_build_loss(energy_force_nodes):
     return
 
 
+def test_loss_broadcast_guard():
+    """
+    Tests that inputs from a database will be wrapped with an unsqueeze.
+    """
+    import torch
+    from hippynn.graphs.nodes import inputs, loss
+    from hippynn.graphs import GraphModule
+
+    
+    a = inputs.InputNode(db_name="a")
+
+    mae = loss.MAELoss.of_node(a)
+
+    g = GraphModule([a.pred,a.true],[mae])
+    
+    true = torch.arange(5,dtype=torch.float)
+    predicted = true.unsqueeze(1)
+
+    out = g(predicted, true)
+    out = out[0].item()
+    assert out == 0., f"Should give zero, but gave {out}."
+
+    # flipping the order (true has extra 1 in shape, but predicted does not) still gives a user warning.
+    with pytest.warns(UserWarning) as recorder:
+        out = g(true, predicted)
+
+    message = recorder[0].message.args[0]
+
+    assert "incorrect results due to broadcasting" in message
+    
+    return
+
+
 
 def test_weighted_loss_from_input(energy_force_nodes):
     from hippynn.graphs import inputs, loss, IdxType

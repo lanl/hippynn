@@ -100,7 +100,7 @@ class PowNode(BinNode, SingleNode , _AlgebraicOperation, operation="pow"):
 # have at least two dimensions.
 # See nodes/loss.py and turn on `debug_loss_broadcast` if you have concerns about
 # broadcasting behavior.
-class AtLeast2D(Node):
+class AtLeast2D(SingleNode):
     torch_module = algebra_mods.AtLeast2D()
     index_state = IdxType.Unlabeled
 
