@@ -71,26 +71,26 @@ class ValueNode(SingleNode):
     def auto_module(self):
         return algebra_mods.ValueMod(self.value, convert=self._converted)
 
-class InvNode(UnaryNode, Node, _AlgebraicOperation, operation="invert"):
+class InvNode(UnaryNode, SingleNode, _AlgebraicOperation, operation="invert"):
     pass
 
-class NegNode(UnaryNode, Node,  _AlgebraicOperation, operation="neg"):
+class NegNode(UnaryNode, SingleNode,  _AlgebraicOperation, operation="neg"):
     pass
 
-class AddNode(BinNode, Node, _AlgebraicOperation, operation="add"):
+class AddNode(BinNode, SingleNode, _AlgebraicOperation, operation="add"):
     pass
 
-class SubNode(BinNode, Node, _AlgebraicOperation, operation="sub"):
+class SubNode(BinNode, SingleNode, _AlgebraicOperation, operation="sub"):
     pass
 
-class MulNode(BinNode, Node, _AlgebraicOperation, operation="mul"):
+class MulNode(BinNode, SingleNode, _AlgebraicOperation, operation="mul"):
     pass
 
-class DivNode(BinNode, Node, _AlgebraicOperation, operation="truediv"):
+class DivNode(BinNode, SingleNode, _AlgebraicOperation, operation="truediv"):
     pass
 
 
-class PowNode(BinNode, Node , _AlgebraicOperation, operation="pow"):
+class PowNode(BinNode, SingleNode , _AlgebraicOperation, operation="pow"):
     pass
 
 

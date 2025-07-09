@@ -4,7 +4,7 @@ import hippynn
 
 
 @pytest.fixture()
-def weight_graph_variables(network_parameters):
+def energy_force_nodes(network_parameters):
     from hippynn.graphs import inputs, networks, targets, physics
 
     # model inputs
@@ -20,11 +20,23 @@ def weight_graph_variables(network_parameters):
 
     return henergy, forces
 
+def test_build_loss(energy_force_nodes):
+    from hippynn.graphs.nodes import loss
+    henergy, forces = energy_force_nodes
 
-def test_weighted_loss_from_input(weight_graph_variables):
+    mae = loss.MAELoss.of_node(henergy)
+    rmse = loss.MSELoss.of_node(henergy)**(1/2)
+
+    total = mae + rmse
+    
+    return
+
+
+
+def test_weighted_loss_from_input(energy_force_nodes):
     from hippynn.graphs import inputs, loss, IdxType
 
-    henergy, forces = weight_graph_variables
+    henergy, forces = energy_force_nodes
 
     en_mask = inputs.InputNode(db_name="en_mask", index_state=IdxType.Systems)
     force_mask = inputs.InputNode(db_name="f_mask", index_state=IdxType.SysAtom)
@@ -33,9 +45,9 @@ def test_weighted_loss_from_input(weight_graph_variables):
     mse_force_weighted = loss.WeightedMSELoss.of_node(forces, force_mask)
 
 
-def test_weighted_loss_string(weight_graph_variables):
+def test_weighted_loss_string(energy_force_nodes):
     from hippynn.graphs import loss
 
-    henergy, forces = weight_graph_variables
+    henergy, forces = energy_force_nodes
     mse_energy_weighted2 = loss.WeightedMSELoss.of_node(henergy, "en_mask")
     mse_force_weighted2 = loss.WeightedMSELoss.of_node(forces, "f_mask")
