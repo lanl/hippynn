@@ -38,11 +38,10 @@ def test_create_simple_henergy_class(neural_network_node):
     from hippynn.graphs.nodes.base.definition_helpers import AutoKw
 
     class SimpleHEnergyNode(AutoKw, MultiNode):
-        input_names = "hier_features", "system_index", "n_molecules"
-        output_names = "mol_energy", "atom_energies", "energy_terms", "hierarchicality"
-        main_output_name = "mol_energy"
+        input_names = "input_features", "system_index", "n_systems"
+        output_names = "system_energies", "atom_energies", "energy_terms", "hierarchicality"
+        main_output_name = "system_energies"
         output_index_states = IdxType.Molecules, IdxType.Atoms, None, IdxType.Molecules
-
         _auto_module_class = target_modules.HEnergy
 
         def __init__(self, name, parents, module='auto',module_kwargs=None,**kwargs):
@@ -65,6 +64,9 @@ def test_create_simple_henergy_class(neural_network_node):
     energy.main_output
     energy.true
     energy.pred
+    energy.input_features
+    energy.system_index
+    energy.n_systems
     pass
 
 def test_create_full_henergy(neural_network_node):

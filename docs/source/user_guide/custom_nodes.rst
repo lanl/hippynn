@@ -50,7 +50,7 @@ A MultiNode
 
 A slightly more complex example would be to use a ``MultiNode``, which is a torch
 module that outputs several outputs. Specify the names of the outputs in the
-``_output_names`` attribute as a tuple of strings. Additionally, you can
+``output_names`` attribute as a tuple of strings. Additionally, you can
 specify the ``IdxType`` of the outputs so that other nodes can recognize
 what type of information is provided. Here is a stripped-down version of the
 hierarchical energy regression target :class:`~hippynn.graphs.nodes.targets.HEnergyNode`:
@@ -62,10 +62,10 @@ hierarchical energy regression target :class:`~hippynn.graphs.nodes.targets.HEne
    :end-before: # end doc snippet
 
 
-Note that we have added the input_names tuple as well, this attribute can be set on
+Note that we have added the ``input_names`` tuple as well, this attribute can be set on
 both SingleNode and MultiNode classes.
 
-The ``_main_output`` attribute specifies what tensor to use by default when sending information
+The ``main_output_name`` attribute specifies what tensor to use by default when sending information
 to a child node. This class also makes use of the ``AutoKw`` mix-in for defining a new module
 using keyword arguments. These arguments will be passed to a new instance of the attribute
 ``auto_module_class``. To use this node, we now only need to supply the arguments for the pytorch module:

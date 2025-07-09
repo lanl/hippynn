@@ -19,9 +19,8 @@ class IdxType(enum.Enum):
     MolAtomAtom = SysAtomAtom     # deprecated name
     QuadMol     = "QuadMol"
     QuadPack    = "QuadPack"      # packed 6-vec of quadrupole, upper triangle
-    Unlabeled   = "Unlabeled"
-    NotFound    = Unlabeled       # Not specified, may treat as any.
-    Other       = "Other"         # Does not conform to an existing indexing scheme; do not coerce.
+    Unlabeled   = "Unlabeled"     # Does not conform to an existing indexing scheme; do not coerce.
+    NotFound    = Unlabeled       
     
     def __repr__(self): return f"<{self.__class__.__name__}.{self.name}>"
 
