@@ -122,16 +122,14 @@ def elementwise_compare_reduce(*nodes_to_reduce):
         return tuple()
     
     try:
-        is_in_loss_graph(nodes_to_reduce) # raises error if node 
+        # The only purpose of this call is to raise error if a node is in an ambiguous state.
+        # Re-indexing a node is generally performed differently in the model graph compared 
+        # to the loss graph.
+        is_in_loss_graph(nodes_to_reduce) 
     except NodeAmbiguityError:
         raise NodeAmbiguityError("Combining nodes requires that they are in the same graph type (model or loss), " \
         "but mixed types were found.")
 
-    # assert (
-    #     is_in_loss_graph(nodes_to_reduce)#all(n.is_in_loss_graph() for n in nodes_to_reduce)     # all in loss
-    #     or                                                  # or
-    #     is_in_loss_graph(nodes_to_reduce)#all(not n.is_in_loss_graph() for n in nodes_to_reduce) # all in model
-    #     ),"Combining nodes requires that they are in the same graph type (model or loss), but mixed types were found."
     coerced_type = get_reduced_index_state(*nodes_to_reduce)
     coerced_nodes = [index_type_coercion(node, coerced_type, hints=nodes_to_reduce) for node in nodes_to_reduce]
     _debprint("Coerced:", [x.name for x in coerced_nodes])
