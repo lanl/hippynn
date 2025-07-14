@@ -66,10 +66,9 @@ class ValueNode(SingleNode):
         name = "Value({})".format(str(value))
         self.value = value
         self._converted = convert
-        super().__init__(name, parents=(), module="auto")
+        module = algebra_mods.ValueMod(self.value, convert=self._converted)
+        super().__init__(name, parents=(), module=module)
 
-    def auto_module(self):
-        return algebra_mods.ValueMod(self.value, convert=self._converted)
 
 class InvNode(UnaryNode, SingleNode, _AlgebraicOperation, operation="invert"):
     pass

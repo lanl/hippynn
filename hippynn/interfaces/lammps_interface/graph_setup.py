@@ -110,7 +110,7 @@ class ReIndexAtomMod(torch.nn.Module):
 class ReIndexAtomNode(AutoNoKw, SingleNode):
     input_names = "raw_atom_index_array", "inverse_real_atoms"
     main_output_name = "total_local_energy"
-    _auto_module_class = ReIndexAtomMod
+    auto_module_class = ReIndexAtomMod
 
     def __init__(self, name, parents, module="auto", **kwargs):
         self.index_state = parents[0].index_state
@@ -132,7 +132,7 @@ class LocalAtomEnergyNode(AutoNoKw, ExpandParents, MultiNode):
     output_names = "local_atom_energies", "total_local_energy"
     main_output_name = "total_local_energy"
     output_index_states = None, IdxType.Scalar
-    _auto_module_class = LocalAtomsEnergy
+    auto_module_class = LocalAtomsEnergy
 
     parent_expander.assertlen(2)
     parent_expander.get_main_outputs()

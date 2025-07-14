@@ -11,7 +11,7 @@ from ..indextypes import IdxType, index_type_coercion
 from ...layers import targets as target_modules
 
 
-class HEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
+class HEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, MultiNode):
     """
     Predict a system-level scalar such as energy from a sum over local components.
     """
@@ -20,7 +20,8 @@ class HEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
     output_names = "mol_energy", "atom_energies", "energy_terms", "hierarchicality", "atom_hier", "mol_hier", "batch_hier"
     main_output_name = "mol_energy"
     output_index_states = IdxType.Systems, IdxType.Atoms, None, IdxType.Systems, IdxType.Atoms, IdxType.Systems, IdxType.Scalar
-    _auto_module_class = target_modules.HEnergy
+    auto_module_class = target_modules.HEnergy
+    auto_module_kwargs = "first_is_interacting", "feature_sizes"
 
     @parent_expander.match(Network)
     def expansion0(self, net, **kwargs):
@@ -29,9 +30,8 @@ class HEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
         pdindexer = find_unique_relative(net, AtomIndexer)
         return net, pdindexer.mol_index, pdindexer.n_molecules
 
-    def __init__(self, name, parents, first_is_interacting=False, module="auto", module_kwargs=None, **kwargs):
+    def __init__(self, name, parents, first_is_interacting=False, module_kwargs=None, **kwargs):
         """
-
         :param name:
         :param parents:
         :param first_is_interacting: If True, drop the first feature
@@ -40,14 +40,11 @@ class HEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
         :param module_kwargs: other module keywords to use in initialization.
         :param kwargs:
         """
-        self.module_kwargs = {"first_is_interacting": first_is_interacting}
-        if module_kwargs is not None:
-            self.module_kwargs = {**self.module_kwargs, **module_kwargs}
-        parents = self.expand_parents(parents, **kwargs)
-        super().__init__(name, parents, module=module, **kwargs)
+        self.module_kwargs = module_kwargs or {}
+        super().__init__(name, parents, first_is_interacting=first_is_interacting, **kwargs)
 
 
-class HChargeNode(Charges, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
+class HChargeNode(Charges, HAtomRegressor,  ExpandParents, AutoKw, MultiNode):
     """
     Predict an atom-level scalar such as charge from local features.
     """
@@ -56,7 +53,7 @@ class HChargeNode(Charges, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
     output_names = "atom_charges", "partial_sums", "charge_hierarchality"
     main_output_name = "atom_charges"
     output_index_states = IdxType.Atoms, None, IdxType.Atoms
-    _auto_module_class = target_modules.HCharge
+    auto_module_class = target_modules.HCharge
 
     @parent_expander.match(Network)
     def expansion0(self, net, **kwargs):
@@ -65,26 +62,29 @@ class HChargeNode(Charges, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
         return (net.main_output,)
 
     def __init__(self, name, parents, module="auto", module_kwargs=None, **kwargs):
-        self.module_kwargs = {} if module_kwargs is None else module_kwargs
-        parents = self.expand_parents(parents)
+        self.module_kwargs = module_kwargs or {}
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class LocalChargeEnergy(Energies, ExpandParents, HAtomRegressor, MultiNode):
+class LocalChargeEnergy(Energies, ExpandParents, AutoKw, HAtomRegressor, MultiNode):
     input_names = "charges", "features", "mol_index", "n_molecules"
     output_names = "mol_energies", "atom_energies"
     main_output_name = "mol_energies"
     output_index_states = IdxType.Systems, IdxType.Atoms
-    _auto_module_class = target_modules.LocalChargeEnergy
+    auto_module_class = target_modules.LocalChargeEnergy
+    auto_module_kwargs = "first_is_interacting", "feature_sizes"
+
 
     @parent_expander.match(Node, Network)
     def expansion0(self, charge, network, **kwargs):
+        if "feature_sizes" not in self.module_kwargs:
+            self.module_kwargs["feature_sizes"] = network.torch_module.feature_sizes
         charge = index_type_coercion(charge.main_output, IdxType.Atoms)
         pdxer = find_unique_relative(network, PaddingIndexer)
         return charge, network.main_output, pdxer.mol_index, pdxer.n_molecules
 
-    def __init__(self, name, parents, **kwargs):
-        parents = self.parents_expand(parents)
+    def __init__(self, name, parents, module_kwargs=None, **kwargs):
+        self.module_kwargs = module_kwargs or {}
         super().__init__(name, parents, **kwargs)
 
 
@@ -93,7 +93,7 @@ class HBondNode(ExpandParents, AutoKw, MultiNode):
     Predict an pair-level scalar such as bond order from local features on both atoms
     """
 
-    _auto_module_class = target_modules.HBondSymmetric
+    auto_module_class = target_modules.HBondSymmetric
     output_names = "bonds", "bond_hierarchality"
     output_index_states = IdxType.Pairs, IdxType.Pairs
     input_names = "features", "pair_first", "pair_second", "pair_dist"
@@ -114,18 +114,18 @@ class HBondNode(ExpandParents, AutoKw, MultiNode):
     def expand2(self, features, pairfinder, **kwargs):
         return features.main_output, pairfinder.pair_first, pairfinder.pair_second, pairfinder.pair_dist
 
-    def __init__(self, name, parents, module="auto", module_kwargs=None, **kwargs):
-        self.module_kwargs = {} if module_kwargs is None else module_kwargs
-        parents = self.expand_parents(parents)
-        super().__init__(name, parents, module=module, **kwargs)
+    def __init__(self, name, parents, module_kwargs=None, **kwargs):
+        self.module_kwargs = module_kwargs or {}
+        super().__init__(name, parents, **kwargs)
 
 
-class AtomizationEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, MultiNode):
+class AtomizationEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, MultiNode):
     input_names = "hier_features", "vac_features", "encoding", "mol_index", "n_molecules"
     output_names = "mol_energy", "partial_energies", "hierarchicality"
     output_index_states = IdxType.Systems, None, IdxType.Systems
     main_output_name = "mol_energy"
-    _auto_module_class = target_modules.AtomizationEnergy
+    auto_module_class = target_modules.AtomizationEnergy
+    auto_module_kwargs = "feature_sizes",
 
     @parent_expander.match(Network)
     def expansion1(self, net, **kwargs):
@@ -149,11 +149,9 @@ class AtomizationEnergyNode(Energies, HAtomRegressor, AutoKw, ExpandParents, Mul
     parent_expander.get_main_outputs()
     parent_expander.require_idx_states(None, None, IdxType.Atoms, None, None)
 
-    def __init__(self, name, parents, module='auto', module_kwargs=None, **kwargs):
-        self.module_kwargs = {**module_kwargs} if module_kwargs else {}
-
-        parents = self.expand_parents(parents, **kwargs)
-        super().__init__(name, parents, module=module, **kwargs)
+    def __init__(self, name, parents, module_kwargs=None, **kwargs):
+        self.module_kwargs = module_kwargs or {}
+        super().__init__(name, parents, **kwargs)
 
     def create_henergy_equivalent(self):
         from .. import copy_subgraph, Predictor

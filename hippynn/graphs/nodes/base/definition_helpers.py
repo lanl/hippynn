@@ -15,21 +15,60 @@ from .. import _debprint
 
 from . import Node
 from ...indextypes import index_type_coercion, elementwise_compare_reduce, get_reduced_index_state
-
+from typing import Dict
 
 class AutoNoKw:
-    _auto_module_class = NotImplemented
-
-    def auto_module(self):
-        return self._auto_module_class()
+    def __init__(self, *args, module="auto", **kwargs):
+        if module == "auto":
+            module = self.auto_module_class()
+        super().__init__(*args,module=module,**kwargs)
 
 
 class AutoKw:
-    _auto_module_class = NotImplemented
+    """
+    Helper class for piping keyword arguments into an nn.module class.
 
-    def auto_module(self):
-        kw = self.module_kwargs or {}  # Default to empty dictionary if Falsey
-        return self._auto_module_class(**kw)
+    Keyword Argument sources (lower precedence first):
+
+        - module_kwargs argument to init.
+        - kwarg-source pairs from self.auto_module_kwargs,
+          where the value for the source is popped from the kwargs to the node.
+        - self.module_kwargs.
+
+    Note: If self.auto_module_kwargs is not a dict, it will then be interpreted
+      as a list of keys for a dictionary with the identity for key-value mapping.
+
+    After constructing the kwargs, they are saved as self.module_kwargs.
+
+    """
+    auto_module_kwargs: Dict[str,str] = None
+
+    def __init__(self, *args, module="auto", module_kwargs=None, **kwargs):
+
+
+        if module_kwargs is None:
+            module_kwargs = {}
+        
+        auto_module_kwargs = self.auto_module_kwargs
+
+        if auto_module_kwargs is None:
+            auto_module_kwargs = {}
+        elif not isinstance(auto_module_kwargs, dict):
+            # Assume list of keys-values which are identical.
+            auto_module_kwargs=dict(zip(auto_module_kwargs, auto_module_kwargs))
+
+        for k,v in auto_module_kwargs.items():
+            if v in kwargs:
+                module_kwargs[k] = kwargs.pop(v)
+
+        module_kwargs |=  getattr(self, "module_kwargs", {})
+
+        if module == "auto": 
+            self.module_kwargs = module_kwargs                
+            module = self.auto_module_class(**module_kwargs)            
+
+        super().__init__(*args, module=module, **kwargs)
+
 
 
 @contextlib.contextmanager
@@ -467,7 +506,43 @@ def _append_docs(cls):
 
 
 class ExpandParents(metaclass=ExpandParentMeta):
+    """ 
+    Keyword Argument sources (lower precedence first):
+
+        - expansion_kwargs argument to init.
+        - kwarg-source pairs from self.parent_expansion_kwargs,
+          where the value for the source is popped from the kwargs to the node.
+        - self.module_kwargs.
+
+    If self.parent_expansion_kwargs is not a dictionary it will be interpreted as
+        a list of keys for an identity key-value mapping.
+
+    """
     parent_expander: ParentExpander
+    parent_expansion_kwargs: dict = None
+    
+    def __init__(self, name, parents, *args, **kwargs):
+        
+        expansion_kwargs = kwargs.pop("expansion_kwargs", {})
+
+        parent_expansion_kwargs = getattr(self, "parent_expansion_kwargs")
+        if parent_expansion_kwargs is None:
+            parent_expansion_kwargs = {}
+        elif not isinstance(parent_expansion_kwargs,dict):
+            # Assume list of keys-values which are identical.
+            parent_expansion_kwargs = dict(zip(parent_expansion_kwargs,parent_expansion_kwargs))
+
+        for k, v in parent_expansion_kwargs.items():
+            if v in kwargs:
+                expansion_kwargs[k] = kwargs.pop(v)
+
+        if getattr(self, "module_kwargs", None) is not None:
+            for k, v in parent_expansion_kwargs.items():
+                if v in self.module_kwargs:
+                    expansion_kwargs[k] = self.module_kwargs[v]
+        
+        parents = self.expand_parents(parents, **expansion_kwargs)  
+        super().__init__(name, parents, *args, **kwargs)
 
     def __init_subclass__(cls, **kwargs):
         """

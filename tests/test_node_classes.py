@@ -42,7 +42,7 @@ def test_create_simple_henergy_class(neural_network_node):
         output_names = "system_energies", "atom_energies", "energy_terms", "hierarchicality"
         main_output_name = "system_energies"
         output_index_states = IdxType.Molecules, IdxType.Atoms, None, IdxType.Molecules
-        _auto_module_class = target_modules.HEnergy
+        auto_module_class = target_modules.HEnergy
 
         def __init__(self, name, parents, module='auto',module_kwargs=None,**kwargs):
             self.module_kwargs = module_kwargs

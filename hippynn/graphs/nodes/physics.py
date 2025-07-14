@@ -29,30 +29,31 @@ class GradientNode(AutoKw, SingleNode):
     """
 
     input_names = "energy", "coordinates"
-    _auto_module_class = physics_layers.Gradient
+    auto_module_class = physics_layers.Gradient
+    auto_module_kwargs = "sign",
 
-    def __init__(self, name, parents, sign, module="auto", **kwargs):
-        self.module_kwargs = {"sign": sign}
+    def __init__(self, name, parents, sign, **kwargs):
         energy, position = parents
         position.requires_grad = True
         parents = energy.main_output, position
         self.sign = sign
         self.index_state = position.index_state
-        super().__init__(name, parents, module=module, **kwargs)
+        super().__init__(name, parents, sign=sign, **kwargs)
         
 class MultiGradientNode(AutoKw, MultiNode):
     """
     Compute the gradient of a quantity.
     """
 
-    _auto_module_class = physics_layers.MultiGradient
+    auto_module_class = physics_layers.MultiGradient
+    auto_module_kwargs = "signs",
 
-    def __init__(self, name: str, molecular_energies_parent: Node, generalized_coordinates_parents: tuple[Node], signs: tuple[int], module="auto", **kwargs):
+
+    def __init__(self, name: str, molecular_energies_parent: Node, generalized_coordinates_parents: tuple[Node], signs: tuple[int], **kwargs):
         if isinstance(signs, int):
             signs = (signs,)
 
         self.signs = signs
-        self.module_kwargs = {"signs": signs}
 
         parents = molecular_energies_parent, *generalized_coordinates_parents
 
@@ -63,13 +64,13 @@ class MultiGradientNode(AutoKw, MultiNode):
         self.output_names = tuple((parent.name + "_grad" for parent in generalized_coordinates_parents))
         self.output_index_states = tuple(parent.index_state for parent in generalized_coordinates_parents)
 
-        super().__init__(name, parents, module=module, **kwargs)
+        super().__init__(name, parents, signs=signs, **kwargs)
 
 
 class StressForceNode(AutoNoKw, MultiNode):
     input_names = "energy", "strain", "coordinates", "cell"
     output_names = "forces", "stress"
-    _auto_module_class = physics_layers.StressForce
+    auto_module_class = physics_layers.StressForce
 
     def __init__(self, name, parents, module="auto", **kwargs):
         energy, strain, coordinates, cell = parents
@@ -109,7 +110,7 @@ class DipoleNode(ChargeMomentNode):
     Compute the dipole of point charges.
     """
 
-    _auto_module_class = physics_layers.Dipole
+    auto_module_class = physics_layers.Dipole
     index_state = IdxType.Systems
 
 
@@ -118,7 +119,7 @@ class QuadrupoleNode(ChargeMomentNode):
     Compute the traceless quadrupole of point charges.
     """
 
-    _auto_module_class = physics_layers.Quadrupole
+    auto_module_class = physics_layers.Quadrupole
     index_state = IdxType.QuadMol
 
 
@@ -175,19 +176,26 @@ class ChargePairSetup(ExpandParents):
     parent_expander.require_idx_states(IdxType.Atoms, *(None,) * 5)
 
 
-class CoulombEnergyNode(ChargePairSetup, Energies, AutoKw, MultiNode):
+class CoulombEnergyNode(AutoKw, ChargePairSetup, Energies,  MultiNode):
+    """
+    Besides the normal 'name' and 'parents' arguments, this node requires an `energy_conversion` parameter.
+    This corresponds to coulomb's constant k in the equation E = kqq/r.
+    """
+
     input_names = "charges", "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules"
     output_names = "mol_energies", "atom_energies", "atom_voltages"
     output_index_states = IdxType.Systems, IdxType.Atoms, IdxType.Atoms
     main_output_name = "mol_energies"
-    _auto_module_class = physics_layers.CoulombEnergy
+    auto_module_class = physics_layers.CoulombEnergy
+    auto_module_kwargs = "energy_conversion_factor"
 
+    
     @staticmethod
     def _validate_pairfinder(pairfinder, cutoff_distance):
         if not isinstance(pairfinder, OpenPairIndexer):
             raise TypeError(
                 "Closed boundary conditions detected.\n"
-                "Coulomb energy module is not compatible with open boundary conditions."
+                "Coulomb energy module is not compatible with closed boundary conditions."
             )
 
         if pairfinder.torch_module.hard_dist_cutoff is not None:
@@ -196,23 +204,25 @@ class CoulombEnergyNode(ChargePairSetup, Energies, AutoKw, MultiNode):
                 "coulomb energy requires summing over the entire set of pairs"
             )
 
-    def __init__(self, name, parents, energy_conversion, module="auto"):
-        """
-        Besides the normal 'name' and 'parents' arguments, this node requires an `energy_conversion` parameter.
-        This corresponds to coulomb's constant k in the equation E = kqq/r.
-        """
-        self.module_kwargs = {"energy_conversion_factor": energy_conversion}
-        parents = self.expand_parents(parents, cutoff_distance=None)
-        self.energy_conversion = energy_conversion
-        super().__init__(name, parents, module=module)
 
 
-class ScreenedCoulombEnergyNode(ChargePairSetup, Energies, AutoKw, MultiNode):
+class ScreenedCoulombEnergyNode(AutoKw, ChargePairSetup, Energies, MultiNode):
+    """
+    Besides the normal 'name' and 'parents' arguments, this node requires an `energy_conversion` parameter.
+    This corresponds to coulomb's constant k in the equation E = kqq/r.
+    """
+
     input_names = "charges", "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules"
     output_names = "mol_energies", "atom_energies", "atom_voltages"
     output_index_states = IdxType.Systems, IdxType.Atoms, IdxType.Atoms
     main_output_name = "mol_energies"
-    _auto_module_class = physics_layers.ScreenedCoulombEnergy
+    auto_module_class = physics_layers.ScreenedCoulombEnergy
+    auto_module_kwargs = {
+        "energy_conversion_factor":"energy_conversion_factor",
+        "radius": "cutoff_distance",
+        "screening": "screening",
+    }
+    parent_expansion_kwargs = "cutoff_distance",
 
     @staticmethod
     def _validate_pairfinder(pairfinder, cutoff_distance):
@@ -224,34 +234,24 @@ class ScreenedCoulombEnergyNode(ChargePairSetup, Energies, AutoKw, MultiNode):
                 f" for the pair_finder (named: {pairfinder.name})"
             )
 
-    def __init__(self, name, parents, energy_conversion, cutoff_distance, screening=None, module="auto"):
-        """
-        Besides the normal 'name' and 'parents' arguments, this node requires an `energy_conversion` parameter.
-        This corresponds to coulomb's constant k in the equation E = kqq/r.
-        """
-
+    def __init__(self, name, parents, energy_conversion_factor, cutoff_distance, screening=None, module="auto", **kwargs):
+        
         if screening is None and module == "auto":
             raise ValueError(
                 "To build this module automatically a screening module must\n"
                 "be provided (e.g. layers.physiscs.QScreening(p_value=4))"
             )
-
-        self.module_kwargs = {
-            "energy_conversion_factor": energy_conversion,
-            "radius": cutoff_distance,
-            "screening": screening,
-        }
-        parents = self.expand_parents(
-            parents,
-            cutoff_distance=cutoff_distance,
-        )
-        self.energy_conversion = energy_conversion
-        super().__init__(name, parents, module=module)
+        super().__init__(name, parents,
+                        energy_conversion_factor=energy_conversion_factor,
+                         cutoff_distance=cutoff_distance,
+                         screening=screening,
+                         module=module,
+                         **kwargs)
 
 
 class VecMag(ExpandParents, AutoNoKw, SingleNode):
     input_names = ("vector",)
-    _auto_module_class = physics_layers.VecMag
+    auto_module_class = physics_layers.VecMag
     index_state = IdxType.Unlabeled
 
     @parent_expander.match(Node, Node)
@@ -273,7 +273,7 @@ class VecMag(ExpandParents, AutoNoKw, SingleNode):
 
 class AtomToMolSummer(ExpandParents, AutoNoKw, SingleNode):
     input_names = "features", "mol_index", "n_molecules"
-    _auto_module_class = index_layers.MolSummer
+    auto_module_class = index_layers.MolSummer
     index_state = IdxType.Systems
 
     @parent_expander.match(Node)
@@ -297,7 +297,7 @@ class AtomToMolSummer(ExpandParents, AutoNoKw, SingleNode):
 # TODO: This seems broken for parent expanders, check the signature of the layer.
 class BondToMolSummmer(ExpandParents, AutoNoKw, SingleNode):
     input_names = "pairfeatures", "mol_index", "n_molecules", "pair_first"
-    _auto_module_class = pair_layers.MolPairSummer
+    auto_module_class = pair_layers.MolPairSummer
     index_state = IdxType.Systems
 
     @parent_expander.match(Node)
@@ -322,7 +322,7 @@ class BondToMolSummmer(ExpandParents, AutoNoKw, SingleNode):
 class PerAtom(ExpandParents, AutoNoKw, SingleNode):
     input_names = "features", "species"
     index_state = IdxType.Systems
-    _auto_module_class = physics_layers.PerAtom
+    auto_module_class = physics_layers.PerAtom
 
     @parent_expander.match(Node)
     def expansion0(self, features, *, purpose, **kwargs):
@@ -341,7 +341,7 @@ class PerAtom(ExpandParents, AutoNoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class CombineEnergyNode(Energies, AutoKw, ExpandParents, MultiNode):
+class CombineEnergyNode(AutoNoKw, Energies,  ExpandParents, MultiNode):
     """
     Combines Local atom energies from different Energy Nodes.
     """
@@ -353,7 +353,7 @@ class CombineEnergyNode(Energies, AutoKw, ExpandParents, MultiNode):
         IdxType.Systems,
         IdxType.Atoms,
     )
-    _auto_module_class = physics_layers.CombineEnergy
+    auto_module_class = physics_layers.CombineEnergy
 
     @parent_expander.match(Node, Energies)
     def expansion0(self, energy_1, energy_2, **kwargs):
@@ -375,7 +375,4 @@ class CombineEnergyNode(Energies, AutoKw, ExpandParents, MultiNode):
     parent_expander.assertlen(4)
     parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, None, None)
 
-    def __init__(self, name, parents, module="auto", module_kwargs=None, **kwargs):
-        self.module_kwargs = {} if module_kwargs is None else module_kwargs
-        parents = self.expand_parents(parents, **kwargs)
-        super().__init__(name, parents=parents, module=module, **kwargs)
+    

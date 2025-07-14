@@ -156,7 +156,7 @@ class SEQM_One_EnergyNode(ExpandParents, AutoKw, MultiNode):
     output_names = "mol_energy", "Etot_m_Eiso"
     main_output_name = "Etot_m_Eiso"
     output_index_states = (IdxType.Systems,) * len(output_names)
-    _auto_module_class = SEQM_One_Energy
+    auto_module_class = SEQM_One_Energy
 
     @parent_expander.match(Network, DensityMatrixNode)
     def expand0(self, network, single_particle_density_matrix, seqm_parameters, decay_factor=1.0e-2, **kwargs):
@@ -200,4 +200,4 @@ class SEQM_One_AllNode(SEQM_One_EnergyNode):
     )
     main_output_name = "Etot_m_Eiso"
     output_index_states = (IdxType.Systems,) * len(output_names)
-    _auto_module_class = SEQM_One_All
+    auto_module_class = SEQM_One_All

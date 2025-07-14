@@ -95,7 +95,7 @@ class MLSEQM_Node(AutoKw, MultiNode):
     )
     main_output_name = "mol_energy"
     output_index_states = (IdxType.Systems,) * len(output_names)
-    _auto_module_class = MLSEQM
+    auto_module_class = MLSEQM
 
     def __init__(self, name, parents, seqm_parameters, module="auto", **kwargs):
         self.module_kwargs = dict(seqm_parameters=seqm_parameters)

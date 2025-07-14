@@ -49,13 +49,10 @@ class SchNetWrapper(torch.nn.Module):
 class SchNetNode(AutoKw, Network, SingleNode):
     input_names = "species", "positions", "nonblank"
     index_state = IdxType.Atoms
-    _auto_module_class = SchNetWrapper
+    auto_module_class = SchNetWrapper
 
     def __init__(self, name, parents, module="auto", module_kwargs=None):
-        if module == "auto":
-            self.module_kwargs = module_kwargs
-            module = self.auto_module()
-        super().__init__(name, parents, module=module)
+        super().__init__(name, parents, module=module, module_kwargs=module_kwargs)
 
 
 def create_schnetpack_inputs(z_arr, r_arr, nonblank):

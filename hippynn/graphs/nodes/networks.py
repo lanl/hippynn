@@ -12,6 +12,12 @@ from ... import networks as network_modules
 
 
 class DefaultNetworkExpansion(ExpandParents):
+    parent_expansion_kwargs = {
+        "dist_hard_max": "dist_hard_max",
+        "species_set": "possible_species",
+        "periodic": "periodic",
+        }
+
     @parent_expander.match(SpeciesNode, PositionsNode)
     @parent_expander.match(SpeciesNode, PositionsNode, CellNode)
     def expansion0(self, species, *other_parents, species_set, purpose, **kwargs):
@@ -83,14 +89,14 @@ class _FeatureNodesMixin:
         self._feature_nodes = feature_nodes
 
 
-class Hipnn(DefaultNetworkExpansion, AutoKw, Network, SingleNode, _FeatureNodesMixin):
+class Hipnn(AutoKw, DefaultNetworkExpansion,  Network, SingleNode, _FeatureNodesMixin):
     """
     Node for HIP-NN neural networks
     """
 
     input_names = "input_features", "pair_first", "pair_second", "pair_dist"
     index_state = IdxType.Unlabeled
-    _auto_module_class = network_modules.hipnn.Hipnn
+    auto_module_class = network_modules.hipnn.Hipnn
 
     @parent_expander.match(Node, PairIndexer)
     def expansion2(self, features, pairfinder, **kwargs):
@@ -100,26 +106,19 @@ class Hipnn(DefaultNetworkExpansion, AutoKw, Network, SingleNode, _FeatureNodesM
     parent_expander.get_main_outputs()
     parent_expander.require_idx_states(IdxType.Atoms, None, None, None)
 
-    def __init__(self, name, parents, periodic=False, module="auto", module_kwargs=None):
-        if module == "auto":
-            self.module_kwargs = module_kwargs
-            net_module = self.auto_module()
-        else:
-            net_module = module
-        parents = self.expand_parents(
-            parents, species_set=net_module.species_set, dist_hard_max=net_module.dist_hard_max, periodic=periodic
-        )
-        super().__init__(name, parents, module=net_module)
+    def __init__(self, name, parents, periodic=False, **kwargs):
+        super().__init__(name, parents, periodic=periodic, **kwargs)
 
 
-class HipnnVec(DefaultNetworkExpansion, AutoKw, Network, SingleNode, _FeatureNodesMixin):
+
+class HipnnVec(AutoKw, DefaultNetworkExpansion, Network, SingleNode, _FeatureNodesMixin):
     """
     Node for HIP-NN-TS neural network, l=2
     """
 
     input_names = "input_features", "pair_first", "pair_second", "pair_dist", "pair_coord"
     index_state = IdxType.Unlabeled
-    _auto_module_class = network_modules.hipnn.HipnnVec
+    auto_module_class = network_modules.hipnn.HipnnVec
 
     @parent_expander.match(Node, PairIndexer)
     def expansion2(self, features, pairfinder, **kwargs):
@@ -129,24 +128,18 @@ class HipnnVec(DefaultNetworkExpansion, AutoKw, Network, SingleNode, _FeatureNod
     parent_expander.get_main_outputs()
     parent_expander.require_idx_states(IdxType.Atoms, None, None, None, None)
 
-    def __init__(self, name, parents, periodic=False, module="auto", module_kwargs=None):
-        if module == "auto":
-            self.module_kwargs = module_kwargs
-            net_module = self.auto_module()
-        else:
-            net_module = module
-        parents = self.expand_parents(
-            parents, species_set=net_module.species_set, dist_hard_max=net_module.dist_hard_max, periodic=periodic
-        )
-
-        super().__init__(name, parents, module=net_module)
+    def __init__(self, name, parents, periodic=False, **kwargs):
+        super().__init__(name, parents, periodic=periodic, **kwargs)
 
 
 class HipnnQuad(HipnnVec):
     """
     Node for HIP-NN-TS neural network, l=2
     """
-    _auto_module_class = network_modules.hipnn.HipnnQuad
+    auto_module_class = network_modules.hipnn.HipnnQuad
 
 class HipHopnn(HipnnVec):
-    _auto_module_class = network_modules.hiphop.HipHopNNModule
+    """
+    Node for HIP-HOP_NN neural network.
+    """
+    auto_module_class = network_modules.hiphop.HipHopNNModule

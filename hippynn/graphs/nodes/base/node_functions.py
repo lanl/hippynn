@@ -42,6 +42,9 @@ class _NodeFunctions(_DeprecatedNamesMixin):
 
         if not isinstance(name, str):
             raise TypeError("Node names must be strings. Instead got: {}".format(name))
+        
+        if isinstance(parents, _NodeFunctions):
+            parents = parents, # wrap a single node as a tuple of parents.
 
         self.name: str = name
         self.origin_node: Optional[Node] = None  # Loss input nodes set this attribute to find references to the model graph
@@ -59,15 +62,15 @@ class _NodeFunctions(_DeprecatedNamesMixin):
         self.db_name: Optional[str] = db_name 
 
         
-        # If specified, trigger automatic module generation
-        if module == "auto":
-            _debprint("Making auto module for", self.name)
-            module = self.auto_module()
+            
         # Otherwise, glue the module on
         if module is not None:
+            if module == "auto":
+                import warnings
+                warnings.warn("Auto module was specified but not created during node construction." \
+                " If a torch module is not supplied then execution will fail.")
             self.torch_module: torch.nn.Module = module
-        else:
-            pass
+        
             # In this case, the node must represent input tensors.
 
     def get_ancestors(self):
@@ -129,9 +132,6 @@ class _NodeFunctions(_DeprecatedNamesMixin):
         for c in self.children:
             c.disconnect_recursive()
 
-    def auto_module(self):
-        raise NotImplementedError("Auto module not defined for node {} of type {}".format(self, type(self)))
-    
 
     ## Properties to implement in concrete nodes.
 

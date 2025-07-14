@@ -158,7 +158,7 @@ class MAELoss(_BaseCompareLoss, op=torch.nn.functional.l1_loss):
 
 class _LPReg(SingleNode):
     index_state = IdxType.Scalar
-    _auto_module_class = reg_modules.LPReg
+    auto_module_class = reg_modules.LPReg
 
     def __init__(self, network, p=2, module="auto"):
         name = "L^P_Reg({},p={})".format(network.name, p)
@@ -167,7 +167,7 @@ class _LPReg(SingleNode):
         super().__init__(name, parents, module=module)
 
     def auto_module(self):
-        return self._auto_module_class(self.parents[0].torch_module, p=self.p)
+        return self.auto_module_class(self.parents[0].torch_module, p=self.p)
 
 
 def lpreg(network, p):

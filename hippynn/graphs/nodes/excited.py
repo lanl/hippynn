@@ -18,7 +18,7 @@ class NACRNode(AutoKw, SingleNode):
     """
 
     input_names = "charges i", "charges j", "coordinates", "energy i", "energy j"
-    _auto_module_class = excited_layers.NACR
+    auto_module_class = excited_layers.NACR
 
     def __init__(self, name: str, parents: Tuple, module="auto", module_kwargs=None, **kwargs):
         """Automatically build the node for calculating NACR * ΔE between two states i
@@ -60,7 +60,7 @@ class NACRMultiStateNode(AutoKw, SingleNode):
     """
 
     input_names = "charges", "coordinates", "energies"
-    _auto_module_class = excited_layers.NACRMultiState
+    auto_module_class = excited_layers.NACRMultiState
 
     def __init__(self, name, parents, module="auto", module_kwargs=None, **kwargs):
         """Automatically build the node for calculating NACR * ΔE between all pairs of
@@ -102,7 +102,7 @@ class LocalEnergyNode(Energies, ExpandParents, HAtomRegressor, MultiNode):
     output_names = "mol_energy", "atom_energy", "atom_preenergy", "atom_probabilities", "atom_propensities"
     main_output_name = "mol_energy"
     output_index_states = IdxType.Systems, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms
-    _auto_module_class = excited_layers.LocalEnergy
+    auto_module_class = excited_layers.LocalEnergy
 
     @parent_expander.match(Network)
     def expansion0(self, net, *, purpose, **kwargs):
@@ -122,7 +122,7 @@ class LocalEnergyNode(Energies, ExpandParents, HAtomRegressor, MultiNode):
 
     def auto_module(self):
         network = find_unique_relative(self, Network).torch_module
-        return self._auto_module_class(network.feature_sizes, **self.module_kwargs)
+        return self.auto_module_class(network.feature_sizes, **self.module_kwargs)
 
 
 def _mae_with_phases(predict: torch.Tensor, true: torch.Tensor):

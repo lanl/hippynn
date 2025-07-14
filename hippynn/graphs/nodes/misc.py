@@ -10,7 +10,7 @@ class StrainInducer(AutoNoKw, MultiNode):
     input_names = "coordinates", "cell"
     output_names = "strained_coordinates", "strained_cell", "strain"
     output_index_states = NotImplemented
-    _auto_module_class = index_modules.CellScaleInducer
+    auto_module_class = index_modules.CellScaleInducer
 
     def __init__(self, name, parents, module="auto", **kwargs):
         position, cell = parents
@@ -21,13 +21,13 @@ class StrainInducer(AutoNoKw, MultiNode):
 class ListNode(AutoNoKw, SingleNode):
     input_names = "features"
     output_names = "wrapped_features"
-    _auto_module_class = algebra_modules.ListMod
+    auto_module_class = algebra_modules.ListMod
 
     def __init__(self, name, parents, module="auto"):
         super().__init__(name, parents, module=module)
 
 class EnsembleTarget(ExpandParents, AutoNoKw, MultiNode):
-    _auto_module_class = algebra_modules.EnsembleTarget
+    auto_module_class = algebra_modules.EnsembleTarget
     input_names = NotImplemented  # NotImplemented tells __init_subclass__ that we will fill this in later.
     output_names = "mean", "std", "all"
 
