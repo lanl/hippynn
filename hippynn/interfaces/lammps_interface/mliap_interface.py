@@ -208,7 +208,7 @@ class MLIAPInterface(MLIAPUnified):
         """
 
         if self.using_kokkos:
-            raise ValueError("Kokkos not yet implemented")
+            return_device = data.elems.device
         else:
             return_device = "cpu"
 
@@ -219,8 +219,8 @@ class MLIAPInterface(MLIAPUnified):
         self.mliap_data = data  # hook data onto the (persistent) object for, e.g., comms hooks. This is needed!
         self.perform_setup()
 
-        elems = self.as_tensor(data.elems).type(torch.int64).reshape(1, data.ntotal)
-        z_vals = self.species_set[elems + 1]
+        self.elems = self.as_tensor(data.elems).type(torch.int64).reshape(1, data.ntotal)
+        z_vals = self.species_set[self.elems + 1]
         npairs = data.npairs
 
         if npairs > 0:
@@ -259,7 +259,7 @@ class MLIAPInterface(MLIAPUnified):
 
         # Write data back. Kokkos and non-kokkos interfaces have diverged, so slightly different paths.
         if self.using_kokkos:
-            return_device = elems.device
+            return_device = self.elems.device
         else:
             return_device = "cpu"
 
@@ -293,7 +293,7 @@ class MLIAPInterface(MLIAPUnified):
 
         self.mliap_data = None  # unhook data, see hooking above.
 
-    def compute_extra_property(self, data, lammps_property_name: str, index: int):
+    def compute_extra_property(self, data, lammps_property_name: str):
         """
         :param lammps_property_name: Property name coming from lammps
         :param: index: Index of the property name for lammps
@@ -301,7 +301,7 @@ class MLIAPInterface(MLIAPUnified):
         #general_property = extra_properties[property_name]
 
         if self.using_kokkos:
-            return_device = elems.device
+            return_device = self.elems.device
         else:
             return_device = "cpu"
 
@@ -317,14 +317,12 @@ class MLIAPInterface(MLIAPUnified):
         else:
             for i, property_name in enumerate(self.property_names):
                 if lammps_property_name == property_name:
-                    # view to data.get_extra_property
-                    property_kokkos = torch.as_tensor(data.get_extra_property(index), device=return_device)
-                    # write into view
-                    property_kokkos.copy_(self.properties[i].detach().to(return_device))
-                    
+                    extra_property_value = torch.as_tensor(self.properties[i], device=return_device, dtype=torch.float64)
+                    extra_property_value.copy_(self.properties[i])
+                    data.update_extra_property(lammps_property_name, extra_property_value)
                     break
-                else:
-                    raise ValueError(f"property {lammps_property_name} not found")
+            else:
+                raise ValueError(f"property {lammps_property_name} not found")
             # view to data.eatoms using pytorch, and write into the view.
             #eatoms = torch.as_tensor(data.eatoms, device=return_device)
             
