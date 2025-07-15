@@ -74,27 +74,27 @@ def get_simulated_data(
     if dtype is None:
         dtype = torch.get_default_dtype()
     np_fdtype = torch.zeros(1, dtype=torch.get_default_dtype()).numpy().dtype
-    molatom_shp = (n_systems, n_atoms)
-    molatom_presence = np.random.choice([False, True], p=[1 - atom_prob, atom_prob], size=molatom_shp)
-    atom_presence = molatom_presence.reshape(n_atoms * n_systems)
+    sysatom_shp = (n_systems, n_atoms)
+    sysatom_presence = np.random.choice([False, True], p=[1 - atom_prob, atom_prob], size=sysatom_shp)
+    atom_presence = sysatom_presence.reshape(n_atoms * n_systems)
 
     mol_features = np.random.randn(n_systems, n_atoms, n_features).astype(np_fdtype)
-    mol_features[~molatom_presence] = 0
+    mol_features[~sysatom_presence] = 0
 
     atom_features = mol_features.reshape(n_systems * n_atoms, n_features).astype(np_fdtype)[atom_presence]
-    n_real = molatom_presence.sum()
+    n_real = sysatom_presence.sum()
     real_atoms_arange = np.arange(n_real, dtype=int)
     inv_real_atoms = np.zeros(n_systems * n_atoms, dtype=int)
     inv_real_atoms[atom_presence] = real_atoms_arange
-    # atom_index = np.arange(n_systems*n_atoms).reshape(molatom_shp)
+    # atom_index = np.arange(n_systems*n_atoms).reshape(sysatom_shp)
     # system_index = np.repeat(np.arange(n_systems)[:,np.newaxis],n_atoms,axis=1)
 
     # pair_dists = np.sqrt(((coords[:,:,np.newaxis] - coords[:,np.newaxis,:])**2).sum(axis=3))
-    pair_presence = (molatom_presence[:, np.newaxis, :] * molatom_presence[:, :, np.newaxis]) & (
+    pair_presence = (sysatom_presence[:, np.newaxis, :] * sysatom_presence[:, :, np.newaxis]) & (
         ~np.identity(n_atoms, dtype=bool)[np.newaxis, :, :]
     )
 
-    atom_index = np.arange(n_systems * n_atoms).reshape(molatom_shp)
+    atom_index = np.arange(n_systems * n_atoms).reshape(sysatom_shp)
     nonzero_pair = np.nonzero(pair_presence)
 
     # We'll just do fully connected molecules.
@@ -132,7 +132,7 @@ def get_simulated_data(
         print("Total atoms:", n_real)
         print("Total pairs:", n_pairs)
         # print("Total (any) atom pairs:",n_atoms**2*n_systems)
-        # print("Total (nonblank) atom pairs:",(molatom_presence[:,np.newaxis,:]*molatom_presence[:,:,np.newaxis]).sum())
+        # print("Total (nonblank) atom pairs:",(sysatom_presence[:,np.newaxis,:]*sysatom_presence[:,:,np.newaxis]).sum())
     pair_sense = torch.tensor(pair_sensitivites).to(dtype=dtype, device=device)
     features = torch.tensor(atom_features).to(dtype=dtype, device=device)
     pair_first = torch.tensor(pair_first).to(device=device)

@@ -57,9 +57,9 @@ def min_dist_info(rij_list, j_list, system_index, atom_index, inv_real_atoms, n_
     ara = torch.arange(n_atoms, dtype=where_min_dist_atom.dtype, device=dev)
     min_dist_atomneigh = j_list[ara, where_min_dist_atom]
 
-    min_dist_molatom = torch.full((n_systems, n_atoms_max), maxr, device=rmag_list.device, dtype=rmag_list.dtype)
-    min_dist_molatom[system_index, atom_index] = min_dist_atom
-    min_dist_mol, where_min_dist_mol = min_dist_molatom.min(dim=1)
+    min_dist_sysatom = torch.full((n_systems, n_atoms_max), maxr, device=rmag_list.device, dtype=rmag_list.dtype)
+    min_dist_sysatom[system_index, atom_index] = min_dist_atom
+    min_dist_mol, where_min_dist_mol = min_dist_sysatom.min(dim=1)
 
     atom1 = where_min_dist_mol
 

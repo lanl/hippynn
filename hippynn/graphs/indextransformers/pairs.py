@@ -14,7 +14,7 @@ from .atoms import make_search_nodes
 # TODO: Rewrite so it can use non-one-hot-encodings?
 
 @register_index_transformer(IdxType.SysAtomAtom, IdxType.Pairs)
-def idx_molatomatom_pair(node, hints=None):
+def idx_sysatomatom_pairs(node, hints=None):
     purpose = "auto-generating indexing for {}".format(node)
 
     search_nodes = make_search_nodes(node, hints)
@@ -78,7 +78,7 @@ def idx_molatomatom_pair(node, hints=None):
 
 
 @register_index_transformer(IdxType.Pairs, IdxType.SysAtomAtom)
-def idx_pair_molatomatom(node, hints=None):
+def idx_pairs_sysatomatom(node, hints=None):
     purpose = "auto-generating indexing for {}".format(node)
 
     search_nodes = make_search_nodes(node,hints)

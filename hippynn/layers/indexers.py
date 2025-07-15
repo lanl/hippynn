@@ -107,9 +107,9 @@ class PaddingIndexer(torch.nn.Module):
 
 
 class AtomReIndexer(torch.nn.Module):
-    def forward(self, molatom_thing, real_atoms):
-        m, a, *rest = molatom_thing.shape
-        out = molatom_thing.reshape(m * a, *rest)[real_atoms]
+    def forward(self, sysatom_thing, real_atoms):
+        m, a, *rest = sysatom_thing.shape
+        out = sysatom_thing.reshape(m * a, *rest)[real_atoms]
         if len(rest) == 0:
             out = out.unsqueeze(1)
         return out

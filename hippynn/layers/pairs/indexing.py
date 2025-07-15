@@ -31,12 +31,12 @@ class ExternalNeighbors(_PairIndexer):
 
 
 class PairReIndexer(torch.nn.Module):
-    def forward(self, molatomatom_thing, molecule_index, atom_index, pair_first, pair_second):
+    def forward(self, sysatomatom_thing, molecule_index, atom_index, pair_first, pair_second):
 
         molecule_position = molecule_index[pair_first]
         absolute_first = atom_index[pair_first]
         absolute_second = atom_index[pair_second]
-        out = molatomatom_thing[molecule_position, absolute_first, absolute_second]
+        out = sysatomatom_thing[molecule_position, absolute_first, absolute_second]
         if out.ndimension() == 1:
             out = out.unsqueeze(1)
         return out

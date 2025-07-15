@@ -20,7 +20,7 @@ def make_search_nodes(node, hints):
     
 
 @register_index_transformer(IdxType.SysAtom, IdxType.Atoms)
-def idx_molatom_atom(node, hints=None):
+def idx_sysatom_atom(node, hints=None):
     purpose = "auto-generating indexing for {}".format(node)
 
     search_nodes = make_search_nodes(node, hints)
@@ -60,7 +60,7 @@ def idx_molatom_atom(node, hints=None):
 
 
 @register_index_transformer(IdxType.Atoms, IdxType.SysAtom)
-def idx_atom_molatom(node, hints=None):
+def idx_atom_sysatom(node, hints=None):
 
     if node.origin_node is None:
         parents = (node,)

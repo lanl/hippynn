@@ -108,9 +108,9 @@ class LocalEnergy(torch.nn.Module):
         # It's a standard SoftMax technique, however, the implementation is not built into pytorch for
         # the molecule/atom framework.
         with torch.autograd.no_grad():
-            propensity_molatom = all_features[0].new_full((n_molecules, n_atoms_max, 1), self.ninf)
-            propensity_molatom[system_index, atom_index] = propensity
-            propensity_norms = propensity_molatom.max(dim=1)[0]  # first element is max vals, 2nd is max position
+            propensity_sysatom = all_features[0].new_full((n_molecules, n_atoms_max, 1), self.ninf)
+            propensity_sysatom[system_index, atom_index] = propensity
+            propensity_norms = propensity_sysatom.max(dim=1)[0]  # first element is max vals, 2nd is max position
             propensity_norm_atoms = propensity_norms[system_index]
 
         propensity_normed = propensity - propensity_norm_atoms
