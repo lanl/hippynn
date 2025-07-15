@@ -277,7 +277,7 @@ class MLIAPInterface(MLIAPUnified):
             #print("type of atom_energy: ", type(atom_energy))
             #print("atom_energy shape: ", atom_energy.shape)
             data.eatoms = atom_energy.numpy().astype(np.double)
-            data.eatoms_stdev = self.properties[0].squeeze(1).detach().to(return_device).numpy().astype(np.double)
+            #data.eatoms_stdev = self.properties[0].squeeze(1).detach().to(return_device).numpy().astype(np.double)
             #print("data.eatoms:", data.eatoms)
             if data.npairs > 0:
                 data.update_pair_forces(fij)
@@ -308,7 +308,7 @@ class MLIAPInterface(MLIAPUnified):
         if not self.using_kokkos:
             for i, property_name in enumerate(self.property_names):
                 if lammps_property_name == property_name:
-                    data.set_extra_property(index, self.properties[i].detach().to(return_device).numpy().astype(np.double))
+                    data.update_extra_property(lammps_property_name, self.properties[i].detach().to(return_device).numpy().astype(np.double))
                     break
             else:
                 raise ValueError("Did not find given property")
