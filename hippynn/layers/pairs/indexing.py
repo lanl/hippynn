@@ -33,10 +33,10 @@ class ExternalNeighbors(_PairIndexer):
 class PairReIndexer(torch.nn.Module):
     def forward(self, sysatomatom_thing, system_index, atom_index, pair_first, pair_second):
 
-        molecule_position = system_index[pair_first]
+        system_pair_index = system_index[pair_first]
         absolute_first = atom_index[pair_first]
         absolute_second = atom_index[pair_second]
-        out = sysatomatom_thing[molecule_position, absolute_first, absolute_second]
+        out = sysatomatom_thing[system_pair_index, absolute_first, absolute_second]
         if out.ndimension() == 1:
             out = out.unsqueeze(1)
         return out
@@ -44,7 +44,7 @@ class PairReIndexer(torch.nn.Module):
 
 class PairDeIndexer(torch.nn.Module):
     def forward(self, features, system_index, atom_index, n_systems, n_atoms_max, pair_first, pair_second):
-        molecule_position = system_index[pair_first]
+        system_pair_index = system_index[pair_first]
         absolute_first = atom_index[pair_first]
         absolute_second = atom_index[pair_second]
 
@@ -54,7 +54,7 @@ class PairDeIndexer(torch.nn.Module):
         out_shape = (n_systems, n_atoms_max, n_atoms_max, *featshape)
 
         result = torch.zeros(*out_shape, device=features.device, dtype=features.dtype)
-        result[molecule_position, absolute_first, absolute_second] = features
+        result[system_pair_index, absolute_first, absolute_second] = features
         return result
 
 

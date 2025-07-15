@@ -21,7 +21,7 @@ from .indexers import AtomIndexer, PaddingIndexer, acquire_encoding_padding
 from .inputs import PositionsNode, SpeciesNode
 from .pairs import OpenPairIndexer
 from .tags import Charges, Encoder, Energies, PairIndexer
-
+from ..._deprecations import _DeprecatedNamesMixin
 
 class GradientNode(AutoKw, SingleNode):
     """
@@ -176,18 +176,20 @@ class ChargePairSetup(ExpandParents):
     parent_expander.require_idx_states(IdxType.Atoms, *(None,) * 5)
 
 
-class CoulombEnergyNode(AutoKw, ChargePairSetup, Energies,  MultiNode):
+class CoulombEnergyNode(AutoKw, ChargePairSetup, Energies,  MultiNode, _DeprecatedNamesMixin):
     """
     Besides the normal 'name' and 'parents' arguments, this node requires an `energy_conversion` parameter.
     This corresponds to coulomb's constant k in the equation E = kqq/r.
     """
-
+    _DEPRECATED_NAMES = {"mol_energies": "system_energies"}
     input_names = "charges", "pair_dist", "pair_first", "pair_second", "system_index", "n_systems"
-    output_names = "mol_energies", "atom_energies", "atom_voltages"
+    output_names = "system_energies", "atom_energies", "atom_voltages"
     output_index_states = IdxType.Systems, IdxType.Atoms, IdxType.Atoms
-    main_output_name = "mol_energies"
+    main_output_name = "system_energies"
     auto_module_class = physics_layers.CoulombEnergy
     auto_module_kwargs = "energy_conversion_factor"
+
+    
 
     
     @staticmethod
@@ -206,16 +208,16 @@ class CoulombEnergyNode(AutoKw, ChargePairSetup, Energies,  MultiNode):
 
 
 
-class ScreenedCoulombEnergyNode(AutoKw, ChargePairSetup, Energies, MultiNode):
+class ScreenedCoulombEnergyNode(AutoKw, ChargePairSetup, Energies, MultiNode, _DeprecatedNamesMixin):
     """
     Besides the normal 'name' and 'parents' arguments, this node requires an `energy_conversion` parameter.
     This corresponds to coulomb's constant k in the equation E = kqq/r.
     """
-
+    _DEPRECATED_NAMES = {"mol_energies": "system_energies"}
     input_names = "charges", "pair_dist", "pair_first", "pair_second", "system_index", "n_systems"
-    output_names = "mol_energies", "atom_energies", "atom_voltages"
+    output_names = "system_energies", "atom_energies", "atom_voltages"
     output_index_states = IdxType.Systems, IdxType.Atoms, IdxType.Atoms
-    main_output_name = "mol_energies"
+    main_output_name = "system_energies"
     auto_module_class = physics_layers.ScreenedCoulombEnergy
     auto_module_kwargs = {
         "energy_conversion_factor":"energy_conversion_factor",

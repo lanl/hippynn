@@ -143,7 +143,7 @@ def ASE_FilterPair_Coulomb_Construct():
 
     # Construct a Calculator from model. 
     from hippynn.interfaces.ase_interface import HippynnCalculator
-    energy_node = model.node_from_name('add(HEnergy.mol_energy, cEnergy.mol_energies)')
+    energy_node = model.node_from_name('add(HEnergy.system_energies, cEnergy.system_energies)')
     try:
         calc = HippynnCalculator(energy=energy_node)
         return True, None 

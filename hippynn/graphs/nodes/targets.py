@@ -9,6 +9,7 @@ from .tags import AtomIndexer, Network, PairIndexer, HAtomRegressor, Charges, En
 from .indexers import PaddingIndexer
 from ..indextypes import IdxType, index_type_coercion
 from ...layers import targets as target_modules
+from ..._deprecations import _DeprecatedNamesMixin
 
 
 class HEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, MultiNode):
@@ -66,10 +67,11 @@ class HChargeNode(Charges, HAtomRegressor,  ExpandParents, AutoKw, MultiNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class LocalChargeEnergy(Energies, ExpandParents, AutoKw, HAtomRegressor, MultiNode):
+class LocalChargeEnergy(Energies, ExpandParents, AutoKw, HAtomRegressor, MultiNode, _DeprecatedNamesMixin):
+    _DEPRECATED_NAMES = {"mol_energies": "system_energies"}
     input_names = "charges", "features", "system_index", "n_systems"
-    output_names = "mol_energies", "atom_energies"
-    main_output_name = "mol_energies"
+    output_names = "system_energies", "atom_energies"
+    main_output_name = "system_energies"
     output_index_states = IdxType.Systems, IdxType.Atoms
     auto_module_class = target_modules.LocalChargeEnergy
     auto_module_kwargs = "first_is_interacting", "feature_sizes"
