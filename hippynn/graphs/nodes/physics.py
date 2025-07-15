@@ -94,7 +94,7 @@ class ChargeMomentNode(ExpandParents, AutoNoKw, SingleNode):
 
     @parent_expander.match(Charges, PositionsNode, AtomIndexer)
     def expansion2(self, charges, positions, pdxer, **kwargs):
-        return charges, positions, pdxer.mol_index, pdxer.n_molecules
+        return charges, positions, pdxer.system_index, pdxer.n_systems
 
     parent_expander.assertlen(4)
     parent_expander.get_main_outputs()
@@ -169,7 +169,7 @@ class ChargePairSetup(ExpandParents):
     def expansion4(self, charges, pairfinder, pidxer, *, cutoff_distance, **kwargs):
         self._validate_pairfinder(pairfinder, cutoff_distance)
         pf = pairfinder
-        return charges, pf.pair_dist, pf.pair_first, pf.pair_second, pidxer.mol_index, pidxer.n_molecules
+        return charges, pf.pair_dist, pf.pair_first, pf.pair_second, pidxer.system_index, pidxer.n_systems
 
     parent_expander.assertlen(6)
     parent_expander.get_main_outputs()
@@ -283,7 +283,7 @@ class AtomToMolSummer(ExpandParents, AutoNoKw, SingleNode):
 
     @parent_expander.match(Node, AtomIndexer)
     def expansion1(self, features, pdxer, **kwargs):
-        return features, pdxer.mol_index, pdxer.n_molecules
+        return features, pdxer.system_index, pdxer.n_systems
 
     parent_expander.assertlen(3)
     parent_expander.get_main_outputs()
@@ -308,7 +308,7 @@ class BondToMolSummmer(ExpandParents, AutoNoKw, SingleNode):
 
     @parent_expander.match(Node, AtomIndexer, PairIndexer)
     def expansion1(self, features, pdxer, pair_idxer, **kwargs):
-        return features, pdxer.mol_index, pdxer.n_molecules, pair_idxer.pair_first
+        return features, pdxer.system_index, pdxer.n_systems, pair_idxer.pair_first
 
     @parent_expander.match(Node, Node, Node, Node, Node)
     def expansion2(self, features, mol_index, n_molecules, **kwargs):
@@ -370,7 +370,7 @@ class CombineEnergyNode(AutoNoKw, Energies,  ExpandParents, MultiNode):
 
     @parent_expander.match(Node, Node, PaddingIndexer)
     def expansion2(self, energy_1, energy_2, pdindexer, **kwargs):
-        return energy_1, energy_2, pdindexer.mol_index, pdindexer.n_molecules
+        return energy_1, energy_2, pdindexer.system_index, pdindexer.n_systems
 
     parent_expander.assertlen(4)
     parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, None, None)

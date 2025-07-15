@@ -73,7 +73,7 @@ def ASE_FilterPair_Coulomb_Construct():
         # input_names = "charges", "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules"
         (atom_charges,
             pairfinder.pair_dist, pairfinder.pair_first, pairfinder.pair_second,
-            padidxer.mol_index, padidxer.n_molecules),
+            padidxer.system_index, padidxer.n_systems),
         energy_conversion=energy_conv, 
     )
     ### 

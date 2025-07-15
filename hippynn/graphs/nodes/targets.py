@@ -28,7 +28,7 @@ class HEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, MultiNode):
         if "feature_sizes" not in self.module_kwargs:
             self.module_kwargs["feature_sizes"] = net.torch_module.feature_sizes
         pdindexer = find_unique_relative(net, AtomIndexer)
-        return net, pdindexer.mol_index, pdindexer.n_molecules
+        return net, pdindexer.system_index, pdindexer.n_systems
 
     def __init__(self, name, parents, first_is_interacting=False, module_kwargs=None, **kwargs):
         """
@@ -81,7 +81,7 @@ class LocalChargeEnergy(Energies, ExpandParents, AutoKw, HAtomRegressor, MultiNo
             self.module_kwargs["feature_sizes"] = network.torch_module.feature_sizes
         charge = index_type_coercion(charge.main_output, IdxType.Atoms)
         pdxer = find_unique_relative(network, PaddingIndexer)
-        return charge, network.main_output, pdxer.mol_index, pdxer.n_molecules
+        return charge, network.main_output, pdxer.system_index, pdxer.n_systems
 
     def __init__(self, name, parents, module_kwargs=None, **kwargs):
         self.module_kwargs = module_kwargs or {}
@@ -143,7 +143,7 @@ class AtomizationEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, Mul
         # Used to be built explicitly because of introduction of multiple encoders.
         # Now fixed by using constants when encoding on the vacuum side.
         # encatom = AtomReIndexer('Encoding[atoms]', (encoding.encoding, pdindexer))
-        return net, vacuum_net, encoding.encoding, pdindexer.mol_index, pdindexer.n_molecules,
+        return net, vacuum_net, encoding.encoding, pdindexer.system_index, pdindexer.n_systems,
 
     parent_expander.assertlen(5)
     parent_expander.get_main_outputs()

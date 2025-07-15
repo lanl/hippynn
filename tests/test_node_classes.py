@@ -54,7 +54,7 @@ def test_create_simple_henergy_class(neural_network_node):
 
     encoder, padding_indexer = acquire_encoding_padding(neural_network_node, None)
 
-    parents = neural_network_node, padding_indexer.mol_index, padding_indexer.n_molecules
+    parents = neural_network_node, padding_indexer.system_index, padding_indexer.n_systems
     module_kwargs = dict(feature_sizes=neural_network_node.torch_module.feature_sizes)
 
     energy = SimpleHEnergyNode("HEnergy", parents, module_kwargs=module_kwargs)

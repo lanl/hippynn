@@ -181,7 +181,7 @@ class PairDeIndexer(ExpandParents, AutoNoKw, SingleNode):
             pair_features.main_output,
             pad_idx.molecule_index,
             pad_idx.atom_index,
-            pad_idx.n_molecules,
+            pad_idx.n_systems,
             pad_idx.n_atoms_max,
             pair_idx.pair_first,
             pair_idx.pair_second,
@@ -214,9 +214,9 @@ class PairCacher(AutoKw, ExpandParents, PairCache, SingleNode):
 
     @parent_expander.match(PairIndexer, AtomIndexer)
     def expand1(self, pair_indexer, atomidx, *args, purpose, **kwargs):
-        mi = atomidx.mol_index
+        mi = atomidx.system_index
         nam = atomidx.n_atoms_max
-        n_molecules = atomidx.n_molecules
+        n_molecules = atomidx.n_systems
         ra = atomidx.real_atoms
         pf = pair_indexer.pair_first
         ps = pair_indexer.pair_second
@@ -248,7 +248,7 @@ class PairUncacher(ExpandParents, AutoNoKw, PairIndexer, MultiNode):
     def expand1(self, sp, r, c, atomidx, *args, purpose, **kwargs):
         ira = atomidx.inv_real_atoms
         nam = atomidx.n_atoms_max
-        n_molecules = atomidx.n_molecules
+        n_molecules = atomidx.n_systems
         ra = atomidx.real_atoms
         return sp, r, c, ra, ira, nam, n_molecules
 
@@ -297,7 +297,7 @@ class RDFBins(AutoKw, ExpandParents, SingleNode):
         Expanded the needed children of pairs, encoder, and padding indexer.
         """
         self.module_kwargs["species_set"] = one_hot.species_set
-        return pairs.pair_dist, pairs.pair_first, pairs.pair_second, one_hot.encoding, pad.n_molecules
+        return pairs.pair_dist, pairs.pair_first, pairs.pair_second, one_hot.encoding, pad.n_systems
 
     parent_expander.require_idx_states(IdxType.Pairs, IdxType.Pairs, IdxType.Pairs, IdxType.Atoms, None)
     parent_expander.assertlen(5)
@@ -346,8 +346,8 @@ class _DispatchNeighbors(AutoKw, ExpandParents, PeriodicPairOutputs, PairIndexer
             indexer.real_atoms,
             indexer.inv_real_atoms,
             cell,
-            indexer.mol_index,
-            indexer.n_molecules,
+            indexer.system_index,
+            indexer.n_systems,
             indexer.n_atoms_max,
         )
 
@@ -462,11 +462,11 @@ class MinDistNode(ExpandParents, AutoNoKw, MultiNode):
         return (
             neigh_list.rij_list,
             neigh_list.j_list,
-            pad_idxer.mol_index,
+            pad_idxer.system_index,
             pad_idxer.atom_index,
             pad_idxer.inv_real_atoms,
             pad_idxer.n_atoms_max,
-            pad_idxer.n_molecules,
+            pad_idxer.n_systems,
         )
 
     parent_expander.assertlen(7)

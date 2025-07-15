@@ -11,6 +11,8 @@ from ..indextypes import IdxType
 from ..indextypes.reduce_funcs import index_type_coercion
 from ...layers import indexers as index_modules
 
+from ..._deprecations import _DeprecatedNamesMixin
+
 
 class OneHotEncoder(AutoKw, Encoder, MultiNode):
     """
@@ -32,19 +34,22 @@ class OneHotEncoder(AutoKw, Encoder, MultiNode):
         super().__init__(name, parents, species_set=species_set, module=module, **kwargs)
 
 
-class PaddingIndexer(AtomIndexer, AutoNoKw, ExpandParents, MultiNode):
+class PaddingIndexer(AtomIndexer, AutoNoKw, ExpandParents, MultiNode, _DeprecatedNamesMixin):
     """
     Node for building information to convert from
     SysAtom to Atom index state.
     """
-
+    _DEPRECATED_NAMES = {
+        "mol_index": "system_index",
+        "n_molecules": "n_systems",
+        }
     output_names = (
         "indexed_features",
         "real_atoms",
         "inv_real_atoms",
-        "mol_index",
+        "system_index",
         "atom_index",
-        "n_molecules",
+        "n_systems",
         "n_atoms_max",
     )
     output_index_states = IdxType.Atoms, None, None, None, None, None, None  # optional?
@@ -97,7 +102,7 @@ class AtomDeIndexer(ExpandParents, AutoNoKw, SingleNode):
     @parent_expander.matchlen(1)
     def expand0(self, features, *, purpose, **kwargs):
         pad_idx = find_unique_relative(features, PaddingIndexer, why_desc=purpose)
-        return features, pad_idx.mol_index, pad_idx.atom_index, pad_idx.n_molecules, pad_idx.n_atoms_max
+        return features, pad_idx.system_index, pad_idx.atom_index, pad_idx.n_systems, pad_idx.n_atoms_max
 
     @parent_expander.matchlen(2)
     def expand0(self, features, mol_index, atom_index, n_mol, n_atom, **kwargs):
@@ -122,7 +127,6 @@ class FilterBondsOneway(AutoNoKw, SingleNode):
     """
     Node which filters the set of pairs to a one-way list.
     """
-
     input_names = "input_bonds", "pair_first", "pair_second"
     index_state = IdxType.Unlabeled
     auto_module_class = index_modules.FilterBondsOneway
@@ -143,7 +147,7 @@ class SysMaxOfAtomsNode(ExpandParents, AutoNoKw, SingleNode):
 
     @parent_expander.match(Node, AtomIndexer)
     def expansion1(self, node, pidxer, *, purpose, **kwargs):
-        return node, pidxer.mol_index, pidxer.n_molecules
+        return node, pidxer.system_index, pidxer.n_systems
 
     parent_expander.assertlen(3)
     parent_expander.get_main_outputs()

@@ -357,7 +357,7 @@ class PeriodicPairIndexerMemory(PairMemory):
 
     def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cells):
         if self.recalculation_needed(coordinates, cells):
-            self.n_molecules, self.n_atoms, _ = coordinates.shape
+            self.n_systems, self.n_atoms, _ = coordinates.shape
             self.recalculations += 1
 
             inputs = (coordinates, nonblank, real_atoms, inv_real_atoms, cells)
@@ -378,7 +378,7 @@ class PeriodicPairIndexerMemory(PairMemory):
         else:
             self.reuses += 1
             pair_shifts = torch.matmul(self.cell_offsets.unsqueeze(1).to(cells.dtype), cells[self.pair_mol]).squeeze(1)
-            coordflat = coordinates.reshape(self.n_molecules * self.n_atoms, 3)[real_atoms]
+            coordflat = coordinates.reshape(self.n_systems * self.n_atoms, 3)[real_atoms]
             paircoord = coordflat[self.pair_first] - coordflat[self.pair_second] + pair_shifts
             distflat = paircoord.norm(dim=1)
 

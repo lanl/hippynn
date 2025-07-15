@@ -73,7 +73,7 @@ def idx_molatomatom_pair(node, hints=None):
             pair_idx = new_PairType("Pairs", pair_parents, dist_hard_max=origin_pairs.dist_hard_max)
 
     cls = PairReIndexer
-    parents = node, pidxer.mol_index, pidxer.atom_index, pair_idx.pair_first, pair_idx.pair_second
+    parents = node, pidxer.system_index, pidxer.atom_index, pair_idx.pair_first, pair_idx.pair_second
     return parents, cls
 
 
@@ -89,9 +89,9 @@ def idx_pair_molatomatom(node, hints=None):
 
         parents = (
             node,
-            padidx.mol_index,
+            padidx.system_index,
             padidx.atom_index,
-            padidx.n_molecules,
+            padidx.n_systems,
             padidx.n_atoms_max,
             pidx.pair_first,
             pidx.pair_second,

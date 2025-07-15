@@ -111,7 +111,7 @@ class LocalEnergyNode(Energies, ExpandParents, HAtomRegressor, MultiNode):
 
     @parent_expander.match(Network, AtomIndexer)
     def expansion1(self, net, pdindexer, **kwargs):
-        return net, pdindexer.mol_index, pdindexer.atom_index, pdindexer.n_molecules, pdindexer.n_atoms_max
+        return net, pdindexer.system_index, pdindexer.atom_index, pdindexer.n_systems, pdindexer.n_atoms_max
 
     parent_expander.assertlen(5)
 
