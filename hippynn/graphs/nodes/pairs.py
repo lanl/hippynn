@@ -162,7 +162,7 @@ class PairDeIndexer(ExpandParents, AutoNoKw, SingleNode):
         "pair_features",
         "molecule_index",
         "atom_index",
-        "n_molecules",
+        "n_systems",
         "n_atoms_max" "pair_first",
         "pair_second",
     )
@@ -200,7 +200,7 @@ class PairCacher(AutoKw, ExpandParents, PairCache, SingleNode):
         "real_atoms",
         "system_index",
         "n_atoms_max",
-        "n_molecules",
+        "n_systems",
     )
     auto_module_class = pairs_modules.PairCacher
     index_state = IdxType.Unlabeled
@@ -216,20 +216,20 @@ class PairCacher(AutoKw, ExpandParents, PairCache, SingleNode):
     def expand1(self, pair_indexer, atomidx, *args, purpose, **kwargs):
         mi = atomidx.system_index
         nam = atomidx.n_atoms_max
-        n_molecules = atomidx.n_systems
+        n_systems = atomidx.n_systems
         ra = atomidx.real_atoms
         pf = pair_indexer.pair_first
         ps = pair_indexer.pair_second
         po = pair_indexer.cell_offsets
         poi = pair_indexer.offset_index
-        return pf, ps, po, poi, ra, mi, n_molecules, nam
+        return pf, ps, po, poi, ra, mi, n_systems, nam
 
     parent_expander.assertlen(8)
     parent_expander.require_idx_states(IdxType.Pairs, IdxType.Pairs, None, None, None, None, None, None)
 
 
 class PairUncacher(ExpandParents, AutoNoKw, PairIndexer, MultiNode):
-    input_names = "sparsepairs", "coordinates", "cells", "real_atoms", "inv_real_atoms", "n_atoms_max", "n_molecules"
+    input_names = "sparsepairs", "coordinates", "cells", "real_atoms", "inv_real_atoms", "n_atoms_max", "n_systems"
     output_names = "pair_dist", "pair_first", "pair_second", "pair_coord", "cell_offsets", "offset_index"
     output_index_states = (IdxType.Pairs,) * len(output_names)
     auto_module_class = pairs_modules.PairUncacher
@@ -248,9 +248,9 @@ class PairUncacher(ExpandParents, AutoNoKw, PairIndexer, MultiNode):
     def expand1(self, sp, r, c, atomidx, *args, purpose, **kwargs):
         ira = atomidx.inv_real_atoms
         nam = atomidx.n_atoms_max
-        n_molecules = atomidx.n_systems
+        n_systems = atomidx.n_systems
         ra = atomidx.real_atoms
-        return sp, r, c, ra, ira, nam, n_molecules
+        return sp, r, c, ra, ira, nam, n_systems
 
     parent_expander.assertlen(7)
 
@@ -260,7 +260,7 @@ class PairUncacher(ExpandParents, AutoNoKw, PairIndexer, MultiNode):
 
 
 class RDFBins(AutoKw, ExpandParents, SingleNode):
-    input_names = "pair_dists", "pair_first", "pair_second", "one_hot", "n_molecules"
+    input_names = "pair_dists", "pair_first", "pair_second", "one_hot", "n_systems"
     index_state = IdxType.Scalar # Computes over whole batch.
     auto_module_class = pairs_modules.RDFBins
     auto_module_kwargs = "bins",
@@ -320,7 +320,7 @@ class _DispatchNeighbors(AutoKw, ExpandParents, PeriodicPairOutputs, PairIndexer
         "inv_real_atoms",
         "cell",
         "system_index",
-        "n_molecules",
+        "n_systems",
         "n_atoms_max",
     )
     auto_module_kwargs = "dist_hard_max",
@@ -437,7 +437,7 @@ class PaddedNeighborNode(ExpandParents, AutoNoKw, MultiNode):
 
 
 class MinDistNode(ExpandParents, AutoNoKw, MultiNode):
-    input_names = "rij_list", "j_list", "system_index", "atom_index", "inv_real_atoms", "n_atoms_max", "n_molecules"
+    input_names = "rij_list", "j_list", "system_index", "atom_index", "inv_real_atoms", "n_atoms_max", "n_systems"
     output_names = "min_dist_mol", "mol_locs", "min_dist_atom", "atom_pairlocs"
     output_index_states = IdxType.Systems, IdxType.Systems, IdxType.Atoms, IdxType.Atoms
     auto_module_class = pairs_modules.MinDistModule

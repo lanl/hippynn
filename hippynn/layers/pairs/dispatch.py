@@ -234,7 +234,7 @@ class _DispatchNeighbors(torch.nn.Module):
     def compute_one(self, r, c):
         return NotImplemented
 
-    def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cell, system_index, n_molecules, n_atoms_max):
+    def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cell, system_index, n_systems, n_atoms_max):
 
         with torch.no_grad():
             dev = coordinates.device  # where to put the results.
@@ -242,7 +242,7 @@ class _DispatchNeighbors(torch.nn.Module):
             cell_list = cell.unbind(0)
             coord_list = coordinates.unbind(0)
             nb_list = nonblank.unbind(0)
-            sys_inv_atoms = inv_real_atoms.reshape(n_molecules, n_atoms_max).unbind(0)
+            sys_inv_atoms = inv_real_atoms.reshape(n_systems, n_atoms_max).unbind(0)
             nlist_data = []
 
             for (r, c, nb, sia) in zip(coord_list, cell_list, nb_list, sys_inv_atoms):
@@ -293,7 +293,7 @@ class _DispatchNeighbors(torch.nn.Module):
 
         # now calculate pair_dist, paircoord differentiably
         # print("Pairs found",pair_first.shape)
-        coordflat = coordinates.reshape(n_molecules * n_atoms_max, 3)[real_atoms]
+        coordflat = coordinates.reshape(n_systems * n_atoms_max, 3)[real_atoms]
         paircoord = coordflat[pair_first] - coordflat[pair_second] + pair_offsets
         distflat = paircoord.norm(dim=1)
 
@@ -341,11 +341,11 @@ class KDTreePairsMemory(PairMemory):
 
     _pair_indexer_class = KDTreeNeighbors
 
-    def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cells, system_index, n_molecules, n_atoms_max):
+    def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cells, system_index, n_systems, n_atoms_max):
         if self.recalculation_needed(coordinates, cells):
             self.recalculations += 1
 
-            inputs = (coordinates, nonblank, real_atoms, inv_real_atoms, cells, system_index, n_molecules, n_atoms_max)
+            inputs = (coordinates, nonblank, real_atoms, inv_real_atoms, cells, system_index, n_systems, n_atoms_max)
             outputs = self._pair_indexer(*inputs)
             distflat, pair_first, pair_second, paircoord, offsets, offset_index = outputs
 
@@ -368,7 +368,7 @@ class KDTreePairsMemory(PairMemory):
         else:
             self.reuses += 1
 
-            coordflat = coordinates.reshape(n_molecules * n_atoms_max, 3)[real_atoms]
+            coordflat = coordinates.reshape(n_systems * n_atoms_max, 3)[real_atoms]
             paircoord = coordflat[self.pair_first] - coordflat[self.pair_second] + self.pair_offsets
             distflat = paircoord.norm(dim=1)
 

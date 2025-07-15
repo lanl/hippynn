@@ -136,7 +136,7 @@ class FilterBondsOneway(AutoNoKw, SingleNode):
 
 
 class SysMaxOfAtomsNode(ExpandParents, AutoNoKw, SingleNode):
-    input_names = "var", "system_index", "n_molecules"
+    input_names = "var", "system_index", "n_systems"
     index_state = IdxType.Systems
     auto_module_class = index_modules.SysMaxOfAtoms
 

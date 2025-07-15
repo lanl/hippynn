@@ -22,11 +22,11 @@ class StaticImagePeriodicPairIndexer(_PairIndexer):
             cur_device = coordinates.device
 
             # Figure out how many molecules and atoms we have
-            n_molecules, n_atoms, _ = coordinates.shape
+            n_systems, n_atoms, _ = coordinates.shape
             n_atoms_max_batch = int(nonblank.sum(axis=1).max())
             # Construct a unique index for each atom (including blanks here)
             atom_index = torch.reshape(
-                torch.arange(n_molecules * n_atoms, dtype=torch.long, device=cur_device), (n_molecules, n_atoms)
+                torch.arange(n_systems * n_atoms, dtype=torch.long, device=cur_device), (n_systems, n_atoms)
             )
 
             nonblank = nonblank[:, :n_atoms_max_batch]
@@ -71,7 +71,7 @@ class StaticImagePeriodicPairIndexer(_PairIndexer):
 
             del nb_b, nb_a1, nb_a2, cp_pair, pair_dist, offsets, pair_diffcoords, nonblank_pair, atom_index
 
-        coordflat = original_coordinates.reshape(n_molecules * n_atoms, 3)[real_atoms]
+        coordflat = original_coordinates.reshape(n_systems * n_atoms, 3)[real_atoms]
         paircoord = coordflat[pair_first] - coordflat[pair_second] + pair_offsets
         distflat2 = paircoord.norm(dim=1)
 
@@ -215,11 +215,11 @@ class PeriodicPairIndexer(_PairIndexer):
             cur_device = coordinates.device
 
             # Figure out how many molecules and atoms we have
-            n_molecules, n_atoms, _ = coordinates.shape
+            n_systems, n_atoms, _ = coordinates.shape
             n_atoms_max_batch = nonblank.sum(dim=1).max()
             # Construct a unique index for each atom (including blanks here)
-            atom_index = torch.arange(n_molecules * n_atoms, dtype=torch.long, device=cur_device)
-            atom_index = atom_index.reshape(n_molecules, n_atoms)
+            atom_index = torch.arange(n_systems * n_atoms, dtype=torch.long, device=cur_device)
+            atom_index = atom_index.reshape(n_systems, n_atoms)
 
             # Trim padding in this batch to minimal level
             nonblank = nonblank[:, :n_atoms_max_batch]
@@ -335,7 +335,7 @@ class PeriodicPairIndexer(_PairIndexer):
 
         # Compute distance differentiably from total image offsets and pair indices
         pair_shifts = torch.matmul(cell_offsets.unsqueeze(1).to(cells.dtype), cells[pair_mol]).squeeze(1)
-        coordflat = original_coordinates.reshape(n_molecules * n_atoms, 3)[real_atoms]
+        coordflat = original_coordinates.reshape(n_systems * n_atoms, 3)[real_atoms]
         paircoord = coordflat[pair_first] - coordflat[pair_second] + pair_shifts
         distflat2 = paircoord.norm(dim=1)
 

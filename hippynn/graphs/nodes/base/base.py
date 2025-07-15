@@ -94,7 +94,7 @@ class PowNode(BinNode, SingleNode , _AlgebraicOperation, operation="pow"):
 
 # This Node exists to prevent potential broadcasting problems, for example in the loss.
 # Model-based quantities all use a feature index, even if the size is 1,
-# e.g. energy is predicted with shape (n_molecules, 1)
+# e.g. energy is predicted with shape (n_systems, 1)
 # This AtLeast2D is then used to wrap things coming from the database so that they will
 # have at least two dimensions.
 # See nodes/loss.py and turn on `debug_loss_broadcast` if you have concerns about

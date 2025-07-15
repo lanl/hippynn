@@ -66,7 +66,7 @@ class PaddingIndexer(torch.nn.Module):
         :return: real atoms, amd inverse atoms mappings
         """
         dev = features.device
-        n_molecules, n_atoms_max = nonblank.shape
+        n_systems, n_atoms_max = nonblank.shape
         n_fictitious_atoms = nonblank.shape[0] * nonblank.shape[1]
         # Just calculate the total number of atoms in the dataset
 
@@ -89,21 +89,21 @@ class PaddingIndexer(torch.nn.Module):
         # Create the inverse real atom "function" give it an index get an atom back
 
         # Flatten incoming features to atom representation
-        indexed_features = features.reshape(n_molecules * n_atoms_max, -1)[real_atoms]
+        indexed_features = features.reshape(n_systems * n_atoms_max, -1)[real_atoms]
         if indexed_features.ndimension() == 1:
             indexed_features = indexed_features.unsqueeze(1)
 
         # Get molecule index for atoms
         mol_index_shaped = (
-            torch.arange(n_molecules, dtype=torch.long, device=dev).unsqueeze(1).expand(-1, n_atoms_max)
+            torch.arange(n_systems, dtype=torch.long, device=dev).unsqueeze(1).expand(-1, n_atoms_max)
         )
         atom_index_shaped = (
-            torch.arange(n_atoms_max, dtype=torch.long, device=dev).unsqueeze(0).expand(n_molecules, -1)
+            torch.arange(n_atoms_max, dtype=torch.long, device=dev).unsqueeze(0).expand(n_systems, -1)
         )
         atom_index = atom_index_shaped.reshape(n_fictitious_atoms)[real_atoms]
         system_index = mol_index_shaped.reshape(n_fictitious_atoms)[real_atoms]
 
-        return indexed_features, real_atoms, inv_real_atoms, system_index, atom_index, n_molecules, n_atoms_max
+        return indexed_features, real_atoms, inv_real_atoms, system_index, atom_index, n_systems, n_atoms_max
 
 
 class AtomReIndexer(torch.nn.Module):
@@ -124,9 +124,9 @@ class MolSummer(torch.nn.Module):
         It actually works similarly to the interaction layer
     """
 
-    def forward(self, features, system_index, n_molecules):
+    def forward(self, features, system_index, n_systems):
         featshape = (1,) if features.ndimension() == 1 else features.shape[1:]
-        out_shape = (n_molecules, *featshape)
+        out_shape = (n_systems, *featshape)
         result = torch.zeros(*out_shape, device=features.device, dtype=features.dtype)
         result.index_add_(0, system_index, features)
 
@@ -137,7 +137,7 @@ class SysMaxOfAtoms(torch.nn.Module):
     """
     Take maximum over atom dimension.
     """
-    def forward(self, features, system_index, n_molecules):
+    def forward(self, features, system_index, n_systems):
         # Add feature dimension if not found
         if features.ndim == 1:
             featshape = (1,)
@@ -145,7 +145,7 @@ class SysMaxOfAtoms(torch.nn.Module):
         else:
             featshape = features.shape[1:]
         # Allocate result
-        out_shape = (n_molecules, *featshape)
+        out_shape = (n_systems, *featshape)
         result = torch.zeros(*out_shape, device=features.device, dtype=features.dtype)
 
         # Prepare index shape for scatter operation
@@ -157,9 +157,9 @@ class SysMaxOfAtoms(torch.nn.Module):
         return result
 
 class AtomDeIndexer(torch.nn.Module):
-    def forward(self, features, system_index, atom_index, n_molecules, n_atoms_max):
+    def forward(self, features, system_index, atom_index, n_systems, n_atoms_max):
         featshape = 1 if features.ndimension() == 1 else features.shape[1:]
-        out_shape = (n_molecules, n_atoms_max, *featshape)
+        out_shape = (n_systems, n_atoms_max, *featshape)
         result = torch.zeros(*out_shape, device=features.device, dtype=features.dtype)
         result[system_index, atom_index] = features
         return result

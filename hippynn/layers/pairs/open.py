@@ -12,12 +12,12 @@ class OpenPairIndexer(_PairIndexer):
 
         with torch.no_grad():
 
-            n_molecules, n_atoms, _ = coordinates.shape
+            n_systems, n_atoms, _ = coordinates.shape
             cur_device = coordinates.device
             # Figure out how many molecules and atoms we have
 
             atom_index = torch.reshape(
-                torch.arange(n_molecules * n_atoms, dtype=torch.long, device=cur_device), (n_molecules, n_atoms)
+                torch.arange(n_systems * n_atoms, dtype=torch.long, device=cur_device), (n_systems, n_atoms)
             )
             n_atoms_max_batch = int(nonblank.sum(axis=1).max())
             namax_box = n_atoms_max_batch
@@ -53,7 +53,7 @@ class OpenPairIndexer(_PairIndexer):
             pair_first = inv_real_atoms[pair_first]
             pair_second = inv_real_atoms[pair_second]
 
-        coordflat = coordinates.reshape(n_molecules * n_atoms, 3)[real_atoms]
+        coordflat = coordinates.reshape(n_systems * n_atoms, 3)[real_atoms]
         paircoord = coordflat[pair_second] - coordflat[pair_first]
         distflat2 = paircoord.norm(dim=1)
 

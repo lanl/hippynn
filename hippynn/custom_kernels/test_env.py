@@ -41,7 +41,7 @@ def get_simulated_data(
 ):
     """
     Get semi-realistic test data for hipnn.
-    n_molecules : number of molecules in the batch
+    n_systems : number of molecules in the batch
     n_atoms     : number of atoms in each system
     atom_prob   : probability that an atom is real (not a padding)
     n_features  : number of features on e
@@ -86,8 +86,8 @@ def get_simulated_data(
     real_atoms_arange = np.arange(n_real, dtype=int)
     inv_real_atoms = np.zeros(n_systems * n_atoms, dtype=int)
     inv_real_atoms[atom_presence] = real_atoms_arange
-    # atom_index = np.arange(n_molecules*n_atoms).reshape(molatom_shp)
-    # system_index = np.repeat(np.arange(n_molecules)[:,np.newaxis],n_atoms,axis=1)
+    # atom_index = np.arange(n_systems*n_atoms).reshape(molatom_shp)
+    # system_index = np.repeat(np.arange(n_systems)[:,np.newaxis],n_atoms,axis=1)
 
     # pair_dists = np.sqrt(((coords[:,:,np.newaxis] - coords[:,np.newaxis,:])**2).sum(axis=3))
     pair_presence = (molatom_presence[:, np.newaxis, :] * molatom_presence[:, :, np.newaxis]) & (
@@ -131,7 +131,7 @@ def get_simulated_data(
         print("Number of sensitivities:", n_nu)
         print("Total atoms:", n_real)
         print("Total pairs:", n_pairs)
-        # print("Total (any) atom pairs:",n_atoms**2*n_molecules)
+        # print("Total (any) atom pairs:",n_atoms**2*n_systems)
         # print("Total (nonblank) atom pairs:",(molatom_presence[:,np.newaxis,:]*molatom_presence[:,:,np.newaxis]).sum())
     pair_sense = torch.tensor(pair_sensitivites).to(dtype=dtype, device=device)
     features = torch.tensor(atom_features).to(dtype=dtype, device=device)

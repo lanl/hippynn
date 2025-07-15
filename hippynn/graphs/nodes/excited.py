@@ -98,7 +98,7 @@ class LocalEnergyNode(Energies, ExpandParents, HAtomRegressor, MultiNode):
     Predict a localized energy, with contributions from implicitly computed atoms.
     """
 
-    input_names = "hier_features", "system_index", "atom index", "n_molecules", "n_atoms_max"
+    input_names = "hier_features", "system_index", "atom index", "n_systems", "n_atoms_max"
     output_names = "mol_energy", "atom_energy", "atom_preenergy", "atom_probabilities", "atom_propensities"
     main_output_name = "mol_energy"
     output_index_states = IdxType.Systems, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms, IdxType.Atoms

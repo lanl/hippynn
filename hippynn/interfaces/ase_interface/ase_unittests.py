@@ -70,7 +70,7 @@ def ASE_FilterPair_Coulomb_Construct():
     energy_conv = 14.397 # Coulomb-konst
     coulomb_energy = physics.CoulombEnergyNode(
         "cEnergy",
-        # input_names = "charges", "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules"
+        # input_names = "charges", "pair_dist", "pair_first", "pair_second", "system_index", "n_systems"
         (atom_charges,
             pairfinder.pair_dist, pairfinder.pair_first, pairfinder.pair_second,
             padidxer.system_index, padidxer.n_systems),
