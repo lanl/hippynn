@@ -122,7 +122,7 @@ class PairReIndexer(ExpandParents, AutoNoKw, SingleNode):
     from IdxType.SysAtomAtom -> IdxType.Pairs
     """
 
-    input_names = "pair_features", "molecule_index", "atom_index", "pair_first", "pair_second"
+    input_names = "pair_features", "system_index", "atom_index", "pair_first", "pair_second"
     auto_module_class = pairs_modules.PairReIndexer
     index_state = IdxType.Pairs
 
@@ -136,7 +136,7 @@ class PairReIndexer(ExpandParents, AutoNoKw, SingleNode):
     def expand1(self, pair_features, pad_idx, pair_idx):
         return (
             pair_features.main_output,
-            pad_idx.molecule_index,
+            pad_idx.system_index,
             pad_idx.atom_index,
             pair_idx.pair_first,
             pair_idx.pair_second,
@@ -160,7 +160,7 @@ class PairDeIndexer(ExpandParents, AutoNoKw, SingleNode):
 
     input_names = (
         "pair_features",
-        "molecule_index",
+        "system_index",
         "atom_index",
         "n_systems",
         "n_atoms_max" "pair_first",
@@ -179,7 +179,7 @@ class PairDeIndexer(ExpandParents, AutoNoKw, SingleNode):
     def expand1(self, pair_features, pad_idx, pair_idx):
         return (
             pair_features.main_output,
-            pad_idx.molecule_index,
+            pad_idx.system_index,
             pad_idx.atom_index,
             pad_idx.n_systems,
             pad_idx.n_atoms_max,

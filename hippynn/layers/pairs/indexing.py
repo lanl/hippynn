@@ -31,9 +31,9 @@ class ExternalNeighbors(_PairIndexer):
 
 
 class PairReIndexer(torch.nn.Module):
-    def forward(self, sysatomatom_thing, molecule_index, atom_index, pair_first, pair_second):
+    def forward(self, sysatomatom_thing, system_index, atom_index, pair_first, pair_second):
 
-        molecule_position = molecule_index[pair_first]
+        molecule_position = system_index[pair_first]
         absolute_first = atom_index[pair_first]
         absolute_second = atom_index[pair_second]
         out = sysatomatom_thing[molecule_position, absolute_first, absolute_second]
@@ -43,8 +43,8 @@ class PairReIndexer(torch.nn.Module):
 
 
 class PairDeIndexer(torch.nn.Module):
-    def forward(self, features, molecule_index, atom_index, n_systems, n_atoms_max, pair_first, pair_second):
-        molecule_position = molecule_index[pair_first]
+    def forward(self, features, system_index, atom_index, n_systems, n_atoms_max, pair_first, pair_second):
+        molecule_position = system_index[pair_first]
         absolute_first = atom_index[pair_first]
         absolute_second = atom_index[pair_second]
 
