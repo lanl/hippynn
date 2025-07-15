@@ -15,7 +15,7 @@ from .. import _debprint
 
 from . import Node
 from ...indextypes import index_type_coercion, elementwise_compare_reduce, get_reduced_index_state
-from typing import Dict
+from typing import Dict, Union, Tuple, Optional
 
 class AutoNoKw:
     def __init__(self, *args, module="auto", **kwargs):
@@ -41,7 +41,7 @@ class AutoKw:
     After constructing the kwargs, they are saved as self.module_kwargs.
 
     """
-    auto_module_kwargs: Dict[str,str] = None
+    auto_module_kwargs: Optional[Union[Tuple[str], Dict[str,str]]] = None
 
     def __init__(self, *args, module="auto", module_kwargs=None, **kwargs):
 
@@ -400,8 +400,6 @@ class IndexFormTransformer(FormTransformer):
             if idxstate is None:
                 new = node
             else:
-                #if node.index_state is None:
-                #    raise ValueError(f"Hi from {node,node.index_state=} to {idxstate}")
                 new = index_type_coercion(node, idxstate)
             new_parents.append(new)
         return tuple(new_parents)
@@ -478,6 +476,8 @@ class FormAssertLength(FormAssertion):
 # is executed; __init_subclass__ is run /after/ the class
 # definition is executed.
 class ExpandParentMeta(type):
+    parent_expander: ParentExpander
+
     @classmethod
     def __prepare__(mcl, name, bases, **kwargs):
         cls_dict = super(ExpandParentMeta, mcl).__prepare__(name, bases, **kwargs)
@@ -519,7 +519,7 @@ class ExpandParents(metaclass=ExpandParentMeta):
 
     """
     parent_expander: ParentExpander
-    parent_expansion_kwargs: dict = None
+    parent_expansion_kwargs: Optional[Union[Tuple[str], Dict[str,str]]] = None
     
     def __init__(self, name, parents, *args, **kwargs):
         
@@ -528,9 +528,9 @@ class ExpandParents(metaclass=ExpandParentMeta):
         parent_expansion_kwargs = getattr(self, "parent_expansion_kwargs")
         if parent_expansion_kwargs is None:
             parent_expansion_kwargs = {}
-        elif not isinstance(parent_expansion_kwargs,dict):
+        elif not isinstance(parent_expansion_kwargs, dict):
             # Assume list of keys-values which are identical.
-            parent_expansion_kwargs = dict(zip(parent_expansion_kwargs,parent_expansion_kwargs))
+            parent_expansion_kwargs = dict(zip(parent_expansion_kwargs, parent_expansion_kwargs))
 
         for k, v in parent_expansion_kwargs.items():
             if v in kwargs:
