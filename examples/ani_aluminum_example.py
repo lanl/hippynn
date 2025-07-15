@@ -28,8 +28,19 @@ import torch
 torch.set_default_dtype(torch.float32)
 
 import hippynn
+import argparse
+import numpy as np
 
-netname = "TEST_ALUMINUM_MODEL"
+# parse random seed in argument e.g. `python ani_aluminum_example.py --seed=1001`
+# and geenrate ensembles with atom energies
+parser = argparse.ArgumentParser(description='setting random seeds')
+parser.add_argument('--seed', type=int, default=1001, help='seed')
+args = parser.parse_args()
+
+if args.seed == 1001:
+    netname = f'TEST_ALUMINUM_MODEL_{args.seed}'
+else:
+    netname = f'ALUMINUM_ENSEMBLES/TEST_ALUMINUM_MODEL_{args.seed}'
 
 if torch.cuda.is_available():
     # If GPU is available, we train to 80/10/10 split.
@@ -74,6 +85,8 @@ with hippynn.tools.active_directory(netname):
         henergy = targets.HEnergyNode("HEnergy", network)
         sys_energy = henergy.mol_energy
         sys_energy.db_name = "energy"
+        atom_energies = henergy.atom_energies
+        atom_energies.db_name = 'atomenergies'
         hierarchicality = henergy.hierarchicality
         hierarchicality = physics.PerAtom("RperAtom", hierarchicality)
         force = physics.GradientNode("force", (sys_energy, positions), sign=1)
@@ -94,6 +107,8 @@ with hippynn.tools.active_directory(netname):
         rbar = loss.Mean(hierarchicality.pred)
         l2_reg = loss.l2reg(network)
 
+        atomenergies_mae= loss.MAELoss.of_node(atom_energies)
+
         loss_error = 1e2 * (rmse_energy + mae_energy) + (force_mae + force_rmse)
         loss_regularization = 1e-6 * l2_reg + rbar
         train_loss = loss_error + loss_regularization
@@ -105,6 +120,7 @@ with hippynn.tools.active_directory(netname):
             "ForceRMSE": force_rmse,
             "ForceMAE": force_mae,
             "ForceRsq": force_rsq,
+            "Atom_E_MAE": atomenergies_mae,
             "T-Hier": rbar,
             "L2Reg": l2_reg,
             "Loss-Err": loss_error,
@@ -137,7 +153,7 @@ with hippynn.tools.active_directory(netname):
         torch.set_default_dtype(torch.float64)  # Temporary for data pre-processing
         database = PyAniDirectoryDB(
             directory="../../../datasets/ani-al/data/",
-            seed=1001,  # Random seed for splitting data
+            seed=args.seed,  # Random seed for splitting data
             quiet=False,
             allow_unfound=True,  # allows post-loading preprocessing of arrays
             inputs=None,
@@ -154,6 +170,7 @@ with hippynn.tools.active_directory(netname):
         arrays["energy"] = arrays["energy"] * (ase.units.Hartree / ase.units.eV)
         arrays["energy"] = arrays["energy"] + energy_shift * n_atoms
         arrays["energyperatom"] = arrays["energy"] / n_atoms
+        arrays["atomenergies"] = torch.zeros((arrays["force"].shape[0], arrays["force"].shape[1], 1))
 
         # Adds the inputs and targets db_names from the model as things to load
         database.inputs = db_info["inputs"]
@@ -214,3 +231,4 @@ with hippynn.tools.active_directory(netname):
             database=database,
             setup_params=experiment_params,
         )
+
