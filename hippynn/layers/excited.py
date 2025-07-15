@@ -36,16 +36,16 @@ class NACRMultiState(torch.nn.Module):
         super().__init__()
 
     def forward(self, charges: Tensor, positions: Tensor, energies: Tensor):
-        # charges shape: n_systems, n_atoms, n_targets
-        # positions shape: n_systems, n_atoms, 3
-        # energies shape: n_systems, n_targets
-        # dE shape: n_systems, n_targets, n_targets
+        # charges shape: n_molecules, n_atoms, n_targets
+        # positions shape: n_molecules, n_atoms, 3
+        # energies shape: n_molecules, n_targets
+        # dE shape: n_molecules, n_targets, n_targets
         dE = energies.unsqueeze(1) - energies.unsqueeze(2)
         # take the upper triangle excluding the diagonal
         indices = torch.triu_indices(
             self.n_target, self.n_target, offset=1, device=dE.device
         )
-        # dE shape: n_systems, n_pairs
+        # dE shape: n_molecules, n_pairs
         # n_pairs = n_targets * (n_targets - 1) / 2
         dE = dE[..., indices[0], indices[1]]
         # compute q1 * dq2/dR
@@ -58,10 +58,10 @@ class NACRMultiState(torch.nn.Module):
                 create_graph=True,
             )[0]
             nacr_ij.append(nacr)
-        # nacr shape: n_systems, n_atoms, 3, n_pairs
+        # nacr shape: n_molecules, n_atoms, 3, n_pairs
         nacr = torch.stack(nacr_ij, dim=1)
-        n_molecule, n_pairs, n_atoms, n_dims = nacr.shape
-        nacr = nacr.reshape(n_molecule, n_pairs, n_atoms * n_dims)
+        n_systems, n_pairs, n_atoms, n_dims = nacr.shape
+        nacr = nacr.reshape(n_systems, n_pairs, n_atoms * n_dims)
         # multiply dE
         return nacr * dE.unsqueeze(2)
 
@@ -84,12 +84,12 @@ class LocalEnergy(torch.nn.Module):
         self.players = torch.nn.ModuleList(torch.nn.Linear(nf, 1, bias=False) for nf in feature_sizes)
         self.ninf = float("-inf")
 
-    def forward(self, all_features, system_index, atom_index, n_systems, n_atoms_max):
+    def forward(self, all_features, system_index, atom_index, n_molecules, n_atoms_max):
         """
         :param all_features: list of feature tensors
         :param system_index: which molecule is the atom
         :param atom_index: which atom in the molecule is that atom
-        :param n_systems: total number of molecules in the batch
+        :param n_molecules: total number of molecules in the batch
         :param n_atoms_max: maximum number of atoms in the batch
         :return: contributed_energy, atom_energy, atom_preenergy, prob, propensity
         """
@@ -108,7 +108,7 @@ class LocalEnergy(torch.nn.Module):
         # It's a standard SoftMax technique, however, the implementation is not built into pytorch for
         # the molecule/atom framework.
         with torch.autograd.no_grad():
-            propensity_molatom = all_features[0].new_full((n_systems, n_atoms_max, 1), self.ninf)
+            propensity_molatom = all_features[0].new_full((n_molecules, n_atoms_max, 1), self.ninf)
             propensity_molatom[system_index, atom_index] = propensity
             propensity_norms = propensity_molatom.max(dim=1)[0]  # first element is max vals, 2nd is max position
             propensity_norm_atoms = propensity_norms[system_index]
@@ -117,12 +117,12 @@ class LocalEnergy(torch.nn.Module):
 
         # Calculate probabilities with molecule version of softmax
         relative_prob = torch.exp(propensity_normed)
-        z_factor_permol = self.summer(relative_prob, system_index, n_systems)
+        z_factor_permol = self.summer(relative_prob, system_index, n_molecules)
         atom_zfactor = z_factor_permol[system_index]
         prob = relative_prob / atom_zfactor
 
         # Find molecular sum
         atom_energy = prob * atom_preenergy
-        contributed_energy = self.summer(atom_energy, system_index, n_systems)
+        contributed_energy = self.summer(atom_energy, system_index, n_molecules)
 
         return contributed_energy, atom_energy, atom_preenergy, prob, propensity

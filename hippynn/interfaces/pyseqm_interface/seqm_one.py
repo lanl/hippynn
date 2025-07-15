@@ -119,8 +119,8 @@ class SEQM_One_All(SEQM_All):
             P0=single_particle_density_matrix,
         )
 
-        n_molecule, n_atom = species.shape
-        atomic_charge = self.const.tore[species] - P.diagonal(dim1=1, dim2=2).reshape(n_molecule, n_atom, -1).sum(dim=2)
+        n_systems, n_atom = species.shape
+        atomic_charge = self.const.tore[species] - P.diagonal(dim1=1, dim2=2).reshape(n_systems, n_atom, -1).sum(dim=2)
 
         return (
             Etot.reshape(-1, 1),
