@@ -81,7 +81,7 @@ class StressForceNode(AutoNoKw, MultiNode):
 
 
 class ChargeMomentNode(ExpandParents, AutoNoKw, SingleNode):
-    input_names = "charges", "positions", "mol_index", "n_molecules"
+    input_names = "charges", "positions", "system_index", "n_molecules"
 
     @parent_expander.matchlen(1)
     def expansion0(self, charges, *, purpose, **kwargs):
@@ -182,7 +182,7 @@ class CoulombEnergyNode(AutoKw, ChargePairSetup, Energies,  MultiNode):
     This corresponds to coulomb's constant k in the equation E = kqq/r.
     """
 
-    input_names = "charges", "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules"
+    input_names = "charges", "pair_dist", "pair_first", "pair_second", "system_index", "n_molecules"
     output_names = "mol_energies", "atom_energies", "atom_voltages"
     output_index_states = IdxType.Systems, IdxType.Atoms, IdxType.Atoms
     main_output_name = "mol_energies"
@@ -212,7 +212,7 @@ class ScreenedCoulombEnergyNode(AutoKw, ChargePairSetup, Energies, MultiNode):
     This corresponds to coulomb's constant k in the equation E = kqq/r.
     """
 
-    input_names = "charges", "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules"
+    input_names = "charges", "pair_dist", "pair_first", "pair_second", "system_index", "n_molecules"
     output_names = "mol_energies", "atom_energies", "atom_voltages"
     output_index_states = IdxType.Systems, IdxType.Atoms, IdxType.Atoms
     main_output_name = "mol_energies"
@@ -272,7 +272,7 @@ class VecMag(ExpandParents, AutoNoKw, SingleNode):
 
 
 class AtomToMolSummer(ExpandParents, AutoNoKw, SingleNode):
-    input_names = "features", "mol_index", "n_molecules"
+    input_names = "features", "system_index", "n_molecules"
     auto_module_class = index_layers.MolSummer
     index_state = IdxType.Systems
 
@@ -296,7 +296,7 @@ class AtomToMolSummer(ExpandParents, AutoNoKw, SingleNode):
 
 # TODO: This seems broken for parent expanders, check the signature of the layer.
 class BondToMolSummmer(ExpandParents, AutoNoKw, SingleNode):
-    input_names = "pairfeatures", "mol_index", "n_molecules", "pair_first"
+    input_names = "pairfeatures", "system_index", "n_molecules", "pair_first"
     auto_module_class = pair_layers.MolPairSummer
     index_state = IdxType.Systems
 
@@ -311,8 +311,8 @@ class BondToMolSummmer(ExpandParents, AutoNoKw, SingleNode):
         return features, pdxer.system_index, pdxer.n_systems, pair_idxer.pair_first
 
     @parent_expander.match(Node, Node, Node, Node, Node)
-    def expansion2(self, features, mol_index, n_molecules, **kwargs):
-        return index_type_coercion(features.main_output, IdxType.Pairs), mol_index, n_molecules
+    def expansion2(self, features, system_index, n_molecules, **kwargs):
+        return index_type_coercion(features.main_output, IdxType.Pairs), system_index, n_molecules
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
@@ -346,7 +346,7 @@ class CombineEnergyNode(AutoNoKw, Energies,  ExpandParents, MultiNode):
     Combines Local atom energies from different Energy Nodes.
     """
 
-    input_names = "input_atom_energy_1", "input_atom_energy_2", "mol_index", "n_molecules"
+    input_names = "input_atom_energy_1", "input_atom_energy_2", "system_index", "n_molecules"
     output_names = "mol_energy", "atom_energies"
     main_output_name = "mol_energy"
     output_index_states = (

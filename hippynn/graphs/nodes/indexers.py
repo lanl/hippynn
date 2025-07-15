@@ -105,8 +105,8 @@ class AtomDeIndexer(ExpandParents, AutoNoKw, SingleNode):
         return features, pad_idx.system_index, pad_idx.atom_index, pad_idx.n_systems, pad_idx.n_atoms_max
 
     @parent_expander.matchlen(2)
-    def expand0(self, features, mol_index, atom_index, n_mol, n_atom, **kwargs):
-        return features.main_output, mol_index, atom_index, n_mol, n_atom
+    def expand0(self, features, system_index, atom_index, n_mol, n_atom, **kwargs):
+        return features.main_output, system_index, atom_index, n_mol, n_atom
 
     parent_expander.assertlen(5)
 
@@ -136,7 +136,7 @@ class FilterBondsOneway(AutoNoKw, SingleNode):
 
 
 class SysMaxOfAtomsNode(ExpandParents, AutoNoKw, SingleNode):
-    input_names = "var", "mol_index", "n_molecules"
+    input_names = "var", "system_index", "n_molecules"
     index_state = IdxType.Systems
     auto_module_class = index_modules.SysMaxOfAtoms
 

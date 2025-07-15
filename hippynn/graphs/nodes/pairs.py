@@ -198,7 +198,7 @@ class PairCacher(AutoKw, ExpandParents, PairCache, SingleNode):
         "cell_offsets",
         "offset_index",
         "real_atoms",
-        "mol_index",
+        "system_index",
         "n_atoms_max",
         "n_molecules",
     )
@@ -319,7 +319,7 @@ class _DispatchNeighbors(AutoKw, ExpandParents, PeriodicPairOutputs, PairIndexer
         "real_atoms",
         "inv_real_atoms",
         "cell",
-        "mol_index",
+        "system_index",
         "n_molecules",
         "n_atoms_max",
     )
@@ -437,7 +437,7 @@ class PaddedNeighborNode(ExpandParents, AutoNoKw, MultiNode):
 
 
 class MinDistNode(ExpandParents, AutoNoKw, MultiNode):
-    input_names = "rij_list", "j_list", "mol_index", "atom_index", "inv_real_atoms", "n_atoms_max", "n_molecules"
+    input_names = "rij_list", "j_list", "system_index", "atom_index", "inv_real_atoms", "n_atoms_max", "n_molecules"
     output_names = "min_dist_mol", "mol_locs", "min_dist_atom", "atom_pairlocs"
     output_index_states = IdxType.Systems, IdxType.Systems, IdxType.Atoms, IdxType.Atoms
     auto_module_class = pairs_modules.MinDistModule

@@ -59,8 +59,8 @@ class PairDeIndexer(torch.nn.Module):
 
 
 class MolPairSummer(torch.nn.Module):
-    def forward(self, pairfeatures, mol_index, n_molecules, pair_first):
-        pair_mol = mol_index[pair_first]
+    def forward(self, pairfeatures, system_index, n_molecules, pair_first):
+        pair_mol = system_index[pair_first]
         if pairfeatures.shape[0] == 1:
             feat_shape = (1,)
             pairfeatures.unsqueeze(-1)
@@ -81,13 +81,13 @@ class PairCacher(torch.nn.Module):
         self.n_images = n_images
 
     def forward(
-        self, pair_first, pair_second, cell_offsets, offset_index, real_atoms, mol_index, n_molecules, n_atoms_max
+        self, pair_first, pair_second, cell_offsets, offset_index, real_atoms, system_index, n_molecules, n_atoms_max
     ):
         # Set up absolute indices
         abs_atoms = real_atoms % n_atoms_max
         pfabs = abs_atoms[pair_first]
         psabs = abs_atoms[pair_second]
-        mol = mol_index[pair_first]
+        mol = system_index[pair_first]
 
         n_offsets = (2 * self.n_images + 1) ** 3
 

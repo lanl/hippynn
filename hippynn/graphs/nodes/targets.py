@@ -16,7 +16,7 @@ class HEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, MultiNode):
     Predict a system-level scalar such as energy from a sum over local components.
     """
 
-    input_names = "hier_features", "mol_index", "n_molecules"
+    input_names = "hier_features", "system_index", "n_molecules"
     output_names = "mol_energy", "atom_energies", "energy_terms", "hierarchicality", "atom_hier", "mol_hier", "batch_hier"
     main_output_name = "mol_energy"
     output_index_states = IdxType.Systems, IdxType.Atoms, None, IdxType.Systems, IdxType.Atoms, IdxType.Systems, IdxType.Scalar
@@ -67,7 +67,7 @@ class HChargeNode(Charges, HAtomRegressor,  ExpandParents, AutoKw, MultiNode):
 
 
 class LocalChargeEnergy(Energies, ExpandParents, AutoKw, HAtomRegressor, MultiNode):
-    input_names = "charges", "features", "mol_index", "n_molecules"
+    input_names = "charges", "features", "system_index", "n_molecules"
     output_names = "mol_energies", "atom_energies"
     main_output_name = "mol_energies"
     output_index_states = IdxType.Systems, IdxType.Atoms
@@ -120,7 +120,7 @@ class HBondNode(ExpandParents, AutoKw, MultiNode):
 
 
 class AtomizationEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, MultiNode):
-    input_names = "hier_features", "vac_features", "encoding", "mol_index", "n_molecules"
+    input_names = "hier_features", "vac_features", "encoding", "system_index", "n_molecules"
     output_names = "mol_energy", "partial_energies", "hierarchicality"
     output_index_states = IdxType.Systems, None, IdxType.Systems
     main_output_name = "mol_energy"
@@ -157,8 +157,8 @@ class AtomizationEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, Mul
         from .. import copy_subgraph, Predictor
 
         # ignore vacuum encoding input
-        net_parent, vac_net, _, mol_index, n_molecules = self.parents
-        new_parents = (net_parent, mol_index, n_molecules)
+        net_parent, vac_net, _, system_index, n_molecules = self.parents
+        new_parents = (net_parent, system_index, n_molecules)
 
         # copy-out subgraph for vacuum computations.
         new_graph, other_nodes = copy_subgraph(vac_net.feature_nodes, assume_inputed=[])
@@ -170,13 +170,13 @@ class AtomizationEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, Mul
         # from .indexers import AtomDeIndexer
         # species_set = vac_net.torch_module.species_set
         # n_atom_types = len(species_set)-1
-        # mol_index = ValueNode(torch.arange(n_atom_types, dtype=torch.int64, device=species_set.device))
+        # system_index = ValueNode(torch.arange(n_atom_types, dtype=torch.int64, device=species_set.device))
         # atom_index = ValueNode(torch.zeros(n_atom_types, dtype=torch.int64, device=species_set.device))
         # n_molecules = ValueNode(n_atom_types, convert=False)
         # n_atoms_max = ValueNode(1, convert=False)
         # from ..indextypes.registry import assign_index_aliases
         # for n in new_graph:
-        #     index_node = AtomDeIndexer(f"{n.name}[SysAtom]", (n, mol_index, atom_index, n_molecules, n_atoms_max))
+        #     index_node = AtomDeIndexer(f"{n.name}[SysAtom]", (n, system_index, atom_index, n_molecules, n_atoms_max))
         #     assign_index_aliases(n, index_node)
 
         # Alternative hacky way to solve the problem is much simpler.

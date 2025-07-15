@@ -234,7 +234,7 @@ class _DispatchNeighbors(torch.nn.Module):
     def compute_one(self, r, c):
         return NotImplemented
 
-    def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cell, mol_index, n_molecules, n_atoms_max):
+    def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cell, system_index, n_molecules, n_atoms_max):
 
         with torch.no_grad():
             dev = coordinates.device  # where to put the results.
@@ -287,7 +287,7 @@ class _DispatchNeighbors(torch.nn.Module):
             o1, o2, o3 = (offsets + self.n_images).unbind(dim=1)
             offset_index = o3 + n_off * (o2 + n_off * o1)
 
-            pair_mol = mol_index[pair_first]
+            pair_mol = system_index[pair_first]
             pair_cell = cell[pair_mol]
             pair_offsets = torch.bmm(offsets.unsqueeze(1).to(pair_cell.dtype), pair_cell).squeeze(1)
 
@@ -341,16 +341,16 @@ class KDTreePairsMemory(PairMemory):
 
     _pair_indexer_class = KDTreeNeighbors
 
-    def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cells, mol_index, n_molecules, n_atoms_max):
+    def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cells, system_index, n_molecules, n_atoms_max):
         if self.recalculation_needed(coordinates, cells):
             self.recalculations += 1
 
-            inputs = (coordinates, nonblank, real_atoms, inv_real_atoms, cells, mol_index, n_molecules, n_atoms_max)
+            inputs = (coordinates, nonblank, real_atoms, inv_real_atoms, cells, system_index, n_molecules, n_atoms_max)
             outputs = self._pair_indexer(*inputs)
             distflat, pair_first, pair_second, paircoord, offsets, offset_index = outputs
 
             with torch.no_grad():
-                pair_mol = mol_index[pair_first]
+                pair_mol = system_index[pair_first]
                 pair_cell = cells[pair_mol]
                 pair_offsets = torch.bmm(offsets.unsqueeze(1).to(pair_cell.dtype), pair_cell).squeeze(1)
 

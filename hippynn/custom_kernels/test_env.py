@@ -36,13 +36,13 @@ except ImportError:
 
 
 def get_simulated_data(
-    n_molecules, n_atoms, atom_prob, n_features, n_nu, printinfo=False, dtype=None, device=torch.device("cpu"), randomize_order=False,
+    n_systems, n_atoms, atom_prob, n_features, n_nu, printinfo=False, dtype=None, device=torch.device("cpu"), randomize_order=False,
         use_duplicate=False,
 ):
     """
     Get semi-realistic test data for hipnn.
     n_molecules : number of molecules in the batch
-    n_atoms     : number of atoms in each molecule
+    n_atoms     : number of atoms in each system
     atom_prob   : probability that an atom is real (not a padding)
     n_features  : number of features on e
     ach atom
@@ -74,27 +74,27 @@ def get_simulated_data(
     if dtype is None:
         dtype = torch.get_default_dtype()
     np_fdtype = torch.zeros(1, dtype=torch.get_default_dtype()).numpy().dtype
-    molatom_shp = (n_molecules, n_atoms)
+    molatom_shp = (n_systems, n_atoms)
     molatom_presence = np.random.choice([False, True], p=[1 - atom_prob, atom_prob], size=molatom_shp)
-    atom_presence = molatom_presence.reshape(n_atoms * n_molecules)
+    atom_presence = molatom_presence.reshape(n_atoms * n_systems)
 
-    mol_features = np.random.randn(n_molecules, n_atoms, n_features).astype(np_fdtype)
+    mol_features = np.random.randn(n_systems, n_atoms, n_features).astype(np_fdtype)
     mol_features[~molatom_presence] = 0
 
-    atom_features = mol_features.reshape(n_molecules * n_atoms, n_features).astype(np_fdtype)[atom_presence]
+    atom_features = mol_features.reshape(n_systems * n_atoms, n_features).astype(np_fdtype)[atom_presence]
     n_real = molatom_presence.sum()
     real_atoms_arange = np.arange(n_real, dtype=int)
-    inv_real_atoms = np.zeros(n_molecules * n_atoms, dtype=int)
+    inv_real_atoms = np.zeros(n_systems * n_atoms, dtype=int)
     inv_real_atoms[atom_presence] = real_atoms_arange
     # atom_index = np.arange(n_molecules*n_atoms).reshape(molatom_shp)
-    # mol_index = np.repeat(np.arange(n_molecules)[:,np.newaxis],n_atoms,axis=1)
+    # system_index = np.repeat(np.arange(n_molecules)[:,np.newaxis],n_atoms,axis=1)
 
     # pair_dists = np.sqrt(((coords[:,:,np.newaxis] - coords[:,np.newaxis,:])**2).sum(axis=3))
     pair_presence = (molatom_presence[:, np.newaxis, :] * molatom_presence[:, :, np.newaxis]) & (
         ~np.identity(n_atoms, dtype=bool)[np.newaxis, :, :]
     )
 
-    atom_index = np.arange(n_molecules * n_atoms).reshape(molatom_shp)
+    atom_index = np.arange(n_systems * n_atoms).reshape(molatom_shp)
     nonzero_pair = np.nonzero(pair_presence)
 
     # We'll just do fully connected molecules.
@@ -124,8 +124,8 @@ def get_simulated_data(
     pair_sensitivites = np.random.random(size=(n_pairs, n_nu)) * on_sensitivites
     assert not (pair_first == pair_second).any()
     if printinfo:
-        print("Number of molecules:", n_molecules)
-        print("Number of atoms per molecule:", n_atoms)
+        print("Number of systems:", n_systems)
+        print("Number of atoms per system:", n_atoms)
         print("Fraction of real atoms:", atom_prob)
         print("Number of features:", n_features)
         print("Number of sensitivities:", n_nu)
@@ -140,13 +140,13 @@ def get_simulated_data(
     return pair_sense, features, pair_first, pair_second
 
 
-TEST_TINY_PARAMS = dict(n_molecules=2, n_atoms=3, atom_prob=1.0, n_features=5, n_nu=7)
-TEST_SMALL_PARAMS = dict(n_molecules=10, n_atoms=30, atom_prob=0.7, n_features=10, n_nu=20)
-TEST_MEDIUM_PARAMS = dict(n_molecules=100, n_atoms=30, atom_prob=0.7, n_features=20, n_nu=20)
-TEST_LARGE_PARAMS = dict(n_molecules=1000, n_atoms=30, atom_prob=0.7, n_features=80, n_nu=20)
-TEST_MEGA_PARAMS = dict(n_molecules=500, n_atoms=30, atom_prob=0.7, n_features=128, n_nu=100)
-TEST_ULTRA_PARAMS = dict(n_molecules=500, n_atoms=30, atom_prob=0.7, n_features=128, n_nu=320)
-TEST_GIGA_PARAMS = dict(n_molecules=32, n_atoms=30, atom_prob=0.7, n_features=512, n_nu=320)
+TEST_TINY_PARAMS = dict(n_systems=2, n_atoms=3, atom_prob=1.0, n_features=5, n_nu=7)
+TEST_SMALL_PARAMS = dict(n_systems=10, n_atoms=30, atom_prob=0.7, n_features=10, n_nu=20)
+TEST_MEDIUM_PARAMS = dict(n_systems=100, n_atoms=30, atom_prob=0.7, n_features=20, n_nu=20)
+TEST_LARGE_PARAMS = dict(n_systems=1000, n_atoms=30, atom_prob=0.7, n_features=80, n_nu=20)
+TEST_MEGA_PARAMS = dict(n_systems=500, n_atoms=30, atom_prob=0.7, n_features=128, n_nu=100)
+TEST_ULTRA_PARAMS = dict(n_systems=500, n_atoms=30, atom_prob=0.7, n_features=128, n_nu=320)
+TEST_GIGA_PARAMS = dict(n_systems=32, n_atoms=30, atom_prob=0.7, n_features=512, n_nu=320)
 TEST_PARAMS = dict(
     tiny=TEST_TINY_PARAMS,
     small=TEST_SMALL_PARAMS,
