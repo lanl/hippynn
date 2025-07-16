@@ -84,6 +84,7 @@ class MLIAPInterface(MLIAPUnified):
         self.atom_energy = None
         self.total_energy= None 
         self.fij = None
+        self.fi = None
         self.properties = None  
 
         self.nparams = sum(p.nelement() for p in self.graph.parameters())
@@ -237,7 +238,10 @@ class MLIAPInterface(MLIAPUnified):
         # note your sign for rij might need to be +1 or -1, depending on how your implementation works
         self.inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
         
-        self.atom_energy, self.total_energy, self.fij, *self.properties = self.graph(*self.inputs) #[:3]
+        self.atom_energy, self.total_energy, self.fij, self.fi, *self.properties = self.graph(*self.inputs) #[:3]
+        print("self.atom_energy", self.atom_energy)
+        print("==============================")
+        print("self.fi", self.fi)
 
     def compute_forces(self, data):
         """

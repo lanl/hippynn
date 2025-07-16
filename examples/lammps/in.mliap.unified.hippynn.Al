@@ -25,7 +25,8 @@ mass 1 26.981
 
 # choose potential
 
-pair_style	mliap unified mliap_unified_hippynn_Al.pt uq on
+#pair_style	mliap/kk unified mliap_unified_hippynn_Al.pt 0        # for kokkos
+pair_style	mliap unified mliap_unified_hippynn_Al.pt 0 
 pair_coeff	* * Al
 
 # Setup output
@@ -33,6 +34,7 @@ pair_coeff	* * Al
 compute  eatom all pe/atom
 #compute  eatom_stdev all peStdev/atom
 compute  energy all reduce sum c_eatom
+#compute  generalizedProperty all extraProperty/atom/kk name energy_std dim 1     # for kokkos
 compute  generalizedProperty all extraProperty/atom name energy_std dim 1
 
 compute  satom all stress/atom NULL
@@ -58,8 +60,8 @@ dump_modify 4 first yes
 #dump_modify 4 first yes
 
 dump 3 all custom 1 eatoms_uq.xyz id c_eatom c_generalizedProperty[1]
-dump_modify 4 sort id 
-dump_modify 4 first yes
+dump_modify 3 sort id 
+dump_modify 3 first yes
  
 
 # Run MD

@@ -10,7 +10,7 @@ from ...graphs.nodes.inputs import SpeciesNode
 from ...graphs.nodes.pairs import PairFilter
 from ...graphs.nodes.physics import VecMag, GradientNode
 from ...graphs.nodes.tags import PairIndexer, Encoder
-
+from ...graphs.nodes.misc import EnsembleTarget
 
 def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool= False):
     """
@@ -22,7 +22,7 @@ def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool=
     """
     
     if is_ensemble is True: 
-        required_nodes = [energy.mean] #[energy.mean, energy.std] 
+        required_nodes = [energy.mean, energy.all] #[energy.mean, energy.std] 
     else: 
         required_nodes = [energy]
 
@@ -93,7 +93,7 @@ def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool=
         property_names = [f"{key}" for key in properties]
     
     #energy,extra_property, *new_required = new_required
-    energy, *extra_property = new_required
+    energy, energy_all, *extra_property = new_required
     
     try:
         atom_energies = energy.atom_energies.mean
@@ -111,8 +111,9 @@ def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool=
     if is_ensemble is True:
         local_atom_energy = LocalAtomExtractorNode("local_atom_energy", (atom_energies, in_nlocal))
         #local_atom_energy_std = LocalAtomExtractorNode("local_atom_energy_std", (energy_stdev, in_nlocal))
+        local_atom_energy_all = LocalAtomExtractorNode("local_atom_energy_all", (energy_all, in_nlocal))
     else:    
-        local_atom_energy = LocalAtomExtractorNode("local_atom_energy", (atom_energies, in_nlocal))
+        local_atom_energy = LocalAllAtomExtractorNode("local_atom_energy", (atom_energies, in_nlocal))
 
     if extra_properties is not None:
         properties_node = {}
@@ -126,9 +127,33 @@ def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool=
     print("extra_properies_nodes:", extra_properies_nodes)
 
     grad_rij = GradientNode("grad_rij", (local_atom_energy.total_local_value, in_pair_coord), -1)
+    # looping over all local sotm energies
+    fi_all = []
+    grad_rij_all = []
+    for i, local_energy in enumerate(extra_property): #local_atom_energy_all.total_local_value):
+        local_energy = LocalAtomExtractorNode("model_energy", (local_energy, in_nlocal)) 
+        grad_r = GradientNode(f"grad_rij_{i}", (local_energy.total_local_value, in_pair_coord), -1)
+        grad_rij_all.append(grad_r)
+
+        fi = AtomForceFromPairForceNode(f"atom_force_{i}",parents=(grad_rij_all[i], in_pair_first, in_pair_second, in_nlocal))
+        fi_all.append(fi)
+    print("grad_rij_all: ", grad_rij_all)
+    print("fi_all: ", fi_all)
+
+    atom_force_node_0 = AtomForceFromPairForceNode("atom_force",parents=(grad_rij_all[0], in_pair_first, in_pair_second, in_nlocal))
+    print("atom_force_node_0:", atom_force_node_0)
+
+    ensemble_fi = EnsembleTarget("ensemble_fi", fi_all)
+
+    ensemble_fi_all = ensemble_fi.all
+    ensemble_fi_std = ensemble_fi.std
+
+    local_atom_force = LocalAtomExtractorNode("local_atom_force", (ensemble_fi_all, in_nlocal))
+    local_atom_force_std = LocalAtomExtractorNode("local_atom_force_std", (ensemble_fi_std, in_nlocal))
+
 
     if extra_properties is not None:
-        implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, grad_rij, *tuple(node.local_atom_values for node in extra_properies_nodes)
+        implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, grad_rij, local_atom_force.local_atom_values, *tuple(node.local_atom_values for node in extra_properies_nodes)
         print("in if :: implemented_nodes", implemented_nodes)
     else:
         implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, local_atom_energy_std.local_atom_values, grad_rij
@@ -140,6 +165,58 @@ def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool=
 
     return min_radius / 2, species_set, mod
 
+class AtomForceFromPairForce(torch.nn.Module):
+    def forward(self, f_ij, in_pair_first, in_pair_second, in_nlocal):
+        in_nlocal_cpu = in_nlocal.detach().cpu().item()
+        f_i = torch.zeros((in_nlocal_cpu, 3), device=f_ij.device, dtype=f_ij.dtype)
+        f_i.index_add_(0, in_pair_first, f_ij)
+        # To apply newton's third law,
+        # subtract f_ij from j, but only if j is local (< in_nlocal)
+        local_mask = in_pair_second < in_nlocal_cpu
+        print("local_mask:", local_mask)
+        j_local = in_pair_second[local_mask]
+        f_ij_local = f_ij[local_mask]
+        f_i.index_add_(0, j_local, -f_ij_local)
+        print("f_i", f_i)
+        return f_i
+
+class AtomForceFromPairForceNode(AutoNoKw, SingleNode): # ExpandParents, MultiNode):
+    _input_names = "f_ij", "in_pair_first", "in_pair_second", "in_nlocal"
+    _output_names = "f_i"
+    _main_output = "f_i"
+    _output_index_states = (IdxType.Atoms,)
+    _auto_module_class = AtomForceFromPairForce
+
+    #_parent_expander.assertlen(2)
+    #_parent_expander.get_main_outputs()
+    #_parent_expander.require_idx_states(IdxType.Atoms)
+    def __init__(self, name, parents, module="auto", **kwargs):
+        super().__init__(name, parents, module=module, **kwargs)
+        self._index_state = IdxType.Atoms
+
+class LocalAllAtomExtractor(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, all_atom_values, nlocal):
+        local_atom_values = all_atom_values[:, :nlocal]  # [n_models, nlocal]
+        total_local_value = local_atom_values.sum(dim=1)
+        return local_atom_values, total_local_value
+
+class LocalAllAtomExtractorNode(AutoNoKw, ExpandParents, MultiNode):
+    _input_names = "all_atom_values", "nlocal"  
+    _output_names = "local_atom_values", "total_local_value" 
+    _main_output = "total_local_value"
+    _output_index_states = None, IdxType.Scalar 
+    _auto_module_class = LocalAllAtomExtractor
+
+    _parent_expander.assertlen(2)
+    _parent_expander.get_main_outputs()
+    _parent_expander.require_idx_states(IdxType.Atoms, IdxType.Scalar )
+
+    def __init__(self, name, parents, module="auto", **kwargs):
+        parents = self.expand_parents(parents)
+        super().__init__(name, parents, module=module, **kwargs)
 
 class ReIndexAtomMod(torch.nn.Module):
     def forward(self, raw_atom_index_array, inverse_real_atoms):
