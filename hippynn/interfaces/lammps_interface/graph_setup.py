@@ -144,16 +144,21 @@ def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool=
     print("atom_force_node_0:", atom_force_node_0)
 
     ensemble_fi = EnsembleTarget("ensemble_fi", fi_all)
-
     ensemble_fi_all = ensemble_fi.all
     ensemble_fi_std = ensemble_fi.std
+    print("fi_std", ensemble_fi_std)
+    print(len(ensemble_fi.children))  # should be 4
+    print(ensemble_fi.children)
+    ensemble_fi_cov = ensemble_fi.cov
+    print("fi_cov", ensemble_fi_cov)
 
     local_atom_force = LocalAtomExtractorNode("local_atom_force", (ensemble_fi_all, in_nlocal))
     local_atom_force_std = LocalAtomExtractorNode("local_atom_force_std", (ensemble_fi_std, in_nlocal))
-
+    local_atom_force_cov =  LocalAtomExtractorNode("local_atom_force_cov", (ensemble_fi_cov, in_nlocal))
 
     if extra_properties is not None:
-        implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, grad_rij, local_atom_force.local_atom_values, *tuple(node.local_atom_values for node in extra_properies_nodes)
+        #implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, grad_rij, local_atom_force.local_atom_values, *tuple(node.local_atom_values for node in extra_properies_nodes)
+        implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, grad_rij, local_atom_force.local_atom_values, local_atom_force_cov.local_atom_values, *tuple(node.local_atom_values for node in extra_properies_nodes)
         print("in if :: implemented_nodes", implemented_nodes)
     else:
         implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, local_atom_energy_std.local_atom_values, grad_rij

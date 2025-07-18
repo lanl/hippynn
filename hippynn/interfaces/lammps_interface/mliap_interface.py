@@ -68,7 +68,7 @@ class MLIAPInterface(MLIAPUnified):
         if extra_properties is not None:
             self.property_names = [f"{key}" for key in extra_properties]
 
-        
+        self.property_names.append("fi_cov") 
 
         # Build the calculator
         #if self.is_ensemble is True:
@@ -85,6 +85,7 @@ class MLIAPInterface(MLIAPUnified):
         self.total_energy= None 
         self.fij = None
         self.fi = None
+        self.fi_cov = None
         self.properties = None  
 
         self.nparams = sum(p.nelement() for p in self.graph.parameters())
@@ -238,10 +239,15 @@ class MLIAPInterface(MLIAPUnified):
         # note your sign for rij might need to be +1 or -1, depending on how your implementation works
         self.inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
         
-        self.atom_energy, self.total_energy, self.fij, self.fi, *self.properties = self.graph(*self.inputs) #[:3]
+        self.atom_energy, self.total_energy, self.fij, self.fi, self.fi_cov, *self.properties = self.graph(*self.inputs) #[:3]
         print("self.atom_energy", self.atom_energy)
         print("==============================")
         print("self.fi", self.fi)
+        print("self.fi_cov", self.fi_cov)
+        print("self.fi_cov.shape", self.fi_cov.shape)  
+        print("self.fi_cov reshaped", self.fi_cov.view(self.fi_cov.size(0), -1).shape)  
+
+        self.properties.append(self.fi_cov.view(self.fi_cov.size(0), -1))
 
     def compute_forces(self, data):
         """
@@ -311,6 +317,7 @@ class MLIAPInterface(MLIAPUnified):
 
         if not self.using_kokkos:
             for i, property_name in enumerate(self.property_names):
+                print("property_name:", property_name)
                 if lammps_property_name == property_name:
                     data.update_extra_property(lammps_property_name, self.properties[i].detach().to(return_device).numpy().astype(np.double))
                     break

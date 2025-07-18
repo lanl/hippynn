@@ -84,5 +84,9 @@ class EnsembleTarget(torch.nn.Module):
 
         all = torch.stack(input_tensors, dim=1)
         mean = torch.mean(all, dim=1)
+        mid = all - mean
+
+        cov = (mid.transpose(-1, -2) @ mid) / (all.shape[-1] - 1)
+
         std = torch.std(all, dim=1)
-        return mean, std, all
+        return mean, std, all, cov
