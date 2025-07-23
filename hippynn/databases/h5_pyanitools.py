@@ -90,20 +90,24 @@ class PyAniMethods:
         bsize = 0
         bkey = None
         for k, v in batch.items():
+            shape_scheme[k] = list(v.shape)
             for i, l in enumerate(v.shape):
                 if i == 0:
                     continue  # Don't pad the batch index
-                if l == n_atoms:
+                # Check if size of axis is multiple of num_atoms
+                if l % n_atoms == 0:
+                    scale = l // n_atoms
                     padding_scheme[k].append(i)
-                    # Use the largest 0th-axis shape that has an atom index
-                    # as the indicator key for the batch size
-                    this_bsize = v.shape[0]
-                    if this_bsize > bsize:
-                        bsize = this_bsize
-                        bkey = k
-            shape_scheme[k] = list(v.shape)
-            for axis in padding_scheme[k]:
-                shape_scheme[k][axis] = n_atoms_max
+                    shape_scheme[k][i] = scale * n_atoms_max
+
+            # Use the largest 0th-axis shape that has an atom index
+            # as the indicator key for the batch size
+            if len(padding_scheme[k]) > 0:
+                this_bsize = v.shape[0]
+                if this_bsize > bsize:
+                    bsize = this_bsize
+                    bkey = k
+            
             shape_scheme[k][0] = sys_count
 
         padding_scheme["sys_number"] = []
@@ -111,7 +115,7 @@ class PyAniMethods:
 
     def process_batches(self, batches, n_atoms_max, sys_count, species_key="species"):
 
-        # Get padding abd shape info and batch size key
+        # Get padding and shape info and batch size key
         padding_scheme, shape_scheme, size_key = self.determine_key_structure(batches, sys_count, n_atoms_max, species_key=species_key)
 
         # add system numbers to the final arrays

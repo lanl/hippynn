@@ -34,6 +34,62 @@ class MultiGradient(torch.nn.Module):
         grads = torch.autograd.grad(molecular_energies.sum(), generalized_coordinates, create_graph=True)
         return tuple((sign * grad for sign, grad in zip(self.signs, grads)))
 
+class Hessian(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, source, positions, padding_mask):
+        """
+        Computes the Hessian using second derivatives of energy or first derivatives of forces.
+        Assumes:
+            - source: either energy (B, 1) or forces (B, N, 3)
+            - positions: (B, N, 3)
+        Returns:
+            - hessians: (B, 3N, 3N)
+        """
+        B, N, D = positions.shape
+
+        hessian_mask = self.expand_padding_mask_to_hessian_mask(padding_mask)
+
+        if source.ndim == 2 and source.shape[1] == 1:
+            # Case: source is energy (B, 1)
+            forces = self._forces_from_energy(source, positions)
+            return self._hessian_from_forces(forces, positions), hessian_mask
+        elif source.ndim == 3 and source.shape[2] == 3:
+            # Case: source is forces (B, N, 3)
+            return self._hessian_from_forces(source, positions), hessian_mask
+        else:
+            raise ValueError(f"Unsupported source shape: {source.shape}")
+
+    def _forces_from_energy(self, energy, positions):
+        return -torch.autograd.grad(energy.sum(), positions, create_graph=True)[0]
+
+    def _hessian_from_forces(self, force, positions):
+        force_flat = force.flatten(start_dim=1)
+        force_components = force_flat.unbind(dim=1)
+        return -torch.stack([
+            torch.autograd.grad(f.sum(), positions, create_graph=True)[0].flatten(start_dim=1)
+            for f in force_components
+        ], dim=1)
+
+    @staticmethod
+    def expand_padding_mask_to_hessian_mask(padding_mask):
+        """
+        Expand a (B, N) atom mask to a (B, 3N, 3N) Hessian mask.
+
+        Parameters:
+            padding_mask: Boolean tensor of shape (B, N)
+
+        Returns:
+            Boolean tensor of shape (B, 3N, 3N)
+        """
+        B, N = padding_mask.shape
+
+        expanded_mask = padding_mask.unsqueeze(-1).expand(-1, -1, 3).reshape(B, 3 * N)
+        mask_matrix = expanded_mask.unsqueeze(2) & expanded_mask.unsqueeze(1)  # (B, 3N, 3N)
+
+        return mask_matrix
+
 class StressForce(torch.nn.Module):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

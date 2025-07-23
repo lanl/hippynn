@@ -16,7 +16,7 @@ from .base import (
     _BaseNode,
     find_unique_relative,
 )
-from .base.node_functions import NodeNotFound
+from .base.node_functions import NodeNotFound, NodeAmbiguityError
 from .indexers import AtomIndexer, PaddingIndexer, acquire_encoding_padding
 from .inputs import PositionsNode, SpeciesNode
 from .pairs import OpenPairIndexer
@@ -65,6 +65,75 @@ class MultiGradientNode(AutoKw, MultiNode):
 
         super().__init__(name, parents, module=module, **kwargs)
 
+
+class HessianNode(ExpandParents, AutoKw, MultiNode):
+    """
+    Node that computes the Hessian (second derivatives of energy)
+    via gradients of force w.r.t. coordinates or
+    second gradients of enery w.r.t. coordinates.
+    """
+
+    _input_names = "forces", "coordinates", "nonblank"
+    _output_names = "hessian", "hessian_mask"
+    _output_index_states = (IdxType.Molecules, IdxType.Molecules)
+    _auto_module_class = physics_layers.Hessian
+
+    @_parent_expander.matchlen(1)
+    def expansion0(self, source, *, purpose, **kwargs):
+        # Infer positions from energy or force node
+        return source, find_unique_relative(source, PositionsNode, why_desc=purpose)
+
+    @_parent_expander.match(Energies, PositionsNode)
+    def expansion1(self, energy, positions, *, purpose, **kwargs):
+        energy = energy.main_output
+        possible_grads = [child for child in energy.children if (isinstance(child, GradientNode) and child.coordinates == positions)]
+        
+        if len(possible_grads) == 1:
+            # if we found a unique gradient, use that
+            force = possible_grads[0]
+        elif len(possible_grads)==0:
+            # if no gradient was found, make our own
+            force = GradientNode("forces", (energy, positions), sign=-1)
+        elif len(possible_grads)>1:
+            raise NodeAmbiguityError("Unable to automatically determine gradient of energy as multiple gradient nodes are present.")
+        
+        return force, positions
+
+    @_parent_expander.match(GradientNode, PositionsNode)
+    def expansion2(self, force, coordinates, *, purpose, **kwargs):
+        # always use forces, not gradients
+        if force.sign == +1:
+            force = -1 * force
+        return force, coordinates
+    
+    @_parent_expander.match(_BaseNode, PositionsNode)
+    def expansion3(self, force, coordinates, *, purpose, **kwargs):
+    
+        if not isinstance(force, GradientNode) and not any(isinstance(f, GradientNode) for f in force.get_all_parents()):
+            warnings.warn(f"Input to hessian node doesn't appear to be a force or child of a force! Got node: {force}")
+
+        _, pidxer = acquire_encoding_padding((force, coordinates), species_set=None, purpose=purpose)
+        return force, coordinates, pidxer
+
+    @_parent_expander.match(_BaseNode, _BaseNode, _BaseNode)
+    def expansion4(self, force, coordinates, pidxer, **kwargs):
+        return force, coordinates, pidxer.nonblank
+    
+    @_parent_expander.match(_BaseNode, _BaseNode, _BaseNode)
+    def expansion5(self, force, coordinates, nonblank, **kwargs):
+        coordinates.requires_grad = True
+        return force, coordinates, nonblank
+
+    _parent_expander.assertlen(3)
+    _parent_expander.get_main_outputs()
+    _parent_expander.require_idx_states(IdxType.MolAtom, IdxType.MolAtom, None)
+
+
+    def __init__(self, name, parents, module="auto", **kwargs):
+        parents = self.expand_parents(parents)
+        self._index_state = IdxType.Molecules
+        self.module_kwargs = {}
+        super().__init__(name, parents, module=module, **kwargs)
 
 class StressForceNode(AutoNoKw, MultiNode):
     _input_names = "energy", "strain", "coordinates", "cell"
