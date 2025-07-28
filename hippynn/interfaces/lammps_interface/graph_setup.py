@@ -110,59 +110,29 @@ def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool=
 
     if is_ensemble is True:
         local_atom_energy = LocalAtomExtractorNode("local_atom_energy", (atom_energies, in_nlocal))
-        #local_atom_energy_std = LocalAtomExtractorNode("local_atom_energy_std", (energy_stdev, in_nlocal))
-        local_atom_energy_all = LocalAtomExtractorNode("local_atom_energy_all", (energy_all, in_nlocal))
+        #local_atom_energy_all = LocalAtomExtractorNode("local_atom_energy_all", (energy_all, in_nlocal))
     else:    
         local_atom_energy = LocalAllAtomExtractorNode("local_atom_energy", (atom_energies, in_nlocal))
 
     if extra_properties is not None:
         properties_node = {}
         for i, value in enumerate(extra_property):
-        #for key, value in extra_property.items():  #properties.items():
             property_name = property_names[i]
             properties_node[key] = LocalAtomExtractorNode(f"{property_name}", (value, in_nlocal))
 
         extra_properies_nodes = list(properties_node.values())
 
-    print("extra_properies_nodes:", extra_properies_nodes)
+    #print("extra_properies_nodes:", extra_properies_nodes)
 
     grad_rij = GradientNode("grad_rij", (local_atom_energy.total_local_value, in_pair_coord), -1)
     # looping over all local sotm energies
-    fi_all = []
-    grad_rij_all = []
     for i, local_energy in enumerate(extra_property): #local_atom_energy_all.total_local_value):
         local_energy = LocalAtomExtractorNode("model_energy", (local_energy, in_nlocal)) 
-        grad_r = GradientNode(f"grad_rij_{i}", (local_energy.total_local_value, in_pair_coord), -1)
-        grad_rij_all.append(grad_r)
-
-        fi = AtomForceFromPairForceNode(f"atom_force_{i}",parents=(grad_rij_all[i], in_pair_first, in_pair_second, in_nlocal))
-        fi_all.append(fi)
-    print("grad_rij_all: ", grad_rij_all)
-    print("fi_all: ", fi_all)
-
-    atom_force_node_0 = AtomForceFromPairForceNode("atom_force",parents=(grad_rij_all[0], in_pair_first, in_pair_second, in_nlocal))
-    print("atom_force_node_0:", atom_force_node_0)
-
-    ensemble_fi = EnsembleTarget("ensemble_fi", fi_all)
-    ensemble_fi_all = ensemble_fi.all
-    ensemble_fi_std = ensemble_fi.std
-    print("fi_std", ensemble_fi_std)
-    print(len(ensemble_fi.children))  # should be 4
-    print(ensemble_fi.children)
-    ensemble_fi_cov = ensemble_fi.cov
-    print("fi_cov", ensemble_fi_cov)
-
-    local_atom_force = LocalAtomExtractorNode("local_atom_force", (ensemble_fi_all, in_nlocal))
-    local_atom_force_std = LocalAtomExtractorNode("local_atom_force_std", (ensemble_fi_std, in_nlocal))
-    local_atom_force_cov =  LocalAtomExtractorNode("local_atom_force_cov", (ensemble_fi_cov, in_nlocal))
 
     if extra_properties is not None:
-        #implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, grad_rij, local_atom_force.local_atom_values, *tuple(node.local_atom_values for node in extra_properies_nodes)
-        implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, grad_rij, local_atom_force.local_atom_values, local_atom_force_cov.local_atom_values, *tuple(node.local_atom_values for node in extra_properies_nodes)
-        print("in if :: implemented_nodes", implemented_nodes)
+        implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, grad_rij, *tuple(node.local_atom_values for node in extra_properies_nodes)
     else:
-        implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, local_atom_energy_std.local_atom_values, grad_rij
-        print("implemented_nodes:", implemented_nodes)
+        implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, grad_rij
 
     check_link_consistency((*new_inputs, *implemented_nodes))
     mod = GraphModule(new_inputs, implemented_nodes)
@@ -170,80 +140,6 @@ def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool=
 
     return min_radius / 2, species_set, mod
 
-class AtomForceFromPairForce(torch.nn.Module):
-    def forward(self, f_ij, in_pair_first, in_pair_second, in_nlocal):
-    #def forward(self, f_ij, mapped_pair_first, mapped_pair_second, in_nlocal):
-        print(f'len in_pair_first:{len(in_pair_first)}, in_pair_first.min():{in_pair_first.min()}, in_pair_first.max():{in_pair_first.max}')
-        print(f'len in_pair_second:{len(in_pair_second)}, in_pair_secnd.min():{in_pair_second.min()}, in_pair_second.max():{in_pair_second.max}')
-        print('len in_pair_first:', len(in_pair_first))
-        print(' in_pair_first:', in_pair_first)
-        print('len in_pair_second:', len(in_pair_second))
-        
-        print(' in_pair_second:', in_pair_second)
-        '''
-        print('len mapped_pair_first:', len(mapped_pair_first))
-        print(' mapped_pair_first:', mapped_pair_first)
-        print('len mapped_pair_sec:', len(mapped_pair_second))
-        print(' mapped_pair_sec:', mapped_pair_second)
-
-        in_nlocal_cpu = in_nlocal.detach().cpu().item()
-        f_i = torch.zeros((len(mapped_pair_second), 3), device=f_ij.device, dtype=f_ij.dtype)
-        f_i.index_add_(0, mapped_pair_first, f_ij)
-        # Apply -f_ij to atom j **only if j is local**
-        valid_j_mask = mapped_pair_second >= 0  # Only valid if j was mapped
-        j_local = mapped_pair_second[valid_j_mask]
-        f_ij_local = f_ij[valid_j_mask]
-        f_i.index_add_(0, j_local, -f_ij_local)
-        #f_i.index_add_(0, mapped_pair_second, -f_ij)
-        '''
-        print("fij.shape", f_ij.shape)
-        '''in_nlocal_cpu = in_nlocal.detach().cpu().item()
-        f_i = torch.zeros((in_nlocal_cpu, 3), device=f_ij.device, dtype=f_ij.dtype)
-        f_i = torch.zeros((len(in_pair_second), 3), device=f_ij.device, dtype=f_ij.dtype)
-        f_i.index_add_(0, in_pair_first, f_ij)
-        f_i.index_add_(0, in_pair_second, -f_ij)
-        '''
-        # To apply newton's third law,
-        # subtract f_ij from j, but only if j is local (< in_nlocal)
-        '''local_mask = in_pair_second < in_nlocal_cpu
-        print("local_mask:", local_mask)
-        print("local_maski unique:", local_mask.any())
-        j_local = in_pair_second[local_mask]
-        f_ij_local = f_ij[local_mask]
-        f_i.index_add_(0, j_local, -f_ij_local)
-        
-
-        print("f_i", f_i)
-        f_i = f_i[:in_nlocal_cpu]'''
-        in_nlocal_cpu = in_nlocal.detach().cpu().item()
-        f_i = torch.zeros((len(in_pair_second), 3), device=f_ij.device, dtype=f_ij.dtype)
-        for idx in range(f_ij.shape[0]):
-            i = in_pair_first[idx].item()
-            j = in_pair_second[idx].item()
-            fij_vec = f_ij[idx]
-
-            f_i[i] += fij_vec
-            print(f'idx:{idx} , i = {i}, f_i[{i}]={f_i[i]} ')
-            f_i[j] -= fij_vec
-            print(f'idx:{idx} , j = {j}, f_i[{j}]={f_i[j]} ')
-        print("f_i", f_i)
-        f_i = f_i[:in_nlocal_cpu]
-        print("f_i local", f_i)  
-        return f_i
-
-class AtomForceFromPairForceNode(AutoNoKw, SingleNode): # ExpandParents, MultiNode):
-    _input_names = "f_ij", "in_pair_first", "in_pair_second", "in_nlocal"
-    _output_names = "f_i"
-    _main_output = "f_i"
-    _output_index_states = (IdxType.Atoms,)
-    _auto_module_class = AtomForceFromPairForce
-
-    #_parent_expander.assertlen(2)
-    #_parent_expander.get_main_outputs()
-    #_parent_expander.require_idx_states(IdxType.Atoms)
-    def __init__(self, name, parents, module="auto", **kwargs):
-        super().__init__(name, parents, module=module, **kwargs)
-        self._index_state = IdxType.Atoms
 
 class LocalAllAtomExtractor(torch.nn.Module):
     def __init__(self):

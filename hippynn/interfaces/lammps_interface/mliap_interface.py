@@ -68,24 +68,16 @@ class MLIAPInterface(MLIAPUnified):
         if extra_properties is not None:
             self.property_names = [f"{key}" for key in extra_properties]
 
-        self.property_names.append("fi_cov") 
 
         # Build the calculator
         #if self.is_ensemble is True:
         self.rcutfac, self.species_set, self.graph = setup_LAMMPS_graph(energy_node, extra_properties, is_ensemble)
-        
-        #if extra_properties is not None:
-        #    self.rcutfac, self.species_set, self.graph_with_extra_properties = setup_LAMMPS_graph(energy_node, extra_properties, is_ensemble)
 
         self.input_flag = False
-
         self.inputs = None
-
         self.atom_energy = None
         self.total_energy= None 
         self.fij = None
-        self.fi = None
-        self.fi_cov = None
         self.properties = None  
 
         self.nparams = sum(p.nelement() for p in self.graph.parameters())
@@ -239,16 +231,11 @@ class MLIAPInterface(MLIAPUnified):
         # note your sign for rij might need to be +1 or -1, depending on how your implementation works
         self.inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
         
-        self.atom_energy, self.total_energy, self.fij, self.fi, self.fi_cov, *self.properties = self.graph(*self.inputs) #[:3]
+        self.atom_energy, self.total_energy, self.fij, *self.properties = self.graph(*self.inputs) 
         print("self.atom_energy", self.atom_energy)
         print("==============================")
         print("self.properties[0] == atom_energy std : ", self.properties[0])
-        print("self.fi", self.fi)
-        print("self.fi_cov", self.fi_cov)
-        print("self.fi_cov.shape", self.fi_cov.shape)  
-        print("self.fi_cov reshaped", self.fi_cov.view(self.fi_cov.size(0), -1).shape)  
 
-        self.properties.append(self.fi_cov.view(self.fi_cov.size(0), -1))
 
     def compute_forces(self, data):
         """
@@ -292,7 +279,6 @@ class MLIAPInterface(MLIAPUnified):
             #print("data.eatoms:", data.eatoms)
             if data.npairs > 0:
                 data.update_pair_forces(fij)
-            print("==?atom_energy", atom_energy)
         else:
             # view to data.eatoms using pytorch, and write into the view.
             eatoms = torch.as_tensor(data.eatoms, device=return_device)
@@ -335,7 +321,7 @@ class MLIAPInterface(MLIAPUnified):
                     data.update_extra_property(lammps_property_name, extra_property_value)
                     break
             else:
-                raise ValueError(f"property {lammps_property_name} not found")
+                raise ValueError(f"Property {lammps_property_name} not found")
             # view to data.eatoms using pytorch, and write into the view.
             #eatoms = torch.as_tensor(data.eatoms, device=return_device)
             
