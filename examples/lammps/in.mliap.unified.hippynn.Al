@@ -51,8 +51,8 @@ timestep 0.5e-3
 neighbor 1.0 bin
 neigh_modify once no every 1 delay 0 check yes
 
-dump 4 all custom 1 forces.xyz fx fy fz
-dump_modify 4 sort id 
+dump 4 all custom 1 forces.xyz id fx fy fz
+#dump_modify 4 sort id 
 dump_modify 4 first yes
 
 #dump 3 all custom 1 energy_atoms_uq.xyz id c_eatom c_eatom_stdev
@@ -60,7 +60,7 @@ dump_modify 4 first yes
 #dump_modify 4 first yes
 
 dump 3 all custom 1 eatoms_uq.xyz id c_eatom c_generalizedProperty[1]
-dump_modify 3 sort id 
+#dump_modify 3 sort id 
 dump_modify 3 first yes
  
 

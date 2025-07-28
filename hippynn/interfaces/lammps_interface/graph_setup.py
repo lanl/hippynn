@@ -172,17 +172,63 @@ def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool=
 
 class AtomForceFromPairForce(torch.nn.Module):
     def forward(self, f_ij, in_pair_first, in_pair_second, in_nlocal):
+    #def forward(self, f_ij, mapped_pair_first, mapped_pair_second, in_nlocal):
+        print(f'len in_pair_first:{len(in_pair_first)}, in_pair_first.min():{in_pair_first.min()}, in_pair_first.max():{in_pair_first.max}')
+        print(f'len in_pair_second:{len(in_pair_second)}, in_pair_secnd.min():{in_pair_second.min()}, in_pair_second.max():{in_pair_second.max}')
+        print('len in_pair_first:', len(in_pair_first))
+        print(' in_pair_first:', in_pair_first)
+        print('len in_pair_second:', len(in_pair_second))
+        
+        print(' in_pair_second:', in_pair_second)
+        '''
+        print('len mapped_pair_first:', len(mapped_pair_first))
+        print(' mapped_pair_first:', mapped_pair_first)
+        print('len mapped_pair_sec:', len(mapped_pair_second))
+        print(' mapped_pair_sec:', mapped_pair_second)
+
         in_nlocal_cpu = in_nlocal.detach().cpu().item()
+        f_i = torch.zeros((len(mapped_pair_second), 3), device=f_ij.device, dtype=f_ij.dtype)
+        f_i.index_add_(0, mapped_pair_first, f_ij)
+        # Apply -f_ij to atom j **only if j is local**
+        valid_j_mask = mapped_pair_second >= 0  # Only valid if j was mapped
+        j_local = mapped_pair_second[valid_j_mask]
+        f_ij_local = f_ij[valid_j_mask]
+        f_i.index_add_(0, j_local, -f_ij_local)
+        #f_i.index_add_(0, mapped_pair_second, -f_ij)
+        '''
+        print("fij.shape", f_ij.shape)
+        '''in_nlocal_cpu = in_nlocal.detach().cpu().item()
         f_i = torch.zeros((in_nlocal_cpu, 3), device=f_ij.device, dtype=f_ij.dtype)
+        f_i = torch.zeros((len(in_pair_second), 3), device=f_ij.device, dtype=f_ij.dtype)
         f_i.index_add_(0, in_pair_first, f_ij)
+        f_i.index_add_(0, in_pair_second, -f_ij)
+        '''
         # To apply newton's third law,
         # subtract f_ij from j, but only if j is local (< in_nlocal)
-        local_mask = in_pair_second < in_nlocal_cpu
+        '''local_mask = in_pair_second < in_nlocal_cpu
         print("local_mask:", local_mask)
+        print("local_maski unique:", local_mask.any())
         j_local = in_pair_second[local_mask]
         f_ij_local = f_ij[local_mask]
         f_i.index_add_(0, j_local, -f_ij_local)
+        
+
         print("f_i", f_i)
+        f_i = f_i[:in_nlocal_cpu]'''
+        in_nlocal_cpu = in_nlocal.detach().cpu().item()
+        f_i = torch.zeros((len(in_pair_second), 3), device=f_ij.device, dtype=f_ij.dtype)
+        for idx in range(f_ij.shape[0]):
+            i = in_pair_first[idx].item()
+            j = in_pair_second[idx].item()
+            fij_vec = f_ij[idx]
+
+            f_i[i] += fij_vec
+            print(f'idx:{idx} , i = {i}, f_i[{i}]={f_i[i]} ')
+            f_i[j] -= fij_vec
+            print(f'idx:{idx} , j = {j}, f_i[{j}]={f_i[j]} ')
+        print("f_i", f_i)
+        f_i = f_i[:in_nlocal_cpu]
+        print("f_i local", f_i)  
         return f_i
 
 class AtomForceFromPairForceNode(AutoNoKw, SingleNode): # ExpandParents, MultiNode):

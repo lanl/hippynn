@@ -242,6 +242,7 @@ class MLIAPInterface(MLIAPUnified):
         self.atom_energy, self.total_energy, self.fij, self.fi, self.fi_cov, *self.properties = self.graph(*self.inputs) #[:3]
         print("self.atom_energy", self.atom_energy)
         print("==============================")
+        print("self.properties[0] == atom_energy std : ", self.properties[0])
         print("self.fi", self.fi)
         print("self.fi_cov", self.fi_cov)
         print("self.fi_cov.shape", self.fi_cov.shape)  
@@ -283,7 +284,7 @@ class MLIAPInterface(MLIAPUnified):
         if not self.using_kokkos:
             # write back to data.eatoms directly.
             fij = fij.numpy()
-            #print("atom_energy: ", atom_energy)
+            print("atom_energy: ", atom_energy)
             #print("type of atom_energy: ", type(atom_energy))
             #print("atom_energy shape: ", atom_energy.shape)
             data.eatoms = atom_energy.numpy().astype(np.double)
@@ -291,6 +292,7 @@ class MLIAPInterface(MLIAPUnified):
             #print("data.eatoms:", data.eatoms)
             if data.npairs > 0:
                 data.update_pair_forces(fij)
+            print("==?atom_energy", atom_energy)
         else:
             # view to data.eatoms using pytorch, and write into the view.
             eatoms = torch.as_tensor(data.eatoms, device=return_device)
