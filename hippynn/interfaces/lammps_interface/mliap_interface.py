@@ -296,7 +296,6 @@ class MLIAPInterface(MLIAPUnified):
 
         if not self.using_kokkos:
             for i, property_name in enumerate(self.property_names):
-                print("property_name:", property_name)
                 if lammps_property_name == property_name:
                     data.update_extra_property(lammps_property_name, self.properties[i].detach().to(return_device).numpy().astype(np.double))
                     break
