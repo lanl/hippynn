@@ -232,10 +232,6 @@ class MLIAPInterface(MLIAPUnified):
         self.inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
         
         self.atom_energy, self.total_energy, self.fij, *self.properties = self.graph(*self.inputs) 
-        print("self.atom_energy", self.atom_energy)
-        print("==============================")
-        print("self.properties[0] == atom_energy std : ", self.properties[0])
-
 
     def compute_forces(self, data):
         """
@@ -271,12 +267,7 @@ class MLIAPInterface(MLIAPUnified):
         if not self.using_kokkos:
             # write back to data.eatoms directly.
             fij = fij.numpy()
-            print("atom_energy: ", atom_energy)
-            #print("type of atom_energy: ", type(atom_energy))
-            #print("atom_energy shape: ", atom_energy.shape)
             data.eatoms = atom_energy.numpy().astype(np.double)
-            #data.eatoms_stdev = self.properties[0].squeeze(1).detach().to(return_device).numpy().astype(np.double)
-            #print("data.eatoms:", data.eatoms)
             if data.npairs > 0:
                 data.update_pair_forces(fij)
         else:
