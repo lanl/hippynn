@@ -93,12 +93,19 @@ def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool=
         property_names = [f"{key}" for key in properties]
     
     #energy,extra_property, *new_required = new_required
-    energy, energy_all, *extra_property = new_required
-    
-    try:
-        atom_energies = energy.atom_energies.mean
-    except AttributeError:
-        atom_energies = energy
+    if is_ensemble is True:
+        energy, energy_all, *extra_property = new_required
+        try:
+            atom_energies = energy.atom_energies.mean
+        except AttributeError:
+            atom_energies = energy
+    else:
+        energy, *new_required = new_required
+        try:
+            atom_energies = energy.atom_energies
+        except AttributeError:
+            atom_energies = energy
+
 
     try:
         atom_energies = index_type_coercion(atom_energies, IdxType.Atoms)
@@ -126,10 +133,9 @@ def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool=
 
     grad_rij = GradientNode("grad_rij", (local_atom_energy.total_local_value, in_pair_coord), -1)
     # looping over all local sotm energies
-    for i, local_energy in enumerate(extra_property): #local_atom_energy_all.total_local_value):
-        local_energy = LocalAtomExtractorNode("model_energy", (local_energy, in_nlocal)) 
-
     if extra_properties is not None:
+        for i, local_energy in enumerate(extra_property): #local_atom_energy_all.total_local_value):
+            local_energy = LocalAtomExtractorNode("model_energy", (local_energy, in_nlocal)) 
         implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, grad_rij, *tuple(node.local_atom_values for node in extra_properies_nodes)
     else:
         implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, grad_rij
