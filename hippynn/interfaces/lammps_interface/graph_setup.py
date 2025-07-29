@@ -119,7 +119,7 @@ def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool=
         local_atom_energy = LocalAtomExtractorNode("local_atom_energy", (atom_energies, in_nlocal))
         #local_atom_energy_all = LocalAtomExtractorNode("local_atom_energy_all", (energy_all, in_nlocal))
     else:    
-        local_atom_energy = LocalAllAtomExtractorNode("local_atom_energy", (atom_energies, in_nlocal))
+        local_atom_energy = LocalAtomExtractorNode("local_atom_energy", (atom_energies, in_nlocal))
 
     if extra_properties is not None:
         properties_node = {}
