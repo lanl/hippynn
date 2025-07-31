@@ -1,6 +1,7 @@
 import torch
 from ... import custom_kernels
-from .tensors import HopInvariantLayer
+from ...custom_kernels.env_fused import envsum_fused_default_gradient, envsum_fused, envsum_fused_gradient
+from .tensors import HopInvariantLayer, HopInvariantLayerPolynomials
 import warnings
 
 
@@ -281,7 +282,7 @@ _invariant_counts = {
 
 
 class HOPInteractionLayer(InteractLayer):
-    def __init__(self, *args, n_max, l_max, group_norm, group_norm_eps, **kwargs):
+    def __init__(self, *args, n_max, l_max, group_norm, group_norm_eps, invars_poly, env_fused, env_backward_fused, **kwargs):
         super().__init__(*args, **kwargs)
 
         if l_max < 0:
@@ -311,13 +312,18 @@ class HOPInteractionLayer(InteractLayer):
 
         self.n_invariants = n_invariants
         mixing_weights = torch.zeros(self.nf_out, self.n_invariants, self.nf_out)
-        self.invars = HopInvariantLayer(n_max=n_max, l_max=l_max)
+        if invars_poly:
+            self.invars = HopInvariantLayerPolynomials(n_max=n_max, l_max=l_max)
+        else:
+            self.invars = HopInvariantLayer(n_max=n_max, l_max=l_max)
         self.mixing_weights = torch.nn.Parameter(mixing_weights)
         torch.nn.init.xavier_normal_(self.mixing_weights)
         if group_norm:
             self.group_norm = torch.nn.GroupNorm(self.n_invariants, self.n_invariants * self.nf_out, eps=group_norm_eps, affine=True)
         else:
             self.group_norm = None
+        self.env_fused = env_fused
+        self.env_backward_fused = env_backward_fused
 
     def forward(self, in_features, pair_first, pair_second, dist_pairs, tensor_rhats):
 
@@ -328,10 +334,18 @@ class HOPInteractionLayer(InteractLayer):
 
         # set up sensitivity for message passing
         sense_scalar = self.sensitivity(dist_pairs)
-        sensitivity = sense_scalar.unsqueeze(1) * tensor_rhats.unsqueeze(2)
-        sense_flat = sensitivity.reshape(n_pair, n_tensor_comp * self.n_dist)
-
-        env_features = custom_kernels.envsum(sense_flat, in_features, pair_first, pair_second)
+        if self.env_fused:
+            if self.env_backward_fused:
+                env_features = envsum_fused(tensor_rhats, sense_scalar, in_features, pair_first, pair_second)
+            else:
+                env_features = envsum_fused_default_gradient(tensor_rhats, sense_scalar, in_features, pair_first, pair_second)
+        else:
+            if self.env_backward_fused:
+                env_features = envsum_fused_gradient(tensor_rhats, sense_scalar, in_features, pair_first, pair_second)
+            else:
+                sensitivity = sense_scalar.unsqueeze(1) * tensor_rhats.unsqueeze(2)
+                sense_flat = sensitivity.reshape(n_pair, n_tensor_comp * self.n_dist)
+                env_features = custom_kernels.envsum(sense_flat, in_features, pair_first, pair_second)
 
         # apply weights to tensor features
         weights_rs = torch.reshape(self.int_weights.permute(0, 2, 1), (self.n_dist * self.nf_in, self.nf_out))

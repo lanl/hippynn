@@ -4,11 +4,13 @@ Interaction functions for hip-hop-nn
 import collections
 import itertools
 import torch
-
+import torch.nn.functional as F
 
 from typing import List
 from torch import Tensor
 from typing import Dict
+
+from ...custom_kernels.poly_triton import EvaluatePolynomials
 
 # use opt_einsum when it is available
 try:
@@ -302,7 +304,6 @@ def calc_invariants(l_max: int, n_max: int, tensor_features, C: List[Tensor]):
     invars = torch.stack(invariants, dim=-1)
     return invars
 
-
 class HopInvariantLayer(torch.nn.Module):
     def __init__(self, n_max, l_max, _cmaps=cmaps):
         super().__init__()
@@ -330,3 +331,167 @@ class HopInvariantLayer(torch.nn.Module):
                     assert t is not None
         C = self.cmaps
         return calc_invariants(self.l_max, self.n_max, tensor_features, C)
+
+# invariant input offsets is the offset within the list of the basis coefficient of the tensor used to compute the invariants.
+def computeInvariantPolynomial(invariant_code, C, invariant_input_offsets):
+    # For the zero order invariant, there is no einsum, it is just the monomial x0.
+    if len(invariant_code) == 1:
+        return torch.FloatTensor((1,)), torch.IntTensor(((0,),))
+
+    # otherwise, build an einsum string corresponding to our contraction of the C tensors:
+    alpha = "abcdefghijklmnopqrstuvwxyz"
+    back_idx = 25
+    front_idx = 0
+
+
+    einsum_front_terms = []
+    einsum_back = ""
+    tensors_to_contract = []
+
+    # first, construct one term for each code.
+    # keep track of which tensors correspond to which terms.
+    for idx,reduction in enumerate(invariant_code):
+        einsum_front_terms.append(alpha[back_idx])
+        einsum_back += alpha[back_idx]
+        back_idx -= 1
+        assert back_idx > front_idx,"Ran out of leters for einsum."
+        
+        tensors_to_contract.append( C[ len(reduction)-1 ] )
+
+    # now add all of the einsum terms corresponding to the reductions
+    for idx,reduction in enumerate(invariant_code):
+        for other_idx in reduction[1:]:
+            if other_idx > idx:
+                next_letter = alpha[front_idx]
+                front_idx += 1
+                assert back_idx > front_idx,"Ran out of letters for einsum."
+
+                einsum_front_terms[idx] += next_letter
+                einsum_front_terms[other_idx] += next_letter
+
+    einsum_front = einsum_front_terms[0]
+    for einsum_term in einsum_front_terms[1:]:
+        einsum_front += "," + einsum_term
+
+    einsum_string = einsum_front + "->" + einsum_back
+    coef_tensor = torch.einsum(einsum_string, *tensors_to_contract)
+
+    iter_range = []
+    for dim in coef_tensor.shape:
+        iter_range.append(range(dim))
+
+    coefs = {}
+
+    tensor_idxs = itertools.product(*iter_range)
+    for coordinates in tensor_idxs:
+
+        value = coef_tensor[*coordinates]
+        if value != 0:
+
+            key_list = []
+            for dim,coord in enumerate(coordinates):
+                key_list.append( invariant_input_offsets[ invariant_code[dim][0] ] + coord )
+
+            key_list.sort()
+            key = tuple(key_list)
+            if key in coefs:
+                coefs[key] += value
+            else:
+                coefs[key] = value
+    
+    # delete all zero coefficients
+    delete = []
+    for c in coefs:
+        if coefs[c] == 0:
+            delete.append(c)
+    
+    for c in delete:
+        del coefs[c]
+
+    # create the tensor of coefficients
+    coefs_tensor = torch.zeros(len(coefs),dtype=torch.float32)
+    terms_tensor = torch.zeros((len(coefs),len(invariant_code)),dtype=torch.int32)
+    
+    for row, coef in enumerate(coefs):
+        coefs_tensor[row] = coefs[coef]
+        for col,entry in enumerate(coef):
+            terms_tensor[row,col] = entry
+
+    return coefs_tensor, terms_tensor
+
+class HopInvariantLayerPolynomials(torch.nn.Module):
+    def __init__(self, n_max, l_max, _cmaps=cmaps):
+        super().__init__()
+        self.l_max = l_max
+        self.n_max = n_max
+
+        cmaps = [
+            _cmaps[0],
+            _cmaps[1].permute(1,0),
+            _cmaps[2].permute(2,0,1).reshape(5,3,3),
+            _cmaps[3].permute(3,0,1,2).reshape(7,3,3,3),
+        ]
+
+        # invariants are specified as a tuple. The first is a tensor name. Then, there is a list of which other tensors we contract with.
+        # the number of other tensors that we contract with should match the degree
+        possible_invars = [
+            ( ("zero",), ),
+            ( ("one",1), ("one",0) ),
+            ( ("two",1,1), ("two",0,0) ),
+            ( ("two",1,2), ("two",0,2), ("two",0,1) ),
+            ( ("three",1,1,1), ("three",0,0,0) ),
+            ( ("three",1,1,2), ("three",0,0,3), ("three", 3,3,0), ("three", 2,2,1) ),
+            ( ("one",1), ("two",0,2), ("one",1) ),
+            ( ("one",1), ("two",0,2), ("two",1,3), ("one",2) ),
+            ( ("three",1,2,3), ("one",0), ("one",0), ("one",0) ),
+            ( ("one",1), ("three",0,2,2), ("three",3,1,1), ("one",2) ),
+            ( ("two",1,2), ("three",0,2,2), ("three",0,1,1) ),
+            ( ("two",1,2),("two",0,3),("three",0,3,3),("three",1,2,2) ),
+            ( ("two",1,1),("three",0,0,2),("three",1,3,3),("two",2,2) ),
+        ]
+
+        input_offsets = {
+            "zero" : 0,
+            "one" : 1,
+            "two" : 4,
+            "three": 9
+        }
+
+        invars = []
+        for possible_invar in possible_invars:
+            l = max( [len(tup) for tup in possible_invar] ) - 1
+            n = len(possible_invar)
+
+            if l <= l_max and n <= n_max:
+                invars.append(possible_invar)
+
+        for c in cmaps:
+            c.requires_grad_(False)
+
+        coefs_set = []
+        terms_set = []
+        polynomial_sizes_set = []
+        for i,invar in enumerate(invars):
+            coefs, terms = computeInvariantPolynomial(invar, cmaps, input_offsets)
+            coefs_set.append(coefs)
+            terms_set.append(terms)
+            polynomial_sizes_set.append(terms.shape[0])
+
+        max_degrees = [ max( 
+                                [ len(terms_set[i][j]) for j in range(len(terms_set[i])) ] 
+                            ) for i in range(len(terms_set))]
+
+        max_degree = max(max_degrees)
+
+        terms_set_padded = []
+        for i in range(len(coefs_set)):
+            _, degree = terms_set[i].shape
+            terms_set_padded.append(F.pad(terms_set[i], (0,max_degree-degree), value=-1))
+
+        self.register_buffer( "coefs", torch.hstack(coefs_set).contiguous() )
+        self.register_buffer( "terms", torch.vstack(terms_set_padded).contiguous().to(torch.int16) )
+        self.register_buffer( "polynomial_sizes", torch.IntTensor(polynomial_sizes_set) )
+        self.id_number = torch.IntTensor(0)
+
+    def forward(self, tensor_features):
+        return EvaluatePolynomials.apply(tensor_features, self.coefs, self.terms, self.polynomial_sizes, self.id_number)
