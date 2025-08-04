@@ -9,7 +9,7 @@ from hippynn.interfaces.lammps_interface import MLIAPInterface
 if __name__ == "__main__":
     # Load trained model
     try:
-        with active_directory("/vast/home/dshahi/test_al_model/TEST_ALUMINUM_MODEL", create=False):
+        with active_directory("../TEST_ALUMINUM_MODEL", create=False):
             bundle = load_checkpoint_from_cwd(map_location="cpu")
     except FileNotFoundError:
         raise FileNotFoundError("Model not found, run ani_aluminum_example.py first!")
