@@ -119,6 +119,9 @@ DEFAULT_SETTINGS = {
     "TIMEPLOT_AUTOSCALING": (True, bool_or_strtobool),
     "PYTORCH_GPU_MEM_FRAC": (1.0, float),
     "COMM_FEATURES_LAMMPS": (True, bool_or_strtobool),
+    "USE_POLYNOMIAL_INVARIANTS": (True, bool_or_strtobool),
+    "USE_ENV_TENSOR": (True, bool_or_strtobool),
+    "USE_ENV_TENSOR_GRADIENT": (True, bool_or_strtobool),
 }
 
 INITIAL_SETTINGS = {k: handler(default) for k, (default, handler) in DEFAULT_SETTINGS.items()}

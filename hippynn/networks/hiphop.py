@@ -6,7 +6,7 @@ from ..layers.hiplayers import HOPInteractionLayer, TensorExtractor
 
 class HipHopNNModule(Hipnn):
     _interaction_class = HOPInteractionLayer
-    _interaction_kwargs = ("l_max", "n_max", "group_norm", "group_norm_eps", "invars_poly", "env_fused", "env_backward_fused")
+    _interaction_kwargs = ("l_max", "n_max", "group_norm", "group_norm_eps")
 
     def __init__(self, *args, l_max=3, n_max=4, group_norm=True, group_norm_eps=1e-5, **kwargs):
         warnings.warn("HIP-HOP-NN is still in a beta state: " "Details, defaults, and API are still subject to change.")

@@ -35,7 +35,6 @@ def evaluate_polynomials_kernel(
     NUM_MONOMIALS_TO_LOAD : tl.constexpr,
     dtype:tl.constexpr = tl.float32,
 ):
-
     num_monomials_rounded_up : tl.constexpr = triton.next_power_of_2(num_monomials)
 
     x_pid = tl.program_id(0)
