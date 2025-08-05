@@ -41,7 +41,7 @@ def get_configs_polynomials():
             for num_warps in [2,4,8,16,32]:
                 for num_stages in [2,3,4,5,6]:
                     configs.append(triton.Config(kwargs={"NUM_POINTS_TO_LOAD" : num_points_to_load, "NUM_MONOMIALS_TO_LOAD" : num_monomials_to_load}, num_warps=num_warps, num_stages=num_stages))
-
+                    return configs
     return configs
 
 @triton.jit

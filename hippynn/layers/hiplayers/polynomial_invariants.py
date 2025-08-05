@@ -1,37 +1,50 @@
 import torch
 import itertools
+import string
 
 import torch.nn.functional as F
 
 from ...custom_kernels.poly_triton import EvaluatePolynomials
 from .tensors import cmaps
 
-def computeInvariantPolynomial(C, invariant_input_offsets, invariant_code):
+"""
+This module concerns itself with computing invariants by taking products and contractions of irreducible tensors.
+
+We assume that all relevant irreducible tensors of order l are represented as coefficients that correspond to a
+basis Bl for the space of irreducible tensors of order l. Furthermore, we assume that the basis coefficients
+of all of moment tensors are concatenated into a single vector X = (x1, x2, ..., xn), where the basis coefficients
+of each tensor corresponds to a contiguous slice of the entries of X. (for example, the first entry of X could correspond
+to a tensor of order 0, then the next three correspond to a tensor of order 1, etc.).
+
+One has the ability to specify custom invariants, although they are also welcome to use the set of invariants that are included by default.
+One must provide a string to designate how each invariant is computed. It should take the same form
+as an einsum representation, but with two differences. First, instead of listing variable names at the end of the einsum string,
+one should instead use a string that can be used to uniquely identify the tensor that you want to contract. The name can be anything, but please
+do not use commas. These names will correspond with a contiguous slice of the basis coefficients stored in X. For example, if Tensor1 corresponds to a rank
+1 tensor, then the name Tensor1 might correspond to entries 1, 2, and 3 of X, such that x1, x2, and x3 store the basis coefficients for Tensor1.
+The way that one associates these names with slices of X will be indicated when needed. Second, the entire einsum representation should be
+a string. Because the reduction must lead to a scalar, there should be a comma right after the arrow. Then, there should be the names
+of the tensors. For example, it could look like this: 'ijk,ijk->,Tensor1,Tensor1'. To specify a tensor of rank zero, the string would
+look like this: '->,Tensor0'. Any strings with the arrow omitted (e.g. 'ijk,ijk,Tensor1,Tensor1) are also acceptable.
+"""
+
+def computeInvariantPolynomial(tensor_bases, invariant_input_offsets, invariant_code):
     """
     For a given invariant defined by contractions of irreducible moment tensors, represents that invariant
     as a multivariate polynomial.
 
-    We assume that all relevant irreducible tensors of order l are represented as coefficients that correspond to a
-    basis Bl for the space of irreducible tensors of order l. Furthermore, we assume that the basis coefficients
-    of all of moment tensors are concatenated into a single vector X = (x1, x2, ..., xn), where the basis coefficients
-    of each tensor corresponds to a contiguous slice of the entries of X. (for example, the first entry of X could correspond
-    to a tensor of order 0, then the next three correspond to a tensor of order 1, etc.).
-
     The polynomial that is returned is a function of the entries of X (e.g. 2*x1*x2 + 3*x3*x3).
 
-    :param C: The set of bases for tensors of order l. This should be a dictionary where C[l] stores the basis for irreducible tensors
-              of order l. C[l] should be an l+1 dimensional tensor, where C[l][i] stores the i-th basis element.
+    :param tensor_bases: The set of bases for tensors of each order used in the invariants. This should be a dictionary where tensor_bases[l] stores the basis for irreducible tensors
+                         of order l. tensor_bases[l] should be an l+1 dimensional tensor, where the final axis of tensor_bases[l] should index the the basis elements.
+                         For example tensor_bases[2][0,0,3] will represent, in the basis of irreducible tensors of order 2, the (0,0) entry of the third basis element.
 
     :param invariant_input_offsets: A dictionary that is used to keep track of which parts of the vector X correspond to the various tensors.
                                     The keys are a unique name for each tensor - it can be anything that the user wants. The invariant_input_offsets[T]
                                     stores the location in the vector X that corresponds to the basis coefficients for tensor T.
 
-    :param invariant_code: A code that specifies that reduction that is being computed. It should take the same form
-                           as an envsum representation, but with two differences. First, instead of listing variable names at the end of the envsum string,
-                           one should instead use the tensor names specified in invariant_input_offsets. Second, the entire envsum representation should be
-                           a string. Because the reduction must lead to a scalar, there should be a comma right after the arrow. Then, there should be the names
-                           of the tensors. For example, it could look like this: 'ijk,ijk->,Tensor1,Tensor2'. To specify a tensor of rank zero, the string would
-                           look like this: '->,Tensor0'.
+    :param invariant_code: The invariant that is computed, represented using einsum notation. Here the names of the tensors specified in the einsum string should be keys
+                           of invariant_input_offsets.
 
     :return: The polynomial that can be used to compute the invariant from the vector X. The polynomial is specified by its monomials using two arrays. 
              The first array stores the coefficients of all monomials. For instance, if the polynomial is 2*x1*x3 + 4*x1*x1, the list of coefficients would store [2,4].
@@ -39,74 +52,85 @@ def computeInvariantPolynomial(C, invariant_input_offsets, invariant_code):
              polynomial 2*x1*x3 + 4*x1*x1, the first row will store [1,3], and the second row will store [1,1].
     """
 
-    # For the zero order invariant, there is no einsum, it is just the monomial x0.
-    if invariant_code[0:2] == "->":
-        tensor_name = invariant_code[3:]
+    invariant_code = invariant_code.replace("->","")
+
+    # For the zero order invariant, there is no einsum, it is just one monomial.
+    if invariant_code[0] == ",":
+        tensor_name = invariant_code[1:]
         offset = invariant_input_offsets[tensor_name]
-        return torch.FloatTensor((1,)), torch.IntTensor(((offset,),))
+        return torch.FloatTensor((1,)), torch.FloatTensor(((offset,),))
 
-    # otherwise, build an einsum string corresponding to our contraction of the C tensors:
-    alpha = "abcdefghijklmnopqrstuvwxyz"
-    back_idx = 25
-    front_idx = 0
+    invariant_code = invariant_code.split(",")
+    num_terms = len(invariant_code) // 2
 
+    # Each possible monomial in the polynomial will be the equivalent of choosing one basis coefficient from each tensor that we are contracting.
+    # The coefficient corresponding to that monomial will be equal to performing our contraction on the corresponding basis elements.
+    # We can compute all such coefficients by performing an einsum from adding one extra index to the end of each term, and then performing the einsum on the basis tensors (the elements of tensor_bases).
+    # For example, the contraction ij,ij->,two,two becomes ijk,ijl->kl,tensor_bases[2],tensor_bases[2]. The resulting tensor will contain all of the coefficients for polynomials.
 
-    einsum_front_terms = []
+    # Here we set up the contraction that computes the polynomial coefficients.
+
+    # get all of the letters used to specify the einsum.
+    letters_used = set()
+
+    for term_idx in range(num_terms):
+        for letter in invariant_code[term_idx]:
+            letters_used.add(letter)
+    
+    alphabet = {letter for letter in string.ascii_letters}
+
+    # compute the einsum string by appending unused letters to the end of each term. Then, evaluate the einsum.
+
+    unused_letters = alphabet - letters_used
+
+    assert len(unused_letters) >= num_terms, "The invariant specified uses too many index letters; einsum ran out of letters to use."
+
+    unused_letters = list(unused_letters)
+    einsum_front = ""
     einsum_back = ""
     tensors_to_contract = []
 
-    # first, construct one term for each code.
-    # keep track of which tensors correspond to which terms.
-    for idx,reduction in enumerate(invariant_code):
-        einsum_front_terms.append(alpha[back_idx])
-        einsum_back += alpha[back_idx]
-        back_idx -= 1
-        assert back_idx > front_idx,"Ran out of leters for einsum."
-        
-        tensors_to_contract.append( C[ len(reduction)-1 ] )
-
-    # now add all of the einsum terms corresponding to the reductions
-    for idx,reduction in enumerate(invariant_code):
-        for other_idx in reduction[1:]:
-            if other_idx > idx:
-                next_letter = alpha[front_idx]
-                front_idx += 1
-                assert back_idx > front_idx,"Ran out of letters for einsum."
-
-                einsum_front_terms[idx] += next_letter
-                einsum_front_terms[other_idx] += next_letter
-
-    einsum_front = einsum_front_terms[0]
-    for einsum_term in einsum_front_terms[1:]:
-        einsum_front += "," + einsum_term
-
-    einsum_string = einsum_front + "->" + einsum_back
+    for term_idx in range(num_terms):
+        code = invariant_code[term_idx].strip()
+        einsum_front += "," + code + unused_letters[term_idx]
+        einsum_back += unused_letters[term_idx]
+        tensors_to_contract.append( tensor_bases[len(code)] )
+    
+    einsum_string = einsum_front[1:] + "->" + einsum_back
     coef_tensor = torch.einsum(einsum_string, *tensors_to_contract)
 
+    # Will store the monomials. The keys will be a list of all of the indices (sorted), and the values
+    # will be the corresponding coefficients. We sort the indices so that "like terms" are combined e.g.
+    # x1*x2 is treated as the same as x2*x1 (both are represented by the list [1,2]).
+    coefs = {}
+
+    # Create an iterator that can be used to iterate through every index of the coef_tensor
     iter_range = []
     for dim in coef_tensor.shape:
         iter_range.append(range(dim))
 
-    coefs = {}
-
     tensor_idxs = itertools.product(*iter_range)
+
+    # Iterate through coef_tensor to fill out the coefs dictionary.
     for coordinates in tensor_idxs:
 
-        value = coef_tensor[*coordinates]
-        if value != 0:
+        coef = coef_tensor[*coordinates]
+        if coef != 0:
 
+            # Based on the coordinates in coef_tensor, find the terms in the monomial that correspond
+            # using the input offsets.
             key_list = []
             for dim,coord in enumerate(coordinates):
-                key_list.append( invariant_input_offsets[ invariant_code[dim][0] ] + coord )
+                key_list.append( invariant_input_offsets[ invariant_code[num_terms + dim].strip() ] + coord )
 
             key_list.sort()
             key = tuple(key_list)
             if key in coefs:
-                coefs[key] += value
+                coefs[key] += coef
             else:
-                coefs[key] = value
+                coefs[key] = coef
     
-    # delete all zero coefficients
+    # remove all monomials whose coefficient is zero.
     delete = []
     for c in coefs:
         if coefs[c] == 0:
@@ -117,7 +141,7 @@ def computeInvariantPolynomial(C, invariant_input_offsets, invariant_code):
 
     # create the tensor of coefficients
     coefs_tensor = torch.zeros(len(coefs),dtype=torch.float32)
-    terms_tensor = torch.zeros((len(coefs),len(invariant_code)),dtype=torch.int32)
+    terms_tensor = torch.zeros((len(coefs),num_terms),dtype=torch.int32)
     
     for row, coef in enumerate(coefs):
         coefs_tensor[row] = coefs[coef]
@@ -126,60 +150,104 @@ def computeInvariantPolynomial(C, invariant_input_offsets, invariant_code):
 
     return coefs_tensor, terms_tensor
 
-# invariants are specified as a tuple. The first is a tensor name. Then, there is a list of which other tensors we contract with.
-# the number of other tensors that we contract with should match the degree
+# tensor ordering and list of invariants for the default invariants.
+default_invariants_ordering = ["zero", "one", "two", "three"]
+
 default_invariants_list = [
-    ( ("zero",), ),
-    ( ("one",1), ("one",0) ),
-    ( ("two",1,1), ("two",0,0) ),
-    ( ("two",1,2), ("two",0,2), ("two",0,1) ),
-    ( ("three",1,1,1), ("three",0,0,0) ),
-    ( ("three",1,1,2), ("three",0,0,3), ("three", 3,3,0), ("three", 2,2,1) ),
-    ( ("one",1), ("two",0,2), ("one",1) ),
-    ( ("one",1), ("two",0,2), ("two",1,3), ("one",2) ),
-    ( ("three",1,2,3), ("one",0), ("one",0), ("one",0) ),
-    ( ("one",1), ("three",0,2,2), ("three",3,1,1), ("one",2) ),
-    ( ("two",1,2), ("three",0,2,2), ("three",0,1,1) ),
-    ( ("two",1,2),("two",0,3),("three",0,3,3),("three",1,2,2) ),
-    ( ("two",1,1),("three",0,0,2),("three",1,3,3),("two",2,2) ),
+    "->,zero",
+    "i,i->,one,one",
+    "ij,ij->,two,two",
+    "ij,ik,jk->,two,two,two",
+    "ijk,ijk->,three,three",
+    "ijk,ijl,abk,abl->,three,three,three,three",
+    "i,ij,j->,one,two,one",
+    "i,ij,jk,k->,one,two,two,one",
+    "i,j,k,ijk->,one,one,one,three",
+    "i,ijk,jkl,l->,one,three,three,one",
+    "ij,jkl,ikl->,two,three,three",
+    "ij,jk,ilm,klm->,two,two,three,three",
+    "ij,ijk,kab,ab->,two,three,three,two",
 ]
 
-default_input_offsets = {
-    "zero" : 0,
-    "one" : 1,
-    "two" : 4,
-    "three": 9
-}
-
 class PolynomialInvariants(torch.nn.Module):
-    def __init__(self, n_max, l_max, _cmaps=cmaps, possible_invars=default_invariants_list, input_offsets=default_input_offsets):
+    """
+    Computes invariants from a set of irreducible tensors. It does so by explicitly computing the polynomials that are used to perform the
+    computation. In doing so, any monomials whose coefficients are equal to zero can be skipped, allowing one to leverage sparsity.
+    When evaluating, one can pass in a 2D array corresponding to a batch. Each row of this array should correspond to a different
+    vector X.
+
+    :param n_max: The maximum number of tensors used to compute an invariant. Any invariants in the invariants list that have more than n_max
+                  tensors in their computation will be filtered out.
+
+    :param l_max: The maximum order of tensors used to compute an invariant. Any invariants in the invariants list that involve a tensor whose
+                  order is greater than l_max will be filtered out.
+
+    :param tensor_bases: The set of bases for irreducible tensors of each order that is used in the invariants. This should be a dictionary where tensor_bases[l] stores the basis for irreducible tensors
+                         of order l. tensor_bases[l] should be an l+1 dimensional tensor, where the final axis of tensor_bases[l] should index the the basis elements.
+                         For example tensor_bases[2][0,0,3] will represent, in the basis of irreducible tensors of order 2, the (0,0) entry of the third basis element.
+
+    :param invariants: The list of invariants to be computed. This should be a list of einsum strings.
+
+    :param input_tensor_ordering: For each tensor name that is specified in the invariants list, this specifies the order that these tensors occur in
+                                  the array X. For example, if X first contains the basis coefficients for tensor1, then tensor2, then tensor3, the value
+                                  of input_tensor_ordering should be [tensor1, tensor2, tensor3]. The orders of each tensor are computed automatically and do not need to be specified.
+
+    :return: Each invariant computed for the set of inputs. If a batch is given as the input, the output will be a 2D tensor, where each row will contain the value of 
+             each invariant evaluated on the vector X corresponding to that row.
+    """
+
+    def __init__(self, n_max, l_max, tensor_bases=cmaps, invariants=default_invariants_list, input_tensor_ordering=default_invariants_ordering):
         super().__init__()
         self.l_max = l_max
         self.n_max = n_max
 
-        cmaps = [
-            _cmaps[0],
-            _cmaps[1].permute(1,0),
-            _cmaps[2].permute(2,0,1).reshape(5,3,3),
-            _cmaps[3].permute(3,0,1,2).reshape(7,3,3,3),
-        ]
+        # compute the order of each tensor (and make sure that the orders are listed consistently)
+        tensor_orders = {}
 
-        invars = []
-        for possible_invar in possible_invars:
-            l = max( [len(tup) for tup in possible_invar] ) - 1
-            n = len(possible_invar)
+        for i, invar in enumerate(invariants):
+            invar = invar.replace("->", "")
+            invar = invar.split(",")
+            assert len(invar) % 2 == 0, f"Invariant {i} has an odd number of terms. The specification is incorrect."
+            num_terms = len(invar) // 2
+            for term_idx in range(num_terms):
+                tensor_name = invar[term_idx+num_terms].strip()
+                tensor_order = len(invar[term_idx].strip())
+
+                if tensor_name in tensor_orders:
+                    assert tensor_order == tensor_orders[tensor_name], f"Tensor {tensor_name} is used to represent two different orders: {tensor_orders[tensor_name]} and {tensor_order}."
+                else:
+                    tensor_orders[tensor_name] = tensor_order
+
+        # Based on each order, compute the index in the vector X that corresponds to each tensor.
+        # stored in the input_offsets.
+        input_offsets = {}
+        next_offset = 0
+
+        for t in input_tensor_ordering:
+            assert t in tensor_orders, f"Tensor {t} is never used in an invariant."
+
+            input_offsets[t] = next_offset
+            next_offset += 2*tensor_orders[t] + 1
+
+        # Cut invariants out of the list based on n_max and l_max.
+        invariants_kept = []
+        for invar in invariants:
+            invar_split = invar.replace("->","").split(",")
+            n = len(invar_split) // 2
+            l = max( [tensor_orders[t.strip()] for t in invar_split[n:]] )
 
             if l <= l_max and n <= n_max:
-                invars.append(possible_invar)
+                invariants_kept.append(invar)
 
-        for c in cmaps:
-            c.requires_grad_(False)
+        for l in tensor_bases:
+            tensor_bases[l].requires_grad_(False)
 
+        # compute the polynomials associated with every invariant that we are evaluating.
         coefs_set = []
         terms_set = []
         polynomial_sizes_set = []
-        for i,invar in enumerate(invars):
-            coefs, terms = computeInvariantPolynomial(invar, cmaps, input_offsets)
+        for i,invar in enumerate(invariants_kept):
+            coefs, terms = computeInvariantPolynomial(tensor_bases, input_offsets, invar)
             coefs_set.append(coefs)
             terms_set.append(terms)
             polynomial_sizes_set.append(terms.shape[0])
