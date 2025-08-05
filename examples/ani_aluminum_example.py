@@ -35,9 +35,11 @@ import numpy as np
 # and geenrate ensembles with atom energies
 parser = argparse.ArgumentParser(description='setting random seeds')
 parser.add_argument('--seed', type=int, default=1001, help='seed')
+parser.add_argument('--ensemble', action='store_true', help='Store model in ensemble directory')
+
 args = parser.parse_args()
 
-if args.seed == 1001:
+if not args.ensemble:
     netname = f'TEST_ALUMINUM_MODEL_{args.seed}'
 else:
     netname = f'ALUMINUM_ENSEMBLES/TEST_ALUMINUM_MODEL_{args.seed}'

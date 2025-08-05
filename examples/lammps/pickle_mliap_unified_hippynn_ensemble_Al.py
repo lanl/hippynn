@@ -10,7 +10,7 @@ from hippynn.graphs import make_ensemble # added
 if __name__ == "__main__":
     # Load ensemble of trained models
     try:
-        bundle = "/vast/home/dshahi/aluminum/with_atom_energies_test/TEST_ALUMINUM_MODEL_*"
+        bundle = "../TEST_ALUMINUM_MODEL_*"
     except FileNotFoundError:
         raise FileNotFoundError("Model not found, run ani_aluminum_example.py first!")
     
@@ -18,6 +18,6 @@ if __name__ == "__main__":
     ensemble_energy = ensemble_graph.node_from_name("ensemble_atomenergies") #create ensemble energy nodes
    
     extra_properties = {"energy_std": ensemble_energy.std} # create extra properties
-    unified = MLIAPInterface(ensemble_energy, ["Al"],is_ensemble=True, extra_properties=extra_properties, model_device=device_fallback())
+    unified = MLIAPInterface(ensemble_energy, ["Al"],is_ensemble=True, extra_properties=None, model_device=device_fallback())
     torch.save(unified, "mliap_unified_hippynn_Al.pt")
 
