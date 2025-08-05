@@ -1,7 +1,8 @@
 import torch
 from ... import custom_kernels
-from ...custom_kernels.env_fused import envsum_fused, envsum_fused_gradient
-from .tensors import HopInvariantLayer, HopInvariantLayerPolynomials
+from ...custom_kernels.tensor_message_passing import tensorMessagePassing, tensorMessagePassingBackwardOnly
+from .tensors import HopInvariantLayer
+from .polynomial_invariants import PolynomialInvariants
 from ... import settings
 import warnings
 
@@ -314,7 +315,7 @@ class HOPInteractionLayer(InteractLayer):
         self.n_invariants = n_invariants
         mixing_weights = torch.zeros(self.nf_out, self.n_invariants, self.nf_out)
         if settings.USE_POLYNOMIAL_INVARIANTS:  
-            self.invars = HopInvariantLayerPolynomials(n_max=n_max, l_max=l_max)
+            self.invars = PolynomialInvariants(n_max=n_max, l_max=l_max)
         else:
             self.invars = HopInvariantLayer(n_max=n_max, l_max=l_max)
 
@@ -339,9 +340,9 @@ class HOPInteractionLayer(InteractLayer):
         sense_scalar = self.sensitivity(dist_pairs)
         if self.use_env_tensor_gradient:
             if self.use_env_tensor:
-                env_features = envsum_fused(tensor_rhats, sense_scalar, in_features, pair_first, pair_second)
+                env_features = tensorMessagePassing(tensor_rhats, sense_scalar, in_features, pair_first, pair_second)
             else:
-                env_features = envsum_fused_gradient(tensor_rhats, sense_scalar, in_features, pair_first, pair_second)
+                env_features = tensorMessagePassingBackwardOnly(tensor_rhats, sense_scalar, in_features, pair_first, pair_second)
         else:
             sensitivity = sense_scalar.unsqueeze(1) * tensor_rhats.unsqueeze(2)
             sense_flat = sensitivity.reshape(n_pair, n_tensor_comp * self.n_dist)
