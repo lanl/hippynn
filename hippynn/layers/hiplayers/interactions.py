@@ -314,7 +314,7 @@ class HOPInteractionLayer(InteractLayer):
 
         self.n_invariants = n_invariants
         mixing_weights = torch.zeros(self.nf_out, self.n_invariants, self.nf_out)
-        if settings.USE_POLYNOMIAL_INVARIANTS:  
+        if settings.USE_POLYNOMIAL_INVARIANTS:
             self.invars = PolynomialInvariants(n_max=n_max, l_max=l_max)
         else:
             self.invars = HopInvariantLayer(n_max=n_max, l_max=l_max)

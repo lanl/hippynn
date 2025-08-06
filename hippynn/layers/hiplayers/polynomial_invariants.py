@@ -28,6 +28,24 @@ of the tensors. For example, it could look like this: 'ijk,ijk->,Tensor1,Tensor1
 look like this: '->,Tensor0'. Any strings with the arrow omitted (e.g. 'ijk,ijk,Tensor1,Tensor1) are also acceptable.
 """
 
+def split_invariant(invariants):
+    """
+    splits an invariant string into a list of indices and tensors.
+    """
+
+    invars_split = invariants.replace("->","").split(",")
+
+    assert len(invars_split) % 2 == 0, f"the number of indices and tensors in an invariant string is not equal ({invariants})."
+    num_terms = len(invars_split) // 2
+    indices = []
+    tensors = []
+
+    for term_idx in range(num_terms):
+        indices.append( invars_split[term_idx].strip().replace("\n", "") )
+        tensors.append( invars_split[term_idx + num_terms].strip().replace("\n", "") )
+
+    return indices, tensors
+
 def computeInvariantPolynomial(tensor_bases, invariant_input_offsets, invariant_code):
     """
     For a given invariant defined by contractions of irreducible moment tensors, represents that invariant
@@ -53,15 +71,15 @@ def computeInvariantPolynomial(tensor_bases, invariant_input_offsets, invariant_
     """
 
     invariant_code = invariant_code.replace("->","")
+    invar_indices, invar_tensors = split_invariant(invariant_code)
 
     # For the zero order invariant, there is no einsum, it is just one monomial.
-    if invariant_code[0] == ",":
-        tensor_name = invariant_code[1:]
+    if len(invar_indices) == 1:
+        tensor_name = invar_tensors[0]
         offset = invariant_input_offsets[tensor_name]
         return torch.FloatTensor((1,)), torch.FloatTensor(((offset,),))
 
-    invariant_code = invariant_code.split(",")
-    num_terms = len(invariant_code) // 2
+    num_terms = len(invar_indices)
 
     # Each possible monomial in the polynomial will be the equivalent of choosing one basis coefficient from each tensor that we are contracting.
     # The coefficient corresponding to that monomial will be equal to performing our contraction on the corresponding basis elements.
@@ -74,9 +92,9 @@ def computeInvariantPolynomial(tensor_bases, invariant_input_offsets, invariant_
     letters_used = set()
 
     for term_idx in range(num_terms):
-        for letter in invariant_code[term_idx]:
+        for letter in invar_indices[term_idx]:
             letters_used.add(letter)
-    
+
     alphabet = {letter for letter in string.ascii_letters}
 
     # compute the einsum string by appending unused letters to the end of each term. Then, evaluate the einsum.
@@ -91,11 +109,11 @@ def computeInvariantPolynomial(tensor_bases, invariant_input_offsets, invariant_
     tensors_to_contract = []
 
     for term_idx in range(num_terms):
-        code = invariant_code[term_idx].strip()
+        code = invar_indices[term_idx]
         einsum_front += "," + code + unused_letters[term_idx]
         einsum_back += unused_letters[term_idx]
         tensors_to_contract.append( tensor_bases[len(code)] )
-    
+
     einsum_string = einsum_front[1:] + "->" + einsum_back
     coef_tensor = torch.einsum(einsum_string, *tensors_to_contract)
 
@@ -121,7 +139,7 @@ def computeInvariantPolynomial(tensor_bases, invariant_input_offsets, invariant_
             # using the input offsets.
             key_list = []
             for dim,coord in enumerate(coordinates):
-                key_list.append( invariant_input_offsets[ invariant_code[num_terms + dim].strip() ] + coord )
+                key_list.append( invariant_input_offsets[ invar_tensors[dim] ] + coord )
 
             key_list.sort()
             key = tuple(key_list)
@@ -129,7 +147,7 @@ def computeInvariantPolynomial(tensor_bases, invariant_input_offsets, invariant_
                 coefs[key] += coef
             else:
                 coefs[key] = coef
-    
+
     # remove all monomials whose coefficient is zero.
     delete = []
     for c in coefs:
@@ -205,13 +223,13 @@ class PolynomialInvariants(torch.nn.Module):
         tensor_orders = {}
 
         for i, invar in enumerate(invariants):
-            invar = invar.replace("->", "")
-            invar = invar.split(",")
-            assert len(invar) % 2 == 0, f"Invariant {i} has an odd number of terms. The specification is incorrect."
-            num_terms = len(invar) // 2
+
+            invar_indices, invar_terms = split_invariant(invar)
+            num_terms = len(invar_indices)
+
             for term_idx in range(num_terms):
-                tensor_name = invar[term_idx+num_terms].strip()
-                tensor_order = len(invar[term_idx].strip())
+                tensor_name = invar_terms[term_idx]
+                tensor_order = len(invar_indices[term_idx])
 
                 if tensor_name in tensor_orders:
                     assert tensor_order == tensor_orders[tensor_name], f"Tensor {tensor_name} is used to represent two different orders: {tensor_orders[tensor_name]} and {tensor_order}."
@@ -232,9 +250,9 @@ class PolynomialInvariants(torch.nn.Module):
         # Cut invariants out of the list based on n_max and l_max.
         invariants_kept = []
         for invar in invariants:
-            invar_split = invar.replace("->","").split(",")
-            n = len(invar_split) // 2
-            l = max( [tensor_orders[t.strip()] for t in invar_split[n:]] )
+            _, invar_tensors = split_invariant(invar)
+            n = len(invar_tensors)
+            l = max( [tensor_orders[t] for t in invar_tensors] )
 
             if l <= l_max and n <= n_max:
                 invariants_kept.append(invar)
