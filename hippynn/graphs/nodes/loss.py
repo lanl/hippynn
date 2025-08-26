@@ -7,7 +7,7 @@ import torch.nn.functional
 from ... import settings
 from ..indextypes import IdxType, elementwise_compare_reduce
 from ..indextypes.reduce_funcs import db_state_of
-from .base import SingleNode, Node, InputNode
+from .base import SingleNode, Node, InputNode, AutoKw
 from ...layers import algebra as algebra_modules
 from ...layers import regularization as reg_modules
 
@@ -156,18 +156,16 @@ class MAELoss(_BaseCompareLoss, op=torch.nn.functional.l1_loss):
     pass
 
 
-class _LPReg(SingleNode):
+class _LPReg(AutoKw, SingleNode):
     index_state = IdxType.Scalar
     auto_module_class = reg_modules.LPReg
+    auto_module_kwargs = "network",
 
     def __init__(self, network, p=2, module="auto"):
         name = "L^P_Reg({},p={})".format(network.name, p)
         parents = (network,)
         self.p = p
-        super().__init__(name, parents, module=module)
-
-    def auto_module(self):
-        return self.auto_module_class(self.parents[0].torch_module, p=self.p)
+        super().__init__(name, parents, module=module, network=network.torch_module)
 
 
 def lpreg(network, p):
