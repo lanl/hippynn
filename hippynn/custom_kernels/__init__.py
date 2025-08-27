@@ -45,11 +45,9 @@ For more information, see :doc:`/user_guide/ckernels`
 import warnings
 from typing import Union
 import torch
-from .. import settings
 from .registry import MessagePassingKernels
 from . import env_pytorch
-
-
+from .. import settings
 
 class CustomKernelError(Exception):
     pass
@@ -118,7 +116,7 @@ def set_custom_kernels(active: Union[bool, str] = True) -> str:
     """
     populate_custom_kernel_availability()
 
-    global envsum, sensesum, featsum, CUSTOM_KERNELS_ACTIVE
+    global envsum, sensesum, featsum, messagePassing, CUSTOM_KERNELS_ACTIVE
 
     if active is False:
         active = "pytorch"
@@ -160,9 +158,11 @@ def set_custom_kernels(active: Union[bool, str] = True) -> str:
     # Ok, finally set the implementation. Note that get_implementation
     # will error with type CustomKernelError if not found.
     kernel_implementation = MessagePassingKernels.get_implementation(active)
+
     envsum = kernel_implementation.envsum
     sensesum = kernel_implementation.sensesum
     featsum = kernel_implementation.featsum
+
     CUSTOM_KERNELS_ACTIVE = active
 
     return active
@@ -195,9 +195,10 @@ CUSTOM_KERNELS_ACTIVE = None  #: Which custom kernel implementation is currently
 envsum = None  #: See :func:`hippynn.custom_kernels.env_pytorch.envsum` for more information.
 sensesum = None  #: See :func:`hippynn.custom_kernels.env_pytorch.sensesum` for more information.
 featsum = None  #: See :func:`hippynn.custom_kernels.env_pytorch.featsum` for more information.
+kernel_active = "pytorch"
 
 try:
-    set_custom_kernels(try_custom_kernels)
+    kernel_active = set_custom_kernels(try_custom_kernels)
 except CustomKernelError as eee:
     raise  # We re-raise custom kernel releated errors.
 except Exception as ee:

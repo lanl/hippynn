@@ -1,8 +1,7 @@
 import torch
 from ... import custom_kernels
-from ...custom_kernels.tensor_message_passing import tensorMessagePassing, tensorMessagePassingBackwardOnly
-from .tensors import HopInvariantLayer
-from .polynomial_invariants import PolynomialInvariants
+from ...custom_kernels.tensor_message_passing import hopMessagePassing
+from .combined_invariants import HopInvariantLayerCombined
 from ... import settings
 import warnings
 
@@ -314,13 +313,7 @@ class HOPInteractionLayer(InteractLayer):
 
         self.n_invariants = n_invariants
         mixing_weights = torch.zeros(self.nf_out, self.n_invariants, self.nf_out)
-        if settings.USE_POLYNOMIAL_INVARIANTS:
-            self.invars = PolynomialInvariants(n_max=n_max, l_max=l_max)
-        else:
-            self.invars = HopInvariantLayer(n_max=n_max, l_max=l_max)
-
-        self.use_env_tensor_gradient = settings.USE_ENV_TENSOR_GRADIENT
-        self.use_env_tensor = settings.USE_ENV_TENSOR
+        self.invars = HopInvariantLayerCombined(n_max, l_max)
 
         self.mixing_weights = torch.nn.Parameter(mixing_weights)
         torch.nn.init.xavier_normal_(self.mixing_weights)
@@ -338,15 +331,7 @@ class HOPInteractionLayer(InteractLayer):
 
         # set up sensitivity for message passing
         sense_scalar = self.sensitivity(dist_pairs)
-        if self.use_env_tensor_gradient:
-            if self.use_env_tensor:
-                env_features = tensorMessagePassing(tensor_rhats, sense_scalar, in_features, pair_first, pair_second)
-            else:
-                env_features = tensorMessagePassingBackwardOnly(tensor_rhats, sense_scalar, in_features, pair_first, pair_second)
-        else:
-            sensitivity = sense_scalar.unsqueeze(1) * tensor_rhats.unsqueeze(2)
-            sense_flat = sensitivity.reshape(n_pair, n_tensor_comp * self.n_dist)
-            env_features = custom_kernels.envsum(sense_flat, in_features, pair_first, pair_second)
+        env_features = hopMessagePassing(tensor_rhats, sense_scalar, in_features, pair_first, pair_second)
 
         # apply weights to tensor features
         weights_rs = torch.reshape(self.int_weights.permute(0, 2, 1), (self.n_dist * self.nf_in, self.nf_out))

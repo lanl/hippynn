@@ -3,7 +3,8 @@ import triton.language as tl
 import torch
 
 from .utils import resort_pairs_cached
-from . import envsum, sensesum, featsum
+from . import envsum, kernel_active
+from .. import settings
 
 def config_pruner(configs, nargs, **kwargs):
     """
@@ -250,6 +251,19 @@ def tensor_products_kernel(
 
     if compute_Tsz:
         tl.store( Tsz_out + E_offsets, Tsz_accumulator, mask=E_mask )
+
+def hopMessagePassing(T,s,z,pair_first,pair_second):
+    if T.device != 'cpu' and kernel_active == "triton" and settings.USE_ENV_TENSOR_GRADIENT:
+        if settings.USE_ENV_TENSOR:
+            return tensorMessagePassing(T,s,z,pair_first,pair_second)
+        else:
+            return tensorMessagePassingBackwardOnly(T,s,z,pair_first,pair_second)
+    else:
+        ij,t = T.shape
+        _,nu = s.shape
+        sensitivity = s.unsqueeze(1) * T.unsqueeze(2)
+        sense_flat = sensitivity.reshape(ij, t * nu)
+        return envsum(sense_flat, z, pair_first, pair_second)
 
 def tensorMessagePassing(T,s,z,pair_first,pair_second):
     """

@@ -191,7 +191,7 @@ def precompute_pairs(model, database, batch_size=10, device=None, make_dense=Fal
 
     Note that the returned model needs to be re-assembled with the new graph for the cache to take effect.
     Example usage:
-    >>> precompute_pairs(training_modules.model,database,device='cuda')
+    >>> precompute_pairs(training_modules.model,database,device=)
     >>> training_modules, db_info = assemble_for_training(train_loss, validation_losses)
     >>> database.inputs = db_info['inputs']
     """

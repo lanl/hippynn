@@ -277,6 +277,12 @@ def compute_derivative(coefs_,terms_,polynomial_sizes_,input_dimension):
 
     return derivatives_coefs_out, derivatives_terms_out, derivatives_polynomial_sizes_out
 
+next_polynomial_id = 0
+def get_next_polynomial_id():
+    global next_polynomial_id
+    next_polynomial_id += 1
+    return next_polynomial_id
+
 derivative_cache = {}
 
 class EvaluatePolynomials(torch.autograd.Function):

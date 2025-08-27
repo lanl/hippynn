@@ -77,7 +77,7 @@ def computeInvariantPolynomial(tensor_bases, invariant_input_offsets, invariant_
     if len(invar_indices) == 1:
         tensor_name = invar_tensors[0]
         offset = invariant_input_offsets[tensor_name]
-        return torch.FloatTensor((1,)), torch.FloatTensor(((offset,),))
+        return torch.FloatTensor((1,)), torch.IntTensor(((offset,),))
 
     num_terms = len(invar_indices)
 
@@ -187,38 +187,7 @@ default_invariants_list = [
     "ij,ijk,kab,ab->,two,three,three,two",
 ]
 
-class PolynomialInvariants(torch.nn.Module):
-    """
-    Computes invariants from a set of irreducible tensors. It does so by explicitly computing the polynomials that are used to perform the
-    computation. In doing so, any monomials whose coefficients are equal to zero can be skipped, allowing one to leverage sparsity.
-    When evaluating, one can pass in a 2D array corresponding to a batch. Each row of this array should correspond to a different
-    vector X.
-
-    :param n_max: The maximum number of tensors used to compute an invariant. Any invariants in the invariants list that have more than n_max
-                  tensors in their computation will be filtered out.
-
-    :param l_max: The maximum order of tensors used to compute an invariant. Any invariants in the invariants list that involve a tensor whose
-                  order is greater than l_max will be filtered out.
-
-    :param tensor_bases: The set of bases for irreducible tensors of each order that is used in the invariants. This should be a dictionary where tensor_bases[l] stores the basis for irreducible tensors
-                         of order l. tensor_bases[l] should be an l+1 dimensional tensor, where the final axis of tensor_bases[l] should index the the basis elements.
-                         For example tensor_bases[2][0,0,3] will represent, in the basis of irreducible tensors of order 2, the (0,0) entry of the third basis element.
-
-    :param invariants: The list of invariants to be computed. This should be a list of einsum strings.
-
-    :param input_tensor_ordering: For each tensor name that is specified in the invariants list, this specifies the order that these tensors occur in
-                                  the array X. For example, if X first contains the basis coefficients for tensor1, then tensor2, then tensor3, the value
-                                  of input_tensor_ordering should be [tensor1, tensor2, tensor3]. The orders of each tensor are computed automatically and do not need to be specified.
-
-    :return: Each invariant computed for the set of inputs. If a batch is given as the input, the output will be a 2D tensor, where each row will contain the value of 
-             each invariant evaluated on the vector X corresponding to that row.
-    """
-
-    def __init__(self, n_max, l_max, tensor_bases=cmaps, invariants=default_invariants_list, input_tensor_ordering=default_invariants_ordering):
-        super().__init__()
-        self.l_max = l_max
-        self.n_max = n_max
-
+def compute_invariant_polynomial_collection(n_max, l_max, tensor_bases=cmaps, invariants=default_invariants_list, input_tensor_ordering=default_invariants_ordering):
         # compute the order of each tensor (and make sure that the orders are listed consistently)
         tensor_orders = {}
 
@@ -281,9 +250,49 @@ class PolynomialInvariants(torch.nn.Module):
             _, degree = terms_set[i].shape
             terms_set_padded.append(F.pad(terms_set[i], (0,max_degree-degree), value=-1))
 
-        self.register_buffer( "coefs", torch.hstack(coefs_set).contiguous() )
-        self.register_buffer( "terms", torch.vstack(terms_set_padded).contiguous().to(torch.int16) )
-        self.register_buffer( "polynomial_sizes", torch.IntTensor(polynomial_sizes_set) )
+        coefs = torch.hstack(coefs_set)
+        terms = torch.vstack(terms_set_padded)
+        polynomial_sizes = torch.IntTensor(polynomial_sizes_set)
+
+        return coefs, terms, polynomial_sizes
+
+class PolynomialInvariants(torch.nn.Module):
+    """
+    Computes invariants from a set of irreducible tensors. It does so by explicitly computing the polynomials that are used to perform the
+    computation. In doing so, any monomials whose coefficients are equal to zero can be skipped, allowing one to leverage sparsity.
+    When evaluating, one can pass in a 2D array corresponding to a batch. Each row of this array should correspond to a different
+    vector X.
+
+    :param n_max: The maximum number of tensors used to compute an invariant. Any invariants in the invariants list that have more than n_max
+                  tensors in their computation will be filtered out.
+
+    :param l_max: The maximum order of tensors used to compute an invariant. Any invariants in the invariants list that involve a tensor whose
+                  order is greater than l_max will be filtered out.
+
+    :param tensor_bases: The set of bases for irreducible tensors of each order that is used in the invariants. This should be a dictionary where tensor_bases[l] stores the basis for irreducible tensors
+                         of order l. tensor_bases[l] should be an l+1 dimensional tensor, where the final axis of tensor_bases[l] should index the the basis elements.
+                         For example tensor_bases[2][0,0,3] will represent, in the basis of irreducible tensors of order 2, the (0,0) entry of the third basis element.
+
+    :param invariants: The list of invariants to be computed. This should be a list of einsum strings.
+
+    :param input_tensor_ordering: For each tensor name that is specified in the invariants list, this specifies the order that these tensors occur in
+                                  the array X. For example, if X first contains the basis coefficients for tensor1, then tensor2, then tensor3, the value
+                                  of input_tensor_ordering should be [tensor1, tensor2, tensor3]. The orders of each tensor are computed automatically and do not need to be specified.
+
+    :return: Each invariant computed for the set of inputs. If a batch is given as the input, the output will be a 2D tensor, where each row will contain the value of 
+             each invariant evaluated on the vector X corresponding to that row.
+    """
+
+    def __init__(self, n_max, l_max, tensor_bases=cmaps, invariants=default_invariants_list, input_tensor_ordering=default_invariants_ordering):
+        super().__init__()
+        self.l_max = l_max
+        self.n_max = n_max
+
+        coefs, terms, polynomial_sizes = compute_invariant_polynomial_collection( n_max, l_max, tensor_bases, invariants, input_tensor_ordering )
+
+        self.register_buffer( "coefs", coefs )
+        self.register_buffer( "terms", terms.to(torch.int16) )
+        self.register_buffer( "polynomial_sizes", polynomial_sizes )
         self.id_number = torch.IntTensor(0)
 
     def forward(self, tensor_features):
