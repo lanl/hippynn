@@ -135,6 +135,110 @@ class HessianNode(ExpandParents, AutoKw, MultiNode):
         self.module_kwargs = {}
         super().__init__(name, parents, module=module, **kwargs)
 
+
+class HVPVectorNode(ExpandParents, AutoKw, SingleNode):
+    """
+    Outputs a tensor with a determined number of random or one-hot vectors per molecule
+    """
+    _input_names = "coordinates", "nonblank"
+    _index_state = IdxType.MolAtom
+    _auto_module_class = physics_layers.HVPVector
+
+    @_parent_expander.match(PositionsNode)
+    def expand_from_positions(self, positions, *, purpose=None, **kwargs):
+        _, pidxer = acquire_encoding_padding((positions,), species_set=None, purpose=purpose)
+        return positions, pidxer.nonblank
+    
+    _parent_expander.assertlen(2)
+    _parent_expander.get_main_outputs()
+    _parent_expander.require_idx_states(IdxType.MolAtom, IdxType.MolAtom)
+    
+    def __init__(self, name, parents,  module="auto", vector_type="random", **kwargs):
+        self.module_kwargs = {"vector_type": vector_type}
+        parents = self.expand_parents(parents)
+        super().__init__(name, parents, module=module, **kwargs)
+
+
+class HVPNode(ExpandParents, AutoKw, SingleNode):
+    _input_names = "source", "coordinates", "vector"
+    _index_state = IdxType.MolAtom
+    _auto_module_class = physics_layers.HVP
+
+    @_parent_expander.match(Energies, _BaseNode)
+    def expansion0(self, source, vector, *, purpose, **kwargs):
+        # Infer positions from energy or force node
+        positions = find_unique_relative(source, PositionsNode, why_desc=purpose)
+        return source, positions, vector
+
+    @_parent_expander.match(Energies, PositionsNode, _BaseNode)
+    def expansion1(self, energy, positions, vector, *, purpose, **kwargs):
+        energy = energy.main_output
+        possible_grads = [child for child in energy.children if (isinstance(child, GradientNode) and child.coordinates == positions)]
+        
+        if len(possible_grads) == 1:
+            # if we found a unique gradient, use that
+            force = possible_grads[0]
+        elif len(possible_grads)==0:
+            # if no gradient was found, make our own
+            force = GradientNode("forces", (energy, positions), sign=-1)
+        elif len(possible_grads)>1:
+            raise NodeAmbiguityError("Unable to automatically determine gradient of energy as multiple gradient nodes are present.")
+        
+        return force, positions, vector
+
+    @_parent_expander.match(GradientNode, PositionsNode, _BaseNode)
+    def expansion2(self, force, positions, vector, *, purpose, **kwargs):
+        # always use forces, not gradients
+        if force.sign == +1:
+            force = -1 * force
+        return force, positions, vector
+    
+    @_parent_expander.match(_BaseNode, PositionsNode, _BaseNode)
+    def expansion3(self, force, positions, vector, *, purpose, **kwargs):
+    
+        if not isinstance(force, GradientNode) and not any(isinstance(f, GradientNode) for f in force.get_all_parents()):
+            warnings.warn(f"Input to HVP node doesn't appear to be a force or child of a force! Got node: {force}")
+
+        return force, positions, vector
+    
+    @_parent_expander.match(_BaseNode, _BaseNode, _BaseNode)
+    def expansion5(self, force, coordinates, vector, **kwargs):
+        coordinates.requires_grad = True
+        return force, coordinates, vector
+
+    _parent_expander.assertlen(3)
+    _parent_expander.get_main_outputs()
+    _parent_expander.require_idx_states(IdxType.MolAtom, IdxType.MolAtom, IdxType.MolAtom)
+
+    def __init__(self, name, parents, module="auto", **kwargs):
+        self.module_kwargs = {}
+        parents = self.expand_parents(parents)
+        super().__init__(name, parents, module=module, **kwargs)
+
+
+class TrueHVPNode(ExpandParents, AutoNoKw, SingleNode):
+    """
+    Computes true Hessian-vector product from database-stored Hessians and input vector
+    """
+    _input_names = "hessian", "vector"
+    _index_state = IdxType.MolAtom
+    _auto_module_class = physics_layers.TrueHVP
+
+    @_parent_expander.match(_BaseNode, HVPVectorNode)
+    def expand_from_hessian_and_vector(self, hessian, vector, **kwargs):
+        if hessian._index_state != IdxType.Molecules:
+            raise TypeError(f"Expected Molecules-indexed Hessian, got {hessian._index_state}")
+        return hessian, vector
+
+    _parent_expander.get_main_outputs()
+    _parent_expander.require_idx_states(IdxType.Molecules, IdxType.MolAtom)
+
+    def __init__(self, name, parents=None, module="auto", **kwargs):
+        self.module_kwargs = {}
+        parents = self.expand_parents(parents, **kwargs)
+        super().__init__(name, parents, module=module, **kwargs)
+
+
 class StressForceNode(AutoNoKw, MultiNode):
     _input_names = "energy", "strain", "coordinates", "cell"
     _output_names = "forces", "stress"

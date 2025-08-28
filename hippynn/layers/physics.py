@@ -90,6 +90,71 @@ class Hessian(torch.nn.Module):
 
         return mask_matrix
 
+class HVPVector(torch.nn.Module):
+    def __init__(self, vector_type="random"):
+        super().__init__()
+        self.vector_type = vector_type
+
+    def forward(self, positions, nonblank):
+        """
+        positions: (B, N_max, 3)
+        nonblank: (B, N_max, 3), boolean mask
+        Returns: (B, N_max, 3) vector (zeroed on padded atoms)
+        """
+        num_atoms = nonblank.sum(dim=1, dtype=torch.int64)
+        N_max = nonblank.shape[1] # This is the maximum number of atoms across batches
+        vectors = torch.zeros(len(num_atoms), 3*N_max, dtype=positions.dtype, device=positions.device)
+
+        if self.vector_type == "random":
+            for i in range(len(num_atoms)): # For each system,
+                N = num_atoms[i]               # Get the number of atoms
+                # Create a vector with i.i.d. values from a Gaussian distribution with zero mean and unit deviation
+                values = torch.randn(3*N, dtype=positions.dtype, device=positions.device)
+                vectors[i][:3*N] = values
+
+        elif self.vector_type == "onehot":
+            for i in range(len(num_atoms)): # For each system,
+                N = num_atoms[i]               # Get the number of atoms
+                column_idx = torch.randint(0,3*N, (1,)) # Create a random integer from 0 to 3N inclusive
+                vectors[i][column_idx] = 1.0            # Replace the 0.0 at the random index for 1.0
+
+        else:
+            raise ValueError(f"Unknown vector type {self.vector_type}")
+
+        vectors = vectors.view(len(num_atoms), N_max, 3)
+        print("HVP vector dimensions:", vectors.shape)
+        return vectors
+
+class HVP(torch.nn.Module):
+    def forward(self, force, coordinates, vector):
+        """
+        source:      (B, N, 3)  force tensor
+        coordinates: (B, N, 3), requires_grad=True
+        vector:      (B, N, 3), perturbation direction
+        Returns:     (B, N, 3), Hessian-vector product
+        """
+
+        hvp = -torch.autograd.grad(force, coordinates, grad_outputs=vector, create_graph=True, retain_graph=True)[0]
+
+        print("HVP dimensions:", hvp.shape)
+        return hvp
+    
+
+class TrueHVP(torch.nn.Module):
+    def forward(self, hessian, vector):
+        """
+        hessian: (B, 3N, 3N)
+        vector:  (B, N, 3)
+        Returns: (B, N, 3)
+        """
+        B, N, _ = vector.shape
+        vector_flat = vector.flatten(start_dim=1).unsqueeze(-1)  # (B, 3N, 1)
+        hvp_flat = torch.bmm(hessian, vector_flat).squeeze(-1)  # (B, 3N)
+
+        print("True HVP dimensions:", hvp_flat.view(B, N, 3).shape)
+        return hvp_flat.view(B, N, 3)  # (B, N, 3)
+
+
 class StressForce(torch.nn.Module):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
