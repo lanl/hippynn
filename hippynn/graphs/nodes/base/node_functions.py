@@ -255,7 +255,7 @@ def find_relatives(node_or_nodes, constraint_key, ancestors=True, descendants=Tr
         _debprint("Node not found, all relatives:")
         for n in relatives:
             _debprint(n)
-        raise NodeNotFound("({}) Missing: Could not automatically satisfying node in graph.".format(why_desc))
+        raise NodeNotFound("({}) Missing: Could not automatically find satisfying node in graph.".format(why_desc))
 
     return candidates
 
