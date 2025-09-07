@@ -8,6 +8,7 @@ import torch
 
 from .nodes.base import Node
 from .nodes.base import InputNode
+from .nodes.node_functions import NodeNotFound, NodeAmbiguityError
 
 from . import get_subgraph, compute_evaluation_order
 
@@ -110,14 +111,20 @@ class GraphModule(torch.nn.Module):
         node_map.update()
         node_map.update({n: "Out{}:".format(i) for i, n in enumerate(self.forward_output_list)})
 
-    def node_from_name(self, name):
-        for match in list(self.input_nodes) + list(self.forward_output_list):
-            if match.db_name == name or match.name == name:
-                node = match
-                break
-        else:
-            raise ValueError("Name '{}' not found in graph.".format(name))
-        return node
+    def node_from_name(self, name, unique=True):
+        """
+        :param name: name or db_name
+        :param unique: (default True) if True, error when multiple matching nodes are found; if False, return first matching node found
+        """
+        matches = []
+        for node in list(self.input_nodes) + list(self.forward_output_list):
+            if node.db_name == name or node.name == name:
+                matches.append(node)
+        if len(matches) == 0:
+            raise NodeNotFound(f"Name '{name}' not found in graph.")
+        elif len(matches) > 1 and unique:
+            raise NodeAmbiguityError(f"Multiple nodes found with name or db_name '{name}'.")
+        return matches[0]
 
     def extra_repr(self):
         return "Inputs: {} \n Outputs: {}".format(

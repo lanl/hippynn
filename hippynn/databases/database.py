@@ -836,7 +836,7 @@ def prettyprint_arrays(arr_dict: dict[str: torch.Tensor]):
     printline()
     for key, value in arr_dict.items():
         if isinstance(value, torch.Tensor):
-            value = value.numpy()
+            value = value.detach().cpu().numpy()
         printrow(key, repr(value.dtype), repr(value.shape))
     printline()
 

@@ -45,10 +45,10 @@ class RepulsivePotential(torch.nn.Module):
         return mol_energy, atom_energies
 
 class RepulsivePotentialNode(ExpandParents, AutoKw, MultiNode):
-    _input_names = "pair_dist", "pair_first", "mol_index", "n_molecules", "n_atoms_max"
-    _output_names = "mol_energy", "atom_energies",
-    _auto_module_class = RepulsivePotential
-    _output_index_states = IdxType.Systems, IdxType.Atoms,
+    input_names = "pair_dist", "pair_first", "mol_index", "n_molecules", "n_atoms_max"
+    output_names = "mol_energy", "atom_energies",
+    auto_module_class = RepulsivePotential
+    output_index_states = IdxType.Systems, IdxType.Atoms,
 
     @parent_expander.match(PairIndexer, AtomIndexer)
     def expansion(self, pairfinder, pidxer, **kwargs):
@@ -98,10 +98,10 @@ class RepulsivePotentialBySpecies(torch.nn.Module):
         return mol_energy, atom_energies,
 
 class RepulsivePotentialBySpeciesNode(ExpandParents, AutoKw, MultiNode):
-    _input_names = "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules", "n_atoms_max", "spec"
-    _output_names = "mol_energy", "atom_energies",
-    _auto_module_class = RepulsivePotentialBySpecies
-    _output_index_states = IdxType.Systems, IdxType.Atoms,
+    input_names = "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules", "n_atoms_max", "spec"
+    output_names = "mol_energy", "atom_energies",
+    auto_module_class = RepulsivePotentialBySpecies
+    output_index_states = IdxType.Systems, IdxType.Atoms,
 
     @parent_expander.match(PairIndexer, AtomIndexer)
     @parent_expander.match(PairIndexer, AtomIndexer, SpeciesNode)
