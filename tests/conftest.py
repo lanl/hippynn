@@ -89,4 +89,4 @@ def example_box():
     z = torch.ones((batch_size, n_atom), dtype=torch.int64)
     r = l * torch.rand((batch_size, n_atom, n_dim), dtype=torch.float)
     c = l * torch.eye(n_dim, dtype=torch.float).unsqueeze(0).expand((batch_size, n_dim, n_dim))
-    return {"species": z, "coordinates": r, "cell": c}  # must match names in neural_network_node
+    return {"species": z, "coordinates": r, "cell": c}  # must match names in input_nodes
