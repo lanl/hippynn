@@ -8,7 +8,7 @@ import torch
 
 from .nodes.base import Node
 from .nodes.base import InputNode
-from .nodes.node_functions import NodeNotFound, NodeAmbiguityError
+from .nodes.base import NodeNotFound, NodeAmbiguityError
 
 from . import get_subgraph, compute_evaluation_order
 

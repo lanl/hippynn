@@ -112,6 +112,9 @@ class Database:
 
         if isinstance(seed, torch.Generator):
             self.random_state = seed
+        elif isinstance(seed, torch.Tensor):
+            self.random_state = torch.Generator()
+            self.random_state.set_rng_state(seed)
         else:
             self.random_state = torch.Generator()
             self.random_state.manual_seed(seed)

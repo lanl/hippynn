@@ -133,7 +133,7 @@ def warn_name_change(old, new, old_module=None, new_module=None, stacklevel=2, *
 
 
 
-class _DeprecatedNamesMixin(SetStateMixin,GetAttrMixin):
+class _DeprecatedNamesMixin(SetStateMixin, GetAttrMixin):
     _DEPRECATED_NAMES: dict[str, str] = {}
     _DEPRECATED_STATE: dict[str, str] = {}
 
