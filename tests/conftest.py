@@ -50,22 +50,34 @@ def bond_parameters():
 
 
 @pytest.fixture()
-def neural_network_node(network_parameters):
-    from hippynn.graphs import inputs, networks
+def input_nodes():
+    from hippynn.graphs import inputs
 
     species = inputs.SpeciesNode(db_name="species")
     positions = inputs.PositionsNode(db_name="coordinates")
     cell = inputs.CellNode(db_name="cell")
 
-    network = networks.Hipnn("HIPNN", (species, positions, cell), module_kwargs=network_parameters, periodic=True)
+    return species, positions, cell
 
-    return network
+@pytest.fixture()
+def neural_network_node(input_nodes, network_parameters):
+    from hippynn.graphs import networks
+
+    return networks.Hipnn("HIPNN", input_nodes, module_kwargs=network_parameters, periodic=True)
+
+@pytest.fixture()
+def energy_node(neural_network_node):
+    henergy = hippynn.targets.HEnergyNode("Energy", neural_network_node, db_name="T")
+    return henergy
 
 
 @pytest.fixture()
-def energy_model(neural_network_node):
-    henergy = hippynn.targets.HEnergyNode("Energy", neural_network_node, db_name="T")
-    return henergy
+def energy_graph(input_nodes, energy_node):
+    from hippynn.graphs import GraphModule
+
+    graph = GraphModule(required_inputs=input_nodes, nodes_to_compute=(energy_node,))
+
+    return graph
 
 
 @pytest.fixture

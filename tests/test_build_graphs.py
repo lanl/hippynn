@@ -18,9 +18,9 @@ def xfail_if_no_lammps(func):
     return wrapper(func)
 
 
-def test_build_training_modules(energy_model):
+def test_build_training_modules(energy_node):
 
-    mae = hippynn.loss.MAELoss.of_node(energy_model)
+    mae = hippynn.loss.MAELoss.of_node(energy_node)
 
     validation_losses = {"MAE": mae}
 
@@ -29,16 +29,16 @@ def test_build_training_modules(energy_model):
 
 # Mark as xfail because lammps python installations require manual steps.
 @xfail_if_no_lammps
-def test_build_lammps_interface(energy_model):
+def test_build_lammps_interface(energy_node):
     from hippynn.interfaces.lammps_interface import MLIAPInterface
 
-    interface = MLIAPInterface(energy_model, element_types=[1])
+    interface = MLIAPInterface(energy_node, element_types=[1])
 
 
-def test_build_ase_interface(energy_model):
+def test_build_ase_interface(energy_node):
     from hippynn.interfaces.ase_interface import HippynnCalculator
 
-    calc = HippynnCalculator(energy_model)
+    calc = HippynnCalculator(energy_node)
 
 
 @ignore_weights_only_warning

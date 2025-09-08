@@ -109,18 +109,21 @@ class GraphModule(torch.nn.Module):
         node_map.update()
         node_map.update({n: "Out{}:".format(i) for i, n in enumerate(self.forward_output_list)})
 
-    def node_from_name(self, name, unique=True):
+    def nodes_from_name(self, name):
         """
-        :param name: name or db_name
-        :param unique: (default True) if True, error when multiple matching nodes are found; if False, return first matching node found
+        returns list of all matching nodes
         """
         matches = []
         for node in list(self.input_nodes) + list(self.forward_output_list):
             if node.db_name == name or node.name == name:
                 matches.append(node)
+        return matches
+
+    def unique_node_from_name(self, name):
+        matches = self.nodes_from_name(name)
         if len(matches) == 0:
             raise NodeNotFound(f"Name '{name}' not found in graph.")
-        elif len(matches) > 1 and unique:
+        elif len(matches) > 1:
             raise NodeAmbiguityError(f"Multiple nodes found with name or db_name '{name}'.")
         return matches[0]
 
@@ -140,6 +143,14 @@ class GraphModule(torch.nn.Module):
             computed[this_node] = self.get_module(this_node)(*(computed[inkey] for inkey in inputs_for_this_node))
 
         return tuple(computed[x] for x in self.nodes_to_compute)
+
+    def __getattr__(self, item):
+        if item == "node_from_name":
+            from .._deprecations import warn_name_change
+            warn_name_change("node_from_name", "unique_node_from_name")
+            return self.unique_node_from_name
+        else:
+            return super().__getattr__(item)
 
 
 class _DebugGraphModule(GraphModule):
