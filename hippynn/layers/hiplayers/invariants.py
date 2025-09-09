@@ -277,3 +277,8 @@ class HopInvariantLayer(torch.nn.Module):
                 self.polynomials = compute_invariant_polynomial_collection(self.n_max, self.l_max, self.cmaps)
             self.polynomials.set_device(device)
             return EvaluatePolynomials.apply(tensor_features, self.polynomials)
+        
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state["polynomials"] = None
+        return state
