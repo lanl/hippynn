@@ -35,6 +35,7 @@ def test_polynomial_invariants():
 
                 # during this check we need tensor features to be float32 because the 
                 # old HopInvariantLayerTorch only supports float32
+
                 assert torch.allclose(invars_poly, invars_torch, rtol=1e-4, atol=1e-4)
 
                 tensor_features = tensor_features.to(torch.float64)
@@ -52,6 +53,12 @@ def test_invariants_wrapper():
     else:
         device = 'cpu'
 
+    try:
+        import triton
+        triton_available = True
+    except:
+        triton_available = False
+
     for l_max in range(4):
         for n_max in range(1,5):
 
@@ -68,7 +75,12 @@ def test_invariants_wrapper():
 
             assert torch.allclose(invars_poly, invars_torch, rtol=1e-4, atol=1e-4)
 
-            tensor_features = tensor_features.to(torch.float64)
+            # during this check we need tensor features to be float32 because the 
+            # old HopInvariantLayerTorch only supports float32
+            # Thus, we can only gradcheck if triton is available
 
-            assert torch.autograd.gradcheck(invariantLayer, (tensor_features,))
-            assert torch.autograd.gradgradcheck(invariantLayer, (tensor_features,))
+            if triton_available:
+                tensor_features = tensor_features.to(torch.float64)
+
+                assert torch.autograd.gradcheck(invariantLayer, (tensor_features,))
+                assert torch.autograd.gradgradcheck(invariantLayer, (tensor_features,))

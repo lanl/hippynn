@@ -99,7 +99,7 @@ def test_tensor_message_passing_kernel():
             sense_flat = sensitivity.reshape(2*n_pairs, t * nu)
             envsum_message_passing_result = envsum(sense_flat, z, pair_first, pair_second)
 
-            from hippynn.custom_kernels.tensor_message_passing import tensorMessagePassingHop
+            from hippynn.custom_kernels.message_passing_triton import tensorMessagePassingHop
             tensor_message_passing_result = tensorMessagePassingHop(T,s,z,pair_first,pair_second)
 
             assert torch.allclose(tensor_message_passing_result, envsum_message_passing_result, rtol=1e-6, atol=1e-6)
