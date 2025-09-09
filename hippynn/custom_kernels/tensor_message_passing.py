@@ -252,20 +252,7 @@ def tensor_products_kernel(
     if compute_Tsz:
         tl.store( Tsz_out + E_offsets, Tsz_accumulator, mask=E_mask )
 
-def hopMessagePassing(T,s,z,pair_first,pair_second):
-    if T.device != 'cpu' and kernel_active == "triton" and settings.USE_ENV_TENSOR_GRADIENT:
-        if settings.USE_ENV_TENSOR:
-            return tensorMessagePassing(T,s,z,pair_first,pair_second)
-        else:
-            return tensorMessagePassingBackwardOnly(T,s,z,pair_first,pair_second)
-    else:
-        ij,t = T.shape
-        _,nu = s.shape
-        sensitivity = s.unsqueeze(1) * T.unsqueeze(2)
-        sense_flat = sensitivity.reshape(ij, t * nu)
-        return envsum(sense_flat, z, pair_first, pair_second)
-
-def tensorMessagePassing(T,s,z,pair_first,pair_second):
+def tensorMessagePassingHop(T,s,z,pair_first,pair_second):
     """
     Performs the message passing step using the fused kernel. This performs essentially the same operation as
     envsum, except that the outer product of T and s is not computed beforehand.
@@ -289,6 +276,40 @@ def tensorMessagePassing(T,s,z,pair_first,pair_second):
     """
     argsort, atom1_ids, atom1_starts, pair_first, (T,s,pair_second) = resort_pairs_cached(pair_first, [T,s,pair_second])
     env = TensorProductWrapper.apply(None,T,s,z,True,False,False,False,pair_first,pair_second, atom1_ids, atom1_starts)[0]
+    i,t,nu,b = env.shape
+    return env.reshape((i,t*nu,b))
+
+def tensorMessagePassingVec(in_features, sense_vals, pair_first, pair_second, dist_pairs, coord_pairs):
+    device, dtype = in_features.device, in_features.dtype
+    ones_ = torch.ones((sense_vals.shape[0],1), device=device, dtype=dtype)
+    rhats = (coord_pairs / dist_pairs.unsqueeze(1))
+    T = torch.hstack((ones_, rhats))
+
+    argsort, atom1_ids, atom1_starts, pair_first, (T,sense_vals,pair_second) = resort_pairs_cached(pair_first, [T,sense_vals,pair_second])
+
+    env = TensorProductWrapper.apply(None,T,sense_vals,in_features,True,False,False,False,pair_first,pair_second,atom1_ids,atom1_starts)[0]
+    i,t,nu,b = env.shape
+    return env.reshape((i,t*nu,b))
+
+def tensorMessagePassingQuad(in_features, sense_vals, pair_first, pair_second, dist_pairs, coord_pairs):
+    upper_ind = torch.as_tensor([0, 1, 2, 4, 5], dtype=torch.int64)
+
+    device, dtype = in_features.device, in_features.dtype
+    ones_ = torch.ones((sense_vals.shape[0],1), device=device, dtype=dtype)
+    rhats = (coord_pairs / dist_pairs.unsqueeze(1))
+
+    rhatsquad = rhats.unsqueeze(1) * rhats.unsqueeze(2)
+    rhatsquad = (rhatsquad + rhatsquad.transpose(1, 2)) / 2
+    tr = torch.diagonal(rhatsquad, dim1=1, dim2=2).sum(dim=1) / 3.0  # Add divide by 3 early to save flops
+    tr = tr.unsqueeze(1).unsqueeze(2) * torch.eye(3, dtype=tr.dtype, device=tr.device).unsqueeze(0)
+    rhatsquad = rhatsquad - tr
+    rhatsqflat = rhatsquad.reshape(-1, 9)[:, upper_ind]  # Upper-diagonal part
+
+    T = torch.hstack((ones_, rhats, rhatsqflat))
+
+    argsort, atom1_ids, atom1_starts, pair_first, (T,sense_vals,pair_second) = resort_pairs_cached(pair_first, [T,sense_vals,pair_second])
+
+    env = TensorProductWrapper.apply(None,T,sense_vals,in_features,True,False,False,False,pair_first,pair_second,atom1_ids,atom1_starts)[0]
     i,t,nu,b = env.shape
     return env.reshape((i,t*nu,b))
 
@@ -355,6 +376,7 @@ class TensorProductWrapper(torch.autograd.Function):
                 ij = s.shape[0]
             else:
                 ij = T.shape[0]
+        (n_atom_with_pairs,) = atom1_ids.shape
 
         # Create tensors that will be used to call the kernel tensor_products_kernel.
         # Note that the kernel does not directly compute TEs (summed over i, t, and nu). 
@@ -385,11 +407,15 @@ class TensorProductWrapper(torch.autograd.Function):
             ETs_ij = torch.zeros(1, device=device, dtype=dtype, requires_grad=False)
 
         # wrap the bools in a tensor so that we are able to save it for backwards (only tensors can be saved).
-        bool_wrapper = torch.BoolTensor([compute_Tsz, compute_Esz, compute_ETz, compute_ETs])
-        ctx.save_for_backward(E, T, s, z, bool_wrapper, pair_first, pair_second, atom1_ids, atom1_starts)
+
+        ctx.save_for_backward(E, T, s, z, pair_first, pair_second, atom1_ids, atom1_starts)
+        ctx.compute_Tsz = compute_Tsz
+        ctx.compute_Esz = compute_Esz
+        ctx.compute_ETz = compute_ETz
+        ctx.compute_ETs = compute_ETs
 
         # run the kernel. Recall that the T and S block indices are squeezed into one axis (the second one) because Triton only allows up to 3 axes.
-        grid = lambda META : (i, triton.cdiv(t, META["T_BLOCK_SIZE"]) * triton.cdiv(nu, META["S_BLOCK_SIZE"]), triton.cdiv(b, META["Z_BLOCK_SIZE"]))
+        grid = lambda META : (n_atom_with_pairs, triton.cdiv(t, META["T_BLOCK_SIZE"]) * triton.cdiv(nu, META["S_BLOCK_SIZE"]), triton.cdiv(b, META["Z_BLOCK_SIZE"]))
 
         tensor_products_kernel[grid](
             Tsz, Esz, ETz, ETs_ij,
@@ -411,9 +437,7 @@ class TensorProductWrapper(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad_output_Tsz, grad_output_Esz, grad_output_ETz, grad_output_ETs):
-        E, T, s, z, bool_wrapper, pair_first, pair_second, atom1_ids, atom1_starts = ctx.saved_tensors
-
-        compute_Tsz, compute_Esz, compute_ETz, compute_ETs = bool_wrapper
+        E, T, s, z, pair_first, pair_second, atom1_ids, atom1_starts = ctx.saved_tensors
 
         E_grad = T_grad = s_grad = z_grad = None
 
@@ -421,26 +445,26 @@ class TensorProductWrapper(torch.autograd.Function):
         # Then, we sum up all partial derivatives that correspond to the same term (e.g. after computing dL/dz from Tsz, Esz, and ETz, we sum up
         # all of the computed values for dL/dz )
 
-        if compute_Tsz:
+        if ctx.compute_Tsz:
             Tsz_grad = TensorProductWrapper.apply( grad_output_Tsz, T, s, z, False, True, True, True, pair_first, pair_second, atom1_ids, atom1_starts )
 
             T_grad = Tsz_grad[1]
             s_grad = Tsz_grad[2]
             z_grad = Tsz_grad[3]
 
-        if compute_Esz:
+        if ctx.compute_Esz:
             Esz_grad = TensorProductWrapper.apply( E, grad_output_Esz, s, z, True, False, True, True, pair_first, pair_second, atom1_ids, atom1_starts )
 
 
             E_grad = Esz_grad[0]
-            if compute_Tsz:
+            if ctx.compute_Tsz:
                 s_grad = s_grad + Esz_grad[2]
                 z_grad = z_grad + Esz_grad[3]
             else:
                 s_grad = Esz_grad[2]
                 z_grad = Esz_grad[3]
         
-        if compute_ETz:
+        if ctx.compute_ETz:
             ETz_grad = TensorProductWrapper.apply( E, T, grad_output_ETz, z, True, True, False, True, pair_first, pair_second, atom1_ids, atom1_starts )
 
             if E_grad is None:
@@ -458,7 +482,7 @@ class TensorProductWrapper(torch.autograd.Function):
             else:
                 z_grad = z_grad + ETz_grad[3]
 
-        if compute_ETs:
+        if ctx.compute_ETs:
             ETs_grad = TensorProductWrapper.apply( E, T, s, grad_output_ETs, True, True, True, False, pair_first, pair_second, atom1_ids, atom1_starts )
 
             if E_grad is None:
@@ -477,7 +501,6 @@ class TensorProductWrapper(torch.autograd.Function):
                 s_grad = s_grad + ETs_grad[2]
 
         return E_grad, T_grad, s_grad, z_grad, None, None, None, None, None, None, None, None, None
-
 
 ################# USED FOR ABLATION TESTING ONLY ##############################
 

@@ -161,7 +161,6 @@ for i in range(1, 4):
 cmaps = c
 pmaps = p
 
-
 class TensorExtractor(torch.nn.Module):
     def __init__(self, l_max, pmaps=pmaps):
         super().__init__()
@@ -301,7 +300,7 @@ def calc_invariants(l_max: int, n_max: int, tensor_features, C: List[Tensor]):
     invars = torch.stack(invariants, dim=-1)
     return invars
 
-class HopInvariantLayer(torch.nn.Module):
+class HopInvariantLayerTorch(torch.nn.Module):
     def __init__(self, n_max, l_max, _cmaps=cmaps):
         super().__init__()
         self.l_max = l_max
