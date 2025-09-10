@@ -84,11 +84,7 @@ class MultiNode(Node,_DeprecatedNamesMixin):  # Multinode
     
     @property
     def db_name(self):
-        try:
-            return self.main_output.db_name
-        except TypeError:
-            # Allow this to be viewed as None.
-            return None
+        return None
         
     @db_name.setter
     def db_name(self, value):
