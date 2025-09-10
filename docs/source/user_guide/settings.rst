@@ -80,3 +80,18 @@ The following settings are available:
      - bool
      - True
      - yes
+   * - USE_POLYNOMIAL_INVARIANTS
+     - If True, evaluate the invariants by computing their corresponding polynomials and evaluating them using the triton kernel designed for evaluating polynomials (if triton and cuda are avaiable).
+     - true, false
+     - true
+     - yes
+   * - USE_TENSOR_MESSAGE_PASSING
+     - If True, evaluate the message passing step for HIP-HOP-NN and HIP-NN-TS by calling a single fused triton kernel that handles the entire message passing step (if triton and cuda are available).
+     - true, false
+     - true
+     - yes
+   * - TENSOR_MESSAGE_PASSING_GRAD_ONLY
+     - If True, and USE_TENSOR_MESSAGE_PASSING is also True, the message passing step for HIP-HOP-NN will only used the fused triton kernel for gradient computation (if triton and cuda are available), and not the foreward pass. This is used for ablation testing.
+     - true, false
+     - false
+     - yes

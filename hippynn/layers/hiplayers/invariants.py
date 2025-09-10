@@ -8,6 +8,21 @@ from ... import settings
 import itertools
 import string
 
+"""
+This module concerns itself with computing invariants by taking products and contractions of irreducible tensors. It defines a HopInvariantsLayer,
+which is a custom torch layer that can be used to compute these invariants. By default, the invariants will be computed using the triton
+kernel for evaluating polynomials. As such, most of the logic in this module concerns itself with evaluating the polynomials using triton.
+However, if triton or cuda are not available, or using triton for invariants is disabled in the settings, then HopInvariantsLayer will fall
+back on a pytorch implementation that is defined in layers/hiplayers/tensors.py.
+
+We assume that all relevant irreducible tensors of order l are represented as coefficients that correspond to a
+basis Bl for the space of irreducible tensors of order l. Furthermore, we assume that the basis coefficients
+of all of moment tensors are concatenated into a single vector X = (x1, x2, ..., xn), where the basis coefficients
+of each tensor corresponds to a contiguous slice of the entries of X. (for example, the first entry of X could correspond
+to a tensor of order 0, then the next three correspond to a tensor of order 1, etc.).
+"""
+
+
 try:
     from ...custom_kernels.poly_triton import EvaluatePolynomials, PolynomialCollection
     triton_available = True
@@ -15,7 +30,7 @@ except:
     triton_available = False
 
 # tensor ordering and list of invariants for the default invariants.
-default_invariants_ordering = ["zero", "one", "two", "three"]
+default_tensor_ordering = ["zero", "one", "two", "three"]
 
 default_invariants_list = [
     "->,zero",
@@ -62,12 +77,19 @@ def computeInvariantPolynomial(tensor_bases, invariant_input_offsets, invariant_
                          of order l. tensor_bases[l] should be an l+1 dimensional tensor, where the final axis of tensor_bases[l] should index the the basis elements.
                          For example tensor_bases[2][0,0,3] will represent, in the basis of irreducible tensors of order 2, the (0,0) entry of the third basis element.
 
-    :param invariant_input_offsets: A dictionary that is used to keep track of which parts of the vector X correspond to the various tensors.
-                                    The keys are a unique name for each tensor - it can be anything that the user wants. The invariant_input_offsets[T]
-                                    stores the location in the vector X that corresponds to the basis coefficients for tensor T.
+    :param invariant_code: The invariant that is computed. The invariants should be specified as a list of string.
+                           The string should take the same form as an einsum representation, but with two differences. First, instead of listing variable names at the end of the einsum string,
+                           one should instead use a string that can be used to uniquely identify the tensor that you want to contract. The name can be anything, except that it cannot
+                           include commas. The name will correspond with a contiguous slice of the basis coefficients stored in X. For example, if Tensor1 corresponds to a rank
+                           1 tensor, then the name Tensor1 might correspond to entries 1, 2, and 3 of X, such that x1, x2, and x3 store the basis coefficients for Tensor1.
+                           The way that one associates these names with slices of X is specified in the parameter invariant_input_offsets. Second, the entire einsum representation should be
+                           a string. Because the reduction must lead to a scalar, there should be a comma right after the arrow. Then, there should be the names
+                           of the tensors. For example, it could look like this: 'ijk,ijk->,Tensor1,Tensor1'. To specify a tensor of rank zero, the string would
+                           look like this: '->,Tensor0'. Any strings with the arrow omitted (e.g. 'ijk,ijk,Tensor1,Tensor1) are also acceptable.
 
-    :param invariant_code: The invariant that is computed, represented using einsum notation. Here the names of the tensors specified in the einsum string should be keys
-                           of invariant_input_offsets.
+    :param invariant_input_offsets: A dictionary that is used to keep track of which parts of the vector X correspond to the various tensors.
+                                    The keys the names for each tensor specified in invariant_code. If T is the name of a tensor, then invariant_input_offsets[T]
+                                    stores the first location in the vector X that corresponds to the basis coefficients for tensor T.
 
     :return: The polynomial that can be used to compute the invariant from the vector X. The polynomial is specified by its monomials using two arrays. 
              The first array stores the coefficients of all monomials. For instance, if the polynomial is 2*x1*x3 + 4*x1*x1, the list of coefficients would store [2,4].
@@ -173,82 +195,132 @@ def computeInvariantPolynomial(tensor_bases, invariant_input_offsets, invariant_
 
     return coefs_tensor, terms_tensor
 
-def compute_invariant_polynomial_collection(n_max, l_max, tensor_bases=cmaps, invariants=default_invariants_list, input_tensor_ordering=default_invariants_ordering):
-        # compute the order of each tensor (and make sure that the orders are listed consistently)
-        tensor_orders = {}
+def compute_invariant_polynomial_collection(n_max, l_max, tensor_bases=cmaps, invariants=default_invariants_list, input_tensor_ordering=default_tensor_ordering):
+    """
+    For a given collection of invariants, specified as einsum strings, compute the collection of polynomials that corresponds to this collection
+    of invariants.
 
-        for i, invar in enumerate(invariants):
+    :param n_max: Maximum number of tensors that should be used to compute a single invariant. Any provided invariants
+                  that use more than n_max tensors will be filtered out.
 
-            invar_indices, invar_terms = split_invariant(invar)
-            num_terms = len(invar_indices)
+    :param l_max: Maximum tensor degree that should be used in an invariant. Any provided invariants that use tensors
+                  of degree greater than l_max will be filtered out.
 
-            for term_idx in range(num_terms):
-                tensor_name = invar_terms[term_idx]
-                tensor_order = len(invar_indices[term_idx])
+    :param tensor_bases: The set of bases for tensors of each order used in the invariants. This should be a dictionary where tensor_bases[l] stores the basis for irreducible tensors
+                         of order l. tensor_bases[l] should be an l+1 dimensional tensor, where the final axis of tensor_bases[l] should index the the basis elements.
+                         For example tensor_bases[2][0,0,3] will represent, in the basis of irreducible tensors of order 2, the (0,0) entry of the third basis element.
+    
+    :param invariant_code: The invariants that are computed. The invariants should be specified as a list of strings, where each string corresponds to a different invariant.
+                           Each string should take the same form as an einsum representation, but with two differences. First, instead of listing variable names at the end of the einsum string,
+                           one should instead use a string that can be used to uniquely identify the tensor that you want to contract. The name can be anything, except that it cannot
+                           include commas. These names will correspond with a contiguous slice of the basis coefficients stored in X. For example, if Tensor1 corresponds to a rank
+                           1 tensor, then the name Tensor1 might correspond to entries 1, 2, and 3 of X, such that x1, x2, and x3 store the basis coefficients for Tensor1.
+                           The way that one associates these names with slices of X is specified in the parameter input_tensor_ordering. Second, the entire einsum representation should be
+                           a string. Because the reduction must lead to a scalar, there should be a comma right after the arrow. Then, there should be the names
+                           of the tensors. For example, it could look like this: 'ijk,ijk->,Tensor1,Tensor1'. To specify a tensor of rank zero, the string would
+                           look like this: '->,Tensor0'. Any strings with the arrow omitted (e.g. 'ijk,ijk,Tensor1,Tensor1) are also acceptable.
 
-                if tensor_name in tensor_orders:
-                    assert tensor_order == tensor_orders[tensor_name], f"Tensor {tensor_name} is used to represent two different orders: {tensor_orders[tensor_name]} and {tensor_order}."
-                else:
-                    tensor_orders[tensor_name] = tensor_order
+    :param input_tensor_ordering: Specifies how the basis coefficient for each tensor will be inputted into each polynomial. Recall that
+                                  the basis coefficients will be specified as some vector X = (x1,x2,...,xm), where each tensor's basis
+                                  coefficients are stored in a contiguous slice of X. input_tensor_orderings is a list that should store
+                                  all of the names of the tensors that were specified in the einsum strings of the invariants. The ordering
+                                  of the names specifies the order in which the basis coefficients for each tensor appear in X. For example,
+                                  if input_tensor_ordering is ['one', 'two', 'three'], this would mean that the basis coefficients for tensor
+                                  'one' appears in X first, followed by the coefficients for 'two', and then the coefficients for 'three'.
+    """
 
-        # compute the dimension of the entire input.
-        input_dimension = 0
-        for k in tensor_orders:
-            if tensor_orders[k] <= l_max:
-                input_dimension += 2*tensor_orders[k]+1
+    # compute the order of each tensor (and make sure that the orders are listed consistently)
+    tensor_orders = {}
 
-        # Based on each order, compute the index in the vector X that corresponds to each tensor.
-        # stored in the input_offsets.
-        input_offsets = {}
-        next_offset = 0
+    for i, invar in enumerate(invariants):
 
-        for t in input_tensor_ordering:
-            assert t in tensor_orders, f"Tensor {t} is never used in an invariant."
+        invar_indices, invar_terms = split_invariant(invar)
+        num_terms = len(invar_indices)
 
-            input_offsets[t] = next_offset
-            next_offset += 2*tensor_orders[t] + 1
+        for term_idx in range(num_terms):
+            tensor_name = invar_terms[term_idx]
+            tensor_order = len(invar_indices[term_idx])
 
-        # Cut invariants out of the list based on n_max and l_max.
-        invariants_kept = []
-        for invar in invariants:
-            _, invar_tensors = split_invariant(invar)
-            n = len(invar_tensors)
-            l = max( [tensor_orders[t] for t in invar_tensors] )
+            if tensor_name in tensor_orders:
+                assert tensor_order == tensor_orders[tensor_name], f"Tensor {tensor_name} is used to represent two different orders: {tensor_orders[tensor_name]} and {tensor_order}."
+            else:
+                tensor_orders[tensor_name] = tensor_order
 
-            if l <= l_max and n <= n_max:
-                invariants_kept.append(invar)
+    # compute the dimension of the entire input.
+    input_dimension = 0
+    for k in tensor_orders:
+        if tensor_orders[k] <= l_max:
+            input_dimension += 2*tensor_orders[k]+1
 
-        for l in tensor_bases:
-            tensor_bases[l].requires_grad_(False)
+    # Based on each order, compute the index in the vector X that corresponds to each tensor.
+    # stored in the input_offsets.
+    input_offsets = {}
+    next_offset = 0
 
-        # compute the polynomials associated with every invariant that we are evaluating.
-        coefs_set = []
-        terms_set = []
-        polynomial_sizes_set = []
-        for i,invar in enumerate(invariants_kept):
-            coefs, terms = computeInvariantPolynomial(tensor_bases, input_offsets, invar)
-            coefs_set.append(coefs)
-            terms_set.append(terms)
-            polynomial_sizes_set.append(terms.shape[0])
+    for t in input_tensor_ordering:
+        assert t in tensor_orders, f"Tensor {t} is never used in an invariant."
 
-        max_degrees = [ max( 
-                                [ len(terms_set[i][j]) for j in range(len(terms_set[i])) ] 
-                            ) for i in range(len(terms_set)) ]
+        input_offsets[t] = next_offset
+        next_offset += 2*tensor_orders[t] + 1
 
-        max_degree = max(max_degrees)
+    # Cut invariants out of the list based on n_max and l_max.
+    invariants_kept = []
+    for invar in invariants:
+        _, invar_tensors = split_invariant(invar)
+        n = len(invar_tensors)
+        l = max( [tensor_orders[t] for t in invar_tensors] )
 
-        terms_set_padded = []
-        for i in range(len(coefs_set)):
-            _, degree = terms_set[i].shape
-            terms_set_padded.append(F.pad(terms_set[i], (0,max_degree-degree), value=-1))
+        if l <= l_max and n <= n_max:
+            invariants_kept.append(invar)
 
-        coefs = torch.hstack(coefs_set)
-        terms = torch.vstack(terms_set_padded)
-        polynomial_sizes = torch.IntTensor(polynomial_sizes_set)
+    for l in tensor_bases:
+        tensor_bases[l].requires_grad_(False)
 
-        return PolynomialCollection( coefs, terms, polynomial_sizes, input_dimension )
+    # compute the polynomials associated with every invariant that we are evaluating.
+    coefs_set = []
+    terms_set = []
+    polynomial_sizes_set = []
+    for i,invar in enumerate(invariants_kept):
+        coefs, terms = computeInvariantPolynomial(tensor_bases, input_offsets, invar)
+        coefs_set.append(coefs)
+        terms_set.append(terms)
+        polynomial_sizes_set.append(terms.shape[0])
+
+    max_degrees = [ max( 
+                            [ len(terms_set[i][j]) for j in range(len(terms_set[i])) ] 
+                        ) for i in range(len(terms_set)) ]
+
+    max_degree = max(max_degrees)
+
+    terms_set_padded = []
+    for i in range(len(coefs_set)):
+        _, degree = terms_set[i].shape
+        terms_set_padded.append(F.pad(terms_set[i], (0,max_degree-degree), value=-1))
+
+    coefs = torch.hstack(coefs_set)
+    terms = torch.vstack(terms_set_padded)
+    polynomial_sizes = torch.IntTensor(polynomial_sizes_set)
+
+    return PolynomialCollection( coefs, terms, polynomial_sizes, input_dimension )
 
 class HopInvariantLayer(torch.nn.Module):
+    """
+    Pytorch layer that computes the invariants for HIP-HOP-NN. By default it will represent the invariants as a collection of polynomials
+    and evaluate them using the custom triton kernel for evaluating polynomials. However, if triton or cuda are not available, or computing
+    the polynomials with triton is disabled in the settings, then this layer will fall back on the pure PyTorch implementation specified in
+    layers/hiplayers/tensors.py.
+
+    :param n_max: The maximum number of tensors that should be used to compute any given invariant. Any
+                  invariant that requires more than n_max tensors will be omitted.
+
+    :param l_max: The maximum order of a tensor that should be used to compute an invariant. Any invariant
+                  involving tensors of order greater than l_max will be omitted.
+
+    :param cmaps_: The set of bases for tensors of each order used in the invariants. This should be a dictionary where tensor_bases[l] stores the basis for irreducible tensors
+                   of order l. tensor_bases[l] should be an l+1 dimensional tensor, where the final axis of tensor_bases[l] should index the the basis elements.
+                   For example tensor_bases[2][0,0,3] will represent, in the basis of irreducible tensors of order 2, the (0,0) entry of the third basis element.
+    """
+
     def __init__(self, n_max, l_max, cmaps_=cmaps):
         super().__init__()
         self.l_max = l_max
@@ -280,5 +352,7 @@ class HopInvariantLayer(torch.nn.Module):
         
     def __getstate__(self):
         state = self.__dict__.copy()
+        # Make sure that self.polynomials is not saved, because this model may be reloaded onto a machine
+        # where triton or cuda is not available. In that case, the polynomials object would be unnecessary.
         state["polynomials"] = None
         return state

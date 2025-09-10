@@ -126,8 +126,8 @@ DEFAULT_SETTINGS = {
     "PYTORCH_GPU_MEM_FRAC": (1.0, float),
     "COMM_FEATURES_LAMMPS": (True, bool_or_strtobool),
     "USE_POLYNOMIAL_INVARIANTS": (triton_and_cuda_available(), bool_or_strtobool),
-    "USE_ENV_TENSOR": (triton_and_cuda_available(), bool_or_strtobool),
-    "USE_ENV_TENSOR_GRADIENT": (triton_and_cuda_available(), bool_or_strtobool),
+    "USE_TENSOR_MESSAGE_PASSING": (triton_and_cuda_available(), bool_or_strtobool),
+    "TENSOR_MESSAGE_PASSING_GRAD_ONLY": (False, bool_or_strtobool),
 }
 
 INITIAL_SETTINGS = {k: handler(default) for k, (default, handler) in DEFAULT_SETTINGS.items()}

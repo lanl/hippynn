@@ -28,23 +28,55 @@ entries, then the monomial x1*x2 could be represented as [1,2,-1,-1]. In various
 
 The final tensor stores how many monomials are in each polynomial. For example, if we have two monomials: p1 and p2, where p1 has two monomials, and p2 has one monomial, then
 this list would store [2,1]. In various functions, this is typically referred to as "polynomial_sizes".
+
+When the functions in this module are used, the polynomials should be wrapped in the PolynomialCollection class,
+which wraps the coefficients, terms, and polynoimal sizes. It also caches derivatives when they are computed.
 """
 
 class PolynomialCollection():
-    def __init__(self, coefs, terms, sizes, input_dimension):
-        self.polynomials = {0 : (coefs, terms, sizes, input_dimension)}
+
+    """
+    Wraps a collection of polynomials defined by a list of coefficients and terms.
+
+    :param coefs: The coefficients of the monomials for this set of polynomials.
+
+    :param terms: The terms of the monomials for this set of polynomials.
+
+    :param polynomial_sizes: The number of monomials in each polynomial.
+
+    :param input_dimension: The length of the vector X that will be used as the input for each polynomial.
+    """
+
+    def __init__(self, coefs, terms, polynomial_sizes, input_dimension):
+        self.polynomials = {0 : (coefs, terms, polynomial_sizes, input_dimension)}
         self.max_derivative_level = 0
 
     def get_device(self):
+        """
+        Returns the device that each tensor member variable is currently stored on.
+        """
         return self.polynomials[0][0].device
     
     def set_device(self,device):
+        """
+        Changes the device that each tensor member variable is stored on.
+        """
         if self.get_device() != device:
             for i in range(self.max_derivative_level+1):
                 coefs, terms, polynomial_sizes, input_dimension = self.polynomials[i]
                 self.polynomials[i] = (coefs.to(device), terms.to(device), polynomial_sizes.to(device), input_dimension)
     
     def get_polynomials(self,derivative_level=0):
+        """
+        Returns the polynomials associated with this collection, or one of their analytic derivatives.
+
+        :param derivative_level: How many successive derivatives should be computed. If this is set to 0, the
+                                 original polynomial collection will be returned. Otherwise, for example, if derivative_level
+                                 is set equal to 2, then the second derivative will be returned.
+
+        :return: A tuple containing the coefficients, terms, polynomial sizes, and input dimension of the returned polynomial.
+        """
+
         if derivative_level <= self.max_derivative_level:
             return self.polynomials[derivative_level]
         else:
@@ -168,23 +200,16 @@ class EvaluatePolynomials(torch.autograd.Function):
 
     """
     Differentiable function whose purpose is to evaluate a set of multivatiate polynomials on a set of input points.
-    The derivatives are cached in the dictionary derivative_cache. In order to distinguish between different derivatives,
-    each set of polynomial must be assigned a unique index from the user. To distinguish between different levels of derivatives
+    The derivatives are cached in the dictionary derivative_cache. To distinguish between different levels of derivatives
     of the same set of polynomials (e.g. the first derivative and second derivative should be cached separately), which level
     of differentiation must also be specified.
 
-    Since the derivative can be specified as a polynomial, the backward call of this function call's the EvaluatePolynomials
+    Since the derivative can be specified as a polynomial, the backward call of this function call's its own
     forward call in order to evaluate the derivative, insuring that it is infinitely differentiable.
 
     :param x: The set of points being inputted.
 
-    :param coefs: The coefficients of the monomials of this set of polynomials.
-
-    :param terms: The terms of the monomials of this set of polynomials.
-
-    :param polynomial_sizes: The number of monomials in each polynomial.
-
-    :param poly_idx: The unique identifier for this set of polynomials.
+    :param polynomials: A PolynomialCollection storing the polynomials that should be evaluated.
 
     :param derivative_level: Which level of derivative this current set of polynomials represents. For example, if the set
                              of polynomials represents the first derivative, it should take the value of 1. If it is not a 

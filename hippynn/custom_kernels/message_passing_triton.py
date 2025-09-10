@@ -3,8 +3,12 @@ import triton.language as tl
 import torch
 
 from .utils import resort_pairs_cached
-from . import envsum, kernel_active
-from .. import settings
+from . import envsum
+
+"""
+This module concerns itself with implementing the message passing step for HIP-HOP-NN and HIP-NN-TS
+using trition.
+"""
 
 def config_pruner(configs, nargs, **kwargs):
     """
@@ -279,42 +283,7 @@ def tensorMessagePassingHop(T,s,z,pair_first,pair_second):
     i,t,nu,b = env.shape
     return env.reshape((i,t*nu,b))
 
-def tensorMessagePassingVec(in_features, sense_vals, pair_first, pair_second, dist_pairs, coord_pairs):
-    device, dtype = in_features.device, in_features.dtype
-    ones_ = torch.ones((sense_vals.shape[0],1), device=device, dtype=dtype)
-    rhats = (coord_pairs / dist_pairs.unsqueeze(1))
-    T = torch.hstack((ones_, rhats))
-
-    argsort, atom1_ids, atom1_starts, pair_first, (T,sense_vals,pair_second) = resort_pairs_cached(pair_first, [T,sense_vals,pair_second])
-
-    env = TensorProductWrapper.apply(None,T,sense_vals,in_features,True,False,False,False,pair_first,pair_second,atom1_ids,atom1_starts)[0]
-    i,t,nu,b = env.shape
-    return env.reshape((i,t*nu,b))
-
-def tensorMessagePassingQuad(in_features, sense_vals, pair_first, pair_second, dist_pairs, coord_pairs):
-    upper_ind = torch.as_tensor([0, 1, 2, 4, 5], dtype=torch.int64)
-
-    device, dtype = in_features.device, in_features.dtype
-    ones_ = torch.ones((sense_vals.shape[0],1), device=device, dtype=dtype)
-    rhats = (coord_pairs / dist_pairs.unsqueeze(1))
-
-    rhatsquad = rhats.unsqueeze(1) * rhats.unsqueeze(2)
-    rhatsquad = (rhatsquad + rhatsquad.transpose(1, 2)) / 2
-    tr = torch.diagonal(rhatsquad, dim1=1, dim2=2).sum(dim=1) / 3.0  # Add divide by 3 early to save flops
-    tr = tr.unsqueeze(1).unsqueeze(2) * torch.eye(3, dtype=tr.dtype, device=tr.device).unsqueeze(0)
-    rhatsquad = rhatsquad - tr
-    rhatsqflat = rhatsquad.reshape(-1, 9)[:, upper_ind]  # Upper-diagonal part
-
-    T = torch.hstack((ones_, rhats, rhatsqflat))
-
-    argsort, atom1_ids, atom1_starts, pair_first, (T,sense_vals,pair_second) = resort_pairs_cached(pair_first, [T,sense_vals,pair_second])
-
-    env = TensorProductWrapper.apply(None,T,sense_vals,in_features,True,False,False,False,pair_first,pair_second,atom1_ids,atom1_starts)[0]
-    i,t,nu,b = env.shape
-    return env.reshape((i,t*nu,b))
-
 class TensorProductWrapper(torch.autograd.Function):
-
     """
     Let T, s, and z be as they are in the paper. Index atoms by i, neighbors by j,
     components of T by t, components of s by nu, and components of z by b. 
@@ -502,17 +471,89 @@ class TensorProductWrapper(torch.autograd.Function):
 
         return E_grad, T_grad, s_grad, z_grad, None, None, None, None, None, None, None, None, None
 
+def tensorMessagePassingVec(in_features, sense_vals, pair_first, pair_second, dist_pairs, coord_pairs):
+    """
+    Triton implementation of the message passing step for HIP-NN-TS if l_max is equal to 1.
+
+    :param in_features: Matrix. Each row corresponds to an atom and stores the features associated with that atom.
+
+    :param sense_vals: Matrix. Each row corresponds to a pair of neighbors. Each row stores the outputs of the sensitivity
+                       function applied to the corresponding pair.
+
+    :param pair_first: Vector of integers. For the list of pairs of neighbors in message passing, this is a list storing the first atom in each pair.
+
+    :param pair_second: Vector of integers. For the list of pairs of neighbors in message passing, this is a list storing the second atom in each pair.
+
+    :param dist_pairs: Vector. Each entry stores the distance between a pair of neighbors.
+
+    :param coord_pairs: Matrix. Each row corresponds to a pair of neighbors. Each row stores the position offset (as a vector) from the first atom
+                        to the second.
+
+    :return: The output of message passing for HIP-NN-TS.
+    """    
+    device, dtype = in_features.device, in_features.dtype
+    ones_ = torch.ones((sense_vals.shape[0],1), device=device, dtype=dtype)
+    rhats = (coord_pairs / dist_pairs.unsqueeze(1))
+    T = torch.hstack((ones_, rhats))
+
+    _, atom1_ids, atom1_starts, pair_first, (T,sense_vals,pair_second) = resort_pairs_cached(pair_first, [T,sense_vals,pair_second])
+
+    env = TensorProductWrapper.apply(None,T,sense_vals,in_features,True,False,False,False,pair_first,pair_second,atom1_ids,atom1_starts)[0]
+    i,t,nu,b = env.shape
+    return env.reshape((i,t*nu,b))
+
+def tensorMessagePassingQuad(in_features, sense_vals, pair_first, pair_second, dist_pairs, coord_pairs):
+    """
+    Triton implementation of the message passing step for HIP-NN-TS if l_max is equal to 2.
+
+    :param in_features: Matrix. Each row corresponds to an atom and stores the features associated with that atom.
+
+    :param sense_vals: Matrix. Each row corresponds to a pair of neighbors. Each row stores the outputs of the sensitivity
+                       function applied to the corresponding pair.
+
+    :param pair_first: Vector of integers. For the list of pairs of neighbors in message passing, this is a list storing the first atom in each pair.
+
+    :param pair_second: Vector of integers. For the list of pairs of neighbors in message passing, this is a list storing the second atom in each pair.
+
+    :param dist_pairs: Vector. Each entry stores the distance between a pair of neighbors.
+
+    :param coord_pairs: Matrix. Each row corresponds to a pair of neighbors. Each row stores the position offset (as a vector) from the first atom
+                        to the second.
+
+    :return: The output of message passing for HIP-NN-TS.
+    """    
+    upper_ind = torch.as_tensor([0, 1, 2, 4, 5], dtype=torch.int64)
+
+    device, dtype = in_features.device, in_features.dtype
+    ones_ = torch.ones((sense_vals.shape[0],1), device=device, dtype=dtype)
+    rhats = (coord_pairs / dist_pairs.unsqueeze(1))
+
+    rhatsquad = rhats.unsqueeze(1) * rhats.unsqueeze(2)
+    rhatsquad = (rhatsquad + rhatsquad.transpose(1, 2)) / 2
+    tr = torch.diagonal(rhatsquad, dim1=1, dim2=2).sum(dim=1) / 3.0  # Add divide by 3 early to save flops
+    tr = tr.unsqueeze(1).unsqueeze(2) * torch.eye(3, dtype=tr.dtype, device=tr.device).unsqueeze(0)
+    rhatsquad = rhatsquad - tr
+    rhatsqflat = rhatsquad.reshape(-1, 9)[:, upper_ind]  # Upper-diagonal part
+
+    T = torch.hstack((ones_, rhats, rhatsqflat))
+
+    _, atom1_ids, atom1_starts, pair_first, (T,sense_vals,pair_second) = resort_pairs_cached(pair_first, [T,sense_vals,pair_second])
+
+    env = TensorProductWrapper.apply(None,T,sense_vals,in_features,True,False,False,False,pair_first,pair_second,atom1_ids,atom1_starts)[0]
+    i,t,nu,b = env.shape
+    return env.reshape((i,t*nu,b))
+
 ################# USED FOR ABLATION TESTING ONLY ##############################
 
-def tensorMessagePassingBackwardOnly(T,s,z,pair_first,pair_second):
+def _tensorMessagePassingBackwardOnly(T,s,z,pair_first,pair_second):
     """
     Wrapper for EnvsumFusedGradient. This is used only for ablation testing and should not be used in a production environment.
     """
 
     argsort, atom1_ids, atom1_starts, pair_first, (T,s,pair_second) = resort_pairs_cached(pair_first, [T,s,pair_second])
-    return EnvsumFusedGradient.apply(T,s,z,pair_first,pair_second,atom1_ids,atom1_starts)
+    return _EnvsumFusedGradient.apply(T,s,z,pair_first,pair_second,atom1_ids,atom1_starts)
 
-class EnvsumFusedGradient(torch.autograd.Function):
+class _EnvsumFusedGradient(torch.autograd.Function):
     """
     Computes the message passing layer using envsum for the forward pass, but TensorProductWrapper for gradients.
     This is used only for ablation testing and should not be used in a production environment.
@@ -522,7 +563,7 @@ class EnvsumFusedGradient(torch.autograd.Function):
 
         ctx.save_for_backward(T, s, z, pair_first, pair_second, atom1_ids, atom1_starts)
 
-        sense = (s[:,:,None] * T[:,None,:]).flatten(1)
+        sense = (T[:,:,None] * s[:,None,:]).flatten(1)
         return envsum(sense, z, pair_first, pair_second)
 
     @staticmethod

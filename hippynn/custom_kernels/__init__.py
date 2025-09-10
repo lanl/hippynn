@@ -219,29 +219,92 @@ del try_custom_kernels
 # If they will not import, then the kernel active will not end up being triton, so
 # this will not create an issue.
 try:
-    from .message_passing_triton import tensorMessagePassingHop, tensorMessagePassingBackwardOnly, tensorMessagePassingVec, tensorMessagePassingQuad
+    from .message_passing_triton import tensorMessagePassingHop, _tensorMessagePassingBackwardOnly, tensorMessagePassingVec, tensorMessagePassingQuad
 except:
     pass
 
 # Wrapper for tensor message passing for HIP-HOP-NN
 def hopMessagePassing(T,s,z,pair_first,pair_second):
-    if T.device != 'cpu' and kernel_active == "triton" and settings.USE_ENV_TENSOR_GRADIENT:
-        if settings.USE_ENV_TENSOR:
-            return tensorMessagePassingHop(T,s,z,pair_first,pair_second)
+    """
+    Perform the message passing step for HIP-HOP-NN. This function serves as a wrapper to select between triton implementation and a
+    pure PyTorch implementation.
+
+    :param T: Matrix. Each row represents a pair of neighbors. Each row stores the entries of all of
+              irreducible tensors (of each order being used) of the delta function defined on S^2 which is
+              nonzero in the direction from the first atom in the pair to the second. The tensors are stored as
+              lists of basis coefficients and concatenated into a single row of T.
+
+    :param s: Matrix. Each row corresponds to a pair of neighbors. Each row stores the outputs of the sensitivity
+              function applied to the corresponding pair.
+
+    :param z: Matrix. Each row corresponds to an atom and stores the features associated with that atom.
+
+    :param pair_first: Vector of integers. For the list of pairs of neighbors in message passing, this is a list storing the first atom in each pair.
+
+    :param pair_second: Vector of integers. For the list of pairs of neighbors in message passing, this is a list storing the second atom in each pair.
+
+    :return: A 3D tensor storing the result of message passing. The first dimension indexes each individual atom. The second dimension
+             indexes tensor components and sensitivities (sensitivities varies vaster). The third dimension indexes features.
+    """
+    if T.device != 'cpu' and kernel_active == "triton" and settings.USE_TENSOR_MESSAGE_PASSING:
+        if settings.TENSOR_MESSAGE_PASSING_GRAD_ONLY:
+            return _tensorMessagePassingBackwardOnly(T,s,z,pair_first,pair_second)
         else:
-            return tensorMessagePassingBackwardOnly(T,s,z,pair_first,pair_second)
+            return tensorMessagePassingHop(T,s,z,pair_first,pair_second)
     else:
-        return torchMessagePassingHop(T,s,z,pair_first,pair_second,envsum)
+        return torchMessagePassingHop(T,s,z,pair_first,pair_second)
     
 # Wrapper for tensor message passing for HIP-NN-VEC
 def vecMessagePassing(in_features, sense_vals, pair_first, pair_second, dist_pairs, coord_pairs):
-    if in_features.device != 'cpu' and kernel_active == 'triton' and settings.USE_ENV_TENSOR_GRADIENT:
+    """
+    Perform the message passing step for HIP-NN-TS if l_max is equal to 1. This function serves as a wrapper to select between 
+    triton implementation and a pure PyTorch implementation.
+
+    :param in_features: Matrix. Each row corresponds to an atom and stores the features associated with that atom.
+
+    :param sense_vals: Matrix. Each row corresponds to a pair of neighbors. Each row stores the outputs of the sensitivity
+                       function applied to the corresponding pair.
+
+    :param pair_first: Vector of integers. For the list of pairs of neighbors in message passing, this is a list storing the first atom in each pair.
+
+    :param pair_second: Vector of integers. For the list of pairs of neighbors in message passing, this is a list storing the second atom in each pair.
+
+    :param dist_pairs: Vector. Each entry stores the distance between a pair of neighbors.
+
+    :param coord_pairs: Matrix. Each row corresponds to a pair of neighbors. Each row stores the position offset (as a vector) from the first atom
+                        to the second.
+
+    :return: The output of message passing for HIP-NN-TS.
+    """
+
+    if in_features.device != 'cpu' and kernel_active == 'triton' and settings.USE_TENSOR_MESSAGE_PASSING:
         return tensorMessagePassingVec(in_features, sense_vals, pair_first, pair_second, dist_pairs, coord_pairs)
     else:
-        return torchMessagePassingVec(in_features, sense_vals, pair_first, pair_second, dist_pairs, coord_pairs, envsum)
+        return torchMessagePassingVec(in_features, sense_vals, pair_first, pair_second, dist_pairs, coord_pairs)
     
 def quadMessagePassing(in_features, sense_vals, pair_first, pair_second, dist_pairs, coord_pairs, upper_ind):
-    if in_features.device != 'cpu' and kernel_active == 'triton' and settings.USE_ENV_TENSOR_GRADIENT:
+    """
+    Perform the message passing step sfor HIP-NN-TS if l_max is equal to 2. This function serves as a wrapper to select between 
+    triton implementation and a pure PyTorch implementation.
+
+    :param in_features: Matrix. Each row corresponds to an atom and stores the features associated with that atom.
+
+    :param sense_vals: Matrix. Each row corresponds to a pair of neighbors. Each row stores the outputs of the sensitivity
+                       function applied to the corresponding pair.
+
+    :param pair_first: Vector of integers. For the list of pairs of neighbors in message passing, this is a list storing the first atom in each pair.
+
+    :param pair_second: Vector of integers. For the list of pairs of neighbors in message passing, this is a list storing the second atom in each pair.
+
+    :param dist_pairs: Vector. Each entry stores the distance between a pair of neighbors.
+
+    :param coord_pairs: Matrix. Each row corresponds to a pair of neighbors. Each row stores the position offset (as a vector) from the first atom
+                        to the second.
+
+    :return: The output of message passing for HIP-NN-TS.
+    """
+
+    if in_features.device != 'cpu' and kernel_active == 'triton' and settings.USE_TENSOR_MESSAGE_PASSING:
         return tensorMessagePassingQuad(in_features, sense_vals, pair_first, pair_second, dist_pairs, coord_pairs)
     else:
-        return torchMessagePassingQuad(in_features, sense_vals, pair_first, pair_second, dist_pairs, coord_pairs, upper_ind, envsum)
+        return torchMessagePassingQuad(in_features, sense_vals, pair_first, pair_second, dist_pairs, coord_pairs, upper_ind)
