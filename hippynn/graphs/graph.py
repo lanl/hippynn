@@ -6,9 +6,7 @@ from collections import OrderedDict
 
 import torch
 
-from .nodes.base import Node
-from .nodes.base import InputNode
-from .nodes.base import NodeNotFound, NodeAmbiguityError
+from .nodes.base import Node, InputNode, NodeNotFound, NodeAmbiguityError
 
 from . import get_subgraph, compute_evaluation_order
 
