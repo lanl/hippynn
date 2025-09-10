@@ -64,7 +64,7 @@ def example_ensemble_graphs():
     location = str( (MODEL_DIR / "quad*").resolve())
     graphs = get_graphs(location)
      
-    nodes = [g.node_from_name(NODE_TO_ENSEMBLIZE) for g in graphs]
+    nodes = [g.unique_node_from_name(NODE_TO_ENSEMBLIZE) for g in graphs]
     for n in nodes:
         n.db_name = "AE"
 
@@ -79,7 +79,7 @@ def test_build_ensemble_nodes(example_ensemble_graphs):
     from hippynn.graphs import make_ensemble
 
 
-    nodes = [g.node_from_name(NODE_TO_ENSEMBLIZE) for g in example_ensemble_graphs]
+    nodes = [g.unique_node_from_name(NODE_TO_ENSEMBLIZE) for g in example_ensemble_graphs]
     
     ensemble_graph, ensemble_info  = make_ensemble(nodes)
 
@@ -107,7 +107,7 @@ def test_build_ensemble_target_nodes(example_ensemble_graphs):
     from hippynn.graphs import make_ensemble
 
     # Deliberately get a graph that is not exactly the right one.
-    nodes = [g.node_from_name("HEnergy") for g in example_ensemble_graphs]
+    nodes = [g.unique_node_from_name("HEnergy") for g in example_ensemble_graphs]
 
     ensemble_graph, ensemble_info  = make_ensemble(nodes,targets=[NODE_TO_ENSEMBLIZE])
 
