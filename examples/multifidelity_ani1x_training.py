@@ -1,6 +1,13 @@
 """
 Example script for multi-fidelity training HIP-NN directly to multiple levels of theory from the ANI1x_datasets h5 file.
 
+This script showcases the multi-fidelity training technique found in:
+
+"Multi-fidelity learning for interatomic potentials: Low-level forces and high-level energies are all you need"
+Mitchell Messerly, Sakib Matin, Alice Allen, Benjamin Nebgen, Kipton Barros, Justin Smith, Nicholas Lubbers and Richard Messerly
+Machine Learning: Science and Technology
+DOI 10.1088/2632-2153/ae040b
+
 This script was designed for an external dataset available at
 https://doi.org/10.6084/m9.figshare.c.4712477
 pyanitools reader available at
