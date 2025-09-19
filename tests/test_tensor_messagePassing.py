@@ -167,7 +167,3 @@ def test_hop_message_passing_wrappers():
             assert torch.autograd.gradgradcheck(quadMessagePassing, (in_features, sense_vals, pair_first, pair_second, dist_pairs, coord_pairs, upper_ind))
 
         assert torch.allclose(tensor_message_passing_result, envsum_message_passing_result, rtol=1e-6, atol=1e-6)
-
-
-if __name__ == "__main__":
-    test_hop_message_passing_wrapper()

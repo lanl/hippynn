@@ -307,6 +307,10 @@ class HOPInteractionLayer(InteractLayer):
 
     def forward(self, in_features, pair_first, pair_second, dist_pairs, tensor_rhats):
 
+        n_atoms = len(in_features)
+        import numpy as np
+        np.save(f"../data/large_molecule_pairs/{n_atoms}.npy", np.vstack((pair_first.detach().cpu().numpy(), pair_second.detach().cpu().numpy())))
+
         features_out_selfpart = self.selfint(in_features)
 
         n_atoms_real = in_features.shape[0]

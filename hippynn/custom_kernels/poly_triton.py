@@ -220,6 +220,7 @@ class EvaluatePolynomials(torch.autograd.Function):
 
     @staticmethod
     def forward(ctx, x, polynomials, derivative_level=0 ):
+
         # save terms for later
         ctx.save_for_backward(x)
         ctx.polynomials = polynomials

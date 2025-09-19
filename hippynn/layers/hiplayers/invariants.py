@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 
 from .tensors import calc_invariants, cmaps
-
+from packaging import version
 from ... import settings
 
 import itertools
@@ -25,9 +25,13 @@ to a tensor of order 0, then the next three correspond to a tensor of order 1, e
 
 try:
     from ...custom_kernels.poly_triton import EvaluatePolynomials, PolynomialCollection
-    triton_available = True
+
+    triton_available_with_gather = True
+    import triton
+    if version.parse(triton.__version__) < version.parse("3.3.0"):
+        triton_available_with_gather = False
 except:
-    triton_available = False
+    triton_available_with_gather = False
 
 # tensor ordering and list of invariants for the default invariants.
 default_tensor_ordering = ["zero", "one", "two", "three"]
@@ -342,7 +346,7 @@ class HopInvariantLayer(torch.nn.Module):
             for c in self.cmaps.keys():
                 self.cmaps[c] = self.cmaps[c].to(device)
 
-        if device == 'cpu' or not settings.USE_POLYNOMIAL_INVARIANTS or not triton_available:
+        if device == 'cpu' or not settings.USE_POLYNOMIAL_INVARIANTS or not triton_available_with_gather:
             return calc_invariants(self.l_max, self.n_max, tensor_features, self.cmaps)
         else:
             if self.polynomials is None:
