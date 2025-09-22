@@ -10,15 +10,28 @@ from ...graphs.nodes.inputs import SpeciesNode
 from ...graphs.nodes.pairs import PairFilter
 from ...graphs.nodes.physics import VecMag, GradientNode
 from ...graphs.nodes.tags import PairIndexer, Encoder
+from ...graphs.nodes.misc import EnsembleTarget
 
-
-def setup_LAMMPS_graph(energy):
+def setup_LAMMPS_graph(energy, extra_properties: dict = None, is_ensemble: bool= False):
     """
 
-    :param energy: energy node for lammps interface
+    :param energy: energy node for lammp energy_stds interface
+    :param extra_properties: dictionary of names to nodes for additional nodes for the calculator to compute
+    :param is_ensemble: boolean to check if it is an ensemble
     :return: graph for computing from lammps MLIAP unified inputs.
     """
-    required_nodes = [energy]
+    
+    if is_ensemble is True: 
+        required_nodes = [energy.mean, energy.all] #[energy.mean, energy.std] 
+    else: 
+        required_nodes = [energy]
+
+    if extra_properties is not None:
+        properties = {}
+        for key, value in extra_properties.items():
+            #if hasattr(value, "std"):
+            properties[key] = value #.std
+        required_nodes += list(properties.values())
 
     why = "Generating LAMMPS Calculator interface"
     subgraph = get_subgraph(required_nodes)
@@ -76,11 +89,23 @@ def setup_LAMMPS_graph(energy):
             replace_node(pi.pair_dist, mapped_node.pair_dist, disconnect_old=False)
             pi.disconnect()
 
-    energy, *new_required = new_required
-    try:
-        atom_energies = energy.atom_energies
-    except AttributeError:
-        atom_energies = energy
+    if extra_properties is not None:
+        property_names = [f"{key}" for key in properties]
+    
+    #energy,extra_property, *new_required = new_required
+    if is_ensemble is True:
+        energy, energy_all, *extra_property = new_required
+        try:
+            atom_energies = energy.atom_energies.mean
+        except AttributeError:
+            atom_energies = energy
+    else:
+        energy, *new_required = new_required
+        try:
+            atom_energies = energy.atom_energies
+        except AttributeError:
+            atom_energies = energy
+
 
     try:
         atom_energies = index_type_coercion(atom_energies, IdxType.Atoms)
@@ -90,10 +115,30 @@ def setup_LAMMPS_graph(energy):
             "an object with an `atom_energies` attribute."
         )
 
-    local_atom_energy = LocalAtomEnergyNode("local_atom_energy", (atom_energies, in_nlocal))
-    grad_rij = GradientNode("grad_rij", (local_atom_energy.total_local_energy, in_pair_coord), -1)
+    if is_ensemble is True:
+        local_atom_energy = LocalAtomExtractorNode("local_atom_energy", (atom_energies, in_nlocal))
+        #local_atom_energy_all = LocalAtomExtractorNode("local_atom_energy_all", (energy_all, in_nlocal))
+    else:    
+        local_atom_energy = LocalAtomExtractorNode("local_atom_energy", (atom_energies, in_nlocal))
 
-    implemented_nodes = local_atom_energy.local_atom_energies, local_atom_energy.total_local_energy, grad_rij
+    if extra_properties is not None:
+        properties_node = {}
+        for i, value in enumerate(extra_property):
+            property_name = property_names[i]
+            properties_node[key] = LocalAtomExtractorNode(f"{property_name}", (value, in_nlocal))
+
+        extra_properies_nodes = list(properties_node.values())
+
+    #print("extra_properies_nodes:", extra_properies_nodes)
+
+    grad_rij = GradientNode("grad_rij", (local_atom_energy.total_local_value, in_pair_coord), -1)
+    # looping over all local sotm energies
+    if extra_properties is not None:
+        for i, local_energy in enumerate(extra_property): #local_atom_energy_all.total_local_value):
+            local_energy = LocalAtomExtractorNode("model_energy", (local_energy, in_nlocal)) 
+        implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, grad_rij, *tuple(node.local_atom_values for node in extra_properies_nodes)
+    else:
+        implemented_nodes = local_atom_energy.local_atom_values, local_atom_energy.total_local_value, grad_rij
 
     check_link_consistency((*new_inputs, *implemented_nodes))
     mod = GraphModule(new_inputs, implemented_nodes)
@@ -101,6 +146,30 @@ def setup_LAMMPS_graph(energy):
 
     return min_radius / 2, species_set, mod
 
+
+class LocalAllAtomExtractor(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, all_atom_values, nlocal):
+        local_atom_values = all_atom_values[:, :nlocal]  # [n_models, nlocal]
+        total_local_value = local_atom_values.sum(dim=1)
+        return local_atom_values, total_local_value
+
+class LocalAllAtomExtractorNode(AutoNoKw, ExpandParents, MultiNode):
+    _input_names = "all_atom_values", "nlocal"  
+    _output_names = "local_atom_values", "total_local_value" 
+    _main_output = "total_local_value"
+    _output_index_states = None, IdxType.Scalar 
+    _auto_module_class = LocalAllAtomExtractor
+
+    _parent_expander.assertlen(2)
+    _parent_expander.get_main_outputs()
+    _parent_expander.require_idx_states(IdxType.Atoms, IdxType.Scalar )
+
+    def __init__(self, name, parents, module="auto", **kwargs):
+        parents = self.expand_parents(parents)
+        super().__init__(name, parents, module=module, **kwargs)
 
 class ReIndexAtomMod(torch.nn.Module):
     def forward(self, raw_atom_index_array, inverse_real_atoms):
@@ -117,26 +186,26 @@ class ReIndexAtomNode(AutoNoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class LocalAtomsEnergy(torch.nn.Module):
+class LocalAtomExtractor(torch.nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, all_atom_energies, nlocal):
-        local_atom_energies = all_atom_energies[:nlocal]
-        total_local_energy = torch.sum(local_atom_energies)
-        return local_atom_energies, total_local_energy
+    def forward(self, all_atom_values, nlocal):
+        local_atom_values = all_atom_values[:nlocal]
+        total_local_value = torch.sum(local_atom_values)
+        return local_atom_values, total_local_value
 
 
-class LocalAtomEnergyNode(AutoNoKw, ExpandParents, MultiNode):
-    _input_names = "all_atom_energies", "nlocal"
-    _output_names = "local_atom_energies", "total_local_energy"
-    _main_output = "total_local_energy"
-    _output_index_states = None, IdxType.Scalar
-    _auto_module_class = LocalAtomsEnergy
+class LocalAtomExtractorNode(AutoNoKw, ExpandParents, MultiNode):
+    _input_names = "all_atom_values", "nlocal"  
+    _output_names = "local_atom_values", "total_local_value" 
+    _main_output = "total_local_value"
+    _output_index_states = None, IdxType.Scalar 
+    _auto_module_class = LocalAtomExtractor
 
     _parent_expander.assertlen(2)
     _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Atoms, IdxType.Scalar)
+    _parent_expander.require_idx_states(IdxType.Atoms, IdxType.Scalar )
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)

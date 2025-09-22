@@ -14,7 +14,7 @@ Example::
     bundle = load_checkpoint_from_cwd(map_location="cpu", restart_db=False)
     model = bundle["training_modules"].model
     energy_node = model.node_from_name("HEnergy")
-    unified = MLIAPInterface(energy_node, ["Al"], model_device=torch.device("cuda"))
+    unified = MLIAPInterface(energy_node, ["Al"], is_ensemble=False, extra_properties=None, model_device=torch.device("cuda"))
     torch.save(unified, "mliap_unified_hippynn_Al_multilayer.pt")
 
 After creating the Unified object, to perform a LAMMPS simulation you may ``pickle`` or
@@ -23,6 +23,20 @@ Example::
 
     pair_style	mliap unified mliap_unified_hippynn_Al.pt 0
     pair_coeff	* * Al
+
+You may also build LAMMPS ML-IAP Unified model for an ensemble of models. Load ensemble of models and build 
+ensemble graphs that averages predictions across all models. Pass the node associated with the ensemble 
+atom energies from the ensemble graph and `is_ensemble` needs to be set to `True`.
+A standard deviation of atom energy predictions across the ensemble can be used as an extra property.
+
+Example::
+    from hippynn.graphs import make_ensemble
+    models = "../TEST_ALUMINUM_MODEL_*"
+    ensemble_graph, ensemble_info = make_ensemble(models)
+    ensemble_energy = ensemble_graph.node_from_name("ensemble_atomenergies")
+    extra_properties = {"energy_std": ensemble_energy.std}
+    unified = MLIAPInterface(energy, ["Al"], is_ensemble=True, extra_properties=extra_properties, model_device=device_fallback())
+    torch.save(unified, "mliap_unified_hippynn_Al_ensemble.pt")
 
 You may also load it directly into LAMMPS from the `mliappy` Python library.
 Example::

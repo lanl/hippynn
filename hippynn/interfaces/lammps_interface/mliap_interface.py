@@ -34,6 +34,8 @@ class MLIAPInterface(MLIAPUnified):
         energy_node,
         element_types,
         ndescriptors=1,
+        is_ensemble: bool = False,
+        extra_properties: dict = None,
         model_device=torch.device("cpu"),
         compute_dtype=torch.float32,
         energy_unit: float = None,
@@ -44,6 +46,8 @@ class MLIAPInterface(MLIAPUnified):
         :param element_types: list of atomic symbols corresponding to element types
         :param ndescriptors: the number of descriptors to report to LAMMPS
         :param model_device: the device to send torch data to (cpu or cuda)
+        :param is_ensemble: indicates whether an ensemble of models is used
+        :param extra_properties: dictionary of names to nodes for additional nodes for the calculator to compute
         :param energy_unit: If present, multiply the result by the given energy units.
             If your model was trained in Hartree and your lammps script will operate in eV,
             use energy_unit = ase.units.Ha = 27.211386024367243
@@ -59,14 +63,29 @@ class MLIAPInterface(MLIAPUnified):
         self.model_device = model_device
         self.energy_unit = energy_unit
         self.distance_unit = distance_unit
+        self.is_ensemble = is_ensemble # added
+
+        if extra_properties is not None:
+            self.property_names = [f"{key}" for key in extra_properties]
+
 
         # Build the calculator
-        self.rcutfac, self.species_set, self.graph = setup_LAMMPS_graph(energy_node)
+        #if self.is_ensemble is True:
+        self.rcutfac, self.species_set, self.graph = setup_LAMMPS_graph(energy_node, extra_properties, is_ensemble)
+
+        self.input_flag = False
+        self.inputs = None
+        self.atom_energy = None
+        self.total_energy= None 
+        self.fij = None
+        self.properties = None  
+
         self.nparams = sum(p.nelement() for p in self.graph.parameters())
         self.compute_dtype = compute_dtype
         self.graph.to(compute_dtype)
 
         self.clear_runtime_variables()
+
 
     def clear_runtime_variables(self):
         # Variables that will be populated at run time.
@@ -176,14 +195,17 @@ class MLIAPInterface(MLIAPUnified):
 
         return global_grad_in_features, *rest_grad_in
 
-    def compute_forces(self, data):
+    def setup_graph_call(self, data):
         """
-        :param data: MLIAPData object (provided internally by lammps)
-        :return None
-        This function writes results to the input `data`.
+        Calling the graph once such that inits can be set to graphs
+        
         """
 
-        # If there are no local atoms, do nothing
+        if self.using_kokkos:
+            return_device = data.elems.device
+        else:
+            return_device = "cpu"
+
         nlocal = self.as_tensor(data.nlistatoms)
         if nlocal.item() <= 0:
             return
@@ -191,8 +213,8 @@ class MLIAPInterface(MLIAPUnified):
         self.mliap_data = data  # hook data onto the (persistent) object for, e.g., comms hooks. This is needed!
         self.perform_setup()
 
-        elems = self.as_tensor(data.elems).type(torch.int64).reshape(1, data.ntotal)
-        z_vals = self.species_set[elems + 1]
+        self.elems = self.as_tensor(data.elems).type(torch.int64).reshape(1, data.ntotal)
+        z_vals = self.species_set[self.elems + 1]
         npairs = data.npairs
 
         if npairs > 0:
@@ -206,51 +228,95 @@ class MLIAPInterface(MLIAPUnified):
 
         if self.distance_unit is not None:
             rij = self.distance_unit * rij
-
         # note your sign for rij might need to be +1 or -1, depending on how your implementation works
-        inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
-        atom_energy, total_energy, fij = self.graph(*inputs)
+        self.inputs = [z_vals, pair_i, pair_j, -rij, nlocal]
+        
+        self.atom_energy, self.total_energy, self.fij, *self.properties = self.graph(*self.inputs) 
 
+    def compute_forces(self, data):
+        """
+        :param data: MLIAPData object (provided internally by lammps)
+        :return None
+        This function writes results to the input `data`.
+        """
 
+        self.setup_graph_call(data)
 
         # convert units
         if self.energy_unit is not None:
-            atom_energy = self.energy_unit * atom_energy
-            total_energy = self.energy_unit * total_energy
-            fij = self.energy_unit * fij
+            self.atom_energy = self.energy_unit * self.atom_energy
+            self.total_energy = self.energy_unit * self.total_energy
+            self.fij = self.energy_unit * self.fij
 
         if self.distance_unit is not None:
-            fij = fij / self.distance_unit
+            self.fij = self.fij / self.distance_unit
 
         # Write data back. Kokkos and non-kokkos interfaces have diverged, so slightly different paths.
         if self.using_kokkos:
-            return_device = elems.device
+            return_device = self.elems.device
         else:
             return_device = "cpu"
 
-        atom_energy = atom_energy.squeeze(1).detach().to(return_device)
-        total_energy = total_energy.detach().to(return_device)
-        data.energy = total_energy.item()
+        atom_energy = self.atom_energy.squeeze(1).detach().to(return_device)
+        total_energy = self.total_energy.detach().to(return_device)
+        data.energy = self.total_energy.item()
 
         f = self.as_tensor(data.f)
-        fij = fij.type(f.dtype).detach().to(return_device)
+        fij = self.fij.type(f.dtype).detach().to(return_device)
 
         if not self.using_kokkos:
             # write back to data.eatoms directly.
             fij = fij.numpy()
             data.eatoms = atom_energy.numpy().astype(np.double)
-            if npairs > 0:
+            if data.npairs > 0:
                 data.update_pair_forces(fij)
         else:
             # view to data.eatoms using pytorch, and write into the view.
             eatoms = torch.as_tensor(data.eatoms, device=return_device)
             eatoms.copy_(atom_energy)
-            if npairs > 0:
+            if data.npairs > 0:
                 if return_device == "cpu":
                     data.update_pair_forces_cpu(fij)
                 else:
                     data.update_pair_forces_gpu(fij)
 
+        self.mliap_data = None  # unhook data, see hooking above.
+
+    def compute_extra_property(self, data, lammps_property_name: str):
+        """
+        :param lammps_property_name: Property name coming from lammps
+        :param: index: Index of the property name for lammps
+        """
+        #general_property = extra_properties[property_name]
+
+        if self.using_kokkos:
+            return_device = self.elems.device
+        else:
+            return_device = "cpu"
+
+        if not self.using_kokkos:
+            for i, property_name in enumerate(self.property_names):
+                if lammps_property_name == property_name:
+                    data.update_extra_property(lammps_property_name, self.properties[i].detach().to(return_device).numpy().astype(np.double))
+                    break
+            else:
+                raise ValueError("Did not find given property")
+            #general_property = general_property.squeeze(1).detach().to(return_device)
+            #data.general_property = general_property.numpy().astype(np.double)
+        else:
+            for i, property_name in enumerate(self.property_names):
+                if lammps_property_name == property_name:
+                    extra_property_value = torch.as_tensor(self.properties[i], device=return_device, dtype=torch.float64)
+                    extra_property_value.copy_(self.properties[i])
+                    data.update_extra_property(lammps_property_name, extra_property_value)
+                    break
+            else:
+                raise ValueError(f"Property {lammps_property_name} not found")
+            # view to data.eatoms using pytorch, and write into the view.
+            #eatoms = torch.as_tensor(data.eatoms, device=return_device)
+            
+            #general_property = torch.as_tensor(general_property, device=return_device ) 
+            #eatoms.copy_(atom_energy)
         self.mliap_data = None  # unhook data, see hooking above.
 
     def __getstate__(self):

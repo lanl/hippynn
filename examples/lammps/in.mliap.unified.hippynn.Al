@@ -15,22 +15,27 @@ variable nz equal ${nrep}
 
 boundary        p p p
 
-lattice         fcc $a
-region          box block 0 ${nx} 0 ${ny} 0 ${nz}
-create_box      1 box
-create_atoms    1 box
+read_data positions.xyz
+#lattice         fcc $a
+#region          box block 0 ${nx} 0 ${ny} 0 ${nz}
+#create_box      1 box
+#create_atoms    1 box
 
 mass 1 26.981
 
 # choose potential
 
-pair_style	mliap unified mliap_unified_hippynn_Al.pt 0
+#pair_style	mliap/kk unified mliap_unified_hippynn_Al.pt 0        # for kokkos
+pair_style	mliap unified mliap_unified_hippynn_Al.pt 0 
 pair_coeff	* * Al
 
 # Setup output
 
 compute  eatom all pe/atom
+#compute  eatom_stdev all peStdev/atom
 compute  energy all reduce sum c_eatom
+#compute  generalizedProperty all extraProperty/atom/kk name energy_std dim 1     # for kokkos
+compute  generalizedProperty all extraProperty/atom name energy_std dim 1
 
 compute  satom all stress/atom NULL
 compute  str all reduce sum c_satom[1] c_satom[2] c_satom[3]
@@ -46,7 +51,14 @@ timestep 0.5e-3
 neighbor 1.0 bin
 neigh_modify once no every 1 delay 0 check yes
 
-#dump 4 all custom 1 forces.xyz fx fy fz
+dump 4 all custom 1 forces.xyz id fx fy fz
+#dump_modify 4 sort id 
+dump_modify 4 first yes
+
+dump 3 all custom 1 eatoms_uq.xyz id c_eatom c_generalizedProperty[1]
+#dump_modify 3 sort id 
+dump_modify 3 first yes
+ 
 
 # Run MD
 
