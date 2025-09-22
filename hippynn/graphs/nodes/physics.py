@@ -377,4 +377,63 @@ class CombineEnergyNode(AutoNoKw, Energies,  ExpandParents, MultiNode):
     parent_expander.assertlen(4)
     parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, None, None)
 
+
+
+class StrainInducer(AutoNoKw, MultiNode):
+    input_names = "coordinates", "cell"
+    output_names = "strained_coordinates", "strained_cell", "strain"
+    output_index_states = NotImplemented
+    auto_module_class = physics_layers.CellScaleInducer
+
+    def __init__(self, name, parents, module="auto", **kwargs):
+        position, cell = parents
+        self.output_index_states = position.index_state, IdxType.Unlabeled, IdxType.Unlabeled
+        super().__init__(name, parents, module=module, **kwargs)
+
     
+def setup_stressforce_nodes(energy_node, return_transformed_inputs=False, positions_node="auto", cell_node="auto", strain_node="auto"):
+    """_summary_
+
+    :param energy_node: the energy to differenitate
+    :param return_transformed_inputs: If true, return the strained positions, strained cell, and strain
+    :param position_node: defaults to "auto"
+    :param cell_node: defaults to "auto"
+    :param strain_node: defaults to "auto"
+
+    Using "auto" will cause a failure if the corresponding node cannot be found or is ambiguous.
+
+    :return: (forces, stress) or (forces, stress, strained_positions, strained_cell, strain) depending on return_transformed_inputs flag.
+    """
+
+    from .misc import StrainInducer
+
+    from .tags import Positions
+    from .inputs import CellNode
+    
+    if positions_node == "auto":
+        positions_node = find_unique_relative(energy_node, Positions)
+
+    if cell_node == "auto":
+        cell_node = find_unique_relative(energy_node, CellNode)
+    
+    if strain_node == "auto":
+        strain_node = StrainInducer("Strain_inducer", (positions_node, cell_node))
+    
+    strained_coords = strain_node.strained_coordinates
+    strained_cell = strain_node.strained_cell
+    strain = strain_node.strain
+
+    from hippynn.graphs.gops import replace_node
+
+    replace_node(positions_node, strained_coords)
+    replace_node(cell_node, strained_cell)
+
+    derivatives = StressForceNode("StressForceCalculator", (energy_node, strain, positions_node, cell_node))
+    forces, stress = derivatives.forces, derivatives.stress
+
+    if return_transformed_inputs:
+
+        return stress, forces, strained_coords, strained_cell, strain
+    
+    else:
+        return stress, forces

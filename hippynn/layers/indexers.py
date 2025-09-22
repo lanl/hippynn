@@ -165,18 +165,6 @@ class AtomDeIndexer(torch.nn.Module):
         return result
 
 
-class CellScaleInducer(torch.nn.Module):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.pbc = False
-
-    def forward(self, coordinates, cell):
-        strain = torch.eye(
-            coordinates.shape[2], dtype=coordinates.dtype, device=coordinates.device, requires_grad=True
-        ).tile(coordinates.shape[0],1,1)
-        strained_coordinates = torch.bmm(coordinates, strain)
-        strained_cell = torch.bmm(cell, strain)
-        return strained_coordinates, strained_cell, strain
 
 
 class QuadPack(torch.nn.Module):
@@ -282,3 +270,18 @@ class SpeciesIndexer(torch.nn.Module):
             species_values = values[species_mask]
             values_by_species.append(species_values)
         return values_by_species
+
+
+def __getattr__(name: str):
+    """
+    Module-level getattr for finding of old functions.
+    """
+    
+    if name == "CellScaleInducer":
+        # Backwards compatibility for unpickling prior models
+        from . import physics
+        from .._deprecations import warn_name_change
+        warn_name_change(name, name, old_module=__name__, new_module=physics, stacklevel=2)
+        return physics.CellScaleInducer
+    
+    raise AttributeError(f"module {__name__!r} has no attribute {name}")
