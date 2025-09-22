@@ -99,12 +99,13 @@ def load_db(db_info, en_name, force_name, seed, anidata_location, n_workers, use
     # Ensure total energies loaded in float64.
     torch.set_default_dtype(torch.float64)
 
+    # Load DB, ensuring CCX energy info is available if that subset is selected.
     CCX_EN_NAME = "ccsd(t)_cbs.energy"
-    if use_ccx_subset:
-        db_info["targets"].append(CCX_EN_NAME)
+    if use_ccx_subset and en_name != CCX_EN_NAME:
+        db_info["targets"].append(CCX_EN_NAME) # note, this is in-place and affects the evaluator.
     database = PyAniFileDB(file=anidata_location, species_key="atomic_numbers", seed=seed, num_workers=n_workers, **db_info)
-    if en_name != CCX_EN_NAME:
-        database.targets = [x for x in database.targets if x != CCX_EN_NAME]
+    if use_ccx_subset and en_name != CCX_EN_NAME:
+        database.targets.remove(CCX_EN_NAME) # undo in-place addition
 
     # compute (approximate) atomization energy by subtracting self energies
 
@@ -135,6 +136,7 @@ def load_db(db_info, en_name, force_name, seed, anidata_location, n_workers, use
     found_indices = ~torch.isnan(database.arr_dict[filter_name])
     database.arr_dict = {k: v[found_indices] for k, v in database.arr_dict.items()}
     database.make_trainvalidtest_split(test_size=0.1, valid_size=0.1)
+
     return database
 
 

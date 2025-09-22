@@ -3,19 +3,7 @@ Nodes not otherwise categorized.
 """
 from ..indextypes import IdxType
 from .base import AutoNoKw, SingleNode, MultiNode, ExpandParents
-from ...layers import indexers as index_modules, algebra as algebra_modules
-from ..indextypes import elementwise_compare_reduce
-
-class StrainInducer(AutoNoKw, MultiNode):
-    input_names = "coordinates", "cell"
-    output_names = "strained_coordinates", "strained_cell", "strain"
-    output_index_states = NotImplemented
-    auto_module_class = index_modules.CellScaleInducer
-
-    def __init__(self, name, parents, module="auto", **kwargs):
-        position, cell = parents
-        self.output_index_states = position.index_state, IdxType.Unlabeled, IdxType.Unlabeled
-        super().__init__(name, parents, module=module, **kwargs)
+from ...layers import algebra as algebra_modules
 
 
 class ListNode(AutoNoKw, SingleNode):
@@ -25,6 +13,7 @@ class ListNode(AutoNoKw, SingleNode):
 
     def __init__(self, name, parents, module="auto"):
         super().__init__(name, parents, module=module)
+
 
 class EnsembleTarget(ExpandParents, AutoNoKw, MultiNode):
     auto_module_class = algebra_modules.EnsembleTarget
@@ -47,3 +36,17 @@ class EnsembleTarget(ExpandParents, AutoNoKw, MultiNode):
         super().__init__(name, parents, module=module)
         for c, out_name in zip(self.children, self.output_names):
             c.db_name = f'{db_name}_{out_name}'
+
+
+def __getattr__(name: str):
+    """
+    Module-level getattr for finding of old functions.
+    """
+    if name == "StrainInducer":
+        # Backwards compatibility for unpickling prior models
+        from . import physics
+        from ..._deprecations import warn_name_change
+        warn_name_change(name, name, old_module=__name__, new_module=physics, stacklevel=2)
+        return physics.StrainInducer
+    
+    raise AttributeError(f"module {__name__!r} has no attribute {name}")
