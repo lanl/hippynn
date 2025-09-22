@@ -222,7 +222,7 @@ def main(args):
     torch.set_default_dtype(torch.float32)
 
     hippynn.settings.WARN_LOW_DISTANCES = False
-    if args.noprogress:
+    if not args.progress:
         hippynn.settings.PROGRESS = None
 
     netname = f"{args.tag}_GPU{args.gpu}"
