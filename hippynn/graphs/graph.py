@@ -106,9 +106,8 @@ class GraphModule(torch.nn.Module):
             mid = "{:3} : {}".format(node_map[computed], computed.name)
             print("{:-<20}-> {}".format(pre, mid))
 
-        node_map.update()
-        node_map.update()
-        node_map.update({n: "Out{}:".format(i) for i, n in enumerate(self.forward_output_list)})
+        
+        
 
     def node_from_name(self, name):
         for match in list(self.input_nodes) + list(self.forward_output_list):
