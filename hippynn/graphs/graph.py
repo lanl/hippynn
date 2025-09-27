@@ -58,8 +58,6 @@ class GraphModule(torch.nn.Module):
                 else:
                     warnings.warn("Warning: object not base node:", x)
 
-        del x
-
         self.forward_output_list, self.forward_inputs_list = compute_evaluation_order(all_node_list)
 
         # Here we have to do a small dance to allow us to create a dictionary of nodes to modules.
