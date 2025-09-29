@@ -509,10 +509,13 @@ def swap_pairfinders(node_or_nodes, new_pairfinder, new_node_name=None, cell_nod
 
     new_node_name = (new_node_name or old_pf.name)
 
-    try:
-        new_pf = new_pairfinder(new_node_name, parents=(positions, species), **module_kwargs)
-    except RuntimeError:
-        cell = (cell_node or find_unique_relative(old_pf, CellNode))
-        new_pf = new_pairfinder(new_node_name, parents=(positions, species, cell), **module_kwargs)
+    if cell_node:
+        new_pf = new_pairfinder(new_node_name, parents=(positions, species, cell_node), **module_kwargs)
+    else:
+        try:
+            new_pf = new_pairfinder(new_node_name, parents=(positions, species), **module_kwargs)
+        except TypeError:
+            cell_node = find_unique_relative(old_pf, CellNode)
+            new_pf = new_pairfinder(new_node_name, parents=(positions, species, cell_node), **module_kwargs)
     
     replace_node(old_pf, new_pf, disconnect_old=True)
