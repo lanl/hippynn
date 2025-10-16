@@ -38,6 +38,15 @@ from hippynn.pretraining import set_e0_values
 from hippynn.tools import active_directory
 import argparse
 
+def param_count(module):
+    learnable = 0
+    fixed = 0
+    for _, p in module.named_parameters():
+        if p.requires_grad:
+            learnable += p.numel()
+        else:
+            fixed += p.numel()
+    return learnable, fixed
 
 class TomasWandbLogger():
     def __init__(self, metric_tracker, wandb_run):
@@ -76,6 +85,8 @@ def get_parameters():
     parser.add_argument('--data-size', type=int, default=1000,
                        help='Number of configurations to use from dataset')
     parser.add_argument('--test-data', type=str, default="./datasets/test_data_tomas.npz",)
+    parser.add_argument('--model-name', type=str, default="HipHopnn",
+                        help='Model architecture to use (HipHopnn, HipNNTSnn, HipNN)')
     args = parser.parse_args()
 
     args.train_file = f"{args.train_file_name}_{args.data_size}_{args.data_split}.npz"
@@ -92,6 +103,7 @@ seed = params.seed
 train_data = f"{params.train_file_name}_{params.data_size}_{params.data_split}.npz"
 model_save_folder = params.model_save_folder
 n_epochs = params.n_epochs
+assert params.model_name in ["HipHopnn"], "We currently only support HipHopnn"
 network_class = HipHopnn  # HIP-HOP model with defaults with n = 4 and l = 3
 data_size = params.data_size
 test_data = params.test_data
@@ -224,7 +236,7 @@ with wandb.init(project="methane-hiphop", settings=wandb_settings, entity="karel
         test_size=0.1,  # Fraction or number of samples to test on -> this should be reduced closed to zero
         valid_size=0.1,  # Fraction or number of samples to validate on
         seed=seed,  # Random seed for spliting data
-        # num_workers=2,
+        #num_workers=1,
         pin_memory=False,
         **db_info,  # Adds the inputs and targets db_namesnames from the model as things to load
     )
@@ -255,11 +267,18 @@ with wandb.init(project="methane-hiphop", settings=wandb_settings, entity="karel
         evaluator.model.load_state_dict(best_model)
     evaluator.model.eval()
     
+    # --- Count params ---
+    learnable, fixed = param_count(evaluator.model)
+    wandb_run.summary["Learnable Params"] = learnable
+    wandb_run.summary["Fixed Params"] = fixed    
+    print(f"Learnable parameters: {learnable}, Fixed parameters: {fixed}")
+
+
     test_database = hippynn.databases.NPZDatabase(
-    file=test_data,
-    seed=seed,
-    pin_memory=True,
-    **evaluator.db_info,
+        file=test_data,
+        seed=seed,
+        pin_memory=True,
+        **evaluator.db_info,
     )
     
     test_database.split_the_rest("all")
@@ -269,7 +288,7 @@ with wandb.init(project="methane-hiphop", settings=wandb_settings, entity="karel
     metrics = evaluator.evaluate(data_generator, eval_type="all")
     
     # ---- Log Wandb test metrics ----
-    print("Emily test metrics:")
+    print("Test metrics:")
     for key, value in metrics.items():
         print(f"{key}: {value}" )
         wandb_run.summary[f"Test-{key}"] = value
