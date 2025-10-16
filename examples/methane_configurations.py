@@ -66,21 +66,19 @@ def get_parameters():
     
     parser.add_argument('--seed', type=int, default=2025, 
                        help='Random seed for reproducibility')
-    parser.add_argument('-t', '--train-file-name', type=str, default='./datasets/train_emily',
+    parser.add_argument('-t', '--train-file-name', type=str, default='./datasets/train_tomas',
                        help='Path to training data file (defaults to root/train_data_emily.npz)')
-    parser.add_argument('--data-split', type=int, default=0)
-    parser.add_argument('--num-samples', type=int, default=1000)
+    parser.add_argument('--data-split', type=int, default=1)
     parser.add_argument('--model-save-folder', type=str, default='./test_methane_model',
                        help='Directory to save model (defaults to root/TEST_METHANE_MODEL)')
     parser.add_argument('--n-epochs', type=int, default=10000,
                        help='Maximum number of training epochs')
     parser.add_argument('--data-size', type=int, default=1000,
                        help='Number of configurations to use from dataset')
-    parser.add_argument('--emily-test-data', type=str, default="/Users/karella/Projects/hippynn/test_data_emily.npz",)
-    parser.add_argument('--my-test-data', type=str, default="/Users/karella/Projects/hippynn/my_test_data_emily.npz",)
+    parser.add_argument('--test-data', type=str, default="./datasets/test_data_tomas.npz",)
     args = parser.parse_args()
-    
-    args.train_file = f"{args.train_file_name}_{args.num_samples}_{args.data_split}.npz"
+
+    args.train_file = f"{args.train_file_name}_{args.data_size}_{args.data_split}.npz"
     assert os.path.exists(args.train_file), FileNotFoundError(f"Training file {args.train_file} does not exist.")
     if args.model_save_folder is None:
         args.model_save_folder = os.path.join(args.root, "TEST_METHANE_MODEL")
@@ -91,7 +89,7 @@ params = get_parameters()
 
 # Extract individual parameters
 seed = params.seed
-train_data = f"{params.train_file_name}_{params.num_samples}_{params.data_split}.npz"
+train_data = f"{params.train_file_name}_{params.data_size}_{params.data_split}.npz"
 model_save_folder = params.model_save_folder
 n_epochs = params.n_epochs
 network_class = HipHopnn  # HIP-HOP model with defaults with n = 4 and l = 3
