@@ -22,44 +22,66 @@ read the methane.extxyz file repeatedly, I strongly suggest to first convert it 
 another format (eg., .npz) that will be faster to read.
 """
 
-import shutil
 import os
-import sys
-from time import time
-from math import log10
-from itertools import product
 from pathlib import Path
 
 import ase
+from ase import Atoms, units
 import torch
 import numpy as np
-import matplotlib.pyplot as plt
 
 import hippynn
-from hippynn.graphs import inputs, networks, targets, physics
-from hippynn.graphs.nodes.networks import Hipnn, HipnnVec, HipnnQuad, HipHopnn
-from hippynn.experiment import setup_training, train_model
+from hippynn.graphs import inputs, targets, physics
+from hippynn.graphs.nodes.networks import HipHopnn
+from hippynn.experiment import setup_training, train_model, test_model
 from hippynn.graphs import loss
 from hippynn.experiment.controllers import RaiseBatchSizeOnPlateau, PatienceController
 from hippynn.plotting import PlotMaker, Hist2D, SensitivityPlot
-from hippynn.experiment.serialization import load_checkpoint_from_cwd
 from hippynn.pretraining import set_e0_values
 from hippynn.tools import active_directory
+
+# ----- Override default units of Atom -----
+
+class AtomsMethan(Atoms):
+    def get_total_energy(self, **kwargs):
+        e_hartrees = super().get_total_energy(**kwargs) 
+        return e_hartrees * 627.5096080305927   # Hartrees --> kcal/mol
+    def get_forces(self, **kwargs):
+        forces = super().get_forces(**kwargs)
+        return forces * 51.42208619083232 * 23.060541945329334 # Hartrees/Bohr --> eV/Ang --> kcal/mol/Ang 
+    
 
 
 # ----- User parameters -----
 seed = 2025
-data_src = Path(__file__).parents[2] / "datasets" / "methane.extxyz"
+data_root = Path(__file__).parents[2] / "hippynn" /"datasets"  
+data_src = data_root / "methane.extxyz"
+processed_src = data_root / "methane.traj"
 model_save_folder = Path(__file__).parents[1] / Path("TEST_METHANE_MODEL")
-
 n_epochs = 10_000  # reduce to dececrease the run time of the script
+data_size = 1000
 
 # network_class = Hipnn # Original HIP-NN
 # network_class = HipnnVec # HIP-NN-TS, l=1
 # network_class = HipnnQuad # HIP-NN-TS, l=2
 network_class = HipHopnn  # HIP-HOP model with defaults with n = 4 and l = 3
 
-data_size = 100_000
+# ----- Constants -----
+TOTAL_NUM_SAMPLES = 7_732_488 
+TEST_SET_SIZE = 80_000
+
+# ---- Dataset ----
+# Load data and process if not already done
+# Source: https://archive.materialscloud.org/records/kz78r-6nx43
+if os.path.exists(processed_src):
+    data_src = processed_src  # use the .traj file if it exists
+else:
+    assert os.path.exists(data_src), f"Data source {data_src} does not exist! Please download methane.extxyz from https://archive.materialscloud.org/records/kz78r-6nx43 !"
+    print(f"Converting {data_src} to {processed_src} for faster reading next time, this may take a while ~1hr...")
+    frames = ase.io.read(data_src, index=':')
+    ase.io.write(processed_src, frames)
+    data_src = processed_src
+    del frames
 
 # ----- Construct model -----
 torch.random.manual_seed(seed)
@@ -175,10 +197,22 @@ training_modules, controller, metric_tracker = setup_training(
     setup_params=experiment_params,
 )
 
+indices = np.arange(TOTAL_NUM_SAMPLES)
+
+np.random.seed(seed)
+np.random.shuffle(indices)
+
+train_indices = indices[:data_size]
+test_indices = indices[data_size:data_size + TEST_SET_SIZE]
+
 # ----- Load data -----
-iterable = ase.io.read(data_src, index=slice(0, data_size))
-database = hippynn.databases.AseDatabaseIterable(
-    iterable=iterable,
+with ase.io.trajectory.Trajectory(processed_src) as raw_data:
+    train_iterable = [AtomsMethan(raw_data[idx]) for idx in train_indices]
+    test_iterable = [AtomsMethan(raw_data[idx]) for idx in test_indices]
+
+
+train_database = hippynn.databases.AseDatabaseIterable(
+    iterable=train_iterable,
     seed=seed,
     pin_memory=False,
     test_size=0.1,
@@ -186,16 +220,25 @@ database = hippynn.databases.AseDatabaseIterable(
     **db_info,
 )
 
-database.send_to_device(device)
+test_database = hippynn.databases.AseDatabaseIterable(
+    iterable=test_iterable,
+    seed=seed + 1,
+    pin_memory=False,
+    **db_info,
+)
 
-set_e0_values(henergy, database, trainable_after=False)
+test_database.split_the_rest("all")
+
+train_database.send_to_device(device)
+
+set_e0_values(henergy, train_database, trainable_after=False)
 
 # ----- Train model -----
 with active_directory(model_save_folder):
 
     metric_tracker = train_model(
         training_modules=training_modules,
-        database=database,
+        database=train_database,
         controller=controller,
         metric_tracker=metric_tracker,
         callbacks=None,
@@ -205,3 +248,21 @@ with active_directory(model_save_folder):
         store_every=0,
         quiet=False,
     )
+
+    # ----- Evaluate model -----
+    evaluator = training_modules.evaluator
+    best_model = metric_tracker.best_model
+    if best_model:
+        evaluator.model.load_state_dict(best_model)
+
+    print("Testing model...")
+    torch.cuda.empty_cache()
+    test_model(
+        test_database,
+        evaluator,
+        when="FinalTraining",
+        batch_size=controller.eval_batch_size,
+        metric_tracker=metric_tracker,
+    )
+
+
