@@ -54,7 +54,7 @@ processed_src = data_root / "methane.traj"
 model_save_folder = Path(__file__).parents[1] / Path("TEST_METHANE_MODEL")
 n_epochs = 10_000  # reduce to decrease the run time of the script
 data_size = 1000
-random_subset = True  # whether to use a random subset of data or the first data_size sample
+random_subset = False  # whether to use a random subset of data or the first data_size sample
 # network_class = Hipnn # Original HIP-NN
 # network_class = HipnnVec # HIP-NN-TS, l=1
 # network_class = HipnnQuad # HIP-NN-TS, l=2
