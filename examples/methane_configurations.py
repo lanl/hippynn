@@ -52,13 +52,16 @@ data_root = Path(__file__).parents[2] / "datasets"
 data_src = data_root / "methane.extxyz"
 processed_src = data_root / "methane.traj"
 model_save_folder = Path(__file__).parents[1] / Path("TEST_METHANE_MODEL")
-n_epochs = 10_000  # reduce to dececrease the run time of the script
+n_epochs = 10_000  # reduce to decrease the run time of the script
 data_size = 1000
-random_subset = False  # whether to use a random subset of data or the first data_size sample
+random_subset = True  # whether to use a random subset of data or the first data_size sample
 # network_class = Hipnn # Original HIP-NN
 # network_class = HipnnVec # HIP-NN-TS, l=1
 # network_class = HipnnQuad # HIP-NN-TS, l=2
-network_class = HipHopnn  # HIP-HOP model with defaults with n = 4 and l = 3
+network_class = HipHopnn  # HIP-HOP
+hiphop_l_max = 3 # these will not be used if network_class != HipHopnn
+hiphop_n_max = 4 # these will not be used if network_class != HipHopnn
+
 network_params = {
     "possible_species": [0, 1, 6],
     "n_features": 32,
@@ -69,6 +72,14 @@ network_params = {
     "n_interaction_layers": 1,
     "n_atom_layers": 3,
 }
+
+if network_class == HipHopnn:
+    network_params.update(
+        {
+            "l_max": hiphop_l_max,
+            "n_max": hiphop_n_max,
+        }
+    )
 
 # ----- Prepare data -----
 def prepare_data(data_src, train_size, test_size, random_subset=random_subset): 
@@ -91,8 +102,7 @@ def prepare_data(data_src, train_size, test_size, random_subset=random_subset):
         if os.path.exists(processed_src):
             data_src = processed_src  # use the .traj file if it exists
         else:
-            print(f"Converting {data_src} to {processed_src} for faster reading next time, this may take a while ~1hr...")
-            print("Use random_subset = False to avoid this.")
+            print(f"Converting {data_src} to {processed_src} for faster reading next time, this may take a while (~1hr)...")
             frames = ase.io.read(data_src, index=':')
             ase.io.write(processed_src, frames)
             data_src = processed_src
@@ -155,18 +165,12 @@ rmse_energy = loss.MSELoss.of_node(henergy) ** (1 / 2)
 mae_energy = loss.MAELoss.of_node(henergy)
 rsq_energy = loss.Rsq.of_node(henergy)
 
-mol_hier = loss.Mean.of_node(henergy.mol_hier)
-atom_hier = loss.Mean.of_node(henergy.atom_hier)
-old_hier = loss.Mean.of_node(henergy.hierarchicality)
-rbar = henergy.batch_hier.pred  # loss.Mean.of_node(hierarchicality)
-
 loss_energy = rmse_energy + mae_energy
 loss_force = rmse_force + mae_force
 loss_error = loss_energy + loss_force
 l2_reg = 1e-6 * loss.l2reg(network)
 
-loss_reg = l2_reg + 10 * rbar
-total_loss = loss_error + loss_reg
+total_loss = loss_error + l2_reg
 
 validation_losses = {
     "T-RMSE": rmse_energy,
@@ -175,13 +179,8 @@ validation_losses = {
     "F-RMSE": rmse_force,
     "F-MAE": mae_force,
     "F-RSQ": rsq_force,
-    "BHier": rbar,
-    "MHier": mol_hier,
-    "AHier": atom_hier,
-    "OHier": old_hier,
     "Error Loss": loss_error,
     "L2": l2_reg,
-    "Reg Loss": loss_reg,
     "Loss": total_loss,
 }
 
@@ -257,7 +256,7 @@ test_database = hippynn.databases.Database(
     pin_memory=True,
     **db_info,
 )
-test_database.split_the_rest("all")
+test_database.split_the_rest("test")
 test_database.send_to_device(device)
 
 set_e0_values(henergy, train_database, trainable_after=False)
