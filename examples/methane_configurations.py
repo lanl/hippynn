@@ -29,7 +29,7 @@ import torch
 
 import hippynn
 from hippynn.graphs import inputs, targets, physics
-from hippynn.graphs.nodes.networks import HipHopnn
+from hippynn.graphs.nodes.networks import HipHopnn, TKHipHopnn
 from hippynn.experiment import setup_training, train_model
 from hippynn.graphs import loss
 from hippynn.experiment.controllers import RaiseBatchSizeOnPlateau, PatienceController
@@ -85,7 +85,7 @@ def get_parameters():
     parser.add_argument('--data-size', type=int, default=1000,
                        help='Number of configurations to use from dataset')
     parser.add_argument('--test-data', type=str, default="./datasets/test_data_tomas.npz",)
-    parser.add_argument('--model-name', type=str, default="HipHopnn_l2_n3",
+    parser.add_argument('--model-name', type=str, default="HipHopnn_l2_n3_f42",
                         help='Model architecture to use (HipHopnn, HipNNTSnn, HipNN)')
     args = parser.parse_args()
 
@@ -107,18 +107,39 @@ network_params = {
     "dist_hard_max": 10.3,  # diagonal of 6x6x6 cube
     "n_interaction_layers": 1,
     "n_atom_layers": 3,
-    # TODO: Add l_max and n_max
-    "l_max": 2,
-    "n_max": 3,
 }
+
+if params.model_name.startswith("HipHopnn"):
+    network_class = HipHopnn  
+    if "_" in params.model_name:
+        parts = params.model_name.split("_")
+        for part in parts[1:]:
+            if part.startswith("l"):
+                network_params["l_max"] = int(part[1:])
+            elif part.startswith("n"):
+                network_params["n_max"] = int(part[1:])
+            elif part.startswith("f"):
+                network_params["n_features"] = int(part[1:])
+elif params.model_name.startswith("TKHipHopnn"):
+    network_class = TKHipHopnn  
+    if "_" in params.model_name:
+        parts = params.model_name.split("_")
+        for part in parts[1:]:
+            if part.startswith("l"):
+                network_params["l_max"] = int(part[1:])
+            elif part.startswith("n"):
+                network_params["n_max"] = int(part[1:])
+            elif part.startswith("f"):
+                network_params["n_features"] = int(part[1:])
+else: 
+    raise ValueError(f"Model name {params.model_name} not recognized.")
+
 
 # Extract individual parameters
 seed = params.seed
 train_data = f"{params.train_file_name}_{params.data_size}_{params.data_split}.npz"
 model_save_folder = params.model_save_folder
 n_epochs = params.n_epochs
-assert params.model_name in ["HipHopnn_l2_n3"], "We currently only support HipHopnn_l2_n3"
-network_class = HipHopnn  # HIP-HOP model with defaults with n = 4 and l = 3
 data_size = params.data_size
 test_data = params.test_data
 

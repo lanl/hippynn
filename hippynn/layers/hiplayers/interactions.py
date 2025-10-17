@@ -1,6 +1,6 @@
 import torch
 from ... import custom_kernels
-from .tensors import HopInvariantLayer
+from .tensors import HopInvariantLayer, TKHopInvariantLayer
 import warnings
 
 
@@ -312,6 +312,93 @@ class HOPInteractionLayer(InteractLayer):
         self.n_invariants = n_invariants
         mixing_weights = torch.zeros(self.nf_out, self.n_invariants, self.nf_out)
         self.invars = HopInvariantLayer(n_max=n_max, l_max=l_max)
+        self.mixing_weights = torch.nn.Parameter(mixing_weights)
+        torch.nn.init.xavier_normal_(self.mixing_weights)
+        if group_norm:
+            self.group_norm = torch.nn.GroupNorm(self.n_invariants, self.n_invariants * self.nf_out, eps=group_norm_eps, affine=True)
+        else:
+            self.group_norm = None
+
+    def forward(self, in_features, pair_first, pair_second, dist_pairs, tensor_rhats):
+
+        features_out_selfpart = self.selfint(in_features)
+
+        n_atoms_real = in_features.shape[0]
+        n_pair, n_tensor_comp = tensor_rhats.shape
+
+        # set up sensitivity for message passing
+        sense_scalar = self.sensitivity(dist_pairs)
+        sensitivity = sense_scalar.unsqueeze(1) * tensor_rhats.unsqueeze(2)
+        sense_flat = sensitivity.reshape(n_pair, n_tensor_comp * self.n_dist)
+
+        env_features = custom_kernels.envsum(sense_flat, in_features, pair_first, pair_second)
+
+        # apply weights to tensor features
+        weights_rs = torch.reshape(self.int_weights.permute(0, 2, 1), (self.n_dist * self.nf_in, self.nf_out))
+        env_rs = env_features.reshape(n_atoms_real * n_tensor_comp, self.n_dist * self.nf_in)
+        tensor_features = torch.mm(env_rs, weights_rs)
+        tensor_features = tensor_features.reshape(n_atoms_real, n_tensor_comp, self.nf_out)
+
+        # move tensor features to last dimension and compute invariants
+        # shape n_atom, n_feat, n_tensor
+        tensor_features = tensor_features.permute(0, 2, 1).reshape(n_atoms_real * self.nf_out, n_tensor_comp)
+
+        invariants = self.invars(tensor_features)
+        invariants = invariants.reshape(n_atoms_real, self.nf_out, self.n_invariants)
+
+        if self.group_norm:
+            # Group norm operates on n_batch, n_groups*n_features_per_group,
+            # so the group index (invariant index) should come first.
+            invariants = invariants.permute(0, 2, 1).reshape(n_atoms_real, self.n_invariants * self.nf_out)
+            normalized_invariants = self.group_norm(invariants)
+            # Restore shape/order; Put invariants last again.
+            normalized_invariants = normalized_invariants.reshape(n_atoms_real, self.n_invariants, self.nf_out)
+            normalized_invariants = normalized_invariants.permute(0, 2, 1)
+        else:
+            normalized_invariants = invariants
+
+        normalized_invariants = normalized_invariants.reshape(n_atoms_real, self.nf_out * self.n_invariants)
+
+        # (n_a,n_f*n_i) @ (n_f*n_i,n_f) -> (n_a, n_f)
+        mixing_features = normalized_invariants @ self.mixing_weights.reshape(-1, self.nf_out)
+
+        total_out = mixing_features + features_out_selfpart
+
+        return total_out
+
+
+class TKHOPInteractionLayer(InteractLayer):
+    def __init__(self, *args, n_max, l_max, group_norm, group_norm_eps, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if l_max < 0:
+            raise ValueError(f"{l_max=} must be a non-negative integer.")
+
+        if n_max <= 0:
+            raise ValueError(f"{n_max=} must be a positive integer.")
+        elif n_max == 1:
+            if l_max > 0:
+                warnings.warn(f"If variable n_max==1, l_max>0 is unneeded. ({n_max=},{l_max=})")
+        elif n_max > 1:
+            if l_max == 0:
+                warnings.warn(f"If variable n_max>1, l_max>1 is required for" f" non-trivial many-body interactions. ({n_max=},{l_max=})")
+            if n_max > 2 and l_max == 1:
+                warnings.warn(f"If variable l_max==1, n_max>2 is redundant. ({n_max=},{l_max=})")
+
+        try:
+            n_invariants = _invariant_counts[n_max, l_max]
+        except KeyError:
+            raise ValueError(f"HIP-HOP parameters {l_max=},{n_max=} implementation not presently available.")
+
+        if n_invariants == 1:
+            warnings.warn(
+                f"Number of invariants is only 1 for HIP-HOP with ({n_max=},{l_max=}); for these settings"
+                f" it may be preferable to use vanilla HIP-NN."
+            )
+
+        self.n_invariants = n_invariants
+        mixing_weights = torch.zeros(self.nf_out, self.n_invariants, self.nf_out)
+        self.invars = TKHopInvariantLayer(n_max=n_max, l_max=l_max)
         self.mixing_weights = torch.nn.Parameter(mixing_weights)
         torch.nn.init.xavier_normal_(self.mixing_weights)
         if group_norm:

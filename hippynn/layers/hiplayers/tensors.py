@@ -330,3 +330,32 @@ class HopInvariantLayer(torch.nn.Module):
                     assert t is not None
         C = self.cmaps
         return calc_invariants(self.l_max, self.n_max, tensor_features, C)
+
+
+class TKHopInvariantLayer(torch.nn.Module):
+    def __init__(self, n_max, l_max, _cmaps=cmaps):
+        super().__init__()
+        self.l_max = l_max
+        self.n_max = n_max
+        self.cmaps = torch.nn.ParameterList(list(_cmaps.values()))
+        for c in self.cmaps:
+            c.requires_grad_(False)
+        if self.n_max < 1 or self.n_max > 4:
+            raise ValueError(f"Bad n: {n_max}")
+
+        if self.l_max < 0 or self.l_max > 3:
+            raise ValueError(f"Bad l: {l_max}")
+
+    def extra_repr(self):
+        return f"n_max={self.n_max}, l_max={self.l_max}"
+
+    def forward(self, tensor_features):
+        s = v = q = t = True
+        if self.l_max > 0:
+            assert v is not None
+            if self.l_max > 1:
+                assert q is not None
+                if self.l_max > 2:
+                    assert t is not None
+        C = self.cmaps
+        return calc_invariants(self.l_max, self.n_max, tensor_features, C)

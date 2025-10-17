@@ -16,6 +16,13 @@ if [ -z "$DATA_SIZE" ]; then
     exit 1
 fi
 
+DEFAULT_MODEL_NAME="HipHopnn"
+if [ -z "$2" ]; then
+    MODEL_NAME=$DEFAULT_MODEL_NAME
+else
+    MODEL_NAME=$2
+fi
+
 
 # Set single NVIDIA GPU
 echo "Starting training job on $(hostname) with job ID: $SLURM_JOB_ID, partition: $SLURM_JOB_PARTITION"
