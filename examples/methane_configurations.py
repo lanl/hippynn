@@ -18,10 +18,11 @@ BEFORE RUNNING:
 
 NOTE: The methane.extxyz file will be very slow to read, so this script only uses first 1000
 configurations for training and subsequent 80,000 for testing. You can adjust this with 
-the ``data_size`` variable. If you want to read the methane.extxyz file repeatedly, I strongly 
-suggest to first convert it into another format (eg., .traj, .npz) that will be faster to read.
-You can do this by setting ``random_subset = True`` below, which will create a methane.traj file
-automatically for future use. But this conversion may take a while (~1hr) the first time. 
+the ``data_size`` variable and by setting ``random_subset = True`` below. If you want to read
+the methane.extxyz file repeatedly, I strongly suggest to first convert it into another format
+(eg., .traj, .npz) that will be faster to read. You can do this by setting ``random_subset = True``
+below, which will create a methane.traj file automatically for future use. But this conversion
+may take a while (~1hr)."
 """
 
 import os
