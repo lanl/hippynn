@@ -40,17 +40,10 @@ from hippynn.plotting import PlotMaker, Hist2D, SensitivityPlot
 from hippynn.pretraining import set_e0_values
 from hippynn.tools import active_directory
 
-# ----- Override default units of Atom -----
-
-class AtomsMethan(Atoms):
-    def get_total_energy(self, **kwargs):
-        e_hartrees = super().get_total_energy(**kwargs) 
-        return e_hartrees * 627.5096080305927   # Hartrees --> kcal/mol
-    def get_forces(self, **kwargs):
-        forces = super().get_forces(**kwargs)
-        return forces * 51.42208619083232 * 23.060541945329334 # Hartrees/Bohr --> eV/Ang --> kcal/mol/Ang 
-    
-
+# ----- Constants -----
+TOTAL_NUM_SAMPLES = 7_732_488 
+TEST_SET_SIZE = 80_000
+ENERGY_MEAN = -25042.327220945674
 
 # ----- User parameters -----
 seed = 2025
@@ -60,15 +53,69 @@ processed_src = data_root / "methane.traj"
 model_save_folder = Path(__file__).parents[1] / Path("TEST_METHANE_MODEL")
 n_epochs = 10_000  # reduce to dececrease the run time of the script
 data_size = 1000
+random_subset = False  # whether to use a random subset of data or the first data_size sample
+
+# ----- Prepare data -----
+def prepare_data(data_src, train_size, test_size, random_subset=random_subset): 
+    assert os.path.exists(data_src), f"Data source {data_src} does not exist! Please download methane.extxyz from https://archive.materialscloud.org/records/kz78r-6nx43 !"
+    train_dict = {
+        "numbers": [],
+        "positions": [],
+        "forces": [],
+        "energy": [],
+    }
+    test_dict = {
+        "numbers": [],
+        "positions": [],
+        "forces": [],
+        "energy": [],
+    }
+    if not random_subset:
+        generator = ase.io.iread(data_src)
+    else: 
+        if os.path.exists(processed_src):
+            data_src = processed_src  # use the .traj file if it exists
+        else:
+            print(f"Converting {data_src} to {processed_src} for faster reading next time, this may take a while ~1hr...")
+            frames = ase.io.read(data_src, index=':')
+            ase.io.write(processed_src, frames)
+            data_src = processed_src
+            del frames
+
+    for idx, frame in enumerate(generator):
+        species = frame.get_atomic_numbers()
+        positions = frame.get_positions()
+        forces = frame.get_forces()
+        energy = frame.get_total_energy()
+        # Change units 
+        forces = forces * 51.42208619083232 * 23.060541945329334  # Hartrees/Bohr --> eV/Ang --> kcal/mol/Ang
+        energy = energy * 627.5096080305927  # Hartrees --> kcal/mol
+        # Shift energy mean 
+        energy -= ENERGY_MEAN
+        if idx < train_size:
+            train_dict["numbers"].append(species)
+            train_dict["positions"].append(positions)
+            train_dict["forces"].append(forces)
+            train_dict["energy"].append(energy)
+        elif idx < train_size + test_size:
+            test_dict["numbers"].append(species)
+            test_dict["positions"].append(positions)
+            test_dict["forces"].append(forces)
+            test_dict["energy"].append(energy)
+        else:
+            break
+    # Convert to arrays
+    for key in train_dict:
+        if key != "numbers": 
+            train_dict[key] = np.array(train_dict[key], dtype=np.float32)
+            test_dict[key] = np.array(test_dict[key], dtype=np.float32)
+    return train_dict, test_dict
 
 # network_class = Hipnn # Original HIP-NN
 # network_class = HipnnVec # HIP-NN-TS, l=1
 # network_class = HipnnQuad # HIP-NN-TS, l=2
 network_class = HipHopnn  # HIP-HOP model with defaults with n = 4 and l = 3
 
-# ----- Constants -----
-TOTAL_NUM_SAMPLES = 7_732_488 
-TEST_SET_SIZE = 80_000
 
 # ---- Dataset ----
 # Load data and process if not already done
@@ -76,7 +123,6 @@ TEST_SET_SIZE = 80_000
 if os.path.exists(processed_src):
     data_src = processed_src  # use the .traj file if it exists
 else:
-    assert os.path.exists(data_src), f"Data source {data_src} does not exist! Please download methane.extxyz from https://archive.materialscloud.org/records/kz78r-6nx43 !"
     print(f"Converting {data_src} to {processed_src} for faster reading next time, this may take a while ~1hr...")
     frames = ase.io.read(data_src, index=':')
     ase.io.write(processed_src, frames)
@@ -197,33 +243,24 @@ training_modules, controller, metric_tracker = setup_training(
     setup_params=experiment_params,
 )
 
-indices = np.arange(TOTAL_NUM_SAMPLES)
-
-np.random.seed(seed)
-np.random.shuffle(indices)
-
-train_indices = indices[:data_size]
-test_indices = indices[data_size:data_size + TEST_SET_SIZE]
 
 # ----- Load data -----
-with ase.io.trajectory.Trajectory(processed_src) as raw_data:
-    train_iterable = [AtomsMethan(raw_data[idx]) for idx in train_indices]
-    test_iterable = [AtomsMethan(raw_data[idx]) for idx in test_indices]
+train_dict, test_dict = prepare_data(data_src, data_size, TEST_SET_SIZE)
 
 
-train_database = hippynn.databases.AseDatabaseIterable(
-    iterable=train_iterable,
+train_database = hippynn.databases.Database(
+    arr_dict=train_dict,
     seed=seed,
-    pin_memory=False,
+    pin_memory=True,
     test_size=0.1,
     valid_size=0.1,
     **db_info,
 )
 
-test_database = hippynn.databases.AseDatabaseIterable(
-    iterable=test_iterable,
+test_database = hippynn.databases.Database(
+    arr_dict=test_dict,
     seed=seed + 1,
-    pin_memory=False,
+    pin_memory=True,
     **db_info,
 )
 
