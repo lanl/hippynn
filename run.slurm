@@ -6,7 +6,7 @@
 #SBATCH --gres=gpu:1               # Number of GPUs
 #SBATCH --cpus-per-task=16         # CPUs per task
 #SBATCH --mem=64G                  # RAM
-#SBATCH --array=0-2   # Run jobs oversplit 
+#SBATCH --array=0-9   # Run jobs oversplit 
 
 # Check the number of parameters 
 # Parse the arguments
@@ -45,4 +45,4 @@ fi
 echo "Running training script. Python=`which python`"
 # Set PYTHONPATH to the project root
 export PYTHONPATH=$(pwd)
-CUDA_VISIBLE_DEVICES=0 python ./examples/methane_configurations.py --data-split $SLURM_ARRAY_TASK_ID --data-size $DATA_SIZE
+CUDA_VISIBLE_DEVICES=0 python ./examples/methane_configurations.py --data-split $SLURM_ARRAY_TASK_ID --data-size $DATA_SIZE --model-name "$MODEL_NAME"
