@@ -1,8 +1,8 @@
 """
 This script is designed to accompany
-Allen, A. E. A., Shinkle, E., Bujack, R., & Lubbers, N. (2025). Optimal
-invariant bases for atomistic machine learning. arXiv preprint arXiv:2503.23515.
-https://arxiv.org/abs/2503.23515
+Allen, A. E. A., Shinkle, E., Bujack, R., & Lubbers, N. (2025). 
+Optimal invariant bases for atomistic machine learning. 
+arXiv preprint arXiv:2503.23515. https://arxiv.org/abs/2503.23515
 
 In the above paper, a methane dataset of ~7M configurations is used to test the expressive
 capacity of different HIP-NN variants on different sizes of data. We find that for small 
@@ -16,10 +16,12 @@ BEFORE RUNNING:
 3. Place the resulting file in a folder called datasets/ at the same level as hippynn/
    or change ``data_src`` below
 
-NOTE: The methane.extxyz file will be very slow to read, so this script only uses 100,000
-configurations. You can adjust this with the ``data_size`` variable. If you want to
-read the methane.extxyz file repeatedly, I strongly suggest to first convert it into
-another format (eg., .traj, .npz) that will be faster to read.
+NOTE: The methane.extxyz file will be very slow to read, so this script only uses first 1000
+configurations for training and subsequent 80,000 for testing. You can adjust this with 
+the ``data_size`` variable. If you want to read the methane.extxyz file repeatedly, I strongly 
+suggest to first convert it into another format (eg., .traj, .npz) that will be faster to read.
+You can do this by setting ``random_subset = True`` below, which will create a methane.traj file
+automatically for future use. But this conversion may take a while (~1hr) the first time. 
 """
 
 import os
@@ -89,6 +91,7 @@ def prepare_data(data_src, train_size, test_size, random_subset=random_subset):
             data_src = processed_src  # use the .traj file if it exists
         else:
             print(f"Converting {data_src} to {processed_src} for faster reading next time, this may take a while ~1hr...")
+            print("Use random_subset = False to avoid this.")
             frames = ase.io.read(data_src, index=':')
             ase.io.write(processed_src, frames)
             data_src = processed_src
