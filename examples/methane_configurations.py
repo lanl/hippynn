@@ -19,16 +19,14 @@ BEFORE RUNNING:
 NOTE: The methane.extxyz file will be very slow to read, so this script only uses 100,000
 configurations. You can adjust this with the ``data_size`` variable. If you want to
 read the methane.extxyz file repeatedly, I strongly suggest to first convert it into
-another format (eg., .npz) that will be faster to read.
+another format (eg., .traj, .npz) that will be faster to read.
 """
 
 import os
-from pathlib import Path
-
 import ase
-from ase import Atoms, units
 import torch
 import numpy as np
+from pathlib import Path
 
 import hippynn
 from hippynn.graphs import inputs, targets, physics
@@ -47,13 +45,27 @@ ENERGY_MEAN = -25042.327220945674
 
 # ----- User parameters -----
 seed = 2025
-data_root = Path(__file__).parents[2] / "hippynn" /"datasets"  
+data_root = Path(__file__).parents[2] /"datasets"  
 data_src = data_root / "methane.extxyz"
 processed_src = data_root / "methane.traj"
 model_save_folder = Path(__file__).parents[1] / Path("TEST_METHANE_MODEL")
 n_epochs = 10_000  # reduce to dececrease the run time of the script
 data_size = 1000
-random_subset = False  # whether to use a random subset of data or the first data_size sample
+random_subset = True  # whether to use a random subset of data or the first data_size sample
+# network_class = Hipnn # Original HIP-NN
+# network_class = HipnnVec # HIP-NN-TS, l=1
+# network_class = HipnnQuad # HIP-NN-TS, l=2
+network_class = HipHopnn  # HIP-HOP model with defaults with n = 4 and l = 3
+network_params = {
+    "possible_species": [0, 1, 6],
+    "n_features": 32,
+    "n_sensitivities": 20,
+    "dist_soft_min": 0.4,
+    "dist_soft_max": 9.0,
+    "dist_hard_max": 10.3,  # diagonal of 6x6x6 cube
+    "n_interaction_layers": 1,
+    "n_atom_layers": 3,
+}
 
 # ----- Prepare data -----
 def prepare_data(data_src, train_size, test_size, random_subset=random_subset): 
@@ -81,6 +93,11 @@ def prepare_data(data_src, train_size, test_size, random_subset=random_subset):
             ase.io.write(processed_src, frames)
             data_src = processed_src
             del frames
+        indices = np.arange(TOTAL_NUM_SAMPLES)
+        np.random.seed(seed)
+        np.random.shuffle(indices)
+        with ase.io.trajectory.Trajectory(processed_src) as raw_data:
+            generator = [raw_data[i] for i in indices[:data_size + TEST_SET_SIZE]]
 
     for idx, frame in enumerate(generator):
         species = frame.get_atomic_numbers()
@@ -111,40 +128,11 @@ def prepare_data(data_src, train_size, test_size, random_subset=random_subset):
             test_dict[key] = np.array(test_dict[key], dtype=np.float32)
     return train_dict, test_dict
 
-# network_class = Hipnn # Original HIP-NN
-# network_class = HipnnVec # HIP-NN-TS, l=1
-# network_class = HipnnQuad # HIP-NN-TS, l=2
-network_class = HipHopnn  # HIP-HOP model with defaults with n = 4 and l = 3
-
-
-# ---- Dataset ----
-# Load data and process if not already done
-# Source: https://archive.materialscloud.org/records/kz78r-6nx43
-if os.path.exists(processed_src):
-    data_src = processed_src  # use the .traj file if it exists
-else:
-    print(f"Converting {data_src} to {processed_src} for faster reading next time, this may take a while ~1hr...")
-    frames = ase.io.read(data_src, index=':')
-    ase.io.write(processed_src, frames)
-    data_src = processed_src
-    del frames
-
 # ----- Construct model -----
 torch.random.manual_seed(seed)
 
 species = inputs.SpeciesNode(name="species", db_name="numbers")
 positions = inputs.PositionsNode(name="positions", db_name="positions")
-
-network_params = {
-    "possible_species": [0, 1, 6],
-    "n_features": 32,
-    "n_sensitivities": 20,
-    "dist_soft_min": 0.4,
-    "dist_soft_max": 9.0,
-    "dist_hard_max": 10.3,  # diagonal of 6x6x6 cube
-    "n_interaction_layers": 1,
-    "n_atom_layers": 3,
-}
 
 network = network_class("network", (species, positions), module_kwargs=network_params)
 henergy = targets.HEnergyNode(
@@ -245,17 +233,18 @@ training_modules, controller, metric_tracker = setup_training(
 
 
 # ----- Load data -----
-train_dict, test_dict = prepare_data(data_src, data_size, TEST_SET_SIZE)
-
+train_dict, test_dict = prepare_data(data_src, 
+                                     data_size,
+                                     TEST_SET_SIZE)
 
 train_database = hippynn.databases.Database(
     arr_dict=train_dict,
     seed=seed,
     pin_memory=True,
-    test_size=0.1,
     valid_size=0.1,
     **db_info,
 )
+train_database.send_to_device(device)
 
 test_database = hippynn.databases.Database(
     arr_dict=test_dict,
@@ -263,10 +252,8 @@ test_database = hippynn.databases.Database(
     pin_memory=True,
     **db_info,
 )
-
 test_database.split_the_rest("all")
-
-train_database.send_to_device(device)
+test_database.send_to_device(device)
 
 set_e0_values(henergy, train_database, trainable_after=False)
 
@@ -301,5 +288,3 @@ with active_directory(model_save_folder):
         batch_size=controller.eval_batch_size,
         metric_tracker=metric_tracker,
     )
-
-
