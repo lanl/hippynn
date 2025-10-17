@@ -85,7 +85,7 @@ def get_parameters():
     parser.add_argument('--data-size', type=int, default=1000,
                        help='Number of configurations to use from dataset')
     parser.add_argument('--test-data', type=str, default="./datasets/test_data_tomas.npz",)
-    parser.add_argument('--model-name', type=str, default="HipHopnn",
+    parser.add_argument('--model-name', type=str, default="HipHopnn_l2_n3",
                         help='Model architecture to use (HipHopnn, HipNNTSnn, HipNN)')
     args = parser.parse_args()
 
@@ -98,12 +98,26 @@ def get_parameters():
 # Get parameters from command line
 params = get_parameters()
 
+network_params = {
+    "possible_species": [0, 1, 6],
+    "n_features": 32, #42,
+    "n_sensitivities": 20,
+    "dist_soft_min": 0.4,
+    "dist_soft_max": 9.0,
+    "dist_hard_max": 10.3,  # diagonal of 6x6x6 cube
+    "n_interaction_layers": 1,
+    "n_atom_layers": 3,
+    # TODO: Add l_max and n_max
+    "l_max": 2,
+    "n_max": 3,
+}
+
 # Extract individual parameters
 seed = params.seed
 train_data = f"{params.train_file_name}_{params.data_size}_{params.data_split}.npz"
 model_save_folder = params.model_save_folder
 n_epochs = params.n_epochs
-assert params.model_name in ["HipHopnn"], "We currently only support HipHopnn"
+assert params.model_name in ["HipHopnn_l2_n3"], "We currently only support HipHopnn_l2_n3"
 network_class = HipHopnn  # HIP-HOP model with defaults with n = 4 and l = 3
 data_size = params.data_size
 test_data = params.test_data
@@ -117,16 +131,6 @@ with wandb.init(project="methane-hiphop", settings=wandb_settings, entity="karel
     species = inputs.SpeciesNode(name="species", db_name="numbers")
     positions = inputs.PositionsNode(name="positions", db_name="positions")
 
-    network_params = {
-        "possible_species": [0, 1, 6],
-        "n_features": 32,
-        "n_sensitivities": 20,
-        "dist_soft_min": 0.4,
-        "dist_soft_max": 9.0,
-        "dist_hard_max": 10.3,  # diagonal of 6x6x6 cube
-        "n_interaction_layers": 1,
-        "n_atom_layers": 3,
-    }
     for key, val in network_params.items():
         wandb_run.config[key] = val
 
