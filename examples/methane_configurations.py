@@ -30,7 +30,7 @@ from pathlib import Path
 
 import hippynn
 from hippynn.graphs import inputs, targets, physics
-from hippynn.graphs.nodes.networks import HipHopnn
+from hippynn.graphs.nodes.networks import HipHopnn, Hipnn, HipnnVec, HipnnQuad
 from hippynn.experiment import setup_training, train_model, test_model
 from hippynn.graphs import loss
 from hippynn.experiment.controllers import RaiseBatchSizeOnPlateau, PatienceController
@@ -45,7 +45,7 @@ ENERGY_MEAN = -25042.327220945674
 
 # ----- User parameters -----
 seed = 2025
-data_root = Path(__file__).parents[2] /"datasets"  
+data_root = Path(__file__).parents[2] / "datasets"
 data_src = data_root / "methane.extxyz"
 processed_src = data_root / "methane.traj"
 model_save_folder = Path(__file__).parents[1] / Path("TEST_METHANE_MODEL")
@@ -241,6 +241,7 @@ train_database = hippynn.databases.Database(
     arr_dict=train_dict,
     seed=seed,
     pin_memory=True,
+    test_size=0.1,
     valid_size=0.1,
     **db_info,
 )
