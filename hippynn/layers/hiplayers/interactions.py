@@ -368,37 +368,33 @@ class HOPInteractionLayer(InteractLayer):
 
 
 class TKHOPInteractionLayer(InteractLayer):
-    def __init__(self, *args, n_max, l_max, group_norm, group_norm_eps, **kwargs):
+    def __init__(self, *args, inv_list, l_max, group_norm, group_norm_eps, **kwargs):
         super().__init__(*args, **kwargs)
 
         if l_max < 0:
             raise ValueError(f"{l_max=} must be a non-negative integer.")
-
-        if n_max <= 0:
-            raise ValueError(f"{n_max=} must be a positive integer.")
-        elif n_max == 1:
-            if l_max > 0:
-                warnings.warn(f"If variable n_max==1, l_max>0 is unneeded. ({n_max=},{l_max=})")
-        elif n_max > 1:
-            if l_max == 0:
-                warnings.warn(f"If variable n_max>1, l_max>1 is required for" f" non-trivial many-body interactions. ({n_max=},{l_max=})")
-            if n_max > 2 and l_max == 1:
-                warnings.warn(f"If variable l_max==1, n_max>2 is redundant. ({n_max=},{l_max=})")
+        
+        if inv_list is None:
+            assert l_max == 3, "If inv_list is None, l_max must be 3 to use all invariants."
+            warnings.warn(f"inv_list is None; defaulting to all invariants.")
+            self.inv_list = list(range(13))
+        else:
+            self.inv_list = inv_list
 
         try:
-            n_invariants = _invariant_counts[n_max, l_max]
+            n_invariants = len(self.inv_list)
         except KeyError:
-            raise ValueError(f"HIP-HOP parameters {l_max=},{n_max=} implementation not presently available.")
+            raise ValueError(f"HIP-HOP parameters {l_max=},{self.inv_list=} implementation not presently available.")
 
         if n_invariants == 1:
             warnings.warn(
-                f"Number of invariants is only 1 for HIP-HOP with ({n_max=},{l_max=}); for these settings"
+                f"Number of invariants is only 1 for HIP-HOP with ({self.inv_list=},{l_max=}); for these settings"
                 f" it may be preferable to use vanilla HIP-NN."
             )
 
         self.n_invariants = n_invariants
         mixing_weights = torch.zeros(self.nf_out, self.n_invariants, self.nf_out)
-        self.invars = TKHopInvariantLayer(n_max=n_max, l_max=l_max)
+        self.invars = TKHopInvariantLayer(inv_list=self.inv_list, l_max=l_max)
         self.mixing_weights = torch.nn.Parameter(mixing_weights)
         torch.nn.init.xavier_normal_(self.mixing_weights)
         if group_norm:

@@ -85,7 +85,7 @@ def get_parameters():
     parser.add_argument('--data-size', type=int, default=1000,
                        help='Number of configurations to use from dataset')
     parser.add_argument('--test-data', type=str, default="./datasets/test_data_tomas.npz",)
-    parser.add_argument('--model-name', type=str, default="HipHopnn_l2_n3_f42",
+    parser.add_argument('--model-name', type=str, default="TKHipHopnn_l3_n0,1,2,3,4,5,6,7,10,11,12",
                         help='Model architecture to use (HipHopnn, HipNNTSnn, HipNN)')
     args = parser.parse_args()
 
@@ -128,7 +128,7 @@ elif params.model_name.startswith("TKHipHopnn"):
             if part.startswith("l"):
                 network_params["l_max"] = int(part[1:])
             elif part.startswith("n"):
-                network_params["n_max"] = int(part[1:])
+                network_params["inv_list"] = list(map(int, part[1:].split(",")))
             elif part.startswith("f"):
                 network_params["n_features"] = int(part[1:])
 else: 

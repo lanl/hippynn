@@ -52,13 +52,13 @@ class HipHopNNModule(Hipnn):
 
 class TKHipHopNNModule(Hipnn):
     _interaction_class = TKHOPInteractionLayer
-    _interaction_kwargs = ("l_max", "n_max", "group_norm", "group_norm_eps")
+    _interaction_kwargs = ("l_max", "inv_list", "group_norm", "group_norm_eps")
 
-    def __init__(self, *args, l_max=3, n_max=4, group_norm=True, group_norm_eps=1e-5, **kwargs):
+    def __init__(self, *args, l_max=3, inv_list=None, group_norm=True, group_norm_eps=1e-5, **kwargs):
         warnings.warn("HIP-HOP-NN is still in a beta state: " "Details, defaults, and API are still subject to change.")
-        super().__init__(*args, l_max=l_max, n_max=n_max, group_norm=group_norm, group_norm_eps=group_norm_eps, **kwargs)
+        super().__init__(*args, l_max=l_max, inv_list=inv_list, group_norm=group_norm, group_norm_eps=group_norm_eps, **kwargs)
         self.l_max = l_max
-        self.n_max = n_max
+        self.inv_list = inv_list
         self.tensor_extractor = TensorExtractor(l_max=l_max)
 
     def extra_repr(self):
