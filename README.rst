@@ -75,7 +75,7 @@ then proceed to install hippynn.
 Install hippynn from source:
 ----------------------------
 
-For detailed instructions, see `the documentation section on installation <doc_install>`_.
+For detailed instructions, see `the documentation section on installation <doc_install_>`_.
 
 .. _doc_install: https://lanl.github.io/hippynn/installation.html
 
