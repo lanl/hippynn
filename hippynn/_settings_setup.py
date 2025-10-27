@@ -75,7 +75,13 @@ def progress_handler(prog_setting: Union[str, float, bool, None]):
 
     return partial(TQDM_PROGRESS, mininterval=prog_setting, leave=False)
 
-
+def triton_and_cuda_available():
+    try:
+        import triton
+        import torch
+        return torch.cuda.is_available()
+    except ImportError:
+        return False
 
 def kernel_handler(kernel_string):
     """
@@ -119,6 +125,9 @@ DEFAULT_SETTINGS = {
     "TIMEPLOT_AUTOSCALING": (True, bool_or_strtobool),
     "PYTORCH_GPU_MEM_FRAC": (1.0, float),
     "COMM_FEATURES_LAMMPS": (True, bool_or_strtobool),
+    "USE_POLYNOMIAL_INVARIANTS": (triton_and_cuda_available(), bool_or_strtobool),
+    "USE_TENSOR_MESSAGE_PASSING": (triton_and_cuda_available(), bool_or_strtobool),
+    "TENSOR_MESSAGE_PASSING_GRAD_ONLY": (False, bool_or_strtobool),
 }
 
 INITIAL_SETTINGS = {k: handler(default) for k, (default, handler) in DEFAULT_SETTINGS.items()}
