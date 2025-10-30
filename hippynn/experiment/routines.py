@@ -210,8 +210,8 @@ def setup_training(
         model, loss, evaluator, optimizer, setup_params.device or tools.device_fallback()
     )
 
-    metrics = MetricTracker(evaluator.loss_names,
-                            stopping_key=controller.stopping_key)
+    metrics = MetricTracker(evaluator.loss_names, controller.stopping_key)
+
     return training_modules, controller, metrics
 
 

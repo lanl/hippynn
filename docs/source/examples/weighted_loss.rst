@@ -12,13 +12,13 @@ to construct a weighted loss, we can use the usual ``of_node`` method with a wei
 This is shorthand for creating an :class:`~hippynn.graphs.nodes.base.base.InputNode` with the database index state,
 and then feeding it into the ``of_node`` method::
 
-    sample_weights = hippynn.graphs.inputs.InputNode(db_name="weight_name", index_state=hippynn.graphs.IdxType.Molecules)
+    sample_weights = hippynn.graphs.inputs.InputNode(db_name="weight_name", index_state=hippynn.graphs.IdxType.Systems)
     weighted_mse_target = hippynn.graphs.loss.WeightedMSELoss.of_node(target, sample_weights)
 
 You may want to manually create the weight ``InputNode`` if you're re-using the same weights multiple times,
 as it will prevent multiple references to the same quantity.
-We use :class:`~hippynn.graphs.indextypes.IdxType.Molecules` in the case of a system-valued target such as energy.
-In the case of an atom-valued target such as charge, use :class:`~hippynn.graphs.indextypes.IdxType.MolAtom`.
+We use :class:`~hippynn.graphs.indextypes.IdxType.Systems` in the case of a system-valued target such as energy.
+In the case of an atom-valued target such as charge, use :class:`~hippynn.graphs.indextypes.IdxType.SysAtom`.
 
 
 
@@ -42,7 +42,7 @@ For a fuller example, see the snippet below which mimics the ``/examples/barebon
     species = inputs.SpeciesNode(db_name="Z")
     positions = inputs.PositionsNode(db_name="R")
 
-    sample_weights = inputs.InputNode(db_name="W", index_state=hippynn.graphs.IdxType.Molecules)
+    sample_weights = inputs.InputNode(db_name="W", index_state=hippynn.graphs.IdxType.Systems)
 
     network = networks.Hipnn("hipnn_model", (species, positions), module_kwargs=network_params)
     henergy = targets.HEnergyNode("HEnergy", network, db_name="T")

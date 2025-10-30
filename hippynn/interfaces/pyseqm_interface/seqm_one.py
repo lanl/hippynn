@@ -119,8 +119,8 @@ class SEQM_One_All(SEQM_All):
             P0=single_particle_density_matrix,
         )
 
-        n_molecule, n_atom = species.shape
-        atomic_charge = self.const.tore[species] - P.diagonal(dim1=1, dim2=2).reshape(n_molecule, n_atom, -1).sum(dim=2)
+        n_systems, n_atom = species.shape
+        atomic_charge = self.const.tore[species] - P.diagonal(dim1=1, dim2=2).reshape(n_systems, n_atom, -1).sum(dim=2)
 
         return (
             Etot.reshape(-1, 1),
@@ -142,23 +142,23 @@ from hippynn.graphs.nodes.base import MultiNode, AutoKw, find_unique_relative, E
 
 
 class NotConvergedNode(InputNode):
-    _index_state = IdxType.Molecules
+    index_state = IdxType.Systems
     input_type_str = "notconverged"
 
 
 class DensityMatrixNode(InputNode):
-    _index_state = IdxType.Molecules
+    index_state = IdxType.Systems
     input_type_str = "single_particle_density_matrix"
 
 
 class SEQM_One_EnergyNode(ExpandParents, AutoKw, MultiNode):
-    _input_names = "par_atom", "Positions", "Species", "single_particle_density_matrix"
-    _output_names = "mol_energy", "Etot_m_Eiso"
-    _main_output = "Etot_m_Eiso"
-    _output_index_states = (IdxType.Molecules,) * len(_output_names)
-    _auto_module_class = SEQM_One_Energy
+    input_names = "par_atom", "Positions", "Species", "single_particle_density_matrix"
+    output_names = "mol_energy", "Etot_m_Eiso"
+    main_output_name = "Etot_m_Eiso"
+    output_index_states = (IdxType.Systems,) * len(output_names)
+    auto_module_class = SEQM_One_Energy
 
-    @_parent_expander.match(Network, DensityMatrixNode)
+    @parent_expander.match(Network, DensityMatrixNode)
     def expand0(self, network, single_particle_density_matrix, seqm_parameters, decay_factor=1.0e-2, **kwargs):
 
         n_target_peratom = len(seqm_parameters["learned"])
@@ -177,9 +177,9 @@ class SEQM_One_EnergyNode(ExpandParents, AutoKw, MultiNode):
 
         return par_atom.main_output, positions, species, single_particle_density_matrix
 
-    _parent_expander.assertlen(4)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Atoms, None, None, None)
+    parent_expander.assertlen(4)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.Atoms, None, None, None)
 
     def __init__(self, name, parents, seqm_parameters, decay_factor=1.0e-2, module="auto", **kwargs):
         parents = self.expand_parents(parents, seqm_parameters=seqm_parameters, decay_factor=decay_factor, **kwargs)
@@ -188,8 +188,8 @@ class SEQM_One_EnergyNode(ExpandParents, AutoKw, MultiNode):
 
 
 class SEQM_One_AllNode(SEQM_One_EnergyNode):
-    _input_names = "par_atom", "Positions", "Species", "single_particle_density_matrix"
-    _output_names = (
+    input_names = "par_atom", "Positions", "Species", "single_particle_density_matrix"
+    output_names = (
         "mol_energy",
         "Etot_m_Eiso",
         "orbital_energies",
@@ -198,6 +198,6 @@ class SEQM_One_AllNode(SEQM_One_EnergyNode):
         "isolated_atom_energy",
         "atomic_charge",
     )
-    _main_output = "Etot_m_Eiso"
-    _output_index_states = (IdxType.Molecules,) * len(_output_names)
-    _auto_module_class = SEQM_One_All
+    main_output_name = "Etot_m_Eiso"
+    output_index_states = (IdxType.Systems,) * len(output_names)
+    auto_module_class = SEQM_One_All

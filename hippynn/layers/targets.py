@@ -35,12 +35,12 @@ class HEnergy(torch.nn.Module):
             torch.nn.Linear(nf, n_target, bias=bias) for nf, bias in zip(feature_sizes, biases)
         )
 
-    def forward(self, all_features, mol_index, n_molecules):
+    def forward(self, all_features, system_index, n_systems):
         """
         Pytorch Enforced Forward function
 
         :param: all_features a list of feature tensors:
-        :param: mol_index the molecular index for atoms in the batch
+        :param: system_index the molecular index for atoms in the batch
         :param: total number of molecules in the batch
         :return: Total Energy
         """
@@ -48,7 +48,7 @@ class HEnergy(torch.nn.Module):
             all_features = all_features[1:]
 
         partial_energies = [lay(x) for x, lay in zip(all_features, self.layers)]
-        partial_terms = [self.summer(x, mol_index, n_molecules) for x in partial_energies]
+        partial_terms = [self.summer(x, system_index, n_systems) for x in partial_energies]
         partial_sums = [partial_terms[0]]
         z = partial_terms[0]
         for x in partial_terms[1:]:
@@ -56,18 +56,18 @@ class HEnergy(torch.nn.Module):
             partial_sums.append(z)
 
         total_atomen = sum(partial_energies)
-        total_energies = self.summer(total_atomen, mol_index, n_molecules)
+        total_energies = self.summer(total_atomen, system_index, n_systems)
 
         if self.n_terms > 1:
             partial_esq = [torch.square(x) for x in partial_energies]
             partial_atom_hier = [x / (x + y) for x, y in zip(partial_esq[1:], partial_esq[:-1])]
-            mol_hier = [self.summer(x, mol_index, n_molecules)/self.summer(x+y, mol_index, n_molecules)
+            mol_hier = [self.summer(x, system_index, n_systems)/self.summer(x+y, system_index, n_systems)
                         for x,y in zip(partial_esq[1:], partial_esq[:-1])]
             mol_hier = sum(mol_hier)
             partial_batch_hier = [x.sum() / (x.sum() + y.sum()) for x, y in zip(partial_esq[1:], partial_esq[:-1])]
             batch_hier = sum(partial_batch_hier)
             total_atom_hier = sum(partial_atom_hier)
-            total_hier = self.summer(total_atom_hier, mol_index, n_molecules)
+            total_hier = self.summer(total_atom_hier, system_index, n_systems)
 
         else:
             total_hier = torch.zeros_like(total_energies)
@@ -133,7 +133,7 @@ class LocalChargeEnergy(torch.nn.Module):
         )
         self.summer = indexers.MolSummer()
 
-    def forward(self, charges, all_features, mol_index, n_molecules):
+    def forward(self, charges, all_features, system_index, n_systems):
 
         partial_lin_terms = [lay(x) for x, lay in zip(all_features, self.layers_lin)]
         partial_quad_terms = [lay(x) for x, lay in zip(all_features, self.layers_lin)]
@@ -142,7 +142,7 @@ class LocalChargeEnergy(torch.nn.Module):
         total_quad = sum(partial_quad_terms)
 
         atom_charge_energy = (total_quad * charges) ** 2 + total_lin
-        molecule_charge_energy = self.summer(atom_charge_energy, mol_index, n_molecules)
+        molecule_charge_energy = self.summer(atom_charge_energy, system_index, n_systems)
 
         return molecule_charge_energy, atom_charge_energy
 
@@ -267,7 +267,7 @@ class AtomizationEnergy(torch.nn.Module):
         # see how this operates in the `forward` method.
         self.first_is_interacting = True
 
-    def forward(self, all_features, vacuum_features, encoding, mol_index, n_molecules):
+    def forward(self, all_features, vacuum_features, encoding, system_index, n_systems):
 
         # Don't need the non-interacting features,
         # they contribute zero total for this layer, by definition the any component would cancel.
@@ -284,14 +284,14 @@ class AtomizationEnergy(torch.nn.Module):
         # Compute!
         en_terms = [lay(r) for r, lay in zip(renorm_features, self.layers)]
         total_atomen = sum(en_terms)
-        total_energies = self.summer(total_atomen, mol_index, n_molecules)
+        total_energies = self.summer(total_atomen, system_index, n_systems)
 
         e0 = encoding @ vacuum_energies
         if self.n_terms > 1:
             partial_esq = [x ** 2 for x in en_terms]
             partial_atom_hier = [x / (x + y) for x, y in zip(partial_esq[1:], partial_esq[:-1])]
             total_atom_hier = sum(x for x in partial_atom_hier)
-            total_hier = self.summer(total_atom_hier, mol_index, n_molecules)
+            total_hier = self.summer(total_atom_hier, system_index, n_systems)
         else:
             total_hier = torch.zeros_like(total_energies)
 

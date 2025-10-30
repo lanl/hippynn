@@ -13,8 +13,8 @@ from .atoms import make_search_nodes
 
 # TODO: Rewrite so it can use non-one-hot-encodings?
 
-@register_index_transformer(IdxType.MolAtomAtom, IdxType.Pair)
-def idx_molatomatom_pair(node, hints=None):
+@register_index_transformer(IdxType.SysAtomAtom, IdxType.Pairs)
+def idx_sysatomatom_pairs(node, hints=None):
     purpose = "auto-generating indexing for {}".format(node)
 
     search_nodes = make_search_nodes(node, hints)
@@ -73,12 +73,12 @@ def idx_molatomatom_pair(node, hints=None):
             pair_idx = new_PairType("Pairs", pair_parents, dist_hard_max=origin_pairs.dist_hard_max)
 
     cls = PairReIndexer
-    parents = node, pidxer.mol_index, pidxer.atom_index, pair_idx.pair_first, pair_idx.pair_second
+    parents = node, pidxer.system_index, pidxer.atom_index, pair_idx.pair_first, pair_idx.pair_second
     return parents, cls
 
 
-@register_index_transformer(IdxType.Pair, IdxType.MolAtomAtom)
-def idx_pair_molatomatom(node, hints=None):
+@register_index_transformer(IdxType.Pairs, IdxType.SysAtomAtom)
+def idx_pairs_sysatomatom(node, hints=None):
     purpose = "auto-generating indexing for {}".format(node)
 
     search_nodes = make_search_nodes(node,hints)
@@ -89,9 +89,9 @@ def idx_pair_molatomatom(node, hints=None):
 
         parents = (
             node,
-            padidx.mol_index,
+            padidx.system_index,
             padidx.atom_index,
-            padidx.n_molecules,
+            padidx.n_systems,
             padidx.n_atoms_max,
             pidx.pair_first,
             pidx.pair_second,
@@ -100,4 +100,4 @@ def idx_pair_molatomatom(node, hints=None):
         return parents, PairDeIndexer
     else:
         raise NotImplementedError("De-indexing not yet implemented in loss graph")
-        # TODO: refactor out padding indexer creation for loss from the molatom-atom indexer, then re-use it here.
+        # TODO: refactor out padding indexer creation for loss from the sysatom-atom indexer, then re-use it here.

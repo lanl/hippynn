@@ -13,7 +13,7 @@ from .base import (
     ExpandParents,
     MultiNode,
     SingleNode,
-    _BaseNode,
+    Node,
     find_unique_relative,
 )
 from .base.node_functions import NodeNotFound
@@ -21,83 +21,84 @@ from .indexers import AtomIndexer, PaddingIndexer, acquire_encoding_padding
 from .inputs import PositionsNode, SpeciesNode
 from .pairs import OpenPairIndexer
 from .tags import Charges, Encoder, Energies, PairIndexer
-
+from ..._deprecations import _DeprecatedNamesMixin
 
 class GradientNode(AutoKw, SingleNode):
     """
     Compute the gradient of a quantity.
     """
 
-    _input_names = "energy", "coordinates"
-    _auto_module_class = physics_layers.Gradient
+    input_names = "energy", "coordinates"
+    auto_module_class = physics_layers.Gradient
+    auto_module_kwargs = "sign",
 
-    def __init__(self, name, parents, sign, module="auto", **kwargs):
-        self.module_kwargs = {"sign": sign}
+    def __init__(self, name, parents, sign, **kwargs):
         energy, position = parents
         position.requires_grad = True
         parents = energy.main_output, position
         self.sign = sign
-        self._index_state = position._index_state
-        super().__init__(name, parents, module=module, **kwargs)
+        self.index_state = position.index_state
+        super().__init__(name, parents, sign=sign, **kwargs)
         
 class MultiGradientNode(AutoKw, MultiNode):
     """
     Compute the gradient of a quantity.
     """
 
-    _auto_module_class = physics_layers.MultiGradient
+    auto_module_class = physics_layers.MultiGradient
+    auto_module_kwargs = "signs",
 
-    def __init__(self, name: str, molecular_energies_parent: _BaseNode, generalized_coordinates_parents: tuple[_BaseNode], signs: tuple[int], module="auto", **kwargs):
+
+    def __init__(self, name: str, molecular_energies_parent: Node, generalized_coordinates_parents: tuple[Node], signs: tuple[int], **kwargs):
         if isinstance(signs, int):
             signs = (signs,)
 
         self.signs = signs
-        self.module_kwargs = {"signs": signs}
 
         parents = molecular_energies_parent, *generalized_coordinates_parents
 
         for parent in generalized_coordinates_parents:
             parent.requires_grad = True        
 
-        self._input_names = tuple((parent.name for parent in parents))
-        self._output_names = tuple((parent.name + "_grad" for parent in generalized_coordinates_parents))
-        self._output_index_states = tuple(parent._index_state for parent in generalized_coordinates_parents)
+        self.input_names = tuple((parent.name for parent in parents))
+        self.output_names = tuple((parent.name + "_grad" for parent in generalized_coordinates_parents))
+        self.output_index_states = tuple(parent.index_state for parent in generalized_coordinates_parents)
 
-        super().__init__(name, parents, module=module, **kwargs)
+        super().__init__(name, parents, signs=signs, **kwargs)
 
 
 class StressForceNode(AutoNoKw, MultiNode):
-    _input_names = "energy", "strain", "coordinates", "cell"
-    _output_names = "forces", "stress"
-    _auto_module_class = physics_layers.StressForce
+    input_names = "energy", "strain", "coordinates", "cell"
+    output_names = "forces", "stress"
+    auto_module_class = physics_layers.StressForce
 
     def __init__(self, name, parents, module="auto", **kwargs):
         energy, strain, coordinates, cell = parents
         coordinates.requires_grad = True
         parents = energy.main_output, strain, coordinates, cell
-        self._output_index_states = coordinates._index_state, strain._index_state
+        self.output_index_states = coordinates.index_state, strain.index_state
         super().__init__(name, parents, module=module, **kwargs)
 
 
 class ChargeMomentNode(ExpandParents, AutoNoKw, SingleNode):
-    _input_names = "charges", "positions", "mol_index", "n_molecules"
+    input_names = "charges", "positions", "system_index", "n_systems"
 
-    @_parent_expander.matchlen(1)
+    @parent_expander.matchlen(1)
     def expansion0(self, charges, *, purpose, **kwargs):
         return charges, find_unique_relative(charges, PositionsNode, why_desc=purpose)
 
-    @_parent_expander.match(Charges, PositionsNode)
+    @parent_expander.match(Charges, PositionsNode)
     def expansion1(self, charges, positions, *, purpose, **kwargs):
         enc, pidxer = acquire_encoding_padding((charges, positions), species_set=None, purpose=purpose)
         return charges, positions, pidxer
 
-    @_parent_expander.match(Charges, PositionsNode, AtomIndexer)
+    @parent_expander.match(Charges, PositionsNode, AtomIndexer)
     def expansion2(self, charges, positions, pdxer, **kwargs):
-        return charges, positions, pdxer.mol_index, pdxer.n_molecules
+        return charges, positions, pdxer.system_index, pdxer.n_systems
 
-    _parent_expander.assertlen(4)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, None, None)
+    parent_expander.assertlen(4)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, None, None)
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
@@ -109,8 +110,8 @@ class DipoleNode(ChargeMomentNode):
     Compute the dipole of point charges.
     """
 
-    _auto_module_class = physics_layers.Dipole
-    _index_state = IdxType.Molecules
+    auto_module_class = physics_layers.Dipole
+    index_state = IdxType.Systems
 
 
 class QuadrupoleNode(ChargeMomentNode):
@@ -118,8 +119,8 @@ class QuadrupoleNode(ChargeMomentNode):
     Compute the traceless quadrupole of point charges.
     """
 
-    _auto_module_class = physics_layers.Quadrupole
-    _index_state = IdxType.QuadMol
+    auto_module_class = physics_layers.Quadrupole
+    index_state = IdxType.QuadMol
 
 
 # Setup for Coulomb Energy and Screened Coulomb Energy is nearly the same, up to validating the pair finder.
@@ -130,7 +131,7 @@ class ChargePairSetup(ExpandParents):
         # Raises an error if the pairfinder is not satisfactory.
         return NotImplemented
 
-    @_parent_expander.match(Charges)
+    @parent_expander.match(Charges)
     def expansion0(self, charges, *, purpose, **kwargs):
         try:
             pos_or_pair = find_unique_relative(charges, PairIndexer, why_desc=purpose)
@@ -138,23 +139,23 @@ class ChargePairSetup(ExpandParents):
             pos_or_pair = find_unique_relative(charges, PositionsNode, why_desc=purpose)
         return charges, pos_or_pair
 
-    @_parent_expander.match(Charges, PositionsNode)
-    @_parent_expander.match(Charges, PairIndexer)
+    @parent_expander.match(Charges, PositionsNode)
+    @parent_expander.match(Charges, PairIndexer)
     def expansion1(self, charges, pos_or_pair, *, purpose, **kwargs):
         species = find_unique_relative((pos_or_pair, charges), SpeciesNode, why_desc=purpose)
         return charges, pos_or_pair, species
 
-    @_parent_expander.match(Charges, SpeciesNode)
+    @parent_expander.match(Charges, SpeciesNode)
     def expansion1(self, charges, species, *, purpose, **kwargs):
         positions = find_unique_relative((charges, species), PositionsNode, why_desc=purpose)
         return charges, positions, species
 
-    @_parent_expander.match(Charges, _BaseNode, SpeciesNode)
+    @parent_expander.match(Charges, Node, SpeciesNode)
     def expansion2(self, charges, pos_or_pair, species, *, purpose, **kwargs):
         encoder, pidxer = acquire_encoding_padding(species, species_set=None, purpose=purpose)
         return charges, pos_or_pair, pidxer
 
-    @_parent_expander.match(Charges, PositionsNode, PaddingIndexer)
+    @parent_expander.match(Charges, PositionsNode, PaddingIndexer)
     def expansion3(self, charges, positions, pidxer, *, cutoff_distance, **kwargs):
         try:
             pairfinder = find_unique_relative((charges, positions, pidxer), PairIndexer)
@@ -164,30 +165,39 @@ class ChargePairSetup(ExpandParents):
             pairfinder = OpenPairIndexer("PairIndexer", (positions, encoder, pidxer), dist_hard_max=cutoff_distance)
         return charges, pairfinder, pidxer
 
-    @_parent_expander.match(Charges, PairIndexer, AtomIndexer)
+    @parent_expander.match(Charges, PairIndexer, AtomIndexer)
     def expansion4(self, charges, pairfinder, pidxer, *, cutoff_distance, **kwargs):
         self._validate_pairfinder(pairfinder, cutoff_distance)
         pf = pairfinder
-        return charges, pf.pair_dist, pf.pair_first, pf.pair_second, pidxer.mol_index, pidxer.n_molecules
+        return charges, pf.pair_dist, pf.pair_first, pf.pair_second, pidxer.system_index, pidxer.n_systems
 
-    _parent_expander.assertlen(6)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Atoms, *(None,) * 5)
+    parent_expander.assertlen(6)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.Atoms, *(None,) * 5)
 
 
-class CoulombEnergyNode(ChargePairSetup, Energies, AutoKw, MultiNode):
-    _input_names = "charges", "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules"
-    _output_names = "mol_energies", "atom_energies", "atom_voltages"
-    _output_index_states = IdxType.Molecules, IdxType.Atoms, IdxType.Atoms
-    _main_output = "mol_energies"
-    _auto_module_class = physics_layers.CoulombEnergy
+class CoulombEnergyNode(AutoKw, ChargePairSetup, Energies,  MultiNode, _DeprecatedNamesMixin):
+    """
+    Besides the normal 'name' and 'parents' arguments, this node requires an `energy_conversion` parameter.
+    This corresponds to coulomb's constant k in the equation E = kqq/r.
+    """
+    _DEPRECATED_NAMES = {"mol_energies": "system_energies"}
+    input_names = "charges", "pair_dist", "pair_first", "pair_second", "system_index", "n_systems"
+    output_names = "system_energies", "atom_energies", "atom_voltages"
+    output_index_states = IdxType.Systems, IdxType.Atoms, IdxType.Atoms
+    main_output_name = "system_energies"
+    auto_module_class = physics_layers.CoulombEnergy
+    auto_module_kwargs = "energy_conversion_factor"
 
+    
+
+    
     @staticmethod
     def _validate_pairfinder(pairfinder, cutoff_distance):
         if not isinstance(pairfinder, OpenPairIndexer):
             raise TypeError(
                 "Closed boundary conditions detected.\n"
-                "Coulomb energy module is not compatible with open boundary conditions."
+                "Coulomb energy module is not compatible with closed boundary conditions."
             )
 
         if pairfinder.torch_module.hard_dist_cutoff is not None:
@@ -196,23 +206,25 @@ class CoulombEnergyNode(ChargePairSetup, Energies, AutoKw, MultiNode):
                 "coulomb energy requires summing over the entire set of pairs"
             )
 
-    def __init__(self, name, parents, energy_conversion, module="auto"):
-        """
-        Besides the normal 'name' and 'parents' arguments, this node requires an `energy_conversion` parameter.
-        This corresponds to coulomb's constant k in the equation E = kqq/r.
-        """
-        self.module_kwargs = {"energy_conversion_factor": energy_conversion}
-        parents = self.expand_parents(parents, cutoff_distance=None)
-        self.energy_conversion = energy_conversion
-        super().__init__(name, parents, module=module)
 
 
-class ScreenedCoulombEnergyNode(ChargePairSetup, Energies, AutoKw, MultiNode):
-    _input_names = "charges", "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules"
-    _output_names = "mol_energies", "atom_energies", "atom_voltages"
-    _output_index_states = IdxType.Molecules, IdxType.Atoms, IdxType.Atoms
-    _main_output = "mol_energies"
-    _auto_module_class = physics_layers.ScreenedCoulombEnergy
+class ScreenedCoulombEnergyNode(AutoKw, ChargePairSetup, Energies, MultiNode, _DeprecatedNamesMixin):
+    """
+    Besides the normal 'name' and 'parents' arguments, this node requires an `energy_conversion` parameter.
+    This corresponds to coulomb's constant k in the equation E = kqq/r.
+    """
+    _DEPRECATED_NAMES = {"mol_energies": "system_energies"}
+    input_names = "charges", "pair_dist", "pair_first", "pair_second", "system_index", "n_systems"
+    output_names = "system_energies", "atom_energies", "atom_voltages"
+    output_index_states = IdxType.Systems, IdxType.Atoms, IdxType.Atoms
+    main_output_name = "system_energies"
+    auto_module_class = physics_layers.ScreenedCoulombEnergy
+    auto_module_kwargs = {
+        "energy_conversion_factor":"energy_conversion_factor",
+        "radius": "cutoff_distance",
+        "screening": "screening",
+    }
+    parent_expansion_kwargs = "cutoff_distance",
 
     @staticmethod
     def _validate_pairfinder(pairfinder, cutoff_distance):
@@ -224,70 +236,60 @@ class ScreenedCoulombEnergyNode(ChargePairSetup, Energies, AutoKw, MultiNode):
                 f" for the pair_finder (named: {pairfinder.name})"
             )
 
-    def __init__(self, name, parents, energy_conversion, cutoff_distance, screening=None, module="auto"):
-        """
-        Besides the normal 'name' and 'parents' arguments, this node requires an `energy_conversion` parameter.
-        This corresponds to coulomb's constant k in the equation E = kqq/r.
-        """
-
+    def __init__(self, name, parents, energy_conversion_factor, cutoff_distance, screening=None, module="auto", **kwargs):
+        
         if screening is None and module == "auto":
             raise ValueError(
                 "To build this module automatically a screening module must\n"
                 "be provided (e.g. layers.physiscs.QScreening(p_value=4))"
             )
-
-        self.module_kwargs = {
-            "energy_conversion_factor": energy_conversion,
-            "radius": cutoff_distance,
-            "screening": screening,
-        }
-        parents = self.expand_parents(
-            parents,
-            cutoff_distance=cutoff_distance,
-        )
-        self.energy_conversion = energy_conversion
-        super().__init__(name, parents, module=module)
+        super().__init__(name, parents,
+                        energy_conversion_factor=energy_conversion_factor,
+                         cutoff_distance=cutoff_distance,
+                         screening=screening,
+                         module=module,
+                         **kwargs)
 
 
 class VecMag(ExpandParents, AutoNoKw, SingleNode):
-    _input_names = ("vector",)
-    _auto_module_class = physics_layers.VecMag
-    _index_state = IdxType.NotFound
+    input_names = ("vector",)
+    auto_module_class = physics_layers.VecMag
+    index_state = IdxType.Unlabeled
 
-    @_parent_expander.match(_BaseNode, _BaseNode)
+    @parent_expander.match(Node, Node)
     def expansion2(self, vector, helper, *, purpose, **kwargs):
         # This somewhat strange construction allows us to
         # find a padding indexer if the vector is detached from the padding indexer.
         vector, helper = elementwise_compare_reduce(vector, helper)
         return (vector,)
 
-    _parent_expander.assertlen(1)
-    _parent_expander.get_main_outputs()
+    parent_expander.assertlen(1)
+    parent_expander.get_main_outputs()
 
     def __init__(self, name, parents, module="auto", _helper=None, **kwargs):
         parents = self.expand_parents(parents)
-        self._index_state = parents[0]._index_state
+        self.index_state = parents[0].index_state
         assert len(parents) == 1, "Improper number of parents for {}".format(self.__class__.__name__)
         super().__init__(name, parents, module=module, **kwargs)
 
 
 class AtomToMolSummer(ExpandParents, AutoNoKw, SingleNode):
-    _input_names = "features", "mol_index", "n_molecules"
-    _auto_module_class = index_layers.MolSummer
-    _index_state = IdxType.Molecules
+    input_names = "features", "system_index", "n_systems"
+    auto_module_class = index_layers.MolSummer
+    index_state = IdxType.Systems
 
-    @_parent_expander.match(_BaseNode)
+    @parent_expander.match(Node)
     def expansion0(self, features, **kwargs):
         pdxer = find_unique_relative(features, AtomIndexer, why_desc="Generating Molecular summer")
         return features, pdxer
 
-    @_parent_expander.match(_BaseNode, AtomIndexer)
+    @parent_expander.match(Node, AtomIndexer)
     def expansion1(self, features, pdxer, **kwargs):
-        return features, pdxer.mol_index, pdxer.n_molecules
+        return features, pdxer.system_index, pdxer.n_systems
 
-    _parent_expander.assertlen(3)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Atoms, None, None)
+    parent_expander.assertlen(3)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.Atoms, None, None)
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
@@ -296,23 +298,23 @@ class AtomToMolSummer(ExpandParents, AutoNoKw, SingleNode):
 
 # TODO: This seems broken for parent expanders, check the signature of the layer.
 class BondToMolSummmer(ExpandParents, AutoNoKw, SingleNode):
-    _input_names = "pairfeatures", "mol_index", "n_molecules", "pair_first"
-    _auto_module_class = pair_layers.MolPairSummer
-    _index_state = IdxType.Molecules
+    input_names = "pairfeatures", "system_index", "n_systems", "pair_first"
+    auto_module_class = pair_layers.MolPairSummer
+    index_state = IdxType.Systems
 
-    @_parent_expander.match(_BaseNode)
+    @parent_expander.match(Node)
     def expansion0(self, features, *, purpose, **kwargs):
         pdxer = find_unique_relative(features, AtomIndexer, why_desc=purpose)
         pair_idxer = find_unique_relative(features, PairIndexer, why_desc=purpose)
         return features, pdxer, pair_idxer
 
-    @_parent_expander.match(_BaseNode, AtomIndexer, PairIndexer)
+    @parent_expander.match(Node, AtomIndexer, PairIndexer)
     def expansion1(self, features, pdxer, pair_idxer, **kwargs):
-        return features, pdxer.mol_index, pdxer.n_molecules, pair_idxer.pair_first
+        return features, pdxer.system_index, pdxer.n_systems, pair_idxer.pair_first
 
-    @_parent_expander.match(_BaseNode, _BaseNode, _BaseNode, _BaseNode, _BaseNode)
-    def expansion2(self, features, mol_index, n_molecules, **kwargs):
-        return index_type_coercion(features.main_output, IdxType.Pair), mol_index, n_molecules
+    @parent_expander.match(Node, Node, Node, Node, Node)
+    def expansion2(self, features, system_index, n_systems, **kwargs):
+        return index_type_coercion(features.main_output, IdxType.Pairs), system_index, n_systems
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)
@@ -320,19 +322,19 @@ class BondToMolSummmer(ExpandParents, AutoNoKw, SingleNode):
 
 
 class PerAtom(ExpandParents, AutoNoKw, SingleNode):
-    _input_names = "features", "species"
-    _index_state = IdxType.Molecules
-    _auto_module_class = physics_layers.PerAtom
+    input_names = "features", "species"
+    index_state = IdxType.Systems
+    auto_module_class = physics_layers.PerAtom
 
-    @_parent_expander.match(_BaseNode)
+    @parent_expander.match(Node)
     def expansion0(self, features, *, purpose, **kwargs):
         return features, find_unique_relative(features, SpeciesNode, purpose)
 
-    @_parent_expander.match(_BaseNode, _BaseNode)
+    @parent_expander.match(Node, Node)
     def expansion1(self, features, species, **kwargs):
         features = features.main_output
         assert (
-            features._index_state == IdxType.Molecules
+            features.index_state == IdxType.Systems
         ), "Can only calculate Per Atom averages on Molecular quantities"
         return features, species
 
@@ -341,41 +343,97 @@ class PerAtom(ExpandParents, AutoNoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class CombineEnergyNode(Energies, AutoKw, ExpandParents, MultiNode):
+class CombineEnergyNode(AutoNoKw, Energies,  ExpandParents, MultiNode):
     """
     Combines Local atom energies from different Energy Nodes.
     """
 
-    _input_names = "input_atom_energy_1", "input_atom_energy_2", "mol_index", "n_molecules"
-    _output_names = "mol_energy", "atom_energies"
-    _main_output = "mol_energy"
-    _output_index_states = (
-        IdxType.Molecules,
+    input_names = "input_atom_energy_1", "input_atom_energy_2", "system_index", "n_systems"
+    output_names = "mol_energy", "atom_energies"
+    main_output_name = "mol_energy"
+    output_index_states = (
+        IdxType.Systems,
         IdxType.Atoms,
     )
-    _auto_module_class = physics_layers.CombineEnergy
+    auto_module_class = physics_layers.CombineEnergy
 
-    @_parent_expander.match(_BaseNode, Energies)
+    @parent_expander.match(Node, Energies)
     def expansion0(self, energy_1, energy_2, **kwargs):
         return energy_1, energy_2.atom_energies
 
-    @_parent_expander.match(Energies, _BaseNode)
+    @parent_expander.match(Energies, Node)
     def expansion0(self, energy_1, energy_2, **kwargs):
         return energy_1.atom_energies, energy_2
 
-    @_parent_expander.match(_BaseNode, _BaseNode)
+    @parent_expander.match(Node, Node)
     def expansion1(self, energy_1, energy_2, **kwargs):
         pdindexer = find_unique_relative([energy_1, energy_2], AtomIndexer, why_desc="Generating CombineEnergies")
         return energy_1, energy_2, pdindexer
 
-    @_parent_expander.match(_BaseNode, _BaseNode, PaddingIndexer)
+    @parent_expander.match(Node, Node, PaddingIndexer)
     def expansion2(self, energy_1, energy_2, pdindexer, **kwargs):
-        return energy_1, energy_2, pdindexer.mol_index, pdindexer.n_molecules
+        return energy_1, energy_2, pdindexer.system_index, pdindexer.n_systems
 
-    _parent_expander.assertlen(4)
-    _parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, None, None)
+    parent_expander.assertlen(4)
+    parent_expander.require_idx_states(IdxType.Atoms, IdxType.Atoms, None, None)
 
-    def __init__(self, name, parents, module="auto", module_kwargs=None, **kwargs):
-        self.module_kwargs = {} if module_kwargs is None else module_kwargs
-        parents = self.expand_parents(parents, **kwargs)
-        super().__init__(name, parents=parents, module=module, **kwargs)
+
+
+class StrainInducer(AutoNoKw, MultiNode):
+    input_names = "coordinates", "cell"
+    output_names = "strained_coordinates", "strained_cell", "strain"
+    output_index_states = NotImplemented
+    auto_module_class = physics_layers.CellScaleInducer
+
+    def __init__(self, name, parents, module="auto", **kwargs):
+        position, cell = parents
+        self.output_index_states = position.index_state, IdxType.Unlabeled, IdxType.Unlabeled
+        super().__init__(name, parents, module=module, **kwargs)
+
+    
+def setup_stressforce_nodes(energy_node, return_transformed_inputs=False, positions_node="auto", cell_node="auto", strain_node="auto"):
+    """_summary_
+
+    :param energy_node: the energy to differenitate
+    :param return_transformed_inputs: If true, return the strained positions, strained cell, and strain
+    :param position_node: defaults to "auto"
+    :param cell_node: defaults to "auto"
+    :param strain_node: defaults to "auto"
+
+    Using "auto" will cause a failure if the corresponding node cannot be found or is ambiguous.
+
+    :return: (forces, stress) or (forces, stress, strained_positions, strained_cell, strain) depending on return_transformed_inputs flag.
+    """
+
+    from .misc import StrainInducer
+
+    from .tags import Positions
+    from .inputs import CellNode
+    
+    if positions_node == "auto":
+        positions_node = find_unique_relative(energy_node, Positions)
+
+    if cell_node == "auto":
+        cell_node = find_unique_relative(energy_node, CellNode)
+    
+    if strain_node == "auto":
+        strain_node = StrainInducer("Strain_inducer", (positions_node, cell_node))
+    
+    strained_coords = strain_node.strained_coordinates
+    strained_cell = strain_node.strained_cell
+    strain = strain_node.strain
+
+    from hippynn.graphs.gops import replace_node
+
+    replace_node(positions_node, strained_coords)
+    replace_node(cell_node, strained_cell)
+
+    derivatives = StressForceNode("StressForceCalculator", (energy_node, strain, positions_node, cell_node))
+    forces, stress = derivatives.forces, derivatives.stress
+
+    if return_transformed_inputs:
+
+        return stress, forces, strained_coords, strained_cell, strain
+    
+    else:
+        return stress, forces

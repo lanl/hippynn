@@ -6,7 +6,7 @@ import warnings
 import collections
 
 from hippynn.graphs import GraphModule, get_subgraph, find_unique_relative
-from hippynn.graphs.nodes.base import InputNode, LossInputNode, LossPredNode, LossTrueNode
+from hippynn.graphs.nodes.base import InputNode, LossInputNode, LossPredNode, LossTrueNode, Node
 
 from hippynn.experiment.evaluator import Evaluator
 
@@ -69,7 +69,7 @@ def build_loss_modules(training_loss, validation_losses, network_outputs, databa
     return train_loss_module, valid_loss_module
 
 
-def determine_out_in_targ(*nodes_required_for_loss):
+def determine_out_in_targ(*nodes_required_for_loss: Node):
     """
     :param nodes_required_for_loss: train nodes and validation nodes
     :return: lists of needed network inputs, network outputs, and database targets
@@ -86,7 +86,7 @@ def determine_out_in_targ(*nodes_required_for_loss):
 
     outputs = [x.origin_node for x in required_inputs if isinstance(x, LossPredNode)]
     targets = [x.origin_node for x in required_inputs if isinstance(x, LossTrueNode)]
-    inputs = [p for node in outputs for p in node.get_all_parents() if isinstance(p, InputNode)]
+    inputs = [p for node in outputs for p in node.get_ancestors() if isinstance(p, InputNode)]
 
     inputs = list(set(inputs))
     outputs = list(set(outputs))
@@ -204,7 +204,7 @@ def precompute_pairs(model, database, batch_size=10, device=None, make_dense=Fal
     dist_hard_max = pair_indexer.dist_hard_max
     cacher = pairs.PairCacher("PairCacher", pair_indexer, module_kwargs=dict(n_images=n_images))
 
-    input_nodes = set([x for x in cacher.get_all_parents() if isinstance(x, base.InputNode)])
+    input_nodes = set([x for x in cacher.get_ancestors() if isinstance(x, base.InputNode)])
     pred = Predictor(input_nodes, [cacher], model_device=device, name="Pair Precomputer")
 
     try:

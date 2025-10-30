@@ -60,8 +60,8 @@ class NACRMultiState(torch.nn.Module):
             nacr_ij.append(nacr)
         # nacr shape: n_molecules, n_atoms, 3, n_pairs
         nacr = torch.stack(nacr_ij, dim=1)
-        n_molecule, n_pairs, n_atoms, n_dims = nacr.shape
-        nacr = nacr.reshape(n_molecule, n_pairs, n_atoms * n_dims)
+        n_systems, n_pairs, n_atoms, n_dims = nacr.shape
+        nacr = nacr.reshape(n_systems, n_pairs, n_atoms * n_dims)
         # multiply dE
         return nacr * dE.unsqueeze(2)
 
@@ -84,10 +84,10 @@ class LocalEnergy(torch.nn.Module):
         self.players = torch.nn.ModuleList(torch.nn.Linear(nf, 1, bias=False) for nf in feature_sizes)
         self.ninf = float("-inf")
 
-    def forward(self, all_features, mol_index, atom_index, n_molecules, n_atoms_max):
+    def forward(self, all_features, system_index, atom_index, n_molecules, n_atoms_max):
         """
         :param all_features: list of feature tensors
-        :param mol_index: which molecule is the atom
+        :param system_index: which molecule is the atom
         :param atom_index: which atom in the molecule is that atom
         :param n_molecules: total number of molecules in the batch
         :param n_atoms_max: maximum number of atoms in the batch
@@ -108,21 +108,21 @@ class LocalEnergy(torch.nn.Module):
         # It's a standard SoftMax technique, however, the implementation is not built into pytorch for
         # the molecule/atom framework.
         with torch.autograd.no_grad():
-            propensity_molatom = all_features[0].new_full((n_molecules, n_atoms_max, 1), self.ninf)
-            propensity_molatom[mol_index, atom_index] = propensity
-            propensity_norms = propensity_molatom.max(dim=1)[0]  # first element is max vals, 2nd is max position
-            propensity_norm_atoms = propensity_norms[mol_index]
+            propensity_sysatom = all_features[0].new_full((n_molecules, n_atoms_max, 1), self.ninf)
+            propensity_sysatom[system_index, atom_index] = propensity
+            propensity_norms = propensity_sysatom.max(dim=1)[0]  # first element is max vals, 2nd is max position
+            propensity_norm_atoms = propensity_norms[system_index]
 
         propensity_normed = propensity - propensity_norm_atoms
 
         # Calculate probabilities with molecule version of softmax
         relative_prob = torch.exp(propensity_normed)
-        z_factor_permol = self.summer(relative_prob, mol_index, n_molecules)
-        atom_zfactor = z_factor_permol[mol_index]
+        z_factor_permol = self.summer(relative_prob, system_index, n_molecules)
+        atom_zfactor = z_factor_permol[system_index]
         prob = relative_prob / atom_zfactor
 
         # Find molecular sum
         atom_energy = prob * atom_preenergy
-        contributed_energy = self.summer(atom_energy, mol_index, n_molecules)
+        contributed_energy = self.summer(atom_energy, system_index, n_molecules)
 
         return contributed_energy, atom_energy, atom_preenergy, prob, propensity

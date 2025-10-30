@@ -20,7 +20,7 @@ class RDFBins(torch.nn.Module):
         widths = self.bins[1:] - self.bins[:-1]
         return centers, widths
 
-    def forward(self, pair_dist, pair_first, pair_second, one_hot, n_molecules):
+    def forward(self, pair_dist, pair_first, pair_second, one_hot, n_systems):
         n_species = one_hot.shape[-1]
         n_bins = self.bins.shape[0] - 1
 
@@ -32,18 +32,18 @@ class RDFBins(torch.nn.Module):
                 less = maskpairs.unsqueeze(-1) < self.bins.unsqueeze(0)
                 less_counts = less.sum(dim=0)
                 rdf[i, j] = less_counts[..., 1:] - less_counts[..., :-1]
-        return (rdf / n_molecules).unsqueeze(0)
+        return (rdf / n_systems).unsqueeze(0)
 
 
-def min_dist_info(rij_list, j_list, mol_index, atom_index, inv_real_atoms, n_atoms_max, n_molecules):
+def min_dist_info(rij_list, j_list, system_index, atom_index, inv_real_atoms, n_atoms_max, n_systems):
     n_atoms = rij_list.shape[0]
     dev = rij_list.device
 
     if rij_list.shape[1] == 0:
         # empty neighbors list
-        min_dist_mol = torch.zeros(n_molecules, dtype=rij_list.dtype, device=dev)
+        min_dist_mol = torch.zeros(n_systems, dtype=rij_list.dtype, device=dev)
         min_dist_atom = torch.zeros(n_atoms, dtype=rij_list.dtype, device=dev)
-        min_dist_mol_atom_locs = torch.zeros(n_molecules, dtype=torch.int64, device=dev)
+        min_dist_mol_atom_locs = torch.zeros(n_systems, dtype=torch.int64, device=dev)
         min_dist_atomneigh = torch.zeros((n_atoms), dtype=torch.int64, device=dev)
         return min_dist_mol, min_dist_mol_atom_locs, min_dist_atom, min_dist_atomneigh
 
@@ -57,13 +57,13 @@ def min_dist_info(rij_list, j_list, mol_index, atom_index, inv_real_atoms, n_ato
     ara = torch.arange(n_atoms, dtype=where_min_dist_atom.dtype, device=dev)
     min_dist_atomneigh = j_list[ara, where_min_dist_atom]
 
-    min_dist_molatom = torch.full((n_molecules, n_atoms_max), maxr, device=rmag_list.device, dtype=rmag_list.dtype)
-    min_dist_molatom[mol_index, atom_index] = min_dist_atom
-    min_dist_mol, where_min_dist_mol = min_dist_molatom.min(dim=1)
+    min_dist_sysatom = torch.full((n_systems, n_atoms_max), maxr, device=rmag_list.device, dtype=rmag_list.dtype)
+    min_dist_sysatom[system_index, atom_index] = min_dist_atom
+    min_dist_mol, where_min_dist_mol = min_dist_sysatom.min(dim=1)
 
     atom1 = where_min_dist_mol
 
-    atom1_batchloc = torch.arange(n_molecules, device=dev, dtype=torch.int64) * n_atoms_max + atom1
+    atom1_batchloc = torch.arange(n_systems, device=dev, dtype=torch.int64) * n_atoms_max + atom1
     atom1_atomloc = inv_real_atoms[atom1_batchloc]
     atom2 = atom_index[min_dist_atomneigh[atom1_atomloc]]
 
@@ -73,5 +73,5 @@ def min_dist_info(rij_list, j_list, mol_index, atom_index, inv_real_atoms, n_ato
 
 
 class MinDistModule(torch.nn.Module):
-    def forward(self, rmag_list, j_list, mol_index, atom_index, inv_real_atoms, n_atoms_max, n_molecules):
-        return min_dist_info(rmag_list, j_list, mol_index, atom_index, inv_real_atoms, n_atoms_max, n_molecules)
+    def forward(self, rmag_list, j_list, system_index, atom_index, inv_real_atoms, n_atoms_max, n_systems):
+        return min_dist_info(rmag_list, j_list, system_index, atom_index, inv_real_atoms, n_atoms_max, n_systems)

@@ -47,18 +47,8 @@ def make_model_and_loss(network_params, tensor_model, tensor_order, tensor_facto
         energy = targets.AtomizationEnergyNode("HEnergy", network)
 
     if args.force_training:
-        cellscaleinducer = StrainInducer("Strain_inducer", (positions, cell))
-        strained_coords = cellscaleinducer.strained_coordinates
-        strained_cell = cellscaleinducer.strained_cell
-        strain = cellscaleinducer.strain
 
-        from hippynn.graphs.gops import replace_node
-
-        replace_node(positions, strained_coords)
-        replace_node(cell, strained_cell)
-
-        derivatives = physics.StressForceNode("StressForceCalculator", (energy, strain, positions, cell))
-        forces, stress = derivatives.forces, derivatives.stress
+        stress, forces = physics.setup_stressforce_nodes(energy)
 
         forces.db_name = "F"
 

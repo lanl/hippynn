@@ -46,7 +46,7 @@ def index_type_coercion(node, output_index_state, hints=None):
     _debprint("Requesting transformation : {} -> {}".format(node.name, output_index_state))
     node = node.main_output
     try:
-        needs_index = node._index_state != output_index_state
+        needs_index = node.index_state != output_index_state
     except AttributeError as e:
         _debprint("\t Indexing information not found! Something is likely to fail.")
         needs_index = False
@@ -59,7 +59,7 @@ def index_type_coercion(node, output_index_state, hints=None):
             outnode = _index_cache[prior_index_ref]
         else:
             _debprint(f"\t No index version found for node {node} type {output_index_state}")
-            outnode = dispatch_indexing(node._index_state, output_index_state)(node, hints=hints)
+            outnode = dispatch_indexing(node.index_state, output_index_state)(node, hints=hints)
 
     else:
         outnode = node
@@ -76,9 +76,9 @@ def soft_index_type_coercion(node, output_index_state):
     :param output_index_state:
     :return:
     """
-    if output_index_state == IdxType.NotFound or node._index_state == IdxType.NotFound:
+    if output_index_state == IdxType.Unlabeled or node.index_state == IdxType.Unlabeled:
         _debprint(
-            f"Soft request: Skipping requested conversion of {node} ({node._index_state})to {output_index_state}"
+            f"Soft request: Skipping requested conversion of {node} ({node.index_state})to {output_index_state}"
             " as information was not available."
         )
         return node
@@ -97,7 +97,7 @@ def get_reduced_index_state(*nodes_to_reduce):
     :param nodes_to_reduce:
     :return:
     """
-    typeset = frozenset(getattr(n,"_index_state",IdxType.NotFound) for n in nodes_to_reduce)
+    typeset = frozenset(getattr(n,"index_state",IdxType.Unlabeled) for n in nodes_to_reduce)
     _debprint("Finding index comparison for for :", [n.name for n in nodes_to_reduce])
     try:
         coerced_type = elementwise_compare_rules[typeset]
@@ -115,9 +115,21 @@ def elementwise_compare_reduce(*nodes_to_reduce):
     :param nodes_to_reduce: nodes to put in a comparable, reduced index state
     :return: node (if single argument) or tuple(nodes) (if multiple arguments)
     """
+    from ..nodes.base import is_in_loss_graph, NodeAmbiguityError
+    
     if len(nodes_to_reduce) == 0:
         _debprint("Compare reduce on nothing, returning nothing")
         return tuple()
+    
+    try:
+        # The only purpose of this call is to raise error if a node is in an ambiguous state.
+        # Re-indexing a node is generally performed differently in the model graph compared 
+        # to the loss graph.
+        is_in_loss_graph(nodes_to_reduce) 
+    except NodeAmbiguityError:
+        raise NodeAmbiguityError("Combining nodes requires that they are in the same graph type (model or loss), " \
+        "but mixed types were found.")
+
     coerced_type = get_reduced_index_state(*nodes_to_reduce)
     coerced_nodes = [index_type_coercion(node, coerced_type, hints=nodes_to_reduce) for node in nodes_to_reduce]
     _debprint("Coerced:", [x.name for x in coerced_nodes])
@@ -144,4 +156,4 @@ def db_form(node):
     """
     Return a node converted to the index state of the database.
     """
-    return index_type_coercion(node, db_state_of(node._index_state))
+    return index_type_coercion(node, db_state_of(node.index_state))

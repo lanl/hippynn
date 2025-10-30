@@ -42,13 +42,13 @@ def setup_LAMMPS_graph(energy):
     # Set up graph to accept external pair indices and shifts
 
     in_pair_first = InputNode("pair_first")
-    in_pair_first._index_state = IdxType.Pair
+    in_pair_first.index_state = IdxType.Pairs
     in_pair_second = InputNode("pair_second")
-    in_pair_second._index_state = IdxType.Pair
+    in_pair_second.index_state = IdxType.Pairs
     in_pair_coord = InputNode("pair_coord")
-    in_pair_coord._index_state = IdxType.Pair
+    in_pair_coord.index_state = IdxType.Pairs
     in_nlocal = InputNode("nlocal")
-    in_nlocal._index_state = IdxType.Scalar
+    in_nlocal.index_state = IdxType.Scalar
     pair_dist = VecMag("pair_dist", in_pair_coord)
     mapped_pair_first = ReIndexAtomNode("pair_first_internal", (in_pair_first, inv_real_atoms))
     mapped_pair_second = ReIndexAtomNode("pair_second_internal", (in_pair_second, inv_real_atoms))
@@ -108,12 +108,12 @@ class ReIndexAtomMod(torch.nn.Module):
 
 
 class ReIndexAtomNode(AutoNoKw, SingleNode):
-    _input_names = "raw_atom_index_array", "inverse_real_atoms"
-    _main_output = "total_local_energy"
-    _auto_module_class = ReIndexAtomMod
+    input_names = "raw_atom_index_array", "inverse_real_atoms"
+    main_output_name = "total_local_energy"
+    auto_module_class = ReIndexAtomMod
 
     def __init__(self, name, parents, module="auto", **kwargs):
-        self._index_state = parents[0]._index_state
+        self.index_state = parents[0].index_state
         super().__init__(name, parents, module=module, **kwargs)
 
 
@@ -128,15 +128,15 @@ class LocalAtomsEnergy(torch.nn.Module):
 
 
 class LocalAtomEnergyNode(AutoNoKw, ExpandParents, MultiNode):
-    _input_names = "all_atom_energies", "nlocal"
-    _output_names = "local_atom_energies", "total_local_energy"
-    _main_output = "total_local_energy"
-    _output_index_states = None, IdxType.Scalar
-    _auto_module_class = LocalAtomsEnergy
+    input_names = "all_atom_energies", "nlocal"
+    output_names = "local_atom_energies", "total_local_energy"
+    main_output_name = "total_local_energy"
+    output_index_states = None, IdxType.Scalar
+    auto_module_class = LocalAtomsEnergy
 
-    _parent_expander.assertlen(2)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Atoms, IdxType.Scalar)
+    parent_expander.assertlen(2)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.Atoms, IdxType.Scalar)
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = self.expand_parents(parents)

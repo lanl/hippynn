@@ -31,42 +31,42 @@ class ExternalNeighbors(_PairIndexer):
 
 
 class PairReIndexer(torch.nn.Module):
-    def forward(self, molatomatom_thing, molecule_index, atom_index, pair_first, pair_second):
+    def forward(self, sysatomatom_thing, system_index, atom_index, pair_first, pair_second):
 
-        molecule_position = molecule_index[pair_first]
+        system_pair_index = system_index[pair_first]
         absolute_first = atom_index[pair_first]
         absolute_second = atom_index[pair_second]
-        out = molatomatom_thing[molecule_position, absolute_first, absolute_second]
+        out = sysatomatom_thing[system_pair_index, absolute_first, absolute_second]
         if out.ndimension() == 1:
             out = out.unsqueeze(1)
         return out
 
 
 class PairDeIndexer(torch.nn.Module):
-    def forward(self, features, molecule_index, atom_index, n_molecules, n_atoms_max, pair_first, pair_second):
-        molecule_position = molecule_index[pair_first]
+    def forward(self, features, system_index, atom_index, n_systems, n_atoms_max, pair_first, pair_second):
+        system_pair_index = system_index[pair_first]
         absolute_first = atom_index[pair_first]
         absolute_second = atom_index[pair_second]
 
         if features.ndimension() == 1:
             features = features.unsqueeze(-1)
         featshape = features.shape[1:]
-        out_shape = (n_molecules, n_atoms_max, n_atoms_max, *featshape)
+        out_shape = (n_systems, n_atoms_max, n_atoms_max, *featshape)
 
         result = torch.zeros(*out_shape, device=features.device, dtype=features.dtype)
-        result[molecule_position, absolute_first, absolute_second] = features
+        result[system_pair_index, absolute_first, absolute_second] = features
         return result
 
 
 class MolPairSummer(torch.nn.Module):
-    def forward(self, pairfeatures, mol_index, n_molecules, pair_first):
-        pair_mol = mol_index[pair_first]
+    def forward(self, pairfeatures, system_index, n_systems, pair_first):
+        pair_mol = system_index[pair_first]
         if pairfeatures.shape[0] == 1:
             feat_shape = (1,)
             pairfeatures.unsqueeze(-1)
         else:
             feat_shape = pairfeatures.shape[1:]
-        out_shape = (n_molecules, *feat_shape)
+        out_shape = (n_systems, *feat_shape)
         result = torch.zeros(out_shape, device=pairfeatures.device, dtype=pairfeatures.dtype)
         result.index_add_(0, pair_mol, pairfeatures)
         return result
@@ -81,13 +81,13 @@ class PairCacher(torch.nn.Module):
         self.n_images = n_images
 
     def forward(
-        self, pair_first, pair_second, cell_offsets, offset_index, real_atoms, mol_index, n_molecules, n_atoms_max
+        self, pair_first, pair_second, cell_offsets, offset_index, real_atoms, system_index, n_systems, n_atoms_max
     ):
         # Set up absolute indices
         abs_atoms = real_atoms % n_atoms_max
         pfabs = abs_atoms[pair_first]
         psabs = abs_atoms[pair_second]
-        mol = mol_index[pair_first]
+        mol = system_index[pair_first]
 
         n_offsets = (2 * self.n_images + 1) ** 3
 
@@ -103,7 +103,7 @@ class PairCacher(torch.nn.Module):
         # Create sparse tensor
         indices = torch.stack([mol, pfabs, psabs, offset_index], dim=0)
         values = cell_offsets
-        size = (n_molecules, n_atoms_max, n_atoms_max, n_offsets, 3)
+        size = (n_systems, n_atoms_max, n_atoms_max, n_offsets, 3)
         s = torch.sparse_coo_tensor(
             indices=indices, values=values, size=size, dtype=torch.int, device=pair_first.device
         )
@@ -119,7 +119,7 @@ class PairUncacher(torch.nn.Module):
     def set_images(self, n_images):
         self.n_images = n_images
 
-    def forward(self, sparse, coordinates, cell, real_atoms, inv_real_atoms, n_atoms_max, n_molecules):
+    def forward(self, sparse, coordinates, cell, real_atoms, inv_real_atoms, n_atoms_max, n_systems):
 
         if not sparse.is_sparse:
             sparse = sparse.to_sparse(sparse_dim=4)
@@ -135,7 +135,7 @@ class PairUncacher(torch.nn.Module):
         pair_first = inv_real_atoms[pfb]
         pair_second = inv_real_atoms[psb]
 
-        atom_coordinates = coordinates.reshape(n_molecules * n_atoms_max, 3)[real_atoms]
+        atom_coordinates = coordinates.reshape(n_systems * n_atoms_max, 3)[real_atoms]
         offsets = torch.bmm(cell_offsets.to(cell.dtype).unsqueeze(1), cell[mol]).squeeze(1)
 
         paircoord = atom_coordinates[pair_first] - atom_coordinates[pair_second] + offsets
