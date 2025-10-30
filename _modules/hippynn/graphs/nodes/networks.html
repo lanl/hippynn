@@ -110,7 +110,7 @@
 <span class="sd">Nodes for networks.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.tags</span><span class="w"> </span><span class="kn">import</span> <span class="n">Encoder</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">Network</span><span class="p">,</span> <span class="n">AtomIndexer</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">_BaseNode</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">SingleNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Node</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">SingleNode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base.multi</span><span class="w"> </span><span class="kn">import</span> <span class="n">IndexNode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.indexers</span><span class="w"> </span><span class="kn">import</span> <span class="n">OneHotEncoder</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">acquire_encoding_padding</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.pairs</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenPairIndexer</span><span class="p">,</span> <span class="n">PeriodicPairIndexer</span>
@@ -122,10 +122,16 @@
 <div class="viewcode-block" id="DefaultNetworkExpansion">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.networks.html#hippynn.graphs.nodes.networks.DefaultNetworkExpansion">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DefaultNetworkExpansion</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">):</span>
+    <span class="n">parent_expansion_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;dist_hard_max&quot;</span><span class="p">:</span> <span class="s2">&quot;dist_hard_max&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;species_set&quot;</span><span class="p">:</span> <span class="s2">&quot;possible_species&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;periodic&quot;</span><span class="p">:</span> <span class="s2">&quot;periodic&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
 <div class="viewcode-block" id="DefaultNetworkExpansion.expansion0">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.networks.html#hippynn.graphs.nodes.networks.DefaultNetworkExpansion.expansion0">[docs]</a>
-    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">)</span>
-    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">CellNode</span><span class="p">)</span>
+    <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">)</span>
+    <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">CellNode</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expansion0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="o">*</span><span class="n">other_parents</span><span class="p">,</span> <span class="n">species_set</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Finds or sets up a default one-hot encoder if species are passed as first argument.</span>
@@ -137,8 +143,8 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">pidxer</span><span class="p">,</span> <span class="o">*</span><span class="n">other_parents</span><span class="p">)</span></div>
 
 
-    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Encoder</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">)</span>
-    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Encoder</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">CellNode</span><span class="p">)</span>
+    <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Encoder</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">)</span>
+    <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Encoder</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">,</span> <span class="n">PositionsNode</span><span class="p">,</span> <span class="n">CellNode</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expansion1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoder</span><span class="p">,</span> <span class="n">pidxer</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">periodic</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Setup pair finder if positions and cell are passed with encoding.</span>
@@ -158,7 +164,7 @@
 
 <div class="viewcode-block" id="DefaultNetworkExpansion.expansion1">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.networks.html#hippynn.graphs.nodes.networks.DefaultNetworkExpansion.expansion1">[docs]</a>
-    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">AtomIndexer</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">)</span>
+    <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">AtomIndexer</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expansion1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pidxer</span><span class="p">,</span> <span class="n">pairfinder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get indexed features from the atom indexer.</span>
@@ -202,72 +208,56 @@
 
 <div class="viewcode-block" id="Hipnn">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.networks.html#hippynn.graphs.nodes.networks.Hipnn">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Hipnn</span><span class="p">(</span><span class="n">DefaultNetworkExpansion</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">Network</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">_FeatureNodesMixin</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Hipnn</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">DefaultNetworkExpansion</span><span class="p">,</span>  <span class="n">Network</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">_FeatureNodesMixin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Node for HIP-NN neural networks</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;input_features&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_dist&quot;</span>
-    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
-    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">network_modules</span><span class="o">.</span><span class="n">hipnn</span><span class="o">.</span><span class="n">Hipnn</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;input_features&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_dist&quot;</span>
+    <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Unlabeled</span>
+    <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">network_modules</span><span class="o">.</span><span class="n">hipnn</span><span class="o">.</span><span class="n">Hipnn</span>
 
 <div class="viewcode-block" id="Hipnn.expansion2">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.networks.html#hippynn.graphs.nodes.networks.Hipnn.expansion2">[docs]</a>
-    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_BaseNode</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">)</span>
+    <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Node</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expansion2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pairfinder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">features</span><span class="p">,</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">pair_second</span><span class="p">,</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">pair_dist</span></div>
 
 
-    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
-    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
-    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
+    <span class="n">parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="n">module_kwargs</span>
-            <span class="n">net_module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_module</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">net_module</span> <span class="o">=</span> <span class="n">module</span>
-        <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span>
-            <span class="n">parents</span><span class="p">,</span> <span class="n">species_set</span><span class="o">=</span><span class="n">net_module</span><span class="o">.</span><span class="n">species_set</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">net_module</span><span class="o">.</span><span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="n">periodic</span>
-        <span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">net_module</span><span class="p">)</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="n">periodic</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 
 
 
 <div class="viewcode-block" id="HipnnVec">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.networks.html#hippynn.graphs.nodes.networks.HipnnVec">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">HipnnVec</span><span class="p">(</span><span class="n">DefaultNetworkExpansion</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">Network</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">_FeatureNodesMixin</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HipnnVec</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">DefaultNetworkExpansion</span><span class="p">,</span> <span class="n">Network</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">_FeatureNodesMixin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Node for HIP-NN-TS neural network, l=2</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;input_features&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_dist&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_coord&quot;</span>
-    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
-    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">network_modules</span><span class="o">.</span><span class="n">hipnn</span><span class="o">.</span><span class="n">HipnnVec</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;input_features&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_dist&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_coord&quot;</span>
+    <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Unlabeled</span>
+    <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">network_modules</span><span class="o">.</span><span class="n">hipnn</span><span class="o">.</span><span class="n">HipnnVec</span>
 
 <div class="viewcode-block" id="HipnnVec.expansion2">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.networks.html#hippynn.graphs.nodes.networks.HipnnVec.expansion2">[docs]</a>
-    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_BaseNode</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">)</span>
+    <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Node</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expansion2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pairfinder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">features</span><span class="p">,</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">pair_second</span><span class="p">,</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">pair_coord</span></div>
 
 
-    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
-    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
+    <span class="n">parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="n">module_kwargs</span>
-            <span class="n">net_module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_module</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">net_module</span> <span class="o">=</span> <span class="n">module</span>
-        <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span>
-            <span class="n">parents</span><span class="p">,</span> <span class="n">species_set</span><span class="o">=</span><span class="n">net_module</span><span class="o">.</span><span class="n">species_set</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">net_module</span><span class="o">.</span><span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="n">periodic</span>
-        <span class="p">)</span>
-
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">net_module</span><span class="p">)</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="n">periodic</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 
@@ -277,13 +267,16 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Node for HIP-NN-TS neural network, l=2</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">network_modules</span><span class="o">.</span><span class="n">hipnn</span><span class="o">.</span><span class="n">HipnnQuad</span></div>
+    <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">network_modules</span><span class="o">.</span><span class="n">hipnn</span><span class="o">.</span><span class="n">HipnnQuad</span></div>
 
 
 <div class="viewcode-block" id="HipHopnn">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.networks.html#hippynn.graphs.nodes.networks.HipHopnn">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HipHopnn</span><span class="p">(</span><span class="n">HipnnVec</span><span class="p">):</span>
-    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">network_modules</span><span class="o">.</span><span class="n">hiphop</span><span class="o">.</span><span class="n">HipHopNNModule</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Node for HIP-HOP_NN neural network.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">network_modules</span><span class="o">.</span><span class="n">hiphop</span><span class="o">.</span><span class="n">HipHopNNModule</span></div>
 
 </pre></div>
 

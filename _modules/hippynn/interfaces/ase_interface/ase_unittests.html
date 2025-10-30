@@ -180,10 +180,10 @@
     <span class="n">energy_conv</span> <span class="o">=</span> <span class="mf">14.397</span> <span class="c1"># Coulomb-konst</span>
     <span class="n">coulomb_energy</span> <span class="o">=</span> <span class="n">physics</span><span class="o">.</span><span class="n">CoulombEnergyNode</span><span class="p">(</span>
         <span class="s2">&quot;cEnergy&quot;</span><span class="p">,</span>
-        <span class="c1"># _input_names = &quot;charges&quot;, &quot;pair_dist&quot;, &quot;pair_first&quot;, &quot;pair_second&quot;, &quot;mol_index&quot;, &quot;n_molecules&quot;</span>
+        <span class="c1"># input_names = &quot;charges&quot;, &quot;pair_dist&quot;, &quot;pair_first&quot;, &quot;pair_second&quot;, &quot;system_index&quot;, &quot;n_systems&quot;</span>
         <span class="p">(</span><span class="n">atom_charges</span><span class="p">,</span>
             <span class="n">pairfinder</span><span class="o">.</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">pair_second</span><span class="p">,</span>
-            <span class="n">padidxer</span><span class="o">.</span><span class="n">mol_index</span><span class="p">,</span> <span class="n">padidxer</span><span class="o">.</span><span class="n">n_molecules</span><span class="p">),</span>
+            <span class="n">padidxer</span><span class="o">.</span><span class="n">system_index</span><span class="p">,</span> <span class="n">padidxer</span><span class="o">.</span><span class="n">n_systems</span><span class="p">),</span>
         <span class="n">energy_conversion</span><span class="o">=</span><span class="n">energy_conv</span><span class="p">,</span> 
     <span class="p">)</span>
     <span class="c1">### </span>
@@ -253,7 +253,7 @@
 
     <span class="c1"># Construct a Calculator from model. </span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.interfaces.ase_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">HippynnCalculator</span>
-    <span class="n">energy_node</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">node_from_name</span><span class="p">(</span><span class="s1">&#39;add(HEnergy.mol_energy, cEnergy.mol_energies)&#39;</span><span class="p">)</span>
+    <span class="n">energy_node</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">node_from_name</span><span class="p">(</span><span class="s1">&#39;add(HEnergy.system_energies, cEnergy.system_energies)&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">calc</span> <span class="o">=</span> <span class="n">HippynnCalculator</span><span class="p">(</span><span class="n">energy</span><span class="o">=</span><span class="n">energy_node</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span> 

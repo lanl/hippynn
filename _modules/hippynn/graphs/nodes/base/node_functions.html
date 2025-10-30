@@ -107,17 +107,33 @@
              
   <h1>Source code for hippynn.graphs.nodes.base.node_functions</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Base node definition.</span>
+<span class="sd">Here we define some of the core operations for Nodes in the directed</span>
+<span class="sd">acyclic graph associated with a computation.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_debprint</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...._deprecations</span><span class="w"> </span><span class="kn">import</span> <span class="n">_DeprecatedNamesMixin</span>
 
 <span class="n">DEFAULT_WHY_DESC</span> <span class="o">=</span> <span class="s2">&quot;&lt;purpose not specified&gt;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
+<span class="k">if</span> <span class="n">typing</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Node</span>
 
-<span class="k">class</span><span class="w"> </span><span class="nc">_BaseNode</span><span class="p">:</span>
-    <span class="n">_input_names</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
-    <span class="n">_LossPredNode</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Will be set by this child class when it exists</span>
-    <span class="n">_LossTrueNode</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Same</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_NodeFunctions</span><span class="p">(</span><span class="n">_DeprecatedNamesMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base Node methods without dynamic algebra behavior.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
+    
+    <span class="n">_DEPRECATED_NAMES</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;_input_names&quot;</span> <span class="p">:</span> <span class="s2">&quot;input_names&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -134,60 +150,66 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Node names must be strings. Instead got: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="n">_NodeFunctions</span><span class="p">):</span>
+            <span class="n">parents</span> <span class="o">=</span> <span class="n">parents</span><span class="p">,</span> <span class="c1"># wrap a single node as a tuple of parents.</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="n">db_name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">origin_node</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Loss input nodes set this attribute to find references to the model graph</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parents</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pred</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_true</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">origin_node</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Node</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Loss input nodes set this attribute to find references to the model graph</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Node</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Node</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">:</span>
             <span class="n">p</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">children</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="p">,)</span>
 
-        <span class="c1"># If specified, trigger automatic module generation</span>
-        <span class="k">if</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
-            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Making auto module for&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_module</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pred</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Node</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_true</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Node</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="c1"># The db_name must be set after parents, _pred, and _true,</span>
+        <span class="c1"># because assigning a db_name will assign to the true and pred versions of a node, as well;</span>
+        <span class="c1"># this in turn requires having these things as well as the parents to define if they exist or not.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">db_name</span> 
+
+        
+            
         <span class="c1"># Otherwise, glue the module on</span>
         <span class="k">if</span> <span class="n">module</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">torch_module</span> <span class="o">=</span> <span class="n">module</span>
+            <span class="k">if</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Auto module was specified but not created during node construction.&quot;</span> \
+                <span class="s2">&quot; If a torch module is not supplied then execution will fail.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">torch_module</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span> <span class="o">=</span> <span class="n">module</span>
+        
+            <span class="c1"># In this case, the node must represent input tensors.</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_dbname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_name</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="n">db_name</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pred</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pred</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="n">db_name</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_true</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_true</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="n">db_name</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_ancestors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets all parents of this node and recursively to input nodes. This node is not included in the output.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">get_connected_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">,</span> <span class="n">ancestors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">descendants</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="c1">#return self.parents + tuple(pnode for parent in self.parents for pnode in parent.get_all_parents())</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">pred</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pred</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_LossPredNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;-pred&quot;</span><span class="p">,</span> <span class="n">origin_node</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pred</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">true</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_true</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_true</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_LossTrueNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;-true&quot;</span><span class="p">,</span> <span class="n">origin_node</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_true</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_parents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parents</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">pnode</span> <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parents</span> <span class="k">for</span> <span class="n">pnode</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">get_all_parents</span><span class="p">())</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_children</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ccnode</span> <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="k">for</span> <span class="n">ccnode</span> <span class="ow">in</span> <span class="n">child</span><span class="o">.</span><span class="n">get_all_children</span><span class="p">())</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_descendants</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets all children of this node and recursively forward. This node is not included in the output.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">get_connected_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">,</span> <span class="n">ancestors</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">descendants</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#return self.children + tuple(ccnode for child in self.children for ccnode in child.get_all_children())</span>
 
     <span class="c1"># Functions that take either a node or a node set can be accessed as attributes.</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">get_connected_nodes</span><span class="p">({</span><span class="bp">self</span><span class="p">})</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_connected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ancestors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">descendants</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">get_connected_nodes</span><span class="p">({</span><span class="bp">self</span><span class="p">},</span> <span class="n">ancestors</span><span class="o">=</span><span class="n">ancestors</span><span class="p">,</span> <span class="n">descendants</span><span class="o">=</span><span class="n">descendants</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">find_unique_relative</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraint</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">DEFAULT_WHY_DESC</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraint</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why_desc</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">find_relatives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraint</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">DEFAULT_WHY_DESC</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">find_relatives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraint</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why_desc</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_relatives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraint</span><span class="p">,</span> <span class="n">ancestors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">descendants</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">DEFAULT_WHY_DESC</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">find_relatives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraint</span><span class="p">,</span> <span class="n">ancestors</span><span class="o">=</span><span class="n">ancestors</span><span class="p">,</span> <span class="n">descendants</span><span class="o">=</span><span class="n">descendants</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why_desc</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_in_loss_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">DEFAULT_WHY_DESC</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether this node is in the loss graph or the model graph.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">is_in_loss_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">why_desc</span><span class="p">)</span>
+        
 
     <span class="k">def</span><span class="w"> </span><span class="nf">swap_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">old</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">:</span>
@@ -218,24 +240,41 @@
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
             <span class="n">c</span><span class="o">.</span><span class="n">disconnect_recursive</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">auto_module</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Auto module not defined for node </span><span class="si">{}</span><span class="s2"> of type </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+
+    <span class="c1">## Properties to implement in concrete nodes.</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">true</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">pred</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">main_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>    
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">db_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">dir_</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__dir__</span><span class="p">()</span>
         <span class="c1"># need to protect against a case where input names are not specified.</span>
         <span class="c1"># otherwise dir() will raise an error. Debuggers hate that!</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">NotImplemented</span><span class="p">:</span>
-            <span class="n">dir_</span> <span class="o">=</span> <span class="n">dir_</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_names</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">NotImplemented</span><span class="p">:</span>
+            <span class="n">dir_</span> <span class="o">=</span> <span class="n">dir_</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_names</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dir_</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;parents&quot;</span><span class="p">,</span> <span class="s2">&quot;_input_names&quot;</span><span class="p">):</span>  <span class="c1"># Guard against recursion</span>
+        
+        <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;parents&quot;</span><span class="p">,</span> <span class="s2">&quot;input_names&quot;</span><span class="p">):</span>  <span class="c1"># Guard against recursion</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Attribute </span><span class="si">{}</span><span class="s2"> not yet present&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item</span><span class="p">)]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">input_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item</span><span class="p">)]</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> object has no attribute &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">item</span><span class="p">))</span>
+            <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -244,17 +283,11 @@
             <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;UNINITIALIZED&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(&#39;</span><span class="si">{}</span><span class="s2">&#39;)&lt;</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
 
-    <span class="c1"># Overridden by MultiNode, LossInputNode</span>
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">main_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span>
-
 
 <div class="viewcode-block" id="NodeOperationError">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.node_functions.html#hippynn.graphs.NodeOperationError">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NodeOperationError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="k">pass</span></div>
-
 
 
 <div class="viewcode-block" id="NodeNotFound">
@@ -263,12 +296,21 @@
     <span class="k">pass</span></div>
 
 
+<div class="viewcode-block" id="NodeAmbiguityError">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.node_functions.html#hippynn.graphs.NodeAmbiguityError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NodeAmbiguityError</span><span class="p">(</span><span class="n">NodeOperationError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+
 
 <div class="viewcode-block" id="get_connected_nodes">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.node_functions.html#hippynn.graphs.get_connected_nodes">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_connected_nodes</span><span class="p">(</span><span class="n">node_set</span><span class="p">,</span> <span class="n">ancestors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">descendants</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Recursively return nodes connected to the specified node_set.</span>
+
+<span class="sd">    Nodes in the supplied set are included in the output.</span>
 
 <span class="sd">    :param node_set: iterable collection of nodes (list, tuple, set,...)</span>
 <span class="sd">    :param ancestors: whether to search ancestors of the node set</span>
@@ -284,22 +326,26 @@
             <span class="n">search_found</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
             <span class="n">search_from</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">ancestors</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">node_relative</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">get_all_parents</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">node_relative</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">parents</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">node_relative</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">search_found</span><span class="p">:</span>
                         <span class="n">search_from</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_relative</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">descendants</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">node_relative</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">get_all_children</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">node_relative</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">node_relative</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">search_found</span><span class="p">:</span>
                         <span class="n">search_from</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_relative</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">search_found</span></div>
 
 
+<div class="viewcode-block" id="get_ancestors">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.node_functions.html#hippynn.graphs.get_ancestors">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_ancestors</span><span class="p">(</span><span class="n">node_set</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">get_connected_nodes</span><span class="p">(</span><span class="n">node_set</span><span class="p">,</span> <span class="n">ancestors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">descendants</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="NodeAmbiguityError">
-<a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.node_functions.html#hippynn.graphs.NodeAmbiguityError">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">NodeAmbiguityError</span><span class="p">(</span><span class="n">NodeOperationError</span><span class="p">):</span>
-    <span class="k">pass</span></div>
 
+<div class="viewcode-block" id="get_descendants">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.node_functions.html#hippynn.graphs.get_descendants">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_descendants</span><span class="p">(</span><span class="n">node_set</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">get_connected_nodes</span><span class="p">(</span><span class="n">node_set</span><span class="p">,</span> <span class="n">ancestors</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">descendants</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="find_relatives">
@@ -325,21 +371,19 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;constraint must be a type or callable filter function&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node_or_nodes</span><span class="p">,</span> <span class="n">_BaseNode</span><span class="p">):</span>  <span class="c1"># if we search from a node, wrap it as a collection</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">Node</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node_or_nodes</span><span class="p">,</span> <span class="n">Node</span><span class="p">):</span>  <span class="c1"># if we search from a node, wrap it as a collection</span>
         <span class="n">node_or_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_or_nodes</span><span class="p">]</span>
         <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Starting search from single node&quot;</span><span class="p">)</span>
 
-    <span class="n">candidates</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">get_connected_nodes</span><span class="p">(</span><span class="n">node_or_nodes</span><span class="p">)</span> <span class="k">if</span> <span class="n">constraint_key</span><span class="p">(</span><span class="n">n</span><span class="p">)}</span>
-
-    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">node_or_nodes</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">constraint_key</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
-            <span class="n">candidates</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+    <span class="n">relatives</span> <span class="o">=</span> <span class="n">get_connected_nodes</span><span class="p">(</span><span class="n">node_or_nodes</span><span class="p">,</span> <span class="n">ancestors</span><span class="o">=</span><span class="n">ancestors</span><span class="p">,</span> <span class="n">descendants</span><span class="o">=</span><span class="n">descendants</span><span class="p">)</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">relatives</span> <span class="k">if</span> <span class="n">constraint_key</span><span class="p">(</span><span class="n">n</span><span class="p">)}</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Node not found, all relatives:&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">get_connected_nodes</span><span class="p">(</span><span class="n">node_or_nodes</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">relatives</span><span class="p">:</span>
             <span class="n">_debprint</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="n">NodeNotFound</span><span class="p">(</span><span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">) Missing: Could not automatically satisfying node in graph.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">why_desc</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="n">NodeNotFound</span><span class="p">(</span><span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">) Missing: Could not automatically find satisfying node in graph.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">why_desc</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">candidates</span></div>
 
@@ -385,6 +429,52 @@
     <span class="n">result</span> <span class="o">=</span> <span class="n">candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
     <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Found node </span><span class="si">{}</span><span class="s2"> of type </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">constraint</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">why_desc</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">result</span></div>
+
+
+
+<div class="viewcode-block" id="is_in_loss_graph">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.node_functions.html#hippynn.graphs.is_in_loss_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_in_loss_graph</span><span class="p">(</span><span class="n">node_or_nodes</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">DEFAULT_WHY_DESC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decide if a node or collection of nodes is in the loss graph.</span>
+
+<span class="sd">    (If not, they are in the model graph)</span>
+<span class="sd">    (If neither, raise NodeAmbiguityError)</span>
+
+<span class="sd">    .. Warning::</span>
+<span class="sd">        If you call this function, it ought to be on a set of nodes assumed in the same graph.</span>
+<span class="sd">        If not, be prepared for the case that the question was malformed (mixture) and so ``NodeAmbiguityError`` is raised.</span>
+
+<span class="sd">    :param node_or_nodes: a node or iterable of nodes to examine.</span>
+<span class="sd">    :param why_desc: optional specification of error message clarifying reason why this was requested.</span>
+
+<span class="sd">    :return: boolean</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">InputNode</span><span class="p">,</span> <span class="n">LossInputNode</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">inputs_for_nodes</span> <span class="o">=</span> <span class="n">find_relatives</span><span class="p">(</span><span class="n">node_or_nodes</span><span class="p">,</span> <span class="n">InputNode</span><span class="p">,</span> <span class="n">descendants</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">NodeNotFound</span><span class="p">:</span>
+        <span class="c1"># In this case, we probably have a tree of pure ValueNodes. We will arbitrarily call this &quot;in the model graph.&quot;</span>
+        <span class="k">return</span> <span class="kc">False</span> 
+    
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">in_node</span><span class="p">,</span> <span class="n">LossInputNode</span><span class="p">)</span> <span class="k">for</span> <span class="n">in_node</span> <span class="ow">in</span> <span class="n">inputs_for_nodes</span><span class="p">):</span> 
+        <span class="c1"># If any inputs are in the loss graph, we must ensure that they all are, or else</span>
+        <span class="c1"># the graph state has been corrupted.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">in_node</span><span class="p">,</span> <span class="n">LossInputNode</span><span class="p">)</span> <span class="k">for</span> <span class="n">in_node</span> <span class="ow">in</span> <span class="n">inputs_for_nodes</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">NodeAmbiguityError</span><span class="p">(</span><span class="s2">&quot;This node_or_nodes is both in and out of the loss graph. &quot;</span> \
+                    <span class="sa">f</span><span class="s2">&quot;Requested for purpose: </span><span class="si">{</span><span class="n">why_desc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># Graph is not corrupted!</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># No inputs were in the loss graph</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+    
+
+
+
+
 
 </pre></div>
 

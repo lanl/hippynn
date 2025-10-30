@@ -178,8 +178,8 @@
             <span class="n">nacr_ij</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nacr</span><span class="p">)</span>
         <span class="c1"># nacr shape: n_molecules, n_atoms, 3, n_pairs</span>
         <span class="n">nacr</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">nacr_ij</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">n_molecule</span><span class="p">,</span> <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">n_dims</span> <span class="o">=</span> <span class="n">nacr</span><span class="o">.</span><span class="n">shape</span>
-        <span class="n">nacr</span> <span class="o">=</span> <span class="n">nacr</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_molecule</span><span class="p">,</span> <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_atoms</span> <span class="o">*</span> <span class="n">n_dims</span><span class="p">)</span>
+        <span class="n">n_systems</span><span class="p">,</span> <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">,</span> <span class="n">n_dims</span> <span class="o">=</span> <span class="n">nacr</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">nacr</span> <span class="o">=</span> <span class="n">nacr</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_systems</span><span class="p">,</span> <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_atoms</span> <span class="o">*</span> <span class="n">n_dims</span><span class="p">)</span>
         <span class="c1"># multiply dE</span>
         <span class="k">return</span> <span class="n">nacr</span> <span class="o">*</span> <span class="n">dE</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span></div>
 </div>
@@ -208,10 +208,10 @@
 
 <div class="viewcode-block" id="LocalEnergy.forward">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.excited.html#hippynn.layers.excited.LocalEnergy.forward">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_features</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_features</span><span class="p">,</span> <span class="n">system_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param all_features: list of feature tensors</span>
-<span class="sd">        :param mol_index: which molecule is the atom</span>
+<span class="sd">        :param system_index: which molecule is the atom</span>
 <span class="sd">        :param atom_index: which atom in the molecule is that atom</span>
 <span class="sd">        :param n_molecules: total number of molecules in the batch</span>
 <span class="sd">        :param n_atoms_max: maximum number of atoms in the batch</span>
@@ -232,22 +232,22 @@
         <span class="c1"># It&#39;s a standard SoftMax technique, however, the implementation is not built into pytorch for</span>
         <span class="c1"># the molecule/atom framework.</span>
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-            <span class="n">propensity_molatom</span> <span class="o">=</span> <span class="n">all_features</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">new_full</span><span class="p">((</span><span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">ninf</span><span class="p">)</span>
-            <span class="n">propensity_molatom</span><span class="p">[</span><span class="n">mol_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">propensity</span>
-            <span class="n">propensity_norms</span> <span class="o">=</span> <span class="n">propensity_molatom</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># first element is max vals, 2nd is max position</span>
-            <span class="n">propensity_norm_atoms</span> <span class="o">=</span> <span class="n">propensity_norms</span><span class="p">[</span><span class="n">mol_index</span><span class="p">]</span>
+            <span class="n">propensity_sysatom</span> <span class="o">=</span> <span class="n">all_features</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">new_full</span><span class="p">((</span><span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">ninf</span><span class="p">)</span>
+            <span class="n">propensity_sysatom</span><span class="p">[</span><span class="n">system_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">propensity</span>
+            <span class="n">propensity_norms</span> <span class="o">=</span> <span class="n">propensity_sysatom</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># first element is max vals, 2nd is max position</span>
+            <span class="n">propensity_norm_atoms</span> <span class="o">=</span> <span class="n">propensity_norms</span><span class="p">[</span><span class="n">system_index</span><span class="p">]</span>
 
         <span class="n">propensity_normed</span> <span class="o">=</span> <span class="n">propensity</span> <span class="o">-</span> <span class="n">propensity_norm_atoms</span>
 
         <span class="c1"># Calculate probabilities with molecule version of softmax</span>
         <span class="n">relative_prob</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">propensity_normed</span><span class="p">)</span>
-        <span class="n">z_factor_permol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">relative_prob</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
-        <span class="n">atom_zfactor</span> <span class="o">=</span> <span class="n">z_factor_permol</span><span class="p">[</span><span class="n">mol_index</span><span class="p">]</span>
+        <span class="n">z_factor_permol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">relative_prob</span><span class="p">,</span> <span class="n">system_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
+        <span class="n">atom_zfactor</span> <span class="o">=</span> <span class="n">z_factor_permol</span><span class="p">[</span><span class="n">system_index</span><span class="p">]</span>
         <span class="n">prob</span> <span class="o">=</span> <span class="n">relative_prob</span> <span class="o">/</span> <span class="n">atom_zfactor</span>
 
         <span class="c1"># Find molecular sum</span>
         <span class="n">atom_energy</span> <span class="o">=</span> <span class="n">prob</span> <span class="o">*</span> <span class="n">atom_preenergy</span>
-        <span class="n">contributed_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">atom_energy</span><span class="p">,</span> <span class="n">mol_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
+        <span class="n">contributed_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">atom_energy</span><span class="p">,</span> <span class="n">system_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">contributed_energy</span><span class="p">,</span> <span class="n">atom_energy</span><span class="p">,</span> <span class="n">atom_preenergy</span><span class="p">,</span> <span class="n">prob</span><span class="p">,</span> <span class="n">propensity</span></div>
 </div>

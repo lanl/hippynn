@@ -121,10 +121,10 @@
 
 <span class="c1"># TODO: Rewrite so it can use non-one-hot-encodings?</span>
 
-<div class="viewcode-block" id="idx_molatomatom_pair">
-<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.pairs.html#hippynn.graphs.indextransformers.pairs.idx_molatomatom_pair">[docs]</a>
-<span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtomAtom</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">idx_molatomatom_pair</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">hints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="idx_sysatomatom_pairs">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.pairs.html#hippynn.graphs.indextransformers.pairs.idx_sysatomatom_pairs">[docs]</a>
+<span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">SysAtomAtom</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pairs</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">idx_sysatomatom_pairs</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">hints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;auto-generating indexing for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
 
     <span class="n">search_nodes</span> <span class="o">=</span> <span class="n">make_search_nodes</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">hints</span><span class="p">)</span>
@@ -183,15 +183,15 @@
             <span class="n">pair_idx</span> <span class="o">=</span> <span class="n">new_PairType</span><span class="p">(</span><span class="s2">&quot;Pairs&quot;</span><span class="p">,</span> <span class="n">pair_parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">origin_pairs</span><span class="o">.</span><span class="n">dist_hard_max</span><span class="p">)</span>
 
     <span class="bp">cls</span> <span class="o">=</span> <span class="n">PairReIndexer</span>
-    <span class="n">parents</span> <span class="o">=</span> <span class="n">node</span><span class="p">,</span> <span class="n">pidxer</span><span class="o">.</span><span class="n">mol_index</span><span class="p">,</span> <span class="n">pidxer</span><span class="o">.</span><span class="n">atom_index</span><span class="p">,</span> <span class="n">pair_idx</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_idx</span><span class="o">.</span><span class="n">pair_second</span>
+    <span class="n">parents</span> <span class="o">=</span> <span class="n">node</span><span class="p">,</span> <span class="n">pidxer</span><span class="o">.</span><span class="n">system_index</span><span class="p">,</span> <span class="n">pidxer</span><span class="o">.</span><span class="n">atom_index</span><span class="p">,</span> <span class="n">pair_idx</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_idx</span><span class="o">.</span><span class="n">pair_second</span>
     <span class="k">return</span> <span class="n">parents</span><span class="p">,</span> <span class="bp">cls</span></div>
 
 
 
-<div class="viewcode-block" id="idx_pair_molatomatom">
-<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.pairs.html#hippynn.graphs.indextransformers.pairs.idx_pair_molatomatom">[docs]</a>
-<span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtomAtom</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">idx_pair_molatomatom</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">hints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="idx_pairs_sysatomatom">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.pairs.html#hippynn.graphs.indextransformers.pairs.idx_pairs_sysatomatom">[docs]</a>
+<span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pairs</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">SysAtomAtom</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">idx_pairs_sysatomatom</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">hints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;auto-generating indexing for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
 
     <span class="n">search_nodes</span> <span class="o">=</span> <span class="n">make_search_nodes</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="n">hints</span><span class="p">)</span>
@@ -202,9 +202,9 @@
 
         <span class="n">parents</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">node</span><span class="p">,</span>
-            <span class="n">padidx</span><span class="o">.</span><span class="n">mol_index</span><span class="p">,</span>
+            <span class="n">padidx</span><span class="o">.</span><span class="n">system_index</span><span class="p">,</span>
             <span class="n">padidx</span><span class="o">.</span><span class="n">atom_index</span><span class="p">,</span>
-            <span class="n">padidx</span><span class="o">.</span><span class="n">n_molecules</span><span class="p">,</span>
+            <span class="n">padidx</span><span class="o">.</span><span class="n">n_systems</span><span class="p">,</span>
             <span class="n">padidx</span><span class="o">.</span><span class="n">n_atoms_max</span><span class="p">,</span>
             <span class="n">pidx</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span>
             <span class="n">pidx</span><span class="o">.</span><span class="n">pair_second</span><span class="p">,</span>
@@ -214,7 +214,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;De-indexing not yet implemented in loss graph&quot;</span><span class="p">)</span></div>
 
-        <span class="c1"># TODO: refactor out padding indexer creation for loss from the molatom-atom indexer, then re-use it here.</span>
+        <span class="c1"># TODO: refactor out padding indexer creation for loss from the sysatom-atom indexer, then re-use it here.</span>
 </pre></div>
 
            </div>

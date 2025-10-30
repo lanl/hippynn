@@ -319,8 +319,8 @@
 
 <span class="sd">    :param positions: Shape (n_frames, n_particles, 3).</span>
 <span class="sd">    :type positions: np.ndarray</span>
-<span class="sd">    :param cutoff: Maximum arm lengths on angles to consider.</span>
-<span class="sd">    :type cutoff: list[float]</span>
+<span class="sd">    :param cutoffs: Maximum arm lengths on angles to consider.</span>
+<span class="sd">    :type cutoffs: list[float]</span>
 <span class="sd">    :param cells: Shape (n_frames, 3, 3) or (3, 3), no PBC if None, defaults to None.</span>
 <span class="sd">    :type cells: np.ndarray or None, optional</span>
 <span class="sd">    :param species: Shape (n_frames, n_particles) or (n_particles,), defaults to None.</span>
@@ -345,7 +345,7 @@
     <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
         <span class="n">cutoffs</span> <span class="o">=</span> <span class="p">[</span><span class="n">cutoffs</span><span class="p">]</span>
 
-    <span class="n">check_KDTree_compatibility</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">cutoff</span><span class="p">))</span>
+    <span class="n">check_KDTree_compatibility</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">cutoffs</span><span class="p">))</span>
 
     <span class="n">adfs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">cutoff</span> <span class="ow">in</span> <span class="n">cutoffs</span><span class="p">:</span>
@@ -368,7 +368,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="n">vecs</span> <span class="o">=</span> <span class="n">find_mic</span><span class="p">(</span><span class="n">positions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">pairs</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]]</span> <span class="o">-</span> <span class="n">positions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">pairs</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]],</span> <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">)</span>
+        <span class="n">vecs</span> <span class="o">=</span> <span class="n">find_mic</span><span class="p">(</span><span class="n">positions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">pairs</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]]</span> <span class="o">-</span> <span class="n">positions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">pairs</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]],</span> <span class="n">cell</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">cell</span><span class="p">))</span>
         <span class="n">vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vecs</span><span class="p">)</span>
 
         <span class="n">vecs</span> <span class="o">=</span> <span class="n">vecs</span>

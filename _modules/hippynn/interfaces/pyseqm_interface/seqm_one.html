@@ -246,8 +246,8 @@
             <span class="n">P0</span><span class="o">=</span><span class="n">single_particle_density_matrix</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">n_molecule</span><span class="p">,</span> <span class="n">n_atom</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">shape</span>
-        <span class="n">atomic_charge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">const</span><span class="o">.</span><span class="n">tore</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">-</span> <span class="n">P</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">dim1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_molecule</span><span class="p">,</span> <span class="n">n_atom</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">n_systems</span><span class="p">,</span> <span class="n">n_atom</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">atomic_charge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">const</span><span class="o">.</span><span class="n">tore</span><span class="p">[</span><span class="n">species</span><span class="p">]</span> <span class="o">-</span> <span class="n">P</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">dim1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_systems</span><span class="p">,</span> <span class="n">n_atom</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">Etot</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
@@ -273,7 +273,7 @@
 <div class="viewcode-block" id="NotConvergedNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.NotConvergedNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NotConvergedNode</span><span class="p">(</span><span class="n">InputNode</span><span class="p">):</span>
-    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>
+    <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span>
     <span class="n">input_type_str</span> <span class="o">=</span> <span class="s2">&quot;notconverged&quot;</span></div>
 
 
@@ -281,7 +281,7 @@
 <div class="viewcode-block" id="DensityMatrixNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.DensityMatrixNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DensityMatrixNode</span><span class="p">(</span><span class="n">InputNode</span><span class="p">):</span>
-    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>
+    <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span>
     <span class="n">input_type_str</span> <span class="o">=</span> <span class="s2">&quot;single_particle_density_matrix&quot;</span></div>
 
 
@@ -289,15 +289,15 @@
 <div class="viewcode-block" id="SEQM_One_EnergyNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.SEQM_One_EnergyNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SEQM_One_EnergyNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;par_atom&quot;</span><span class="p">,</span> <span class="s2">&quot;Positions&quot;</span><span class="p">,</span> <span class="s2">&quot;Species&quot;</span><span class="p">,</span> <span class="s2">&quot;single_particle_density_matrix&quot;</span>
-    <span class="n">_output_names</span> <span class="o">=</span> <span class="s2">&quot;mol_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;Etot_m_Eiso&quot;</span>
-    <span class="n">_main_output</span> <span class="o">=</span> <span class="s2">&quot;Etot_m_Eiso&quot;</span>
-    <span class="n">_output_index_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">_output_names</span><span class="p">)</span>
-    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">SEQM_One_Energy</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;par_atom&quot;</span><span class="p">,</span> <span class="s2">&quot;Positions&quot;</span><span class="p">,</span> <span class="s2">&quot;Species&quot;</span><span class="p">,</span> <span class="s2">&quot;single_particle_density_matrix&quot;</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;mol_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;Etot_m_Eiso&quot;</span>
+    <span class="n">main_output_name</span> <span class="o">=</span> <span class="s2">&quot;Etot_m_Eiso&quot;</span>
+    <span class="n">output_index_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_names</span><span class="p">)</span>
+    <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">SEQM_One_Energy</span>
 
 <div class="viewcode-block" id="SEQM_One_EnergyNode.expand0">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.SEQM_One_EnergyNode.expand0">[docs]</a>
-    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="n">DensityMatrixNode</span><span class="p">)</span>
+    <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="n">DensityMatrixNode</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expand0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">single_particle_density_matrix</span><span class="p">,</span> <span class="n">seqm_parameters</span><span class="p">,</span> <span class="n">decay_factor</span><span class="o">=</span><span class="mf">1.0e-2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="n">n_target_peratom</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">seqm_parameters</span><span class="p">[</span><span class="s2">&quot;learned&quot;</span><span class="p">])</span>
@@ -317,9 +317,9 @@
         <span class="k">return</span> <span class="n">par_atom</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">single_particle_density_matrix</span></div>
 
 
-    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
-    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
-    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
+    <span class="n">parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">seqm_parameters</span><span class="p">,</span> <span class="n">decay_factor</span><span class="o">=</span><span class="mf">1.0e-2</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="n">seqm_parameters</span><span class="o">=</span><span class="n">seqm_parameters</span><span class="p">,</span> <span class="n">decay_factor</span><span class="o">=</span><span class="n">decay_factor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -331,8 +331,8 @@
 <div class="viewcode-block" id="SEQM_One_AllNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.pyseqm_interface.seqm_one.html#hippynn.interfaces.pyseqm_interface.seqm_one.SEQM_One_AllNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SEQM_One_AllNode</span><span class="p">(</span><span class="n">SEQM_One_EnergyNode</span><span class="p">):</span>
-    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;par_atom&quot;</span><span class="p">,</span> <span class="s2">&quot;Positions&quot;</span><span class="p">,</span> <span class="s2">&quot;Species&quot;</span><span class="p">,</span> <span class="s2">&quot;single_particle_density_matrix&quot;</span>
-    <span class="n">_output_names</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;par_atom&quot;</span><span class="p">,</span> <span class="s2">&quot;Positions&quot;</span><span class="p">,</span> <span class="s2">&quot;Species&quot;</span><span class="p">,</span> <span class="s2">&quot;single_particle_density_matrix&quot;</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="p">(</span>
         <span class="s2">&quot;mol_energy&quot;</span><span class="p">,</span>
         <span class="s2">&quot;Etot_m_Eiso&quot;</span><span class="p">,</span>
         <span class="s2">&quot;orbital_energies&quot;</span><span class="p">,</span>
@@ -341,9 +341,9 @@
         <span class="s2">&quot;isolated_atom_energy&quot;</span><span class="p">,</span>
         <span class="s2">&quot;atomic_charge&quot;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">_main_output</span> <span class="o">=</span> <span class="s2">&quot;Etot_m_Eiso&quot;</span>
-    <span class="n">_output_index_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">_output_names</span><span class="p">)</span>
-    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">SEQM_One_All</span></div>
+    <span class="n">main_output_name</span> <span class="o">=</span> <span class="s2">&quot;Etot_m_Eiso&quot;</span>
+    <span class="n">output_index_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_names</span><span class="p">)</span>
+    <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">SEQM_One_All</span></div>
 
 </pre></div>
 

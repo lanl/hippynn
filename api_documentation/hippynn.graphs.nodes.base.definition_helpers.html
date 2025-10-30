@@ -126,21 +126,23 @@
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.TupleTypeMismatch"><code class="docutils literal notranslate"><span class="pre">TupleTypeMismatch</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.AlwaysMatch"><code class="docutils literal notranslate"><span class="pre">AlwaysMatch</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.AutoKw"><code class="docutils literal notranslate"><span class="pre">AutoKw</span></code></a><ul>
-<li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.AutoKw.auto_module"><code class="docutils literal notranslate"><span class="pre">AutoKw.auto_module()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.AutoKw.auto_module_kwargs"><code class="docutils literal notranslate"><span class="pre">AutoKw.auto_module_kwargs</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.AutoNoKw"><code class="docutils literal notranslate"><span class="pre">AutoNoKw</span></code></a><ul>
-<li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.AutoNoKw.auto_module"><code class="docutils literal notranslate"><span class="pre">AutoNoKw.auto_module()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.AutoNoKw"><code class="docutils literal notranslate"><span class="pre">AutoNoKw</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.CompatibleIdxTypeTransformer"><code class="docutils literal notranslate"><span class="pre">CompatibleIdxTypeTransformer</span></code></a><ul>
 <li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.CompatibleIdxTypeTransformer.fn"><code class="docutils literal notranslate"><span class="pre">CompatibleIdxTypeTransformer.fn()</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.CompatibleIdxTypeTransformer.add_class_doc"><code class="docutils literal notranslate"><span class="pre">CompatibleIdxTypeTransformer.add_class_doc()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.ExpandParentMeta"><code class="docutils literal notranslate"><span class="pre">ExpandParentMeta</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.ExpandParentMeta"><code class="docutils literal notranslate"><span class="pre">ExpandParentMeta</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.ExpandParentMeta.parent_expander"><code class="docutils literal notranslate"><span class="pre">ExpandParentMeta.parent_expander</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.ExpandParents"><code class="docutils literal notranslate"><span class="pre">ExpandParents</span></code></a><ul>
 <li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.ExpandParents.expand_parents"><code class="docutils literal notranslate"><span class="pre">ExpandParents.expand_parents()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.ExpandParents.parent_expander"><code class="docutils literal notranslate"><span class="pre">ExpandParents.parent_expander</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.ExpandParents.parent_expansion_kwargs"><code class="docutils literal notranslate"><span class="pre">ExpandParents.parent_expansion_kwargs</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.FormAssertLength"><code class="docutils literal notranslate"><span class="pre">FormAssertLength</span></code></a><ul>
@@ -279,24 +281,34 @@ complex node behavior in a simple fashion.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="hippynn.graphs.nodes.base.definition_helpers.AutoKw">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AutoKw</span></span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/definition_helpers.html#AutoKw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.definition_helpers.AutoKw" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AutoKw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/definition_helpers.html#AutoKw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.definition_helpers.AutoKw" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.graphs.nodes.base.definition_helpers.AutoKw.auto_module">
-<span class="sig-name descname"><span class="pre">auto_module</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/definition_helpers.html#AutoKw.auto_module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.definition_helpers.AutoKw.auto_module" title="Link to this definition"></a></dt>
+<p>Helper class for piping keyword arguments into an nn.module class.</p>
+<p>Keyword Argument sources (lower precedence first):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>module_kwargs argument to init.</p></li>
+<li><p>kwarg-source pairs from self.auto_module_kwargs,
+where the value for the source is popped from the kwargs to the node.</p></li>
+<li><p>self.module_kwargs.</p></li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt>Note: If self.auto_module_kwargs is not a dict, it will then be interpreted</dt><dd><p>as a list of keys for a dictionary with the identity for key-value mapping.</p>
+</dd>
+</dl>
+<p>After constructing the kwargs, they are saved as self.module_kwargs.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.base.definition_helpers.AutoKw.auto_module_kwargs">
+<span class="sig-name descname"><span class="pre">auto_module_kwargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#hippynn.graphs.nodes.base.definition_helpers.AutoKw.auto_module_kwargs" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="hippynn.graphs.nodes.base.definition_helpers.AutoNoKw">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AutoNoKw</span></span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/definition_helpers.html#AutoNoKw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.definition_helpers.AutoNoKw" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AutoNoKw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/definition_helpers.html#AutoNoKw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.definition_helpers.AutoNoKw" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.graphs.nodes.base.definition_helpers.AutoNoKw.auto_module">
-<span class="sig-name descname"><span class="pre">auto_module</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/definition_helpers.html#AutoNoKw.auto_module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.definition_helpers.AutoNoKw.auto_module" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
@@ -320,15 +332,43 @@ complex node behavior in a simple fashion.</p>
 <dt class="sig sig-object py" id="hippynn.graphs.nodes.base.definition_helpers.ExpandParentMeta">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExpandParentMeta</span></span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/definition_helpers.html#ExpandParentMeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.definition_helpers.ExpandParentMeta" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.base.definition_helpers.ExpandParentMeta.parent_expander">
+<span class="sig-name descname"><span class="pre">parent_expander</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.ParentExpander" title="hippynn.graphs.nodes.base.definition_helpers.ParentExpander"><span class="pre">ParentExpander</span></a></em><a class="headerlink" href="#hippynn.graphs.nodes.base.definition_helpers.ExpandParentMeta.parent_expander" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="hippynn.graphs.nodes.base.definition_helpers.ExpandParents">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExpandParents</span></span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/definition_helpers.html#ExpandParents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.definition_helpers.ExpandParents" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExpandParents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/definition_helpers.html#ExpandParents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.definition_helpers.ExpandParents" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Keyword Argument sources (lower precedence first):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>expansion_kwargs argument to init.</p></li>
+<li><p>kwarg-source pairs from self.parent_expansion_kwargs,
+where the value for the source is popped from the kwargs to the node.</p></li>
+<li><p>self.module_kwargs.</p></li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt>If self.parent_expansion_kwargs is not a dictionary it will be interpreted as</dt><dd><p>a list of keys for an identity key-value mapping.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.graphs.nodes.base.definition_helpers.ExpandParents.expand_parents">
 <span class="sig-name descname"><span class="pre">expand_parents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">purpose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/definition_helpers.html#ExpandParents.expand_parents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.definition_helpers.ExpandParents.expand_parents" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.base.definition_helpers.ExpandParents.parent_expander">
+<span class="sig-name descname"><span class="pre">parent_expander</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#hippynn.graphs.nodes.base.definition_helpers.ParentExpander" title="hippynn.graphs.nodes.base.definition_helpers.ParentExpander"><span class="pre">ParentExpander</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;hippynn.graphs.nodes.base.definition_helpers.ParentExpander</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#hippynn.graphs.nodes.base.definition_helpers.ExpandParents.parent_expander" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.base.definition_helpers.ExpandParents.parent_expansion_kwargs">
+<span class="sig-name descname"><span class="pre">parent_expansion_kwargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#hippynn.graphs.nodes.base.definition_helpers.ExpandParents.parent_expansion_kwargs" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

@@ -115,12 +115,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..databases</span><span class="w"> </span><span class="kn">import</span> <span class="n">Database</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..databases.restarter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Restartable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..graphs</span><span class="w"> </span><span class="kn">import</span> <span class="n">GraphModule</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">device_fallback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._deprecations</span><span class="w"> </span><span class="kn">import</span> <span class="n">bundles_deprecated_warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.assembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrainingModules</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.controllers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Controller</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.device</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_devices</span>
@@ -235,6 +235,7 @@
 
 <div class="viewcode-block" id="load_saved_tensors">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.serialization.html#hippynn.load_saved_tensors">[docs]</a>
+<span class="nd">@bundles_deprecated_warnings</span><span class="p">(</span><span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_saved_tensors</span><span class="p">(</span><span class="n">structure_fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">state_fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">weights_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load torch tensors from file.</span>

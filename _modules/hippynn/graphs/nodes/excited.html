@@ -127,8 +127,8 @@
 <span class="sd">    between two states.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;charges i&quot;</span><span class="p">,</span> <span class="s2">&quot;charges j&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;energy i&quot;</span><span class="p">,</span> <span class="s2">&quot;energy j&quot;</span>
-    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">excited_layers</span><span class="o">.</span><span class="n">NACR</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;charges i&quot;</span><span class="p">,</span> <span class="s2">&quot;charges j&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;energy i&quot;</span><span class="p">,</span> <span class="s2">&quot;energy j&quot;</span>
+    <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">excited_layers</span><span class="o">.</span><span class="n">NACR</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">parents</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Automatically build the node for calculating NACR * ΔE between two states i</span>
@@ -151,8 +151,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">module_kwargs</span><span class="p">)</span>
         <span class="n">charges1</span><span class="p">,</span> <span class="n">charges2</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">energy1</span><span class="p">,</span> <span class="n">energy2</span> <span class="o">=</span> <span class="n">parents</span>
         <span class="n">positions</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>
-        <span class="c1"># self._index_state = positions._index_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span>
+        <span class="c1"># self.index_state = positions.index_state</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">charges1</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span>
             <span class="n">charges2</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span>
@@ -172,8 +172,8 @@
 <span class="sd">    between all pairs of states.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;charges&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;energies&quot;</span>
-    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">excited_layers</span><span class="o">.</span><span class="n">NACRMultiState</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;charges&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;energies&quot;</span>
+    <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">excited_layers</span><span class="o">.</span><span class="n">NACRMultiState</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Automatically build the node for calculating NACR * ΔE between all pairs of</span>
@@ -196,8 +196,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">module_kwargs</span><span class="p">)</span>
         <span class="n">charges</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">energies</span> <span class="o">=</span> <span class="n">parents</span>
         <span class="n">positions</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>
-        <span class="c1"># self._index_state = positions._index_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span>
+        <span class="c1"># self.index_state = positions.index_state</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">charges</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span>
             <span class="n">positions</span><span class="p">,</span>
@@ -214,15 +214,15 @@
 <span class="sd">    Predict a localized energy, with contributions from implicitly computed atoms.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;hier_features&quot;</span><span class="p">,</span> <span class="s2">&quot;mol_index&quot;</span><span class="p">,</span> <span class="s2">&quot;atom index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_molecules&quot;</span><span class="p">,</span> <span class="s2">&quot;n_atoms_max&quot;</span>
-    <span class="n">_output_names</span> <span class="o">=</span> <span class="s2">&quot;mol_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_preenergy&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_probabilities&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_propensities&quot;</span>
-    <span class="n">_main_output</span> <span class="o">=</span> <span class="s2">&quot;mol_energy&quot;</span>
-    <span class="n">_output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
-    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">excited_layers</span><span class="o">.</span><span class="n">LocalEnergy</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;hier_features&quot;</span><span class="p">,</span> <span class="s2">&quot;system_index&quot;</span><span class="p">,</span> <span class="s2">&quot;atom index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_systems&quot;</span><span class="p">,</span> <span class="s2">&quot;n_atoms_max&quot;</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;mol_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_preenergy&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_probabilities&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_propensities&quot;</span>
+    <span class="n">main_output_name</span> <span class="o">=</span> <span class="s2">&quot;mol_energy&quot;</span>
+    <span class="n">output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
+    <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">excited_layers</span><span class="o">.</span><span class="n">LocalEnergy</span>
 
 <div class="viewcode-block" id="LocalEnergyNode.expansion0">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.excited.html#hippynn.graphs.nodes.excited.LocalEnergyNode.expansion0">[docs]</a>
-    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Network</span><span class="p">)</span>
+    <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Network</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expansion0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">pdindexer</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">net</span><span class="p">,</span> <span class="n">pdindexer</span></div>
@@ -230,12 +230,12 @@
 
 <div class="viewcode-block" id="LocalEnergyNode.expansion1">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.excited.html#hippynn.graphs.nodes.excited.LocalEnergyNode.expansion1">[docs]</a>
-    <span class="nd">@_parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">)</span>
+    <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expansion1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">pdindexer</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">net</span><span class="p">,</span> <span class="n">pdindexer</span><span class="o">.</span><span class="n">mol_index</span><span class="p">,</span> <span class="n">pdindexer</span><span class="o">.</span><span class="n">atom_index</span><span class="p">,</span> <span class="n">pdindexer</span><span class="o">.</span><span class="n">n_molecules</span><span class="p">,</span> <span class="n">pdindexer</span><span class="o">.</span><span class="n">n_atoms_max</span></div>
+        <span class="k">return</span> <span class="n">net</span><span class="p">,</span> <span class="n">pdindexer</span><span class="o">.</span><span class="n">system_index</span><span class="p">,</span> <span class="n">pdindexer</span><span class="o">.</span><span class="n">atom_index</span><span class="p">,</span> <span class="n">pdindexer</span><span class="o">.</span><span class="n">n_systems</span><span class="p">,</span> <span class="n">pdindexer</span><span class="o">.</span><span class="n">n_atoms_max</span></div>
 
 
-    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
@@ -246,7 +246,7 @@
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.excited.html#hippynn.graphs.nodes.excited.LocalEnergyNode.auto_module">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">auto_module</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">network</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Network</span><span class="p">)</span><span class="o">.</span><span class="n">torch_module</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auto_module_class</span><span class="p">(</span><span class="n">network</span><span class="o">.</span><span class="n">feature_sizes</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_module_class</span><span class="p">(</span><span class="n">network</span><span class="o">.</span><span class="n">feature_sizes</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">)</span></div>
 </div>
 
 

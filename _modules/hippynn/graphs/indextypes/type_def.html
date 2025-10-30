@@ -110,25 +110,45 @@
 <span class="sd">Enum for index states.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
-
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..._deprecations</span><span class="w"> </span><span class="kn">import</span> <span class="n">warn_name_change</span>
 
 <span class="c1"># fmt: off</span>
 <div class="viewcode-block" id="IdxType">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.type_def.html#hippynn.IdxType">[docs]</a>
-<span class="nd">@enum</span><span class="o">.</span><span class="n">unique</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">IdxType</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
     <span class="n">Scalar</span>      <span class="o">=</span> <span class="s2">&quot;Scalar&quot;</span>
-    <span class="n">MolAtom</span>     <span class="o">=</span> <span class="s2">&quot;MolAtom&quot;</span>       <span class="c1"># rectangular padded array of atom-like data</span>
-    <span class="n">Molecules</span>   <span class="o">=</span> <span class="s2">&quot;Molecules&quot;</span>
+    <span class="n">Systems</span>     <span class="o">=</span> <span class="s2">&quot;Systems&quot;</span>
+    <span class="n">Molecules</span>   <span class="o">=</span> <span class="n">Systems</span>         <span class="c1"># deprecated name</span>
+    <span class="n">SysAtom</span>     <span class="o">=</span> <span class="s2">&quot;SysAtom&quot;</span>       <span class="c1"># rectangular padded array of atom-like data</span>
+    <span class="n">MolAtom</span>     <span class="o">=</span> <span class="n">SysAtom</span>         <span class="c1"># deprecated name</span>
     <span class="n">Atoms</span>       <span class="o">=</span> <span class="s2">&quot;Atoms&quot;</span>
-    <span class="n">Pair</span>        <span class="o">=</span> <span class="s2">&quot;Pair&quot;</span>
-    <span class="n">MolAtomAtom</span> <span class="o">=</span> <span class="s2">&quot;MolAtomAtom&quot;</span>   <span class="c1"># rectangular padded array of bond-like data</span>
+    <span class="n">Pairs</span>       <span class="o">=</span> <span class="s2">&quot;Pairs&quot;</span>
+    <span class="n">Pair</span>        <span class="o">=</span> <span class="n">Pairs</span>           <span class="c1"># deprecated name</span>
+    <span class="n">SysAtomAtom</span> <span class="o">=</span> <span class="s2">&quot;SysAtomAtom&quot;</span>   <span class="c1"># rectangular padded array of bond-like data</span>
+    <span class="n">MolAtomAtom</span> <span class="o">=</span> <span class="n">SysAtomAtom</span>     <span class="c1"># deprecated name</span>
     <span class="n">QuadMol</span>     <span class="o">=</span> <span class="s2">&quot;QuadMol&quot;</span>
-    <span class="n">QuadPack</span>    <span class="o">=</span> <span class="s2">&quot;QuadPack&quot;</span>      <span class="c1"># packed 6-vec of quadrupole upper triangle</span>
-    <span class="n">NotFound</span>    <span class="o">=</span> <span class="s2">&quot;NOT FOUND&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&gt;&quot;</span></div>
+    <span class="n">QuadPack</span>    <span class="o">=</span> <span class="s2">&quot;QuadPack&quot;</span>      <span class="c1"># packed 6-vec of quadrupole, upper triangle</span>
+    <span class="n">Unlabeled</span>   <span class="o">=</span> <span class="s2">&quot;Unlabeled&quot;</span>     <span class="c1"># Does not conform to an existing indexing scheme; do not coerce.</span>
+    <span class="n">NotFound</span>    <span class="o">=</span> <span class="n">Unlabeled</span>       
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;NOT FOUND&quot;</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">output</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">Unlabeled</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__members__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warn_name_change</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">output</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">old_module</span><span class="o">=</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">new_module</span><span class="o">=</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
 
 <span class="c1"># fmt: on</span>
+
+
+
 </pre></div>
 
            </div>

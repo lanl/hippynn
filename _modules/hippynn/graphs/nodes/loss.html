@@ -115,7 +115,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">...</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdxType</span><span class="p">,</span> <span class="n">elementwise_compare_reduce</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..indextypes.reduce_funcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">db_state_of</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">_BaseNode</span><span class="p">,</span> <span class="n">InputNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">Node</span><span class="p">,</span> <span class="n">InputNode</span><span class="p">,</span> <span class="n">AutoKw</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">algebra</span> <span class="k">as</span> <span class="n">algebra_modules</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">regularization</span> <span class="k">as</span> <span class="n">reg_modules</span>
 
@@ -140,7 +140,7 @@
 <div class="viewcode-block" id="ReduceSingleNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.ReduceSingleNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ReduceSingleNode</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">):</span>
-    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
+    <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classname</span> <span class="o">+</span> <span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -197,9 +197,13 @@
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">_BaseCompareLoss</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">):</span>
-    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
+    <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span> <span class="n">true</span><span class="p">):</span>
+        
+        <span class="n">predicted</span> <span class="o">=</span> <span class="n">predicted</span><span class="o">.</span><span class="n">main_output</span>
+        <span class="n">true</span> <span class="o">=</span> <span class="n">true</span><span class="o">.</span><span class="n">main_output</span>
+
         <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classname</span><span class="p">,</span> <span class="n">predicted</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">true</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">predicted</span><span class="p">,</span> <span class="n">true</span> <span class="o">=</span> <span class="n">elementwise_compare_reduce</span><span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">true</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">true</span><span class="p">),</span> <span class="n">module</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
@@ -221,7 +225,7 @@
                 <span class="bp">cls</span><span class="o">.</span><span class="n">torch_module</span> <span class="o">=</span> <span class="n">algebra_modules</span><span class="o">.</span><span class="n">LambdaModule</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">_WeightedCompareLoss</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">):</span>
-    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
+    <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span><span class="n">true</span><span class="p">,</span> <span class="n">weight</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classname</span><span class="p">,</span> <span class="n">predicted</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">true</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">weight</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">predicted</span><span class="p">,</span> <span class="n">true</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="n">elementwise_compare_reduce</span><span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">true</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span>
@@ -241,12 +245,18 @@
         <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main_output</span>
         
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">weight</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
-            <span class="n">index_state</span> <span class="o">=</span> <span class="n">db_state_of</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">_index_state</span><span class="p">)</span>
+            <span class="n">index_state</span> <span class="o">=</span> <span class="n">db_state_of</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">index_state</span><span class="p">)</span>
             <span class="n">weight</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">index_state</span><span class="o">=</span><span class="n">index_state</span><span class="p">)</span>
             
-        <span class="n">true</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">true</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">weight</span><span class="o">.</span><span class="n">is_in_loss_graph</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">weight</span><span class="p">,</span> <span class="n">InputNode</span><span class="p">):</span>
+                <span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span><span class="o">.</span><span class="n">true</span>  <span class="c1"># Weight is pre-defined in database</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span><span class="o">.</span><span class="n">pred</span>  <span class="c1"># Weight is dynamically calculated</span>
+
         <span class="n">predicted</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">pred</span>
-        <span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span><span class="o">.</span><span class="n">true</span>
+        <span class="n">true</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">true</span>
+
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">true</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span>
 
 <div class="viewcode-block" id="WeightedMSELoss">
@@ -296,18 +306,16 @@
 
 
 
-<span class="k">class</span><span class="w"> </span><span class="nc">_LPReg</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">):</span>
-    <span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
-    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">reg_modules</span><span class="o">.</span><span class="n">LPReg</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_LPReg</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
+    <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
+    <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">reg_modules</span><span class="o">.</span><span class="n">LPReg</span>
+    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">&quot;network&quot;</span><span class="p">,</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;L^P_Reg(</span><span class="si">{}</span><span class="s2">,p=</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">network</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="p">(</span><span class="n">network</span><span class="p">,)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">p</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">auto_module</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auto_module_class</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">torch_module</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="o">.</span><span class="n">torch_module</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="lpreg">

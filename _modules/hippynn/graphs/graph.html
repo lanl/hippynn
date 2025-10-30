@@ -114,8 +114,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.nodes.base.node_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">_BaseNode</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.nodes.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">InputNode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.nodes.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Node</span><span class="p">,</span> <span class="n">InputNode</span><span class="p">,</span> <span class="n">NodeNotFound</span><span class="p">,</span> <span class="n">NodeAmbiguityError</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_subgraph</span><span class="p">,</span> <span class="n">compute_evaluation_order</span>
 
@@ -162,7 +161,7 @@
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Nodes to compute requires an unspecified input:&quot;</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_node_list</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">_BaseNode</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Node</span><span class="p">):</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Computational objects must be callable.&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -225,16 +224,28 @@
         
         
 
-<div class="viewcode-block" id="GraphModule.node_from_name">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.GraphModule.node_from_name">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">node_from_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward_output_list</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">match</span><span class="o">.</span><span class="n">db_name</span> <span class="o">==</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">match</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
-                <span class="n">node</span> <span class="o">=</span> <span class="n">match</span>
-                <span class="k">break</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Name &#39;</span><span class="si">{}</span><span class="s2">&#39; not found in graph.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">node</span></div>
+<div class="viewcode-block" id="GraphModule.nodes_from_name">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.GraphModule.nodes_from_name">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nodes_from_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        returns list of all matching nodes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward_output_list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">db_name</span> <span class="o">==</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">matches</span></div>
+
+
+<div class="viewcode-block" id="GraphModule.unique_node_from_name">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.GraphModule.unique_node_from_name">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unique_node_from_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes_from_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NodeNotFound</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in graph.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NodeAmbiguityError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Multiple nodes found with name or db_name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="GraphModule.extra_repr">
@@ -258,7 +269,15 @@
             <span class="n">computed</span><span class="p">[</span><span class="n">this_node</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_module</span><span class="p">(</span><span class="n">this_node</span><span class="p">)(</span><span class="o">*</span><span class="p">(</span><span class="n">computed</span><span class="p">[</span><span class="n">inkey</span><span class="p">]</span> <span class="k">for</span> <span class="n">inkey</span> <span class="ow">in</span> <span class="n">inputs_for_this_node</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">computed</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">)</span></div>
-</div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="s2">&quot;node_from_name&quot;</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">.._deprecations</span><span class="w"> </span><span class="kn">import</span> <span class="n">warn_name_change</span>
+            <span class="n">warn_name_change</span><span class="p">(</span><span class="s2">&quot;node_from_name&quot;</span><span class="p">,</span> <span class="s2">&quot;unique_node_from_name&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_node_from_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
 
 
 

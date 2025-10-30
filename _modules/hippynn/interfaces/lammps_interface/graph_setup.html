@@ -152,13 +152,13 @@
     <span class="c1"># Set up graph to accept external pair indices and shifts</span>
 
     <span class="n">in_pair_first</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;pair_first&quot;</span><span class="p">)</span>
-    <span class="n">in_pair_first</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span>
+    <span class="n">in_pair_first</span><span class="o">.</span><span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pairs</span>
     <span class="n">in_pair_second</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;pair_second&quot;</span><span class="p">)</span>
-    <span class="n">in_pair_second</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span>
+    <span class="n">in_pair_second</span><span class="o">.</span><span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pairs</span>
     <span class="n">in_pair_coord</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;pair_coord&quot;</span><span class="p">)</span>
-    <span class="n">in_pair_coord</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pair</span>
+    <span class="n">in_pair_coord</span><span class="o">.</span><span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pairs</span>
     <span class="n">in_nlocal</span> <span class="o">=</span> <span class="n">InputNode</span><span class="p">(</span><span class="s2">&quot;nlocal&quot;</span><span class="p">)</span>
-    <span class="n">in_nlocal</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
+    <span class="n">in_nlocal</span><span class="o">.</span><span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
     <span class="n">pair_dist</span> <span class="o">=</span> <span class="n">VecMag</span><span class="p">(</span><span class="s2">&quot;pair_dist&quot;</span><span class="p">,</span> <span class="n">in_pair_coord</span><span class="p">)</span>
     <span class="n">mapped_pair_first</span> <span class="o">=</span> <span class="n">ReIndexAtomNode</span><span class="p">(</span><span class="s2">&quot;pair_first_internal&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">in_pair_first</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">))</span>
     <span class="n">mapped_pair_second</span> <span class="o">=</span> <span class="n">ReIndexAtomNode</span><span class="p">(</span><span class="s2">&quot;pair_second_internal&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">in_pair_second</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">))</span>
@@ -227,12 +227,12 @@
 <div class="viewcode-block" id="ReIndexAtomNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.graph_setup.html#hippynn.interfaces.lammps_interface.graph_setup.ReIndexAtomNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ReIndexAtomNode</span><span class="p">(</span><span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
-    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;raw_atom_index_array&quot;</span><span class="p">,</span> <span class="s2">&quot;inverse_real_atoms&quot;</span>
-    <span class="n">_main_output</span> <span class="o">=</span> <span class="s2">&quot;total_local_energy&quot;</span>
-    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">ReIndexAtomMod</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;raw_atom_index_array&quot;</span><span class="p">,</span> <span class="s2">&quot;inverse_real_atoms&quot;</span>
+    <span class="n">main_output_name</span> <span class="o">=</span> <span class="s2">&quot;total_local_energy&quot;</span>
+    <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">ReIndexAtomMod</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_index_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_state</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">index_state</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
@@ -256,15 +256,15 @@
 <div class="viewcode-block" id="LocalAtomEnergyNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.interfaces.lammps_interface.graph_setup.html#hippynn.interfaces.lammps_interface.graph_setup.LocalAtomEnergyNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">LocalAtomEnergyNode</span><span class="p">(</span><span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-    <span class="n">_input_names</span> <span class="o">=</span> <span class="s2">&quot;all_atom_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;nlocal&quot;</span>
-    <span class="n">_output_names</span> <span class="o">=</span> <span class="s2">&quot;local_atom_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;total_local_energy&quot;</span>
-    <span class="n">_main_output</span> <span class="o">=</span> <span class="s2">&quot;total_local_energy&quot;</span>
-    <span class="n">_output_index_states</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
-    <span class="n">_auto_module_class</span> <span class="o">=</span> <span class="n">LocalAtomsEnergy</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;all_atom_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;nlocal&quot;</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;local_atom_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;total_local_energy&quot;</span>
+    <span class="n">main_output_name</span> <span class="o">=</span> <span class="s2">&quot;total_local_energy&quot;</span>
+    <span class="n">output_index_states</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
+    <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">LocalAtomsEnergy</span>
 
-    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
-    <span class="n">_parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span><span class="p">)</span>
+    <span class="n">parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
+    <span class="n">parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
