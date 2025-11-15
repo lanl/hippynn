@@ -66,7 +66,7 @@ class TomasWandbLogger():
 # ----- User parameters -----
 def get_parameters():
     """
-    Parse command line arguments for the methane configuration experiment.
+    Parse command line arguments for the methane configuration experimen32768s3276832768.
     
     Returns:
         argparse.Namespace: Parsed command line arguments
@@ -211,7 +211,7 @@ with wandb.init(project="methane-hiphop", settings=wandb_settings, entity="karel
     optimizer = torch.optim.Adam(training_modules.model.parameters(), lr=2.5e-3)
     scheduler = RaiseBatchSizeOnPlateau(
         optimizer=optimizer,
-        max_batch_size=4096,
+        max_batch_size=32768,
         patience=150,
         factor=0.5,
     )
@@ -219,8 +219,8 @@ with wandb.init(project="methane-hiphop", settings=wandb_settings, entity="karel
     controller = PatienceController(
         optimizer=optimizer,
         scheduler=scheduler,
-        batch_size=512,
-        eval_batch_size=4096,
+        batch_size=32768,
+        eval_batch_size=32768,
         max_epochs=n_epochs,
         stopping_key="T-MAE",
         termination_patience=300,
