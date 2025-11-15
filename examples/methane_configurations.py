@@ -85,7 +85,7 @@ def get_parameters():
     parser.add_argument('--data-size', type=int, default=1000,
                        help='Number of configurations to use from dataset')
     parser.add_argument('--test-data', type=str, default="./datasets/test_data_tomas.npz",)
-    parser.add_argument('--model-name', type=str, default="TKHipHopnn_l3_n0,1,2,3,4,5,6,7,10,11,12",
+    parser.add_argument('--model-name', type=str, default="TKHipHopnn_l3_f36_n0,1,2,3,4,5,6,7,10",
                         help='Model architecture to use (HipHopnn, HipNNTSnn, HipNN)')
     args = parser.parse_args()
 
@@ -202,29 +202,16 @@ with wandb.init(project="methane-hiphop", settings=wandb_settings, entity="karel
         "Loss": total_loss,
     }
 
-    plotters = [
-        Hist2D.compare(henergy, saved="energy", shown=False),
-        Hist2D.compare(force, saved="force", shown=False),
-        SensitivityPlot(
-            network.torch_module.sensitivity_layers[0],
-            saved="sensitivity",
-            shown=False,
-        ),
-    ]
 
-    plot_maker = PlotMaker(
-        *plotters,
-        plot_every=10,
-    )
 
     training_modules, db_info = hippynn.experiment.assemble_for_training(
-        total_loss, validation_losses, plot_maker=plot_maker
+        total_loss, validation_losses
     )
 
     optimizer = torch.optim.Adam(training_modules.model.parameters(), lr=2.5e-3)
     scheduler = RaiseBatchSizeOnPlateau(
         optimizer=optimizer,
-        max_batch_size=2048,
+        max_batch_size=4096,
         patience=150,
         factor=0.5,
     )
@@ -232,8 +219,8 @@ with wandb.init(project="methane-hiphop", settings=wandb_settings, entity="karel
     controller = PatienceController(
         optimizer=optimizer,
         scheduler=scheduler,
-        batch_size=256,
-        eval_batch_size=2048,
+        batch_size=512,
+        eval_batch_size=4096,
         max_epochs=n_epochs,
         stopping_key="T-MAE",
         termination_patience=300,
