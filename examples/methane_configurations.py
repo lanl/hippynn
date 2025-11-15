@@ -232,6 +232,7 @@ with wandb.init(project="methane-hiphop", settings=wandb_settings, entity="karel
     experiment_params = hippynn.experiment.SetupParams(
         controller=controller,
         device=device,
+        batch_size=32768,
     )
 
     training_modules, controller, metric_tracker = setup_training(
