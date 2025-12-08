@@ -38,14 +38,10 @@ def test_polynomial_invariants():
 
                 assert torch.allclose(invars_poly, invars_torch, rtol=1e-4, atol=1e-4)
 
-                # we can only do gradcheck if triton is available because gradcheck requires float64,
-                # but the old HopInvariantLayerTorch only supports float32.
+                tensor_features = tensor_features.to(torch.float64)
 
-                if triton_available and torch.cuda.is_available():
-                    tensor_features = tensor_features.to(torch.float64)
-
-                    assert torch.autograd.gradcheck(EvaluatePolynomials.apply, (tensor_features, polyCollection))
-                    assert torch.autograd.gradgradcheck(EvaluatePolynomials.apply, (tensor_features, polyCollection))
+                assert torch.autograd.gradcheck(EvaluatePolynomials.apply, (tensor_features, polyCollection))
+                assert torch.autograd.gradgradcheck(EvaluatePolynomials.apply, (tensor_features, polyCollection))
 
 def test_invariants_wrapper():
 
@@ -83,7 +79,7 @@ def test_invariants_wrapper():
             # old HopInvariantLayerTorch only supports float32
             # Thus, we can only gradcheck if triton is available
 
-            if triton_available:
+            if triton_available and torch.cuda.is_available():
                 tensor_features = tensor_features.to(torch.float64)
 
                 assert torch.autograd.gradcheck(invariantLayer, (tensor_features,))
