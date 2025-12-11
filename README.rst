@@ -109,6 +109,7 @@ As we clean up the rough edges, we are preparing a manuscript.
 If, in the mean time, you are using hippynn in your work, please cite this repository and the HIP-NN paper:
 
 .. code:: bibtex
+
   @article{hippynn,
       author = {Lubbers, Nicholas and Smith, Justin S. and Barros, Kipton},
       title = {Hierarchical modeling of molecular energies using a deep neural network},
@@ -123,8 +124,7 @@ If, in the mean time, you are using hippynn in your work, please cite this repos
       eprint = {https://pubs.aip.org/aip/jcp/article-pdf/doi/10.1063/1.5011181/16654049/241715_1_online.pdf},
   }
 
-See our related publications at `our publications page <https://lanl.github.io/hippynn/bibliography.html>`_.
-
+See `https://lanl.github.io/hippynn/bibliography.html <https://lanl.github.io/hippynn/bibliography.html>`_ for other references.
 See `AUTHORS.txt <AUTHORS.txt>`_ for information on authors.
 
 See `LICENSE.txt <LICENSE.txt>`_ for licensing information. hippynn is licensed under the BSD-3 license.
