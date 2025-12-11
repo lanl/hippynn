@@ -125,9 +125,11 @@ If, in the mean time, you are using hippynn in your work, please cite this repos
   }
 
 See `https://lanl.github.io/hippynn/bibliography.html <https://lanl.github.io/hippynn/bibliography.html>`_ for other references.
+
 See `AUTHORS.txt <AUTHORS.txt>`_ for information on authors.
 
 See `LICENSE.txt <LICENSE.txt>`_ for licensing information. hippynn is licensed under the BSD-3 license.
+
 See `COPYRIGHT.txt <COPYRIGHT.txt>`_ for copyright information.
 
 Triad National Security, LLC (Triad) owns the copyright to hippynn, which it identifies as project number LA-CC-19-093.
