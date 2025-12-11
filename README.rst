@@ -97,7 +97,7 @@ Documentation
 =============
 
 Please see https://lanl.github.io/hippynn/ for the latest documentation. You can also build
-the documentation locally, see /docs/README.txt
+the documentation locally, see `docs/README.txt <docs/README.txt>`_
 
 Other things
 ============
@@ -108,7 +108,7 @@ of what version you are using if you need to maintain consistency.
 As we clean up the rough edges, we are preparing a manuscript.
 If, in the mean time, you are using hippynn in your work, please cite this repository and the HIP-NN paper:
 
-  ```bibtex
+.. code:: bibtex
   @article{hippynn,
       author = {Lubbers, Nicholas and Smith, Justin S. and Barros, Kipton},
       title = {Hierarchical modeling of molecular energies using a deep neural network},
@@ -122,15 +122,13 @@ If, in the mean time, you are using hippynn in your work, please cite this repos
       doi = {10.1063/1.5011181},
       eprint = {https://pubs.aip.org/aip/jcp/article-pdf/doi/10.1063/1.5011181/16654049/241715_1_online.pdf},
   }
-  ```
-Lubbers, N., Smith, J. S., & Barros, K. (2018).
-Hierarchical modeling of molecular energies using a deep neural network.
-The Journal of chemical physics, 148(24), 241715.
 
-See AUTHORS.txt for information on authors.
+See our related publications at `our publications page <https://lanl.github.io/hippynn/bibliography.html>`_.
 
-See LICENSE.txt for licensing information. hippynn is licensed under the BSD-3 license.
-See COPYRIGHT.txt for copyright information.
+See `AUTHORS.txt <AUTHORS.txt>`_ for information on authors.
+
+See `LICENSE.txt <LICENSE.txt>`_ for licensing information. hippynn is licensed under the BSD-3 license.
+See `COPYRIGHT.txt <COPYRIGHT.txt>`_ for copyright information.
 
 Triad National Security, LLC (Triad) owns the copyright to hippynn, which it identifies as project number LA-CC-19-093.
 
