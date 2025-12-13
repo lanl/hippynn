@@ -405,7 +405,6 @@ def setup_stressforce_nodes(energy_node, return_transformed_inputs=False, positi
     :return: (forces, stress) or (forces, stress, strained_positions, strained_cell, strain) depending on return_transformed_inputs flag.
     """
 
-    from .misc import StrainInducer
 
     from .tags import Positions
     from .inputs import CellNode

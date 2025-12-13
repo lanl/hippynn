@@ -1,6 +1,7 @@
 import torch
 
 from .open import _PairIndexer, PairMemory
+from .csr_pairs import calc_neighbors
 
 # Deprecated?
 class StaticImagePeriodicPairIndexer(_PairIndexer):
@@ -384,3 +385,19 @@ class PeriodicPairIndexerMemory(PairMemory):
 
         # We filter the lists to only send forward relevant pairs (those with distance under cutoff), improving performance.   
         return filter_pairs(self.hard_dist_cutoff, distflat, self.pair_first, self.pair_second, paircoord, self.cell_offsets, self.offset_num)
+    
+
+class SparsePairIndexer(_PairIndexer):
+    def forward(self, coordinates, nonblank, real_atoms, inv_real_atoms, cells, cutoff=None):
+
+        # TODO CSR algorithm re-generates atom indices (real atoms/inv_real_atoms),
+        # pass those in instead (in case atoms are numbered differently) 
+
+        if cutoff is None:
+            cutoff = self.hard_dist_cutoff
+       
+        pair_first, pair_second, cell_offsets, distflat, pair_coord = calc_neighbors(coordinates, nonblank, cells, cutoff)
+
+        # final None is offset number, which is used when caching pairs?
+        return distflat, pair_first, pair_second, pair_coord, cell_offsets, None
+
