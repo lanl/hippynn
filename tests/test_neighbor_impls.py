@@ -69,27 +69,31 @@ def test_consistency(pairfinder_cls,dtype,cutoff,supercell):
     ref_discrete, ref_dist, ref_disp = canonicalize_outs(*refs)
     got_discrete, got_dist, got_disp = canonicalize_outs(*gots)
 
-    assert ref_dist.requires_grad
-    assert got_dist.requires_grad
-    
+    got_has_grad = got_dist.requires_grad, got_disp.requires_grad
+    assert all(got_has_grad)
+
     print("n_pairs:", ref_dist.shape[0],end=" ") # if pytest is run in -s, we will show number of pairs.
     assert ref_dist.shape == got_dist.shape, "different number of pairs"
     assert torch.equal(ref_discrete, got_discrete), "different discrete outputs"
-    atol=1e-11 if dtype==torch.float64 else 1e-5
-    is_close = torch.isclose(ref_dist, got_dist, atol=atol, rtol=0)
+
+    # These tols can be adjusted because right now essentially all algorithms recompute using the discrete indices and the same pytorch calls.
+    rtol = 1e-13 if dtype==torch.float64 else 1e-6
+    atol = 0
+
+    is_close = torch.isclose(ref_dist, got_dist, atol=atol, rtol=rtol)
     bad_rows = torch.where(~is_close)[0]
     bad_rows = torch.unique(bad_rows)
     if bad_rows.any():
         print(f"Different distances detected: {bad_rows=}\n values:{torch.stack([ref_dist,got_dist],dim=1)[bad_rows][:1]}")
         raise ValueError("Different distances detected! {bad_rows=}")
-    assert torch.allclose(ref_dist, got_dist,atol=atol,rtol=0)
+    assert torch.allclose(ref_dist, got_dist,atol=atol,rtol=rtol)
 
-    is_close = torch.isclose(ref_disp, got_disp, atol=atol, rtol=0)
+    is_close = torch.isclose(ref_disp, got_disp, atol=atol, rtol=rtol)
     bad_rows = torch.where(~is_close)[0]
     bad_rows = torch.unique(bad_rows)
     if bad_rows.any():
         print(f"Different displacements detected: {bad_rows=}\n values:{torch.stack([ref_disp,got_disp],dim=2)[bad_rows][:1]}")
         raise ValueError(f"Different displacements detected! {bad_rows=}")
-    assert torch.allclose(ref_disp, got_disp,atol=atol,rtol=0)
+    assert torch.allclose(ref_disp, got_disp,atol=atol,rtol=rtol)
 
 

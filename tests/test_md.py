@@ -21,7 +21,7 @@ from hippynn.molecular_dynamics.md import (
     MolecularDynamics,
 )
 
-from conftest import xfail_if_no_models, ignore_relocation, ignore_weights_only_warning, ignore_sensitivity_warning, MODEL_DIR
+from conftest import skip_if_no_models, ignore_relocation, ignore_weights_only_warning, ignore_sensitivity_warning, MODEL_DIR
 
 from ase import Atoms
 from ase.md.velocitydistribution import (
@@ -109,7 +109,7 @@ def generate_ase_results(hippynn_model_location, n_steps=3):
 @ignore_weights_only_warning
 @ignore_relocation
 @ignore_sensitivity_warning
-@xfail_if_no_models
+@skip_if_no_models
 def test_md_verlet():
     # Define coordinates and results from running the function `generate_ase_results` from above
 

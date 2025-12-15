@@ -694,6 +694,7 @@ def calc_neighbors(
     cells: torch.Tensor,                     # [n_systems, 3, 3] float
     cutoff: float,
     use_full_stencil: bool = True,
+    return_displacements=True,
 ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     """Full neighbor-list pipeline (batched triclinic PBC).
 
@@ -718,6 +719,8 @@ def calc_neighbors(
         Per-system radial cutoff; a scalar is broadcast.
     use_full_stencil : bool, default ``True``
         Controls the image offset stencil in :func:`build_image_offsets`.
+    return_displacements: bool, default ``True``
+        If true, return distances and displacments as well as discrete indices.
 
     Returns
     -------
@@ -803,10 +806,11 @@ def calc_neighbors(
     idA    = pairs["idA"].to(torch.long)
     idB    = pairs["idB"].to(torch.long)
     rel_k = pairs["offsets"]
+    sys = pairs["system"]
 
     with torch.no_grad():
 
-        pair_cutoffs = systemCSR['cutoff'][pairs["system"]]
+        pair_cutoffs = systemCSR['cutoff'][sys]
         keep = pairs["distance"] <= pair_cutoffs
         diff_atoms = (idA != idB)
         # For same atom pairs, we need to drop the self-connection,
@@ -821,15 +825,17 @@ def calc_neighbors(
     posA = posA[keep]
     posB = posB[keep]
     rel_k = rel_k[keep]
+    sys = sys[keep]
 
-    # Todo carry through original positions and do this in terms of relative displacements so that
-    # the only part that needs to be differentiable is this final piece.
-    # This helps reduce autograd load through inactive pairs.
-    # This also helps ensure floating point accuracy between implementations
 
-    disp = posA - posB
-    dist = torch.norm(disp,dim=1)
     
+    outs = idA, idB, sys, rel_k,
 
-    return idA, idB, rel_k, dist, disp
+    if return_displacements:
+        # Only recalculate if the calling code asks for it.
+        # (Layer wrapper does not; tests do)
+        disp = posA - posB
+        dist = torch.norm(disp,dim=1)
+        outs = *outs, dist, disp
+    return outs
 

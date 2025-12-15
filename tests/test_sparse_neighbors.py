@@ -302,7 +302,7 @@ def test_neighbors_vs_bruteforce(n_systems, n_atoms_max, dtype, device):
     positions, nonblank, cells = random_batch(n_systems, n_atoms_max, device, dtype=dtype)
 
     with torch.no_grad():
-        idA, idB, rel_k, got_dist, got_disp = calc_neighbors(
+        idA, idB, sys, rel_k, got_dist, got_disp = calc_neighbors(
             positions=positions,
             nonblank=nonblank,
             cells=cells,
@@ -333,7 +333,7 @@ def test_empty(device, n_systems, n_atoms_max):
     cells = random_triclinic_cells(n_systems, device, dtype)
 
     with torch.no_grad():
-        idA, idB, rel_k, dist, disp = calc_neighbors(positions, nonblank, cells, cutoff)
+        idA, idB, sys, rel_k, dist, disp = calc_neighbors(positions, nonblank, cells, cutoff)
 
     # With only one atom total, there should be no pairs
     assert idA.numel() == 0, "IdA nonempty"
@@ -353,7 +353,7 @@ def test_single_lone_atom(device, n_systems, n_atoms_max):
     cells = random_triclinic_cells(n_systems, device, dtype)
 
     with torch.no_grad():
-        idA, idB, rel_k, dist, disp = calc_neighbors(positions, nonblank, cells, cutoff)
+        idA, idB, sys, rel_k, dist, disp = calc_neighbors(positions, nonblank, cells, cutoff)
 
     # With only one atom total, there should be no pairs
     assert idA.numel() == 0, "IdA nonempty"
@@ -408,7 +408,7 @@ def matches_hippynn(positions, nonblank, cells, cutoff, device):
     
     # Build our neighbors
     with torch.no_grad():
-        idA, idB, rel_k, got_dist, got_disp = calc_neighbors(positions, nonblank, cells, cutoff)
+        idA, idB, sys, rel_k, got_dist, got_disp = calc_neighbors(positions, nonblank, cells, cutoff)
         # for v in [idA, idB, rel_k, dist]:
         #     print(v.shape, v.dtype, *minmax(v))
 
@@ -519,7 +519,7 @@ def test_no_duplicate_pairs(cell_kind,cutoff_factor,device):
     nonblank = torch.ones((S, N), dtype=torch.bool, device=device)
 
     with torch.no_grad():
-        idA, idB, rel_k, dist, disp = calc_neighbors(
+        idA, idB, sys, rel_k, dist, disp = calc_neighbors(
             positions=R,
             nonblank=nonblank,
             cells=H,
@@ -563,7 +563,7 @@ def test_device_dtype_combos(device_dtype:tuple[str]):
     cells = torch.eye(3, dtype=dtype, device=device).unsqueeze(0) * 5.0  # roomy box
     cutoff = 0.3
 
-    idA, idB, rel_k, dist, disp = calc_neighbors(
+    idA, idB, sys, rel_k, dist, disp = calc_neighbors(
         positions=positions,
         nonblank=nonblank,
         cells=cells,
@@ -666,7 +666,7 @@ def test_neighbor_counts_on_toy():
     assert vA.numel() == 4, "wrong number of voxel pairs " # 2 self plus both voxels to each other.
 
     # 5) Final pairs: two ordered pairs, both at distance 0.1
-    idA, idB, rel_k, dist, disp = calc_neighbors(
+    idA, idB, sys, rel_k, dist, disp = calc_neighbors(
         positions=pos,
         nonblank=nonblank,
         cells=cells,
@@ -707,7 +707,7 @@ def test_triclinic_bruteforce(A: torch.Tensor):
     idA_b, idB_b, k_b, dist_ref, d_ref = brute_force_pairs(positions, nonblank, cells, cutoff)
 
     # Pipeline under test
-    idA, idB, k, d, got_disp = calc_neighbors(
+    idA, idB, sys, k, d, got_disp = calc_neighbors(
         positions=positions,
         nonblank=nonblank,
         cells=cells,

@@ -2,7 +2,7 @@ import pytest
 
 import hippynn
 
-from conftest import xfail_if_no_models, MODEL_DIR
+from conftest import skip_if_no_models, MODEL_DIR
 from conftest import ignore_cusp_warning, ignore_relocation, ignore_weights_only_warning, ignore_sensitivity_warning
 import torch
 
@@ -10,7 +10,7 @@ import torch
 @ignore_relocation
 @ignore_weights_only_warning
 @ignore_cusp_warning
-@xfail_if_no_models
+@skip_if_no_models
 def test_load_old():
     from hippynn.tools import active_directory
     from hippynn.experiment import load_checkpoint_from_cwd
@@ -26,7 +26,7 @@ def test_load_old():
 @ignore_cusp_warning
 @ignore_relocation
 @ignore_sensitivity_warning
-@xfail_if_no_models
+@skip_if_no_models
 def test_run_old(example_box):
     from hippynn.tools import active_directory
     from hippynn.experiment import load_checkpoint_from_cwd
@@ -52,7 +52,7 @@ def test_run_old(example_box):
 @ignore_weights_only_warning
 @ignore_cusp_warning
 @ignore_relocation
-@xfail_if_no_models
+@skip_if_no_models
 def test_validate_old():
 
     from optimizer.test_configs import c2h6_config

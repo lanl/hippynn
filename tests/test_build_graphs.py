@@ -3,15 +3,15 @@ import pytest
 import hippynn
 import ase
 
-from conftest import xfail_if_no_models, MODEL_DIR
+from conftest import skip_if_no_models, MODEL_DIR
 from conftest import ignore_cusp_warning, ignore_relocation, ignore_weights_only_warning
 
-def xfail_if_no_lammps(func):
+def skip_if_no_lammps(func):
     try:
         import lammps
     except ImportError:  # missing lammps doesn't raise ImportError per se.  ModuleNotFoundError.
         # Something went wrong importing!
-        wrapper = pytest.mark.xfail(strict=False)
+        wrapper = pytest.mark.skip(reason="lammps is not installed")
     else:
         # Importing
         wrapper = lambda f: f
@@ -28,7 +28,7 @@ def test_build_training_modules(energy_node):
 
 
 # Mark as xfail because lammps python installations require manual steps.
-@xfail_if_no_lammps
+@skip_if_no_lammps
 def test_build_lammps_interface(energy_node):
     from hippynn.interfaces.lammps_interface import MLIAPInterface
 
@@ -44,7 +44,7 @@ def test_build_ase_interface(energy_node):
 @ignore_weights_only_warning
 @ignore_cusp_warning
 @ignore_relocation
-@xfail_if_no_models
+@skip_if_no_models
 def test_build_ensemble_auto():
 
     from hippynn.graphs import make_ensemble
@@ -74,7 +74,7 @@ def example_ensemble_graphs():
 @ignore_weights_only_warning
 @ignore_cusp_warning
 @ignore_relocation
-@xfail_if_no_models
+@skip_if_no_models
 def test_build_ensemble_nodes(example_ensemble_graphs):
     from hippynn.graphs import make_ensemble
 
@@ -90,7 +90,7 @@ def test_build_ensemble_nodes(example_ensemble_graphs):
 @ignore_weights_only_warning
 @ignore_cusp_warning
 @ignore_relocation
-@xfail_if_no_models
+@skip_if_no_models
 def test_build_ensemble_target_graphs(example_ensemble_graphs):
     from hippynn.graphs import make_ensemble
 
@@ -102,7 +102,7 @@ def test_build_ensemble_target_graphs(example_ensemble_graphs):
 @ignore_weights_only_warning
 @ignore_cusp_warning
 @ignore_relocation
-@xfail_if_no_models
+@skip_if_no_models
 def test_build_ensemble_target_nodes(example_ensemble_graphs):
     from hippynn.graphs import make_ensemble
 

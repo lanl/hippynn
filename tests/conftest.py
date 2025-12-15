@@ -9,11 +9,11 @@ from pathlib import Path
 MODEL_DIR = Path(__file__).parents[2] / "collected_models"
 
 
-def xfail_if_no_models(func):
+def skip_if_no_models(func):
     if MODEL_DIR.exists():
         wrapper = lambda f: f
     else:
-        wrapper = pytest.mark.xfail(strict=False)
+        wrapper = pytest.mark.ski(reason="model resources were not found.")
     return wrapper(func)
 
 ignore_relocation = pytest.mark.filterwarnings("ignore:.*HIPPYNN_DEPRECATION_WARNINGS=ignore*.")

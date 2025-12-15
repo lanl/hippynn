@@ -396,8 +396,16 @@ class SparsePairIndexer(_PairIndexer):
         if cutoff is None:
             cutoff = self.hard_dist_cutoff
        
-        pair_first, pair_second, cell_offsets, distflat, pair_coord = calc_neighbors(coordinates, nonblank, cells, cutoff)
+        with torch.no_grad():
+            pair_first, pair_second, pair_system, cell_offsets = calc_neighbors(coordinates, nonblank, cells, cutoff, return_displacements=False)
+
+        pair_shifts = torch.matmul(cell_offsets.unsqueeze(1).to(cells.dtype), cells[pair_system]).squeeze(1)
+        n_systems, n_atoms, ndim = coordinates.shape
+
+        coordflat = coordinates.reshape(n_systems * n_atoms, 3)[real_atoms]
+        pair_coord = coordflat[pair_first] - coordflat[pair_second] + pair_shifts
+        distflat2 = pair_coord.norm(dim=1)
 
         # final None is offset number, which is used when caching pairs?
-        return distflat, pair_first, pair_second, pair_coord, cell_offsets, None
+        return distflat2, pair_first, pair_second, pair_coord, cell_offsets, None
 
