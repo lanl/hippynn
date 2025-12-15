@@ -30,7 +30,7 @@ from typing import Tuple
 from .csrtable import CSRTable, row_and_offset
 
 
-def build_initial_data(positions,nonblank,cells,cutoff):
+def build_initial_data(positions, nonblank, cells, cutoff):
     """Package raw inputs (positions/mask/cells/cutoff) into CSR containers.
 
     Parameters
@@ -71,14 +71,14 @@ def build_initial_data(positions,nonblank,cells,cutoff):
     n_sys = cells.shape[0]
     assert n_sys == positions.shape[0], f"number of systems not identical ({n_sys} vs {positions.shape[0]})"
 
-    if isinstance(cutoff,float):
-        cutoff = torch.as_tensor(cutoff,dtype=coord_dtype,device=device)
-    if cutoff.ndim==0:
+    if isinstance(cutoff, float):
+        cutoff = torch.as_tensor(cutoff, dtype=coord_dtype, device=device)
+    if cutoff.ndim == 0:
         cutoff = cutoff.expand(n_sys)
-    assert cutoff.shape[0]==n_sys
+    assert cutoff.shape[0] == n_sys
     sys_counts = torch.ones(n_sys, device=device, dtype=torch.long)
-    systemCSR = CSRTable.from_counts(sys_counts, row_data={"cells":cells,"cutoff":cutoff})
-    atomCSR = CSRTable.from_mask(nonblank, data={"raw_positions":positions})
+    systemCSR = CSRTable.from_counts(sys_counts, row_data={"cells": cells, "cutoff": cutoff})
+    atomCSR = CSRTable.from_mask(nonblank, data={"raw_positions": positions})
     # global atom id, including padding, to carry on for tracking.
     atomCSR["atom_gid"] = torch.arange(atomCSR.nnz, dtype=torch.long, device=device)
 
@@ -86,8 +86,8 @@ def build_initial_data(positions,nonblank,cells,cutoff):
 
 
 def normalize_atoms(
-    atomCSR: CSRTable,      # [n_systems, n_atoms_max, 3]
-    systemCSR: CSRTable,    # [n_systems, n_atoms_max] bool
+    atomCSR: CSRTable,  # [n_systems, n_atoms_max, 3]
+    systemCSR: CSRTable,  # [n_systems, n_atoms_max] bool
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Wrap atoms into the primary triclinic cell and record image offsets.
 
@@ -121,33 +121,31 @@ def normalize_atoms(
     --------
     ``positions`` remain differentiable w.r.t. input positions; ``offsets``/``cells_inv`` are non-differentiable.
     """
-    
+
     positions = atomCSR["raw_positions"]
-    dtype = positions.dtype  
+    dtype = positions.dtype
 
     # Batched fractional coords and wrapping (triclinic)
-    cells= systemCSR["cells"]
-    systemCSR["cells_inv"] = cells_inv = torch.linalg.inv(cells)         # [n_systems,3,3]
+    cells = systemCSR["cells"]
+    systemCSR["cells_inv"] = cells_inv = torch.linalg.inv(cells)  # [n_systems,3,3]
 
     sys_ID = atomCSR["rows"]
 
-    frac = torch.einsum("ax, axb->ab", positions,  cells_inv[sys_ID])      # [n_atoms,3]
-    offsets = torch.floor(frac).to(torch.long)                               # integer images
-    frac_wrapped = frac - offsets.to(dtype)                            # [n_systems,n_atoms_max,3] in [0,1)
-    positions_wrapped = torch.einsum("ab, abx->ax", frac_wrapped, cells[sys_ID])             # back to Cartesian
+    frac = torch.einsum("ax, axb->ab", positions, cells_inv[sys_ID])  # [n_atoms,3]
+    offsets = torch.floor(frac).to(torch.long)  # integer images
+    frac_wrapped = frac - offsets.to(dtype)  # [n_systems,n_atoms_max,3] in [0,1)
+    positions_wrapped = torch.einsum("ab, abx->ax", frac_wrapped, cells[sys_ID])  # back to Cartesian
 
     atomCSR["positions"] = positions_wrapped
     atomCSR["offsets"] = offsets
 
-    #recon = (frac_wrapped + offsets.to(frac_wrapped.dtype)) @ systemCSR["cells"][sys_ID]
-    #assert (recon - positions).abs().max() <= (1e-5 if positions.dtype==torch.float32 else 1e-10), "Failed reconstruction!!"
+    # recon = (frac_wrapped + offsets.to(frac_wrapped.dtype)) @ systemCSR["cells"][sys_ID]
+    # assert (recon - positions).abs().max() <= (1e-5 if positions.dtype==torch.float32 else 1e-10), "Failed reconstruction!!"
 
     return atomCSR, systemCSR
 
 
-
-
-def build_image_offsets(systemCSR:CSRTable, use_full_stencil=True) -> CSRTable:
+def build_image_offsets(systemCSR: CSRTable, use_full_stencil=True) -> CSRTable:
     """Compute per-system periodic image offsets sufficient for ``cutoff``.
 
     The stencil size per axis is
@@ -177,8 +175,7 @@ def build_image_offsets(systemCSR:CSRTable, use_full_stencil=True) -> CSRTable:
     ----------
     O(S) to compute per-axis replication counts; O(total images) to materialize.
     """
-    
-    
+
     if not use_full_stencil:
         # TODO: Optional: Implement different stencils.
         # # Calculate nonzero delta entries
@@ -191,19 +188,17 @@ def build_image_offsets(systemCSR:CSRTable, use_full_stencil=True) -> CSRTable:
         # first_nonzero_positive = (all_deltas*first_nonzero_mask).clamp(min=0).to(torch.bool).any(dim=1)
         # one_way_deltas = first_nonzero_positive | (all_deltas==0).all(dim=1)
         # deltas = all_deltas[one_way_deltas]
-        
-        raise ValueError("Not implemented!")
-    
 
-    cells = systemCSR['cells']
+        raise ValueError("Not implemented!")
+
+    cells = systemCSR["cells"]
     n_systems = cells.shape[0]
     device = cells.device
     coord_dtype = cells.dtype
 
+    systemCSR["reciprocol_norms"] = row_norms = torch.linalg.norm(systemCSR["cells_inv"], dim=1)
 
-    systemCSR['reciprocol_norms'] = row_norms = torch.linalg.norm(systemCSR['cells_inv'], dim=1)
-    
-    n_rep_per_axis = torch.ceil(systemCSR['cutoff'].unsqueeze(-1) * row_norms).to(torch.long).clamp(min=1)
+    n_rep_per_axis = torch.ceil(systemCSR["cutoff"].unsqueeze(-1) * row_norms).to(torch.long).clamp(min=1)
 
     # replication counts for periodic boundaries
     per_axis_counts = 2 * n_rep_per_axis + 1
@@ -239,7 +234,7 @@ def build_image_offsets(systemCSR:CSRTable, use_full_stencil=True) -> CSRTable:
     return imageCSR
 
 
-def calculate_aabb(positions: torch.Tensor, system_id: torch.Tensor, n_systems:int):
+def calculate_aabb(positions: torch.Tensor, system_id: torch.Tensor, n_systems: int):
     """Compute per-system axis-aligned bounding boxes (AABB).
 
     Parameters
@@ -266,7 +261,7 @@ def calculate_aabb(positions: torch.Tensor, system_id: torch.Tensor, n_systems:i
 
     dtype = positions.dtype
     device = positions.device
-    mins = torch.full((n_systems, 3), float("inf"),  device=device, dtype=dtype)
+    mins = torch.full((n_systems, 3), float("inf"), device=device, dtype=dtype)
     maxs = torch.full((n_systems, 3), float("-inf"), device=device, dtype=dtype)
     sys3 = system_id.unsqueeze(1).expand(-1, 3)  # [M,3] # each column xyz reduced in parallel
     # include_self=True works with ±inf init and covers empty systems safely
@@ -274,12 +269,13 @@ def calculate_aabb(positions: torch.Tensor, system_id: torch.Tensor, n_systems:i
     maxs.scatter_reduce_(0, sys3, positions, reduce="amax", include_self=True)
 
     ## maybe not needed at all?
-    #If a system has no entries, give it a span of [0,0]
+    # If a system has no entries, give it a span of [0,0]
     system_present = torch.zeros(n_systems, dtype=torch.bool, device=device)
     system_present[system_id] = True
     empty_mask = ~system_present
     if empty_mask.any():
-        mins = mins.clone(); maxs = maxs.clone()
+        mins = mins.clone()
+        maxs = maxs.clone()
         mins[empty_mask] = 0
         maxs[empty_mask] = 0
 
@@ -287,9 +283,9 @@ def calculate_aabb(positions: torch.Tensor, system_id: torch.Tensor, n_systems:i
 
 
 def build_image_atoms(
-    atomCSR : CSRTable, # rows are systems, cols are atoms in system
-    imageCSR: CSRTable, # rows are displaced images of systems
-    systemCSR: CSRTable, # rows are systems
+    atomCSR: CSRTable,  # rows are systems, cols are atoms in system
+    imageCSR: CSRTable,  # rows are displaced images of systems
+    systemCSR: CSRTable,  # rows are systems
 ) -> CSRTable:
     """Expand primary atoms across image offsets (row-wise outer join).
 
@@ -323,60 +319,59 @@ def build_image_atoms(
     ----------
     O(N*I) per system in the worst case before pruning; typically much less after AABB culling.
     """
-    
-  
+
     # ---------- Outer (row-wise Cartesian join): atomCSR × imageCSR ----------
     image_atomCSR = atomCSR.outer(
         imageCSR,
         operations={
+            # fmt: off
             # Shift positions using the shift of the image
-            ("positions", "shift",        "positions"): lambda p, s: p + s,   # coord_dtype
+            ("positions", "shift", "positions"):     lambda p, s: p + s,  # floatX
             # Offsets shift like positions
-            ("offsets",   "image_offsets", "offsets"):   lambda ka, kd: ka + kd,  # long
+            ("offsets", "image_offsets", "offsets"): lambda ka, kd: ka + kd,  # long
             # Retain atom id
-            ("atom_gid",  None,           "atom_gid"):  lambda f: f,              # long
+            ("atom_gid", None, "atom_gid"):          lambda f: f,  # long
             # Inherit primary images from image_cellCSR
-            (None,        "is_primary",   "is_primary"):lambda ip: ip,            # bool
+            (None, "is_primary", "is_primary"):      lambda ip: ip,  # bool
             # Inherit system number from the atomCSR
-            ("rows",      None,           "system"):    lambda r: r,              # long
+            ("rows", None, "system"):                lambda r: r,  # long
+            # fmt: on
         },
     )
 
-    
-    primary_positions = atomCSR['positions']
-    primary_systems = atomCSR['rows']
-    n_systems = systemCSR['rows'].shape[0]
-    
+    primary_positions = atomCSR["positions"]
+    primary_systems = atomCSR["rows"]
+    n_systems = systemCSR["rows"].shape[0]
+
     mins, maxs = calculate_aabb(primary_positions, primary_systems, n_systems)
     # broadcast back to images
-    image_system = image_atomCSR['system']
-    image_positions = image_atomCSR['positions']
-    
+    image_system = image_atomCSR["system"]
+    image_positions = image_atomCSR["positions"]
+
     mins = mins[image_system]
     maxs = maxs[image_system]
 
-    gap_1 = image_positions-maxs # positive if image-atom is on right side of box
-    gap_2 = mins-image_positions # positive of image-atom is on left side of box
+    gap_1 = image_positions - maxs  # positive if image-atom is on right side of box
+    gap_2 = mins - image_positions  # positive of image-atom is on left side of box
 
     # smallest positive gap wins, if both are negative, the particle is in the box range for that axis.
     # total_gap = gap_2.clamp(min=gap_1).clamp(min=0) # alternate calculation
-    total_gap = torch.maximum(torch.maximum(gap_1,gap_2),torch.zeros_like(gap_1))
+    total_gap = torch.maximum(torch.maximum(gap_1, gap_2), torch.zeros_like(gap_1))
     dist_to_box = total_gap.norm(dim=-1)
-    
-    image_cutoffs = systemCSR['cutoff'][image_system] 
-    
+
+    image_cutoffs = systemCSR["cutoff"][image_system]
+
     eps = 1e-5
-    close_enough_to_aabb = dist_to_box < image_cutoffs * (1+eps)
-    
+    close_enough_to_aabb = dist_to_box < image_cutoffs * (1 + eps)
+
     # Drop images which cannot be relevant
     image_atomCSR = image_atomCSR.filter_mask(close_enough_to_aabb)
 
     return image_atomCSR
 
 
-
 def voxelize_images(
-    image_atomCSR: CSRTable,      # nnz-aligned fields: "positions","atom_gid","offsets","is_primary","system"
+    image_atomCSR: CSRTable,  # nnz-aligned fields: "positions","atom_gid","offsets","is_primary","system"
     systemCSR: CSRTable,
 ) -> Tuple[CSRTable, CSRTable, torch.Tensor]:
     """Partition image-atoms into near-cubic voxels of edge ≈ cutoff.
@@ -415,58 +410,54 @@ def voxelize_images(
     O(M) to assign atoms to voxels; O(V) to materialize per-system voxel metadata.
     """
     # ---- shapes / device / dtype up-front ----
-    cutoff = systemCSR['cutoff']
+    cutoff = systemCSR["cutoff"]
     dtype = cutoff.dtype
     device = cutoff.device
-    n_systems = systemCSR['rows'].shape[0]
-
+    n_systems = systemCSR["rows"].shape[0]
 
     # calculate bounding boxes per system
-    positions = image_atomCSR["positions"]                      # [M,3]    
-    system_id = image_atomCSR["system"]                         # [M]
+    positions = image_atomCSR["positions"]  # [M,3]
+    system_id = image_atomCSR["system"]  # [M]
     mins, maxs = calculate_aabb(positions, system_id, n_systems)
-    
 
     # calculate grid shape per system
-    span = (maxs - mins)
-    per_system_grid_shape = torch.ceil(span / cutoff.unsqueeze(-1)).to(torch.long).clamp(min=1)   # [n_systems,3]
+    span = maxs - mins
+    per_system_grid_shape = torch.ceil(span / cutoff.unsqueeze(-1)).to(torch.long).clamp(min=1)  # [n_systems,3]
     systemCSR["voxel_grid_shape"] = per_system_grid_shape
-    
-    
 
     # setup voxel coordinate system.
-    voxels_per_system = per_system_grid_shape.prod(dim=1)        # [n_systems]
+    voxels_per_system = per_system_grid_shape.prod(dim=1)  # [n_systems]
     systemCSR["n_voxels_per_system"] = voxels_per_system
     mx, my, mz = per_system_grid_shape.unbind(1)
-    per_system_voxel_strides = torch.stack([mz*my, mz, torch.ones_like(mz)],dim=-1)
+    per_system_voxel_strides = torch.stack([mz * my, mz, torch.ones_like(mz)], dim=-1)
     systemCSR["voxel_strides"] = per_system_voxel_strides
 
     # build system-aligned CSR for tracking voxels
-    voxelCSR = CSRTable.from_counts(counts=voxels_per_system)    # nnz == V_tot
+    voxelCSR = CSRTable.from_counts(counts=voxels_per_system)  # nnz == V_tot
     voxel_sys = voxelCSR["rows"]
     local_index = voxelCSR["cols"]
 
     # unravel t_local -> (vx, vy, vz) per voxel using per-system dims
-    dims_per_voxel = per_system_grid_shape[voxel_sys]             # [V_tot,3]
+    dims_per_voxel = per_system_grid_shape[voxel_sys]  # [V_tot,3]
     strides_per_voxel = per_system_voxel_strides[voxel_sys]
-    digits = torch.div(local_index.unsqueeze(-1), strides_per_voxel, rounding_mode='floor') # extract multiples of each stride
-    voxel_coords = torch.remainder(digits, dims_per_voxel) # reduce multiples by length of that axis
+    digits = torch.div(local_index.unsqueeze(-1), strides_per_voxel, rounding_mode="floor")  # extract multiples of each stride
+    voxel_coords = torch.remainder(digits, dims_per_voxel)  # reduce multiples by length of that axis
 
-    voxelCSR["m"] = dims_per_voxel # max voxel indices
+    voxelCSR["m"] = dims_per_voxel  # max voxel indices
     voxelCSR["s"] = strides_per_voxel
-    voxelCSR["v"] = voxel_coords # coords for voxel in cell
+    voxelCSR["v"] = voxel_coords  # coords for voxel in cell
     voxelCSR["voxel_gid"] = torch.arange(voxelCSR.nnz, dtype=torch.long, device=device)
 
     # Now calculate which voxel each image-atom falls into.
 
-    origin_per_entry = mins[system_id]                           # [M,3]
-    dims_per_entry   = per_system_grid_shape[system_id]          # [M,3]
+    origin_per_entry = mins[system_id]  # [M,3]
+    dims_per_entry = per_system_grid_shape[system_id]  # [M,3]
 
     # tiny percentage extra in voxel size to ensure
     # all pairs can be found regardless of numerical noise
     # also should handle rightmost voxel coordinate being in range.
-    skin_ratio = 1e-4 
-    cutoff_with_skin = cutoff*(1 + skin_ratio)
+    skin_ratio = 1e-4
+    cutoff_with_skin = cutoff * (1 + skin_ratio)
 
     voxel_nondim_coords = (positions - origin_per_entry) / cutoff_with_skin[system_id].unsqueeze(-1)
     # clamp_min here handles if the leftmost point in the box encounters numerical noise.
@@ -476,7 +467,7 @@ def voxelize_images(
 
     per_imageatom_strides = per_system_voxel_strides[system_id]
     # could be a dot product but not usually efficient for very dot index:
-    local_voxel_linear_id = (voxel_indices * per_imageatom_strides).sum(dim=-1)      # [M]
+    local_voxel_linear_id = (voxel_indices * per_imageatom_strides).sum(dim=-1)  # [M]
 
     # Re-index atoms into a voxel-aligned CSR (was in system-aligned)
     voxel_starts = voxelCSR.starts
@@ -496,21 +487,19 @@ def voxelize_images(
     primary_vox_mask = torch.zeros(v_tot, dtype=torch.bool, device=device)
     primary_vox_mask.scatter_reduce_(
         0,
-        voxel_atomCSR["rows"],                      # rows after reorder
+        voxel_atomCSR["rows"],  # rows after reorder
         voxel_atomCSR["is_primary"].to(torch.bool),
         reduce="amax",
         include_self=False,
     )
-    voxelCSR["is_primary_voxel"] = primary_vox_mask              # nnz-aligned per-voxel mask
-
+    voxelCSR["is_primary_voxel"] = primary_vox_mask  # nnz-aligned per-voxel mask
 
     return voxel_atomCSR, voxelCSR, systemCSR
 
 
-
-def voxel_adjacency(  
-    voxelCSR: CSRTable, 
-    systemCSR: CSRTable, 
+def voxel_adjacency(
+    voxelCSR: CSRTable,
+    systemCSR: CSRTable,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """Build voxel–voxel edges using a fixed stencil (includes self-edges).
 
@@ -545,34 +534,34 @@ def voxel_adjacency(
 
     n_systems = per_system_grid_shape.shape[0]
 
-
     # ---- Stencil: packed [S,3]; include (0,0,0) so intra-voxel pairs are produced ----
     base = torch.tensor([-1, 0, 1], device=device, dtype=torch.long)
-    
+
     deltas = torch.cartesian_prod(base, base, base)  # [27,3]
     S = deltas.shape[0]
-
 
     # Same stencil is applied to each system.
     stencilCSR = CSRTable.from_counts(
         counts=torch.full((n_systems,), S, dtype=torch.long, device=device),
-        col_data={"delta": deltas},                 # packed [S,3]
+        col_data={"delta": deltas},  # packed [S,3]
     )
-    
-    # ---- OUTER: voxelCSR × stencilCSR → candidate neighbors per voxel ----
+
+    # ---- OUTER: voxelCSR × stencilCSR -> candidate neighbors per voxel ----
     cand = voxelCSR.outer(
         stencilCSR,
         operations={
-            ("v",   "delta", "coord_second"):      lambda v, d: v + d,   # neighbor coords [E,3]
-            ("v",   None, "v_orig"):      lambda v:v,
-            ("voxel_gid", None,    "first"):   lambda gid: gid,      # source voxel gid
-            ("rows",      None,    "system"):  lambda r: r,          # system id
-            ("m",      None,    "m"):    lambda m: m,          # dims [E,3]
-            ("s", None, "s"): lambda s:s # strides for each voxel.       
+            # fmt: off
+            ("v",   "delta", "coord_second"):  lambda v, d: v + d,  # neighbor coords [E,3]
+            ("v",   None, "v_orig"):           lambda v:v,          # source voxel indices
+            ("voxel_gid", None,    "first"):   lambda gid: gid,     # source voxel gid
+            ("rows",      None,    "system"):  lambda r: r,         # system id
+            ("m",      None,    "m"):          lambda m: m,         # dims [E,3]
+            ("s", None, "s"):                  lambda s:s           # strides for each voxel.       
+            # fmt: on
         },
     )
 
-    coord_second = cand['coord_second']
+    coord_second = cand["coord_second"]
 
     m = cand["m"]
 
@@ -583,17 +572,17 @@ def voxel_adjacency(
     #     empty = torch.empty(0, dtype=torch.long, device=device)
     #     return empty, empty.clone()
 
-    coord_second = cand['coord_second']
-    second_local = (cand['s']*coord_second).sum(dim=-1) # reconstruct the per-system voxel ID numbers
+    coord_second = cand["coord_second"]
+    second_local = (cand["s"] * coord_second).sum(dim=-1)  # reconstruct the per-system voxel ID numbers
 
     # reconstruct the global voxel ID numbers
     voxel_starts = voxelCSR.starts
-    first_global  = cand["first"]
+    first_global = cand["first"]
     second_global = voxel_starts[cand["system"]] + second_local
 
     # ---- Keep edges if at least one endpoint voxel is primary ----
     primary = voxelCSR["is_primary_voxel"]
-    keep = primary[first_global] | primary[second_global] # one of the voxels must contain real atoms
+    keep = primary[first_global] | primary[second_global]  # one of the voxels must contain real atoms
 
     first_global = first_global[keep]
     second_global = second_global[keep]
@@ -601,7 +590,7 @@ def voxel_adjacency(
     return first_global, second_global
 
 
-def expand_pairs(voxel_atomCSR,first_vox,second_vox):
+def expand_pairs(voxel_atomCSR, first_vox, second_vox):
     """Expand voxel edges to candidate atom pairs.
 
     Parameters
@@ -636,14 +625,16 @@ def expand_pairs(voxel_atomCSR,first_vox,second_vox):
         left_rows=first_vox,
         right_rows=second_vox,
         operations={
-            ("positions", None, "posA"): lambda x:x,
-            (None, "positions", "posB"): lambda x:x,
+            # fmt: off
+            ("positions", None, "posA"):                lambda x:x,
+            (None, "positions", "posB"):                lambda x:x,
             ("positions", "positions", "displacement"): lambda x,y:y-x,
             ("atom_gid",   None,        "idA"):         lambda x: x,
             (None,         "atom_gid",  "idB"):         lambda y: y,
             ("offsets",    "offsets",  "offsets"):      lambda a,b:b-a,
-            (None,         "is_primary", "primB"):       lambda y: y,
-            ("system",     None,        "system"):     lambda x: x,
+            (None,         "is_primary", "primB"):      lambda y: y,
+            ("system",     None,        "system"):      lambda x: x,
+            # fmt: on
         },
     )
 
@@ -687,11 +678,10 @@ def prune_pairs(pairs):
     pass
 
 
-
 def calc_neighbors(
-    positions: torch.Tensor,                 # [n_systems, n_atoms_max, 3] float
-    nonblank: torch.Tensor,                  # [n_systems, n_atoms_max] bool
-    cells: torch.Tensor,                     # [n_systems, 3, 3] float
+    positions: torch.Tensor,  # [n_systems, n_atoms_max, 3] float
+    nonblank: torch.Tensor,  # [n_systems, n_atoms_max] bool
+    cells: torch.Tensor,  # [n_systems, 3, 3] float
     cutoff: float,
     use_full_stencil: bool = True,
     return_displacements=True,
@@ -751,22 +741,21 @@ def calc_neighbors(
     >>> idA, idB, k, dist, disp = calc_neighbors(positions, nonblank, cells, cutoff)
 
     """
-    
+
     ##TODO Check call sites for cutoff variable which used to use float, now use per-system tensor.
     # Write test for per-system cutoffs
     device = positions.device
 
     ### TODO: use integer cell transforms to reduce skew during neighbor calculations!
     ### Remember to map back at the end?
-    
-    
+
     # shape tests: (Not testing this can cause silent errors)
     assert positions.shape[0] == nonblank.shape[0], "mismatched batch size"
     assert positions.shape[0] == cells.shape[0], "mismatched batch size"
     assert positions.shape[1] == nonblank.shape[1], "mismatched atom size"
 
     # 0) set up data structures
-    atomCSR, systemCSR = build_initial_data(positions,nonblank,cells,cutoff)
+    atomCSR, systemCSR = build_initial_data(positions, nonblank, cells, cutoff)
 
     # 1) wrap + base offsets
 
@@ -774,52 +763,45 @@ def calc_neighbors(
 
     # 2) dynamic image offsets per system (nnz-aligned fields on returned CSR)
     # TODO: accept mixed boundary conditions.
-    imageCSR = build_image_offsets(systemCSR, use_full_stencil=use_full_stencil) 
+    imageCSR = build_image_offsets(systemCSR, use_full_stencil=use_full_stencil)
 
     # 3) expand primary atoms to images (joins atoms × imageCSR)
-    image_atomsCSR = build_image_atoms(
-        atomCSR, imageCSR, systemCSR
-    )  
+    image_atomsCSR = build_image_atoms(atomCSR, imageCSR, systemCSR)
 
-    voxel_atomCSR, voxelCSR, systemCSR = voxelize_images(
-        image_atomsCSR, systemCSR
-    )
+    voxel_atomCSR, voxelCSR, systemCSR = voxelize_images(image_atomsCSR, systemCSR)
 
     # Construct pairs of voxels where:
     # 1) they are adjvacent to each other (or same as each other)
     # 2) one of them contains primary atoms
-    # TODO Add logic to only perform this on filled voxels. Or maybe scale voxels 
+    # TODO Add logic to only perform this on filled voxels. Or maybe scale voxels
     # per system so that we don't end up with many empty ones.
     # Something to address bad scaling when systems get very sparse!
     # (# of voxels scales like size of space, not size of particles)
-    first_vox, second_vox = voxel_adjacency(
-        voxelCSR, systemCSR)
-    
-    with torch.no_grad():
-        pairs = expand_pairs(voxel_atomCSR=voxel_atomCSR,
-                            first_vox=first_vox,
-                            second_vox=second_vox)
+    first_vox, second_vox = voxel_adjacency(voxelCSR, systemCSR)
 
-    posA   = pairs["posA"]          # [P,3]
-    posB   = pairs["posB"]          # [P,3]
-    prim_B = pairs["primB"]         # [P]
-    idA    = pairs["idA"].to(torch.long)
-    idB    = pairs["idB"].to(torch.long)
+    with torch.no_grad():
+        pairs = expand_pairs(voxel_atomCSR=voxel_atomCSR, first_vox=first_vox, second_vox=second_vox)
+
+    posA = pairs["posA"]  # [P,3]
+    posB = pairs["posB"]  # [P,3]
+    prim_B = pairs["primB"]  # [P]
+    idA = pairs["idA"].to(torch.long)
+    idB = pairs["idB"].to(torch.long)
     rel_k = pairs["offsets"]
     sys = pairs["system"]
 
     with torch.no_grad():
 
-        pair_cutoffs = systemCSR['cutoff'][sys]
+        pair_cutoffs = systemCSR["cutoff"][sys]
         keep = pairs["distance"] <= pair_cutoffs
-        diff_atoms = (idA != idB)
+        diff_atoms = idA != idB
         # For same atom pairs, we need to drop the self-connection,
         # so if B is the primary (same position as A) then we drop it.
         keep &= diff_atoms | ~prim_B
 
-    #keep_ratio = keep.to(torch.long).sum().item()/keep.numel()
-    #print(f"{keep_ratio=}")
-    
+    # keep_ratio = keep.to(torch.long).sum().item()/keep.numel()
+    # print(f"{keep_ratio=}")
+
     idA = idA[keep]
     idB = idB[keep]
     posA = posA[keep]
@@ -827,15 +809,13 @@ def calc_neighbors(
     rel_k = rel_k[keep]
     sys = sys[keep]
 
-
-    
-    outs = idA, idB, sys, rel_k,
+    outs = (idA, idB, sys, rel_k)
 
     if return_displacements:
         # Only recalculate if the calling code asks for it.
         # (Layer wrapper does not; tests do)
         disp = posA - posB
-        dist = torch.norm(disp,dim=1)
+        dist = torch.norm(disp, dim=1)
         outs = *outs, dist, disp
+        
     return outs
-

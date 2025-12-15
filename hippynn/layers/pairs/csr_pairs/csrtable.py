@@ -29,7 +29,6 @@ import torch
 from typing import Dict, Tuple, Optional
 
 
-
 def starts_from_counts(counts: torch.Tensor) -> torch.Tensor:
     """Build a CSR row-pointer (`starts`) from per-row counts.
 
@@ -101,10 +100,8 @@ def row_and_offset(starts: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
     nnz = int(starts[-1].item())
     t = torch.arange(nnz, dtype=torch.long, device=device)
     counts = torch.diff(starts)
-    n_rows = starts.numel()-1
-    rows = torch.repeat_interleave(
-        torch.arange(n_rows, device=device, dtype=torch.long), counts
-    ) 
+    n_rows = starts.numel() - 1
+    rows = torch.repeat_interleave(torch.arange(n_rows, device=device, dtype=torch.long), counts)
     offs = t - starts[rows]
     return rows, offs
 
@@ -133,12 +130,13 @@ class CSRTable:
     --------
     starts_from_counts, row_and_offset
     """
+
     def __init__(
         self,
-        starts: torch.Tensor,                         # LongTensor [R+1]
-        cols: torch.Tensor,                           # LongTensor [nnz]
+        starts: torch.Tensor,  # LongTensor [R+1]
+        cols: torch.Tensor,  # LongTensor [nnz]
         data: Optional[Dict[str, torch.Tensor]] = None,
-        reorder: bool = True,                         # (only meaningful in from_coo)
+        reorder: bool = True,  # (only meaningful in from_coo)
     ) -> None:
         """Construct a CSRTable.
 
@@ -167,7 +165,7 @@ class CSRTable:
         # infer a single device and a single "coord" dtype (first floating dtype wins;
         # if none are floating, fall back to the first tensor's dtype)
         device: torch.device | None = None
-        dtype: torch.dtype | None = None # for floating point only.
+        dtype: torch.dtype | None = None  # for floating point only.
 
         if not self.data:
             example_tensor = cols
@@ -177,7 +175,6 @@ class CSRTable:
                     break
         self.dtype = example_tensor.dtype
         self.device = example_tensor.device
-
 
     @property
     def nnz(self):
@@ -189,7 +186,7 @@ class CSRTable:
             Equal to ``cols.numel()`` and ``starts[-1]``.
         """
         return self.cols.numel()
-    
+
     @property
     def nrows(self):
         """Number of rows in the table (``R``).
@@ -200,7 +197,6 @@ class CSRTable:
             Equal to ``starts.numel() - 1``.
         """
         return self.starts.numel() - 1
-    
 
     # constructors
 
@@ -234,11 +230,11 @@ class CSRTable:
     @classmethod
     def from_coo(
         cls,
-        rows: torch.Tensor,                           # LongTensor [nnz]
-        cols: torch.Tensor,                           # LongTensor [nnz]
+        rows: torch.Tensor,  # LongTensor [nnz]
+        cols: torch.Tensor,  # LongTensor [nnz]
         data: Optional[Dict[str, torch.Tensor]] = None,
         reorder: bool = True,
-        nrows = None,
+        nrows=None,
     ) -> "CSRTable":
         """Build a CSRTable from COO-style row/col indices.
 
@@ -278,14 +274,13 @@ class CSRTable:
         cols = cols.to(torch.long)
 
         nnz = rows.numel()
-            # --- New: validate data sizes up front ---
+        # --- New: validate data sizes up front ---
         d0 = {}
         if data:
             for k, v in data.items():
                 if v.shape[0] != nnz:
                     raise ValueError(
-                        f"from_coo: data['{k}'] length {v.shape[0]} != nnz {nnz}. "
-                        "Ensure payloads are already aligned to entries."
+                        f"from_coo: data['{k}'] length {v.shape[0]} != nnz {nnz}. Ensure payloads are already aligned to entries."
                     )
                 d0[k] = v
 
@@ -303,7 +298,7 @@ class CSRTable:
         if nrows is None:
             minlength = int(rows_sorted.max().item()) + 1 if rows_sorted.numel() else 0
         else:
-            minlength= nrows
+            minlength = nrows
         counts = torch.bincount(rows_sorted, minlength=minlength) if minlength > 0 else torch.zeros(0, dtype=torch.long)
         starts = starts_from_counts(counts)
 
@@ -312,9 +307,9 @@ class CSRTable:
     @classmethod
     def from_counts(
         cls,
-        counts: torch.Tensor,                         # LongTensor [R]
-        row_data: Optional[Dict[str, torch.Tensor]] = None,          # each [R,(...)] → expands by row id
-        col_data: Optional[Dict[str, torch.Tensor]] = None,          # each [.,C] → expands by col id
+        counts: torch.Tensor,  # LongTensor [R]
+        row_data: Optional[Dict[str, torch.Tensor]] = None,  # each [R,(...)] → expands by row id
+        col_data: Optional[Dict[str, torch.Tensor]] = None,  # each [.,C] → expands by col id
     ) -> "CSRTable":
         """Create a CSR with locally indexed columns from per-row counts.
 
@@ -342,26 +337,24 @@ class CSRTable:
         >>> t = CSRTable.from_counts(counts, row_data={"rf": row_feat}, col_data={"cf": col_feat})
         >>> t.cols
         tensor([0, 1, 0])
-        """       
-        starts = starts_from_counts(counts.to(torch.long))             # [R+1]
-        rows_of_entry, local_col = row_and_offset(starts)              # [nnz], [nnz]
+        """
+        starts = starts_from_counts(counts.to(torch.long))  # [R+1]
+        rows_of_entry, local_col = row_and_offset(starts)  # [nnz], [nnz]
 
         data: Dict[str, torch.Tensor] = {}
         if row_data:
             for k, v in row_data.items():
                 data[k] = v[rows_of_entry]
         if col_data:
-            for k,v in col_data.items():
+            for k, v in col_data.items():
                 data[k] = v[local_col]
 
-
         return cls(starts=starts, cols=local_col, data=data, reorder=False)
-    
-    
+
     @classmethod
     def from_mask(
         cls,
-        mask: torch.Tensor,                           # BoolTensor [R, C]
+        mask: torch.Tensor,  # BoolTensor [R, C]
         data: Optional[Dict[str, torch.Tensor]] = None,
     ) -> "CSRTable":
         """Build a CSR from a boolean mask.
@@ -389,13 +382,12 @@ class CSRTable:
         ----------
         O(R*C) for the boolean scan; storage scales with ``nnz``.
         """
-        idx = mask.nonzero(as_tuple=False) # shape nnz, 2
+        idx = mask.nonzero(as_tuple=False)  # shape nnz, 2
 
-        rows, cols = idx.unbind(-1) # if there are more indices what do we do?
-        data = {k:v[rows,cols] for k,v in data.items()}
+        rows, cols = idx.unbind(-1)  # if there are more indices what do we do?
+        data = {k: v[rows, cols] for k, v in data.items()}
         # Reorder is false because we have just acquired this in sorted order.
         return cls.from_coo(rows, cols, data=data, reorder=False)
-
 
     def __getitem__(self, key: str) -> torch.Tensor:
         """Return a derived field or a stored per-entry tensor.
@@ -423,7 +415,6 @@ class CSRTable:
         if key == "cols":
             return self.cols
         return self.data[key]
-    
 
     def __setitem__(self, key: str, value: torch.Tensor) -> None:
         """Set or replace a per-entry field in ``data``.
@@ -444,8 +435,6 @@ class CSRTable:
         if key in ("rows", "cols"):
             raise KeyError(f"Invalid key for data: {key}")
         self.data[key] = value
-
-
 
     def filter_mask(self, keep_mask: torch.Tensor) -> "CSRTable":
         """Filter entries by a boolean mask while recomputing per-row pointers.
@@ -508,10 +497,12 @@ class CSRTable:
         keep_indices = keep_indices.to(torch.long)
         if keep_indices.numel() == 0:
             R = self.starts.numel() - 1
-            return CSRTable(starts=torch.zeros(R + 1, dtype=torch.long),
-                            cols=torch.empty(0, dtype=torch.long),
-                            data={k: v[:0] for k, v in self.data.items()},
-                            reorder=False)
+            return CSRTable(
+                starts=torch.zeros(R + 1, dtype=torch.long),
+                cols=torch.empty(0, dtype=torch.long),
+                data={k: v[:0] for k, v in self.data.items()},
+                reorder=False,
+            )
 
         cols_new = self.cols[keep_indices]
         data_new = {k: v[keep_indices] for k, v in self.data.items()}
@@ -522,7 +513,6 @@ class CSRTable:
         counts_new = torch.bincount(rows_kept, minlength=R)
         starts_new = starts_from_counts(counts_new)
 
-                # inside CSRTable.filter_indices
         N = keep_indices.numel()
         orig_pos = torch.arange(N, device=rows_kept.device, dtype=torch.long)
         # composite key: (row, original_position) → guarantees stable-by-row
@@ -535,8 +525,8 @@ class CSRTable:
 
     def reindex(
         self,
-        row_ids: torch.Tensor,                        # LongTensor [E]
-        carry: Optional[Tuple[str, ...]] = None,      # None → carry all fields
+        row_ids: torch.Tensor,  # LongTensor [E]
+        carry: Optional[Tuple[str, ...]] = None,  # None → carry all fields
         include_src_pos: bool = False,
         include_src_cols: bool = False,
     ) -> "CSRTable":
@@ -576,7 +566,7 @@ class CSRTable:
 
         out_starts = starts_from_counts(row_len)
         nnz_out = int(out_starts[-1].item())
-        
+
         # Absolute positions in source value domain for each output entry
         local_off = torch.arange(nnz_out, dtype=torch.long, device=out_starts.device) - torch.repeat_interleave(out_starts[:-1], row_len)
         src_pos = torch.repeat_interleave(row_beg, row_len) + local_off
@@ -633,15 +623,16 @@ class CSRTable:
         # Note, if this arrange construct is somehow costly (doesn't seem like it would be)
         # then this can be rewritten to avoid it.
         rows = torch.arange(self.nrows, device=self.starts.device, dtype=torch.long)
-        return CSRTable.expand_pairings(self,other,rows,rows,operations)
+        return CSRTable.expand_pairings(self, other, rows, rows, operations)
 
     @staticmethod
-    def expand_pairings(left_csr,
-                        right_csr,
-                        left_rows,
-                        right_rows,                    
-                        operations: Dict[Tuple[Optional[str], Optional[str], str], callable],
-        ) -> "CSRTable":
+    def expand_pairings(
+        left_csr: "CSRTable",
+        right_csr: "CSRTable",
+        left_rows: torch.Tensor,
+        right_rows: torch.Tensor,
+        operations: Dict[Tuple[Optional[str], Optional[str], str], callable],
+    ) -> "CSRTable":
         """Expand specific row pairings of two CSR tables (generalized join).
 
         Parameters
@@ -674,31 +665,30 @@ class CSRTable:
 
         A_st = left_csr.starts
         B_st = right_csr.starts
-        
+
         # Sanity (rows must have same length E)
         if left_rows.numel() != right_rows.numel():
             raise ValueError(f"first_rows and second_rows must have identical length. {right_rows.numel()=} ; {left_rows.numel()=}")
 
-        
         # shapes: number of rows:
-        begA, endA = A_st[left_rows], A_st[left_rows + 1] 
+        begA, endA = A_st[left_rows], A_st[left_rows + 1]
         begB, endB = B_st[right_rows], B_st[right_rows + 1]
         lenA = endA - begA
-        lenB = (endB - begB) 
+        lenB = endB - begB
         # Build row pointer for combination
-        counts = lenA * lenB     
+        counts = lenA * lenB
         out_starts = starts_from_counts(counts)
 
         # shapes: nnz
-        rows_of_out, cols_of_out = row_and_offset(out_starts) 
-        lenB_per_out_row = lenB[rows_of_out] 
+        rows_of_out, cols_of_out = row_and_offset(out_starts)
+        lenB_per_out_row = lenB[rows_of_out]
         # mod out the local counter by number of B items from that row. (B is faster varying)
         cols_A = torch.div(cols_of_out, lenB_per_out_row, rounding_mode="floor")
         cols_B = torch.remainder(cols_of_out, lenB_per_out_row)
 
         # Flat position indices
-        posA = begA[rows_of_out] + cols_A                                # [P]
-        posB = begB[rows_of_out] + cols_B                                # [P]
+        posA = begA[rows_of_out] + cols_A  # [P]
+        posB = begB[rows_of_out] + cols_B  # [P]
 
         # Build outputs per requested operation
         out_data: Dict[str, torch.Tensor] = {}
@@ -714,7 +704,6 @@ class CSRTable:
             else:
                 v1 = left_csr[ka][posA]
                 v2 = right_csr[kb][posB]
-                out_data[kout] = fn(v1,v2)
+                out_data[kout] = fn(v1, v2)
 
         return CSRTable(starts=out_starts, cols=cols_of_out, data=out_data, reorder=False)
-
