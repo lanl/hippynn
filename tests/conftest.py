@@ -4,8 +4,8 @@ import torch
 import hippynn
 
 
-
 from pathlib import Path
+
 MODEL_DIR = Path(__file__).parents[2] / "collected_models"
 
 
@@ -15,6 +15,7 @@ def skip_if_no_models(func):
     else:
         wrapper = pytest.mark.ski(reason="model resources were not found.")
     return wrapper(func)
+
 
 ignore_relocation = pytest.mark.filterwarnings("ignore:.*HIPPYNN_DEPRECATION_WARNINGS=ignore*.")
 ignore_weights_only_warning = pytest.mark.filterwarnings("ignore:.*weights_only=False*.")
@@ -59,11 +60,13 @@ def input_nodes():
 
     return species, positions, cell
 
+
 @pytest.fixture()
 def neural_network_node(input_nodes, network_parameters):
     from hippynn.graphs import networks
 
     return networks.Hipnn("HIPNN", input_nodes, module_kwargs=network_parameters, periodic=True)
+
 
 @pytest.fixture()
 def energy_node(neural_network_node):

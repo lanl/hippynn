@@ -58,7 +58,6 @@ def default_envtest_args():
     return args
 
 
-
 ignore_not_importable = pytest.mark.filterwarnings("ignore:.*implementation not importable*.")
 
 
@@ -106,4 +105,3 @@ def test_envsum_kernel(implementation, cuda_status, default_envtest_args):
     import hippynn.custom_kernels.test_env as test_env
 
     test_env.main(args)
-

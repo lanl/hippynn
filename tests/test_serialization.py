@@ -49,6 +49,7 @@ def test_run_old(example_box):
 
     return
 
+
 @ignore_weights_only_warning
 @ignore_cusp_warning
 @ignore_relocation
@@ -57,6 +58,7 @@ def test_validate_old():
 
     from optimizer.test_configs import c2h6_config
 
+    # fmt: off
     expected_T = torch.tensor([[-566.0421],
           [-633.7504],
           [-683.5908],
@@ -72,6 +74,7 @@ def test_validate_old():
           [-485.9834],
           [-526.7410],
           [-525.0599]])
+    # fmt: on
 
     
     from hippynn.tools import active_directory
@@ -92,10 +95,10 @@ def test_validate_old():
     )
 
     outputs = predictor(**renamed_box)
-    out_energy = outputs['T']
+    out_energy = outputs["T"]
 
-    maxreldiff = ((out_energy - expected_T)/expected_T).abs().max()
+    maxreldiff = ((out_energy - expected_T) / expected_T).abs().max()
 
     assert maxreldiff < 1.2e-7, f"Output of network changed. (relative difference = {maxreldiff})"
-    
+
     return

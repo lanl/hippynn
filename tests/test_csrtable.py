@@ -1,6 +1,7 @@
 """
 This file was written with assistance from an LLM.
 """
+
 import pytest
 import torch
 
@@ -10,35 +11,39 @@ from hippynn.layers.pairs.csr_pairs.csrtable import (
     CSRTable,
 )
 
-def materialize(function=None,/,**kwargs):
+
+def materialize(function=None, /, **kwargs):
     if function is None:
+
         def inner(fn):
             return fn(**kwargs)
+
         return inner
     return function(**kwargs)
 
 
 @materialize
 def available_device_names() -> list[str]:
-    possible_backends = ['cpu','cuda','mps','xpu']
+    possible_backends = ["cpu", "cuda", "mps", "xpu"]
     devices = []
 
     for back_str in possible_backends:
-        back = getattr(torch,back_str)
+        back = getattr(torch, back_str)
         if back.is_available():
             for i in range(back.device_count()):
-                devices.append(f'{back_str}:{i}')
-    
+                devices.append(f"{back_str}:{i}")
+
     return devices
+
 
 @materialize(available_device_names=available_device_names)
 def device_dtype_pairs(available_device_names) -> list[str]:
     output = []
 
     for device in available_device_names:
-        for dtype in [torch.float32,torch.float64]:
+        for dtype in [torch.float32, torch.float64]:
             try:
-                x = torch.ones(1,device=device,dtype=dtype)
+                x = torch.ones(1, device=device, dtype=dtype)
             except TypeError:
                 pass
             else:
@@ -50,61 +55,65 @@ def test_make_empty_shapes():
     tbl = CSRTable.make_empty(4, dtype=torch.long, device=torch.device("cpu"))
     assert tbl.nrows == 4
     assert tbl.nnz == 0
-    assert tbl.starts.tolist() == [0,0,0,0,0]
+    assert tbl.starts.tolist() == [0, 0, 0, 0, 0]
     assert tbl["cols"].numel() == 0
     # rows accessor should be empty too
     assert tbl["rows"].numel() == 0
 
+
 def test_from_counts_structure_and_payload_broadcast():
-    counts = torch.tensor([0,2,3], dtype=torch.long)
-    row_data = {"rid": torch.tensor([10,20,30], dtype=torch.long)}
+    counts = torch.tensor([0, 2, 3], dtype=torch.long)
+    row_data = {"rid": torch.tensor([10, 20, 30], dtype=torch.long)}
     # local template for per-column broadcast: here we attach local index, length doesn't need to equal max(counts)
-    col_data = {"loc": torch.arange(0,3, dtype=torch.long)}
+    col_data = {"loc": torch.arange(0, 3, dtype=torch.long)}
     tbl = CSRTable.from_counts(counts, row_data=row_data, col_data=col_data)
-    assert tbl.starts.tolist() == [0,0,2,5]
+    assert tbl.starts.tolist() == [0, 0, 2, 5]
     assert tbl.nnz == 5
     # rows accessor: 0 appears 0 times, 1 two times, 2 three times
     rows = tbl["rows"].tolist()
-    assert rows == [1,1,2,2,2]
+    assert rows == [1, 1, 2, 2, 2]
     # cols are 0..len(row)-1 per row
-    assert tbl["cols"].tolist() == [0,1,0,1,2]
+    assert tbl["cols"].tolist() == [0, 1, 0, 1, 2]
     # row_data should have been expanded per entry
-    assert tbl["rid"].tolist() == [20,20,30,30,30]
+    assert tbl["rid"].tolist() == [20, 20, 30, 30, 30]
     # col_data should have been expanded per local col
-    assert tbl["loc"].tolist() == [0,1,0,1,2]
+    assert tbl["loc"].tolist() == [0, 1, 0, 1, 2]
+
 
 def test_from_mask_and_coo_roundtrip_and_cols_payload():
-    mask = torch.tensor([[True, False, True],[False, True, False]], dtype=torch.bool)
+    mask = torch.tensor([[True, False, True], [False, True, False]], dtype=torch.bool)
     r, c = mask.nonzero(as_tuple=True)
     payload = torch.rand(mask.shape)
-    payload[~mask]=0
+    payload[~mask] = 0
     nnz = r.numel()
-    payload_nnz = payload[payload!=0] #torch.arange(nnz, dtype=torch.long) * 5
+    payload_nnz = payload[payload != 0]  # torch.arange(nnz, dtype=torch.long) * 5
     tbl = CSRTable.from_mask(mask, data={"p": payload})
     # 2 rows, with counts [2,1]
-    assert tbl.starts.tolist() == [0,2,3]
+    assert tbl.starts.tolist() == [0, 2, 3]
     # 'cols' carries the original column indices where mask was True
     assert tbl["cols"].tolist() == c.tolist()
     assert tbl["p"].tolist() == payload_nnz.tolist()
 
     # Build equivalent with from_coo (explicit rows/cols), ensure stable ordering by row
     coo = CSRTable.from_coo(rows=r, cols=c, data={"p": payload_nnz}, reorder=True)
-    assert coo.starts.tolist() == [0,2,3]
+    assert coo.starts.tolist() == [0, 2, 3]
     assert coo["cols"].tolist() == c.tolist()
     assert coo["p"].tolist() == payload_nnz.tolist()
 
+
 def test_getitem_special_keys_rows_and_cols():
-    counts = torch.tensor([2,0,1], dtype=torch.long)
+    counts = torch.tensor([2, 0, 1], dtype=torch.long)
     tbl = CSRTable.from_counts(counts)
     # rows should equal [0,0,2]
-    assert tbl["rows"].tolist() == [0,0,2]
+    assert tbl["rows"].tolist() == [0, 0, 2]
     # cols are local offsets per row: [0,1,0]
-    assert tbl["cols"].tolist() == [0,1,0]
+    assert tbl["cols"].tolist() == [0, 1, 0]
+
 
 def test_filter_mask_and_filter_indices():
-    rows = torch.tensor([2,0,2,1,2], dtype=torch.long)
-    cols = torch.tensor([10,11,12,13,14], dtype=torch.long)
-    x = torch.tensor([100,101,102,103,104], dtype=torch.long)
+    rows = torch.tensor([2, 0, 2, 1, 2], dtype=torch.long)
+    cols = torch.tensor([10, 11, 12, 13, 14], dtype=torch.long)
+    x = torch.tensor([100, 101, 102, 103, 104], dtype=torch.long)
     tbl = CSRTable.from_coo(rows=rows, cols=cols, data={"x": x}, reorder=True)
 
     # Keep a boolean mask (e.g., keep indices 0,2,4 in the current (row-grouped) order)
@@ -113,51 +122,56 @@ def test_filter_mask_and_filter_indices():
     assert t1.nnz == 3
     # Starts should reflect how many kept per original row (rows were grouped 0,1,2)
     # Compute expected counts: rows after reorder were [0,1,2,2,2]
-    assert t1.starts.tolist() == [0,1,1,3]
-    assert t1["cols"].tolist() == [11,12,14] if False else t1["cols"].tolist()  # sanity: present
+    assert t1.starts.tolist() == [0, 1, 1, 3]
+    assert t1["cols"].tolist() == [11, 12, 14] if False else t1["cols"].tolist()  # sanity: present
 
     # Keep by explicit indices (original grouped order): [0,4,3]
-    t2 = tbl.filter_indices(torch.tensor([0,4,3]))
+    t2 = tbl.filter_indices(torch.tensor([0, 4, 3]))
     # Rows of kept entries: [0,2,2] -> counts [1,0,2]
-    assert t2.starts.tolist() == [0,1,1,3]
+    assert t2.starts.tolist() == [0, 1, 1, 3]
     # Data preserved in order grouped by row (0 then 2)
     assert t2["x"].tolist() == [101, 104, 102]
 
+
 def test_reindex_duplicate_and_order_rows():
-    counts = torch.tensor([1,2,0,1], dtype=torch.long)
+    counts = torch.tensor([1, 2, 0, 1], dtype=torch.long)
     tbl = CSRTable.from_counts(counts)
     tbl["id"] = torch.arange(tbl.nnz, dtype=torch.long)
     # New row order with duplicates and skipping row 2
-    order = torch.tensor([3,1,1,0], dtype=torch.long)
+    order = torch.tensor([3, 1, 1, 0], dtype=torch.long)
     out = tbl.reindex(order, carry=("id",), include_src_pos=False, include_src_cols=False)
     # Row lengths become [1,2,2,1]
-    assert out.starts.tolist() == [0,1,3,5,6]
+    assert out.starts.tolist() == [0, 1, 3, 5, 6]
     # ids carried in the same per-row local order
     # original rows: r0=[0], r1=[1,2], r3=[3]
     assert out["id"].tolist() == [3, 1, 2, 1, 2, 0]
 
 
 def test_outer_rowwise_cartesian_and_ops_signatures():
-    A = CSRTable.from_counts(torch.tensor([2,1], dtype=torch.long))
-    A["a"] = torch.tensor([2,3,5], dtype=torch.long)
-    B = CSRTable.from_counts(torch.tensor([2,1], dtype=torch.long))
-    B["b"] = torch.tensor([7,11,13], dtype=torch.long)
+    A = CSRTable.from_counts(torch.tensor([2, 1], dtype=torch.long))
+    A["a"] = torch.tensor([2, 3, 5], dtype=torch.long)
+    B = CSRTable.from_counts(torch.tensor([2, 1], dtype=torch.long))
+    B["b"] = torch.tensor([7, 11, 13], dtype=torch.long)
 
     # Two-arg op
-    out = A.outer(B, {("a","b","c"): lambda aa, bb: aa * bb})
-    assert out.starts.tolist() == [0,4,5] # 2x2=4 in first row, 1x1=1 in second.
-    assert out["c"].tolist() == [2*7,2*11,3*7,3*11,5*13]
+    out = A.outer(B, {("a", "b", "c"): lambda aa, bb: aa * bb})
+    assert out.starts.tolist() == [0, 4, 5]  # 2x2=4 in first row, 1x1=1 in second.
+    assert out["c"].tolist() == [2 * 7, 2 * 11, 3 * 7, 3 * 11, 5 * 13]
 
     # Mix unary and nullary ops
-    out2 = A.outer(B, {
-        ("a",None,"only_a"): lambda aa: aa * 2,
-        (None,"b","only_b"): lambda bb: bb + 1,
-        (None,None,"const"): lambda : torch.ones(out.nnz, dtype=torch.long)
-    })
+    out2 = A.outer(
+        B,
+        {
+            ("a", None, "only_a"): lambda aa: aa * 2,
+            (None, "b", "only_b"): lambda bb: bb + 1,
+            (None, None, "const"): lambda: torch.ones(out.nnz, dtype=torch.long),
+        },
+    )
     assert out2.nnz == out.nnz
-    assert out2["only_a"].tolist() == [4,4,6,6,10]
-    assert out2["only_b"].tolist() == [8,12,8,12,14]
-    assert out2["const"].tolist() == [1]*out.nnz
+    assert out2["only_a"].tolist() == [4, 4, 6, 6, 10]
+    assert out2["only_b"].tolist() == [8, 12, 8, 12, 14]
+    assert out2["const"].tolist() == [1] * out.nnz
+
 
 def test_expand_cartesian_pairings_edges_to_entry_pairs():
     # Build a "voxel->atom" CSR with per-row sizes [2,1,3]
@@ -175,8 +189,8 @@ def test_expand_cartesian_pairings_edges_to_entry_pairs():
         left_rows=first,
         right_rows=second,
         operations={
-            ("id", None,  "idA"): lambda x: x,  # carry A-side ids
-            (None,  "id", "idB"): lambda y: y,  # carry B-side ids
+            ("id", None, "idA"): lambda x: x,  # carry A-side ids
+            (None, "id", "idB"): lambda y: y,  # carry B-side ids
         },
     )
 
@@ -189,27 +203,26 @@ def test_expand_cartesian_pairings_edges_to_entry_pairs():
 
 
 def test_starts_from_counts_helper():
-    counts = torch.tensor([0,2,3], dtype=torch.long)
+    counts = torch.tensor([0, 2, 3], dtype=torch.long)
     starts = starts_from_counts(counts)
-    assert starts.tolist() == [0,0,2,5]
-
+    assert starts.tolist() == [0, 0, 2, 5]
 
 
 def test_expand_cartesian_pairings_between_edges_to_entry_pairs():
     # Build two voxel→entry CSRs with different per-row sizes
     # first: row lengths [2,1,3], payload idA = 0..5
-    counts_first = torch.tensor([2,1,3], dtype=torch.long)
+    counts_first = torch.tensor([2, 1, 3], dtype=torch.long)
     first = CSRTable.from_counts(counts_first)
     first["id"] = torch.arange(first.nnz, dtype=torch.long)
 
     # second: row lengths [3,0,2], payload idB = 100..104
-    counts_second = torch.tensor([3,0,2], dtype=torch.long)
+    counts_second = torch.tensor([3, 0, 2], dtype=torch.long)
     second = CSRTable.from_counts(counts_second)
     second["id"] = torch.arange(100, 100 + second.nnz, dtype=torch.long)
 
     # Edges: (0,2) and (1,0)
     #   -> pair counts: 2*2 = 4 and 1*3 = 3  => starts [0,4,7]
-    first_rows  = torch.tensor([0, 1], dtype=torch.long)
+    first_rows = torch.tensor([0, 1], dtype=torch.long)
     second_rows = torch.tensor([2, 0], dtype=torch.long)
 
     paired_output = CSRTable.expand_pairings(
@@ -218,13 +231,13 @@ def test_expand_cartesian_pairings_between_edges_to_entry_pairs():
         left_rows=first_rows,
         right_rows=second_rows,
         operations={
-            ("id", None, "idA"):lambda i:i,
-            (None, "id", "idB"):lambda i:i,
-        }
+            ("id", None, "idA"): lambda i: i,
+            (None, "id", "idB"): lambda i: i,
+        },
     )
 
-    idA = paired_output['idA']
-    idB = paired_output['idB']
+    idA = paired_output["idA"]
+    idB = paired_output["idB"]
     # Structure: same starts/cols on both outputs
     assert paired_output.starts.tolist() == [0, 4, 7]
 
@@ -241,8 +254,8 @@ def test_expand_cartesian_pairings_between_edges_to_entry_pairs():
     assert idB[4:].tolist() == [100, 101, 102]
 
 
-
 # ---------- Helpers ----------
+
 
 def assert_dtype_equal(tensors: list[torch.Tensor]) -> torch.dtype:
     """Assert all tensors share the same dtype; return it for convenience."""
@@ -253,7 +266,7 @@ def assert_dtype_equal(tensors: list[torch.Tensor]) -> torch.dtype:
     return d0
 
 
-def assert_device_equal(tensors: list[torch.Tensor],label=None) -> torch.device:
+def assert_device_equal(tensors: list[torch.Tensor], label=None) -> torch.device:
     """
     Assert all tensors are on 'the same device' (tolerating cpu vs cpu:0, mps vs mps:0).
     Return the normalized reference device for convenience.
@@ -278,9 +291,10 @@ def _all_tensors(csr: CSRTable) -> list[torch.Tensor]:
     vals.extend(csr.data.values())
     return vals
 
-def assert_device_intact(*csr: CSRTable,label=None):
+
+def assert_device_intact(*csr: CSRTable, label=None):
     all_all_tensors = [t for c in csr for t in _all_tensors(c)]
-    return assert_device_equal(all_all_tensors,label=label)
+    return assert_device_equal(all_all_tensors, label=label)
 
 
 @pytest.mark.parametrize("device_dtype", device_dtype_pairs)
@@ -317,10 +331,8 @@ def test_core_preserve_device_dtype(device_dtype: tuple[str, torch.dtype]):
     assert_device_equal([starts, rows, offs])
     assert assert_dtype_equal([starts, rows, offs]) == torch.long
 
-
-    for table in [csr,sub,right,out]:
+    for table in [csr, sub, right, out]:
         assert_device_intact(table)
-    
 
     # ---- Dtype checks
     # structure dtypes
@@ -352,9 +364,9 @@ def test_filter_preserve_device_dtype(device_dtype: tuple[str, torch.dtype]):
     # Drop all
     empty = csr.filter_mask(torch.zeros(3, device=dev, dtype=torch.bool))
 
-    for name in ["csr","kept","empty"]:
+    for name in ["csr", "kept", "empty"]:
         table = locals()[name]
-        assert_device_intact(table,label=name)
+        assert_device_intact(table, label=name)
 
     # ---- Dtypes
     # index structure stays long

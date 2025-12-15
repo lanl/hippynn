@@ -33,7 +33,6 @@ def example_all_target_nodes(neural_network_node, bond_parameters):
     return all_targets
 
 
-
 @pytest.mark.parametrize("operation", ["add", "sub", "mul", "truediv", "pow"])
 def test_node_algebra(operation):
     from hippynn.graphs.nodes.base import ValueNode
