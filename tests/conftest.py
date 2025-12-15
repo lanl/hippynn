@@ -9,12 +9,7 @@ from pathlib import Path
 MODEL_DIR = Path(__file__).parents[2] / "collected_models"
 
 
-def skip_if_no_models(func):
-    if MODEL_DIR.exists():
-        wrapper = lambda f: f
-    else:
-        wrapper = pytest.mark.ski(reason="model resources were not found.")
-    return wrapper(func)
+skip_if_no_models = pytest.mark.skipif(not MODEL_DIR.exists(), reason="test model resources not found")
 
 
 ignore_relocation = pytest.mark.filterwarnings("ignore:.*HIPPYNN_DEPRECATION_WARNINGS=ignore*.")

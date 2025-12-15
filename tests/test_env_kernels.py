@@ -16,7 +16,7 @@ TEST_KERNELS = list(set(list(CUSTOM_KERNELS_AVAILABLE) + list(_RECOMMENDED_CUSTO
 KERNEL_PARAMETRIZATION = []
 for kname in TEST_KERNELS:
     skip = kname not in CUSTOM_KERNELS_AVAILABLE
-    marks = pytest.mark.skipif(skip, reason=f"Kernel implementation {kname!r} not available.")
+    marks = pytest.mark.skipif(skip, reason=f"envsum kernels implementation {kname!r} not available")
     KERNEL_PARAMETRIZATION.append(pytest.param(kname, marks=marks))
 
 
