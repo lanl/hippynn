@@ -484,14 +484,21 @@ def voxelize_images(
 
     # A voxel is primary iff it has any primary atoms in it
     v_tot = voxelCSR.nnz
-    primary_vox_mask = torch.zeros(v_tot, dtype=torch.bool, device=device)
+
+    # Conversion to bool cannot be done before reduce because 
+    # cuda backend cannot reduce bools; reduce using bool if available,
+    # but with int on cuda.
+    accum_dtype = torch.long if device.type == "cuda" else torch.bool
+
+    primary_vox_mask = torch.zeros(v_tot, dtype=accum_dtype, device=device)
     primary_vox_mask.scatter_reduce_(
         0,
         voxel_atomCSR["rows"],  # rows after reorder
-        voxel_atomCSR["is_primary"].to(torch.bool),
+        voxel_atomCSR["is_primary"].to(accum_dtype),
         reduce="amax",
         include_self=False,
     )
+    primary_vox_mask = primary_vox_mask.to(torch.bool)
     voxelCSR["is_primary_voxel"] = primary_vox_mask  # nnz-aligned per-voxel mask
 
     return voxel_atomCSR, voxelCSR, systemCSR
@@ -817,5 +824,5 @@ def calc_neighbors(
         disp = posA - posB
         dist = torch.norm(disp, dim=1)
         outs = *outs, dist, disp
-        
+
     return outs

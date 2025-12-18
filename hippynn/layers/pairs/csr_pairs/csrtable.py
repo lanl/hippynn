@@ -299,7 +299,7 @@ class CSRTable:
             minlength = int(rows_sorted.max().item()) + 1 if rows_sorted.numel() else 0
         else:
             minlength = nrows
-        counts = torch.bincount(rows_sorted, minlength=minlength) if minlength > 0 else torch.zeros(0, dtype=torch.long)
+        counts = torch.bincount(rows_sorted, minlength=minlength)
         starts = starts_from_counts(counts)
 
         return cls(starts=starts, cols=cols_sorted, data=data_sorted, reorder=False)

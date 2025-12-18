@@ -29,7 +29,8 @@ def available_device_names() -> list[str]:
 
     for back_str in possible_backends:
         back = getattr(torch, back_str)
-        if back.is_available():
+        # is_available is not as available as device_count, so check that first with short-circuiting.
+        if back.device_count() and back.is_available():
             for i in range(back.device_count()):
                 devices.append(f"{back_str}:{i}")
 

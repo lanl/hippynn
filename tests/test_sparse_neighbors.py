@@ -319,9 +319,11 @@ def test_neighbors_vs_bruteforce(n_systems, n_atoms_max, dtype, device):
     assert torch.allclose(ref_dist, got_dist, atol=atol, rtol=0)
 
 
-@pytest.mark.parametrize("n_systems,n_atoms_max", [(2, 10)])
-def test_empty(device, n_systems, n_atoms_max):
-    dtype = torch.float32
+@pytest.mark.parametrize("n_systems,n_atoms_max", [(2, 10), (1,0), (0,10)])
+@pytest.mark.parametrize("device_dtype", device_dtype_pairs)
+def test_empty(device_dtype, n_systems, n_atoms_max):
+    device, dtype = device_dtype
+
     cutoff = 2.0
     positions = torch.zeros((n_systems, n_atoms_max, 3), dtype=dtype, device=device)
     nonblank = torch.zeros((n_systems, n_atoms_max), dtype=torch.bool, device=device)
@@ -329,8 +331,14 @@ def test_empty(device, n_systems, n_atoms_max):
     # nonblank[1, 0] = True
     cells = random_triclinic_cells(n_systems, device, dtype)
 
-    with torch.no_grad():
-        idA, idB, sys, rel_k, dist, disp = calc_neighbors(positions, nonblank, cells, cutoff)
+    try:
+        with torch.no_grad():
+            idA, idB, sys, rel_k, dist, disp = calc_neighbors(positions, nonblank, cells, cutoff)
+    except:        
+        if torch.device(device).type == "mps":
+            pytest.xfail("mps does not work on all empty systems")
+        else:
+            raise
 
     # With only one atom total, there should be no pairs
     assert idA.numel() == 0, "IdA nonempty"
