@@ -11,7 +11,7 @@ use_cuda = torch.cuda.is_available()
 # use_cuda = False
 n_warmup = 3
 n_trials = 5
-n_atoms = 10000
+n_atoms = 1000
 n_systems = 10
 expected_neighbors_per_atom = 100
 # Build cutoff so that neighbor count is according to the above; V = 4/3 pi r^#
@@ -41,10 +41,10 @@ def bench_once(function):
 def benchmark(function):
     print("benchmarking", function)
     for _ in tqdm(range(n_warmup),unit="warmup runs", leave=True):
-        bench_once(calc_neighbors)
+        bench_once(function)
     times = []
     for i in tqdm(range(n_trials),unit="benchmark runs", leave=True):
-        t,n_pairs_per_atom = bench_once(calc_neighbors)
+        t,n_pairs_per_atom = bench_once(function)
         times.append(t)
 
     total_time = 1000*sum(times)/len(times) # in milliseconds
