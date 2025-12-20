@@ -227,7 +227,6 @@ def build_image_offsets(systemCSR: CSRTable, use_full_stencil=True) -> CSRTable:
     shift = -torch.einsum("pk,pkj->pj", image_offsets.to(coord_dtype), cells[system])
     is_primary = (image_offsets == 0).all(dim=1)
 
-    # Use __setitem__ to populate nnz-aligned fields
     imageCSR["image_offsets"] = image_offsets
     imageCSR["shift"] = shift
     imageCSR["is_primary"] = is_primary
@@ -596,8 +595,12 @@ def voxel_adjacency(
         col_data={"delta": deltas},  # packed [S,3]
     )
 
+    # since the first particle is always primary, don't compute shifts from non-primary voxels,
+    # only from primary ones. This will reduce excess rows in the pairing table.
+    primary_voxelCSR = voxelCSR.filter_mask(voxelCSR["is_primary_voxel"])
+
     # ---- OUTER: voxelCSR × stencilCSR -> candidate neighbors per voxel ----
-    cand = voxelCSR.outer(
+    cand = primary_voxelCSR.outer(
         stencilCSR,
         operations={
             # fmt: off
@@ -613,7 +616,7 @@ def voxel_adjacency(
     )
 
     
-    # Drop neighbors that are not in bounds.
+    # Drop neighbors voxels that are not in bounds.
     # ;PBC is not required since image atoms are construted explictly)
     # ;;If you don't do this you will get spurious duplicate instances of the second voxel as well as
     # ;;invalid/corrupt voxel gids)
@@ -636,14 +639,6 @@ def voxel_adjacency(
     # re-find the voxel index for the first voxel in the pair, as well.
     where_first_valid, first_indices = find_indices(first_global, gids)
     assert where_first_valid.shape[0] == first_global.shape[0], f"Not all first voxels were valid!"
-
-    # drop edges that don't contain at least a one primary atom
-    # (we never need image-image pairs)
-    primary = voxelCSR["is_primary_voxel"]
-    keep = primary[first_indices] | primary[second_indices]  # one of the voxels must contain real atoms
-
-    first_indices = first_indices[keep]
-    second_indices = second_indices[keep]
 
     return first_indices, second_indices
 
