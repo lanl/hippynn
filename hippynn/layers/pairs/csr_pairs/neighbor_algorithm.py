@@ -27,7 +27,7 @@ All tensor operations are batched and device/dtype agnostic. Index tensors are
 import torch
 from typing import Tuple
 
-from .csrtable import CSRTable, row_and_offset
+from .csrtable import CSRTable, row_and_offset, find_indices
 
 
 def build_initial_data(positions, nonblank, cells, cutoff):
@@ -427,26 +427,24 @@ def voxelize_images(
 
     # setup voxel coordinate system.
     voxels_per_system = per_system_grid_shape.prod(dim=1)  # [n_systems]
+    # print("Voxels per system", voxels_per_system)
+
     systemCSR["n_voxels_per_system"] = voxels_per_system
+    # calculate voxel id offsets for each system
+    voxel_offset = torch.zeros(n_systems+1, device=device,dtype=torch.long)
+    torch.cumsum(voxels_per_system,0,out=voxel_offset[1:])
+    voxel_offset = voxel_offset[:-1]
+    systemCSR["voxel_offset"] = voxel_offset
+
     mx, my, mz = per_system_grid_shape.unbind(1)
+    # We index the voxels in C-order:
     per_system_voxel_strides = torch.stack([mz * my, mz, torch.ones_like(mz)], dim=-1)
+    # If you want to switch to Fortran order:
+    # per_system_voxel_strides = torch.stack([torch.ones_like(mx), mx, mx * my], dim=-1)
+    # (either order is fine.)
+
     systemCSR["voxel_strides"] = per_system_voxel_strides
 
-    # build system-aligned CSR for tracking voxels
-    voxelCSR = CSRTable.from_counts(counts=voxels_per_system)  # nnz == V_tot
-    voxel_sys = voxelCSR["rows"]
-    local_index = voxelCSR["cols"]
-
-    # unravel t_local -> (vx, vy, vz) per voxel using per-system dims
-    dims_per_voxel = per_system_grid_shape[voxel_sys]  # [V_tot,3]
-    strides_per_voxel = per_system_voxel_strides[voxel_sys]
-    digits = torch.div(local_index.unsqueeze(-1), strides_per_voxel, rounding_mode="floor")  # extract multiples of each stride
-    voxel_coords = torch.remainder(digits, dims_per_voxel)  # reduce multiples by length of that axis
-
-    voxelCSR["m"] = dims_per_voxel  # max voxel indices
-    voxelCSR["s"] = strides_per_voxel
-    voxelCSR["v"] = voxel_coords  # coords for voxel in cell
-    voxelCSR["voxel_gid"] = torch.arange(voxelCSR.nnz, dtype=torch.long, device=device)
 
     # Now calculate which voxel each image-atom falls into.
 
@@ -470,37 +468,82 @@ def voxelize_images(
     local_voxel_linear_id = (voxel_indices * per_imageatom_strides).sum(dim=-1)  # [M]
 
     # Re-index atoms into a voxel-aligned CSR (was in system-aligned)
-    voxel_starts = voxelCSR.starts
-    global_voxel_id_per_entry = voxel_starts[system_id] + local_voxel_linear_id  # [M]
+    global_voxel_id_per_entry = voxel_offset[system_id] + local_voxel_linear_id  # [M]
 
-    carry = ("positions", "atom_gid", "offsets", "is_primary", "system")
+    occupied_voxel_ids, voxel_index_per_atom = torch.unique(global_voxel_id_per_entry, return_inverse=True, sorted=True)
+    n_voxels = occupied_voxel_ids.shape[0]
+    voxel_arange = torch.arange(n_voxels,device=device,dtype=torch.long)
+
+    data = {k: image_atomCSR[k] for k in ("positions", "atom_gid", "offsets", "is_primary", "system")}
+    data["voxel_id"] = global_voxel_id_per_entry
     voxel_atomCSR = CSRTable.from_coo(
-        rows=global_voxel_id_per_entry,
-        cols=torch.arange(image_atomCSR.nnz, dtype=torch.long, device=device),
-        data={k: image_atomCSR[k] for k in carry},
-        nrows=voxelCSR.nnz,
+        rows=voxel_index_per_atom,
+        cols=torch.arange(image_atomCSR.nnz, dtype=torch.long, device=device), # each atom has its own column; we're just grouping rows.
+        data=data,
+        #nrows=voxelCSR.nnz,
         reorder=True,
     )
 
-    # A voxel is primary iff it has any primary atoms in it
-    v_tot = voxelCSR.nnz
+    
+    # Note: the below scheme for populating voxel information looks like a race condition.
+    # Actually we're just writing the atom data back to the voxel table, 
+    # instead of re-computing all the voxel info based on the GID.
+    
+    occupied_voxel_sys = torch.full((n_voxels,),-1, dtype=torch.long, device=device)
+    occupied_voxel_sys[voxel_index_per_atom] = system_id 
+    occupied_voxel_stride = torch.full((n_voxels,3),-1, dtype=torch.long, device=device)
+    occupied_voxel_stride[voxel_index_per_atom] = per_imageatom_strides
+    occupied_voxel_dims = torch.full((n_voxels,3),-1, dtype=torch.long, device=device)
+    occupied_voxel_dims[voxel_index_per_atom] = dims_per_entry
+    
+    occupied_voxel_local_id = torch.full((n_voxels,),-1, dtype=torch.long, device=device)
+    occupied_voxel_local_id[voxel_index_per_atom] = local_voxel_linear_id
+    occupied_voxel_coord = torch.full((n_voxels,3),-1, dtype=torch.long, device=device)
+    occupied_voxel_coord[voxel_index_per_atom] = voxel_indices
+
+    # The other strategy (could be implemented if needed for perforamnce)
+    # would be to unwrap the voxel offset and local id, then
+    # use offset to find the system -> strides, dims
+    # use local id -> coord
+    # actually that is irrelevant as each index is set to the same value;
+    # all atoms belonging to a given voxel also belong to a given system. 
 
     # Conversion to bool cannot be done before reduce because 
     # cuda backend cannot reduce bools; reduce using bool if available,
     # but with int on cuda.
+    
     accum_dtype = torch.long if device.type == "cuda" else torch.bool
 
-    primary_vox_mask = torch.zeros(v_tot, dtype=accum_dtype, device=device)
+    # Note that this data is not constant on atoms so we must do a 
+    # safe reduction using max.
+    primary_vox_mask = torch.zeros(n_voxels, dtype=accum_dtype, device=device)
+     
     primary_vox_mask.scatter_reduce_(
         0,
-        voxel_atomCSR["rows"],  # rows after reorder
-        voxel_atomCSR["is_primary"].to(accum_dtype),
+        voxel_index_per_atom,
+        image_atomCSR["is_primary"].to(accum_dtype),
         reduce="amax",
         include_self=False,
     )
+    
     primary_vox_mask = primary_vox_mask.to(torch.bool)
-    voxelCSR["is_primary_voxel"] = primary_vox_mask  # nnz-aligned per-voxel mask
+    
+    # ^^^
+    # Note for future: if you are tempted to get "is_priamry" from
+    # the voxel_atomCSR then make sure to reduce on the rows of that CSR,
+    # as building it re-orders the atoms and puts the data in a different order than
+    # the array voxel_index_per_atom
+    
+    data={
+        "voxel_gid":occupied_voxel_ids,
+        "v":occupied_voxel_coord,
+        "s":occupied_voxel_stride,
+        "m":occupied_voxel_dims,
+        "is_primary_voxel":primary_vox_mask,
+        }
+    voxelCSR = CSRTable.from_coo(rows=occupied_voxel_sys, cols=voxel_arange,data=data)
 
+    
     return voxel_atomCSR, voxelCSR, systemCSR
 
 
@@ -558,43 +601,51 @@ def voxel_adjacency(
         stencilCSR,
         operations={
             # fmt: off
-            ("v",   "delta", "coord_second"):  lambda v, d: v + d,  # neighbor coords [E,3]
-            ("v",   None, "v_orig"):           lambda v:v,          # source voxel indices
-            ("voxel_gid", None,    "first"):   lambda gid: gid,     # source voxel gid
+            ("v",   "delta", "v2"):  lambda v, d: v + d,  # neighbor coords [E,3]
+            #("v",   None, "v1"):           lambda v:v,          # source voxel indices
+            ("voxel_gid", None,    "gid1"):   lambda gid: gid,     # source voxel gid
             ("rows",      None,    "system"):  lambda r: r,         # system id
-            ("m",      None,    "m"):          lambda m: m,         # dims [E,3]
+            ("m",      None,    "m"):          lambda m: m,         # voxel dims [E,3]
+            #(None,"delta", "d"): lambda d: d, # keep delta
             ("s", None, "s"):                  lambda s:s           # strides for each voxel.       
             # fmt: on
         },
     )
 
-    coord_second = cand["coord_second"]
-
+    
+    # Drop neighbors that are not in bounds.
+    # ;PBC is not required since image atoms are construted explictly)
+    # ;;If you don't do this you will get spurious duplicate instances of the second voxel as well as
+    # ;;invalid/corrupt voxel gids)
+    v2 = cand["v2"]
     m = cand["m"]
-
-    # Drop no neighbors that are not in bounds. (PBC is not required since image atoms are construted)
-    in_bounds = ((coord_second >= 0) & (coord_second < m)).all(dim=1)
+    in_bounds = ((v2 >= 0) & (v2 < m)).all(dim=1)
     cand = cand.filter_mask(in_bounds)
-    # if cand.nnz == 0:
-    #     empty = torch.empty(0, dtype=torch.long, device=device)
-    #     return empty, empty.clone()
 
-    coord_second = cand["coord_second"]
-    second_local = (cand["s"] * coord_second).sum(dim=-1)  # reconstruct the per-system voxel ID numbers
+    second_local = (cand["s"] * cand["v2"]).sum(dim=-1)  # reconstruct the per-system voxel ID numbers
 
     # reconstruct the global voxel ID numbers
-    voxel_starts = voxelCSR.starts
-    first_global = cand["first"]
-    second_global = voxel_starts[cand["system"]] + second_local
+    first_global = cand["gid1"]
+    second_global = systemCSR["voxel_offset"][cand["system"]] + second_local
 
-    # ---- Keep edges if at least one endpoint voxel is primary ----
+    # drop locations where the second voxel index is unpopulated.
+    gids = voxelCSR["voxel_gid"]
+    where_second_nonempty, second_indices = find_indices(second_global, gids)
+    first_global = first_global[where_second_nonempty]    
+
+    # re-find the voxel index for the first voxel in the pair, as well.
+    where_first_valid, first_indices = find_indices(first_global, gids)
+    assert where_first_valid.shape[0] == first_global.shape[0], f"Not all first voxels were valid!"
+
+    # drop edges that don't contain at least a one primary atom
+    # (we never need image-image pairs)
     primary = voxelCSR["is_primary_voxel"]
-    keep = primary[first_global] | primary[second_global]  # one of the voxels must contain real atoms
+    keep = primary[first_indices] | primary[second_indices]  # one of the voxels must contain real atoms
 
-    first_global = first_global[keep]
-    second_global = second_global[keep]
+    first_indices = first_indices[keep]
+    second_indices = second_indices[keep]
 
-    return first_global, second_global
+    return first_indices, second_indices
 
 
 def expand_pairs(voxel_atomCSR, first_vox, second_vox):

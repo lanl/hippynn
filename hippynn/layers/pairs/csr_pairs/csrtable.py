@@ -707,3 +707,44 @@ class CSRTable:
                 out_data[kout] = fn(v1, v2)
 
         return CSRTable(starts=out_starts, cols=cols_of_out, data=out_data, reorder=False)
+
+
+def find_indices(query_vals: torch.Tensor, keys: torch.Tensor) -> Tuple[torch.Tensor]:
+    """
+    Map query values to their indices in keys, or -1 if not found.
+
+    This function allows you to look at the CSR rows for a table and see if they exist in another csr table.
+
+    Args:
+        keys: [V] long tensor, strictly increasing 
+        query_vals: [...] long tensor
+    
+    Returns:
+        Tuple: (locations, indices)
+        locations: indices of query values which are in the key.
+        indices: Index of the key corresponding to those query values.
+    
+    """
+    
+    #Example:
+    #    keys = [1, 5, 10, 15, 20]
+    #    query_vals = [5, 7, 10, 25, 1]
+    
+    n = keys.shape[0]  # Number of keys
+    # n = 5
+
+    # Step 1: Binary search to find insertion points
+    idx = torch.bucketize(query_vals, keys, right=False)  # long
+    # idx = [1, 2, 2, 5, 0]
+        
+    # Step 2: Clamp indices to prevent out-of-bounds access
+    idx_clamped = idx.clamp_max(n - 1)  # long
+    # idx_clamped = [1, 2, 2, 4, 0]
+    hit = (query_vals == keys[idx_clamped])
+    # hit = [True, False, True, False, True]
+    
+    locations = torch.nonzero(hit,as_tuple=True)[0]
+    # [0, 2, 4]
+    indices = idx_clamped[locations]
+    # [1, 2, 0]
+    return locations, indices
