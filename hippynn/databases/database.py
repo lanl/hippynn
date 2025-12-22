@@ -112,9 +112,15 @@ class Database:
 
         if isinstance(seed, torch.Generator):
             self.random_state = seed
+        elif isinstance(seed, torch.Tensor):
+            self.random_state = torch.Generator()
+            self.random_state.set_state(seed)
         else:
             self.random_state = torch.Generator()
-            self.random_state.manual_seed(seed)
+            try:
+                self.random_state.manual_seed(seed)
+            except Exception as eee:
+                raise ValueError(f"Invalid seed value {seed} caused error {eee}")
 
         if self.auto_split:
             if test_size is not None or valid_size is not None:
@@ -836,7 +842,7 @@ def prettyprint_arrays(arr_dict: dict[str: torch.Tensor]):
     printline()
     for key, value in arr_dict.items():
         if isinstance(value, torch.Tensor):
-            value = value.numpy()
+            value = value.detach().cpu().numpy()
         printrow(key, repr(value.dtype), repr(value.shape))
     printline()
 

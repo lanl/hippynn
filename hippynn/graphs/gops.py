@@ -4,16 +4,15 @@ Graph Operations ("gops") that process or transform a set of nodes.
 import collections
 import copy
 
-from .nodes.base import InputNode, MultiNode
-from .nodes.base.algebra import ValueNode
+from .nodes.base import InputNode, MultiNode, Node, ValueNode
 from .nodes.base.node_functions import NodeNotFound, NodeOperationError
 from .indextypes import soft_index_type_coercion
 
 from . import get_connected_nodes, find_unique_relative
 from ..tools import is_equal_state_dict
+from typing import Collection, List
 
-
-def get_subgraph(required_nodes):
+def get_subgraph(required_nodes: Collection[Node])->List[Node]:
     """
     Get the subgraph associated with some target (required) nodes.
 
@@ -23,7 +22,7 @@ def get_subgraph(required_nodes):
     """
 
     required_nodes = list(set(required_nodes))
-    subgraph_nodes = required_nodes + [p for node in required_nodes for p in node.get_all_parents()]
+    subgraph_nodes = required_nodes + [p for node in required_nodes for p in node.get_ancestors()]
 
     subgraph_nodes = subgraph_nodes + [c for mn in subgraph_nodes if isinstance(mn, MultiNode) for c in mn.children]
     # ^-- a note on this:
@@ -162,7 +161,6 @@ def copy_subgraph(required_nodes, assume_inputed, tag=None):
         if all(p not in n.parents for n in new_subgraph if n not in assume_inputed)
     )
 
-    # print(get_connected_nodes(new_required)) # Prior debug... change to logging?
     return new_required, new_subgraph
 
 
@@ -199,7 +197,7 @@ def check_link_consistency(node_set):
     )
 
 
-def replace_node(old_node, new_node, disconnect_old=False):
+def replace_node(old_node: Node, new_node: Node, disconnect_old=False):
     """
     :param old_node: Node to replace
     :param new_node: Node to insert
@@ -224,7 +222,7 @@ def replace_node(old_node, new_node, disconnect_old=False):
     :return: None
     """
 
-    new_node_requires = set(new_node.get_all_parents())
+    new_node_requires = set(new_node.get_ancestors())
 
     if disconnect_old:
         if old_node in new_node_requires:
@@ -250,7 +248,7 @@ def replace_node(old_node, new_node, disconnect_old=False):
         # If new node is a multinode, this will ensure we swap the main output in
         new_node = new_node.main_output
         # Convert index state if possible.
-        new_node = soft_index_type_coercion(new_node, old_node._index_state)
+        new_node = soft_index_type_coercion(new_node, old_node.index_state)
 
         # Find children that need replacing
         swap_children = set(old_node.children) - set(new_node_requires)
@@ -272,7 +270,7 @@ def _determine_multinode_child_match(old_node: MultiNode, new_node: MultiNode):
 
     try:
         # Try name-based matching first.
-        matches = {getattr(old_node, name): getattr(new_node, name) for name in new_node._output_names}
+        matches = {getattr(old_node, name): getattr(new_node, name) for name in new_node.output_names}
     except AttributeError:
         # If name-based matching does not work, just match by order.
         matches = {co: cn for co, cn in zip(old_node.children, new_node.children)}
@@ -460,7 +458,7 @@ def vacuum_outputs(node_list, species_set):
         # further specialize if encoder is OneHotEncoder
         if isinstance(encoder, OneHotEncoder):
             species_encoding = torch.eye(n_species, dtype=torch.int64)
-            # Unsqueeze adds atom-wise axis for MolAtom index type.
+            # Unsqueeze adds atom-wise axis for sysatom index type.
             replace_node_with_constant(encoder.encoding, species_encoding.unsqueeze(1), name="vacuum_encoding")
             replace_node_with_constant(pad_idxer.indexed_features, species_encoding, name="vacuum_indexed_features")
 
@@ -511,10 +509,13 @@ def swap_pairfinders(node_or_nodes, new_pairfinder, new_node_name=None, cell_nod
 
     new_node_name = (new_node_name or old_pf.name)
 
-    try:
-        new_pf = new_pairfinder(new_node_name, parents=(positions, species), **module_kwargs)
-    except RuntimeError:
-        cell = (cell_node or find_unique_relative(old_pf, CellNode))
-        new_pf = new_pairfinder(new_node_name, parents=(positions, species, cell), **module_kwargs)
+    if cell_node:
+        new_pf = new_pairfinder(new_node_name, parents=(positions, species, cell_node), **module_kwargs)
+    else:
+        try:
+            new_pf = new_pairfinder(new_node_name, parents=(positions, species), **module_kwargs)
+        except TypeError:
+            cell_node = find_unique_relative(old_pf, CellNode)
+            new_pf = new_pairfinder(new_node_name, parents=(positions, species, cell_node), **module_kwargs)
     
     replace_node(old_pf, new_pf, disconnect_old=True)

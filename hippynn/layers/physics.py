@@ -177,7 +177,7 @@ class Dipole(torch.nn.Module):
         super().__init__()
         self.summer = indexers.MolSummer()
 
-    def forward(self, charges: Tensor, positions: Tensor, mol_index: Tensor, n_molecules: int):
+    def forward(self, charges: Tensor, positions: Tensor, system_index: Tensor, n_systems: int):
         if charges.shape[1] > 1:
             # charges contain multiple targets, so set up broadcasting
             charges = charges.unsqueeze(2)
@@ -186,19 +186,19 @@ class Dipole(torch.nn.Module):
         # shape is (n_atoms, 3, n_targets) in multi-target mode
         # shape is (n_atoms, 3) in single target mode
         dipole_elements = charges * positions
-        dipoles = self.summer(dipole_elements, mol_index, n_molecules)
+        dipoles = self.summer(dipole_elements, system_index, n_systems)
         return dipoles
 
 
 class Quadrupole(torch.nn.Module):
-    """Computes quadrupoles as a flattened (n_molecules,9) array.
+    """Computes quadrupoles as a flattened (n_systems,9) array.
     NOTE: Uses normalization sum_a q_a (r_a,i*r_a,j - 1/3 delta_ij r_a^2)"""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.summer = indexers.MolSummer()
 
-    def forward(self, charges, positions, mol_index, n_molecules):
+    def forward(self, charges, positions, system_index, n_systems):
         # positions shape: (atoms, xyz)
         # charge shape: (atoms,1)
         ri_rj = positions.unsqueeze(1) * positions.unsqueeze(2)
@@ -206,7 +206,7 @@ class Quadrupole(torch.nn.Module):
         rsq = (positions**2).sum(dim=1).unsqueeze(1)  # unsqueeze over component index
         delta_ij = torch.eye(3, device=rsq.device).flatten().unsqueeze(0)  # unsqueeze over atom index
         quad_elements = charges * (ri_rj_flat - (1 / 3) * (rsq * delta_ij))
-        quadrupoles = self.summer(quad_elements, mol_index, n_molecules)
+        quadrupoles = self.summer(quad_elements, system_index, n_systems)
         return quadrupoles
 
 
@@ -223,13 +223,13 @@ class CoulombEnergy(torch.nn.Module):
         self.register_buffer("energy_conversion_factor", torch.tensor(energy_conversion_factor))
         self.summer = indexers.MolSummer()
 
-    def forward(self, charges, pair_dist, pair_first, pair_second, mol_index, n_molecules):
+    def forward(self, charges, pair_dist, pair_first, pair_second, system_index, n_systems):
         voltage_pairs = self.energy_conversion_factor * (charges[pair_second] / pair_dist.unsqueeze(1))
         n_atoms, _ = charges.shape
         voltage_atom = torch.zeros((n_atoms, 1), device=charges.device, dtype=charges.dtype)
         voltage_atom.index_add_(0, pair_first, voltage_pairs)
         coulomb_atoms = 0.5*voltage_atom * charges
-        coulomb_molecule = self.summer(coulomb_atoms, mol_index, n_molecules)
+        coulomb_molecule = self.summer(coulomb_atoms, system_index, n_systems)
         return coulomb_molecule, coulomb_atoms, voltage_atom
 
 
@@ -255,7 +255,7 @@ class ScreenedCoulombEnergy(CoulombEnergy):
         self.screening = screening
         self.bond_summer = pairs.MolPairSummer()
 
-    def forward(self, charges, pair_dist, pair_first, pair_second, mol_index, n_molecules):
+    def forward(self, charges, pair_dist, pair_first, pair_second, system_index, n_systems):
         screening = self.screening(pair_dist, self.radius).unsqueeze(1)
         screening = torch.where((pair_dist < self.radius).unsqueeze(1), screening, torch.zeros_like(screening))
 
@@ -266,7 +266,7 @@ class ScreenedCoulombEnergy(CoulombEnergy):
         voltage_atom = torch.zeros((n_atoms, 1), device=charges.device, dtype=charges.dtype)
         voltage_atom.index_add_(0, pair_first, voltage_pairs) 
         coulomb_atoms = 0.5 * voltage_atom * charges
-        coulomb_molecule = self.summer(coulomb_atoms, mol_index, n_molecules)
+        coulomb_molecule = self.summer(coulomb_atoms, system_index, n_systems)
 
         return coulomb_molecule, coulomb_atoms, voltage_atom
 
@@ -396,15 +396,30 @@ class CombineEnergy(torch.nn.Module):
         super().__init__()
         self.summer = indexers.MolSummer()
 
-    def forward(self, atom_energy_1, atom_energy_2, mol_index, n_molecules):
+    def forward(self, atom_energy_1, atom_energy_2, system_index, n_systems):
         """
         :param: atom_energy_1 per-atom energy from first node. 
         :param: atom_energy_2 per atom energy from second node. 
-        :param: mol_index the molecular index for atoms in the batch
+        :param: system_index the molecular index for atoms in the batch
         :param: total number of molecules in the batch
         :return: Total Energy
         """
         total_atom_energy = atom_energy_1 + atom_energy_2
-        mol_energy = self.summer(total_atom_energy, mol_index, n_molecules)
+        mol_energy = self.summer(total_atom_energy, system_index, n_systems)
         
         return mol_energy, total_atom_energy
+
+
+class CellScaleInducer(torch.nn.Module):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pbc = False
+
+    def forward(self, coordinates, cell):
+        strain = torch.eye(
+            coordinates.shape[2], dtype=coordinates.dtype, device=coordinates.device, requires_grad=True
+        ).tile(coordinates.shape[0],1,1)
+        strained_coordinates = torch.bmm(coordinates, strain)
+        strained_cell = torch.bmm(cell, strain)
+        return strained_coordinates, strained_cell, strain
+    

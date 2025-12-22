@@ -37,9 +37,9 @@ class _OptionModule(torch.nn.Module):
 
 
 class OptionalMixin(ExpandParents, AutoKw):
-    _auto_module_class = _OptionModule
+    auto_module_class = _OptionModule
 
-    @_parent_expander.match(SingleNode)
+    @parent_expander.match(SingleNode)
     def _expand0(self, option, *, criteria_map, one_option):
         option_parents = one_option.parents
         assert all(
@@ -52,7 +52,7 @@ class OptionalMixin(ExpandParents, AutoKw):
 
         parents = self.expand_parents(parents, criteria_map, one_option)
         self.module_kwargs = {"criteria_map": {k: v.torch_module for k, v in criteria_map}}
-        self._input_names = parents
+        self.input_names = parents
 
         super().__init__(name, parents, module=module, **kwargs)
 
@@ -62,11 +62,11 @@ class OptionalNode(OptionalMixin, SingleNode):
         assert all(isinstance(v, SingleNode) for k, v in criteria_map), "OptionalNode option types must be all BaseNode"
         one_option = one_value_from_dict(criteria_map)
 
-        idxstate = one_option._index_state
+        idxstate = one_option.index_state
         assert all(
-            o._index_state == idxstate for o in criteria_map.values()
+            o.index_state == idxstate for o in criteria_map.values()
         ), "Sub-options must provide the same index structure to be compatible"
-        self._index_state = idxstate
+        self.index_state = idxstate
 
         super().__init__(self, name, parents, module=module, **kwargs)
 
@@ -78,17 +78,17 @@ class OptionalMultiNode(OptionalMixin, MultiNode):
             isinstance(v, SingleNode) for k, v in criteria_map
         ), "OptionalMultiNode option types must be all MultiNode"
 
-        onames = one_option._output_names
+        onames = one_option.output_names
         assert all(
-            o._output_names == onames for o in criteria_map.values()
+            o.output_names == onames for o in criteria_map.values()
         ), "Sub-options must provide the same outputs to be compatible"
-        self._output_names = onames
+        self.output_names = onames
 
-        child_states = one_option._output_index_states
+        child_states = one_option.output_index_states
         assert all(
-            o._output_index_states == child_states for o in criteria_map.values()
+            o.output_index_states == child_states for o in criteria_map.values()
         ), "Sub-options must provide the same index structure to be compatible"
-        self._output_index_states = child_states
+        self.output_index_states = child_states
 
         super().__init__(self, name, parents, module=module, **kwargs)
 

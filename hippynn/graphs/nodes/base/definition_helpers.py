@@ -13,23 +13,62 @@ import functools
 import contextlib
 from .. import _debprint
 
-from . import _BaseNode
+from . import Node
 from ...indextypes import index_type_coercion, elementwise_compare_reduce, get_reduced_index_state
-
+from typing import Dict, Union, Tuple, Optional
 
 class AutoNoKw:
-    _auto_module_class = NotImplemented
-
-    def auto_module(self):
-        return self._auto_module_class()
+    def __init__(self, *args, module="auto", **kwargs):
+        if module == "auto":
+            module = self.auto_module_class()
+        super().__init__(*args,module=module,**kwargs)
 
 
 class AutoKw:
-    _auto_module_class = NotImplemented
+    """
+    Helper class for piping keyword arguments into an nn.module class.
 
-    def auto_module(self):
-        kw = self.module_kwargs or {}  # Default to empty dictionary if Falsey
-        return self._auto_module_class(**kw)
+    Keyword Argument sources (lower precedence first):
+
+        - module_kwargs argument to init.
+        - kwarg-source pairs from self.auto_module_kwargs,
+          where the value for the source is popped from the kwargs to the node.
+        - self.module_kwargs.
+
+    Note: If self.auto_module_kwargs is not a dict, it will then be interpreted
+      as a list of keys for a dictionary with the identity for key-value mapping.
+
+    After constructing the kwargs, they are saved as self.module_kwargs.
+
+    """
+    auto_module_kwargs: Optional[Union[Tuple[str], Dict[str,str]]] = None
+
+    def __init__(self, *args, module="auto", module_kwargs=None, **kwargs):
+
+
+        if module_kwargs is None:
+            module_kwargs = {}
+        
+        auto_module_kwargs = self.auto_module_kwargs
+
+        if auto_module_kwargs is None:
+            auto_module_kwargs = {}
+        elif not isinstance(auto_module_kwargs, dict):
+            # Assume list of keys-values which are identical.
+            auto_module_kwargs=dict(zip(auto_module_kwargs, auto_module_kwargs))
+
+        for k,v in auto_module_kwargs.items():
+            if v in kwargs:
+                module_kwargs[k] = kwargs.pop(v)
+
+        module_kwargs |=  getattr(self, "module_kwargs", {})
+
+        if module == "auto": 
+            self.module_kwargs = module_kwargs                
+            module = self.auto_module_class(**module_kwargs)            
+
+        super().__init__(*args, module=module, **kwargs)
+
 
 
 @contextlib.contextmanager
@@ -45,24 +84,38 @@ def temporary_parents(child, parents):
     :return: None
     """
     # Raise error if this is called on an already-build child.
-    # (This function could be refactored to deal with this case.)
-    assert not (
-        hasattr(child, "parents") or hasattr(child, "children")
-    ), "Temporary connection to node requires that it is not initialized."
+    # (This function could be refactored to deal with this case... delicately.)
+    assert not hasattr(child, "children"), \
+        "Temporary connection to node requires that it is not initialized."
 
-    parset = set(parents)  # In case a node has the same parent twice.
+    if hasattr(child, "parents"):
+        old_parents = child.parents
+    else:
+        old_parents = None  # No parents!
+
+    parents_set = set(parents)  # don't iterate over the same thing twice.
+    disconnect_child_set = set()
+    # it is important only to disconnect a parent from this child at the end
+    # if the parent didn't already include the child.
 
     try:
-        for p in parset:
-            p.children = (*p.children, child)
-        child.parents = parents
+        for p in parents_set:
+            if child not in p.children:
+                p.children = (*p.children, child)
+                disconnect_child_set.add(p)
+        child.parents = tuple(parents_set)
         child.children = ()
         yield
     finally:
-        for p in parset:
-            p.children = tuple(c for c in p.children if c is not child)
-        del child.parents
+        for p in disconnect_child_set:
+            p.children = tuple(c for c in p.children if c is not child) 
+        
+        if old_parents is not None: # non-empty
+            child.parents = old_parents
+        else:
+            del child.parents
         del child.children
+    
 
 
 class TupleTypeMismatch(Exception):
@@ -153,7 +206,7 @@ class ParentExpander:
         :param length:
         :return:
         """
-        return self.match(*((_BaseNode,) * length))
+        return self.match(*((Node,) * length))
 
     @adds_to_forms
     def assertion(self, *form):
@@ -240,7 +293,7 @@ class ParentExpander:
             if issubclass(sup_class, ExpandParents) and sup_class is not ExpandParents
         )
 
-        base_matches = tuple(form for sup_class in relevant_classes for form in sup_class._parent_expander.matches)
+        base_matches = tuple(form for sup_class in relevant_classes for form in sup_class.parent_expander.matches)
 
         _debprint("Bases found for merging:", relevant_classes)
 
@@ -313,20 +366,20 @@ class FormTransformer(FormHandler):
     def __call__(self, node_self, *parents, purpose=None, **kwargs):
         try:
             _assert_tupleform(parents, self.form)
-            _debprint("Expanding form", self.form)
-            _debprint("Input parents:", self.form)
-            _debprint("Match function:", self.fn)
-            if purpose is None:
-                purpose = "{}: Expanding parents {} based on form {}".format(type(self), parents, self.form)
-            with temporary_parents(node_self, parents):
-                # We have to pass self here explicitly because the form handler stores unbound functions.
-                new_parents = self.fn(node_self, *parents, purpose=purpose, **kwargs)
-            return new_parents
         except TupleTypeMismatch:
             _debprint("Didn't pass form!")
             return parents
-        except Exception as ee:
-            raise RuntimeError("Error while transforming {}".format(self.fn.__qualname__)) from ee
+    
+        _debprint("Expanding form", self.form)
+        _debprint("Input parents:", parents)
+        _debprint("Match function:", self.fn)
+        if purpose is None:
+            purpose = "{}: Expanding parents {} based on form {}".format(type(self), parents, self.form)
+        with temporary_parents(node_self, parents):
+            # We have to pass self here explicitly because the form handler stores unbound functions.
+            new_parents = self.fn(node_self, *parents, purpose=purpose, **kwargs)
+        return new_parents
+        ### Note: used to exception chain here, was too verbose.
 
 
 class IndexFormTransformer(FormTransformer):
@@ -407,7 +460,7 @@ class FormAssertion(FormHandler):
 class FormAssertLength(FormAssertion):
     def __init__(self, length):
         self.length = length
-        super().__init__((_BaseNode,) * length)
+        super().__init__((Node,) * length)
 
     def add_class_doc(self):
         return f"Asserts that the number of parents is {self.length}"
@@ -416,17 +469,19 @@ class FormAssertLength(FormAssertion):
         return "FormLengthAssertion({})".format(self.length)
 
 
-# This metaclass inserts the _parent_expander attribute into
+# This metaclass inserts the parent_expander attribute into
 # any class that has this metaclass.
 # Note for developers: The metaclass is needed because
 # the class must be modified before the class definition
 # is executed; __init_subclass__ is run /after/ the class
 # definition is executed.
 class ExpandParentMeta(type):
+    parent_expander: ParentExpander
+
     @classmethod
     def __prepare__(mcl, name, bases, **kwargs):
         cls_dict = super(ExpandParentMeta, mcl).__prepare__(name, bases, **kwargs)
-        cls_dict["_parent_expander"] = ParentExpander()
+        cls_dict["parent_expander"] = ParentExpander()
         return cls_dict
 
 
@@ -440,7 +495,7 @@ def _append_docs(cls):
     """
     new_doc = (cls.__doc__ + "\n") if cls.__doc__ else ""
     new_doc += """\n    .. Note::\n       This node has parent expansion, following these procedures.\n\n"""
-    for form_handler in cls._parent_expander:
+    for form_handler in cls.parent_expander:
         add = form_handler.add_class_doc()
         if add:
             new_doc += f"       #. {add}\n"
@@ -451,7 +506,43 @@ def _append_docs(cls):
 
 
 class ExpandParents(metaclass=ExpandParentMeta):
-    _parent_expander = None
+    """ 
+    Keyword Argument sources (lower precedence first):
+
+        - expansion_kwargs argument to init.
+        - kwarg-source pairs from self.parent_expansion_kwargs,
+          where the value for the source is popped from the kwargs to the node.
+        - self.module_kwargs.
+
+    If self.parent_expansion_kwargs is not a dictionary it will be interpreted as
+        a list of keys for an identity key-value mapping.
+
+    """
+    parent_expander: ParentExpander
+    parent_expansion_kwargs: Optional[Union[Tuple[str], Dict[str,str]]] = None
+    
+    def __init__(self, name, parents, *args, **kwargs):
+        
+        expansion_kwargs = kwargs.pop("expansion_kwargs", {})
+
+        parent_expansion_kwargs = getattr(self, "parent_expansion_kwargs")
+        if parent_expansion_kwargs is None:
+            parent_expansion_kwargs = {}
+        elif not isinstance(parent_expansion_kwargs, dict):
+            # Assume list of keys-values which are identical.
+            parent_expansion_kwargs = dict(zip(parent_expansion_kwargs, parent_expansion_kwargs))
+
+        for k, v in parent_expansion_kwargs.items():
+            if v in kwargs:
+                expansion_kwargs[k] = kwargs.pop(v)
+
+        if getattr(self, "module_kwargs", None) is not None:
+            for k, v in parent_expansion_kwargs.items():
+                if v in self.module_kwargs:
+                    expansion_kwargs[k] = self.module_kwargs[v]
+        
+        parents = self.expand_parents(parents, **expansion_kwargs)  
+        super().__init__(name, parents, *args, **kwargs)
 
     def __init_subclass__(cls, **kwargs):
         """
@@ -463,24 +554,33 @@ class ExpandParents(metaclass=ExpandParentMeta):
         #  This makes sense because initialization typically
         #  begins with the base class and then is customized or added to
         #  by a derived class.
-        cls._parent_expander._merge(*cls.__mro__)
+        cls.parent_expander._merge(*cls.__mro__)
 
         # If no documentation, do not apply any decorating to the documentation
         if cls.__doc__:
             cls.__doc__ = _append_docs(cls)
 
+    def __getattr__(self, item):
+        if item == "_parent_expander":
+            from ....tools import warn_name_change
+            warn_name_change("_parent_expander", "parent_expander")
+            return self.parent_expander
+        else:
+            return super().__getattr__(item)
+
+            
+
     def expand_parents(self, parents, *, purpose=None, **kwargs):
-        if isinstance(parents, _BaseNode):
+        if isinstance(parents, Node):
             parents = (parents,)
-        for form_handler in self._parent_expander:
+        for form_handler in self.parent_expander:
             _debprint("Processing form:")
             _debprint("\tForm:", form_handler.form)
             _debprint("\t\targs:", parents)
             _debprint("\t\tkwargs:", kwargs)
-            try:
-                # We have to pass self here explicitly because the form handler stores unbound functions,
-                # rather than bound methods.
-                parents = form_handler(self, *parents, purpose=purpose, **kwargs)
-            except Exception as ee:
-                raise RuntimeError("Couldn't build {} automatically".format(type(self))) from ee
+            # We have to pass self here explicitly because the form handler stores unbound functions,
+            # rather than bound methods.
+            ### Note: used to exception chain here, was too verbose.
+            parents = form_handler(self, *parents, purpose=purpose, **kwargs)
+
         return parents

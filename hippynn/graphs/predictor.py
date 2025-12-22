@@ -41,9 +41,10 @@ class Predictor:
         """
 
         outputs = [search_by_name(inputs, o) if isinstance(o, str) else o for o in outputs]
+        outputs = [o.main_output for o in outputs] # Make sure not to directly include a MultiNode as an output.
         outputs = list(set(outputs))  # Remove any redundancies -- they will screw up the output name map.
 
-        outputs = [o for o in outputs if o._index_state is not IdxType.Scalar]
+        outputs = [o for o in outputs if o.index_state is not IdxType.Scalar]
 
         self.out_names = [o.name for o in outputs]
         self.out_dbnames = [o.db_name for o in outputs]

@@ -1,7 +1,7 @@
-'''
+"""
 To obtain the data files needed for this example, use the script process_QM7_data.py,
 also located in this folder. The script contains further instructions for use.
-'''
+"""
 
 import torch
 
@@ -35,7 +35,7 @@ network = networks.Hipnn("hipnn_model", (species, positions), module_kwargs=netw
 # henergy = targets.HEnergyNode("HEnergy", network, db_name="T")
 henergy = targets.AtomizationEnergyNode("HEnergy", network, db_name="T")
 
-model = hippynn.GraphModule([species,positions], [henergy.mol_energy])
+model = hippynn.GraphModule([species, positions], [henergy.mol_energy])
 
 from hippynn import ase_interface as hai
 import ase.units, ase.build
@@ -54,7 +54,7 @@ calc.module.print_structure()
 atoms.calc = calc
 ase_en = atoms.get_potential_energy() / (ase.units.kcal / ase.units.mol)
 print("ASE Energy is:", ase_en)
-print("Ratio:", ase_en/original_en)
+print("Ratio:", ase_en / original_en)
 
 if not torch.allclose(torch.as_tensor(ase_en), original_en):
     raise ValueError(f"Values do not match!: {ase_en},{original_en}")

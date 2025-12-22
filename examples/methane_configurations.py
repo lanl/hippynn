@@ -1,8 +1,8 @@
 """
 This script is designed to accompany
-Allen, A. E. A., Shinkle, E., Bujack, R., & Lubbers, N. (2025). Optimal
-invariant bases for atomistic machine learning. arXiv preprint arXiv:2503.23515.
-https://arxiv.org/abs/2503.23515
+Allen, A. E. A., Shinkle, E., Bujack, R., & Lubbers, N. (2025). 
+Optimal invariant bases for atomistic machine learning. 
+arXiv preprint arXiv:2503.23515. https://arxiv.org/abs/2503.23515
 
 In the above paper, a methane dataset of ~7M configurations is used to test the expressive
 capacity of different HIP-NN variants on different sizes of data. We find that for small 
@@ -16,56 +16,51 @@ BEFORE RUNNING:
 3. Place the resulting file in a folder called datasets/ at the same level as hippynn/
    or change ``data_src`` below
 
-NOTE: The methane.extxyz file will be very slow to read, so this script only uses 100,000
-configurations. You can adjust this with the ``data_size`` variable. If you want to
-read the methane.extxyz file repeatedly, I strongly suggest to first convert it into
-another format (eg., .npz) that will be faster to read.
+NOTE: The methane.extxyz file will be very slow to read, so this script only uses first 1000
+configurations for training and subsequent 80,000 for testing. You can adjust this with 
+the ``data_size`` variable and by setting ``random_subset = True`` below. If you want to read
+the methane.extxyz file repeatedly, I strongly suggest to first convert it into another format
+(eg., .traj, .npz) that will be faster to read. You can do this by setting ``random_subset = True``
+below, which will create a methane.traj file automatically for future use. But this conversion
+may take a while (~1hr)."
 """
 
-import shutil
 import os
-import sys
-from time import time
-from math import log10
-from itertools import product
-from pathlib import Path
-
 import ase
 import torch
 import numpy as np
-import matplotlib.pyplot as plt
+from pathlib import Path
 
 import hippynn
-from hippynn.graphs import inputs, networks, targets, physics
-from hippynn.graphs.nodes.networks import Hipnn, HipnnVec, HipnnQuad, HipHopnn
-from hippynn.experiment import setup_training, train_model
+from hippynn.graphs import inputs, targets, physics
+from hippynn.graphs.nodes.networks import HipHopnn, Hipnn, HipnnVec, HipnnQuad
+from hippynn.experiment import setup_training, train_model, test_model
 from hippynn.graphs import loss
 from hippynn.experiment.controllers import RaiseBatchSizeOnPlateau, PatienceController
 from hippynn.plotting import PlotMaker, Hist2D, SensitivityPlot
-from hippynn.experiment.serialization import load_checkpoint_from_cwd
 from hippynn.pretraining import set_e0_values
 from hippynn.tools import active_directory
 
+# ----- Constants -----
+TOTAL_NUM_SAMPLES = 7_732_488 
+TEST_SET_SIZE = 80_000
+ENERGY_MEAN = -25042.327220945674
 
 # ----- User parameters -----
 seed = 2025
-data_src = Path(__file__).parents[2] / "datasets" / "methane.extxyz"
+data_root = Path(__file__).parents[2] / "datasets"
+data_src = data_root / "methane.extxyz"
+processed_src = data_root / "methane.traj"
 model_save_folder = Path(__file__).parents[1] / Path("TEST_METHANE_MODEL")
-
-n_epochs = 10_000  # reduce to dececrease the run time of the script
-
+n_epochs = 10_000  # reduce to decrease the run time of the script
+data_size = 1000
+random_subset = False  # whether to use a random subset of data or the first data_size sample
 # network_class = Hipnn # Original HIP-NN
 # network_class = HipnnVec # HIP-NN-TS, l=1
 # network_class = HipnnQuad # HIP-NN-TS, l=2
-network_class = HipHopnn  # HIP-HOP model with defaults with n = 4 and l = 3
-
-data_size = 100_000
-
-# ----- Construct model -----
-torch.random.manual_seed(seed)
-
-species = inputs.SpeciesNode(name="species", db_name="numbers")
-positions = inputs.PositionsNode(name="positions", db_name="positions")
+network_class = HipHopnn  # HIP-HOP
+hiphop_l_max = 3 # these will not be used if network_class != HipHopnn
+hiphop_n_max = 4 # these will not be used if network_class != HipHopnn
 
 network_params = {
     "possible_species": [0, 1, 6],
@@ -77,6 +72,81 @@ network_params = {
     "n_interaction_layers": 1,
     "n_atom_layers": 3,
 }
+
+if network_class == HipHopnn:
+    network_params.update(
+        {
+            "l_max": hiphop_l_max,
+            "n_max": hiphop_n_max,
+        }
+    )
+
+# ----- Prepare data -----
+def prepare_data(data_src, train_size, test_size, random_subset=random_subset): 
+    assert os.path.exists(data_src), f"Data source {data_src} does not exist! Please download methane.extxyz from https://archive.materialscloud.org/records/kz78r-6nx43 !"
+    train_dict = {
+        "numbers": [],
+        "positions": [],
+        "forces": [],
+        "energy": [],
+    }
+    test_dict = {
+        "numbers": [],
+        "positions": [],
+        "forces": [],
+        "energy": [],
+    }
+    if not random_subset:
+        generator = ase.io.iread(data_src)
+    else: 
+        if os.path.exists(processed_src):
+            data_src = processed_src  # use the .traj file if it exists
+        else:
+            print(f"Converting {data_src} to {processed_src} for faster reading next time, this may take a while (~1hr)...")
+            frames = ase.io.read(data_src, index=':')
+            ase.io.write(processed_src, frames)
+            data_src = processed_src
+            del frames
+        indices = np.arange(TOTAL_NUM_SAMPLES)
+        np.random.seed(seed)
+        np.random.shuffle(indices)
+        with ase.io.trajectory.Trajectory(processed_src) as raw_data:
+            generator = [raw_data[i] for i in indices[:data_size + TEST_SET_SIZE]]
+
+    for idx, frame in enumerate(generator):
+        species = frame.get_atomic_numbers()
+        positions = frame.get_positions()
+        forces = frame.get_forces()
+        energy = frame.get_total_energy()
+        # Change units 
+        forces = forces * 51.42208619083232 * 23.060541945329334  # Hartrees/Bohr --> eV/Ang --> kcal/mol/Ang
+        energy = energy * 627.5096080305927  # Hartrees --> kcal/mol
+        # Shift energy mean 
+        energy -= ENERGY_MEAN
+        if idx < train_size:
+            train_dict["numbers"].append(species)
+            train_dict["positions"].append(positions)
+            train_dict["forces"].append(forces)
+            train_dict["energy"].append(energy)
+        elif idx < train_size + test_size:
+            test_dict["numbers"].append(species)
+            test_dict["positions"].append(positions)
+            test_dict["forces"].append(forces)
+            test_dict["energy"].append(energy)
+        else:
+            break
+    # Convert to arrays
+    for key in train_dict:
+        if key != "numbers": 
+            train_dict[key] = np.array(train_dict[key], dtype=np.float32)
+            test_dict[key] = np.array(test_dict[key], dtype=np.float32)
+    return train_dict, test_dict
+
+# ----- Construct model -----
+torch.random.manual_seed(seed)
+
+species = inputs.SpeciesNode(name="species", db_name="numbers")
+positions = inputs.PositionsNode(name="positions", db_name="positions")
 
 network = network_class("network", (species, positions), module_kwargs=network_params)
 henergy = targets.HEnergyNode(
@@ -95,18 +165,12 @@ rmse_energy = loss.MSELoss.of_node(henergy) ** (1 / 2)
 mae_energy = loss.MAELoss.of_node(henergy)
 rsq_energy = loss.Rsq.of_node(henergy)
 
-mol_hier = loss.Mean.of_node(henergy.mol_hier)
-atom_hier = loss.Mean.of_node(henergy.atom_hier)
-old_hier = loss.Mean.of_node(henergy.hierarchicality)
-rbar = henergy.batch_hier.pred  # loss.Mean.of_node(hierarchicality)
-
 loss_energy = rmse_energy + mae_energy
 loss_force = rmse_force + mae_force
 loss_error = loss_energy + loss_force
 l2_reg = 1e-6 * loss.l2reg(network)
 
-loss_reg = l2_reg + 10 * rbar
-total_loss = loss_error + loss_reg
+total_loss = loss_error + l2_reg
 
 validation_losses = {
     "T-RMSE": rmse_energy,
@@ -115,13 +179,8 @@ validation_losses = {
     "F-RMSE": rmse_force,
     "F-MAE": mae_force,
     "F-RSQ": rsq_force,
-    "BHier": rbar,
-    "MHier": mol_hier,
-    "AHier": atom_hier,
-    "OHier": old_hier,
     "Error Loss": loss_error,
     "L2": l2_reg,
-    "Reg Loss": loss_reg,
     "Loss": total_loss,
 }
 
@@ -175,27 +234,39 @@ training_modules, controller, metric_tracker = setup_training(
     setup_params=experiment_params,
 )
 
+
 # ----- Load data -----
-iterable = ase.io.read(data_src, index=slice(0, data_size))
-database = hippynn.databases.AseDatabaseIterable(
-    iterable=iterable,
+train_dict, test_dict = prepare_data(data_src, 
+                                     data_size,
+                                     TEST_SET_SIZE)
+
+train_database = hippynn.databases.Database(
+    arr_dict=train_dict,
     seed=seed,
-    pin_memory=False,
+    pin_memory=True,
     test_size=0.1,
     valid_size=0.1,
     **db_info,
 )
+train_database.send_to_device(device)
 
-database.send_to_device(device)
+test_database = hippynn.databases.Database(
+    arr_dict=test_dict,
+    seed=seed + 1,
+    pin_memory=True,
+    **db_info,
+)
+test_database.split_the_rest("test")
+test_database.send_to_device(device)
 
-set_e0_values(henergy, database, trainable_after=False)
+set_e0_values(henergy, train_database, trainable_after=False)
 
 # ----- Train model -----
 with active_directory(model_save_folder):
 
     metric_tracker = train_model(
         training_modules=training_modules,
-        database=database,
+        database=train_database,
         controller=controller,
         metric_tracker=metric_tracker,
         callbacks=None,
@@ -204,4 +275,20 @@ with active_directory(model_save_folder):
         store_best=True,
         store_every=0,
         quiet=False,
+    )
+
+    # ----- Evaluate model -----
+    evaluator = training_modules.evaluator
+    best_model = metric_tracker.best_model
+    if best_model:
+        evaluator.model.load_state_dict(best_model)
+
+    print("Testing model...")
+    torch.cuda.empty_cache()
+    test_model(
+        test_database,
+        evaluator,
+        when="FinalTraining",
+        batch_size=controller.eval_batch_size,
+        metric_tracker=metric_tracker,
     )

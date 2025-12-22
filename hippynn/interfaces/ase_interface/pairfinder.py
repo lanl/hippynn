@@ -34,7 +34,7 @@ class ASENeighbors(pair_modules.dispatch._DispatchNeighbors):
 
 
 class ASEPairNode(_DispatchNeighbors):
-    _auto_module_class = ASENeighbors
+    auto_module_class = ASENeighbors
 
 
 from ...experiment import assembly

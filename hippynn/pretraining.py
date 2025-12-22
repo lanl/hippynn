@@ -7,7 +7,7 @@ import numpy as np
 import torch
 
 from .graphs import find_unique_relative, Predictor
-from .graphs.nodes.base import _BaseNode
+from .graphs.nodes.base import Node
 from .graphs.nodes.tags import Encoder
 from .graphs.nodes.inputs import SpeciesNode, PositionsNode, CellNode, ForceNode
 from .graphs.nodes.pairs import OpenPairIndexer, DynamicPeriodicPairs, MinDistNode
@@ -40,7 +40,7 @@ def hierarchical_energy_initialization(
     :return: None
     """
 
-    if isinstance(energy_module, _BaseNode):
+    if isinstance(energy_module, Node):
         if encoder is None:
             encoder = find_unique_relative(energy_module, Encoder, "Constructing E0 Values")
         if species_name is None:
@@ -50,7 +50,7 @@ def hierarchical_energy_initialization(
 
         energy_module = energy_module.torch_module
 
-    if isinstance(encoder, _BaseNode):
+    if isinstance(encoder, Node):
         encoder = encoder.torch_module
 
     # If model has E0 term, set its initial value using the database provided
@@ -129,7 +129,7 @@ def calculate_min_dists(
     dist_hard_max: float,
     cell_name: str = None,
     device: torch.device = None,
-    pair_finder_class: _BaseNode = "auto",
+    pair_finder_class: Node = "auto",
     batch_size: int = 50,
 ):
     """

@@ -5,83 +5,114 @@ from ....layers.algebra import Idx
 from .base import SingleNode, Node
 from .. import _debprint
 from ...indextypes import IdxType
+from ...._deprecations import _DeprecatedNamesMixin
 
 
 class IndexNode(SingleNode):
-    _input_names = ("parent",)
+    input_names = ("parent",)
 
     def __init__(self, name, parents, index, index_state=None):
         if len(parents) != 1:
             raise TypeError("Index node takes exactly one parent.")
         par = parents[0]
-        iname = par._output_names[index] if hasattr(par, "_output_names") else "<{index}>".format(index=index)
+        iname = par.output_names[index] if hasattr(par, "output_names") else "<{index}>".format(index=index)
         repr_info = {"parent_name": par.name, "index": iname}
         module = Idx(index, repr_info=repr_info)
         self.index = index
-        self._index_state = IdxType.NotFound if index_state is None else index_state
+        self.index_state = IdxType.Unlabeled if index_state is None else index_state
         super().__init__(name, parents, module=module)
+            
 
-
-class MultiNode(Node):  # Multinode
-    _output_names = NotImplemented
-    _output_index_states = NotImplemented  # optional?
-    _main_output = NotImplemented
+class MultiNode(Node,_DeprecatedNamesMixin):  # Multinode
+    output_names = NotImplemented
+    output_index_states = NotImplemented  # optional?
+    main_output_name = NotImplemented
+    _DEPRECATED_NAMES = {
+    "_main_output" : "main_output_name",
+    "_output_names": "output_names",
+    "_output_index_states": "output_index_states"
+}
 
     def __init__(self, name, parents, module="auto", *args, db_name=None, **kwargs):
 
         super().__init__(name, parents, *args, module=module, **kwargs)
 
+        if self.output_index_states is NotImplemented:
+            raise TypeError(f"no defined output index in {self.__class__.__name__}")
+        
+        if self.output_names is NotImplemented:
+            raise TypeError(f"no defined output names in {self.__class__.__name__}")
+
         self.children = tuple(
             IndexNode(name + "." + cn, (self,), index=i, index_state=cidx)
-            for i, (cn, cidx) in enumerate(zip(self._output_names, self._output_index_states))
+            for i, (cn, cidx) in enumerate(zip(self.output_names, self.output_index_states))
         )
-        self.main_output.db_name = db_name
+    
+        if db_name is not None:
+            self.db_name = db_name
 
-    def set_dbname(self, db_name):
-        self.main_output.set_dbname(db_name)
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        # Enforce _child_index_states has same length as _output_names
-        if cls._output_index_states is not NotImplemented:
-            if len(cls._output_index_states) != len(cls._output_names):
+        # Enforce _child_index_states has same length as output_names
+        if cls.output_index_states is not NotImplemented:
+            if len(cls.output_index_states) != len(cls.output_names):
                 raise AssertionError(
                     "Lengths of _child_index_states {} doesn't match lengths of ouput_names {}".format(
-                        cls._output_index_states, cls._output_names
+                        cls.output_index_states, cls.output_names
                     )
                 )
 
         # Enforce no name conflict between input names and output names
-        if cls._input_names is not NotImplemented:
+        if cls.input_names is not NotImplemented:
             try:
-                assert all(o not in cls._input_names for o in cls._output_names)
+                assert all(o not in cls.input_names for o in cls.output_names)
             except AssertionError as ae:
                 raise ValueError(
                     "Multi-node output names {} conflict with input names {}".format(
-                        cls._output_names, cls._input_names
+                        cls.output_names, cls.input_names
                     )
                 ) from ae
+            
+    @property
+    def pred(self):
+        return self.main_output.pred
+    
+    @property
+    def true(self):
+        return self.main_output.true
+    
+    @property
+    def db_name(self):
+        return None
+        
+    @db_name.setter
+    def db_name(self, value):
+        if value is not None:
+            self.main_output.db_name = value
 
     def __dir__(self):
         dir_ = super().__dir__()
-        if self._output_names is not NotImplemented:
-            dir_ = dir_ + list(self._output_names)
+        if self.output_names is not NotImplemented:
+            dir_ = dir_ + list(self.output_names)
         return dir_
 
     def __getattr__(self, item):
-        if item in ("children", "_output_names"):  # Guard against recursion
-            raise AttributeError("Attribute {} not yet present.".format(item))
+
+        if item in ("children", "output_names"):  # Guard against recursion
+            raise AttributeError("Attribute {} not yet present.".format(item))        
+        
         try:
-            return super().__getattr__(item)  # Defer to BaseNode first
-        except AttributeError:
-            pass
-        try:
-            return self.children[self._output_names.index(item)]
+            return self.children[self.output_names.index(item)]
         except (AttributeError, ValueError):
-            raise AttributeError("{} object has no attribute '{}'".format(self.__class__, item))
+            pass
+
+        return super().__getattr__(item)
+            
 
     @property
     def main_output(self):
-        if self._main_output is NotImplemented:
-            return super().main_output
-        return getattr(self, self._main_output)
+        if self.main_output_name is NotImplemented:
+            raise TypeError(f"Main output not implemented for node type: {type(self)!r}")
+        return getattr(self, self.main_output_name)
+

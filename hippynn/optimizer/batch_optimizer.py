@@ -47,11 +47,13 @@ class Optimizer:
                 force_node = find_unique_relative(model.nodes_to_compute, GradientNode)
             except NodeNotFound:
                 try:
+                    # Could be refactored into a search_by_name?
                     force_node = find_unique_relative(model.nodes_to_compute, lambda node: 'force' in node.name,)
                 except Exception as ee:
                     raise ValueError("No automatic force node could be found for optimizer.") from ee
                 # TODO even find an energy node if we can and add forces to it?
         else:
+            # Could be refactored into a search_by_name?
             force_node = find_unique_relative(model.nodes_to_compute, lambda node: node.db_name == force_key)
 
         additional_outputs = None

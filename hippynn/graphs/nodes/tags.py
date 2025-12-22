@@ -7,7 +7,7 @@ from ..indextypes import IdxType
 
 
 class Encoder:
-    _output_names = "encoding", "nonblank"
+    output_names = "encoding", "nonblank"
     species_set = NotImplemented
 
 
@@ -20,8 +20,8 @@ class Network:
 
 
 class PairIndexer:
-    _output_names = "pair_dist", "pair_first", "pair_second", "pair_coord"
-    _output_index_states = (IdxType.Pair,) * len(_output_names)
+    output_names = "pair_dist", "pair_first", "pair_second", "pair_coord"
+    output_index_states = (IdxType.Pairs,) * len(output_names)
 
 
 class PairCache:

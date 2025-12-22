@@ -9,6 +9,9 @@ Breaking changes:
   now accept only an int or a torch.Generator for the ``seed`` argument. 
 - The arguments on the MD objects LangevinDynamics and ASELangevinDynamics
   have changed slightly. 
+- Refactoring of core node logic. Most old names are still available and backwards
+  compatibility with loading previously trained models is still being maintained, although
+  you will likely see warnings when loading said models.
 
 New Features:
 -------------
@@ -35,6 +38,7 @@ Improvements:
 - New variant of ``AseDatabase`` named ``AseDatabaseIterable``. Accepts an 
   iterable of ``ase.Atoms`` objects (e.g., the result of ``ase.io.read`` 
   or ``ase.io.iread``).
+
 
 
 Bug Fixes:

@@ -6,8 +6,7 @@ from collections import OrderedDict
 
 import torch
 
-from .nodes.base.node_functions import _BaseNode
-from .nodes.base import InputNode
+from .nodes.base import Node, InputNode, NodeNotFound, NodeAmbiguityError
 
 from . import get_subgraph, compute_evaluation_order
 
@@ -52,7 +51,7 @@ class GraphModule(torch.nn.Module):
                     raise ValueError("Nodes to compute requires an unspecified input:", node)
 
         for x in all_node_list:
-            if not isinstance(x, _BaseNode):
+            if not isinstance(x, Node):
                 if not callable(x):
                     raise ValueError("Computational objects must be callable.")
                 else:
@@ -106,18 +105,26 @@ class GraphModule(torch.nn.Module):
             mid = "{:3} : {}".format(node_map[computed], computed.name)
             print("{:-<20}-> {}".format(pre, mid))
 
-        node_map.update()
-        node_map.update()
-        node_map.update({n: "Out{}:".format(i) for i, n in enumerate(self.forward_output_list)})
+        
+        
 
-    def node_from_name(self, name):
-        for match in list(self.input_nodes) + list(self.forward_output_list):
-            if match.db_name == name or match.name == name:
-                node = match
-                break
-        else:
-            raise ValueError("Name '{}' not found in graph.".format(name))
-        return node
+    def nodes_from_name(self, name):
+        """
+        returns list of all matching nodes
+        """
+        matches = []
+        for node in list(self.input_nodes) + list(self.forward_output_list):
+            if node.db_name == name or node.name == name:
+                matches.append(node)
+        return matches
+
+    def unique_node_from_name(self, name):
+        matches = self.nodes_from_name(name)
+        if len(matches) == 0:
+            raise NodeNotFound(f"Name '{name}' not found in graph.")
+        elif len(matches) > 1:
+            raise NodeAmbiguityError(f"Multiple nodes found with name or db_name '{name}'.")
+        return matches[0]
 
     def extra_repr(self):
         return "Inputs: {} \n Outputs: {}".format(
@@ -135,6 +142,14 @@ class GraphModule(torch.nn.Module):
             computed[this_node] = self.get_module(this_node)(*(computed[inkey] for inkey in inputs_for_this_node))
 
         return tuple(computed[x] for x in self.nodes_to_compute)
+
+    def __getattr__(self, item):
+        if item == "node_from_name":
+            from .._deprecations import warn_name_change
+            warn_name_change("node_from_name", "unique_node_from_name")
+            return self.unique_node_from_name
+        else:
+            return super().__getattr__(item)
 
 
 class _DebugGraphModule(GraphModule):

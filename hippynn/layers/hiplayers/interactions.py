@@ -128,8 +128,9 @@ class InteractLayerVec(InteractLayer):
             f"Loaded state does not contain 'cusp_reg' parameter. "
             f"Using deprecated value of 1e-30. "
             f"This compatibility behavior will be removed in the future. "
-            f"To avoid this warning, re-save this model."
-        )
+            f"To avoid this warning, re-save this model.",
+            stacklevel=3,
+            )
         self.set_extra_state({"cusp_reg": DEPRECATED_CUSP_REG})
         missing.remove(m)
 

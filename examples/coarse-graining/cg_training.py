@@ -123,7 +123,7 @@ with active_directory(results_folder):
         # Combined energy prediction
         sys_energy = henergy.mol_energy + repulse.mol_energy
         sys_energy.name = "sys_energy"
-        sys_energy._index_state = IdxType.Molecules
+        sys_energy.index_state = IdxType.Systems
 
         # Force node
         grad = MultiGradientNode("forces", sys_energy, (positions,), signs=-1)

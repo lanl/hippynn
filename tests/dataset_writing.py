@@ -47,7 +47,9 @@ if __name__ == "__main__":
     db1.split_the_rest("remaining")
     # write an npz version and reload it.
     db1.write_npz(file=new_npz_file, record_split_masks=True, overwrite=True)
-    db3 = NPZDatabase(file=new_npz_file, seed=seed, num_workers=num_workers, allow_unfound=True, inputs=None, targets=None, auto_split=True, **db_info)
+    db3 = NPZDatabase(
+        file=new_npz_file, seed=seed, num_workers=num_workers, allow_unfound=True, inputs=None, targets=None, auto_split=True, **db_info
+    )
 
     # write an h5 version and reload it.
     db1.write_h5(split=True, h5path=new_ani_file, species_key="Z", overwrite=True)
