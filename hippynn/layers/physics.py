@@ -38,12 +38,13 @@ class Hessian(torch.nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, source, positions, padding_mask):
+    def forward(self, forces, positions, padding_mask):
         """
         Computes the Hessian using second derivatives of energy or first derivatives of forces.
-        Assumes:
-            - source: either energy (B, 1) or forces (B, N, 3)
+        Assumes dimensions:
+            - forces: (B, N, 3)
             - positions: (B, N, 3)
+            - padding_mask: (B, N)
         Returns:
             - hessians: (B, 3N, 3N)
         """
@@ -51,24 +52,17 @@ class Hessian(torch.nn.Module):
 
         hessian_mask = self.expand_padding_mask_to_hessian_mask(padding_mask)
 
-        if source.ndim == 2 and source.shape[1] == 1:
-            # Case: source is energy (B, 1)
-            forces = self._forces_from_energy(source, positions)
-            return self._hessian_from_forces(forces, positions), hessian_mask
-        elif source.ndim == 3 and source.shape[2] == 3:
+        if forces.ndim == 3 and forces.shape[2] == 3:
             # Case: source is forces (B, N, 3)
-            return self._hessian_from_forces(source, positions), hessian_mask
+            return self._hessian_from_forces(forces, positions), hessian_mask
         else:
-            raise ValueError(f"Unsupported source shape: {source.shape}")
+            raise ValueError(f"Unsupported shape of force tensor: {forces.shape}")
 
-    def _forces_from_energy(self, energy, positions):
-        return -torch.autograd.grad(energy.sum(), positions, create_graph=True)[0]
-
-    def _hessian_from_forces(self, force, positions):
-        force_flat = force.flatten(start_dim=1)
+    def _hessian_from_forces(self, _forces, _positions):
+        force_flat = _forces.flatten(start_dim=1)
         force_components = force_flat.unbind(dim=1)
         return -torch.stack([
-            torch.autograd.grad(f.sum(), positions, create_graph=True)[0].flatten(start_dim=1)
+            torch.autograd.grad(f.sum(), _positions, create_graph=True)[0].flatten(start_dim=1)
             for f in force_components
         ], dim=1)
 
@@ -116,28 +110,46 @@ class HVPVector(torch.nn.Module):
             for i in range(len(num_atoms)): # For each system,
                 N = num_atoms[i]               # Get the number of atoms
                 column_idx = torch.randint(0,3*N, (1,)) # Create a random integer from 0 to 3N inclusive
-                vectors[i][column_idx] = 1.0            # Replace the 0.0 at the random index for 1.0
+                vectors[i][column_idx] = 1.0            # Replace the 0.0 at the random index for 1.0https://github.com/DjokicMa/MACE.git
 
         else:
             raise ValueError(f"Unknown vector type {self.vector_type}")
 
         vectors = vectors.view(len(num_atoms), N_max, 3)
-        print("HVP vector dimensions:", vectors.shape)
         return vectors
 
 class HVP(torch.nn.Module):
-    def forward(self, force, coordinates, vector):
+    def forward(self, force, coordinates, vector, padding_mask):
         """
-        source:      (B, N, 3)  force tensor
-        coordinates: (B, N, 3), requires_grad=True
-        vector:      (B, N, 3), perturbation direction
-        Returns:     (B, N, 3), Hessian-vector product
+        source:       (B, N, 3)  force tensor
+        coordinates:  (B, N, 3), requires_grad=True
+        vector:       (B, N, 3), perturbation direction
+        padding_mask: (B, N), Hessian padding mask with 3N non-zero elements
+        Returns:      (B, N, 3), Hessian-vector product
         """
 
+        hessian_mask = self.expand_padding_mask_to_hessian_mask(padding_mask)
         hvp = -torch.autograd.grad(force, coordinates, grad_outputs=vector, create_graph=True, retain_graph=True)[0]
 
-        print("HVP dimensions:", hvp.shape)
-        return hvp
+        return hvp, hessian_mask
+    
+    @staticmethod
+    def expand_padding_mask_to_hessian_mask(padding_mask):
+        """
+        Expand a (B, N) atom mask to a (B, 3N, 3N) Hessian mask.
+
+        Parameters:
+            padding_mask: Boolean tensor of shape (B, N)
+
+        Returns:
+            Boolean tensor of shape (B, 3N, 3N)
+        """
+        B, N = padding_mask.shape
+
+        expanded_mask = padding_mask.unsqueeze(-1).expand(-1, -1, 3).reshape(B, 3 * N)
+        mask_matrix = expanded_mask.unsqueeze(2) & expanded_mask.unsqueeze(1)  # (B, 3N, 3N)
+
+        return mask_matrix
     
 
 class TrueHVP(torch.nn.Module):
@@ -150,9 +162,9 @@ class TrueHVP(torch.nn.Module):
         B, N, _ = vector.shape
         vector_flat = vector.flatten(start_dim=1).unsqueeze(-1)  # (B, 3N, 1)
         hvp_flat = torch.bmm(hessian, vector_flat).squeeze(-1)  # (B, 3N)
+        hvp = hvp_flat.view(B, N, 3)
 
-        print("True HVP dimensions:", hvp_flat.view(B, N, 3).shape)
-        return hvp_flat.view(B, N, 3)  # (B, N, 3)
+        return hvp  # (B, N, 3)
 
 
 class StressForce(torch.nn.Module):

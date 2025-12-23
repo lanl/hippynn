@@ -1,0 +1,358 @@
+Data Loaded and Network set up! Just need to train... 
+Using device:  cuda:0
+Beginning training.
+Model:
+Inputs:
+	 I0 : SpeciesNode('Species(db_name='species')')<0x28d85333f70>
+	 I1 : LossTrueNode('hessian.hessian-true')<0x28dcea9af40>
+	 I2 : PositionsNode('Positions(db_name='coordinates')')<0x28d85333df0>
+Outputs:
+	 O0 : TrueHVPNode('true_hvp')<0x28de4004250>
+	 O1 : IndexNode('energy.mol_energy')<0x28de3ff0e50>
+	 O2 : GradientNode('forces')<0x28d8528ce80>
+	 O3 : IndexNode('hessian.hessian')<0x28de4004280>
+	 O4 : IndexNode('hessian.hessian_mask')<0x28de4035fa0>
+	 O5 : HVPNode('hvp')<0x28dcea9afd0>
+Order:
+I0-------------------> H0  : OneHot
+H0-------------------> H1  : OneHot.encoding
+H0-------------------> H2  : OneHot.nonblank
+H1,H2----------------> H3  : PaddingIndexer
+H3-------------------> H5  : PaddingIndexer.indexed_features
+H3-------------------> H6  : PaddingIndexer.inv_real_atoms
+H3-------------------> H7  : PaddingIndexer.mol_index
+H3-------------------> H9  : PaddingIndexer.n_molecules
+H3-------------------> H10 : PaddingIndexer.real_atoms
+H2,H10,H6,I2---------> H11 : PairIndexer
+H11------------------> H13 : PairIndexer.pair_dist
+H11------------------> H14 : PairIndexer.pair_first
+H11------------------> H15 : PairIndexer.pair_second
+I1-------------------> H16 : Atleast2D(LossTrueNode('hessian.hessian-true')<0x28dcea9af40>)
+H13,H15,H5,H14-------> H17 : hipnn_model
+H9,H17,H7------------> H18 : energy
+H18------------------> O1  : energy.mol_energy
+I2,O1----------------> O2  : forces
+H2,O2,I2-------------> H27 : hessian
+H27------------------> O3  : hessian.hessian
+H27------------------> O4  : hessian.hessian_mask
+H2,I2----------------> H30 : hvp_vector
+H30,O2,I2------------> O5  : hvp
+H16,H30--------------> O0  : true_hvp
+Model Params:
+cuda:0 Fixed torch.int64 torch.Size([9]) moddict.node0.species_map
+cuda:0 Learned torch.float32 torch.Size([16, 16, 4]) moddict.node17.blocks.0.0.base_layer.int_weights
+cuda:0 Learned torch.float32 torch.Size([1, 16]) moddict.node17.blocks.0.0.base_layer.sensitivity.mu
+cuda:0 Learned torch.float32 torch.Size([1, 16]) moddict.node17.blocks.0.0.base_layer.sensitivity.sigma
+cuda:0 Learned torch.float32 torch.Size([16, 4]) moddict.node17.blocks.0.0.base_layer.selfint.weight
+cuda:0 Learned torch.float32 torch.Size([16]) moddict.node17.blocks.0.0.base_layer.selfint.bias
+cuda:0 Learned torch.float32 torch.Size([16, 16]) moddict.node17.blocks.0.0.res_layer.weight
+cuda:0 Learned torch.float32 torch.Size([16]) moddict.node17.blocks.0.0.res_layer.bias
+cuda:0 Learned torch.float32 torch.Size([16, 4]) moddict.node17.blocks.0.0.adjust_layer.weight
+cuda:0 Learned torch.float32 torch.Size([16, 16]) moddict.node17.blocks.0.1.base_layer.weight
+cuda:0 Learned torch.float32 torch.Size([16]) moddict.node17.blocks.0.1.base_layer.bias
+cuda:0 Learned torch.float32 torch.Size([16, 16]) moddict.node17.blocks.0.1.res_layer.weight
+cuda:0 Learned torch.float32 torch.Size([16]) moddict.node17.blocks.0.1.res_layer.bias
+cuda:0 Learned torch.float32 torch.Size([16, 16]) moddict.node17.blocks.0.2.base_layer.weight
+cuda:0 Learned torch.float32 torch.Size([16]) moddict.node17.blocks.0.2.base_layer.bias
+cuda:0 Learned torch.float32 torch.Size([16, 16]) moddict.node17.blocks.0.2.res_layer.weight
+cuda:0 Learned torch.float32 torch.Size([16]) moddict.node17.blocks.0.2.res_layer.bias
+cuda:0 Learned torch.float32 torch.Size([16, 16, 16]) moddict.node17.blocks.1.0.base_layer.int_weights
+cuda:0 Learned torch.float32 torch.Size([1, 16]) moddict.node17.blocks.1.0.base_layer.sensitivity.mu
+cuda:0 Learned torch.float32 torch.Size([1, 16]) moddict.node17.blocks.1.0.base_layer.sensitivity.sigma
+cuda:0 Learned torch.float32 torch.Size([16, 16]) moddict.node17.blocks.1.0.base_layer.selfint.weight
+cuda:0 Learned torch.float32 torch.Size([16]) moddict.node17.blocks.1.0.base_layer.selfint.bias
+cuda:0 Learned torch.float32 torch.Size([16, 16]) moddict.node17.blocks.1.0.res_layer.weight
+cuda:0 Learned torch.float32 torch.Size([16]) moddict.node17.blocks.1.0.res_layer.bias
+cuda:0 Learned torch.float32 torch.Size([16, 16]) moddict.node17.blocks.1.1.base_layer.weight
+cuda:0 Learned torch.float32 torch.Size([16]) moddict.node17.blocks.1.1.base_layer.bias
+cuda:0 Learned torch.float32 torch.Size([16, 16]) moddict.node17.blocks.1.1.res_layer.weight
+cuda:0 Learned torch.float32 torch.Size([16]) moddict.node17.blocks.1.1.res_layer.bias
+cuda:0 Learned torch.float32 torch.Size([16, 16]) moddict.node17.blocks.1.2.base_layer.weight
+cuda:0 Learned torch.float32 torch.Size([16]) moddict.node17.blocks.1.2.base_layer.bias
+cuda:0 Learned torch.float32 torch.Size([16, 16]) moddict.node17.blocks.1.2.res_layer.weight
+cuda:0 Learned torch.float32 torch.Size([16]) moddict.node17.blocks.1.2.res_layer.bias
+cuda:0 Learned torch.float32 torch.Size([1, 4]) moddict.node18.layers.0.weight
+cuda:0 Learned torch.float32 torch.Size([1, 16]) moddict.node18.layers.1.weight
+cuda:0 Learned torch.float32 torch.Size([1]) moddict.node18.layers.1.bias
+cuda:0 Learned torch.float32 torch.Size([1, 16]) moddict.node18.layers.2.weight
+cuda:0 Learned torch.float32 torch.Size([1]) moddict.node18.layers.2.bias
+Total Count: 8367
+At least 21 epochs will be run
+__________________________________________________
+Epoch 0:
+Learning rate:    0.0001
+Batch Size: 300
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Training time:  75.54 s
+Validating...
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+                   train         valid
+--------------------------------------
+E-RMSE  :    *    1311.1   *    1324.4
+F-RMSE  :    *    3.8398   *     3.816
+H-RMSE  :    *    155.41   *    151.95
+HVP-RMSE:    *    1014.1   *    987.91
+Best HVP-RMSE so far:   987.91
+Epochs since last best: 0
+Current max epochs: 21
+Total epoch time:  91.56 s
+**** NEW BEST MODEL - Saving! ****
+__________________________________________________
+Epoch 1:
+Learning rate:    0.0001
+Batch Size: 300
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+******* TRAINING INTERRUPTED *******
+Finishing up...
+Training phase ended.
+Reverting to best model found.
+Making plots over training time...
+C:\Users\arrg\Dropbox\Research\Rxn_Database_Analysis\Training\HIPPYNN\hippynn\hippynn\plotting\timeplots.py:34: UserWarning: May override plots in plots/over_time !
+  warnings.warn("May override plots in {} !".format(save_dir))
+Testing model...
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+Hessian calculation
+                   train         valid          test
+----------------------------------------------------
+E-RMSE  :         1321.6        1324.4        1330.5
+F-RMSE  :         3.8287         3.816        3.8209
+H-RMSE  :         152.49        151.95        149.84
+HVP-RMSE:         994.89        993.02        982.34
+----------------------------------------------------
+Training complete.

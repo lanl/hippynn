@@ -75,16 +75,16 @@ class HessianNode(ExpandParents, AutoKw, MultiNode):
     """
 
     _input_names = "forces", "coordinates", "nonblank"
-    _output_names = "hessian", "hessian_mask"
+    _output_names = "hessian", "mask"
     _output_index_states = (IdxType.Molecules, IdxType.Molecules)
     _auto_module_class = physics_layers.Hessian
 
-    @_parent_expander.matchlen(1)
+    @parent_expander.matchlen(1)
     def expansion0(self, source, *, purpose, **kwargs):
         # Infer positions from energy or force node
         return source, find_unique_relative(source, PositionsNode, why_desc=purpose)
 
-    @_parent_expander.match(Energies, PositionsNode)
+    @parent_expander.match(Energies, PositionsNode)
     def expansion1(self, energy, positions, *, purpose, **kwargs):
         energy = energy.main_output
         possible_grads = [child for child in energy.children if (isinstance(child, GradientNode) and child.coordinates == positions)]
@@ -100,14 +100,14 @@ class HessianNode(ExpandParents, AutoKw, MultiNode):
         
         return force, positions
 
-    @_parent_expander.match(GradientNode, PositionsNode)
+    @parent_expander.match(GradientNode, PositionsNode)
     def expansion2(self, force, coordinates, *, purpose, **kwargs):
         # always use forces, not gradients
         if force.sign == +1:
             force = -1 * force
         return force, coordinates
     
-    @_parent_expander.match(_BaseNode, PositionsNode)
+    @parent_expander.match(_BaseNode, PositionsNode)
     def expansion3(self, force, coordinates, *, purpose, **kwargs):
     
         if not isinstance(force, GradientNode) and not any(isinstance(f, GradientNode) for f in force.get_all_parents()):
@@ -116,18 +116,18 @@ class HessianNode(ExpandParents, AutoKw, MultiNode):
         _, pidxer = acquire_encoding_padding((force, coordinates), species_set=None, purpose=purpose)
         return force, coordinates, pidxer
 
-    @_parent_expander.match(_BaseNode, _BaseNode, _BaseNode)
+    @parent_expander.match(_BaseNode, _BaseNode, _BaseNode)
     def expansion4(self, force, coordinates, pidxer, **kwargs):
         return force, coordinates, pidxer.nonblank
     
-    @_parent_expander.match(_BaseNode, _BaseNode, _BaseNode)
+    @parent_expander.match(_BaseNode, _BaseNode, _BaseNode)
     def expansion5(self, force, coordinates, nonblank, **kwargs):
         coordinates.requires_grad = True
         return force, coordinates, nonblank
 
-    _parent_expander.assertlen(3)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.MolAtom, IdxType.MolAtom, None)
+    parent_expander.assertlen(3)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.MolAtom, IdxType.MolAtom, None)
 
 
     def __init__(self, name, parents, module="auto", **kwargs):
@@ -160,9 +160,10 @@ class HVPVectorNode(ExpandParents, AutoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class HVPNode(ExpandParents, AutoKw, SingleNode):
-    _input_names = "source", "coordinates", "vector"
-    _index_state = IdxType.MolAtom
+class HVPNode(ExpandParents, AutoKw, MultiNode):
+    _input_names = "source", "coordinates", "vector", "nonblank"
+    _output_names = "hvp", "mask"
+    _output_index_states = (IdxType.MolAtom, IdxType.Molecules)
     _auto_module_class = physics_layers.HVP
 
     @_parent_expander.match(Energies, _BaseNode)
@@ -200,20 +201,26 @@ class HVPNode(ExpandParents, AutoKw, SingleNode):
         if not isinstance(force, GradientNode) and not any(isinstance(f, GradientNode) for f in force.get_all_parents()):
             warnings.warn(f"Input to HVP node doesn't appear to be a force or child of a force! Got node: {force}")
 
-        return force, positions, vector
+        _, pidxer = acquire_encoding_padding((force, positions), species_set=None, purpose=purpose)
+        return force, positions, vector, pidxer
     
-    @_parent_expander.match(_BaseNode, _BaseNode, _BaseNode)
-    def expansion5(self, force, coordinates, vector, **kwargs):
+    @_parent_expander.match(_BaseNode, PositionsNode, _BaseNode, _BaseNode)
+    def expansion4(self, force, coordinates, vector, pidxer, *, purpose, **kwargs):
+        return force, coordinates, vector, pidxer.nonblank
+    
+    @_parent_expander.match(_BaseNode, PositionsNode, _BaseNode, _BaseNode)
+    def expansion5(self, force, coordinates, vector, nonblank, *, purpose, **kwargs):
         coordinates.requires_grad = True
-        return force, coordinates, vector
+        return force, coordinates, vector, nonblank
 
-    _parent_expander.assertlen(3)
+    _parent_expander.assertlen(4)
     _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.MolAtom, IdxType.MolAtom, IdxType.MolAtom)
+    _parent_expander.require_idx_states(IdxType.MolAtom, IdxType.MolAtom, IdxType.MolAtom, None)
 
     def __init__(self, name, parents, module="auto", **kwargs):
-        self.module_kwargs = {}
         parents = self.expand_parents(parents)
+        self._index_state = IdxType.Molecules
+        self.module_kwargs = {}
         super().__init__(name, parents, module=module, **kwargs)
 
 
