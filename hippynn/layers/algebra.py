@@ -26,6 +26,14 @@ class _WeightedLoss(torch.nn.Module):
 
     def forward(self, pred, true, weights):
         unweighted_loss = self.loss_func(pred, true, reduction='none')
+        # Ensure weights broadcast correctly
+        assert weights.shape == unweighted_loss.shape, (
+            f"Shape mismatch: weights {weights.shape}, loss {unweighted_loss.shape}"
+        )
+
+        # Convert mask to float
+        weights = weights.to(dtype=unweighted_loss.dtype)
+
         normalized_weights = weights/torch.mean(weights)
         weighted_loss = (normalized_weights*unweighted_loss).mean()
         return weighted_loss
