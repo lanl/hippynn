@@ -365,7 +365,7 @@ def write_h5(
         for k in is_atom_var.keys():
             mol[k] = np.asarray(mol[k])
 
-            if np.issubdtype(mol[k].dtype, np.unicode_):
+            if np.issubdtype(mol[k].dtype, np.str_):
                 mol[k] = [el.encode("utf-8") for el in list(mol[k])]
                 mol[k] = np.array(mol[k])
     # Store data
