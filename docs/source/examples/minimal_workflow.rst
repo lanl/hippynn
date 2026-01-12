@@ -158,6 +158,14 @@ Now that these are defined, we are good to begin training::
                     setup_params=experiment_params,
                     )
 
+
+The :func:`~hippynn.experiment.setup_and_train` function is a shortcut that calls 
+:func:`~hippynn.experiment.setup_training` followed by :func:`~hippynn.experiment.train_model`. 
+
+Sometimes it may be insightful to understand where potential performance bottlenecks exist in the training. To analyze this, the :func:`~hippynn.experiment.setup_and_profile` functions as 
+a drop-in replacement for the :func:`~hippynn.experiment.setup_and_train` function. The function accepts the same kwargs as :func:`~hippynn.experiment.setup_and_train`, so users may 
+quickly receive the robust feature offerings of the PyTorch profiler API with one function call.
+
 When training completes, we can use the model to make predictions.
 
 The simplest form will be to predict everything that the model needs to

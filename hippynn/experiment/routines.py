@@ -237,7 +237,7 @@ def setup_and_profile(
     
     print(f"\nProfile saved to: {trace_file}")
     print("Open chrome://tracing in Chrome to visualize.")
-    print("For guidance viewing and interpreting results, see: https://hippynn.readthedocs.io/en/latest/profiling.html\n")
+    print("For guidance viewing and interpreting results, see: https://hippynn.readthedocs.io/en/latest/examples/profiling.html\n")
     print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=15))
     
     return trace_file
