@@ -181,7 +181,8 @@ def setup_and_profile(
 
     """
     # informs users that epoch number is overwritten temporarily 
-    if setup_params.max_epochs > profile_epochs:
+    max_epochs = setup_params.max_epochs
+    if max_epochs is not None and max_epochs > profile_epochs:
         print(f"Note: setup_and_profile uses {profile_epochs} epochs for profiling "
               f"(your setting of {setup_params.max_epochs} epochs is temporarily ignored). "
               f"This provides enough data to analyze performance without excessive runtime.")
