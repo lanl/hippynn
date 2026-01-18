@@ -26,7 +26,7 @@ Now, let's create some nodes. We start with input nodes for the species and posi
     species = inputs.SpeciesNode(db_name="Z")
     positions = inputs.PositionsNode(db_name="R")
 
-The ``db_name`` is a key which will be used to find the corresponding information in the database we train or predict on.s
+The ``db_name`` is a key which will be used to find the corresponding information in the database we train or predict on.
 
 From here, we want to build a neural network. HIPNN has several hyperparameters that should be defined.
 
