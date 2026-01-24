@@ -10,17 +10,20 @@ Requirements:
     * pytorch_ >= 2.0
     * numpy_
 
-Optional Dependencies:
+Recommended Optional Dependencies:
     * triton_ (recommended, for improved GPU performance)
     * numba_ (recommended, for improved CPU/GPU performance)
-    * cupy_ (alternative for accelerating GPU performance)
     * ASE_ (for usage with ase and other misc. features)
     * matplotlib_ (for plotting)
+    * h5py_ (for loading ani-h5 datasets)
+
+Other Optional Dependencies:
+    * cupy_ (alternative for accelerating GPU performance)
     * tqdm_ (for progress bars)
     * graphviz_ (for visualizing model graphs)
     * h5py_ (for loading ani-h5 datasets)
     * pytorch-lightning_ (for distributed training)
-    * opt_einsum_ (backend for accelerating some pytorch expressions)
+    * opt_einsum_ (backend for accelerating some pytorch operations)
 
 Interfacing codes:
     * ASE_
@@ -47,12 +50,29 @@ Interfacing codes:
 Installation Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We recommend installation from source, although you can also get hippynn
-from conda and pypi, see below. A base installation of hippynn only requires
-pytorch (`installation instructions <pytorch_install_>`_) and
-numpy (`installation instructions <numpy_install_>`_).
-We recommend you install these first using your package manager of choice,
-then proceed to install hippynn.
+We recommend installing hippynn from source for the latest features as well as
+the example and test suites.
+
+
+Install hippynn using pip
+-------------------------
+Minimal Install using pip::
+
+    $ pip install hippynn
+
+All optional dependencies with pip::
+
+    $ pip install hippynn[full]
+
+On a recent mac with zsh instead of bash, this command must be escaped as::
+
+    % pip install hippynn\[full\]
+
+Install hippynn usnig conda
+---------------------------
+Install using conda::
+
+    $ conda install -c conda-forge hippynn
 
 
 Installing hippynn from source
@@ -105,25 +125,6 @@ On a recent mac with zsh instead of bash, this command must be escaped as::
 
     % pip install -e .\[full\]
 
-Install hippynn from Conda
---------------------------
-Install using conda::
-
-    $ conda install -c conda-forge hippynn
-
-Install hippynn from Pip
-------------------------
-Minimal Install using pip::
-
-    $ pip install hippynn
-
-All optional dependencies with pip::
-
-    $ pip install hippynn[full]
-
-On a recent mac with zsh instead of bash, this command must be escaped as::
-
-    % pip install hippynn\[full\]
 
 
 Note on installing cupy with conda
@@ -139,8 +140,8 @@ it from pypi. `Link to cupy installation instructions <cupy_install>`_
 Misc. Notes
 -----------
 
-- Install dependencies with pip from requirements.txt .
-- Install dependencies with conda from conda_requirements.txt .
+- You can also install dependencies with pip from requirements.txt .
+- Likewise with conda from conda_requirements.txt .
 - If you don't want pip to install them, conda install from file before installing ``hippynn``.
   You may want to use -c pytorch for the pytorch channel.
   For ase and cupy, you probably want to use -c conda-forge.

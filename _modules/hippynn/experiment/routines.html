@@ -52,9 +52,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide/features.html">hippynn Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide/concepts.html">hippynn Concepts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide/databases.html">Databases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/loss_graph.html">Model and Loss Graphs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide/units.html">Units in hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/performance.html">Performance Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide/ckernels.html">Custom Kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide/loss_graph.html">Model and Loss Graphs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide/settings.html">Library Settings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide/custom_nodes.html">Creating Custom Node Types</a></li>
 </ul>
@@ -693,6 +694,117 @@
         <span class="n">epoch</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="k">return</span> <span class="n">metric_tracker</span></div>
+
+
+
+
+<div class="viewcode-block" id="setup_and_profile">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.routines.html#hippynn.setup_and_profile">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">setup_and_profile</span><span class="p">(</span>
+    <span class="n">training_modules</span><span class="p">:</span> <span class="n">TrainingModules</span><span class="p">,</span>
+    <span class="n">database</span><span class="p">:</span> <span class="n">Database</span><span class="p">,</span>
+    <span class="n">setup_params</span><span class="p">:</span> <span class="n">SetupParams</span><span class="p">,</span>
+    <span class="n">profile_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">batches_per_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">record_shapes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">with_stack</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">with_modules</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">with_flops</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">trace_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;profile_trace.json&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Profile training for performance analysis.</span>
+
+<span class="sd">    For documentation information, see :doc:`/user_guide/performance`</span>
+
+<span class="sd">    This function provides the same interface as :func:`setup_and_train`, but runs</span>
+<span class="sd">    a short training loop under a PyTorch profiler context and exports results</span>
+<span class="sd">    for visualization.</span>
+
+<span class="sd">    :param training_modules: see :func:`setup_training`</span>
+<span class="sd">    :param database: see :func:`train_model`</span>
+<span class="sd">    :param setup_params: see :func:`setup_training`</span>
+<span class="sd">    :param profile_epochs: Number of epochs to profile (default: 3)</span>
+<span class="sd">    :param batches_per_epoch: Number of batches per epoch to profile (default: 5)</span>
+<span class="sd">    :param trace_file: Output path for Chrome trace file (default: &quot;profile_trace.json&quot;)</span>
+
+<span class="sd">    :return: Path to the saved trace file</span>
+
+<span class="sd">    .. Note::</span>
+<span class="sd">        The setup_params max_epochs is ignored; profiling uses profile_epochs instead.</span>
+
+<span class="sd">    .. Note::</span>
+<span class="sd">        Open chrome://tracing in Chrome browser to visualize the trace file.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># informs users that epoch number is overwritten temporarily </span>
+    <span class="n">max_epochs</span> <span class="o">=</span> <span class="n">setup_params</span><span class="o">.</span><span class="n">max_epochs</span>
+    <span class="k">if</span> <span class="n">max_epochs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">max_epochs</span> <span class="o">&gt;</span> <span class="n">profile_epochs</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note: setup_and_profile uses </span><span class="si">{</span><span class="n">profile_epochs</span><span class="si">}</span><span class="s2"> epochs for profiling &quot;</span>
+              <span class="sa">f</span><span class="s2">&quot;(your setting of </span><span class="si">{</span><span class="n">setup_params</span><span class="o">.</span><span class="n">max_epochs</span><span class="si">}</span><span class="s2"> epochs is temporarily ignored). &quot;</span>
+              <span class="sa">f</span><span class="s2">&quot;This provides enough data to analyze performance without excessive runtime.&quot;</span><span class="p">)</span>
+    
+    
+    <span class="n">training_modules</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">metric_tracker</span> <span class="o">=</span> <span class="n">setup_training</span><span class="p">(</span>
+        <span class="n">training_modules</span><span class="o">=</span><span class="n">training_modules</span><span class="p">,</span>
+        <span class="n">setup_params</span><span class="o">=</span><span class="n">setup_params</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="n">model</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">evaluator</span> <span class="o">=</span> <span class="n">training_modules</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">database</span><span class="o">.</span><span class="n">splitting_completed</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Database has not been split. Please split the database before profiling.&quot;</span><span class="p">)</span>
+    <span class="n">database</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">db_info</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">]</span>
+    <span class="n">database</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">db_info</span><span class="p">[</span><span class="s1">&#39;targets&#39;</span><span class="p">]</span>
+    
+    <span class="n">n_inputs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">database</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="n">n_targets</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">database</span><span class="o">.</span><span class="n">targets</span><span class="p">)</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">model_device</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">controller</span><span class="o">.</span><span class="n">optimizer</span>
+    <span class="n">step_function</span> <span class="o">=</span> <span class="n">get_step_function</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
+    
+    <span class="n">use_cuda</span> <span class="o">=</span> <span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+    <span class="n">train_gen</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">step_once</span><span class="p">(</span><span class="n">batch</span><span class="p">):</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">]</span>
+        <span class="n">batch_inputs</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[:</span><span class="n">n_inputs</span><span class="p">]</span>
+        <span class="n">batch_targets</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="o">-</span><span class="n">n_targets</span><span class="p">:]</span>
+        <span class="n">batch_targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">batch_targets</span><span class="p">]</span>
+        <span class="n">batch_model_outputs</span> <span class="o">=</span> <span class="n">step_function</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">batch_inputs</span><span class="p">,</span> <span class="n">batch_targets</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">batch_model_outputs</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running test batch.&quot;</span><span class="p">)</span>    
+    <span class="c1"># We run the test batch so that all necessary code is imported before tracing.</span>
+    <span class="n">step_once</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">train_gen</span><span class="p">)))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Profiling </span><span class="si">{</span><span class="n">profile_epochs</span><span class="si">}</span><span class="s2"> epochs x </span><span class="si">{</span><span class="n">batches_per_epoch</span><span class="si">}</span><span class="s2"> batches on </span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">profile</span><span class="p">(</span>
+        <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">use_cuda</span><span class="o">=</span><span class="n">use_cuda</span><span class="p">,</span>
+        <span class="n">record_shapes</span><span class="o">=</span><span class="n">record_shapes</span><span class="p">,</span>
+        <span class="n">with_stack</span><span class="o">=</span><span class="n">with_stack</span><span class="p">,</span>
+        <span class="n">with_modules</span><span class="o">=</span><span class="n">with_modules</span><span class="p">,</span>
+        <span class="n">with_flops</span><span class="o">=</span><span class="n">with_flops</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">prof</span><span class="p">:</span>
+        
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">progress_bar</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">profile_epochs</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Profiling Epochs&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;epoch&quot;</span><span class="p">):</span>
+            
+            <span class="k">for</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">progress_bar</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">train_gen</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Batches&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;batch&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">batch_idx</span> <span class="o">&gt;=</span> <span class="n">batches_per_epoch</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">step_once</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+    
+    <span class="n">prof</span><span class="o">.</span><span class="n">export_chrome_trace</span><span class="p">(</span><span class="n">trace_file</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Profile saved to: </span><span class="si">{</span><span class="n">trace_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Open chrome://tracing in Chrome to visualize.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">prof</span><span class="o">.</span><span class="n">key_averages</span><span class="p">()</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="n">sort_by</span><span class="o">=</span><span class="s2">&quot;cpu_time_total&quot;</span><span class="p">,</span> <span class="n">row_limit</span><span class="o">=</span><span class="mi">15</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">trace_file</span></div>
+
 
 </pre></div>
 

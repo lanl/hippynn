@@ -49,13 +49,13 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">How to install hippynn</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#installation-instructions">Installation Instructions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-hippynn-using-pip">Install hippynn using pip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-hippynn-usnig-conda">Install hippynn usnig conda</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#installing-hippynn-from-source">Installing hippynn from source</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#install-optional-dependencies-using-conda">Install Optional Dependencies using conda</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#install-optional-dependencies-using-pip">Install Optional Dependencies using pip</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#install-hippynn-from-conda">Install hippynn from Conda</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#install-hippynn-from-pip">Install hippynn from Pip</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#note-on-installing-cupy-with-conda">Note on installing cupy with conda</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#misc-notes">Misc. Notes</a></li>
 </ul>
@@ -70,9 +70,10 @@
 <li class="toctree-l1"><a class="reference internal" href="user_guide/features.html">hippynn Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/concepts.html">hippynn Concepts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/databases.html">Databases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="user_guide/loss_graph.html">Model and Loss Graphs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/units.html">Units in hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/performance.html">Performance Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/ckernels.html">Custom Kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/loss_graph.html">Model and Loss Graphs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/settings.html">Library Settings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user_guide/custom_nodes.html">Creating Custom Node Types</a></li>
 </ul>
@@ -137,17 +138,21 @@
 <li><p><a class="reference external" href="https://numpy.org/">numpy</a></p></li>
 </ul>
 </dd>
-<dt>Optional Dependencies:</dt><dd><ul class="simple">
+<dt>Recommended Optional Dependencies:</dt><dd><ul class="simple">
 <li><p><a class="reference external" href="https://triton-lang.org/">triton</a> (recommended, for improved GPU performance)</p></li>
 <li><p><a class="reference external" href="https://numba.pydata.org/">numba</a> (recommended, for improved CPU/GPU performance)</p></li>
-<li><p><a class="reference external" href="https://cupy.dev/">cupy</a> (alternative for accelerating GPU performance)</p></li>
 <li><p><a class="reference external" href="https://wiki.fysik.dtu.dk/ase/">ASE</a> (for usage with ase and other misc. features)</p></li>
 <li><p><a class="reference external" href="https://matplotlib.org">matplotlib</a> (for plotting)</p></li>
+<li><p><a class="reference external" href="https://www.h5py.org/">h5py</a> (for loading ani-h5 datasets)</p></li>
+</ul>
+</dd>
+<dt>Other Optional Dependencies:</dt><dd><ul class="simple">
+<li><p><a class="reference external" href="https://cupy.dev/">cupy</a> (alternative for accelerating GPU performance)</p></li>
 <li><p><a class="reference external" href="https://tqdm.github.io/">tqdm</a> (for progress bars)</p></li>
 <li><p><a class="reference external" href="https://github.com/xflr6/graphviz">graphviz</a> (for visualizing model graphs)</p></li>
 <li><p><a class="reference external" href="https://www.h5py.org/">h5py</a> (for loading ani-h5 datasets)</p></li>
 <li><p><a class="reference external" href="https://github.com/Lightning-AI/pytorch-lightning">pytorch-lightning</a> (for distributed training)</p></li>
-<li><p><a class="reference external" href="https://github.com/dgasmith/opt_einsum">opt_einsum</a> (backend for accelerating some pytorch expressions)</p></li>
+<li><p><a class="reference external" href="https://github.com/dgasmith/opt_einsum">opt_einsum</a> (backend for accelerating some pytorch operations)</p></li>
 </ul>
 </dd>
 <dt>Interfacing codes:</dt><dd><ul class="simple">
@@ -160,12 +165,30 @@
 </section>
 <section id="installation-instructions">
 <h2>Installation Instructions<a class="headerlink" href="#installation-instructions" title="Link to this heading"></a></h2>
-<p>We recommend installation from source, although you can also get hippynn
-from conda and pypi, see below. A base installation of hippynn only requires
-pytorch (<a class="reference external" href="https://pytorch.org/get-started/locally/">installation instructions</a>) and
-numpy (<a class="reference external" href="https://numpy.org/install/">installation instructions</a>).
-We recommend you install these first using your package manager of choice,
-then proceed to install hippynn.</p>
+<p>We recommend installing hippynn from source for the latest features as well as
+the example and test suites.</p>
+<section id="install-hippynn-using-pip">
+<h3>Install hippynn using pip<a class="headerlink" href="#install-hippynn-using-pip" title="Link to this heading"></a></h3>
+<p>Minimal Install using pip:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install hippynn
+</pre></div>
+</div>
+<p>All optional dependencies with pip:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install hippynn[full]
+</pre></div>
+</div>
+<p>On a recent mac with zsh instead of bash, this command must be escaped as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">hippynn</span>\<span class="p">[</span><span class="n">full</span>\<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="install-hippynn-usnig-conda">
+<h3>Install hippynn usnig conda<a class="headerlink" href="#install-hippynn-usnig-conda" title="Link to this heading"></a></h3>
+<p>Install using conda:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ conda install -c conda-forge hippynn
+</pre></div>
+</div>
+</section>
 <section id="installing-hippynn-from-source">
 <h3>Installing hippynn from source<a class="headerlink" href="#installing-hippynn-from-source" title="Link to this heading"></a></h3>
 <p>Installing hippynn from source is an easy process.
@@ -210,28 +233,6 @@ out <code class="docutils literal notranslate"><span class="pre">cupy</span></co
 </div>
 </section>
 </section>
-<section id="install-hippynn-from-conda">
-<h3>Install hippynn from Conda<a class="headerlink" href="#install-hippynn-from-conda" title="Link to this heading"></a></h3>
-<p>Install using conda:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ conda install -c conda-forge hippynn
-</pre></div>
-</div>
-</section>
-<section id="install-hippynn-from-pip">
-<h3>Install hippynn from Pip<a class="headerlink" href="#install-hippynn-from-pip" title="Link to this heading"></a></h3>
-<p>Minimal Install using pip:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install hippynn
-</pre></div>
-</div>
-<p>All optional dependencies with pip:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install hippynn[full]
-</pre></div>
-</div>
-<p>On a recent mac with zsh instead of bash, this command must be escaped as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">hippynn</span>\<span class="p">[</span><span class="n">full</span>\<span class="p">]</span>
-</pre></div>
-</div>
-</section>
 <section id="note-on-installing-cupy-with-conda">
 <h3>Note on installing cupy with conda<a class="headerlink" href="#note-on-installing-cupy-with-conda" title="Link to this heading"></a></h3>
 <p>When using conda, sometimes both pytorch and cupy try to install cuda toolkit components,
@@ -242,8 +243,8 @@ it from pypi. <a class="reference external" href="cupy_install">Link to cupy ins
 <section id="misc-notes">
 <h3>Misc. Notes<a class="headerlink" href="#misc-notes" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p>Install dependencies with pip from requirements.txt .</p></li>
-<li><p>Install dependencies with conda from conda_requirements.txt .</p></li>
+<li><p>You can also install dependencies with pip from requirements.txt .</p></li>
+<li><p>Likewise with conda from conda_requirements.txt .</p></li>
 <li><p>If you don’t want pip to install them, conda install from file before installing <code class="docutils literal notranslate"><span class="pre">hippynn</span></code>.
 You may want to use -c pytorch for the pytorch channel.
 For ase and cupy, you probably want to use -c conda-forge.</p></li>

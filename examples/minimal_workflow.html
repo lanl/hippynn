@@ -55,9 +55,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/features.html">hippynn Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/concepts.html">hippynn Concepts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/databases.html">Databases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../user_guide/loss_graph.html">Model and Loss Graphs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/units.html">Units in hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/performance.html">Performance Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/ckernels.html">Custom Kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/loss_graph.html">Model and Loss Graphs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/settings.html">Library Settings</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user_guide/custom_nodes.html">Creating Custom Node Types</a></li>
 </ul>
@@ -133,7 +134,7 @@
 <span class="n">positions</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">PositionsNode</span><span class="p">(</span><span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;R&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal notranslate"><span class="pre">db_name</span></code> is a key which will be used to find the corresponding information in the database we train or predict on.s</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">db_name</span></code> is a key which will be used to find the corresponding information in the database we train or predict on.</p>
 <p>From here, we want to build a neural network. HIPNN has several hyperparameters that should be defined.</p>
 <p>These include</p>
 <ul class="simple">
@@ -261,6 +262,11 @@ The keys will define the name used when printing the losses, and the values are 
                 <span class="p">)</span>
 </pre></div>
 </div>
+<p>The <a class="reference internal" href="../api_documentation/hippynn.experiment.html#hippynn.experiment.setup_and_train" title="hippynn.experiment.setup_and_train"><code class="xref py py-func docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a> function is a shortcut that calls
+<a class="reference internal" href="../api_documentation/hippynn.experiment.html#hippynn.experiment.setup_training" title="hippynn.experiment.setup_training"><code class="xref py py-func docutils literal notranslate"><span class="pre">setup_training()</span></code></a> followed by <a class="reference internal" href="../api_documentation/hippynn.experiment.html#hippynn.experiment.train_model" title="hippynn.experiment.train_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">train_model()</span></code></a>.</p>
+<p>Sometimes it may be insightful to understand where potential performance bottlenecks exist in the training. To analyze this, the <a class="reference internal" href="../api_documentation/hippynn.experiment.html#hippynn.experiment.setup_and_profile" title="hippynn.experiment.setup_and_profile"><code class="xref py py-func docutils literal notranslate"><span class="pre">setup_and_profile()</span></code></a> functions as
+a drop-in replacement for the <a class="reference internal" href="../api_documentation/hippynn.experiment.html#hippynn.experiment.setup_and_train" title="hippynn.experiment.setup_and_train"><code class="xref py py-func docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a> function. The function accepts the same kwargs as <a class="reference internal" href="../api_documentation/hippynn.experiment.html#hippynn.experiment.setup_and_train" title="hippynn.experiment.setup_and_train"><code class="xref py py-func docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a>, so users may
+quickly receive the robust feature offerings of the PyTorch profiler API with one function call.</p>
 <p>When training completes, we can use the model to make predictions.</p>
 <p>The simplest form will be to predict everything that the model needs to
 compute the loss function. To do this we can use the <cite>from_graph</cite> method
