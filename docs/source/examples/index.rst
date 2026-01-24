@@ -12,6 +12,7 @@ For runnable example scripts, see `the examples at the hippynn github repository
     :maxdepth: 1
 
     minimal_workflow
+    profiling
     controller
     plotting
     predictor

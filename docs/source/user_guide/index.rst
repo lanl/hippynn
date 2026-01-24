@@ -1,7 +1,7 @@
 User Guide
 ==========
 
-Here we explain in how the library works.
+Here we explain how the library works.
 
 .. toctree::
     :maxdepth: 2
@@ -10,9 +10,11 @@ Here we explain in how the library works.
     features
     concepts
     databases
-    loss_graph
     units
+    performance
+    loss_graph
     ckernels
     settings
     custom_nodes
+    
 

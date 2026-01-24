@@ -26,7 +26,7 @@ Now, let's create some nodes. We start with input nodes for the species and posi
     species = inputs.SpeciesNode(db_name="Z")
     positions = inputs.PositionsNode(db_name="R")
 
-The ``db_name`` is a key which will be used to find the corresponding information in the database we train or predict on.s
+The ``db_name`` is a key which will be used to find the corresponding information in the database we train or predict on.
 
 From here, we want to build a neural network. HIPNN has several hyperparameters that should be defined.
 
@@ -157,6 +157,14 @@ Now that these are defined, we are good to begin training::
                     database=database,
                     setup_params=experiment_params,
                     )
+
+
+The :func:`~hippynn.experiment.setup_and_train` function is a shortcut that calls 
+:func:`~hippynn.experiment.setup_training` followed by :func:`~hippynn.experiment.train_model`. 
+
+Sometimes it may be insightful to understand where potential performance bottlenecks exist in the training. To analyze this, the :func:`~hippynn.experiment.setup_and_profile` functions as 
+a drop-in replacement for the :func:`~hippynn.experiment.setup_and_train` function. The function accepts the same kwargs as :func:`~hippynn.experiment.setup_and_train`, so users may 
+quickly receive the robust feature offerings of the PyTorch profiler API with one function call.
 
 When training completes, we can use the model to make predictions.
 
