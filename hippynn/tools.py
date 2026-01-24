@@ -132,7 +132,7 @@ def param_print(module):
 
 
 def device_fallback():
-    device = (torch.cuda.is_available() and torch.device(torch.cuda.current_device())) or torch.device("cpu")
+    device = (torch.cuda.is_available() and torch.device(torch.cuda.current_device())) or torch.get_default_device()
     print("Device was not specified. Attempting to default to device:", device)
     device = torch.device(device.type)
     return device

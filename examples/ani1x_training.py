@@ -340,7 +340,7 @@ if __name__ == "__main__":
         "If tensor_order==0 then vanilla HIP-NN will "
         "be used regardless.",
     )
-    parser.add_argument("--tensor_order", type=int, default=0, help="tensor order $\ell$")
+    parser.add_argument("--tensor_order", type=int, default=0, help="tensor order $\\ell$")
     parser.add_argument("--tensor_factors", type=int, default=4, help="number of factors used (in HIP-HOP-NN only)")
     parser.add_argument("--atomization_consistent", type=bool, default=False)
 
