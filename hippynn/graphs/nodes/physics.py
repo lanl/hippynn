@@ -16,7 +16,7 @@ from .base import (
     Node,
     find_unique_relative,
 )
-from .base.node_functions import NodeNotFound
+from .base.node_functions import NodeNotFound, NodeAmbiguityError
 from .indexers import AtomIndexer, PaddingIndexer, acquire_encoding_padding
 from .inputs import PositionsNode, SpeciesNode
 from .pairs import OpenPairIndexer
@@ -96,7 +96,7 @@ class HessianNode(ExpandParents, AutoKw, MultiNode):
             # if no gradient was found, make our own
             force = GradientNode("forces", (energy, positions), sign=-1)
         elif len(possible_grads)>1:
-            raise NodeAmbiguityError("Unable to automatically determine gradient of energy as multiple gradient nodes are present.")
+            raise NodeAmbiguityError("Unable to automatically determine correct gradient of energy, as multiple gradient nodes are already present.")
         
         return force, positions
 
@@ -109,10 +109,6 @@ class HessianNode(ExpandParents, AutoKw, MultiNode):
     
     @parent_expander.match(Node, PositionsNode)
     def expansion3(self, force, coordinates, *, purpose, **kwargs):
-    
-        if not isinstance(force, GradientNode) and not any(isinstance(f, GradientNode) for f in force.get_all_parents()):
-            warnings.warn(f"Input to hessian node doesn't appear to be a force or child of a force! Got node: {force}")
-
         encoder, _ = acquire_encoding_padding((force, coordinates), species_set=None, purpose=purpose)
         return force, coordinates, encoder
 
@@ -120,6 +116,13 @@ class HessianNode(ExpandParents, AutoKw, MultiNode):
     def expansion4(self, force, coordinates, encoder, **kwargs):
         coordinates.requires_grad = True
         return force, coordinates, encoder.nonblank
+    
+    @parent_expander.match(Node, Node, Node)
+    def check_for_grad(self, force, coordinates, encoder, **kwargs):
+        self_and_parents = {force, *force.get_ancestors()}
+        if not any(isinstance(n, (GradientNode, MultiGradientNode)) for n in self_and_parents):
+            warnings.warn(f"Input to hessian node doesn't appear to be a force or child of a force! This node: {force}")
+        return force, coordinates, encoder
 
     parent_expander.assertlen(3)
     parent_expander.get_main_outputs()

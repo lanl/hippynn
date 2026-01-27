@@ -28,7 +28,16 @@ class PyAniMethods:
     _IGNORE_KEYS = ("path", "Jnames")
 
     # Note: assumes that all data files have 'coordinates'.
-    def extract_full_file(self, file, species_key="species"):
+    def extract_full_file(self, file, species_key="species", permit_only=None):
+        """
+        
+        :param file: filename to open
+        :param species_key: name for species variable (needs special treatment)
+        :param permit_only: if truthy, give a list of valid keys; skip others.
+        :return: batches, n_atoms_max, sys_count
+        :rtype: tuple[list, int, int]
+        """
+
         n_atoms_max = 0
         batches = []
         x = AniDataLoader(file, driver=self.driver)  # Engine=core reads the entire file at once.
@@ -41,6 +50,8 @@ class PyAniMethods:
             for k, v in c.items():
                 # Filter things we don't need
                 if k in self._IGNORE_KEYS:
+                    continue
+                if permit_only and k not in permit_only:
                     continue
 
                 # Convert to numpy
@@ -140,13 +151,15 @@ class PyAniMethods:
             for k, arr in b.items():
 
                 if k == species_key:
+                    # ANI datasets come with one set of conformations per batch, each has the same elements.
+                    # here we repeat that information for each conformation.
                     arr = np.repeat(arr, n_sys, axis=0)
 
                 # set up slicing for non-batch axes
                 where = tuple(slice(0, s) for s in arr.shape[1:])
                 # add batch slicing
                 where = (slice(sys_start, sys_end), *where)
-
+                
                 # store array!
                 arr_dict[k][where] = arr
 
@@ -216,9 +229,14 @@ class PyAniFileDB(Database, PyAniMethods, Restartable):
         )
 
     def load_arrays(self, allow_unfound=False, quiet=False):
+
         if not quiet:
             print("Loading arrays from", self.file)
-        batches, n_atoms_max, sys_count = self.extract_full_file(self.file, species_key=self.species_key)
+
+        # var list if allow_founded is False
+        permit_only = (not allow_unfound) and set(self.var_list)
+
+        batches, n_atoms_max, sys_count = self.extract_full_file(self.file, species_key=self.species_key, permit_only=permit_only)
         arr_dict = self.process_batches(batches, n_atoms_max, sys_count, species_key=self.species_key)
         arr_dict = self.filter_arrays(arr_dict, quiet=quiet, allow_unfound=allow_unfound)
         return arr_dict
@@ -266,9 +284,12 @@ class PyAniDirectoryDB(Database, PyAniMethods, Restartable):
             print("Gathering data from files:\n\t", end="")
             print(*files, sep="\n\t")
 
+        # var list if allow_founded is False
+        permit_only = (not allow_unfound) and set(self.var_list)
+
         file_batches = []
         for f in progress_bar(files, desc="Data Files", unit="file"):
-            file_batches.append(self.extract_full_file(f, species_key=self.species_key))
+            file_batches.append(self.extract_full_file(f, species_key=self.species_key, permit_only=permit_only))
 
         data, max_atoms_list, sys_count = zip(*file_batches)
 
