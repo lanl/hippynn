@@ -290,14 +290,24 @@ def main(args):
                 stopping_key=args.stopping_key,
             )
 
-            from hippynn.experiment import setup_and_train
-
-            setup_and_train(
-                training_modules=training_modules,
-                database=database,
-                setup_params=setup_params,
-            )
-
+            if args.profile:
+                from hippynn.experiment import setup_and_profile
+                
+                setup_and_profile(
+                    training_modules=training_modules,
+                    database=database,
+                    setup_params=setup_params,
+                    trace_file="profile_trace.json",
+                )
+            else:
+                from hippynn.experiment import setup_and_train
+                
+                setup_and_train(
+                    training_modules=training_modules,
+                    database=database,
+                    setup_params=setup_params,
+                )
+            
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -330,14 +340,14 @@ if __name__ == "__main__":
         "If tensor_order==0 then vanilla HIP-NN will "
         "be used regardless.",
     )
-    parser.add_argument("--tensor_order", type=int, default=0, help="tensor order $\ell$")
+    parser.add_argument("--tensor_order", type=int, default=0, help="tensor order $\\ell$")
     parser.add_argument("--tensor_factors", type=int, default=4, help="number of factors used (in HIP-HOP-NN only)")
     parser.add_argument("--atomization_consistent", type=bool, default=False)
 
     parser.add_argument("--anidata_location", type=str, default="../../../datasets/ani1x_release/ani1x-release.h5")
     parser.add_argument("--qm_method", type=str, default="wb97x")
     parser.add_argument("--basis_set", type=str, default="dz")
-
+    parser.add_argument("--profile", action="store_true", help="Run profiler instead of full training")
     parser.add_argument("--force_training", action=BooleanOptionalAction, default=True, help="Use force training.")
 
     parser.add_argument("--batch_size", type=int, default=256)

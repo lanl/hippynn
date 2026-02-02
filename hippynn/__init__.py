@@ -44,8 +44,8 @@ from .databases import Database, NPZDatabase, DirectoryDatabase
 
 # Training/testing routines
 from . import experiment
-from .experiment import setup_and_train, train_model, setup_training,\
-    test_model, load_model_from_cwd, load_checkpoint, load_checkpoint_from_cwd
+from .experiment import setup_and_train, setup_and_profile, train_model, setup_training,\
+    test_model, load_model_from_cwd, load_checkpoint, load_checkpoint_from_cwd, SetupParams
 
 # Optional imports are dealt with in submodule
 from . import molecular_dynamics
