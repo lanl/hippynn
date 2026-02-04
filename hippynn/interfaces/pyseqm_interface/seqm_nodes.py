@@ -15,9 +15,9 @@ from hippynn.graphs.nodes.inputs import PositionsNode, SpeciesNode
 
 
 class ScaleNode(AutoKw, SingleNode):
-    _input_names = "notconverged"
-    _auto_module_class = Scale
-    _index_state = IdxType.Scalar
+    input_names = "notconverged"
+    auto_module_class = Scale
+    index_state = IdxType.Scalar
 
     def __init__(self, name, parents, func=torch.sqrt, module="auto", **kwargs):
         self.module_kwargs = {"func": func}
@@ -25,9 +25,9 @@ class ScaleNode(AutoKw, SingleNode):
 
 
 class SEQM_MolMaskNode(AutoKw, SingleNode):
-    _input_names = "notconverged"
-    _auto_module_class = SEQM_MolMask
-    _index_state = IdxType.Molecules
+    input_names = "notconverged"
+    auto_module_class = SEQM_MolMask
+    index_state = IdxType.Systems
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = (parents,)
@@ -36,9 +36,9 @@ class SEQM_MolMaskNode(AutoKw, SingleNode):
 
 
 class AtomMaskNode(AutoKw, SingleNode):
-    _input_names = "species"
-    _auto_module_class = AtomMask
-    _index_state = IdxType.Molecules
+    input_names = "species"
+    auto_module_class = AtomMask
+    index_state = IdxType.Systems
 
     def __init__(self, name, parents, module="auto", **kwargs):
         parents = (parents,)
@@ -47,9 +47,9 @@ class AtomMaskNode(AutoKw, SingleNode):
 
 
 class SEQM_OrbitalMaskNode(AutoKw, SingleNode):
-    _input_names = "species"
-    _auto_module_class = SEQM_OrbitalMask
-    _index_state = IdxType.Molecules
+    input_names = "species"
+    auto_module_class = SEQM_OrbitalMask
+    index_state = IdxType.Systems
 
     def __init__(self, name, parents, target_method, nOccVirt=None, module="auto", **kwargs):
         parents = (parents,)
@@ -63,9 +63,9 @@ class SEQM_MaskOnMolNode(AutoKw, SingleNode):
     with shape (molecules,)
     """
 
-    _input_names = "var", "mol_mask"
-    _auto_module_class = SEQM_MaskOnMol
-    _index_state = IdxType.NotFound
+    input_names = "var", "mol_mask"
+    auto_module_class = SEQM_MaskOnMol
+    index_state = IdxType.Unlabeled
 
     def __init__(self, name, parents, module="auto", **kwargs):
         self.module_kwargs = {}
@@ -78,9 +78,9 @@ class SEQM_MaskOnMolAtomNode(AutoKw, SingleNode):
     with shape (molecules,atoms)
     """
 
-    _input_names = "var", "mol_mask", "atom_mask"
-    _auto_module_class = SEQM_MaskOnMolAtom
-    _index_state = IdxType.NotFound
+    input_names = "var", "mol_mask", "atom_mask"
+    auto_module_class = SEQM_MaskOnMolAtom
+    index_state = IdxType.Unlabeled
 
     def __init__(self, name, parents, module="auto", **kwargs):
         self.module_kwargs = {}
@@ -93,9 +93,9 @@ class SEQM_MaskOnMolOrbitalNode(AutoKw, SingleNode):
     with shape (molecules,orbitals)
     """
 
-    _input_names = "var", "mol_mask", "orbital_mask"
-    _auto_module_class = SEQM_MaskOnMolOrbital
-    _index_state = IdxType.NotFound
+    input_names = "var", "mol_mask", "orbital_mask"
+    auto_module_class = SEQM_MaskOnMolOrbital
+    index_state = IdxType.Unlabeled
 
     def __init__(self, name, parents, module="auto", **kwargs):
         self.module_kwargs = {}
@@ -108,9 +108,9 @@ class SEQM_MaskOnMolOrbitalAtomNode(AutoKw, SingleNode):
     with shape (molecules,orbitals, atoms)
     """
 
-    _input_names = "var", "mol_mask", "orbital_mask", "atom_mask"
-    _auto_module_class = SEQM_MaskOnMolOrbitalAtom
-    _index_state = IdxType.NotFound
+    input_names = "var", "mol_mask", "orbital_mask", "atom_mask"
+    auto_module_class = SEQM_MaskOnMolOrbitalAtom
+    index_state = IdxType.Unlabeled
 
     def __init__(self, name, parents, module="auto", **kwargs):
         self.module_kwargs = {}
@@ -118,13 +118,13 @@ class SEQM_MaskOnMolOrbitalAtomNode(AutoKw, SingleNode):
 
 
 class SEQM_EnergyNode(ExpandParents, AutoKw, MultiNode):
-    _input_names = "par_atom", "Positions", "Species"
-    _output_names = "mol_energy", "Etot_m_Eiso", "notconverged"
-    _main_output = "mol_energy"
-    _output_index_states = (IdxType.Molecules,) * len(_output_names)
-    _auto_module_class = SEQM_Energy
+    input_names = "par_atom", "Positions", "Species"
+    output_names = "mol_energy", "Etot_m_Eiso", "notconverged"
+    main_output_name = "mol_energy"
+    output_index_states = (IdxType.Systems,) * len(output_names)
+    auto_module_class = SEQM_Energy
 
-    @_parent_expander.match(Network)
+    @parent_expander.match(Network)
     def expand0(self, network, seqm_parameters, decay_factor=1.0e-2, **kwargs):
 
         n_target_peratom = len(seqm_parameters["learned"])
@@ -143,9 +143,9 @@ class SEQM_EnergyNode(ExpandParents, AutoKw, MultiNode):
 
         return par_atom.main_output, positions, species
 
-    _parent_expander.assertlen(3)
-    _parent_expander.get_main_outputs()
-    _parent_expander.require_idx_states(IdxType.Atoms, None, None)
+    parent_expander.assertlen(3)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.Atoms, None, None)
 
     def __init__(self, name, parents, seqm_parameters, decay_factor=1.0e-2, module="auto", **kwargs):
         parents = self.expand_parents(parents, seqm_parameters=seqm_parameters, decay_factor=decay_factor, **kwargs)
@@ -154,8 +154,8 @@ class SEQM_EnergyNode(ExpandParents, AutoKw, MultiNode):
 
 
 class SEQM_AllNode(SEQM_EnergyNode):
-    _input_names = "par_atom", "Positions", "Species"
-    _output_names = (
+    input_names = "par_atom", "Positions", "Species"
+    output_names = (
         "mol_energy",
         "Etot_m_Eiso",
         "orbital_energies",
@@ -167,6 +167,6 @@ class SEQM_AllNode(SEQM_EnergyNode):
         "notconverged",
         "atomic_charge",
     )
-    _main_output = "mol_energy"
-    _output_index_states = (IdxType.Molecules,) * len(_output_names)
-    _auto_module_class = SEQM_All
+    main_output_name = "mol_energy"
+    output_index_states = (IdxType.Systems,) * len(output_names)
+    auto_module_class = SEQM_All

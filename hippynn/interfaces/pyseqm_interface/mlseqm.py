@@ -62,8 +62,8 @@ class MLSEQM(torch.nn.Module):
         Etot_m_Eiso, Etot, Eelec, Enuc, Eiso, EnucAB, e, P, charge, notconverged = self.energy(
             self.const, coordinates, species, learned_parameters=learned_parameters, all_terms=True
         )
-        n_molecule, n_atom = species.shape
-        atomic_charge = self.const.tore[species] - P.diagonal(dim1=1, dim2=2).reshape(n_molecule, n_atom, -1).sum(dim=2)
+        n_systems, n_atom = species.shape
+        atomic_charge = self.const.tore[species] - P.diagonal(dim1=1, dim2=2).reshape(n_systems, n_atom, -1).sum(dim=2)
 
         return (
             Etot.reshape(-1, 1),
@@ -80,8 +80,8 @@ class MLSEQM(torch.nn.Module):
 
 
 class MLSEQM_Node(AutoKw, MultiNode):
-    _input_names = "Positions", "Species"
-    _output_names = (
+    input_names = "Positions", "Species"
+    output_names = (
         "mol_energy",
         "Etot_m_Eiso",
         "orbital_energies",
@@ -93,10 +93,11 @@ class MLSEQM_Node(AutoKw, MultiNode):
         "notconverged",
         "atomic_charge",
     )
-    _main_output = "mol_energy"
-    _output_index_states = (IdxType.Molecules,) * len(_output_names)
-    _auto_module_class = MLSEQM
+    main_output_name = "mol_energy"
+    output_index_states = (IdxType.Systems,) * len(output_names)
+    auto_module_class = MLSEQM
 
     def __init__(self, name, parents, seqm_parameters, module="auto", **kwargs):
         self.module_kwargs = dict(seqm_parameters=seqm_parameters)
         super().__init__(name, parents, module=module, **kwargs)
+rgs)

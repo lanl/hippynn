@@ -99,12 +99,13 @@ def load_db(db_info, en_name, force_name, seed, anidata_location, n_workers, use
     # Ensure total energies loaded in float64.
     torch.set_default_dtype(torch.float64)
 
+    # Load DB, ensuring CCX energy info is available if that subset is selected.
     CCX_EN_NAME = "ccsd(t)_cbs.energy"
-    if use_ccx_subset:
-        db_info["targets"].append(CCX_EN_NAME)
+    if use_ccx_subset and en_name != CCX_EN_NAME:
+        db_info["targets"].append(CCX_EN_NAME) # note, this is in-place and affects the evaluator.
     database = PyAniFileDB(file=anidata_location, species_key="atomic_numbers", seed=seed, num_workers=n_workers, **db_info)
-    if en_name != CCX_EN_NAME:
-        database.targets = [x for x in database.targets if x != CCX_EN_NAME]
+    if use_ccx_subset and en_name != CCX_EN_NAME:
+        database.targets.remove(CCX_EN_NAME) # undo in-place addition
 
     # compute (approximate) atomization energy by subtracting self energies
 
@@ -135,6 +136,7 @@ def load_db(db_info, en_name, force_name, seed, anidata_location, n_workers, use
     found_indices = ~torch.isnan(database.arr_dict[filter_name])
     database.arr_dict = {k: v[found_indices] for k, v in database.arr_dict.items()}
     database.make_trainvalidtest_split(test_size=0.1, valid_size=0.1)
+
     return database
 
 
@@ -222,7 +224,7 @@ def main(args):
     torch.set_default_dtype(torch.float32)
 
     hippynn.settings.WARN_LOW_DISTANCES = False
-    if args.noprogress:
+    if not args.progress:
         hippynn.settings.PROGRESS = None
 
     netname = f"{args.tag}_GPU{args.gpu}"
@@ -288,14 +290,24 @@ def main(args):
                 stopping_key=args.stopping_key,
             )
 
-            from hippynn.experiment import setup_and_train
-
-            setup_and_train(
-                training_modules=training_modules,
-                database=database,
-                setup_params=setup_params,
-            )
-
+            if args.profile:
+                from hippynn.experiment import setup_and_profile
+                
+                setup_and_profile(
+                    training_modules=training_modules,
+                    database=database,
+                    setup_params=setup_params,
+                    trace_file="profile_trace.json",
+                )
+            else:
+                from hippynn.experiment import setup_and_train
+                
+                setup_and_train(
+                    training_modules=training_modules,
+                    database=database,
+                    setup_params=setup_params,
+                )
+            
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -328,14 +340,14 @@ if __name__ == "__main__":
         "If tensor_order==0 then vanilla HIP-NN will "
         "be used regardless.",
     )
-    parser.add_argument("--tensor_order", type=int, default=0, help="tensor order $\ell$")
+    parser.add_argument("--tensor_order", type=int, default=0, help="tensor order $\\ell$")
     parser.add_argument("--tensor_factors", type=int, default=4, help="number of factors used (in HIP-HOP-NN only)")
     parser.add_argument("--atomization_consistent", type=bool, default=False)
 
     parser.add_argument("--anidata_location", type=str, default="../../../datasets/ani1x_release/ani1x-release.h5")
     parser.add_argument("--qm_method", type=str, default="wb97x")
     parser.add_argument("--basis_set", type=str, default="dz")
-
+    parser.add_argument("--profile", action="store_true", help="Run profiler instead of full training")
     parser.add_argument("--force_training", action=BooleanOptionalAction, default=True, help="Use force training.")
 
     parser.add_argument("--batch_size", type=int, default=256)

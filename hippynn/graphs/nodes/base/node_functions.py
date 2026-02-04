@@ -1,15 +1,31 @@
 """
-Base node definition.
+Here we define some of the core operations for Nodes in the directed
+acyclic graph associated with a computation.
 """
+import warnings
+from typing import Optional, Tuple
+
+import torch
 from .. import _debprint
+from ...._deprecations import _DeprecatedNamesMixin
 
 DEFAULT_WHY_DESC = "<purpose not specified>"
 
+import typing
+if typing.TYPE_CHECKING:
+    from .base import Node
 
-class _BaseNode:
-    _input_names = NotImplemented
-    _LossPredNode = None  # Will be set by this child class when it exists
-    _LossTrueNode = None  # Same
+
+
+class _NodeFunctions(_DeprecatedNamesMixin):
+    """
+    Base Node methods without dynamic algebra behavior.
+    """
+    input_names = NotImplemented
+    
+    _DEPRECATED_NAMES = {
+        "_input_names" : "input_names",
+    }
 
     def __init__(self, name, parents, db_name=None, module=None):
         """
@@ -26,60 +42,66 @@ class _BaseNode:
 
         if not isinstance(name, str):
             raise TypeError("Node names must be strings. Instead got: {}".format(name))
+        
+        if isinstance(parents, _NodeFunctions):
+            parents = parents, # wrap a single node as a tuple of parents.
 
-        self.db_name = db_name
-        self.origin_node = None  # Loss input nodes set this attribute to find references to the model graph
-        self.parents = tuple(parents)
-        self.name = name
-        self._pred = None
-        self._true = None
-        self.children = tuple()
+        self.name: str = name
+        self.origin_node: Optional[Node] = None  # Loss input nodes set this attribute to find references to the model graph
+        self.parents: Tuple[Node] = tuple(parents)
+        self.children: Tuple[Node] = tuple()
         for p in self.parents:
             p.children = p.children + (self,)
 
-        # If specified, trigger automatic module generation
-        if module == "auto":
-            _debprint("Making auto module for", self.name)
-            module = self.auto_module()
+        self._pred: Optional[Node] = None
+        self._true: Optional[Node] = None
+        
+        # The db_name must be set after parents, _pred, and _true,
+        # because assigning a db_name will assign to the true and pred versions of a node, as well;
+        # this in turn requires having these things as well as the parents to define if they exist or not.
+        self.db_name: Optional[str] = db_name 
+
+        
+            
         # Otherwise, glue the module on
         if module is not None:
-            self.torch_module = module
+            if module == "auto":
+                import warnings
+                warnings.warn("Auto module was specified but not created during node construction." \
+                " If a torch module is not supplied then execution will fail.")
+            self.torch_module: torch.nn.Module = module
+        
+            # In this case, the node must represent input tensors.
 
-    def set_dbname(self, db_name):
-        self.db_name = db_name
-        if self._pred is not None:
-            self._pred.db_name = db_name
-        if self._true is not None:
-            self._true.db_name = db_name
+    def get_ancestors(self):
+        """
+        Gets all parents of this node and recursively to input nodes. This node is not included in the output.
+        """
+        return get_connected_nodes(self.parents, ancestors=True, descendants=False)
+        #return self.parents + tuple(pnode for parent in self.parents for pnode in parent.get_all_parents())
 
-    @property
-    def pred(self):
-        if self._pred is None:
-            self._pred = self._LossPredNode(self.name + "-pred", origin_node=self, db_name=self.db_name)
-        return self._pred
-
-    @property
-    def true(self):
-        if self._true is None:
-            self._true = self._LossTrueNode(self.name + "-true", origin_node=self, db_name=self.db_name)
-        return self._true
-
-    def get_all_parents(self):
-        return self.parents + tuple(pnode for parent in self.parents for pnode in parent.get_all_parents())
-
-    def get_all_children(self):
-        return self.children + tuple(ccnode for child in self.children for ccnode in child.get_all_children())
+    def get_descendants(self):
+        """
+        Gets all children of this node and recursively forward. This node is not included in the output.
+        """
+        return get_connected_nodes(self.children, ancestors=False, descendants=True)
+        #return self.children + tuple(ccnode for child in self.children for ccnode in child.get_all_children())
 
     # Functions that take either a node or a node set can be accessed as attributes.
 
-    def get_all_connected(self):
-        return get_connected_nodes({self})
+    def get_all_connected(self, ancestors=True, descendants=True):
+        return get_connected_nodes({self}, ancestors=ancestors, descendants=descendants)
 
     def find_unique_relative(self, constraint, why_desc=DEFAULT_WHY_DESC):
         return find_unique_relative(self, constraint, why_desc=why_desc)
 
-    def find_relatives(self, constraint, why_desc=DEFAULT_WHY_DESC):
-        return find_relatives(self, constraint, why_desc=why_desc)
+    def find_relatives(self, constraint, ancestors=True, descendants=True, why_desc=DEFAULT_WHY_DESC):
+        return find_relatives(self, constraint, ancestors=ancestors, descendants=descendants, why_desc=why_desc)
+    
+    def is_in_loss_graph(self, why_desc=DEFAULT_WHY_DESC):
+        """Return whether this node is in the loss graph or the model graph."""
+        return is_in_loss_graph(self, why_desc=why_desc)
+        
 
     def swap_parent(self, old, new):
         if old not in self.parents:
@@ -110,24 +132,41 @@ class _BaseNode:
         for c in self.children:
             c.disconnect_recursive()
 
-    def auto_module(self):
-        raise NotImplementedError("Auto module not defined for node {} of type {}".format(self, type(self)))
+
+    ## Properties to implement in concrete nodes.
+
+    def true(self):
+        return NotImplemented
+    
+    def pred(self):
+        return NotImplemented
+    
+    def main_output(self):
+        return NotImplemented    
+    
+    def db_name(self):
+        return NotImplemented
 
     def __dir__(self):
         dir_ = super().__dir__()
         # need to protect against a case where input names are not specified.
         # otherwise dir() will raise an error. Debuggers hate that!
-        if self._input_names is not NotImplemented:
-            dir_ = dir_ + list(self._input_names)
+        if self.input_names is not NotImplemented:
+            dir_ = dir_ + list(self.input_names)
         return dir_
 
     def __getattr__(self, item):
-        if item in ("parents", "_input_names"):  # Guard against recursion
+        
+        if item in ("parents", "input_names"):  # Guard against recursion
             raise AttributeError("Attribute {} not yet present".format(item))
         try:
-            return self.parents[self._input_names.index(item)]
+            return self.parents[self.input_names.index(item)]
         except (AttributeError, ValueError) as ee:
-            raise AttributeError("{} object has no attribute '{}'".format(self.__class__, item))
+            pass
+
+        return super().__getattr__(item)
+        
+
 
     def __repr__(self):
         try:
@@ -136,23 +175,23 @@ class _BaseNode:
             name = "UNINITIALIZED"
         return "{}('{}')<{}>".format(self.__class__.__name__, name, hex(id(self)))
 
-    # Overridden by MultiNode, LossInputNode
-    @property
-    def main_output(self):
-        return self
-
 
 class NodeOperationError(Exception):
     pass
 
-
 class NodeNotFound(NodeOperationError):
     pass
+
+class NodeAmbiguityError(NodeOperationError):
+    pass
+
 
 
 def get_connected_nodes(node_set, ancestors=True, descendants=True):
     """
     Recursively return nodes connected to the specified node_set.
+
+    Nodes in the supplied set are included in the output.
 
     :param node_set: iterable collection of nodes (list, tuple, set,...)
     :param ancestors: whether to search ancestors of the node set
@@ -168,19 +207,20 @@ def get_connected_nodes(node_set, ancestors=True, descendants=True):
             search_found.add(node)
             search_from.remove(node)
             if ancestors:
-                for node_relative in node.get_all_parents():
+                for node_relative in node.parents:
                     if node_relative not in search_found:
                         search_from.add(node_relative)
             if descendants:
-                for node_relative in node.get_all_children():
+                for node_relative in node.children:
                     if node_relative not in search_found:
                         search_from.add(node_relative)
     return search_found
 
+def get_ancestors(node_set):
+    return get_connected_nodes(node_set, ancestors=True, descendants=False)
 
-class NodeAmbiguityError(NodeOperationError):
-    pass
-
+def get_descendants(node_set):
+    return get_connected_nodes(node_set, ancestors=False, descendants=True)
 
 def find_relatives(node_or_nodes, constraint_key, ancestors=True, descendants=True, why_desc=DEFAULT_WHY_DESC):
     """
@@ -203,21 +243,19 @@ def find_relatives(node_or_nodes, constraint_key, ancestors=True, descendants=Tr
     else:
         raise ValueError("constraint must be a type or callable filter function")
 
-    if isinstance(node_or_nodes, _BaseNode):  # if we search from a node, wrap it as a collection
+    from . import Node
+    if isinstance(node_or_nodes, Node):  # if we search from a node, wrap it as a collection
         node_or_nodes = [node_or_nodes]
         _debprint("Starting search from single node")
 
-    candidates = {n for n in get_connected_nodes(node_or_nodes) if constraint_key(n)}
-
-    for node in node_or_nodes:
-        if constraint_key(node):
-            candidates.add(node)
+    relatives = get_connected_nodes(node_or_nodes, ancestors=ancestors, descendants=descendants)
+    candidates = {n for n in relatives if constraint_key(n)}
 
     if len(candidates) == 0:
         _debprint("Node not found, all relatives:")
-        for n in get_connected_nodes(node_or_nodes):
+        for n in relatives:
             _debprint(n)
-        raise NodeNotFound("({}) Missing: Could not automatically satisfying node in graph.".format(why_desc))
+        raise NodeNotFound("({}) Missing: Could not automatically find satisfying node in graph.".format(why_desc))
 
     return candidates
 
@@ -260,3 +298,46 @@ def find_unique_relative(node_or_nodes, constraint, ancestor_fallback=True, why_
     result = candidates.pop()
     _debprint("Found node {} of type {}: {}".format(result, constraint.__name__, why_desc))
     return result
+
+
+def is_in_loss_graph(node_or_nodes, why_desc=DEFAULT_WHY_DESC):
+    """
+    Decide if a node or collection of nodes is in the loss graph.
+
+    (If not, they are in the model graph)
+    (If neither, raise NodeAmbiguityError)
+
+    .. Warning::
+        If you call this function, it ought to be on a set of nodes assumed in the same graph.
+        If not, be prepared for the case that the question was malformed (mixture) and so ``NodeAmbiguityError`` is raised.
+
+    :param node_or_nodes: a node or iterable of nodes to examine.
+    :param why_desc: optional specification of error message clarifying reason why this was requested.
+
+    :return: boolean
+    """
+
+    from .base import InputNode, LossInputNode
+    try:
+        inputs_for_nodes = find_relatives(node_or_nodes, InputNode, descendants=False)
+    except NodeNotFound:
+        # In this case, we probably have a tree of pure ValueNodes. We will arbitrarily call this "in the model graph."
+        return False 
+    
+    if any(isinstance(in_node, LossInputNode) for in_node in inputs_for_nodes): 
+        # If any inputs are in the loss graph, we must ensure that they all are, or else
+        # the graph state has been corrupted.
+        if not all(isinstance(in_node, LossInputNode) for in_node in inputs_for_nodes):
+            raise NodeAmbiguityError("This node_or_nodes is both in and out of the loss graph. " \
+                    f"Requested for purpose: {why_desc}")
+        # Graph is not corrupted!
+        return True
+    else:
+        # No inputs were in the loss graph
+        return False
+    
+
+
+
+
+

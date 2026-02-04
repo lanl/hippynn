@@ -7,7 +7,7 @@ import torch.nn.functional
 from ... import settings
 from ..indextypes import IdxType, elementwise_compare_reduce
 from ..indextypes.reduce_funcs import db_state_of
-from .base import SingleNode, _BaseNode, InputNode
+from .base import SingleNode, Node, InputNode, AutoKw
 from ...layers import algebra as algebra_modules
 from ...layers import regularization as reg_modules
 
@@ -30,7 +30,7 @@ class _DebugBroadCast(torch.nn.Module):
 
 
 class ReduceSingleNode(SingleNode):
-    _index_state = IdxType.Scalar
+    index_state = IdxType.Scalar
 
     def __init__(self, parent):
         name = self._classname + "({})".format(parent.name)
@@ -68,9 +68,13 @@ class Var(ReduceSingleNode, op=torch.var):
 
 
 class _BaseCompareLoss(SingleNode):
-    _index_state = IdxType.Scalar
+    index_state = IdxType.Scalar
 
     def __init__(self, predicted, true):
+        
+        predicted = predicted.main_output
+        true = true.main_output
+
         name = "{}({},{})".format(self._classname, predicted.name, true.name)
         predicted, true = elementwise_compare_reduce(predicted, true)
         super().__init__(name, (predicted, true), module=None)
@@ -92,7 +96,7 @@ class _BaseCompareLoss(SingleNode):
                 cls.torch_module = algebra_modules.LambdaModule(op)
 
 class _WeightedCompareLoss(SingleNode):
-    _index_state = IdxType.Scalar
+    index_state = IdxType.Scalar
     def __init__(self, predicted,true, weight):
         name = "{}({},{},{})".format(self._classname, predicted.name, true.name, weight.name)
         predicted, true, weight = elementwise_compare_reduce(predicted, true, weight)
@@ -112,12 +116,18 @@ class _WeightedCompareLoss(SingleNode):
         node = node.main_output
         
         if isinstance(weight,str):
-            index_state = db_state_of(node._index_state)
+            index_state = db_state_of(node.index_state)
             weight = InputNode(db_name=weight, index_state=index_state)
             
-        true = node.true
+        if not weight.is_in_loss_graph():
+            if isinstance(weight, InputNode):
+                weight = weight.true  # Weight is pre-defined in database
+            else:
+                weight = weight.pred  # Weight is dynamically calculated
+
         predicted = node.pred
-        weight = weight.true
+        true = node.true
+
         return cls(predicted, true, weight)
 
 class WeightedMSELoss(_WeightedCompareLoss):
@@ -146,18 +156,16 @@ class MAELoss(_BaseCompareLoss, op=torch.nn.functional.l1_loss):
     pass
 
 
-class _LPReg(SingleNode):
-    _index_state = IdxType.Scalar
-    _auto_module_class = reg_modules.LPReg
+class _LPReg(AutoKw, SingleNode):
+    index_state = IdxType.Scalar
+    auto_module_class = reg_modules.LPReg
+    auto_module_kwargs = "network",
 
     def __init__(self, network, p=2, module="auto"):
         name = "L^P_Reg({},p={})".format(network.name, p)
         parents = (network,)
         self.p = p
-        super().__init__(name, parents, module=module)
-
-    def auto_module(self):
-        return self._auto_module_class(self.parents[0].torch_module, p=self.p)
+        super().__init__(name, parents, module=module, network=network.torch_module)
 
 
 def lpreg(network, p):

@@ -188,8 +188,8 @@ def calculate_adf(positions, cutoffs, cells=None, species=None):
 
     :param positions: Shape (n_frames, n_particles, 3).
     :type positions: np.ndarray
-    :param cutoff: Maximum arm lengths on angles to consider.
-    :type cutoff: list[float]
+    :param cutoffs: Maximum arm lengths on angles to consider.
+    :type cutoffs: list[float]
     :param cells: Shape (n_frames, 3, 3) or (3, 3), no PBC if None, defaults to None.
     :type cells: np.ndarray or None, optional
     :param species: Shape (n_frames, n_particles) or (n_particles,), defaults to None.
@@ -214,7 +214,7 @@ def calculate_adf(positions, cutoffs, cells=None, species=None):
     except TypeError:
         cutoffs = [cutoffs]
 
-    check_KDTree_compatibility(cells, max(cutoff))
+    check_KDTree_compatibility(cells, max(cutoffs))
 
     adfs = dict()
     for cutoff in cutoffs:
@@ -237,7 +237,7 @@ def calculate_adf(positions, cutoffs, cells=None, species=None):
         if len(pairs) == 0:
             continue
 
-        vecs = find_mic(positions[i][pairs[:,0]] - positions[i][pairs[:,1]], cell=cell)
+        vecs = find_mic(positions[i][pairs[:,0]] - positions[i][pairs[:,1]], cell=np.diag(cell))
         vecs = np.array(vecs)
 
         vecs = vecs

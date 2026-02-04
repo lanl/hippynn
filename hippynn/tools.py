@@ -4,7 +4,7 @@ Misc. helpful functions which are not part of the library organization per se.
 """
 # Dev Note: functions placed here should not have any dependency on internal
 # hippynn packages. This is the place for misc. pytorch/numpy/pure-python code.
-import sys, os, traceback
+import sys, os, traceback, warnings, functools
 import collections
 import contextlib
 
@@ -121,6 +121,7 @@ def progress_bar(iterable, *args, **kwargs):
         return settings.PROGRESS(iterable, *args, **kwargs)
 
 
+
 def param_print(module):
     count = 0
     for pname, p in module.named_parameters():
@@ -131,7 +132,7 @@ def param_print(module):
 
 
 def device_fallback():
-    device = (torch.cuda.is_available() and torch.device(torch.cuda.current_device())) or torch.device("cpu")
+    device = (torch.cuda.is_available() and torch.device(torch.cuda.current_device())) or torch.get_default_device()
     print("Device was not specified. Attempting to default to device:", device)
     device = torch.device(device.type)
     return device
@@ -266,3 +267,23 @@ except AttributeError:
         """
         pass
 
+
+class SetStateMixin:
+    """So that you can safely call super().__setstate__()."""
+    def __setstate__(self, state: dict):
+        parent_setstate = getattr(super(), "__setstate__", None)
+        if parent_setstate is not None:
+            parent_setstate(state)
+        else:
+            self.__dict__.update(state)
+
+class GetAttrMixin:
+    """So that you can safely call super().__getattr__()."""
+    def __getattr__(self, name):
+        parent_getattr = getattr(super(), "__getattr__", None)
+        if parent_getattr is not None:
+            return parent_getattr(name)
+        else:
+            raise AttributeError(
+               f"{type(self).__name__!r} object has no attribute {name!r}"
+            )

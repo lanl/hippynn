@@ -34,6 +34,132 @@ class MultiGradient(torch.nn.Module):
         grads = torch.autograd.grad(molecular_energies.sum(), generalized_coordinates, create_graph=True)
         return tuple((sign * grad for sign, grad in zip(self.signs, grads)))
 
+
+class Hessian(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, source, positions, padding_mask):
+        """
+        Computes the Hessian using second derivatives of energy or first derivatives of forces.
+        Assumes:
+            - source: either energy (B, 1) or forces (B, N_max, 3)
+            - positions: (B, N_max, 3)
+        Returns:
+            - hessians: (B, 3N_max, 3N_max)
+        """
+        B, N, D = positions.shape
+
+        hessian_mask = self.expand_padding_mask_to_hessian_mask(padding_mask)
+
+        if source.ndim == 2 and source.shape[1] == 1:
+            # Case: source is energy (B, 1)
+            forces = self._forces_from_energy(source, positions)
+            return self._hessian_from_forces(forces, positions), hessian_mask
+        elif source.ndim == 3 and source.shape[2] == 3:
+            # Case: source is forces (B, N, 3)
+            return self._hessian_from_forces(source, positions), hessian_mask
+        else:
+            raise ValueError(f"Unsupported source shape: {source.shape}")
+
+    def _forces_from_energy(self, energy, positions):
+        return -torch.autograd.grad(energy.sum(), positions, create_graph=True)[0]
+
+    def _hessian_from_forces(self, force, positions):
+        force_flat = force.flatten(start_dim=1)
+        force_components = force_flat.unbind(dim=1)
+        return -torch.stack([
+            torch.autograd.grad(f.sum(), positions, create_graph=True)[0].flatten(start_dim=1)
+            for f in force_components
+        ], dim=1)
+
+    @staticmethod
+    def expand_padding_mask_to_hessian_mask(padding_mask):
+        """
+        Expand a (B, N) atom mask to a (B, 3N, 3N) Hessian mask.
+
+        Parameters:
+            padding_mask: Boolean tensor of shape (B, N_max)
+
+        Returns:
+            Boolean tensor of shape (B, 3N_max, 3N_max)
+        """
+        B, N = padding_mask.shape
+
+        expanded_mask = padding_mask.unsqueeze(-1).expand(-1, -1, 3).reshape(B, 3 * N)
+        mask_matrix = expanded_mask.unsqueeze(2) & expanded_mask.unsqueeze(1)  # (B, 3N, 3N)
+
+        return mask_matrix
+
+
+class HVPVector(torch.nn.Module):
+    def __init__(self, vector_type="random"):
+        super().__init__()
+        self.vector_type = vector_type
+
+    def forward(self, positions, nonblank):
+        """
+        positions: (B, N_max, 3)
+        nonblank: (B, N_max, 3), boolean mask
+        Returns: (B, N_max, 3) vector (zeroed on padded atoms)
+        """
+        num_atoms = nonblank.sum(dim=1, dtype=torch.int64)
+        N_max = nonblank.shape[1] # This is the maximum number of atoms across batches
+        vectors = torch.zeros(len(num_atoms), 3*N_max, dtype=positions.dtype, device=positions.device)
+
+        if self.vector_type == "random":
+            for i in range(len(num_atoms)): # For each system,
+                N = num_atoms[i]               # Get the number of atoms
+                # Create a vector with i.i.d. values from a Gaussian distribution with zero mean and unit deviation
+                values = torch.randn(3*N, dtype=positions.dtype, device=positions.device)
+                # Divide by its norm to get a unit vector (adds a 1/(3N) factor to the expected squared values)
+                values = values / torch.norm(values)
+                vectors[i][:3*N] = values
+
+        elif self.vector_type == "one-hot":
+            for i in range(len(num_atoms)): # For each system,
+                N = num_atoms[i]               # Get the number of atoms
+                column_idx = torch.randint(0,3*N, (1,)) # Create a random integer from 0 to 3N inclusive
+                vectors[i][column_idx] = 1.0            # Replace the 0.0 at the random index for 1.0
+
+        else:
+            raise ValueError(f"Unknown vector type {self.vector_type}")
+
+        vectors = vectors.view(len(num_atoms), N_max, 3)
+        return vectors
+
+
+class HVP(torch.nn.Module):
+    def forward(self, force, coordinates, vector, padding_mask):
+        """
+        source:       (B, N_max, 3)  force tensor
+        coordinates:  (B, N_max, 3), requires_grad=True
+        vector:       (B, N_max, 3), perturbation direction
+        padding_mask: (B, N_max, 3), HVP padding mask with 3N non-zero elements
+        Returns:      (B, N_max, 3), Hessian-vector product
+        """
+
+        # hessian_mask = self.expand_padding_mask_to_hessian_mask(padding_mask)
+        hvp = -torch.autograd.grad(force, coordinates, grad_outputs=vector, create_graph=True, retain_graph=True)[0]
+
+        return hvp, padding_mask.unsqueeze(-1).expand(-1, -1, 3)
+
+
+class TrueHVP(torch.nn.Module):
+    def forward(self, hessian, vector):
+        """
+        hessian: (B, 3N_max, 3N_max)
+        vector:  (B, N_max, 3)
+        Returns: (B, N_max, 3)
+        """
+        B, N, _ = vector.shape
+        vector_flat = vector.flatten(start_dim=1).unsqueeze(-1)  # (B, 3N, 1)
+        hvp_flat = torch.bmm(hessian, vector_flat).squeeze(-1)  # (B, 3N)
+        hvp = hvp_flat.view(B, N, 3)
+
+        return hvp  # (B, N, 3)
+    
+
 class StressForce(torch.nn.Module):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -56,7 +182,7 @@ class Dipole(torch.nn.Module):
         super().__init__()
         self.summer = indexers.MolSummer()
 
-    def forward(self, charges: Tensor, positions: Tensor, mol_index: Tensor, n_molecules: int):
+    def forward(self, charges: Tensor, positions: Tensor, system_index: Tensor, n_systems: int):
         if charges.shape[1] > 1:
             # charges contain multiple targets, so set up broadcasting
             charges = charges.unsqueeze(2)
@@ -65,19 +191,19 @@ class Dipole(torch.nn.Module):
         # shape is (n_atoms, 3, n_targets) in multi-target mode
         # shape is (n_atoms, 3) in single target mode
         dipole_elements = charges * positions
-        dipoles = self.summer(dipole_elements, mol_index, n_molecules)
+        dipoles = self.summer(dipole_elements, system_index, n_systems)
         return dipoles
 
 
 class Quadrupole(torch.nn.Module):
-    """Computes quadrupoles as a flattened (n_molecules,9) array.
+    """Computes quadrupoles as a flattened (n_systems,9) array.
     NOTE: Uses normalization sum_a q_a (r_a,i*r_a,j - 1/3 delta_ij r_a^2)"""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.summer = indexers.MolSummer()
 
-    def forward(self, charges, positions, mol_index, n_molecules):
+    def forward(self, charges, positions, system_index, n_systems):
         # positions shape: (atoms, xyz)
         # charge shape: (atoms,1)
         ri_rj = positions.unsqueeze(1) * positions.unsqueeze(2)
@@ -85,7 +211,7 @@ class Quadrupole(torch.nn.Module):
         rsq = (positions**2).sum(dim=1).unsqueeze(1)  # unsqueeze over component index
         delta_ij = torch.eye(3, device=rsq.device).flatten().unsqueeze(0)  # unsqueeze over atom index
         quad_elements = charges * (ri_rj_flat - (1 / 3) * (rsq * delta_ij))
-        quadrupoles = self.summer(quad_elements, mol_index, n_molecules)
+        quadrupoles = self.summer(quad_elements, system_index, n_systems)
         return quadrupoles
 
 
@@ -102,13 +228,13 @@ class CoulombEnergy(torch.nn.Module):
         self.register_buffer("energy_conversion_factor", torch.tensor(energy_conversion_factor))
         self.summer = indexers.MolSummer()
 
-    def forward(self, charges, pair_dist, pair_first, pair_second, mol_index, n_molecules):
+    def forward(self, charges, pair_dist, pair_first, pair_second, system_index, n_systems):
         voltage_pairs = self.energy_conversion_factor * (charges[pair_second] / pair_dist.unsqueeze(1))
         n_atoms, _ = charges.shape
         voltage_atom = torch.zeros((n_atoms, 1), device=charges.device, dtype=charges.dtype)
         voltage_atom.index_add_(0, pair_first, voltage_pairs)
         coulomb_atoms = 0.5*voltage_atom * charges
-        coulomb_molecule = self.summer(coulomb_atoms, mol_index, n_molecules)
+        coulomb_molecule = self.summer(coulomb_atoms, system_index, n_systems)
         return coulomb_molecule, coulomb_atoms, voltage_atom
 
 
@@ -134,7 +260,7 @@ class ScreenedCoulombEnergy(CoulombEnergy):
         self.screening = screening
         self.bond_summer = pairs.MolPairSummer()
 
-    def forward(self, charges, pair_dist, pair_first, pair_second, mol_index, n_molecules):
+    def forward(self, charges, pair_dist, pair_first, pair_second, system_index, n_systems):
         screening = self.screening(pair_dist, self.radius).unsqueeze(1)
         screening = torch.where((pair_dist < self.radius).unsqueeze(1), screening, torch.zeros_like(screening))
 
@@ -145,7 +271,7 @@ class ScreenedCoulombEnergy(CoulombEnergy):
         voltage_atom = torch.zeros((n_atoms, 1), device=charges.device, dtype=charges.dtype)
         voltage_atom.index_add_(0, pair_first, voltage_pairs) 
         coulomb_atoms = 0.5 * voltage_atom * charges
-        coulomb_molecule = self.summer(coulomb_atoms, mol_index, n_molecules)
+        coulomb_molecule = self.summer(coulomb_atoms, system_index, n_systems)
 
         return coulomb_molecule, coulomb_atoms, voltage_atom
 
@@ -275,15 +401,30 @@ class CombineEnergy(torch.nn.Module):
         super().__init__()
         self.summer = indexers.MolSummer()
 
-    def forward(self, atom_energy_1, atom_energy_2, mol_index, n_molecules):
+    def forward(self, atom_energy_1, atom_energy_2, system_index, n_systems):
         """
         :param: atom_energy_1 per-atom energy from first node. 
         :param: atom_energy_2 per atom energy from second node. 
-        :param: mol_index the molecular index for atoms in the batch
+        :param: system_index the molecular index for atoms in the batch
         :param: total number of molecules in the batch
         :return: Total Energy
         """
         total_atom_energy = atom_energy_1 + atom_energy_2
-        mol_energy = self.summer(total_atom_energy, mol_index, n_molecules)
+        mol_energy = self.summer(total_atom_energy, system_index, n_systems)
         
         return mol_energy, total_atom_energy
+
+
+class CellScaleInducer(torch.nn.Module):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pbc = False
+
+    def forward(self, coordinates, cell):
+        strain = torch.eye(
+            coordinates.shape[2], dtype=coordinates.dtype, device=coordinates.device, requires_grad=True
+        ).tile(coordinates.shape[0],1,1)
+        strained_coordinates = torch.bmm(coordinates, strain)
+        strained_cell = torch.bmm(cell, strain)
+        return strained_coordinates, strained_cell, strain
+    
