@@ -145,6 +145,19 @@
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.Gradient.forward"><code class="docutils literal notranslate"><span class="pre">Gradient.forward()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.HVP"><code class="docutils literal notranslate"><span class="pre">HVP</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.HVP.forward"><code class="docutils literal notranslate"><span class="pre">HVP.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.HVPVector"><code class="docutils literal notranslate"><span class="pre">HVPVector</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.HVPVector.forward"><code class="docutils literal notranslate"><span class="pre">HVPVector.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.Hessian"><code class="docutils literal notranslate"><span class="pre">Hessian</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.Hessian.expand_padding_mask_to_hessian_mask"><code class="docutils literal notranslate"><span class="pre">Hessian.expand_padding_mask_to_hessian_mask()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.Hessian.forward"><code class="docutils literal notranslate"><span class="pre">Hessian.forward()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.LocalDampingCosine"><code class="docutils literal notranslate"><span class="pre">LocalDampingCosine</span></code></a><ul>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.LocalDampingCosine.forward"><code class="docutils literal notranslate"><span class="pre">LocalDampingCosine.forward()</span></code></a></li>
 </ul>
@@ -172,6 +185,10 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.StressForce"><code class="docutils literal notranslate"><span class="pre">StressForce</span></code></a><ul>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.StressForce.forward"><code class="docutils literal notranslate"><span class="pre">StressForce.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.TrueHVP"><code class="docutils literal notranslate"><span class="pre">TrueHVP</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.TrueHVP.forward"><code class="docutils literal notranslate"><span class="pre">TrueHVP.forward()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.VecMag"><code class="docutils literal notranslate"><span class="pre">VecMag</span></code></a><ul>
@@ -400,6 +417,73 @@ registered hooks while the latter silently ignores them.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.physics.HVP">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">HVP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#HVP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.HVP" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.physics.HVP.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding_mask</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#HVP.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.HVP.forward" title="Link to this definition"></a></dt>
+<dd><p>source:       (B, N_max, 3)  force tensor
+coordinates:  (B, N_max, 3), requires_grad=True
+vector:       (B, N_max, 3), perturbation direction
+padding_mask: (B, N_max, 3), HVP padding mask with 3N non-zero elements
+Returns:      (B, N_max, 3), Hessian-vector product</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.physics.HVPVector">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">HVPVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'random'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#HVPVector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.HVPVector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.physics.HVPVector.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonblank</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#HVPVector.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.HVPVector.forward" title="Link to this definition"></a></dt>
+<dd><p>positions: (B, N_max, 3)
+nonblank: (B, N_max, 3), boolean mask
+Returns: (B, N_max, 3) vector (zeroed on padded atoms)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.physics.Hessian">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Hessian</span></span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#Hessian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.Hessian" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.physics.Hessian.expand_padding_mask_to_hessian_mask">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">expand_padding_mask_to_hessian_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">padding_mask</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#Hessian.expand_padding_mask_to_hessian_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.Hessian.expand_padding_mask_to_hessian_mask" title="Link to this definition"></a></dt>
+<dd><p>Expand a (B, N) atom mask to a (B, 3N, 3N) Hessian mask.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>padding_mask: Boolean tensor of shape (B, N_max)</p>
+</dd>
+<dt>Returns:</dt><dd><p>Boolean tensor of shape (B, 3N_max, 3N_max)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.physics.Hessian.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding_mask</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#Hessian.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.Hessian.forward" title="Link to this definition"></a></dt>
+<dd><p>Computes the Hessian using second derivatives of energy or first derivatives of forces.
+Assumes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>source: either energy (B, 1) or forces (B, N_max, 3)</p></li>
+<li><p>positions: (B, N_max, 3)</p></li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt>Returns:</dt><dd><ul class="simple">
+<li><p>hessians: (B, 3N_max, 3N_max)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="hippynn.layers.physics.LocalDampingCosine">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">LocalDampingCosine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#LocalDampingCosine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.LocalDampingCosine" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#hippynn.layers.physics.AlphaScreening" title="hippynn.layers.physics.AlphaScreening"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlphaScreening</span></code></a></p>
@@ -549,6 +633,20 @@ this function, one should call the <code class="xref py py-class docutils litera
 instead of this since the former takes care of running the
 registered hooks while the latter silently ignores them.</p>
 </div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.physics.TrueHVP">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">TrueHVP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#TrueHVP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.TrueHVP" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.physics.TrueHVP.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hessian</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#TrueHVP.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.TrueHVP.forward" title="Link to this definition"></a></dt>
+<dd><p>hessian: (B, 3N_max, 3N_max)
+vector:  (B, N_max, 3)
+Returns: (B, N_max, 3)</p>
 </dd></dl>
 
 </dd></dl>

@@ -155,6 +155,159 @@
 </div>
 
 
+
+<div class="viewcode-block" id="Hessian">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Hessian">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Hessian</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Hessian.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Hessian.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">padding_mask</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the Hessian using second derivatives of energy or first derivatives of forces.</span>
+<span class="sd">        Assumes:</span>
+<span class="sd">            - source: either energy (B, 1) or forces (B, N_max, 3)</span>
+<span class="sd">            - positions: (B, N_max, 3)</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            - hessians: (B, 3N_max, 3N_max)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">hessian_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_padding_mask_to_hessian_mask</span><span class="p">(</span><span class="n">padding_mask</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">source</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Case: source is energy (B, 1)</span>
+            <span class="n">forces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forces_from_energy</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">positions</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hessian_from_forces</span><span class="p">(</span><span class="n">forces</span><span class="p">,</span> <span class="n">positions</span><span class="p">),</span> <span class="n">hessian_mask</span>
+        <span class="k">elif</span> <span class="n">source</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">source</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># Case: source is forces (B, N, 3)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hessian_from_forces</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">positions</span><span class="p">),</span> <span class="n">hessian_mask</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported source shape: </span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_forces_from_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">energy</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">positions</span><span class="p">,</span> <span class="n">create_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_hessian_from_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">positions</span><span class="p">):</span>
+        <span class="n">force_flat</span> <span class="o">=</span> <span class="n">force</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">start_dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">force_components</span> <span class="o">=</span> <span class="n">force_flat</span><span class="o">.</span><span class="n">unbind</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">positions</span><span class="p">,</span> <span class="n">create_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">start_dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">force_components</span>
+        <span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Hessian.expand_padding_mask_to_hessian_mask">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.Hessian.expand_padding_mask_to_hessian_mask">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">expand_padding_mask_to_hessian_mask</span><span class="p">(</span><span class="n">padding_mask</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Expand a (B, N) atom mask to a (B, 3N, 3N) Hessian mask.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            padding_mask: Boolean tensor of shape (B, N_max)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Boolean tensor of shape (B, 3N_max, 3N_max)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">B</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">padding_mask</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">expanded_mask</span> <span class="o">=</span> <span class="n">padding_mask</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">N</span><span class="p">)</span>
+        <span class="n">mask_matrix</span> <span class="o">=</span> <span class="n">expanded_mask</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">expanded_mask</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (B, 3N, 3N)</span>
+
+        <span class="k">return</span> <span class="n">mask_matrix</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="HVPVector">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.HVPVector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HVPVector</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vector_type</span><span class="o">=</span><span class="s2">&quot;random&quot;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector_type</span> <span class="o">=</span> <span class="n">vector_type</span>
+
+<div class="viewcode-block" id="HVPVector.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.HVPVector.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">nonblank</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        positions: (B, N_max, 3)</span>
+<span class="sd">        nonblank: (B, N_max, 3), boolean mask</span>
+<span class="sd">        Returns: (B, N_max, 3) vector (zeroed on padded atoms)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">num_atoms</span> <span class="o">=</span> <span class="n">nonblank</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="n">N_max</span> <span class="o">=</span> <span class="n">nonblank</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># This is the maximum number of atoms across batches</span>
+        <span class="n">vectors</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">num_atoms</span><span class="p">),</span> <span class="mi">3</span><span class="o">*</span><span class="n">N_max</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">positions</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">positions</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_type</span> <span class="o">==</span> <span class="s2">&quot;random&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">num_atoms</span><span class="p">)):</span> <span class="c1"># For each system,</span>
+                <span class="n">N</span> <span class="o">=</span> <span class="n">num_atoms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>               <span class="c1"># Get the number of atoms</span>
+                <span class="c1"># Create a vector with i.i.d. values from a Gaussian distribution with zero mean and unit deviation</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">positions</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">positions</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+                <span class="c1"># Divide by its norm to get a unit vector (adds a 1/(3N) factor to the expected squared values)</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">values</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+                <span class="n">vectors</span><span class="p">[</span><span class="n">i</span><span class="p">][:</span><span class="mi">3</span><span class="o">*</span><span class="n">N</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_type</span> <span class="o">==</span> <span class="s2">&quot;one-hot&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">num_atoms</span><span class="p">)):</span> <span class="c1"># For each system,</span>
+                <span class="n">N</span> <span class="o">=</span> <span class="n">num_atoms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>               <span class="c1"># Get the number of atoms</span>
+                <span class="n">column_idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="o">*</span><span class="n">N</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,))</span> <span class="c1"># Create a random integer from 0 to 3N inclusive</span>
+                <span class="n">vectors</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">column_idx</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>            <span class="c1"># Replace the 0.0 at the random index for 1.0</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown vector type </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">vector_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">vectors</span> <span class="o">=</span> <span class="n">vectors</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">num_atoms</span><span class="p">),</span> <span class="n">N_max</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">vectors</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="HVP">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.HVP">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HVP</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="HVP.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.HVP.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">padding_mask</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        source:       (B, N_max, 3)  force tensor</span>
+<span class="sd">        coordinates:  (B, N_max, 3), requires_grad=True</span>
+<span class="sd">        vector:       (B, N_max, 3), perturbation direction</span>
+<span class="sd">        padding_mask: (B, N_max, 3), HVP padding mask with 3N non-zero elements</span>
+<span class="sd">        Returns:      (B, N_max, 3), Hessian-vector product</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># hessian_mask = self.expand_padding_mask_to_hessian_mask(padding_mask)</span>
+        <span class="n">hvp</span> <span class="o">=</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">force</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">grad_outputs</span><span class="o">=</span><span class="n">vector</span><span class="p">,</span> <span class="n">create_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">retain_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">hvp</span><span class="p">,</span> <span class="n">padding_mask</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TrueHVP">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.TrueHVP">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TrueHVP</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="TrueHVP.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.TrueHVP.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hessian</span><span class="p">,</span> <span class="n">vector</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        hessian: (B, 3N_max, 3N_max)</span>
+<span class="sd">        vector:  (B, N_max, 3)</span>
+<span class="sd">        Returns: (B, N_max, 3)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">vector</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">vector_flat</span> <span class="o">=</span> <span class="n">vector</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">start_dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (B, 3N, 1)</span>
+        <span class="n">hvp_flat</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">bmm</span><span class="p">(</span><span class="n">hessian</span><span class="p">,</span> <span class="n">vector_flat</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (B, 3N)</span>
+        <span class="n">hvp</span> <span class="o">=</span> <span class="n">hvp_flat</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">hvp</span>  <span class="c1"># (B, N, 3)</span></div>
+</div>
+
+    
+
 <div class="viewcode-block" id="StressForce">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.physics.html#hippynn.layers.physics.StressForce">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StressForce</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>

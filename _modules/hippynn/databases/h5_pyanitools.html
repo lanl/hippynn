@@ -141,7 +141,16 @@
     <span class="c1"># Note: assumes that all data files have &#39;coordinates&#39;.</span>
 <div class="viewcode-block" id="PyAniMethods.extract_full_file">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniMethods.extract_full_file">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">extract_full_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_full_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="n">permit_only</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+<span class="sd">        :param file: filename to open</span>
+<span class="sd">        :param species_key: name for species variable (needs special treatment)</span>
+<span class="sd">        :param permit_only: if truthy, give a list of valid keys; skip others.</span>
+<span class="sd">        :return: batches, n_atoms_max, sys_count</span>
+<span class="sd">        :rtype: tuple[list, int, int]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">n_atoms_max</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">batches</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">AniDataLoader</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="p">)</span>  <span class="c1"># Engine=core reads the entire file at once.</span>
@@ -154,6 +163,8 @@
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="c1"># Filter things we don&#39;t need</span>
                 <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_IGNORE_KEYS</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">permit_only</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">permit_only</span><span class="p">:</span>
                     <span class="k">continue</span>
 
                 <span class="c1"># Convert to numpy</span>
@@ -206,20 +217,24 @@
         <span class="n">bsize</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">bkey</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">batch</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">shape_scheme</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">continue</span>  <span class="c1"># Don&#39;t pad the batch index</span>
-                <span class="k">if</span> <span class="n">l</span> <span class="o">==</span> <span class="n">n_atoms</span><span class="p">:</span>
+                <span class="c1"># Check if size of axis is multiple of num_atoms</span>
+                <span class="k">if</span> <span class="n">l</span> <span class="o">%</span> <span class="n">n_atoms</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">scale</span> <span class="o">=</span> <span class="n">l</span> <span class="o">//</span> <span class="n">n_atoms</span>
                     <span class="n">padding_scheme</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-                    <span class="c1"># Use the largest 0th-axis shape that has an atom index</span>
-                    <span class="c1"># as the indicator key for the batch size</span>
-                    <span class="n">this_bsize</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">this_bsize</span> <span class="o">&gt;</span> <span class="n">bsize</span><span class="p">:</span>
-                        <span class="n">bsize</span> <span class="o">=</span> <span class="n">this_bsize</span>
-                        <span class="n">bkey</span> <span class="o">=</span> <span class="n">k</span>
-            <span class="n">shape_scheme</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">padding_scheme</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
-                <span class="n">shape_scheme</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">axis</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_atoms_max</span>
+                    <span class="n">shape_scheme</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">n_atoms_max</span>
+
+            <span class="c1"># Use the largest 0th-axis shape that has an atom index</span>
+            <span class="c1"># as the indicator key for the batch size</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">padding_scheme</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">this_bsize</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">this_bsize</span> <span class="o">&gt;</span> <span class="n">bsize</span><span class="p">:</span>
+                    <span class="n">bsize</span> <span class="o">=</span> <span class="n">this_bsize</span>
+                    <span class="n">bkey</span> <span class="o">=</span> <span class="n">k</span>
+
             <span class="n">shape_scheme</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">sys_count</span>
 
         <span class="n">padding_scheme</span><span class="p">[</span><span class="s2">&quot;sys_number&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -230,7 +245,7 @@
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniMethods.process_batches">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">process_batches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">sys_count</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="s2">&quot;species&quot;</span><span class="p">):</span>
 
-        <span class="c1"># Get padding abd shape info and batch size key</span>
+        <span class="c1"># Get padding and shape info and batch size key</span>
         <span class="n">padding_scheme</span><span class="p">,</span> <span class="n">shape_scheme</span><span class="p">,</span> <span class="n">size_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">determine_key_structure</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span> <span class="n">sys_count</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="n">species_key</span><span class="p">)</span>
 
         <span class="c1"># add system numbers to the final arrays</span>
@@ -255,13 +270,15 @@
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">b</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 
                 <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="n">species_key</span><span class="p">:</span>
+                    <span class="c1"># ANI datasets come with one set of conformations per batch, each has the same elements.</span>
+                    <span class="c1"># here we repeat that information for each conformation.</span>
                     <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">n_sys</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
                 <span class="c1"># set up slicing for non-batch axes</span>
                 <span class="n">where</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
                 <span class="c1"># add batch slicing</span>
                 <span class="n">where</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">sys_start</span><span class="p">,</span> <span class="n">sys_end</span><span class="p">),</span> <span class="o">*</span><span class="n">where</span><span class="p">)</span>
-
+                
                 <span class="c1"># store array!</span>
                 <span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">where</span><span class="p">]</span> <span class="o">=</span> <span class="n">arr</span>
 
@@ -340,9 +357,14 @@
 <div class="viewcode-block" id="PyAniFileDB.load_arrays">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.h5_pyanitools.html#hippynn.databases.h5_pyanitools.PyAniFileDB.load_arrays">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading arrays from&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
-        <span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">sys_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_full_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">species_key</span><span class="p">)</span>
+
+        <span class="c1"># var list if allow_founded is False</span>
+        <span class="n">permit_only</span> <span class="o">=</span> <span class="p">(</span><span class="ow">not</span> <span class="n">allow_unfound</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">var_list</span><span class="p">)</span>
+
+        <span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">sys_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_full_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">species_key</span><span class="p">,</span> <span class="n">permit_only</span><span class="o">=</span><span class="n">permit_only</span><span class="p">)</span>
         <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_batches</span><span class="p">(</span><span class="n">batches</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="n">sys_count</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">species_key</span><span class="p">)</span>
         <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_arrays</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">arr_dict</span></div>
@@ -396,9 +418,12 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Gathering data from files:</span><span class="se">\n\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">files</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">&quot;</span><span class="p">)</span>
 
+        <span class="c1"># var list if allow_founded is False</span>
+        <span class="n">permit_only</span> <span class="o">=</span> <span class="p">(</span><span class="ow">not</span> <span class="n">allow_unfound</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">var_list</span><span class="p">)</span>
+
         <span class="n">file_batches</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">progress_bar</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Data Files&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;file&quot;</span><span class="p">):</span>
-            <span class="n">file_batches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extract_full_file</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">species_key</span><span class="p">))</span>
+            <span class="n">file_batches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extract_full_file</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">species_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">species_key</span><span class="p">,</span> <span class="n">permit_only</span><span class="o">=</span><span class="n">permit_only</span><span class="p">))</span>
 
         <span class="n">data</span><span class="p">,</span> <span class="n">max_atoms_list</span><span class="p">,</span> <span class="n">sys_count</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">file_batches</span><span class="p">)</span>
 
