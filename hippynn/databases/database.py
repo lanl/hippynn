@@ -27,7 +27,7 @@ class Database:
         arr_dict: dict[str, torch.Tensor],
         inputs: list[str],
         targets: list[str],
-        seed: [int, torch.Generator],
+        seed: list[int, torch.Generator],
         test_size: Union[float, int] = None,
         valid_size: Union[float, int] = None,
         num_workers: int = 0,
@@ -47,8 +47,10 @@ class Database:
         :param valid_size: fraction of data to use in train split
         :param num_workers: passed to pytorch dataloaders
         :param pin_memory: passed to pytorch dataloaders
-        :param allow_unfound: If true, skip checking if the needed inputs and targets are found.
-           This allows setting inputs=None and/or targets=None.
+        :param allow_unfound: If true, skip validating the needed inputs and targets are found.
+            This allows setting inputs=None and/or targets=None.
+            If True, the code will attempt to load all arrays.
+            If False, the code should only open the needed arrays. 
         :param auto_split: If true, look for keys like "split_*" to make initial splits from. See write_npz() method.
         :param device: if set, move the dataset to this device after splitting.
         :param dataloader_kwargs: dictionary, passed to pytorch dataloaders in addition to num_workers, pin_memory.
