@@ -1,3 +1,16 @@
+"""
+This example is intended to illustrate things people commonly want to do after training a hippynn model. 
+This includes:
+    1. Loading a saved model from a directory
+    2. Creating a 'Predictor' object from the model that allows easy evaluation of the model
+    3. Appling the Predictor directly to a database and extracting predicted values
+    4. Appling the Predictor object to pytorch Tensors and extracting the predicted values
+    5. Making a parity plot to visualize the predicted vs. true values
+
+Also see https://lanl.github.io/hippynn/examples/predictor.html for additional information about how to use
+the Predictor object. 
+"""
+
 import os
 
 import matplotlib.pyplot as plt
@@ -17,9 +30,9 @@ with active_directory(model_dir):
     check = load_checkpoint_from_cwd(model_device='cpu', restart_db=True) 
     # alternatively, one can use 'restart_db=False' and manually load a different database with the same db_name for each input variable
 
-# EXTRACT MODEL
+# EXTRACT MODEL AND DATABASE
 model = check['training_modules'].model
-database = check['database']
+database = check['database'] # available if restart_db=True
 
 # CREATE PREDICTOR OBJECT
 predictor = Predictor.from_graph(model)
