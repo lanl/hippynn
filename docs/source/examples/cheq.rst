@@ -22,12 +22,12 @@ short-range energy terms for each atom at position, :math:`{\bf R}_i`, and :math
 are the atomic electronegativities and chemical hardness (or Hubbard-U) parameters, respectively. 
 We assume that these depend not only on the atom type but also on their local atomic environments. 
 The charge-independent energy terms, :math:`V_i^{\rm S}({\bf R})`, as well as :math:`\chi_i({\bf R})` and :math:`u_i({\bf R})`
-are parameterized using HIP-NN that captures the local many-body interactions of each atom. This 
-allows us to leverage HIP-NN to parameterize their values based on reference data generated from
+are parameterized using HIPNN that captures the local many-body interactions of each atom. This 
+allows us to leverage HIPNN to parameterize their values based on reference data generated from
 first-principles theory. 
 
 
-We construct two HIP-NN networks to predict the 1) short-range energy and 
+We construct two HIPNN networks to predict the 1) short-range energy and 
 2) electronegativity and Hubbard-U separately.
 
 For the short-range energy, the node can be constructed using :class:`~hippynn.graphs.nodes.targets.HEnergyNode`::
@@ -52,7 +52,7 @@ Then, we need to define the total energy, forces, and dipoles for training::
     gradient.db_name = "Grad"
     dipole.db_name = "dipole"
 
-In order to obtain a HIP-NN-ChEQ model which can run stable molecular dynamcis, we emphasize
+In order to obtain a HIPNN-ChEQ model which can run stable molecular dynamcis, we emphasize
 the loss of forces and dipole more over the total energy::
 
     loss_error = 1.0 * (rmse_energy + mae_energy) + 100.0 * (rmse_grad + mae_grad) + 
