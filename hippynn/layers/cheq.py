@@ -1,8 +1,5 @@
 import torch
 
-a_0 = 0.529177210903  # Bohr radius in Angstrom
-E_h = 27.211386245988  # Hatree energy in eV
-
 def change_tanh_range(vals, minn, maxx):
     '''
     Map [-1,1] to [min,  max]
@@ -44,7 +41,7 @@ class ChEQ(torch.nn.Module):
         self.length_scale = length_scale
         self.energy_scale = energy_scale
 
-        self.c = self.bound * E_h  # It is no longer used
+        #self.c = self.bound * E_h  # It is no longer used
 
         self.tanh_chi = torch.nn.Tanh()
 
@@ -61,7 +58,6 @@ class ChEQ(torch.nn.Module):
         device = coordinates.device
         nonblank = species > 0
         n_molecule, n_atom = coordinates.shape[:2]
-        print('species', species[0][:10])
         
         # parameter ranges
         chi_start = 2.0
@@ -74,7 +70,6 @@ class ChEQ(torch.nn.Module):
         chi0 = torch.zeros(species.shape, dtype=dtype, device=device)
         chi0[nonblank] = chi.reshape(-1)
         chi = chi0
-        print('chi', chi[0][:10])
         
         # make sure U is positive
         # U = self.sp_U(U) + self.c # softplus example
@@ -83,7 +78,6 @@ class ChEQ(torch.nn.Module):
         U0 = torch.zeros(species.shape, dtype=dtype, device=device)
         U0[nonblank] = U.reshape(-1)
         U = U0
-        print('U', U[0][:10])
 
         J = coul_J_with_Hubbard_U_screening(nonblank, coordinates, U)
         # E  = 0.5 q^T * (U+J) * q + q^T * (chi)
@@ -142,11 +136,10 @@ class ChEQ(torch.nn.Module):
         """
         return torch.sum(q * coordinates, dim=1)
 
-
 @torch.jit.script
 def coul_J_with_Hubbard_U_screening(nonblank, coordinates, U):
-    #a_0 = 0.529177210903  # Bohr radius in Angstrom
-    #E_h = 27.211386245988  # Hatree energy in eV
+    a_0 = 0.529177210903  # Bohr radius in Angstrom
+    E_h = 27.211386245988  # Hatree energy in eV
     e2_over_four_pi_epsilon_0 = E_h * a_0
 
     _, n_atom, _ = coordinates.shape
@@ -167,7 +160,6 @@ def coul_J_with_Hubbard_U_screening(nonblank, coordinates, U):
 
     J0 = 1.0 / rij
     TFACT = 16.0 / (5.0 * e2_over_four_pi_epsilon_0)
-    #    print('U', U[0][:10])
 
     # shape:(n_mol, n_atom, n_atom)
     # TI = TFACT * U
@@ -232,6 +224,5 @@ def coul_J_with_Hubbard_U_screening(nonblank, coordinates, U):
     )
 
     J = torch.where(mask, e2_over_four_pi_epsilon_0 * J0, zero)
-    #    print('J', J[0])
 
     return J
