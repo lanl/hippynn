@@ -747,7 +747,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">record_split_masks</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">compressed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">compress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">split_prefix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">return_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -798,7 +798,7 @@
             <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File exists: </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">compressed</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">compress</span><span class="p">:</span>
             <span class="n">np</span><span class="o">.</span><span class="n">savez_compressed</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">**</span><span class="n">arr_dict</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">np</span><span class="o">.</span><span class="n">savez</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">**</span><span class="n">arr_dict</span><span class="p">)</span>
@@ -913,7 +913,7 @@
 
 <div class="viewcode-block" id="Database.make_database_cache">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.database.html#hippynn.Database.make_database_cache">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">make_database_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./hippynn_db_cache.npz&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">override_kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Database&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_database_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./hippynn_db_cache.npz&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">override_kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Database&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Cache the database as-is, and re-open it.</span>
 
@@ -956,7 +956,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Writing Cached database to&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">write_npz</span><span class="p">(</span>
-            <span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">,</span> <span class="n">record_split_masks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">return_only</span><span class="o">=</span><span class="kc">False</span>  <span class="c1"># allows inheriting of splits from this db.</span>
+            <span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">,</span> <span class="n">record_split_masks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="n">compress</span><span class="p">,</span> <span class="n">return_only</span><span class="o">=</span><span class="kc">False</span>  <span class="c1"># allows inheriting of splits from this db.</span>
         <span class="p">)</span>
         <span class="c1"># now reload cached file.</span>
         <span class="k">return</span> <span class="n">NPZDatabase</span><span class="p">(</span><span class="o">**</span><span class="n">arguments</span><span class="p">)</span></div>
@@ -973,9 +973,8 @@
 <span class="sd">    :param index_pool:</span>
 <span class="sd">    :return:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">index_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">index_pool</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="ow">in</span> <span class="n">index_set</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provided indices not in database&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">torch</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">index_pool</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Some provided indices not in database.&quot;</span><span class="p">)</span>
 
     <span class="n">uniques</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">uniques</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">!=</span> <span class="n">indices</span><span class="o">.</span><span class="n">numel</span><span class="p">():</span>
