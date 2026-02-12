@@ -1,5 +1,9 @@
 """
-Example script for training HIP-NN directly from the ANI1x_datasets h5 file.
+Pytorch lightning example script for training HIP-NN using data split across multiple ranks.
+
+See also:
+ split_ani1x.py (splits the data, must be run first)
+ job_ani1x.py (simple slurm script that runs the python files)
 
 This script was designed for an external dataset available at
 https://doi.org/10.6084/m9.figshare.c.4712477
