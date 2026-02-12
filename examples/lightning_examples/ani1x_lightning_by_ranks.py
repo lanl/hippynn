@@ -282,6 +282,7 @@ def main(args):
         database = load_split(rank=this_rank)            
         database.targets = db_info["targets"]
         database.inputs = db_info["inputs"]
+        database.num_workers = args.n_workers
 
         from hippynn.pretraining import hierarchical_energy_initialization
 
