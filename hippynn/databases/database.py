@@ -601,7 +601,7 @@ class Database:
         self,
         file: str,
         record_split_masks: bool = True,
-        compressed: bool = True,
+        compress: bool = True,
         overwrite: bool = False,
         split_prefix: Union[str, None] = None,
         return_only: bool = False,
@@ -652,7 +652,7 @@ class Database:
             if file.exists() and not overwrite:
                 raise FileExistsError(f"File exists: {file}")
 
-        if compressed:
+        if compress:
             np.savez_compressed(file, **arr_dict)
         else:
             np.savez(file, **arr_dict)
@@ -755,7 +755,7 @@ class Database:
         device = devices.pop()
         return device
 
-    def make_database_cache(self, file: str = "./hippynn_db_cache.npz", overwrite: bool = False, **override_kwargs) -> "Database":
+    def make_database_cache(self, file: str = "./hippynn_db_cache.npz", overwrite: bool = False, compress=True, **override_kwargs) -> "Database":
         """
         Cache the database as-is, and re-open it.
 
@@ -798,7 +798,7 @@ class Database:
             print("Writing Cached database to", file)
 
         self.write_npz(
-            file=file, record_split_masks=True, overwrite=overwrite, return_only=False  # allows inheriting of splits from this db.
+            file=file, record_split_masks=True, overwrite=overwrite, compress=compress, return_only=False  # allows inheriting of splits from this db.
         )
         # now reload cached file.
         return NPZDatabase(**arguments)
@@ -811,9 +811,8 @@ def compute_index_mask(indices: torch.Tensor, index_pool: torch.Tensor) -> torch
     :param index_pool:
     :return:
     """
-    index_set = set(index_pool.tolist())
-    if not all(i.item() in index_set for i in indices):
-        raise ValueError("Provided indices not in database")
+    if not torch.isin(indices, index_pool).all().item():
+        raise ValueError("Some provided indices not in database.")
 
     uniques, counts = torch.unique(indices, return_counts=True)
     if uniques.numel() != indices.numel():
