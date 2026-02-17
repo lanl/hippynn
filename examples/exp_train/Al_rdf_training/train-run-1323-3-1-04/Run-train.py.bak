@@ -1,0 +1,225 @@
+import sys
+
+from matplotlib import pyplot
+import numpy as np
+import os
+
+import torch
+
+import ase
+from ase.build import bulk
+from ase.build import make_supercell
+from ase.visualize import view
+
+from io import StringIO
+
+import glob
+
+from  FEFFtools import *
+
+from scipy.optimize import minimize
+
+from copy import deepcopy
+
+import hippynn
+from hippynn.interfaces.ase_interface import HippynnCalculator
+
+from hippynn.experiment.serialization import load_checkpoint_from_cwd
+from hippynn.tools import active_directory
+from hippynn.interfaces.ase_interface import HippynnCalculator
+from hippynn.experiment.assembly import precompute_pairs,assemble_for_training
+
+from hippynn.graphs import loss
+
+from hippynn.experiment.controllers import RaiseBatchSizeOnPlateau, PatienceController
+
+from hippynn.experiment import SetupParams, setup_and_train
+
+import math
+
+mdDataDir = sys.argv[1]
+curModelDir = sys.argv[2]
+MLModelDir = sys.argv[3]
+newModelDir = sys.argv[4]
+targTemp = float(sys.argv[5])
+fractionThresh = 0.95
+
+boltzFac = lambda de : np.exp(-de/(ase.units.kB*targTemp))
+lossFn = lambda x : np.linalg.norm(np.dot(simSpec,x)/np.sum(x)-targSpec)**2
+lossFnD = lambda x : 2*np.dot((np.dot(simSpec,x)-simSpec.T*np.sum(x)),targSpec*np.sum(x)-np.dot(simSpec,x))/(np.sum(x)**3)
+lossFnE = lambda de : lossFn(boltzFac(de))
+lossFnED = lambda de : (-boltzFac(de)/(ase.units.kB*targTemp))*lossFnD(boltzFac(de))
+lossRegE = lambda de : (1/de.shape[0])*np.linalg.norm(de+Ecur-EML)**2
+lossRegED = lambda de : (2/de.shape[0])*(de+Ecur-EML)
+lossRegExpE = lambda de : (1/de.shape[0])*np.sum(np.exp(np.abs(de+Ecur-EML)))
+lossRegExpED = lambda de : (1/de.shape[0])*np.exp(np.abs(de+Ecur-EML))*np.sign(de+Ecur-EML)
+lossRegQuadE = lambda de : (1/de.shape[0])*np.sum((de+Ecur-EML)**4)
+lossRegQuadED = lambda de : (4/de.shape[0])*(de+Ecur-EML)**3
+regFac = 2000000000.0
+lossT = lambda x : (lossFnE(x) + regFac*lossRegQuadE(x))*1e8
+lossTD = lambda x : (lossFnED(x) + regFac*lossRegQuadED(x))*1e8
+
+expData = {}
+for temp in [943,1023,1323]:
+    expData[str(temp)] = np.genfromtxt('/usr/projects/ml4chem/SakibMatin/RDF_Expt_Data/Al_ref_{:s}K_Gr.dat'.format(str(temp)))
+targSpec = expData[sys.argv[5]][(expData[sys.argv[5]][:,0]>2.2)*(expData[sys.argv[5]][:,0]<9.0),1]
+targEnergy = expData[sys.argv[5]][(expData[sys.argv[5]][:,0]>2.2)*(expData[sys.argv[5]][:,0]<9.0),0]
+
+print('model loaded\n')
+with active_directory(curModelDir):
+    HIPNNbundleCur = load_checkpoint_from_cwd(map_location="cpu", restore_db=False)
+HIPNNmodelCur = HIPNNbundleCur["training_modules"].model
+HIPNNmodelCur.double()
+
+#with active_directory(MLModelDir):
+#    HIPNNbundleML = load_checkpoint_from_cwd(map_location="cpu", restore_db=False)
+#HIPNNmodelML = HIPNNbundleML["training_modules"].model
+#HIPNNmodelML.double()
+
+dirNX = []
+dirNS = []
+dirNSL = []
+dirNDB = []
+for curI in range(len(glob.glob(mdDataDir+'/sub-*'))):
+    print('loading spectrum data sub-0\n')
+    (dir0X,dir0S,dir0SL,dir0DB) = loadFEFFdir(mdDataDir+'/sub-{:d}/'.format(curI),2,8)
+    dirNX.append(deepcopy(dir0X))
+    dirNS.append(deepcopy(dir0S))
+    dirNSL.append(deepcopy(dir0SL))
+    dirNDB.append(deepcopy(dir0DB))
+dirDB={}
+
+dirDB['species'] = np.concatenate([dir0DB['species'] for dir0DB in dirNDB])
+dirDB['coordinates'] = np.concatenate([dir0DB['coordinates'] for dir0DB in dirNDB])
+nConf = dirDB['species'].shape[0]
+nAtom = dirDB['species'].shape[1]
+tempCell = np.concatenate([dir0DB['cell'] for dir0DB in dirNDB])
+dirDB['cell'] = np.zeros([nConf,3,3])
+dirDB['cell'][:,0,0] = tempCell[:,0]
+dirDB['cell'][:,1,1] = tempCell[:,1]
+dirDB['cell'][:,2,2] = tempCell[:,2]
+dirDB['atomenergies'] = np.zeros([nConf,nAtom,1])
+dirDB['energy'] = np.zeros([nConf])
+dirDB['force'] = np.zeros([nConf,nAtom,3])
+dirDB["energyperatom"] = dirDB["energy"] / nAtom
+
+simEnergy = dirNX[0]
+simSpec = np.concatenate(dirNS)
+
+simSpec = simSpec[:,(simEnergy>2.2)*(simEnergy<9.0)]
+simEnergy = simEnergy[(simEnergy>2.2)*(simEnergy<9.0)]
+simSpec=simSpec.T
+
+rho = nAtom/(dirDB['cell'][0:,0,0]*dirDB['cell'][:,1,1]*dirDB['cell'][:,2,2])
+rho =np.repeat(rho,nAtom)
+simSpec=simSpec/rho[np.newaxis,:]
+simSpec = simSpec/(4*math.pi*.1*simEnergy[:,np.newaxis]**2)
+
+
+#Save quantities
+np.save(newModelDir+'-spec.npy',simSpec)
+np.savez(newModelDir+'-data.npz',**dirDB)
+	
+dirDBtrain = deepcopy(dirDB)
+
+#database = hippynn.databases.Database(dirDB,inputs=['cell','coordinates','species'],targets=['energy','forces','atomenergies'],seed=0)
+database = hippynn.databases.Database(dirDB,**HIPNNbundleCur["training_modules"].evaluator.db_info,seed=0)
+database.split_the_rest('all')
+
+predictorCur = hippynn.graphs.Predictor.from_graph(HIPNNmodelCur,model_device='cuda:0')
+resultsCur =predictorCur.apply_to_database(database,batch_size=1)['all']
+print(list(resultsCur))
+Ecur = resultsCur['HEnergy.atom_energies'].cpu().detach().numpy().flatten()
+np.save(newModelDir+'-Ecur.npy',Ecur)
+Ecur=0
+
+#predictorML = hippynn.graphs.Predictor.from_graph(HIPNNmodelML,model_device='cuda:0')
+#resultsML =predictorML.apply_to_database(database,batch_size=1)['all']
+#EML = resultsML['HEnergy.atom_energies'].cpu().detach().numpy().flatten()
+#np.save(newModelDir+'-EML.npy',EML)
+EML=0
+
+#x0 = np.ones(simSpec.shape[1])
+#dE0 = EML-Ecur
+dE0 = np.zeros(simSpec.shape[1])
+
+print('Starting Optimize Loop')
+opt = minimize(lossT,dE0,bounds=[(-.1,.1) for i in range(dE0.shape[0])],method='L-BFGS-B',jac=lossTD)
+optNew = deepcopy(opt)
+curWeights = boltzFac(opt['x'])/np.sum(boltzFac(opt['x']))
+curNeff = (np.sum(curWeights)**2/np.dot(curWeights,curWeights))/(opt['x'].shape[0])
+#while (optNew['success'] and ((np.sum(curWeights)**2/np.dot(curWeights,curWeights))/(dE.shape[0]) > fractionThresh)):
+while (optNew['success'] and curNeff>fractionThresh):
+    sys.stdout.flush()
+    print('Regularization Factor: ' + str(regFac))
+    print('Neff:  ' + str(curNeff))
+    print('Neff-J: ' + str(np.exp(-1*np.sum(curWeights*np.log(curWeights)))/(optNew['x'].shape[0])))
+    print('Min: ' + str(np.min(optNew['x'])))
+    print('Max: ' + str(np.max(optNew['x'])))
+    print('Loss: ' + str(lossFnE(optNew['x'])))
+    print('Loss-Reg: ' + str(regFac*lossRegQuadE(optNew['x'])))
+    regFac = regFac*.5
+    opt = deepcopy(optNew)
+    optNew = minimize(lossT,dE0,bounds=[(-.1,.1) for i in range(dE0.shape[0])],method='L-BFGS-B',jac=lossTD)
+    curWeights= boltzFac(optNew['x'])/np.sum(boltzFac(optNew['x']))
+    curNeff = (np.sum(curWeights)**2/np.dot(curWeights,curWeights))/(opt['x'].shape[0])
+    
+print('Solution Found')
+print('Regularization Factor: ' + str(regFac))
+curWeights = boltzFac(opt['x'])/np.sum(boltzFac(opt['x']))
+print('Neff:  ' + str((np.sum(curWeights)**2/np.dot(curWeights,curWeights))/(opt['x'].shape[0])))
+print('Neff-J: ' + str(np.exp(-1*np.sum(curWeights*np.log(curWeights)))))
+
+np.save(newModelDir+'-sol.npy',opt['x'])
+
+print('number of good spectra: ' + str(np.sum(opt['x']>0)))
+print('Max x: ' + str(np.max(opt['x'])))
+print('Min x: ' + str(np.min(opt['x'])))
+print('Loss: ' + str(lossFnE(opt['x'])))
+print('Loss-Reg: ' + str(regFac*lossRegQuadE(opt['x'])))
+
+deltaE = opt['x']
+
+with hippynn.tools.active_directory(newModelDir):
+    with hippynn.tools.log_terminal("training_log.txt", 'wt'):
+        
+        AEloss = loss.MAELoss.of_node(HIPNNmodelCur.node_from_name('HEnergy.atom_energies'))
+        l2_reg = 1e-8*loss.l2reg(HIPNNmodelCur.node_from_name('HIPNN'))
+        Tloss = AEloss + l2_reg
+        
+        validation_losses = {'atomic energy loss':AEloss,'l2 reg':l2_reg,'total loss':Tloss}
+        	
+        training_modules, db_info = assemble_for_training(Tloss, validation_losses)
+        
+        databaseTrain = hippynn.databases.Database(dirDBtrain,**db_info,seed=0)
+        databaseTrain.arr_dict['atomenergies'] =np.array(resultsCur['atomenergies']+deltaE.reshape(nConf,nAtom,1))
+        databaseTrain.make_trainvalidtest_split(test_size=0.005,valid_size=0.1)
+        
+        optimizer = torch.optim.Adam(HIPNNmodelCur.parameters(), lr=1e-4)
+        scheduler = RaiseBatchSizeOnPlateau(
+            optimizer=optimizer,
+            max_batch_size=1,
+            patience=10,
+            factor=0.5,
+            )
+        controller = PatienceController(
+            optimizer=optimizer,
+            scheduler=scheduler,
+            batch_size=1,
+            eval_batch_size=1,
+            max_epochs=5,
+            termination_patience=21,
+            stopping_key='atomic energy loss',
+            )
+        experiment_params = SetupParams(controller=controller)
+        
+        print("Experiment Params:")
+        print(experiment_params)
+        
+        setup_and_train(
+                    training_modules=training_modules,
+                    database=databaseTrain,
+                    setup_params=experiment_params,
+                    )
+
+

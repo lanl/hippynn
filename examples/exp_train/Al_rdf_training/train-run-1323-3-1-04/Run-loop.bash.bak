@@ -1,0 +1,74 @@
+#!/bin/bash
+#SBATCH --time=48:00:00
+#SBATCH --nodes=1
+#SBATCH --qos=long
+#SBATCH -p ml4chem
+#SBATCH --job-name=EXAFStrain
+
+#This run is basically as Kipton suggested, shortened for testing.
+
+runTemp=1323
+
+source ~/ml4chem/envs/p38-parsl-ani.bash
+
+#python Run-train.py /vast/home/bnebgen/scratch/Al-Rad-MD/MD-run-1323-3-0/md-1/ /vast/home/bnebgen/scratch/HIPNN-Al-3/HIPNN-Al-03-0/ /vast/home/bnebgen/scratch/HIPNN-Al-3/HIPNN-Al-03-0/ model-00 $runTemp
+
+CURMOD=/vast/home/bnebgen/scratch/HIPNN-Al-3/HIPNN-Al-03-1/
+echo $CURMOD
+
+for LOOPI in 01 02 03 04 05 06 07 08 09 10
+do
+	echo "starting loop ${LOOPI}"
+	mkdir md-${LOOPI}
+	cd md-${LOOPI}
+	
+	mkdir sub-0
+	mkdir -p /ram/tmp/md-${LOOPI}/sub-0
+	mkdir sub-1
+	mkdir -p /ram/tmp/md-${LOOPI}/sub-1
+	mkdir sub-2
+	mkdir -p /ram/tmp/md-${LOOPI}/sub-2
+	mkdir sub-3
+	mkdir -p /ram/tmp/md-${LOOPI}/sub-3
+	mkdir sub-4
+	mkdir -p /ram/tmp/md-${LOOPI}/sub-4
+	mkdir sub-5
+	mkdir -p /ram/tmp/md-${LOOPI}/sub-5
+	mkdir sub-6
+	mkdir -p /ram/tmp/md-${LOOPI}/sub-6
+	mkdir sub-7
+	mkdir -p /ram/tmp/md-${LOOPI}/sub-7
+	
+	export CUDA_VISIBLE_DEVICES=0
+	cd sub-0
+	python ../../Run-MD.py ${CURMOD} /ram/tmp/md-${LOOPI}/sub-0 $runTemp &
+	export CUDA_VISIBLE_DEVICES=0    
+	cd ../sub-1                      
+	python ../../Run-MD.py ${CURMOD} /ram/tmp/md-${LOOPI}/sub-1 $runTemp &
+	export CUDA_VISIBLE_DEVICES=1    
+	cd ../sub-2                      
+	python ../../Run-MD.py ${CURMOD} /ram/tmp/md-${LOOPI}/sub-2 $runTemp &
+	export CUDA_VISIBLE_DEVICES=1    
+	cd ../sub-3                      
+	python ../../Run-MD.py ${CURMOD} /ram/tmp/md-${LOOPI}/sub-3 $runTemp &
+	export CUDA_VISIBLE_DEVICES=2    
+	cd ../sub-4                      
+	python ../../Run-MD.py ${CURMOD} /ram/tmp/md-${LOOPI}/sub-4 $runTemp &
+	export CUDA_VISIBLE_DEVICES=2    
+	cd ../sub-5                      
+	python ../../Run-MD.py ${CURMOD} /ram/tmp/md-${LOOPI}/sub-5 $runTemp &
+	export CUDA_VISIBLE_DEVICES=3    
+	cd ../sub-6                      
+	python ../../Run-MD.py ${CURMOD} /ram/tmp/md-${LOOPI}/sub-6 $runTemp &
+	export CUDA_VISIBLE_DEVICES=3    
+	cd ../sub-7                      
+	python ../../Run-MD.py ${CURMOD} /ram/tmp/md-${LOOPI}/sub-7 $runTemp &
+	
+	cd ${SLURM_SUBMIT_DIR}
+	
+	wait
+	
+	python Run-train.py /ram/tmp/md-${LOOPI} ${CURMOD} /vast/home/bnebgen/scratch/HIPNN-Al-3/HIPNN-Al-03-1/ model-${LOOPI} $runTemp
+	CURMOD=${SLURM_SUBMIT_DIR}/model-${LOOPI}
+	echo ${CURMOD}
+done
