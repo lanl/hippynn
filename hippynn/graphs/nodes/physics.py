@@ -300,6 +300,9 @@ class QuadrupoleNode(ChargeMomentNode):
 
 # Setup for Coulomb Energy and Screened Coulomb Energy is nearly the same, up to validating the pair finder.
 class ChargePairSetup(ExpandParents):
+    parent_expansion_kwargs = "_pe_cutoff_distance",
+    
+
     @staticmethod
     def _validate_pairfinder(pairfinder, cutoff_distance):
         # This method required by this ExpandParents setup.
@@ -331,18 +334,19 @@ class ChargePairSetup(ExpandParents):
         return charges, pos_or_pair, pidxer
 
     @parent_expander.match(Charges, PositionsNode, PaddingIndexer)
-    def expansion3(self, charges, positions, pidxer, *, cutoff_distance, **kwargs):
+    def expansion3(self, charges, positions, pidxer, *, _pe_cutoff_distance, **kwargs):
         try:
             pairfinder = find_unique_relative((charges, positions, pidxer), PairIndexer)
         except NodeNotFound:
             warnings.warn("Boundary conditions not specified, Building open boundary conditions.")
             encoder = find_unique_relative(pidxer, Encoder)
-            pairfinder = OpenPairIndexer("PairIndexer", (positions, encoder, pidxer), dist_hard_max=cutoff_distance)
+            pairfinder = OpenPairIndexer("PairIndexer", (positions, encoder, pidxer), dist_hard_max=_pe_cutoff_distance)
         return charges, pairfinder, pidxer
 
     @parent_expander.match(Charges, PairIndexer, AtomIndexer)
-    def expansion4(self, charges, pairfinder, pidxer, *, cutoff_distance, **kwargs):
-        self._validate_pairfinder(pairfinder, cutoff_distance)
+    def expansion4(self, charges, pairfinder, pidxer, *, _pe_cutoff_distance, **kwargs):
+        self._validate_pairfinder(pairfinder, _pe_cutoff_distance)
+        
         pf = pairfinder
         return charges, pf.pair_dist, pf.pair_first, pf.pair_second, pidxer.system_index, pidxer.n_systems
 
@@ -362,9 +366,16 @@ class CoulombEnergyNode(AutoKw, ChargePairSetup, Energies,  MultiNode, _Deprecat
     output_index_states = IdxType.Systems, IdxType.Atoms, IdxType.Atoms
     main_output_name = "system_energies"
     auto_module_class = physics_layers.CoulombEnergy
-    auto_module_kwargs = "energy_conversion_factor"
+    auto_module_kwargs = "energy_conversion_factor",
 
-    
+    def __init__(self, name, parents, energy_conversion_factor, module="auto", **kwargs):
+        
+        super().__init__(name, parents,
+                         energy_conversion_factor=energy_conversion_factor,
+                         _pe_cutoff_distance=None,
+                         module=module,
+                         **kwargs)
+
 
     
     @staticmethod
@@ -380,7 +391,6 @@ class CoulombEnergyNode(AutoKw, ChargePairSetup, Energies,  MultiNode, _Deprecat
                 "hard_dist_cutoff is set to a finite value,\n"
                 "coulomb energy requires summing over the entire set of pairs"
             )
-
 
 
 class ScreenedCoulombEnergyNode(AutoKw, ChargePairSetup, Energies, MultiNode, _DeprecatedNamesMixin):
@@ -399,7 +409,6 @@ class ScreenedCoulombEnergyNode(AutoKw, ChargePairSetup, Energies, MultiNode, _D
         "radius": "cutoff_distance",
         "screening": "screening",
     }
-    parent_expansion_kwargs = "cutoff_distance",
 
     @staticmethod
     def _validate_pairfinder(pairfinder, cutoff_distance):
@@ -407,8 +416,8 @@ class ScreenedCoulombEnergyNode(AutoKw, ChargePairSetup, Energies, MultiNode, _D
         if existing_cutoff is not None and existing_cutoff < cutoff_distance:
             raise ValueError(
                 f"Distance cutoff ({existing_cutoff}) is set to less than\n"
-                f" pair finder distance ({cutoff_distance}). Increase the cutoff distance\n"
-                f" for the pair_finder (named: {pairfinder.name})"
+                f"pair finder distance ({cutoff_distance}). Increase the cutoff distance\n"
+                f"for the pair_finder (named: {pairfinder.name})"
             )
 
     def __init__(self, name, parents, energy_conversion_factor, cutoff_distance, screening=None, module="auto", **kwargs):
@@ -418,9 +427,18 @@ class ScreenedCoulombEnergyNode(AutoKw, ChargePairSetup, Energies, MultiNode, _D
                 "To build this module automatically a screening module must\n"
                 "be provided (e.g. layers.physiscs.QScreening(p_value=4))"
             )
+        
+        
+        # Dev Note: the _pe_cutoff_distance argument duplicates the cutoff_distance argument
+        # because the AutoKw and ExpandParent mixins both consume their keywords.
+        # Since both of them require the cutoff, we have it supplied with two different names.
+        # Would be nice if the workflow didn't require this, but the workaround is not costly,
+        # just confusing to find.
+
         super().__init__(name, parents,
                         energy_conversion_factor=energy_conversion_factor,
                          cutoff_distance=cutoff_distance,
+                         _pe_cutoff_distance=cutoff_distance,
                          screening=screening,
                          module=module,
                          **kwargs)
