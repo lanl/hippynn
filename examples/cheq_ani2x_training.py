@@ -15,8 +15,7 @@ https://pubs.acs.org/doi/10.1021/acs.jctc.5c00062
 import os
 import sys
 import torch
-from hippynn.graphs.nodes.cheq import ChEQNode
-from hippynn.graphs.nodes.targets import HChargeNode
+
 from hippynn.graphs import find_unique_relative
 
 import matplotlib
@@ -80,21 +79,21 @@ with hippynn.tools.log_terminal("training_log.txt",'wt'):
 
     network = networks.Hipnn("HIPNN", (species, positions), module_kwargs = network_params)
     
-    henergy = ChEQNode("ChEQ", (network,), units={'energy':'kcal/mol', 'length':"Angstrom"}, lower_bound=0.01)
+    cheq = physics.ChEQNode("ChEQ", (network,), units={'energy':'kcal/mol', 'length':"Angstrom"}, lower_bound=0.01)
 
     network1 = networks.Hipnn("HIPNN2", network.parents, module_kwargs = network1_params)
-    henergy1 = targets.HEnergyNode("HEnergy",network1)
+    henergy = targets.HEnergyNode("HEnergy",network1)
     
-    dipole = henergy.dipole
+    dipole = cheq.dipole
 
-    molecule_energy = henergy.coul_energy + henergy1.mol_energy 
+    molecule_energy = cheq.coul_energy + henergy.mol_energy 
     gradient = physics.GradientNode("Gradient", (molecule_energy, positions), sign=+1)
 
     molecule_energy.db_name="energies"
     gradient.db_name = "Grad"
     dipole.db_name = "dipole"
 
-    hierarchicality = henergy1.hierarchicality
+    hierarchicality = henergy.hierarchicality
 
     # define loss quantities
     from hippynn.graphs import loss
@@ -184,7 +183,7 @@ with hippynn.tools.log_terminal("training_log.txt",'wt'):
     database.make_trainvalidtest_split(test_size=0.1,valid_size=0.1)
 
     from hippynn.pretraining import set_e0_values
-    set_e0_values(henergy1, database, energy_name="energies",trainable_after=False)
+    set_e0_values(henergy, database, energy_name="energies",trainable_after=False)
 
     init_lr =  1.0 * 1e-3
     optimizer = torch.optim.Adam(training_modules.model.parameters(),lr=init_lr)

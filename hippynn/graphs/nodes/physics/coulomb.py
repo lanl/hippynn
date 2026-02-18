@@ -3,7 +3,6 @@ Node for charge equilibration model.
 """
 from ...._deprecations import _DeprecatedNamesMixin
 
-from ....layers import cheq as cheq_layers 
 from ....layers import physics as physics_layers 
 
 from ..base import MultiNode, AutoKw, find_unique_relative, find_relatives, ExpandParents, Node
@@ -176,7 +175,7 @@ class ChEQNode(ExpandParents, AutoKw, MultiNode):
     )
 
     main_output = "charge"
-    auto_module_class = cheq_layers.ChEQ
+    auto_module_class = physics_layers.ChEQ
 
     @parent_expander.match(Network)
     def expand0(self, network, **kwargs):

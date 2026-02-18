@@ -1,4 +1,179 @@
+"""
+Layers for physical operations
+"""
+import warnings
+
 import torch
+
+from .. import indexers, pairs
+
+
+class CoulombEnergy(torch.nn.Module):
+    """ Computes the Coulomb Energy of the molecule/configuration. 
+    
+    Coulomb energies is defined for pairs of atoms. Here, we adopt the 
+    convention that the Coulomby energy for a pair of atoms is evenly
+    partitioned to both atoms as the 'per-atom energies'. Therefore, the 
+    atom energies sum to the molecular energy; similar to the HEnergy. 
+    """
+    def __init__(self, energy_conversion_factor):
+        super().__init__()
+        self.register_buffer("energy_conversion_factor", torch.tensor(energy_conversion_factor))
+        self.summer = indexers.MolSummer()
+
+    def forward(self, charges, pair_dist, pair_first, pair_second, system_index, n_systems):
+        voltage_pairs = self.energy_conversion_factor * (charges[pair_second] / pair_dist.unsqueeze(1))
+        n_atoms, _ = charges.shape
+        voltage_atom = torch.zeros((n_atoms, 1), device=charges.device, dtype=charges.dtype)
+        voltage_atom.index_add_(0, pair_first, voltage_pairs)
+        coulomb_atoms = 0.5*voltage_atom * charges
+        coulomb_molecule = self.summer(coulomb_atoms, system_index, n_systems)
+        return coulomb_molecule, coulomb_atoms, voltage_atom
+
+
+class ScreenedCoulombEnergy(CoulombEnergy):
+    """ Computes the Coulomb Energy of the molecule/configuration. 
+    
+    The convention for the atom energies is the same as CoulombEnergy
+    and the HEnergy. 
+    """
+    
+    def __init__(self, energy_conversion_factor, screening, radius=None):
+        super().__init__(energy_conversion_factor)
+        if screening is None:
+            raise ValueError("Screened Coulomb requires specification of a screening type.")
+        if radius is None:
+            raise ValueError("Screened Coulomb requires specification of a radius")
+
+        if isinstance(screening, type):
+            screening = screening()
+
+        self.radius = radius
+
+        self.screening = screening
+        self.bond_summer = pairs.MolPairSummer()
+
+    def forward(self, charges, pair_dist, pair_first, pair_second, system_index, n_systems):
+        screening = self.screening(pair_dist, self.radius).unsqueeze(1)
+        screening = torch.where((pair_dist < self.radius).unsqueeze(1), screening, torch.zeros_like(screening))
+
+        # Voltage pairs for per-atom energy
+        voltage_pairs = self.energy_conversion_factor * (charges[pair_second] / pair_dist.unsqueeze(1)) 
+        voltage_pairs = voltage_pairs * screening 
+        n_atoms, _ = charges.shape
+        voltage_atom = torch.zeros((n_atoms, 1), device=charges.device, dtype=charges.dtype)
+        voltage_atom.index_add_(0, pair_first, voltage_pairs) 
+        coulomb_atoms = 0.5 * voltage_atom * charges
+        coulomb_molecule = self.summer(coulomb_atoms, system_index, n_systems)
+
+        return coulomb_molecule, coulomb_atoms, voltage_atom
+
+
+class CombineScreenings(torch.nn.Module):
+    """ Returns products of different screenings for Screened Coulomb Interactions.
+    """
+    def __init__(self, screening_list):
+        super().__init__()
+        self.SL = torch.nn.ModuleList(screening_list)
+
+    def forward(self, pair_dist, radius):
+        """ Product of different screenings applied to pair_dist upto radius.
+
+        :param pair_dist: torch.tensor, dtype=float64: 'Neighborlist' distances for coulomb energies.
+        :param radius: Maximum radius that Screened-Coulomb is evaluated upto.
+        :return screening: Weights for screening for all pair_dist.
+        """
+        screening = None
+
+        for s in self.SL:
+            if screening is None:
+                screening = s(pair_dist=pair_dist, radius=radius)
+            else:
+                screening = screening * s(pair_dist=pair_dist, radius=radius)
+
+        return screening
+
+
+class AlphaScreening(torch.nn.Module):
+    def __init__(self, alpha):
+        super().__init__()
+        self.alpha = alpha
+
+
+# Note: This is somewhat incomplete as it does not include a k-space contribution -- more is needed
+class EwaldRealSpaceScreening(AlphaScreening):
+    def __init__(self, alpha):
+        warnings.warn("Ewald implementation incomplete, does not include k-space contributions.")
+        super().__init__(alpha)
+
+    def forward(self, pair_dist, radius):
+        q = pair_dist / radius
+        eta = self.alpha * radius
+        return torch.erfc(eta * q)
+
+
+# Note: typically
+class WolfScreening(AlphaScreening):
+    def __init__(self, alpha):
+        warnings.warn("Wolf implemnetation uses exact derivative of the potential.")
+        super().__init__(alpha)
+
+    def forward(self, pair_dist, radius):
+        q = pair_dist / radius
+        eta = self.alpha * radius
+        return torch.erfc(eta * q) - q * torch.erfc(eta)
+
+
+class LocalDampingCosine(AlphaScreening):
+    """ Local damping using complement of the hipnn cutoff function. ('glue-on' method)
+        g = 1 if pair_dist > R_cutoff, 1 - [cos(pi/2 * dist * R_cutoff)]^2  otherwise
+    """
+    def __init__(self, alpha): 
+        """ 
+        :param alpha: R_cutoff for glue-on function to ensure 
+            smooth crossover from hipnn energy to long-range coulomb energy.  
+        """
+        super().__init__(alpha) 
+
+
+    def forward(self, pair_dist, radius):
+        """
+        :param pair_dist: torch.tensor, dtype=float64: 'Neighborlist' distances for coulomb energies.
+        :param radius: Maximum radius that Screened-Coulomb is evaluated upto. 
+        :return screening: Weights for screening for each pair.
+        """
+        pi = torch.tensor([3.141592653589793238], device=pair_dist.device)        
+        screening = torch.subtract(torch.tensor([1.0], device=pair_dist.device), torch.square(torch.cos(0.5*pi*pair_dist/self.alpha)))
+    
+        # pair_dist greater than cut-off; no local-damping. 
+        screening = torch.where((pair_dist<self.alpha), screening, torch.ones_like(screening))
+        
+        return screening
+
+
+class QScreening(torch.nn.Module):
+    def __init__(self, p_value):
+        super().__init__()
+        self.p_value = p_value
+
+    @property
+    def p_value(self):
+        return self._p_value
+
+    @p_value.setter
+    def p_value(self, value):
+        value = int(value)
+        self._p_value = value
+        powers = torch.arange(1, value + 1, dtype=torch.long).unsqueeze(0)
+        self.register_buffer("powers", powers)
+
+    def forward(self, pair_dist, radius):
+        q = pair_dist / radius
+        q_factors = 1 - torch.pow(q.unsqueeze(1), self.powers)
+        product = q_factors.prod(dim=1)
+        return product
+
+
 
 def change_tanh_range(vals, minn, maxx):
     '''
