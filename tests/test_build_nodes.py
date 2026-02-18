@@ -67,8 +67,8 @@ def test_build_charge_moment(moment_cls, neural_network_node):
     moment = moment_cls("charge_moment", charge)
 
 def test_build_cheq(neural_network_node):
-    from hippynn.graphs.nodes.cheq import ChEQNode
-    cheq = ChEQNode("ChEQ", (neural_network_node,), units={'energy':'kcal/mol', 'length':"Angstrom"}, lower_bound=0.01)
+
+    cheq = physics.ChEQNode("ChEQ", (neural_network_node,), units={'energy':'kcal/mol', 'length':"Angstrom"}, lower_bound=0.01)
 
     return
 

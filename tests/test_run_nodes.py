@@ -8,18 +8,18 @@ from conftest import ignore_sensitivity_warning
 @pytest.fixture
 def example_all_target_nodes(neural_network_node, bond_parameters):
     from hippynn.graphs import inputs, targets, physics
-    from hippynn.graphs.nodes.cheq import ChEQNode
 
     network = neural_network_node
     henergy = targets.HEnergyNode("E", network)
     aenergy = targets.AtomizationEnergyNode("T", network)
     hcharge = targets.HChargeNode("C", network)
-    cheq = ChEQNode("c", network).dipole
+    
     
     bonds = targets.HBondNode("B", network, module_kwargs=bond_parameters)
 
     dipole = physics.DipoleNode("dipole", hcharge)
     quadrupole = physics.QuadrupoleNode("quadrupole", hcharge)
+    cheq = physics.ChEQNode("c", network).dipole
 
     from hippynn.graphs import find_unique_relative
 
