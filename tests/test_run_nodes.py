@@ -8,11 +8,14 @@ from conftest import ignore_sensitivity_warning
 @pytest.fixture
 def example_all_target_nodes(neural_network_node, bond_parameters):
     from hippynn.graphs import inputs, targets, physics
+    from hippynn.graphs.nodes.cheq import ChEQNode
 
     network = neural_network_node
     henergy = targets.HEnergyNode("E", network)
     aenergy = targets.AtomizationEnergyNode("T", network)
     hcharge = targets.HChargeNode("C", network)
+    cheq = ChEQNode("c", network).dipole
+    
     bonds = targets.HBondNode("B", network, module_kwargs=bond_parameters)
 
     dipole = physics.DipoleNode("dipole", hcharge)
@@ -24,10 +27,10 @@ def example_all_target_nodes(neural_network_node, bond_parameters):
 
     force_h = physics.GradientNode("F_E", (henergy, positions), sign=-1)
     force_a = physics.GradientNode("F_T", (aenergy, positions), sign=-1)
-
     stress_s, force_s = physics.setup_stressforce_nodes(henergy)
+    
 
-    all_targets = [henergy, aenergy, hcharge, bonds, dipole, quadrupole, force_h, force_a, force_s, stress_s]
+    all_targets = [henergy, aenergy, hcharge, bonds, dipole, quadrupole, cheq, force_h, force_a, force_s, stress_s]
     quadrupole.index_state = hippynn.graphs.IdxType.Systems  # hack to avoid db_form conversion
 
     return all_targets
