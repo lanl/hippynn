@@ -59,6 +59,8 @@ def input_nodes():
 
     return species, positions, cell
 
+
+
 @pytest.fixture()
 def neural_network_node(input_nodes, network_parameters):
     from hippynn.graphs import networks
