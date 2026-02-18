@@ -1,0 +1,597 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.layers.physics.coulomb &mdash; hippynn 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=e3456cac" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=c9d3d048"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../what_is_hippynn.html">What is hippynn?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../bibliography.html">Research articles using hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/features.html">hippynn Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/concepts.html">hippynn Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/databases.html">Databases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/units.html">Units in hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/performance.html">Performance Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/ckernels.html">Custom Kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/loss_graph.html">Model and Loss Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/settings.html">Library Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide/custom_nodes.html">Creating Custom Node Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/minimal_workflow.html">Minimal Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/controller.html">Controller</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/predictor.html">Predictor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/ensembles.html">Ensembling Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/periodic.html">Periodic Boundary Conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/forces.html">Force Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/restarting.html">Restarting training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/ase_calculator.html">ASE Calculators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/mliap_unified.html">LAMMPS interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/excited_states.html">Non-Adiabiatic Excited States</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/cheq.html">Charge Equilibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/weighted_loss.html">Weighted/Masked Loss Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/lightning.html">Pytorch Lightning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/hyperopt.html">Hyperparameter optimization with Ax and Ray</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/hippynn.html">Full API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_summary/hippynn.html">API Summary Pages</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.layers.physics.coulomb</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.layers.physics.coulomb</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Layers for physical operations</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">indexers</span><span class="p">,</span> <span class="n">pairs</span>
+
+
+<div class="viewcode-block" id="CoulombEnergy">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.CoulombEnergy">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CoulombEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Computes the Coulomb Energy of the molecule/configuration. </span>
+<span class="sd">    </span>
+<span class="sd">    Coulomb energies is defined for pairs of atoms. Here, we adopt the </span>
+<span class="sd">    convention that the Coulomby energy for a pair of atoms is evenly</span>
+<span class="sd">    partitioned to both atoms as the &#39;per-atom energies&#39;. Therefore, the </span>
+<span class="sd">    atom energies sum to the molecular energy; similar to the HEnergy. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_conversion_factor</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;energy_conversion_factor&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">energy_conversion_factor</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">summer</span> <span class="o">=</span> <span class="n">indexers</span><span class="o">.</span><span class="n">MolSummer</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CoulombEnergy.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.CoulombEnergy.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">system_index</span><span class="p">,</span> <span class="n">n_systems</span><span class="p">):</span>
+        <span class="n">voltage_pairs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_conversion_factor</span> <span class="o">*</span> <span class="p">(</span><span class="n">charges</span><span class="p">[</span><span class="n">pair_second</span><span class="p">]</span> <span class="o">/</span> <span class="n">pair_dist</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">n_atoms</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">charges</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">voltage_atom</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_atoms</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">charges</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">charges</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">voltage_atom</span><span class="o">.</span><span class="n">index_add_</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">voltage_pairs</span><span class="p">)</span>
+        <span class="n">coulomb_atoms</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">voltage_atom</span> <span class="o">*</span> <span class="n">charges</span>
+        <span class="n">coulomb_molecule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">coulomb_atoms</span><span class="p">,</span> <span class="n">system_index</span><span class="p">,</span> <span class="n">n_systems</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">coulomb_molecule</span><span class="p">,</span> <span class="n">coulomb_atoms</span><span class="p">,</span> <span class="n">voltage_atom</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ScreenedCoulombEnergy">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.ScreenedCoulombEnergy">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ScreenedCoulombEnergy</span><span class="p">(</span><span class="n">CoulombEnergy</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Computes the Coulomb Energy of the molecule/configuration. </span>
+<span class="sd">    </span>
+<span class="sd">    The convention for the atom energies is the same as CoulombEnergy</span>
+<span class="sd">    and the HEnergy. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_conversion_factor</span><span class="p">,</span> <span class="n">screening</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">energy_conversion_factor</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">screening</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Screened Coulomb requires specification of a screening type.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">radius</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Screened Coulomb requires specification of a radius&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">screening</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+            <span class="n">screening</span> <span class="o">=</span> <span class="n">screening</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">screening</span> <span class="o">=</span> <span class="n">screening</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bond_summer</span> <span class="o">=</span> <span class="n">pairs</span><span class="o">.</span><span class="n">MolPairSummer</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ScreenedCoulombEnergy.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.ScreenedCoulombEnergy.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">charges</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">system_index</span><span class="p">,</span> <span class="n">n_systems</span><span class="p">):</span>
+        <span class="n">screening</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">screening</span><span class="p">(</span><span class="n">pair_dist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">screening</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">pair_dist</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">screening</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">screening</span><span class="p">))</span>
+
+        <span class="c1"># Voltage pairs for per-atom energy</span>
+        <span class="n">voltage_pairs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_conversion_factor</span> <span class="o">*</span> <span class="p">(</span><span class="n">charges</span><span class="p">[</span><span class="n">pair_second</span><span class="p">]</span> <span class="o">/</span> <span class="n">pair_dist</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> 
+        <span class="n">voltage_pairs</span> <span class="o">=</span> <span class="n">voltage_pairs</span> <span class="o">*</span> <span class="n">screening</span> 
+        <span class="n">n_atoms</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">charges</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">voltage_atom</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_atoms</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">charges</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">charges</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">voltage_atom</span><span class="o">.</span><span class="n">index_add_</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">voltage_pairs</span><span class="p">)</span> 
+        <span class="n">coulomb_atoms</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">voltage_atom</span> <span class="o">*</span> <span class="n">charges</span>
+        <span class="n">coulomb_molecule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">coulomb_atoms</span><span class="p">,</span> <span class="n">system_index</span><span class="p">,</span> <span class="n">n_systems</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">coulomb_molecule</span><span class="p">,</span> <span class="n">coulomb_atoms</span><span class="p">,</span> <span class="n">voltage_atom</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="CombineScreenings">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.CombineScreenings">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CombineScreenings</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns products of different screenings for Screened Coulomb Interactions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screening_list</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SL</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span><span class="n">screening_list</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CombineScreenings.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.CombineScreenings.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Product of different screenings applied to pair_dist upto radius.</span>
+
+<span class="sd">        :param pair_dist: torch.tensor, dtype=float64: &#39;Neighborlist&#39; distances for coulomb energies.</span>
+<span class="sd">        :param radius: Maximum radius that Screened-Coulomb is evaluated upto.</span>
+<span class="sd">        :return screening: Weights for screening for all pair_dist.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">screening</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SL</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">screening</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">screening</span> <span class="o">=</span> <span class="n">s</span><span class="p">(</span><span class="n">pair_dist</span><span class="o">=</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">screening</span> <span class="o">=</span> <span class="n">screening</span> <span class="o">*</span> <span class="n">s</span><span class="p">(</span><span class="n">pair_dist</span><span class="o">=</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">screening</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AlphaScreening">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.AlphaScreening">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AlphaScreening</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span></div>
+
+
+
+<span class="c1"># Note: This is somewhat incomplete as it does not include a k-space contribution -- more is needed</span>
+<div class="viewcode-block" id="EwaldRealSpaceScreening">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.EwaldRealSpaceScreening">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EwaldRealSpaceScreening</span><span class="p">(</span><span class="n">AlphaScreening</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Ewald implementation incomplete, does not include k-space contributions.&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EwaldRealSpaceScreening.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.EwaldRealSpaceScreening.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">pair_dist</span> <span class="o">/</span> <span class="n">radius</span>
+        <span class="n">eta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">radius</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">erfc</span><span class="p">(</span><span class="n">eta</span> <span class="o">*</span> <span class="n">q</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="c1"># Note: typically</span>
+<div class="viewcode-block" id="WolfScreening">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.WolfScreening">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">WolfScreening</span><span class="p">(</span><span class="n">AlphaScreening</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Wolf implemnetation uses exact derivative of the potential.&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WolfScreening.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.WolfScreening.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">pair_dist</span> <span class="o">/</span> <span class="n">radius</span>
+        <span class="n">eta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">radius</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">erfc</span><span class="p">(</span><span class="n">eta</span> <span class="o">*</span> <span class="n">q</span><span class="p">)</span> <span class="o">-</span> <span class="n">q</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">erfc</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="LocalDampingCosine">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.LocalDampingCosine">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LocalDampingCosine</span><span class="p">(</span><span class="n">AlphaScreening</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Local damping using complement of the hipnn cutoff function. (&#39;glue-on&#39; method)</span>
+<span class="sd">        g = 1 if pair_dist &gt; R_cutoff, 1 - [cos(pi/2 * dist * R_cutoff)]^2  otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        :param alpha: R_cutoff for glue-on function to ensure </span>
+<span class="sd">            smooth crossover from hipnn energy to long-range coulomb energy.  </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span> 
+
+
+<div class="viewcode-block" id="LocalDampingCosine.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.LocalDampingCosine.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param pair_dist: torch.tensor, dtype=float64: &#39;Neighborlist&#39; distances for coulomb energies.</span>
+<span class="sd">        :param radius: Maximum radius that Screened-Coulomb is evaluated upto. </span>
+<span class="sd">        :return screening: Weights for screening for each pair.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pi</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">3.141592653589793238</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">pair_dist</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>        
+        <span class="n">screening</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">pair_dist</span><span class="o">.</span><span class="n">device</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">pair_dist</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)))</span>
+    
+        <span class="c1"># pair_dist greater than cut-off; no local-damping. </span>
+        <span class="n">screening</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">pair_dist</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">),</span> <span class="n">screening</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">screening</span><span class="p">))</span>
+        
+        <span class="k">return</span> <span class="n">screening</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="QScreening">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.QScreening">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">QScreening</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_value</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_value</span> <span class="o">=</span> <span class="n">p_value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">p_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p_value</span>
+
+    <span class="nd">@p_value</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">p_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_p_value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">powers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">value</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;powers&quot;</span><span class="p">,</span> <span class="n">powers</span><span class="p">)</span>
+
+<div class="viewcode-block" id="QScreening.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.QScreening.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">pair_dist</span> <span class="o">/</span> <span class="n">radius</span>
+        <span class="n">q_factors</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">powers</span><span class="p">)</span>
+        <span class="n">product</span> <span class="o">=</span> <span class="n">q_factors</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">product</span></div>
+</div>
+
+
+
+
+<div class="viewcode-block" id="change_tanh_range">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.change_tanh_range">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">change_tanh_range</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">minn</span><span class="p">,</span> <span class="n">maxx</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Map [-1,1] to [min,  max]</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="n">vals</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="c1"># [0,1]</span>
+    <span class="n">vals</span> <span class="o">=</span> <span class="n">vals</span> <span class="o">*</span> <span class="p">(</span><span class="n">maxx</span> <span class="o">-</span> <span class="n">minn</span><span class="p">)</span> <span class="o">+</span> <span class="n">minn</span>
+    <span class="k">return</span> <span class="n">vals</span></div>
+
+
+<div class="viewcode-block" id="ChEQ">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.ChEQ">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ChEQ</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;energy&quot;</span><span class="p">:</span> <span class="s2">&quot;eV&quot;</span><span class="p">,</span> <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="s2">&quot;Angstrom&quot;</span><span class="p">},</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        default unit used here</span>
+<span class="sd">        Length: Angstom</span>
+<span class="sd">        Charge: elementary charge +e</span>
+<span class="sd">        Energy: eV</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">units</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bound</span> <span class="o">=</span> <span class="n">lower_bound</span>  <span class="c1"># It was used to enforece Hubbard U to be positive (together with softplus), but it is replaced by using Tanh() here</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Angstrom&quot;</span><span class="p">:</span>
+            <span class="n">length_scale</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Bohr&quot;</span><span class="p">:</span>
+            <span class="n">length_scale</span> <span class="o">=</span> <span class="mf">0.529177210903</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;length with unit </span><span class="si">{}</span><span class="s2"> not supported yet&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;eV&quot;</span><span class="p">:</span>
+            <span class="n">energy_scale</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Hartree&quot;</span><span class="p">:</span>
+            <span class="n">energy_scale</span> <span class="o">=</span> <span class="mf">27.211386245988</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;kcal/mol&quot;</span><span class="p">:</span>
+            <span class="n">energy_scale</span> <span class="o">=</span> <span class="mf">23.0609</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;energy with unit </span><span class="si">{}</span><span class="s2"> not supported yet&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">conversion_factor</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">length_scale</span> <span class="o">/</span> <span class="n">energy_scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">length_scale</span> <span class="o">=</span> <span class="n">length_scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_scale</span> <span class="o">=</span> <span class="n">energy_scale</span>
+
+        <span class="c1">#self.c = self.bound * E_h  # It is no longer used</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tanh_chi</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Tanh</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tanh_U</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Tanh</span><span class="p">()</span>  <span class="c1"># torch.nn.Softplus(beta=10.0) # used for enforce U to be positive, U: Hubbard_U</span>
+
+<div class="viewcode-block" id="ChEQ.forward">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.ChEQ.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">chi</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        species : shape (n_molecule, n_atom)</span>
+<span class="sd">        coordinates : shape (n_molecule, n_atom, 3), unit Angstrom or bohr</span>
+<span class="sd">        U : Hubbard U, diagonal part of A, shape (n_real_atom, 1), output from HCharge Node</span>
+<span class="sd">        chi : Electronegatvitiy, shape (n_real_atom, 1), output from HCharge Node</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">dtype</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">device</span>
+        <span class="n">nonblank</span> <span class="o">=</span> <span class="n">species</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="n">n_molecule</span><span class="p">,</span> <span class="n">n_atom</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+        
+        <span class="c1"># parameter ranges</span>
+        <span class="n">chi_start</span> <span class="o">=</span> <span class="mf">2.0</span>
+        <span class="n">chi_end</span> <span class="o">=</span> <span class="mf">10.0</span>
+        <span class="n">U_start</span> <span class="o">=</span> <span class="mf">8.0</span>
+        <span class="n">U_end</span> <span class="o">=</span> <span class="mf">16.0</span>
+
+        <span class="n">chi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tanh_chi</span><span class="p">(</span><span class="n">chi</span><span class="p">)</span> <span class="c1">#* 4.0  # 4.0</span>
+        <span class="n">chi</span> <span class="o">=</span> <span class="n">change_tanh_range</span><span class="p">(</span><span class="n">chi</span><span class="p">,</span> <span class="n">chi_start</span><span class="p">,</span> <span class="n">chi_end</span><span class="p">)</span>
+        <span class="n">chi0</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">species</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">chi0</span><span class="p">[</span><span class="n">nonblank</span><span class="p">]</span> <span class="o">=</span> <span class="n">chi</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">chi</span> <span class="o">=</span> <span class="n">chi0</span>
+        
+        <span class="c1"># make sure U is positive</span>
+        <span class="c1"># U = self.sp_U(U) + self.c # softplus example</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tanh_U</span><span class="p">(</span><span class="n">U</span><span class="p">)</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">change_tanh_range</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">U_start</span><span class="p">,</span> <span class="n">U_end</span><span class="p">)</span>
+        <span class="n">U0</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">species</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">U0</span><span class="p">[</span><span class="n">nonblank</span><span class="p">]</span> <span class="o">=</span> <span class="n">U</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">U0</span>
+
+        <span class="n">J</span> <span class="o">=</span> <span class="n">coul_J_with_Hubbard_U_screening</span><span class="p">(</span><span class="n">nonblank</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+        <span class="c1"># E  = 0.5 q^T * (U+J) * q + q^T * (chi)</span>
+        <span class="c1"># dE/dq = 0 ==&gt; (U+J)q = - chi</span>
+
+        <span class="c1"># have to replace the padding diagonal 0 with 1 on A, shift A by 1.0</span>
+        <span class="n">A0</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_molecule</span><span class="p">,</span> <span class="n">n_atom</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_atom</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="c1"># put diagonal elements of padding part as 1.0</span>
+        <span class="n">maskd</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_molecule</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_atom</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="o">+</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_atom</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_atom</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="o">~</span><span class="n">nonblank</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="n">A0</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="n">maskd</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="c1"># add constraint</span>
+        <span class="n">maskc</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_molecule</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_atom</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="o">+</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_atom</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="n">nonblank</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="n">A0</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_atom</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)[</span><span class="n">maskc</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">A0</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">A0</span><span class="p">[:,</span> <span class="p">:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># q_mol : net charge, a float number or a tensor with shape (n_molecule, )</span>
+        <span class="c1"># chi : shape (n_molecule, n_atom)</span>
+        <span class="c1"># phi : same as chi</span>
+        <span class="n">q_mol</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="o">-</span><span class="n">chi</span>
+        <span class="n">b0</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_molecule</span><span class="p">,</span> <span class="n">n_atom</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">b0</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span>
+        <span class="n">b0</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">q_mol</span>
+
+        <span class="n">q</span><span class="p">,</span> <span class="n">Ecoul</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exact_charge</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">chi</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">A0</span><span class="p">,</span> <span class="n">b0</span><span class="p">)</span>
+
+        <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dipole</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">q</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_molecule</span><span class="p">,</span> <span class="n">n_atom</span><span class="p">),</span> <span class="n">Ecoul</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_scale</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">chi</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exact_charge</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">chi</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">A0</span><span class="p">,</span> <span class="n">b0</span><span class="p">):</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">diag_embed</span><span class="p">(</span><span class="n">U</span><span class="p">)</span> <span class="o">+</span> <span class="n">J</span>
+        <span class="n">A0</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">A</span>
+
+        <span class="n">q_tmp</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">A0</span><span class="p">,</span> <span class="n">b0</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">q_tmp</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="c1"># q: shape (n_molecule, n_atom, 1)</span>
+        <span class="n">Ecoul</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">q</span><span class="p">))</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="n">chi</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">q</span><span class="p">,</span> <span class="n">Ecoul</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dipole</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        q : charge, shape (n_molecule, n_atom, 1)</span>
+<span class="sd">        coordinates : shape (n_molecule, n_atom, 3)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">coul_J_with_Hubbard_U_screening</span><span class="p">(</span><span class="n">nonblank</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">U</span><span class="p">):</span>
+    <span class="n">a_0</span> <span class="o">=</span> <span class="mf">0.529177210903</span>  <span class="c1"># Bohr radius in Angstrom</span>
+    <span class="n">E_h</span> <span class="o">=</span> <span class="mf">27.211386245988</span>  <span class="c1"># Hatree energy in eV</span>
+    <span class="n">e2_over_four_pi_epsilon_0</span> <span class="o">=</span> <span class="n">E_h</span> <span class="o">*</span> <span class="n">a_0</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">n_atom</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">device</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">dtype</span>
+
+    <span class="n">one</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">zero</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="c1"># Mask for nonblank and off-diagonal elements</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">nonblank</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">nonblank</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="o">&amp;</span> <span class="o">~</span><span class="p">(</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n_atom</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">rij</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">coordinates</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">one</span><span class="p">)</span>
+    <span class="n">rij_sq</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">rij</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">rij_cube</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">rij</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">rij_quad</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">rij</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">rij_penta</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">rij</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="n">J0</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">rij</span>
+    <span class="n">TFACT</span> <span class="o">=</span> <span class="mf">16.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">5.0</span> <span class="o">*</span> <span class="n">e2_over_four_pi_epsilon_0</span><span class="p">)</span>
+
+    <span class="c1"># shape:(n_mol, n_atom, n_atom)</span>
+    <span class="c1"># TI = TFACT * U</span>
+    <span class="n">TI</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">TFACT</span> <span class="o">*</span> <span class="n">U</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">U</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">one</span><span class="p">)</span>
+    <span class="n">TI2</span> <span class="o">=</span> <span class="n">TI</span> <span class="o">*</span> <span class="n">TI</span>
+    <span class="n">TI3</span> <span class="o">=</span> <span class="n">TI2</span> <span class="o">*</span> <span class="n">TI</span>
+    <span class="n">TI4</span> <span class="o">=</span> <span class="n">TI2</span> <span class="o">*</span> <span class="n">TI2</span>
+    <span class="n">TI6</span> <span class="o">=</span> <span class="n">TI4</span> <span class="o">*</span> <span class="n">TI2</span>
+
+    <span class="n">TJ</span> <span class="o">=</span> <span class="n">TFACT</span> <span class="o">*</span> <span class="n">U</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">U</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">TJ2</span> <span class="o">=</span> <span class="n">TJ</span> <span class="o">*</span> <span class="n">TJ</span>
+    <span class="n">TJ4</span> <span class="o">=</span> <span class="n">TJ2</span> <span class="o">*</span> <span class="n">TJ2</span>
+    <span class="n">TJ6</span> <span class="o">=</span> <span class="n">TJ4</span> <span class="o">*</span> <span class="n">TJ2</span>
+    <span class="n">TI2MTJ2</span> <span class="o">=</span> <span class="n">TI2</span> <span class="o">-</span> <span class="n">TJ2</span>
+
+    <span class="n">same_element_mask</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">TI</span> <span class="o">-</span> <span class="n">TJ</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">))</span>  <span class="c1"># n_mol, n_atom, n_atom</span>
+    <span class="n">different_element_mask</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">same_element_mask</span>  <span class="c1"># n_mol, n_atom, n_atom</span>
+    <span class="n">TI2MTJ2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">different_element_mask</span><span class="p">,</span> <span class="n">TI2MTJ2</span><span class="p">,</span> <span class="n">one</span><span class="p">)</span>
+
+    <span class="n">EXPTI</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="o">-</span><span class="n">TI</span> <span class="o">*</span> <span class="n">rij</span><span class="p">))</span>
+    <span class="n">EXPTJ</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="o">-</span><span class="n">TJ</span> <span class="o">*</span> <span class="n">rij</span><span class="p">))</span>
+
+    <span class="c1"># TI2MTJ2 is small, so do divsion from left to right to provide numerical stability</span>
+    <span class="n">SB</span> <span class="o">=</span> <span class="n">EXPTI</span> <span class="o">*</span> <span class="n">TJ4</span> <span class="o">*</span> <span class="n">TI</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="n">TI2MTJ2</span> <span class="o">/</span> <span class="n">TI2MTJ2</span>
+    <span class="n">SC</span> <span class="o">=</span> <span class="n">EXPTI</span> <span class="o">*</span> <span class="p">(</span><span class="n">TJ6</span> <span class="o">-</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">TJ4</span> <span class="o">*</span> <span class="n">TI2</span><span class="p">)</span> <span class="o">/</span> <span class="n">TI2MTJ2</span> <span class="o">/</span> <span class="n">TI2MTJ2</span> <span class="o">/</span> <span class="n">TI2MTJ2</span>
+    <span class="n">SE</span> <span class="o">=</span> <span class="n">EXPTJ</span> <span class="o">*</span> <span class="n">TI4</span> <span class="o">*</span> <span class="n">TJ</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="n">TI2MTJ2</span> <span class="o">/</span> <span class="n">TI2MTJ2</span>
+    <span class="n">SF</span> <span class="o">=</span> <span class="n">EXPTJ</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">TI6</span> <span class="o">-</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">TI4</span> <span class="o">*</span> <span class="n">TJ2</span><span class="p">))</span> <span class="o">/</span> <span class="n">TI2MTJ2</span> <span class="o">/</span> <span class="n">TI2MTJ2</span> <span class="o">/</span> <span class="n">TI2MTJ2</span>
+
+    <span class="n">J0</span><span class="p">[</span><span class="n">different_element_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">J0</span><span class="p">[</span><span class="n">different_element_mask</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">SB</span> <span class="o">-</span> <span class="p">(</span><span class="n">SC</span> <span class="o">/</span> <span class="n">rij</span><span class="p">))</span> <span class="o">+</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">SE</span> <span class="o">-</span> <span class="p">(</span><span class="n">SF</span> <span class="o">/</span> <span class="n">rij</span><span class="p">)))[</span><span class="n">different_element_mask</span><span class="p">]</span>
+    <span class="c1"># Taylor expansion around ta - tb -&gt; 0</span>
+    <span class="n">SSB</span> <span class="o">=</span> <span class="n">TI3</span> <span class="o">/</span> <span class="mf">48.0</span>
+    <span class="n">SSC</span> <span class="o">=</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">TI2</span> <span class="o">/</span> <span class="mf">16.0</span>
+    <span class="n">SSD</span> <span class="o">=</span> <span class="mf">11.0</span> <span class="o">*</span> <span class="n">TI</span> <span class="o">/</span> <span class="mf">16.0</span>
+    <span class="n">SSE</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="c1"># first-order terms</span>
+    <span class="n">SSF</span> <span class="o">=</span> <span class="mf">5.0</span> <span class="o">/</span> <span class="mf">32.0</span>
+    <span class="n">SSG</span> <span class="o">=</span> <span class="mf">5.0</span> <span class="o">*</span> <span class="n">TI</span> <span class="o">/</span> <span class="mf">32.0</span>
+    <span class="n">SSH</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">TI2</span> <span class="o">/</span> <span class="mf">16.0</span>
+    <span class="n">SSI</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">TI3</span> <span class="o">/</span> <span class="mf">96.0</span>
+    <span class="c1"># second-order terms</span>
+    <span class="n">SSJ</span> <span class="o">=</span> <span class="mf">3.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">32.0</span> <span class="o">*</span> <span class="n">TI</span><span class="p">)</span>
+    <span class="n">SSK</span> <span class="o">=</span> <span class="mf">3.0</span> <span class="o">/</span> <span class="mf">32.0</span>
+    <span class="n">SSL</span> <span class="o">=</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">TI</span> <span class="o">/</span> <span class="mf">64.0</span>
+    <span class="n">SSM</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">TI2</span> <span class="o">/</span> <span class="mf">64.0</span>
+    <span class="n">SSN</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">TI3</span> <span class="o">/</span> <span class="mf">320.0</span>
+    <span class="c1"># third-order terms</span>
+    <span class="n">SSO</span> <span class="o">=</span> <span class="mf">3.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">64.0</span> <span class="o">*</span> <span class="n">TI2</span><span class="p">)</span>
+    <span class="n">SSP</span> <span class="o">=</span> <span class="mf">3.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">64.0</span> <span class="o">*</span> <span class="n">TI</span><span class="p">)</span>
+    <span class="n">SSQ</span> <span class="o">=</span> <span class="mf">5.0</span> <span class="o">/</span> <span class="mf">192.0</span>
+    <span class="n">SSR</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">TI</span> <span class="o">/</span> <span class="mf">96.0</span>
+    <span class="n">SSS</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">TI2</span> <span class="o">/</span> <span class="mf">320.0</span>
+    <span class="n">SST</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">TI3</span> <span class="o">/</span> <span class="mf">1440.0</span>
+
+    <span class="n">J0</span><span class="p">[</span><span class="n">same_element_mask</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">J0</span><span class="p">[</span><span class="n">same_element_mask</span><span class="p">]</span>
+        <span class="o">-</span> <span class="p">(</span>
+            <span class="n">EXPTI</span> <span class="o">*</span> <span class="p">(</span><span class="n">SSB</span> <span class="o">*</span> <span class="n">rij_sq</span> <span class="o">+</span> <span class="n">SSC</span> <span class="o">*</span> <span class="n">rij</span> <span class="o">+</span> <span class="n">SSD</span> <span class="o">+</span> <span class="n">SSE</span> <span class="o">/</span> <span class="n">rij</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">EXPTI</span> <span class="o">*</span> <span class="p">(</span><span class="n">SSF</span> <span class="o">+</span> <span class="n">SSG</span> <span class="o">*</span> <span class="n">rij</span> <span class="o">+</span> <span class="n">SSH</span> <span class="o">*</span> <span class="n">rij_sq</span> <span class="o">+</span> <span class="n">SSI</span> <span class="o">*</span> <span class="n">rij_cube</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">TI</span> <span class="o">-</span> <span class="n">TJ</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">EXPTI</span> <span class="o">*</span> <span class="p">(</span><span class="n">SSJ</span> <span class="o">+</span> <span class="n">SSK</span> <span class="o">*</span> <span class="n">rij</span> <span class="o">+</span> <span class="n">SSL</span> <span class="o">*</span> <span class="n">rij_sq</span> <span class="o">+</span> <span class="n">SSM</span> <span class="o">*</span> <span class="n">rij_cube</span> <span class="o">+</span> <span class="n">SSN</span> <span class="o">*</span> <span class="n">rij_quad</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">TI</span> <span class="o">-</span> <span class="n">TJ</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">EXPTI</span> <span class="o">*</span> <span class="p">(</span><span class="n">SSO</span> <span class="o">+</span> <span class="n">SSP</span> <span class="o">*</span> <span class="n">rij</span> <span class="o">+</span> <span class="n">SSQ</span> <span class="o">*</span> <span class="n">rij_sq</span> <span class="o">+</span> <span class="n">SSR</span> <span class="o">*</span> <span class="n">rij_cube</span> <span class="o">+</span> <span class="n">SSS</span> <span class="o">*</span> <span class="n">rij_quad</span> <span class="o">+</span> <span class="n">SST</span> <span class="o">*</span> <span class="n">rij_penta</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">TI</span> <span class="o">-</span> <span class="n">TJ</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="p">)[</span><span class="n">same_element_mask</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">J</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">e2_over_four_pi_epsilon_0</span> <span class="o">*</span> <span class="n">J0</span><span class="p">,</span> <span class="n">zero</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">J</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

@@ -55,6 +55,7 @@ Install hippynn with::
     examples/ase_calculator
     examples/mliap_unified
     examples/excited_states
+    examples/cheq
     examples/weighted_loss
     examples/lightning
     examples/hyperopt

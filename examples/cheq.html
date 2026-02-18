@@ -1,0 +1,213 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Charge Equilibration &mdash; hippynn 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c9d3d048"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Weighted/Masked Loss Functions" href="weighted_loss.html" />
+    <link rel="prev" title="Non-Adiabiatic Excited States" href="excited_states.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../what_is_hippynn.html">What is hippynn?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Research articles using hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/features.html">hippynn Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/concepts.html">hippynn Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/databases.html">Databases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/units.html">Units in hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/performance.html">Performance Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/ckernels.html">Custom Kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/loss_graph.html">Model and Loss Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/settings.html">Library Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/custom_nodes.html">Creating Custom Node Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="minimal_workflow.html">Minimal Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller.html">Controller</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="predictor.html">Predictor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ensembles.html">Ensembling Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="periodic.html">Periodic Boundary Conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forces.html">Force Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="restarting.html">Restarting training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ase_calculator.html">ASE Calculators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mliap_unified.html">LAMMPS interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="excited_states.html">Non-Adiabiatic Excited States</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Charge Equilibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="weighted_loss.html">Weighted/Masked Loss Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lightning.html">Pytorch Lightning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hyperopt.html">Hyperparameter optimization with Ax and Ray</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_documentation/hippynn.html">Full API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_summary/hippynn.html">API Summary Pages</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Charge Equilibration</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/cheq.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="excited_states.html" class="btn btn-neutral float-left" title="Non-Adiabiatic Excited States" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="weighted_loss.html" class="btn btn-neutral float-right" title="Weighted/Masked Loss Functions" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="charge-equilibration">
+<h1>Charge Equilibration<a class="headerlink" href="#charge-equilibration" title="Link to this heading"></a></h1>
+<p><cite>hippynn</cite> has features for incorporating charge equilibration model (ChEQ)
+to include long-range interactions.
+These features can be found in <code class="xref py py-mod docutils literal notranslate"><span class="pre">cheq</span></code>.</p>
+<p>For a more detailed description, please see the paper <a class="reference internal" href="#li2025" id="id1"><span>[Li2025]</span></a></p>
+<p>The HIPNN-ChEQ model learns short-range energy (<span class="math notranslate nohighlight">\(V^{S}_{i}\)</span>), electronegativity (<span class="math notranslate nohighlight">\(\chi_{i}\)</span>), and Hubbard-U (<span class="math notranslate nohighlight">\(u_{i}\)</span>)
+indirectly through training with total energy, forces, and dipole.</p>
+<p>This is based on the second-order monopole charge equilibration model as following,</p>
+<div class="math notranslate nohighlight">
+\[E({\bf R,q}) =  \sum_i V_i^{\rm S}({\bf R}) + \sum_i q_i \chi_i({\bf R}) + \frac{1}{2} \sum_i q_i^2 u_i({\bf R})  + \frac{1}{2} \sum_{ij}^{i \ne j} q_i \gamma_{ij} q_j\]</div>
+<p>Here index <cite>i</cite> runs over the atomic centers, <span class="math notranslate nohighlight">\(i = 1,2,\ldots N\)</span>, <span class="math notranslate nohighlight">\({\bf q} = \{q_i\}\)</span>
+are the net partial charges on each atom, <span class="math notranslate nohighlight">\(V_i^{\rm S}({\bf R})\)</span> are charge-independent,
+short-range energy terms for each atom at position, <span class="math notranslate nohighlight">\({\bf R}_i\)</span>, and <span class="math notranslate nohighlight">\(\chi_i({\bf R})\)</span> and <span class="math notranslate nohighlight">\(u_i({\bf R})\)</span>
+are the atomic electronegativities and chemical hardness (or Hubbard-U) parameters, respectively.
+We assume that these depend not only on the atom type but also on their local atomic environments.
+The charge-independent energy terms, <span class="math notranslate nohighlight">\(V_i^{\rm S}({\bf R})\)</span>, as well as <span class="math notranslate nohighlight">\(\chi_i({\bf R})\)</span> and <span class="math notranslate nohighlight">\(u_i({\bf R})\)</span>
+are parameterized using HIPNN that captures the local many-body interactions of each atom. This
+allows us to leverage HIPNN to parameterize their values based on reference data generated from
+first-principles theory.</p>
+<p>We construct two HIPNN networks to predict the 1) short-range energy and
+2) electronegativity and Hubbard-U separately. (Note: it is not absolutely necessary to use two different networks,</p>
+<blockquote>
+<div><p>but we have found it to be effective–this way gradients are split to parameters in the same way as the energy is split.)</p>
+</div></blockquote>
+<p>For the short-range energy, the node can be constructed using <a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HEnergyNode" title="hippynn.graphs.nodes.targets.HEnergyNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">HEnergyNode</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network1</span> <span class="o">=</span> <span class="n">networks</span><span class="o">.</span><span class="n">Hipnn</span><span class="p">(</span><span class="s2">&quot;HIPNN2&quot;</span><span class="p">,</span> <span class="n">network</span><span class="o">.</span><span class="n">parents</span><span class="p">,</span> <span class="n">module_kwargs</span> <span class="o">=</span> <span class="n">network1_params</span><span class="p">)</span>
+<span class="n">henergy1</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">HEnergyNode</span><span class="p">(</span><span class="s2">&quot;HEnergy&quot;</span><span class="p">,</span><span class="n">network1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>On the other hand, we build another HIP-NN network for the electronegativity and Hubbard-U predictions
+using <code class="xref py py-class docutils literal notranslate"><span class="pre">ChEQNode</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">networks</span><span class="o">.</span><span class="n">Hipnn</span><span class="p">(</span><span class="s2">&quot;HIPNN&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">positions</span><span class="p">),</span> <span class="n">module_kwargs</span> <span class="o">=</span> <span class="n">network_params</span><span class="p">)</span>
+<span class="n">henergy</span> <span class="o">=</span> <span class="n">ChEQNode</span><span class="p">(</span><span class="s2">&quot;ChEQ&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">network</span><span class="p">,),</span> <span class="n">units</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;energy&#39;</span><span class="p">:</span><span class="s1">&#39;kcal/mol&#39;</span><span class="p">,</span> <span class="s1">&#39;length&#39;</span><span class="p">:</span><span class="s2">&quot;Angstrom&quot;</span><span class="p">},</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then, we need to define the total energy, forces, and dipoles for training:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dipole</span> <span class="o">=</span> <span class="n">henergy</span><span class="o">.</span><span class="n">dipole</span>
+
+<span class="n">molecule_energy</span> <span class="o">=</span> <span class="n">henergy</span><span class="o">.</span><span class="n">coul_energy</span> <span class="o">+</span> <span class="n">henergy1</span><span class="o">.</span><span class="n">sys_energy</span>
+<span class="n">gradient</span> <span class="o">=</span> <span class="n">physics</span><span class="o">.</span><span class="n">GradientNode</span><span class="p">(</span><span class="s2">&quot;Gradient&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">molecule_energy</span><span class="p">,</span> <span class="n">positions</span><span class="p">),</span> <span class="n">sign</span><span class="o">=+</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">molecule_energy</span><span class="o">.</span><span class="n">db_name</span><span class="o">=</span><span class="s2">&quot;energies&quot;</span>
+<span class="n">gradient</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="s2">&quot;Grad&quot;</span>
+<span class="n">dipole</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="s2">&quot;dipole&quot;</span>
+</pre></div>
+</div>
+<p>In order to obtain a HIPNN-ChEQ model which can run stable molecular dynamcis, we emphasize
+the loss of forces and dipole more over the total energy:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">loss_error</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">rmse_energy</span> <span class="o">+</span> <span class="n">mae_energy</span><span class="p">)</span> <span class="o">+</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">rmse_grad</span> <span class="o">+</span> <span class="n">mae_grad</span><span class="p">)</span> <span class="o">+</span>
+            <span class="mf">10000.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">rmse_dipole</span> <span class="o">+</span> <span class="n">mae_dipole</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For a complete script, please take a look at <code class="docutils literal notranslate"><span class="pre">examples/cheq_ani2x_training.py</span></code>.</p>
+<div role="list" class="citation-list">
+<div class="citation" id="li2025" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">Li2025</a><span class="fn-bracket">]</span></span>
+<div class="line-block">
+<div class="line">Shadow Molecular Dynamics with a Machine Learned Flexible Charge Potential.</div>
+<div class="line">Li et. al, 2025. <a class="reference external" href="https://pubs.acs.org/doi/10.1021/acs.jctc.5c00062">https://pubs.acs.org/doi/10.1021/acs.jctc.5c00062</a></div>
+</div>
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="excited_states.html" class="btn btn-neutral float-left" title="Non-Adiabiatic Excited States" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="weighted_loss.html" class="btn btn-neutral float-right" title="Weighted/Masked Loss Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

@@ -75,6 +75,7 @@
 <li class="toctree-l1"><a class="reference internal" href="examples/ase_calculator.html">ASE Calculators</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/mliap_unified.html">LAMMPS interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/excited_states.html">Non-Adiabiatic Excited States</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/cheq.html">Charge Equilibration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/weighted_loss.html">Weighted/Masked Loss Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/lightning.html">Pytorch Lightning module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/hyperopt.html">Hyperparameter optimization with Ax and Ray</a></li>
@@ -119,141 +120,152 @@ research was created with an older, internal implementation
 of HIP-NN using theano. However, the capabilities are available in hippynn.</p>
 <p>One of the main components of hippynn is the implementation of HIP-NN,
 or the Hierarchical Interacting Particle Neural Network, was introduced in
-<span id="id1">Lubbers <em>et al.</em> [<a class="reference internal" href="#id25" title="Nicholas Lubbers, Justin S Smith, and Kipton Barros. Hierarchical modeling of molecular energies using a deep neural network. The Journal of chemical physics, 2018.">LSB18</a>]</span> for the modeling of molecular energies and forces
+<span id="id1">Lubbers <em>et al.</em> [<a class="reference internal" href="#id27" title="Nicholas Lubbers, Justin S Smith, and Kipton Barros. Hierarchical modeling of molecular energies using a deep neural network. The Journal of chemical physics, 2018.">LSB18</a>]</span> for the modeling of molecular energies and forces
 from atomistic configuration data. HIP-NN was also used to help validate results for potential energy surfaces
-in <span id="id2">Suwa <em>et al.</em> [<a class="reference internal" href="#id28" title="Hidemaro Suwa, Justin S Smith, Nicholas Lubbers, Cristian D Batista, Gia-Wei Chern, and Kipton Barros. Machine learning for molecular dynamics with strongly correlated electrons. Physical Review B, 99(16):161107, 2019.">SSL+19</a>]</span> and <span id="id3">Smith <em>et al.</em> [<a class="reference internal" href="#id33" title="Justin S Smith, Benjamin Nebgen, Nithin Mathew, Jie Chen, Nicholas Lubbers, Leonid Burakovsky, Sergei Tretiak, Hai Ah Nam, Timothy Germann, Saryu Fensin, and others. Automated discovery of a robust interatomic potential for aluminum. Nature communications, 12(1):1257, 2021.">SNM+21</a>]</span>, and was
+in <span id="id2">Suwa <em>et al.</em> [<a class="reference internal" href="#id30" title="Hidemaro Suwa, Justin S Smith, Nicholas Lubbers, Cristian D Batista, Gia-Wei Chern, and Kipton Barros. Machine learning for molecular dynamics with strongly correlated electrons. Physical Review B, 99(16):161107, 2019.">SSL+19</a>]</span> and <span id="id3">Smith <em>et al.</em> [<a class="reference internal" href="#id35" title="Justin S Smith, Benjamin Nebgen, Nithin Mathew, Jie Chen, Nicholas Lubbers, Leonid Burakovsky, Sergei Tretiak, Hai Ah Nam, Timothy Germann, Saryu Fensin, and others. Automated discovery of a robust interatomic potential for aluminum. Nature communications, 12(1):1257, 2021.">SNM+21</a>]</span>, and was
 later extended to a more flexible functional form, HIP-NN with Tensor Sensitivities,
-or HIP-NN-TS, in <span id="id4">Chigaev <em>et al.</em> [<a class="reference internal" href="#id35" title="Michael Chigaev, Justin S Smith, Steven Anaya, Benjamin Nebgen, Matthew Bettencourt, Kipton Barros, and Nicholas Lubbers. Lightweight and effective tensor sensitivity for atomistic neural networks. The Journal of Chemical Physics, 2023.">CSA+23</a>]</span>.
-<span id="id5">Fedik <em>et al.</em> [<a class="reference internal" href="#id42" title="Nikita Fedik, Wei Li, Ying Wai Li, Nicholas Lubbers, Benjamin Nebjen, and Sergei Tretiak. Challenges and opportunities for machine learning potentials in transition path sampling: alanine dipeptide and azobenzene studies. Digital Discovery, 2025.">FLL+25</a>]</span> critically examined the performance of this improved
-functional form for transitions states and transition path sampling.
-<span id="id6">Matin <em>et al.</em> [<a class="reference internal" href="#id39" title="Sakib Matin, Alice EA Allen, Justin Smith, Nicholas Lubbers, Ryan B Jadrich, Richard Messerly, Benjamin Nebgen, Ying Wai Li, Sergei Tretiak, and Kipton Barros. Machine learning potentials with the iterative boltzmann inversion: training to experiment. Journal of Chemical Theory and Computation, 20(3):1274–1281, 2024.">MAS+24</a>]</span> demonstrated a method for improving the performance
+or HIP-NN-TS, in <span id="id4">Chigaev <em>et al.</em> [<a class="reference internal" href="#id37" title="Michael Chigaev, Justin S Smith, Steven Anaya, Benjamin Nebgen, Matthew Bettencourt, Kipton Barros, and Nicholas Lubbers. Lightweight and effective tensor sensitivity for atomistic neural networks. The Journal of Chemical Physics, 2023.">CSA+23</a>]</span>.
+<span id="id5">Matin <em>et al.</em> [<a class="reference internal" href="#id41" title="Sakib Matin, Alice EA Allen, Justin Smith, Nicholas Lubbers, Ryan B Jadrich, Richard Messerly, Benjamin Nebgen, Ying Wai Li, Sergei Tretiak, and Kipton Barros. Machine learning potentials with the iterative boltzmann inversion: training to experiment. Journal of Chemical Theory and Computation, 20(3):1274–1281, 2024.">MAS+24</a>]</span> demonstrated a method for improving the performance
 of potentials with respect to experiment by incorporating experimental structural
-data.  <span id="id7">Burrill <em>et al.</em> [<a class="reference internal" href="#id38" title="Daniel J. Burrill, Chang Liu, Michael G. Taylor, Marc J. Cawkwell, Danny Perez, Enrique R. Batista, Nicholas Lubbers, and Ping Yang. Mltb: enhancing transferability and extensibility of density functional tight-binding theory with many-body interaction corrections. Journal of Chemical Theory and Computation, 21(3):1089–1097, 02 2025.">BLT+25</a>]</span> showed how a linear combination of semi-empirical
+data.  <span id="id6">Burrill <em>et al.</em> [<a class="reference internal" href="#id40" title="Daniel J. Burrill, Chang Liu, Michael G. Taylor, Marc J. Cawkwell, Danny Perez, Enrique R. Batista, Nicholas Lubbers, and Ping Yang. Mltb: enhancing transferability and extensibility of density functional tight-binding theory with many-body interaction corrections. Journal of Chemical Theory and Computation, 21(3):1089–1097, 02 2025.">BLT+25</a>]</span> showed how a linear combination of semi-empirical
 and machine learning models can be more powerful than either model alone.
-<span id="id8">Shinkle <em>et al.</em> [<a class="reference internal" href="#id37" title="Emily Shinkle, Aleksandra Pachalieva, Riti Bahl, Sakib Matin, Brendan Gifford, Galen T Craven, and Nicholas Lubbers. Thermodynamic transferability in coarse-grained force fields using graph neural networks. arXiv preprint arXiv:2406.12112, 2024.">SPB+24</a>]</span> demonstrated that HIP-NN can model free energies
+<span id="id7">Shinkle <em>et al.</em> [<a class="reference internal" href="#id39" title="Emily Shinkle, Aleksandra Pachalieva, Riti Bahl, Sakib Matin, Brendan Gifford, Galen T. Craven, and Nicholas Lubbers. Thermodynamic transferability in coarse-grained force fields using graph neural networks. Journal of Chemical Theory and Computation, 20(23):10524–10539, 12 2024. URL: https://doi.org/10.1021/acs.jctc.4c00788, doi:10.1021/acs.jctc.4c00788.">SPB+24</a>]</span> demonstrated that HIP-NN can model free energies
 for coarse-grained models using force-matching, and that these many-body models provide
 improved transferability between thermodynamic states. A more advanced form of the interaction
-layer, which directly captures high-order many-body information, was built in <span id="id9">Allen <em>et al.</em> [<a class="reference internal" href="#id41" title="Alice EA Allen, Emily Shinkle, Roxana Bujack, and Nicholas Lubbers. Optimal invariant bases for atomistic machine learning. arXiv preprint arXiv:2503.23515, 2025.">ASBL25</a>]</span>.
+layer, which directly captures high-order many-body information
+(HIP-HOP-NN), was built in <span id="id8">Allen <em>et al.</em> [<a class="reference internal" href="#id44" title="Alice E. A. Allen, Emily Shinkle, Roxana Bujack, and Nicholas Lubbers. Optimal invariant sets for atomistic machine learning. npj Computational Materials, 12(1):75, 2026. URL: https://doi.org/10.1038/s41524-025-01948-0, doi:10.1038/s41524-025-01948-0.">ASBL26</a>]</span>.
 Knowledge distillation techniques, where initial teacher models are used to improve
 the performance of students, have been examined and found effective using hippynn,
-in <span id="id10">Matin <em>et al.</em> [<a class="reference internal" href="#id44" title="Sakib Matin, Alice Allen, Emily Shinkle, Aleksandra Pachalieva, Galen T Craven, Benjamin Nebgen, Justin Smith, Richard Messerly, Ying Wai Li, Sergei Tretiak, and others. Teacher-student training improves accuracy and efficiency of machine learning inter-atomic potentials. arXiv preprint arXiv:2502.05379, 2025.">MAS+25</a>]</span> and <span id="id11">Matin <em>et al.</em> [<a class="reference internal" href="#id43" title="Sakib Matin, Emily Shinkle, Yulia Pimonova, Galen T Craven, Ying Wai Li, Kipton Barros, and Nicholas Lubbers. Ensemble knowledge distillation for machine learning interatomic potentials. arXiv preprint arXiv:2503.14293, 2025.">MSP+25</a>]</span>. In <span id="id12">Zhang <em>et al.</em> [<a class="reference internal" href="#id45" title="Shuhao Zhang, Michael Chigaev, Olexandr Isayev, Richard Messerly, and Nicholas Lubbers. Including physics-informed atomization constraints in neural networks for reactive chemistry. ChemRxiv preprint, 2024.">ZCI+24</a>]</span>,
+in <span id="id9">Matin <em>et al.</em> [<a class="reference internal" href="#id46" title="Sakib Matin, Alice E. A. Allen, Emily Shinkle, Aleksandra Pachalieva, Galen T. Craven, Benjamin Nebgen, Justin S. Smith, Richard Messerly, Ying Wai Li, Sergei Tretiak, Kipton Barros, and Nicholas Lubbers. Teacher-student training improves the accuracy and efficiency of machine learning interatomic potentials. Digital Discovery, 4:2502-2511, 2025. URL: http://dx.doi.org/10.1039/D5DD00085H, doi:10.1039/D5DD00085H.">MAS+25</a>]</span>. This was further extended to data without forces by using
+an ensemble of teachers in <span id="id10">Matin <em>et al.</em> [<a class="reference internal" href="#id51" title="Sakib Matin, Emily Shinkle, Yulia Pimonova, Galen T. Craven, Aleksandra Pachalieva, Ying Wai Li, Kipton Barros, and Nicholas Lubbers. Ensemble knowledge distillation for machine learning interatomic potentials. 2025. URL: https://arxiv.org/abs/2503.14293, arXiv:2503.14293.">MSP+25</a>]</span>, and further extended to
+distillation of learned free energies for coarse-graining in
+<span id="id11">Olowookere <em>et al.</em> [<a class="reference internal" href="#id50" title="Feranmi V. Olowookere, Sakib Matin, Aleksandra Pachalieva, Nicholas Lubbers, and Emily Shinkle. Knowledge distillation of noisy force labels for improved coarse-grained force fields. 2026. URL: https://arxiv.org/abs/2510.26650, arXiv:2510.26650.">OMP+26</a>]</span>. In <span id="id12">Zhang <em>et al.</em> [<a class="reference internal" href="#id47" title="Shuhao Zhang, Michael Chigaev, Olexandr Isayev, Richard Messerly, and Nicholas Lubbers. Including physics-informed atomization constraints in neural networks for reactive chemistry. ChemRxiv preprint, 2024.">ZCI+24</a>]</span>,
 a physics-informed constraint for atomization of molecules was introduced to improve the
-performance of models far from equilibrium. A potential for Uranium Nitride was
-investigated in <span id="id13">Alzate-Vargas <em>et al.</em> [<a class="reference internal" href="#id47" title="Lorena Alzate-Vargas, Kashi N Subedi, Nicholas Lubbers, Michael WD Cooper, Roxanne M Tutchton, Tammie Gibson, and Richard A Messerly. Machine learning interatomic potential for modeling uranium mononitride. arXiv preprint arXiv:2411.14608, 2024.">AVSL+24</a>]</span>.</p>
+performance of models far from equilibrium.</p>
+<p>hippynn has also been used directly in application to research.
+<span id="id13">Fedik <em>et al.</em> [<a class="reference internal" href="#id45" title="Nikita Fedik, Wei Li, Ying Wai Li, Nicholas Lubbers, Benjamin Nebjen, and Sergei Tretiak. Challenges and opportunities for machine learning potentials in transition path sampling: alanine dipeptide and azobenzene studies. Digital Discovery, 2025.">FLL+25</a>]</span> critically examined the performance of this improved
+functional form for transitions states and transition path sampling.
+A potential for Uranium Nitride was investigated in <span id="id14"></span>.
+In <span id="id15">Allen <em>et al.</em> [<a class="reference internal" href="#id49" title="Alice E. A. Allen, Rui Li, Sakib Matin, Xing Zhang, Benjamin Nebgen, Nicholas Lubbers, Justin S. Smith, Richard Messerly, Sergei Tretiak, Garnet Kin-Lic Chan, and Kipton Barros. Reactive chemistry at unrestricted coupled cluster level: high-throughput calculations for training machine learning potentials. 2025. URL: https://arxiv.org/abs/2509.10872, arXiv:2509.10872.">ALM+25</a>]</span> hippynn was used as part of an active learning loop
+to collect high-quality coupled-cluster data, including forces.</p>
 <p>HIP-NN is also useful for modeling properties aside from energy/forces.
-It was adapted to learn charges in <span id="id14">Nebgen <em>et al.</em> [<a class="reference internal" href="#id26" title="Benjamin Nebgen, Nicholas Lubbers, Justin S Smith, Andrew E Sifain, Andrey Lokhov, Olexandr Isayev, Adrian E Roitberg, Kipton Barros, and Sergei Tretiak. Transferable dynamic molecular charge assignment using deep neural networks. Journal of chemical theory and computation, 14(9):4687–4698, 2018.">NLS+18</a>]</span>
-and to learn charge predictions from dipole information in <span id="id15">Sifain <em>et al.</em> [<a class="reference internal" href="#id27" title="Andrew E Sifain, Nicholas Lubbers, Benjamin T Nebgen, Justin S Smith, Andrey Y Lokhov, Olexandr Isayev, Adrian E Roitberg, Kipton Barros, and Sergei Tretiak. Discovering a transferable charge assignment model using machine learning. The journal of physical chemistry letters, 9(16):4495–4501, 2018.">SLN+18</a>]</span>.
-Bond order regression to predict two-body quantities was explored in <span id="id16">Magedov <em>et al.</em> [<a class="reference internal" href="#id31" title="Sergey Magedov, Christopher Koh, Walter Malone, Nicholas Lubbers, and Benjamin Nebgen. Bond order predictions using deep neural networks. Journal of Applied Physics, 2021.">MKM+21</a>]</span>.
+It was adapted to learn charges in <span id="id16">Nebgen <em>et al.</em> [<a class="reference internal" href="#id28" title="Benjamin Nebgen, Nicholas Lubbers, Justin S Smith, Andrew E Sifain, Andrey Lokhov, Olexandr Isayev, Adrian E Roitberg, Kipton Barros, and Sergei Tretiak. Transferable dynamic molecular charge assignment using deep neural networks. Journal of chemical theory and computation, 14(9):4687–4698, 2018.">NLS+18</a>]</span>
+and to learn charge predictions from dipole information in <span id="id17">Sifain <em>et al.</em> [<a class="reference internal" href="#id29" title="Andrew E Sifain, Nicholas Lubbers, Benjamin T Nebgen, Justin S Smith, Andrey Y Lokhov, Olexandr Isayev, Adrian E Roitberg, Kipton Barros, and Sergei Tretiak. Discovering a transferable charge assignment model using machine learning. The journal of physical chemistry letters, 9(16):4495–4501, 2018.">SLN+18</a>]</span>.
+Bond order regression to predict two-body quantities was explored in <span id="id18">Magedov <em>et al.</em> [<a class="reference internal" href="#id33" title="Sergey Magedov, Christopher Koh, Walter Malone, Nicholas Lubbers, and Benjamin Nebgen. Bond order predictions using deep neural networks. Journal of Applied Physics, 2021.">MKM+21</a>]</span>.
 The atom (charge) and two-body (bond) regressions were combined to build Huckel-type
-quantum Hamiltonians in <span id="id17">Zubatiuk <em>et al.</em> [<a class="reference internal" href="#id32" title="Tetiana Zubatiuk, Benjamin Nebgen, Nicholas Lubbers, Justin S Smith, Roman Zubatyuk, Guoqing Zhou, Christopher Koh, Kipton Barros, Olexandr Isayev, and Sergei Tretiak. Machine learned hückel theory: interfacing physics and deep neural networks. The Journal of Chemical Physics, 2021.">ZNL+21</a>]</span>. This was extended to
-semi-empirical Hamiltonians in <span id="id18">Zhou <em>et al.</em> [<a class="reference internal" href="#id34" title="Guoqing Zhou, Nicholas Lubbers, Kipton Barros, Sergei Tretiak, and Benjamin Nebgen. Deep learning of dynamically responsive chemical hamiltonians with semiempirical quantum mechanics. Proceedings of the National Academy of Sciences, 119(27):e2120333119, 2022.">ZLB+22</a>]</span> by combining the facilities
-of hippynn with another pytorch code, PYSEQM, developed by <span id="id19">Zhou <em>et al.</em> [<a class="reference internal" href="#id29" title="Guoqing Zhou, Ben Nebgen, Nicholas Lubbers, Walter Malone, Anders MN Niklasson, and Sergei Tretiak. Graphics processing unit-accelerated semiempirical born oppenheimer molecular dynamics using pytorch. Journal of Chemical Theory and Computation, 16(8):4951–4962, 2020.">ZNL+20</a>]</span>,
+quantum Hamiltonians in <span id="id19">Zubatiuk <em>et al.</em> [<a class="reference internal" href="#id34" title="Tetiana Zubatiuk, Benjamin Nebgen, Nicholas Lubbers, Justin S Smith, Roman Zubatyuk, Guoqing Zhou, Christopher Koh, Kipton Barros, Olexandr Isayev, and Sergei Tretiak. Machine learned hückel theory: interfacing physics and deep neural networks. The Journal of Chemical Physics, 2021.">ZNL+21</a>]</span>. This was extended to
+semi-empirical Hamiltonians in <span id="id20">Zhou <em>et al.</em> [<a class="reference internal" href="#id36" title="Guoqing Zhou, Nicholas Lubbers, Kipton Barros, Sergei Tretiak, and Benjamin Nebgen. Deep learning of dynamically responsive chemical hamiltonians with semiempirical quantum mechanics. Proceedings of the National Academy of Sciences, 119(27):e2120333119, 2022.">ZLB+22</a>]</span> by combining the facilities
+of hippynn with another pytorch code, PYSEQM, developed by <span id="id21">Zhou <em>et al.</em> [<a class="reference internal" href="#id31" title="Guoqing Zhou, Ben Nebgen, Nicholas Lubbers, Walter Malone, Anders MN Niklasson, and Sergei Tretiak. Graphics processing unit-accelerated semiempirical born oppenheimer molecular dynamics using pytorch. Journal of Chemical Theory and Computation, 16(8):4951–4962, 2020.">ZNL+20</a>]</span>,
 which provides quantum calculations that are differentiable by pytorch.
-In <span id="id20">Li <em>et al.</em> [<a class="reference internal" href="#id46" title="Cheng-Han Li, Mehmet Cagri Kaymak, Maksim Kulichenko, Nicholas Lubbers, Benjamin T Nebgen, Sergei Tretiak, Joshua Finkelstein, Daniel P Tabor, and Anders MN Niklasson. Shadow molecular dynamics with a machine learned flexible charge potential. Journal of Chemical Theory and Computation, 2025.">LKK+25</a>]</span>, a lighter-weight version of this framework, using classical
-equilibrated charges, was employed, using a shadow dynamics technique to avoid
+In <span id="id22">Li <em>et al.</em> [<a class="reference internal" href="#id43" title="Cheng-Han Li, Mehmet Cagri Kaymak, Maksim Kulichenko, Nicholas Lubbers, Benjamin T. Nebgen, Sergei Tretiak, Joshua Finkelstein, Daniel P. Tabor, and Anders M. N. Niklasson. Shadow molecular dynamics with a machine learned flexible charge potential. Journal of Chemical Theory and Computation, 21(7):3658–3675, 04 2025. URL: https://doi.org/10.1021/acs.jctc.5c00062, doi:10.1021/acs.jctc.5c00062.">LKK+25</a>]</span>, a lighter-weight version of this framework, using classical
+equilibrated charges, was built, using a shadow dynamics technique to avoid
 cost and numerical difficulties associated with self-consistency conditions.</p>
 <p>Another avenue of work has been to model excited state dynamics with HIP-NN.
-In <span id="id21">Sifain <em>et al.</em> [<a class="reference internal" href="#id30" title="Andrew E Sifain, Levi Lystrom, Richard A Messerly, Justin S Smith, Benjamin Nebgen, Kipton Barros, Sergei Tretiak, Nicholas Lubbers, and Brendan J Gifford. Predicting phosphorescence energies and inferring wavefunction localization with machine learning. Chemical Science, 12(30):10207–10217, 2021.">SLM+21</a>]</span>, a localization layer was used to predict
+In <span id="id23">Sifain <em>et al.</em> [<a class="reference internal" href="#id32" title="Andrew E Sifain, Levi Lystrom, Richard A Messerly, Justin S Smith, Benjamin Nebgen, Kipton Barros, Sergei Tretiak, Nicholas Lubbers, and Brendan J Gifford. Predicting phosphorescence energies and inferring wavefunction localization with machine learning. Chemical Science, 12(30):10207–10217, 2021.">SLM+21</a>]</span>, a localization layer was used to predict
 both the energy and location of singlet-triplet excitations in organic materials.
-In <span id="id22">Habib <em>et al.</em> [<a class="reference internal" href="#id36" title="Adela Habib, Nicholas Lubbers, Sergei Tretiak, and Benjamin Nebgen. Machine learning models capture plasmon dynamics in ag nanoparticles. The Journal of Physical Chemistry A, 127(17):3768–3778, 2023.">HLTN23</a>]</span>, HIP-NN was used in a dynamical setting to learn
+In <span id="id24">Habib <em>et al.</em> [<a class="reference internal" href="#id38" title="Adela Habib, Nicholas Lubbers, Sergei Tretiak, and Benjamin Nebgen. Machine learning models capture plasmon dynamics in ag nanoparticles. The Journal of Physical Chemistry A, 127(17):3768–3778, 2023.">HLTN23</a>]</span>, HIP-NN was used in a dynamical setting to learn
 the dynamics of excitons in nanoparticles. In this mode, the predictions of
 a model produce inputs for the next time step, and training takes place by
-backpropagating through multiple steps of prediction. <span id="id23">Li <em>et al.</em> [<a class="reference internal" href="#id40" title="Xinyang Li, Nicholas Lubbers, Sergei Tretiak, Kipton Barros, and Yu Zhang. Machine learning framework for modeling exciton polaritons in molecular materials. Journal of Chemical Theory and Computation, 20(2):891–901, 2024.">LLT+24</a>]</span> used
+backpropagating through multiple steps of prediction. <span id="id25">Li <em>et al.</em> [<a class="reference internal" href="#id42" title="Xinyang Li, Nicholas Lubbers, Sergei Tretiak, Kipton Barros, and Yu Zhang. Machine learning framework for modeling exciton polaritons in molecular materials. Journal of Chemical Theory and Computation, 20(2):891–901, 2024.">LLT+24</a>]</span> used
 the framework to predict several excited state properties; energy,
 transition dipole, and non-adiabatic coupling vectors were predicted for several
 excited states in a molecular system.</p>
-<div class="docutils container" id="id24">
+<div class="docutils container" id="id26">
 <div role="list" class="citation-list">
-<div class="citation" id="id41" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">ASBL25</a><span class="fn-bracket">]</span></span>
-<p>Alice EA Allen, Emily Shinkle, Roxana Bujack, and Nicholas Lubbers. Optimal invariant bases for atomistic machine learning. <em>arXiv preprint arXiv:2503.23515</em>, 2025.</p>
+<div class="citation" id="id49" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id15">ALM+25</a><span class="fn-bracket">]</span></span>
+<p>Alice E. A. Allen, Rui Li, Sakib Matin, Xing Zhang, Benjamin Nebgen, Nicholas Lubbers, Justin S. Smith, Richard Messerly, Sergei Tretiak, Garnet Kin-Lic Chan, and Kipton Barros. Reactive chemistry at unrestricted coupled cluster level: high-throughput calculations for training machine learning potentials. 2025. URL: <a class="reference external" href="https://arxiv.org/abs/2509.10872">https://arxiv.org/abs/2509.10872</a>, <a class="reference external" href="https://arxiv.org/abs/2509.10872">arXiv:2509.10872</a>.</p>
 </div>
-<div class="citation" id="id47" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id13">AVSL+24</a><span class="fn-bracket">]</span></span>
-<p>Lorena Alzate-Vargas, Kashi N Subedi, Nicholas Lubbers, Michael WD Cooper, Roxanne M Tutchton, Tammie Gibson, and Richard A Messerly. Machine learning interatomic potential for modeling uranium mononitride. <em>arXiv preprint arXiv:2411.14608</em>, 2024.</p>
+<div class="citation" id="id44" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">ASBL26</a><span class="fn-bracket">]</span></span>
+<p>Alice E. A. Allen, Emily Shinkle, Roxana Bujack, and Nicholas Lubbers. Optimal invariant sets for atomistic machine learning. <em>npj Computational Materials</em>, 12(1):75, 2026. URL: <a class="reference external" href="https://doi.org/10.1038/s41524-025-01948-0">https://doi.org/10.1038/s41524-025-01948-0</a>, <a class="reference external" href="https://doi.org/10.1038/s41524-025-01948-0">doi:10.1038/s41524-025-01948-0</a>.</p>
 </div>
-<div class="citation" id="id38" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">BLT+25</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id40" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">BLT+25</a><span class="fn-bracket">]</span></span>
 <p>Daniel J. Burrill, Chang Liu, Michael G. Taylor, Marc J. Cawkwell, Danny Perez, Enrique R. Batista, Nicholas Lubbers, and Ping Yang. Mltb: enhancing transferability and extensibility of density functional tight-binding theory with many-body interaction corrections. <em>Journal of Chemical Theory and Computation</em>, 21(3):1089–1097, 02 2025.</p>
 </div>
-<div class="citation" id="id35" role="doc-biblioentry">
+<div class="citation" id="id37" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">CSA+23</a><span class="fn-bracket">]</span></span>
 <p>Michael Chigaev, Justin S Smith, Steven Anaya, Benjamin Nebgen, Matthew Bettencourt, Kipton Barros, and Nicholas Lubbers. Lightweight and effective tensor sensitivity for atomistic neural networks. <em>The Journal of Chemical Physics</em>, 2023.</p>
 </div>
-<div class="citation" id="id42" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">FLL+25</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id45" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id13">FLL+25</a><span class="fn-bracket">]</span></span>
 <p>Nikita Fedik, Wei Li, Ying Wai Li, Nicholas Lubbers, Benjamin Nebjen, and Sergei Tretiak. Challenges and opportunities for machine learning potentials in transition path sampling: alanine dipeptide and azobenzene studies. <em>Digital Discovery</em>, 2025.</p>
 </div>
-<div class="citation" id="id36" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id22">HLTN23</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id38" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id24">HLTN23</a><span class="fn-bracket">]</span></span>
 <p>Adela Habib, Nicholas Lubbers, Sergei Tretiak, and Benjamin Nebgen. Machine learning models capture plasmon dynamics in ag nanoparticles. <em>The Journal of Physical Chemistry A</em>, 127(17):3768–3778, 2023.</p>
 </div>
-<div class="citation" id="id46" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id20">LKK+25</a><span class="fn-bracket">]</span></span>
-<p>Cheng-Han Li, Mehmet Cagri Kaymak, Maksim Kulichenko, Nicholas Lubbers, Benjamin T Nebgen, Sergei Tretiak, Joshua Finkelstein, Daniel P Tabor, and Anders MN Niklasson. Shadow molecular dynamics with a machine learned flexible charge potential. <em>Journal of Chemical Theory and Computation</em>, 2025.</p>
+<div class="citation" id="id43" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id22">LKK+25</a><span class="fn-bracket">]</span></span>
+<p>Cheng-Han Li, Mehmet Cagri Kaymak, Maksim Kulichenko, Nicholas Lubbers, Benjamin T. Nebgen, Sergei Tretiak, Joshua Finkelstein, Daniel P. Tabor, and Anders M. N. Niklasson. Shadow molecular dynamics with a machine learned flexible charge potential. <em>Journal of Chemical Theory and Computation</em>, 21(7):3658–3675, 04 2025. URL: <a class="reference external" href="https://doi.org/10.1021/acs.jctc.5c00062">https://doi.org/10.1021/acs.jctc.5c00062</a>, <a class="reference external" href="https://doi.org/10.1021/acs.jctc.5c00062">doi:10.1021/acs.jctc.5c00062</a>.</p>
 </div>
-<div class="citation" id="id40" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id23">LLT+24</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id42" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id25">LLT+24</a><span class="fn-bracket">]</span></span>
 <p>Xinyang Li, Nicholas Lubbers, Sergei Tretiak, Kipton Barros, and Yu Zhang. Machine learning framework for modeling exciton polaritons in molecular materials. <em>Journal of Chemical Theory and Computation</em>, 20(2):891–901, 2024.</p>
 </div>
-<div class="citation" id="id25" role="doc-biblioentry">
+<div class="citation" id="id27" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">LSB18</a><span class="fn-bracket">]</span></span>
 <p>Nicholas Lubbers, Justin S Smith, and Kipton Barros. Hierarchical modeling of molecular energies using a deep neural network. <em>The Journal of chemical physics</em>, 2018.</p>
 </div>
-<div class="citation" id="id31" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id16">MKM+21</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id33" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id18">MKM+21</a><span class="fn-bracket">]</span></span>
 <p>Sergey Magedov, Christopher Koh, Walter Malone, Nicholas Lubbers, and Benjamin Nebgen. Bond order predictions using deep neural networks. <em>Journal of Applied Physics</em>, 2021.</p>
 </div>
-<div class="citation" id="id44" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id10">MAS+25</a><span class="fn-bracket">]</span></span>
-<p>Sakib Matin, Alice Allen, Emily Shinkle, Aleksandra Pachalieva, Galen T Craven, Benjamin Nebgen, Justin Smith, Richard Messerly, Ying Wai Li, Sergei Tretiak, and others. Teacher-student training improves accuracy and efficiency of machine learning inter-atomic potentials. <em>arXiv preprint arXiv:2502.05379</em>, 2025.</p>
+<div class="citation" id="id46" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">MAS+25</a><span class="fn-bracket">]</span></span>
+<p>Sakib Matin, Alice E. A. Allen, Emily Shinkle, Aleksandra Pachalieva, Galen T. Craven, Benjamin Nebgen, Justin S. Smith, Richard Messerly, Ying Wai Li, Sergei Tretiak, Kipton Barros, and Nicholas Lubbers. Teacher-student training improves the accuracy and efficiency of machine learning interatomic potentials. <em>Digital Discovery</em>, 4:2502–2511, 2025. URL: <a class="reference external" href="http://dx.doi.org/10.1039/D5DD00085H">http://dx.doi.org/10.1039/D5DD00085H</a>, <a class="reference external" href="https://doi.org/10.1039/D5DD00085H">doi:10.1039/D5DD00085H</a>.</p>
 </div>
-<div class="citation" id="id39" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">MAS+24</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id41" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">MAS+24</a><span class="fn-bracket">]</span></span>
 <p>Sakib Matin, Alice EA Allen, Justin Smith, Nicholas Lubbers, Ryan B Jadrich, Richard Messerly, Benjamin Nebgen, Ying Wai Li, Sergei Tretiak, and Kipton Barros. Machine learning potentials with the iterative boltzmann inversion: training to experiment. <em>Journal of Chemical Theory and Computation</em>, 20(3):1274–1281, 2024.</p>
 </div>
-<div class="citation" id="id43" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id11">MSP+25</a><span class="fn-bracket">]</span></span>
-<p>Sakib Matin, Emily Shinkle, Yulia Pimonova, Galen T Craven, Ying Wai Li, Kipton Barros, and Nicholas Lubbers. Ensemble knowledge distillation for machine learning interatomic potentials. <em>arXiv preprint arXiv:2503.14293</em>, 2025.</p>
+<div class="citation" id="id51" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id10">MSP+25</a><span class="fn-bracket">]</span></span>
+<p>Sakib Matin, Emily Shinkle, Yulia Pimonova, Galen T. Craven, Aleksandra Pachalieva, Ying Wai Li, Kipton Barros, and Nicholas Lubbers. Ensemble knowledge distillation for machine learning interatomic potentials. 2025. URL: <a class="reference external" href="https://arxiv.org/abs/2503.14293">https://arxiv.org/abs/2503.14293</a>, <a class="reference external" href="https://arxiv.org/abs/2503.14293">arXiv:2503.14293</a>.</p>
 </div>
-<div class="citation" id="id26" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id14">NLS+18</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id28" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id16">NLS+18</a><span class="fn-bracket">]</span></span>
 <p>Benjamin Nebgen, Nicholas Lubbers, Justin S Smith, Andrew E Sifain, Andrey Lokhov, Olexandr Isayev, Adrian E Roitberg, Kipton Barros, and Sergei Tretiak. Transferable dynamic molecular charge assignment using deep neural networks. <em>Journal of chemical theory and computation</em>, 14(9):4687–4698, 2018.</p>
 </div>
-<div class="citation" id="id37" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">SPB+24</a><span class="fn-bracket">]</span></span>
-<p>Emily Shinkle, Aleksandra Pachalieva, Riti Bahl, Sakib Matin, Brendan Gifford, Galen T Craven, and Nicholas Lubbers. Thermodynamic transferability in coarse-grained force fields using graph neural networks. <em>arXiv preprint arXiv:2406.12112</em>, 2024.</p>
+<div class="citation" id="id50" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id11">OMP+26</a><span class="fn-bracket">]</span></span>
+<p>Feranmi V. Olowookere, Sakib Matin, Aleksandra Pachalieva, Nicholas Lubbers, and Emily Shinkle. Knowledge distillation of noisy force labels for improved coarse-grained force fields. 2026. URL: <a class="reference external" href="https://arxiv.org/abs/2510.26650">https://arxiv.org/abs/2510.26650</a>, <a class="reference external" href="https://arxiv.org/abs/2510.26650">arXiv:2510.26650</a>.</p>
 </div>
-<div class="citation" id="id27" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id15">SLN+18</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id39" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">SPB+24</a><span class="fn-bracket">]</span></span>
+<p>Emily Shinkle, Aleksandra Pachalieva, Riti Bahl, Sakib Matin, Brendan Gifford, Galen T. Craven, and Nicholas Lubbers. Thermodynamic transferability in coarse-grained force fields using graph neural networks. <em>Journal of Chemical Theory and Computation</em>, 20(23):10524–10539, 12 2024. URL: <a class="reference external" href="https://doi.org/10.1021/acs.jctc.4c00788">https://doi.org/10.1021/acs.jctc.4c00788</a>, <a class="reference external" href="https://doi.org/10.1021/acs.jctc.4c00788">doi:10.1021/acs.jctc.4c00788</a>.</p>
+</div>
+<div class="citation" id="id29" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id17">SLN+18</a><span class="fn-bracket">]</span></span>
 <p>Andrew E Sifain, Nicholas Lubbers, Benjamin T Nebgen, Justin S Smith, Andrey Y Lokhov, Olexandr Isayev, Adrian E Roitberg, Kipton Barros, and Sergei Tretiak. Discovering a transferable charge assignment model using machine learning. <em>The journal of physical chemistry letters</em>, 9(16):4495–4501, 2018.</p>
 </div>
-<div class="citation" id="id30" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id21">SLM+21</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id32" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id23">SLM+21</a><span class="fn-bracket">]</span></span>
 <p>Andrew E Sifain, Levi Lystrom, Richard A Messerly, Justin S Smith, Benjamin Nebgen, Kipton Barros, Sergei Tretiak, Nicholas Lubbers, and Brendan J Gifford. Predicting phosphorescence energies and inferring wavefunction localization with machine learning. <em>Chemical Science</em>, 12(30):10207–10217, 2021.</p>
 </div>
-<div class="citation" id="id33" role="doc-biblioentry">
+<div class="citation" id="id35" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">SNM+21</a><span class="fn-bracket">]</span></span>
 <p>Justin S Smith, Benjamin Nebgen, Nithin Mathew, Jie Chen, Nicholas Lubbers, Leonid Burakovsky, Sergei Tretiak, Hai Ah Nam, Timothy Germann, Saryu Fensin, and others. Automated discovery of a robust interatomic potential for aluminum. <em>Nature communications</em>, 12(1):1257, 2021.</p>
 </div>
-<div class="citation" id="id28" role="doc-biblioentry">
+<div class="citation" id="id30" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">SSL+19</a><span class="fn-bracket">]</span></span>
 <p>Hidemaro Suwa, Justin S Smith, Nicholas Lubbers, Cristian D Batista, Gia-Wei Chern, and Kipton Barros. Machine learning for molecular dynamics with strongly correlated electrons. <em>Physical Review B</em>, 99(16):161107, 2019.</p>
 </div>
-<div class="citation" id="id45" role="doc-biblioentry">
+<div class="citation" id="id47" role="doc-biblioentry">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id12">ZCI+24</a><span class="fn-bracket">]</span></span>
 <p>Shuhao Zhang, Michael Chigaev, Olexandr Isayev, Richard Messerly, and Nicholas Lubbers. Including physics-informed atomization constraints in neural networks for reactive chemistry. <em>ChemRxiv preprint</em>, 2024.</p>
 </div>
-<div class="citation" id="id34" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id18">ZLB+22</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id36" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id20">ZLB+22</a><span class="fn-bracket">]</span></span>
 <p>Guoqing Zhou, Nicholas Lubbers, Kipton Barros, Sergei Tretiak, and Benjamin Nebgen. Deep learning of dynamically responsive chemical hamiltonians with semiempirical quantum mechanics. <em>Proceedings of the National Academy of Sciences</em>, 119(27):e2120333119, 2022.</p>
 </div>
-<div class="citation" id="id29" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id19">ZNL+20</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id31" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id21">ZNL+20</a><span class="fn-bracket">]</span></span>
 <p>Guoqing Zhou, Ben Nebgen, Nicholas Lubbers, Walter Malone, Anders MN Niklasson, and Sergei Tretiak. Graphics processing unit-accelerated semiempirical born oppenheimer molecular dynamics using pytorch. <em>Journal of Chemical Theory and Computation</em>, 16(8):4951–4962, 2020.</p>
 </div>
-<div class="citation" id="id32" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id17">ZNL+21</a><span class="fn-bracket">]</span></span>
+<div class="citation" id="id34" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id19">ZNL+21</a><span class="fn-bracket">]</span></span>
 <p>Tetiana Zubatiuk, Benjamin Nebgen, Nicholas Lubbers, Justin S Smith, Roman Zubatyuk, Guoqing Zhou, Christopher Koh, Kipton Barros, Olexandr Isayev, and Sergei Tretiak. Machine learned hückel theory: interfacing physics and deep neural networks. <em>The Journal of Chemical Physics</em>, 2021.</p>
 </div>
 </div>

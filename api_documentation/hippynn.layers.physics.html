@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>physics module &mdash; hippynn 0+unknown documentation</title>
+  <title>physics &mdash; hippynn 0+unknown documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
@@ -20,8 +20,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="regularization module" href="hippynn.layers.regularization.html" />
-    <link rel="prev" title="indexers module" href="hippynn.layers.indexers.html" /> 
+    <link rel="next" title="charges module" href="hippynn.layers.physics.charges.html" />
+    <link rel="prev" title="periodic module" href="hippynn.layers.pairs.periodic.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -75,6 +75,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../examples/ase_calculator.html">ASE Calculators</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/mliap_unified.html">LAMMPS interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/excited_states.html">Non-Adiabiatic Excited States</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/cheq.html">Charge Equilibration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/weighted_loss.html">Weighted/Masked Loss Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/lightning.html">Pytorch Lightning module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/hyperopt.html">Hyperparameter optimization with Ax and Ray</a></li>
@@ -112,95 +113,17 @@
 <li class="toctree-l2 current"><a class="reference internal" href="hippynn.layers.html">layers</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="hippynn.layers.hiplayers.html">hiplayers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.layers.pairs.html">pairs</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">physics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.physics.charges.html">charges module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.physics.cheq.html">cheq module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.physics.coulomb.html">coulomb module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.physics.derivatives.html">derivatives module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.physics.transforms.html">transforms module</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.layers.algebra.html">algebra module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.layers.excited.html">excited module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.layers.indexers.html">indexers module</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">physics module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.AlphaScreening"><code class="docutils literal notranslate"><span class="pre">AlphaScreening</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.CellScaleInducer"><code class="docutils literal notranslate"><span class="pre">CellScaleInducer</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.CellScaleInducer.forward"><code class="docutils literal notranslate"><span class="pre">CellScaleInducer.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.CombineEnergy"><code class="docutils literal notranslate"><span class="pre">CombineEnergy</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.CombineEnergy.forward"><code class="docutils literal notranslate"><span class="pre">CombineEnergy.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.CombineScreenings"><code class="docutils literal notranslate"><span class="pre">CombineScreenings</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.CombineScreenings.forward"><code class="docutils literal notranslate"><span class="pre">CombineScreenings.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.CoulombEnergy"><code class="docutils literal notranslate"><span class="pre">CoulombEnergy</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.CoulombEnergy.forward"><code class="docutils literal notranslate"><span class="pre">CoulombEnergy.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.Dipole"><code class="docutils literal notranslate"><span class="pre">Dipole</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.Dipole.forward"><code class="docutils literal notranslate"><span class="pre">Dipole.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.EwaldRealSpaceScreening"><code class="docutils literal notranslate"><span class="pre">EwaldRealSpaceScreening</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.EwaldRealSpaceScreening.forward"><code class="docutils literal notranslate"><span class="pre">EwaldRealSpaceScreening.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.Gradient"><code class="docutils literal notranslate"><span class="pre">Gradient</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.Gradient.forward"><code class="docutils literal notranslate"><span class="pre">Gradient.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.HVP"><code class="docutils literal notranslate"><span class="pre">HVP</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.HVP.forward"><code class="docutils literal notranslate"><span class="pre">HVP.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.HVPVector"><code class="docutils literal notranslate"><span class="pre">HVPVector</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.HVPVector.forward"><code class="docutils literal notranslate"><span class="pre">HVPVector.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.Hessian"><code class="docutils literal notranslate"><span class="pre">Hessian</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.Hessian.expand_padding_mask_to_hessian_mask"><code class="docutils literal notranslate"><span class="pre">Hessian.expand_padding_mask_to_hessian_mask()</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.Hessian.forward"><code class="docutils literal notranslate"><span class="pre">Hessian.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.LocalDampingCosine"><code class="docutils literal notranslate"><span class="pre">LocalDampingCosine</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.LocalDampingCosine.forward"><code class="docutils literal notranslate"><span class="pre">LocalDampingCosine.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.MultiGradient"><code class="docutils literal notranslate"><span class="pre">MultiGradient</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.MultiGradient.forward"><code class="docutils literal notranslate"><span class="pre">MultiGradient.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.PerAtom"><code class="docutils literal notranslate"><span class="pre">PerAtom</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.PerAtom.forward"><code class="docutils literal notranslate"><span class="pre">PerAtom.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.QScreening"><code class="docutils literal notranslate"><span class="pre">QScreening</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.QScreening.forward"><code class="docutils literal notranslate"><span class="pre">QScreening.forward()</span></code></a></li>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.QScreening.p_value"><code class="docutils literal notranslate"><span class="pre">QScreening.p_value</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.Quadrupole"><code class="docutils literal notranslate"><span class="pre">Quadrupole</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.Quadrupole.forward"><code class="docutils literal notranslate"><span class="pre">Quadrupole.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.ScreenedCoulombEnergy"><code class="docutils literal notranslate"><span class="pre">ScreenedCoulombEnergy</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.ScreenedCoulombEnergy.forward"><code class="docutils literal notranslate"><span class="pre">ScreenedCoulombEnergy.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.StressForce"><code class="docutils literal notranslate"><span class="pre">StressForce</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.StressForce.forward"><code class="docutils literal notranslate"><span class="pre">StressForce.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.TrueHVP"><code class="docutils literal notranslate"><span class="pre">TrueHVP</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.TrueHVP.forward"><code class="docutils literal notranslate"><span class="pre">TrueHVP.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.VecMag"><code class="docutils literal notranslate"><span class="pre">VecMag</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.VecMag.forward"><code class="docutils literal notranslate"><span class="pre">VecMag.forward()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="#hippynn.layers.physics.WolfScreening"><code class="docutils literal notranslate"><span class="pre">WolfScreening</span></code></a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.WolfScreening.forward"><code class="docutils literal notranslate"><span class="pre">WolfScreening.forward()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.layers.regularization.html">regularization module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.layers.targets.html">targets module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.layers.transform.html">transform module</a></li>
@@ -233,472 +156,42 @@
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="hippynn.html">hippynn</a></li>
           <li class="breadcrumb-item"><a href="hippynn.layers.html">layers</a></li>
-      <li class="breadcrumb-item active">physics module</li>
+      <li class="breadcrumb-item active">physics</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api_documentation/hippynn.layers.physics.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
-        <a href="hippynn.layers.indexers.html" class="btn btn-neutral float-left" title="indexers module" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="hippynn.layers.regularization.html" class="btn btn-neutral float-right" title="regularization module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hippynn.layers.pairs.periodic.html" class="btn btn-neutral float-left" title="periodic module" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hippynn.layers.physics.charges.html" class="btn btn-neutral float-right" title="charges module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
   </div>
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="physics-module">
-<h1>physics module<a class="headerlink" href="#physics-module" title="Link to this heading"></a></h1>
-<p>Full Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.layers.physics</span></code> module.
+  <section id="physics">
+<h1>physics<a class="headerlink" href="#physics" title="Link to this heading"></a></h1>
+<p>Full Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.layers.physics</span></code> package.
 <a class="reference internal" href="../api_summary/hippynn.layers.physics.html"><span class="doc">Click here for a summary page.</span></a></p>
 <p id="module-hippynn.layers.physics">Layers for physical operations</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.AlphaScreening">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">AlphaScreening</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#AlphaScreening"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.AlphaScreening" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.CellScaleInducer">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">CellScaleInducer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CellScaleInducer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CellScaleInducer" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.CellScaleInducer.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CellScaleInducer.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CellScaleInducer.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.CombineEnergy">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">CombineEnergy</span></span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CombineEnergy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CombineEnergy" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<p>Combines the energies (molecular and atom energies) from two different 
-nodes, e.g. HEnergy, Coulomb, or ScreenedCoulomb Energy Nodes.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.CombineEnergy.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atom_energy_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_energy_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_systems</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CombineEnergy.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CombineEnergy.forward" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Param<span class="colon">:</span></dt>
-<dd class="field-odd"><p>atom_energy_1 per-atom energy from first node.</p>
-</dd>
-<dt class="field-even">Param<span class="colon">:</span></dt>
-<dd class="field-even"><p>atom_energy_2 per atom energy from second node.</p>
-</dd>
-<dt class="field-odd">Param<span class="colon">:</span></dt>
-<dd class="field-odd"><p>system_index the molecular index for atoms in the batch</p>
-</dd>
-<dt class="field-even">Param<span class="colon">:</span></dt>
-<dd class="field-even"><p>total number of molecules in the batch</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Total Energy</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.CombineScreenings">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">CombineScreenings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">screening_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CombineScreenings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CombineScreenings" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<p>Returns products of different screenings for Screened Coulomb Interactions.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.CombineScreenings.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pair_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CombineScreenings.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CombineScreenings.forward" title="Link to this definition"></a></dt>
-<dd><p>Product of different screenings applied to pair_dist upto radius.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>pair_dist</strong> – torch.tensor, dtype=float64: ‘Neighborlist’ distances for coulomb energies.</p></li>
-<li><p><strong>radius</strong> – Maximum radius that Screened-Coulomb is evaluated upto.</p></li>
+<p>Submodules</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.layers.physics.charges.html">charges module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.layers.physics.cheq.html">cheq module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.layers.physics.coulomb.html">coulomb module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.layers.physics.derivatives.html">derivatives module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hippynn.layers.physics.transforms.html">transforms module</a></li>
 </ul>
-</dd>
-<dt class="field-even">Return screening<span class="colon">:</span></dt>
-<dd class="field-even"><p>Weights for screening for all pair_dist.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.CoulombEnergy">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">CoulombEnergy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_conversion_factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CoulombEnergy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CoulombEnergy" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<p>Computes the Coulomb Energy of the molecule/configuration.</p>
-<p>Coulomb energies is defined for pairs of atoms. Here, we adopt the 
-convention that the Coulomby energy for a pair of atoms is evenly
-partitioned to both atoms as the ‘per-atom energies’. Therefore, the 
-atom energies sum to the molecular energy; similar to the HEnergy.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.CoulombEnergy.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_systems</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#CoulombEnergy.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.CoulombEnergy.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
 </div>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.Dipole">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Dipole</span></span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#Dipole"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.Dipole" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.Dipole.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_systems</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#Dipole.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.Dipole.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.EwaldRealSpaceScreening">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">EwaldRealSpaceScreening</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#EwaldRealSpaceScreening"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.EwaldRealSpaceScreening" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#hippynn.layers.physics.AlphaScreening" title="hippynn.layers.physics.AlphaScreening"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlphaScreening</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.EwaldRealSpaceScreening.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pair_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#EwaldRealSpaceScreening.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.EwaldRealSpaceScreening.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.Gradient">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sign</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#Gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.Gradient" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.Gradient.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecular_energies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#Gradient.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.Gradient.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.HVP">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">HVP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#HVP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.HVP" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.HVP.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">force</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding_mask</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#HVP.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.HVP.forward" title="Link to this definition"></a></dt>
-<dd><p>source:       (B, N_max, 3)  force tensor
-coordinates:  (B, N_max, 3), requires_grad=True
-vector:       (B, N_max, 3), perturbation direction
-padding_mask: (B, N_max, 3), HVP padding mask with 3N non-zero elements
-Returns:      (B, N_max, 3), Hessian-vector product</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.HVPVector">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">HVPVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'random'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#HVPVector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.HVPVector" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.HVPVector.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonblank</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#HVPVector.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.HVPVector.forward" title="Link to this definition"></a></dt>
-<dd><p>positions: (B, N_max, 3)
-nonblank: (B, N_max, 3), boolean mask
-Returns: (B, N_max, 3) vector (zeroed on padded atoms)</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.Hessian">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Hessian</span></span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#Hessian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.Hessian" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.Hessian.expand_padding_mask_to_hessian_mask">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">expand_padding_mask_to_hessian_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">padding_mask</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#Hessian.expand_padding_mask_to_hessian_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.Hessian.expand_padding_mask_to_hessian_mask" title="Link to this definition"></a></dt>
-<dd><p>Expand a (B, N) atom mask to a (B, 3N, 3N) Hessian mask.</p>
-<dl class="simple">
-<dt>Parameters:</dt><dd><p>padding_mask: Boolean tensor of shape (B, N_max)</p>
-</dd>
-<dt>Returns:</dt><dd><p>Boolean tensor of shape (B, 3N_max, 3N_max)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.Hessian.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding_mask</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#Hessian.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.Hessian.forward" title="Link to this definition"></a></dt>
-<dd><p>Computes the Hessian using second derivatives of energy or first derivatives of forces.
-Assumes:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>source: either energy (B, 1) or forces (B, N_max, 3)</p></li>
-<li><p>positions: (B, N_max, 3)</p></li>
-</ul>
-</div></blockquote>
-<dl class="simple">
-<dt>Returns:</dt><dd><ul class="simple">
-<li><p>hessians: (B, 3N_max, 3N_max)</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.LocalDampingCosine">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">LocalDampingCosine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#LocalDampingCosine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.LocalDampingCosine" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#hippynn.layers.physics.AlphaScreening" title="hippynn.layers.physics.AlphaScreening"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlphaScreening</span></code></a></p>
-<p>Local damping using complement of the hipnn cutoff function. (‘glue-on’ method)
-g = 1 if pair_dist &gt; R_cutoff, 1 - [cos(pi/2 * dist * R_cutoff)]^2  otherwise</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.LocalDampingCosine.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pair_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#LocalDampingCosine.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.LocalDampingCosine.forward" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>pair_dist</strong> – torch.tensor, dtype=float64: ‘Neighborlist’ distances for coulomb energies.</p></li>
-<li><p><strong>radius</strong> – Maximum radius that Screened-Coulomb is evaluated upto.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return screening<span class="colon">:</span></dt>
-<dd class="field-even"><p>Weights for screening for each pair.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.MultiGradient">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">MultiGradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#MultiGradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.MultiGradient" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.MultiGradient.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecular_energies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">generalized_coordinates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#MultiGradient.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.MultiGradient.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.PerAtom">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">PerAtom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#PerAtom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.PerAtom" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.PerAtom.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#PerAtom.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.PerAtom.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.QScreening">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">QScreening</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#QScreening"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.QScreening" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.QScreening.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pair_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#QScreening.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.QScreening.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="hippynn.layers.physics.QScreening.p_value">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">p_value</span></span><a class="headerlink" href="#hippynn.layers.physics.QScreening.p_value" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.Quadrupole">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Quadrupole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#Quadrupole"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.Quadrupole" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<p>Computes quadrupoles as a flattened (n_systems,9) array.
-NOTE: Uses normalization sum_a q_a (r_a,i*r_a,j - 1/3 delta_ij r_a^2)</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.Quadrupole.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_systems</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#Quadrupole.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.Quadrupole.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.ScreenedCoulombEnergy">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ScreenedCoulombEnergy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy_conversion_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screening</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#ScreenedCoulombEnergy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.ScreenedCoulombEnergy" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#hippynn.layers.physics.CoulombEnergy" title="hippynn.layers.physics.CoulombEnergy"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoulombEnergy</span></code></a></p>
-<p>Computes the Coulomb Energy of the molecule/configuration.</p>
-<p>The convention for the atom energies is the same as CoulombEnergy
-and the HEnergy.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.ScreenedCoulombEnergy.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair_second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_systems</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#ScreenedCoulombEnergy.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.ScreenedCoulombEnergy.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.StressForce">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">StressForce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#StressForce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.StressForce" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.StressForce.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#StressForce.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.StressForce.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.TrueHVP">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">TrueHVP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#TrueHVP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.TrueHVP" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.TrueHVP.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hessian</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#TrueHVP.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.TrueHVP.forward" title="Link to this definition"></a></dt>
-<dd><p>hessian: (B, 3N_max, 3N_max)
-vector:  (B, N_max, 3)
-Returns: (B, N_max, 3)</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.VecMag">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">VecMag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#VecMag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.VecMag" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.VecMag.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector_feature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#VecMag.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.VecMag.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="hippynn.layers.physics.WolfScreening">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">WolfScreening</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#WolfScreening"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.WolfScreening" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#hippynn.layers.physics.AlphaScreening" title="hippynn.layers.physics.AlphaScreening"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlphaScreening</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="hippynn.layers.physics.WolfScreening.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pair_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics.html#WolfScreening.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.WolfScreening.forward" title="Link to this definition"></a></dt>
-<dd><p>Define the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-</dd></dl>
-
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="hippynn.layers.indexers.html" class="btn btn-neutral float-left" title="indexers module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="hippynn.layers.regularization.html" class="btn btn-neutral float-right" title="regularization module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hippynn.layers.pairs.periodic.html" class="btn btn-neutral float-left" title="periodic module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hippynn.layers.physics.charges.html" class="btn btn-neutral float-right" title="charges module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
