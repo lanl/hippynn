@@ -116,7 +116,7 @@ class Predictor:
 
         self.outputs.append(node)
         self.out_names.append(source.name)
-        self.out_dbnames.append(source.bname)
+        self.out_dbnames.append(source.dbname)
 
     def wrap_outputs(self, out_dict):
         for (node, tensor), dbname, name in zip(out_dict.copy().items(), self.out_dbnames, self.out_names):

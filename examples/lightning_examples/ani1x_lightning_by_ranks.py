@@ -1,5 +1,9 @@
 """
-Example script for training HIP-NN directly from the ANI1x_datasets h5 file.
+Pytorch lightning example script for training HIP-NN using data split across multiple ranks.
+
+See also:
+ split_ani1x.py (splits the data, must be run first)
+ job_ani1x.py (simple slurm script that runs the python files)
 
 This script was designed for an external dataset available at
 https://doi.org/10.6084/m9.figshare.c.4712477
@@ -140,6 +144,17 @@ def load_db(db_info, en_name, force_name, seed, anidata_location, n_workers, use
     return database
 
 
+def load_split(rank):
+    from hippynn.experiment.serialization import restore_checkpoint
+
+    with hippynn.active_directory("./data_ani1x_split", create=False):
+
+        restarter_list = torch.load('restarters.pt', weights_only=False)
+        restarter = restarter_list[rank]
+        db = restarter.attempt_restart()
+    return db
+
+
 def setup_experiment(training_modules, device, batch_size, init_lr, patience, max_epochs, stopping_key):
     """
     Set up the training run.
@@ -219,13 +234,20 @@ def get_data_names(qm_method, basis_set):
 
 def main(args):
     torch.manual_seed(args.seed)
-    if args.use_gpu:
-        torch.cuda.set_device(args.gpu)
     torch.set_default_dtype(torch.float32)
 
     hippynn.settings.WARN_LOW_DISTANCES = False
     if not args.progress:
         hippynn.settings.PROGRESS = None
+
+    import os
+    ntasks_per_node = int(os.environ.get('SLURM_NTASKS_PER_NODE', 1))
+    n_nodes = int(os.environ.get('SLURM_NNODES', 1))
+    this_rank = int(os.environ.get('SLURM_PROCID', 0))
+    if args.scaling == "strong":
+        num_devices_total = n_nodes * ntasks_per_node
+        args.batch_size = args.batch_size//num_devices_total
+
 
     netname = f"{args.tag}_GPU{args.gpu}"
     network_parameters = {
@@ -239,74 +261,86 @@ def main(args):
         "n_atom_layers": args.n_atom_layers,
     }
 
-    with hippynn.tools.active_directory(netname):
-        with hippynn.tools.log_terminal("training_log.txt", "wt"):
-            henergy, force = make_model(
-                network_parameters,
-                tensor_model=args.tensor_model,
-                tensor_order=args.tensor_order,
-                tensor_factors=args.tensor_factors,
-                atomization_consistent=args.atomization_consistent,
-            )
+    with hippynn.tools.log_terminal("training_log.txt", "wt"):
+        henergy, force = make_model(
+            network_parameters,
+            tensor_model=args.tensor_model,
+            tensor_order=args.tensor_order,
+            tensor_factors=args.tensor_factors,
+            atomization_consistent=args.atomization_consistent,
+        )
 
-            en_name, force_name = get_data_names(args.qm_method, args.basis_set)
+        en_name, force_name = get_data_names(args.qm_method, args.basis_set)
 
-            henergy.mol_energy.db_name = en_name
-            force.db_name = force_name
+        henergy.mol_energy.db_name = en_name
+        force.db_name = force_name
 
-            validation_losses = make_loss(henergy, force, force_training=args.force_training)
+        validation_losses = make_loss(henergy, force, force_training=args.force_training)
 
-            train_loss = validation_losses["LossTotal"]
+        train_loss = validation_losses["LossTotal"]
 
-            from hippynn.experiment import assemble_for_training
+        from hippynn.experiment import assemble_for_training
 
-            training_modules, db_info = assemble_for_training(train_loss, validation_losses)
+        training_modules, db_info = assemble_for_training(train_loss, validation_losses)
 
-            database = load_db(
-                db_info,
-                en_name,
-                force_name,
-                n_workers=args.n_workers,
-                seed=args.seed,
-                anidata_location=args.anidata_location,
-                use_ccx_subset=args.use_ccx_subset,
-            )
+        database = load_split(rank=this_rank)            
+        database.targets = db_info["targets"]
+        database.inputs = db_info["inputs"]
+        database.num_workers = args.n_workers
 
-            from hippynn.pretraining import hierarchical_energy_initialization
+        from hippynn.pretraining import hierarchical_energy_initialization
 
-            hierarchical_energy_initialization(henergy, database, trainable_after=False)
+        hierarchical_energy_initialization(henergy, database, trainable_after=False)
 
-            patience = args.patience
-            if args.use_ccx_subset:
-                patience *= 4
+        patience = args.patience
+        if args.use_ccx_subset:
+            patience *= 4
 
-            setup_params = setup_experiment(
-                training_modules,
-                device=args.gpu,
-                batch_size=args.batch_size,
-                init_lr=args.init_lr,
-                patience=patience,
-                max_epochs=args.max_epochs,
-                stopping_key=args.stopping_key,
-            )
+        setup_params = setup_experiment(
+            training_modules,
+            device=args.gpu,
+            batch_size=args.batch_size,
+            init_lr=args.init_lr,
+            patience=patience,
+            max_epochs=args.max_epochs,
+            stopping_key=args.stopping_key,
+        )
 
-            if args.profile:
-                from hippynn.experiment import setup_and_profile
-                
-                setup_and_profile(
-                    training_modules=training_modules,
-                    database=database,
-                    setup_params=setup_params,
-                    trace_file="profile_trace.json",
-                )
-            else:
-                from hippynn.experiment import setup_and_train
-                
-                setup_and_train(
-                    training_modules=training_modules,
-                    database=database,
-                    setup_params=setup_params,
-                )
+    from hippynn.experiment import HippynnLightningModule
+    lightmod, datamodule = HippynnLightningModule.from_experiment_setup(training_modules, database, setup_params)
+
+    from lightning.pytorch.loggers import CSVLogger
+    logger = CSVLogger(save_dir=".", name=netname)
+    from pytorch_lightning.callbacks import ModelCheckpoint
+
+    checkpointer = ModelCheckpoint(monitor=f"valid_{args.stopping_key}",
+                                   save_last=True,
+                                   save_top_k=5,
+                                   every_n_epochs=50,
+                                   every_n_train_steps=None,
+                                   )
+
+    import pytorch_lightning as pl
+
+    accelerator='cpu'
+    if args.use_gpu:
+        if torch.cuda.is_available():
+            accelerator='gpu'
+        else:
+            print("Cuda not available, using CPU")
+            
+
+    trainer = pl.Trainer(accelerator=accelerator,
+                         devices=ntasks_per_node,
+                         logger=logger,
+                         num_nodes=n_nodes,
+                         log_every_n_steps=100,
+                         callbacks=[checkpointer],
+                         max_epochs=1000000000, # hippynn terminates training
+                         ) #'auto' detects MPS which doesn't work.
+    #lightmod.model.print_structure()
+    trainer.fit(model=lightmod, datamodule=datamodule)
+    return
             
 
 if __name__ == "__main__":
@@ -347,8 +381,8 @@ if __name__ == "__main__":
     parser.add_argument("--anidata_location", type=str, default="../../../datasets/ani1x_release/ani1x-release.h5")
     parser.add_argument("--qm_method", type=str, default="wb97x")
     parser.add_argument("--basis_set", type=str, default="dz")
-    parser.add_argument("--profile", action="store_true", help="Run profiler instead of full training")
     parser.add_argument("--force_training", action=BooleanOptionalAction, default=True, help="Use force training.")
+    parser.add_argument("--scaling",type=str, choices=['strong','weak'], default='strong',help="strong or weak scaling of batch size")
 
     parser.add_argument("--batch_size", type=int, default=256)
     parser.add_argument("--init_lr", type=float, default=1e-3)

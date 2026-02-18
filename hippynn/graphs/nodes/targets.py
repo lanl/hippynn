@@ -12,14 +12,15 @@ from ...layers import targets as target_modules
 from ..._deprecations import _DeprecatedNamesMixin
 
 
-class HEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, MultiNode):
+class HEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, MultiNode, _DeprecatedNamesMixin):
     """
     Predict a system-level scalar such as energy from a sum over local components.
     """
+    _DEPRECATED_NAMES = {"mol_energy": "system_energy"}
 
     input_names = "hier_features", "system_index", "n_systems"
-    output_names = "mol_energy", "atom_energies", "energy_terms", "hierarchicality", "atom_hier", "mol_hier", "batch_hier"
-    main_output_name = "mol_energy"
+    output_names = "system_energy", "atom_energies", "energy_terms", "hierarchicality", "atom_hier", "mol_hier", "batch_hier"
+    main_output_name = "system_energy"
     output_index_states = IdxType.Systems, IdxType.Atoms, None, IdxType.Systems, IdxType.Atoms, IdxType.Systems, IdxType.Scalar
     auto_module_class = target_modules.HEnergy
     auto_module_kwargs = "first_is_interacting", "feature_sizes"
@@ -68,10 +69,10 @@ class HChargeNode(Charges, HAtomRegressor,  ExpandParents, AutoKw, MultiNode):
 
 
 class LocalChargeEnergy(Energies, ExpandParents, AutoKw, HAtomRegressor, MultiNode, _DeprecatedNamesMixin):
-    _DEPRECATED_NAMES = {"mol_energies": "system_energies"}
+    _DEPRECATED_NAMES = {"mol_energies": "system_energy"}
     input_names = "charges", "features", "system_index", "n_systems"
-    output_names = "system_energies", "atom_energies"
-    main_output_name = "system_energies"
+    output_names = "system_energy", "atom_energies"
+    main_output_name = "system_energy"
     output_index_states = IdxType.Systems, IdxType.Atoms
     auto_module_class = target_modules.LocalChargeEnergy
     auto_module_kwargs = "first_is_interacting", "feature_sizes"

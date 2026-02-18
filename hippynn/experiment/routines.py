@@ -568,3 +568,111 @@ def training_loop(
         epoch += 1
 
     return metric_tracker
+
+
+
+def setup_and_profile(
+    training_modules: TrainingModules,
+    database: Database,
+    setup_params: SetupParams,
+    profile_epochs: int = 3,
+    batches_per_epoch: int = 3,
+    record_shapes=False,
+    with_stack=False,
+    with_modules=False,
+    with_flops=False,
+    trace_file: str = "profile_trace.json",
+):
+    """
+    Profile training for performance analysis.
+
+    For documentation information, see :doc:`/user_guide/performance`
+
+    This function provides the same interface as :func:`setup_and_train`, but runs
+    a short training loop under a PyTorch profiler context and exports results
+    for visualization.
+
+    :param training_modules: see :func:`setup_training`
+    :param database: see :func:`train_model`
+    :param setup_params: see :func:`setup_training`
+    :param profile_epochs: Number of epochs to profile (default: 3)
+    :param batches_per_epoch: Number of batches per epoch to profile (default: 5)
+    :param trace_file: Output path for Chrome trace file (default: "profile_trace.json")
+
+    :return: Path to the saved trace file
+
+    .. Note::
+        The setup_params max_epochs is ignored; profiling uses profile_epochs instead.
+
+    .. Note::
+        Open chrome://tracing in Chrome browser to visualize the trace file.
+
+    """
+    # informs users that epoch number is overwritten temporarily 
+    max_epochs = setup_params.max_epochs
+    if max_epochs is not None and max_epochs > profile_epochs:
+        print(f"Note: setup_and_profile uses {profile_epochs} epochs for profiling "
+              f"(your setting of {setup_params.max_epochs} epochs is temporarily ignored). "
+              f"This provides enough data to analyze performance without excessive runtime.")
+    
+    
+    training_modules, controller, metric_tracker = setup_training(
+        training_modules=training_modules,
+        setup_params=setup_params,
+    )
+    
+    model, loss, evaluator = training_modules
+    
+    if not database.splitting_completed:
+        raise ValueError("Database has not been split. Please split the database before profiling.")
+    database.inputs = evaluator.db_info['inputs']
+    database.targets = evaluator.db_info['targets']
+    
+    n_inputs = len(database.inputs)
+    n_targets = len(database.targets)
+    device = evaluator.model_device
+    optimizer = controller.optimizer
+    step_function = get_step_function(optimizer)
+    
+    use_cuda = (device.type == "cuda")
+    train_gen = database.make_generator("train", "train", batch_size=controller.batch_size)
+    model.train()
+
+    def step_once(batch):
+        batch = [item.to(device=device, non_blocking=True) for item in batch]
+        batch_inputs = batch[:n_inputs]
+        batch_targets = batch[-n_targets:]
+        batch_targets = [x.requires_grad_(False) for x in batch_targets]
+        batch_model_outputs = step_function(optimizer, model, loss, batch_inputs, batch_targets)
+        del batch_model_outputs
+    
+    print("Running test batch.")    
+    # We run the test batch so that all necessary code is imported before tracing.
+    step_once(next(iter(train_gen)))
+    
+    print(f"Profiling {profile_epochs} epochs x {batches_per_epoch} batches on {device}")
+    
+    with torch.autograd.profiler.profile(
+        enabled=True,
+        use_cuda=use_cuda,
+        record_shapes=record_shapes,
+        with_stack=with_stack,
+        with_modules=with_modules,
+        with_flops=with_flops,
+    ) as prof:
+        
+        for epoch in tools.progress_bar(range(profile_epochs), desc="Profiling Epochs", unit="epoch"):
+            
+            for batch_idx, batch in tools.progress_bar(enumerate(train_gen), desc="Batches", unit="batch"):
+                if batch_idx >= batches_per_epoch:
+                    break
+                step_once(batch)
+    
+    prof.export_chrome_trace(trace_file)
+    
+    print(f"\nProfile saved to: {trace_file}")
+    print("Open chrome://tracing in Chrome to visualize.")
+    print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=15))
+    
+    return trace_file
+

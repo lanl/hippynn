@@ -5,6 +5,12 @@ Welcome to hippynn's documentation!
 
 We hope you enjoy your stay.
 
+Install hippynn with::
+
+        $ pip install hippynn
+
+(Or see :doc:`the installation documentation <installation/>`)
+
 .. include:: what_is_hippynn.rst
 
 .. toctree::
@@ -20,14 +26,17 @@ We hope you enjoy your stay.
     :maxdepth: 1
     :caption: User Guide:
 
+
     user_guide/features
     user_guide/concepts
     user_guide/databases
-    user_guide/loss_graph
     user_guide/units
+    user_guide/performance
     user_guide/ckernels
+    user_guide/loss_graph
     user_guide/settings
     user_guide/custom_nodes
+    
 
 
 .. toctree::
@@ -46,6 +55,7 @@ We hope you enjoy your stay.
     examples/ase_calculator
     examples/mliap_unified
     examples/excited_states
+    examples/cheq
     examples/weighted_loss
     examples/lightning
     examples/hyperopt

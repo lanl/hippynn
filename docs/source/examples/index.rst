@@ -12,6 +12,7 @@ For runnable example scripts, see `the examples at the hippynn github repository
     :maxdepth: 1
 
     minimal_workflow
+    profiling
     controller
     plotting
     predictor
@@ -22,6 +23,7 @@ For runnable example scripts, see `the examples at the hippynn github repository
     ase_calculator
     mliap_unified
     excited_states
+    cheq
     weighted_loss
     lightning
     hyperopt

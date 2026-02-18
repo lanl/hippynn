@@ -28,7 +28,16 @@ class PyAniMethods:
     _IGNORE_KEYS = ("path", "Jnames")
 
     # Note: assumes that all data files have 'coordinates'.
-    def extract_full_file(self, file, species_key="species"):
+    def extract_full_file(self, file, species_key="species", permit_only=None):
+        """
+        
+        :param file: filename to open
+        :param species_key: name for species variable (needs special treatment)
+        :param permit_only: if truthy, give a list of valid keys; skip others.
+        :return: batches, n_atoms_max, sys_count
+        :rtype: tuple[list, int, int]
+        """
+
         n_atoms_max = 0
         batches = []
         x = AniDataLoader(file, driver=self.driver)  # Engine=core reads the entire file at once.
@@ -41,6 +50,8 @@ class PyAniMethods:
             for k, v in c.items():
                 # Filter things we don't need
                 if k in self._IGNORE_KEYS:
+                    continue
+                if permit_only and k not in permit_only:
                     continue
 
                 # Convert to numpy
@@ -90,20 +101,24 @@ class PyAniMethods:
         bsize = 0
         bkey = None
         for k, v in batch.items():
+            shape_scheme[k] = list(v.shape)
             for i, l in enumerate(v.shape):
                 if i == 0:
                     continue  # Don't pad the batch index
-                if l == n_atoms:
+                # Check if size of axis is multiple of num_atoms
+                if l % n_atoms == 0:
+                    scale = l // n_atoms
                     padding_scheme[k].append(i)
-                    # Use the largest 0th-axis shape that has an atom index
-                    # as the indicator key for the batch size
-                    this_bsize = v.shape[0]
-                    if this_bsize > bsize:
-                        bsize = this_bsize
-                        bkey = k
-            shape_scheme[k] = list(v.shape)
-            for axis in padding_scheme[k]:
-                shape_scheme[k][axis] = n_atoms_max
+                    shape_scheme[k][i] = scale * n_atoms_max
+
+            # Use the largest 0th-axis shape that has an atom index
+            # as the indicator key for the batch size
+            if len(padding_scheme[k]) > 0:
+                this_bsize = v.shape[0]
+                if this_bsize > bsize:
+                    bsize = this_bsize
+                    bkey = k
+
             shape_scheme[k][0] = sys_count
 
         padding_scheme["sys_number"] = []
@@ -111,7 +126,7 @@ class PyAniMethods:
 
     def process_batches(self, batches, n_atoms_max, sys_count, species_key="species"):
 
-        # Get padding abd shape info and batch size key
+        # Get padding and shape info and batch size key
         padding_scheme, shape_scheme, size_key = self.determine_key_structure(batches, sys_count, n_atoms_max, species_key=species_key)
 
         # add system numbers to the final arrays
@@ -136,13 +151,15 @@ class PyAniMethods:
             for k, arr in b.items():
 
                 if k == species_key:
+                    # ANI datasets come with one set of conformations per batch, each has the same elements.
+                    # here we repeat that information for each conformation.
                     arr = np.repeat(arr, n_sys, axis=0)
 
                 # set up slicing for non-batch axes
                 where = tuple(slice(0, s) for s in arr.shape[1:])
                 # add batch slicing
                 where = (slice(sys_start, sys_end), *where)
-
+                
                 # store array!
                 arr_dict[k][where] = arr
 
@@ -212,9 +229,14 @@ class PyAniFileDB(Database, PyAniMethods, Restartable):
         )
 
     def load_arrays(self, allow_unfound=False, quiet=False):
+
         if not quiet:
             print("Loading arrays from", self.file)
-        batches, n_atoms_max, sys_count = self.extract_full_file(self.file, species_key=self.species_key)
+
+        # var list if allow_founded is False
+        permit_only = (not allow_unfound) and set(self.var_list)
+
+        batches, n_atoms_max, sys_count = self.extract_full_file(self.file, species_key=self.species_key, permit_only=permit_only)
         arr_dict = self.process_batches(batches, n_atoms_max, sys_count, species_key=self.species_key)
         arr_dict = self.filter_arrays(arr_dict, quiet=quiet, allow_unfound=allow_unfound)
         return arr_dict
@@ -262,9 +284,12 @@ class PyAniDirectoryDB(Database, PyAniMethods, Restartable):
             print("Gathering data from files:\n\t", end="")
             print(*files, sep="\n\t")
 
+        # var list if allow_founded is False
+        permit_only = (not allow_unfound) and set(self.var_list)
+
         file_batches = []
         for f in progress_bar(files, desc="Data Files", unit="file"):
-            file_batches.append(self.extract_full_file(f, species_key=self.species_key))
+            file_batches.append(self.extract_full_file(f, species_key=self.species_key, permit_only=permit_only))
 
         data, max_atoms_list, sys_count = zip(*file_batches)
 
@@ -365,7 +390,7 @@ def write_h5(
         for k in is_atom_var.keys():
             mol[k] = np.asarray(mol[k])
 
-            if np.issubdtype(mol[k].dtype, np.unicode_):
+            if np.issubdtype(mol[k].dtype, np.str_):
                 mol[k] = [el.encode("utf-8") for el in list(mol[k])]
                 mol[k] = np.array(mol[k])
     # Store data
