@@ -28,7 +28,8 @@ first-principles theory.
 
 
 We construct two HIPNN networks to predict the 1) short-range energy and 
-2) electronegativity and Hubbard-U separately.
+2) electronegativity and Hubbard-U separately. (Note: it is not absolutely necessary to use two different networks,
+ but we have found it to be effective--this way gradients are split to parameters in the same way as the energy is split.)
 
 For the short-range energy, the node can be constructed using :class:`~hippynn.graphs.nodes.targets.HEnergyNode`::
 
@@ -45,7 +46,7 @@ Then, we need to define the total energy, forces, and dipoles for training::
 
     dipole = henergy.dipole
 
-    molecule_energy = henergy.coul_energy + henergy1.mol_energy 
+    molecule_energy = henergy.coul_energy + henergy1.sys_energy 
     gradient = physics.GradientNode("Gradient", (molecule_energy, positions), sign=+1)
 
     molecule_energy.db_name="energies"
