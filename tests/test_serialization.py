@@ -58,24 +58,25 @@ def test_validate_old():
 
     from optimizer.test_configs import c2h6_config
 
+    floatX = torch.float64
     # fmt: off
-    expected_T = torch.tensor([[-566.0421],
-          [-633.7504],
-          [-683.5908],
-          [-706.4001],
-          [-713.3954],
-          [-711.6498],
-          [-705.4093],
-          [-694.8241],
-          [-686.6531],
-          [-677.4547],
-          [-571.3558],
-          [-471.0748],
-          [-485.9834],
-          [-526.7410],
-          [-525.0599]])
+    expected_T = torch.tensor([[-566.04203682388606466702],
+        [-633.75044483854321697436],
+        [-683.59081489815389431897],
+        [-706.40015799352158865076],
+        [-713.39539090423795641982],
+        [-711.64985486498540012690],
+        [-705.40931757941268642753],
+        [-694.82413721139664630755],
+        [-686.65307032058126424090],
+        [-677.45483365599477565411],
+        [-571.35603221853000377450],
+        [-471.07485521951696227916],
+        [-485.98350140870610402999],
+        [-526.74108660103354395687],
+        [-525.06023249181453138590]], dtype=floatX)
     # fmt: on
-
+    torch.set_printoptions(precision=24)
     
     from hippynn.tools import active_directory
     from hippynn.experiment import load_checkpoint_from_cwd
@@ -87,18 +88,19 @@ def test_validate_old():
         check = load_checkpoint_from_cwd(map_location="cpu")
 
     model = check["training_modules"].model
-    predictor = Predictor.from_graph(model)
+    predictor = Predictor.from_graph(model).to(floatX)
 
     renamed_box = dict(
         Z=c2h6_config["Z"],
-        R=c2h6_config["R"],
+        R=c2h6_config["R"].to(floatX),
     )
-
     outputs = predictor(**renamed_box)
     out_energy = outputs["T"]
 
-    maxreldiff = ((out_energy - expected_T) / expected_T).abs().max()
+    absdiff = (out_energy - expected_T).abs()
+    maxreldiff = (absdiff / expected_T).max()
+    print(f"({maxreldiff=})")
 
-    assert maxreldiff < 1.2e-7, f"Output of network changed. (relative difference = {maxreldiff})"
+    assert maxreldiff < 1.e-12, f"Output of network changed. (relative difference = {maxreldiff}, absdiff = {absdiff})"
 
     return
