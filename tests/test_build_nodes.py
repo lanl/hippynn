@@ -72,6 +72,7 @@ def test_build_cheq(neural_network_node):
 
     return
 
+pytest.mark.filterwarnings("ignore:.*Wolf implementation uses exact derivative*.")
 def test_build_coulomb(network_parameters):
     # requires open boundary so text fixture errors.
     from hippynn.graphs import inputs, networks, find_unique_relative

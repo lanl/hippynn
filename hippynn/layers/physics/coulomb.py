@@ -115,7 +115,7 @@ class EwaldRealSpaceScreening(AlphaScreening):
 # Note: typically
 class WolfScreening(AlphaScreening):
     def __init__(self, alpha):
-        warnings.warn("Wolf implemnetation uses exact derivative of the potential.")
+        warnings.warn("Wolf implementation currently uses exact derivative of the potential.")
         super().__init__(alpha)
 
     def forward(self, pair_dist, radius):

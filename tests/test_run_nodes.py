@@ -108,7 +108,7 @@ def test_atomization_conversion(example_box, neural_network_node):
     hen_equivalent = energy.create_henergy_equivalent()
 
     input_nodes = energy.find_relatives(base.InputNode)
-    model = hippynn.GraphModule(input_nodes, [energy.mol_energy, hen_equivalent.mol_energy])
+    model = hippynn.GraphModule(input_nodes, [energy.system_energy, hen_equivalent.system_energy])
 
     args = [example_box[node.db_name] for node in input_nodes]
     
