@@ -2,7 +2,7 @@
 Nodes for networks.
 """
 from .tags import Encoder, PairIndexer, Network, AtomIndexer
-from .base import Node, AutoKw, ExpandParents, SingleNode
+from .base import Node, AutoModule, ExpandParents, SingleNode
 from .base.multi import IndexNode
 from .indexers import OneHotEncoder, PaddingIndexer, acquire_encoding_padding
 from .pairs import OpenPairIndexer, PeriodicPairIndexer
@@ -89,7 +89,7 @@ class _FeatureNodesMixin:
         self._feature_nodes = feature_nodes
 
 
-class Hipnn(AutoKw, DefaultNetworkExpansion,  Network, SingleNode, _FeatureNodesMixin):
+class Hipnn(AutoModule, DefaultNetworkExpansion,  Network, SingleNode, _FeatureNodesMixin):
     """
     Node for HIP-NN neural networks
     """
@@ -111,7 +111,7 @@ class Hipnn(AutoKw, DefaultNetworkExpansion,  Network, SingleNode, _FeatureNodes
 
 
 
-class HipnnVec(AutoKw, DefaultNetworkExpansion, Network, SingleNode, _FeatureNodesMixin):
+class HipnnVec(AutoModule, DefaultNetworkExpansion, Network, SingleNode, _FeatureNodesMixin):
     """
     Node for HIP-NN-TS neural network, l=2
     """

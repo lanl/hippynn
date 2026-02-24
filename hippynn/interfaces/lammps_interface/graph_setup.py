@@ -4,7 +4,7 @@ from ... import IdxType, GraphModule
 from ...graphs import get_subgraph, find_relatives, copy_subgraph, find_unique_relative, replace_node
 from ...graphs.gops import check_link_consistency
 from ...graphs.indextypes import index_type_coercion
-from ...graphs.nodes.base import InputNode, AutoNoKw, SingleNode, ExpandParents, MultiNode
+from ...graphs.nodes.base import InputNode, AutoModule, SingleNode, ExpandParents, MultiNode
 from ...graphs.nodes.indexers import PaddingIndexer
 from ...graphs.nodes.inputs import SpeciesNode
 from ...graphs.nodes.pairs import PairFilter
@@ -107,7 +107,7 @@ class ReIndexAtomMod(torch.nn.Module):
         return inverse_real_atoms[raw_atom_index_array]
 
 
-class ReIndexAtomNode(AutoNoKw, SingleNode):
+class ReIndexAtomNode(AutoModule, SingleNode):
     input_names = "raw_atom_index_array", "inverse_real_atoms"
     main_output_name = "total_local_energy"
     auto_module_class = ReIndexAtomMod
@@ -127,7 +127,7 @@ class LocalAtomsEnergy(torch.nn.Module):
         return local_atom_energies, total_local_energy
 
 
-class LocalAtomEnergyNode(AutoNoKw, ExpandParents, MultiNode):
+class LocalAtomEnergyNode(AutoModule, ExpandParents, MultiNode):
     input_names = "all_atom_energies", "nlocal"
     output_names = "local_atom_energies", "total_local_energy"
     main_output_name = "total_local_energy"

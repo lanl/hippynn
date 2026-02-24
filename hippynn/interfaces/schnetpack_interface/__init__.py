@@ -13,7 +13,7 @@ import torch
 
 from schnetpack import Properties
 
-from ...graphs.nodes.base import SingleNode, AutoKw
+from ...graphs.nodes.base import SingleNode, AutoModule
 from ...graphs.nodes.networks import Network
 from ...graphs.indextypes import IdxType
 
@@ -46,7 +46,7 @@ class SchNetWrapper(torch.nn.Module):
         return outputs
 
 
-class SchNetNode(AutoKw, Network, SingleNode):
+class SchNetNode(AutoModule, Network, SingleNode):
     input_names = "species", "positions", "nonblank"
     index_state = IdxType.Atoms
     auto_module_class = SchNetWrapper

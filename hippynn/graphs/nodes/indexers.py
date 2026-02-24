@@ -2,7 +2,7 @@
 Nodes for indexing information.
 """
 from .tags import Encoder, AtomIndexer
-from .base import SingleNode, AutoNoKw, AutoKw, find_unique_relative, MultiNode, ExpandParents, Node, IndexNode
+from .base import SingleNode, AutoModule, AutoModule, find_unique_relative, MultiNode, ExpandParents, Node, IndexNode
 from .base.node_functions import NodeNotFound
 from .inputs import SpeciesNode
 
@@ -14,7 +14,7 @@ from ...layers import indexers as index_modules
 from ..._deprecations import _DeprecatedNamesMixin
 
 
-class OneHotEncoder(AutoKw, Encoder, MultiNode):
+class OneHotEncoder(AutoModule, Encoder, MultiNode):
     """
     Node for encoding species as one-hot vectors
     """
@@ -34,7 +34,7 @@ class OneHotEncoder(AutoKw, Encoder, MultiNode):
         super().__init__(name, parents, species_set=species_set, module=module, **kwargs)
 
 
-class PaddingIndexer(AtomIndexer, AutoNoKw, ExpandParents, MultiNode, _DeprecatedNamesMixin):
+class PaddingIndexer(AtomIndexer, AutoModule, ExpandParents, MultiNode, _DeprecatedNamesMixin):
     """
     Node for building information to convert from
     SysAtom to Atom index state.
@@ -67,7 +67,7 @@ class PaddingIndexer(AtomIndexer, AutoNoKw, ExpandParents, MultiNode, _Deprecate
         super().__init__(name, parents, *args, **kwargs)
 
 
-class AtomReIndexer(ExpandParents, AutoNoKw, SingleNode):
+class AtomReIndexer(ExpandParents, AutoModule, SingleNode):
     """
     Node for re-using index information to convert SysAtom->Atom.
     """
@@ -91,7 +91,7 @@ class AtomReIndexer(ExpandParents, AutoNoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class AtomDeIndexer(ExpandParents, AutoNoKw, SingleNode):
+class AtomDeIndexer(ExpandParents, AutoModule, SingleNode):
     """
     Node for converting Atom->SysAtom
     """
@@ -115,7 +115,7 @@ class AtomDeIndexer(ExpandParents, AutoNoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class QuadUnpackNode(AutoNoKw, SingleNode):
+class QuadUnpackNode(AutoModule, SingleNode):
     auto_module_class = index_modules.QuadUnpack
     index_state = IdxType.Systems
 
@@ -123,7 +123,7 @@ class QuadUnpackNode(AutoNoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class FilterBondsOneway(AutoNoKw, SingleNode):
+class FilterBondsOneway(AutoModule, SingleNode):
     """
     Node which filters the set of pairs to a one-way list.
     """
@@ -135,7 +135,7 @@ class FilterBondsOneway(AutoNoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class SysMaxOfAtomsNode(ExpandParents, AutoNoKw, SingleNode):
+class SysMaxOfAtomsNode(ExpandParents, AutoModule, SingleNode):
     input_names = "var", "system_index", "n_systems"
     index_state = IdxType.Systems
     auto_module_class = index_modules.SysMaxOfAtoms
@@ -189,7 +189,7 @@ def acquire_encoding_padding(search_nodes, species_set, purpose=None):
 
     return encoder, pidxer
 
-class FuzzyHistogrammer(AutoKw, SingleNode):
+class FuzzyHistogrammer(AutoModule, SingleNode):
     """ 
     Node for transforming a scalar feature into a vectorized feature via 
     the fuzzy/soft histogram method.
@@ -205,7 +205,7 @@ class FuzzyHistogrammer(AutoKw, SingleNode):
         self.output_index_state = parents[0].index_state
         super().__init__(name, parents, length=length, vmin=vmin, vmax=vmax, module=module, **kwargs)
 
-class SpeciesIndexer(AutoNoKw, SingleNode, ExpandParents):
+class SpeciesIndexer(AutoModule, SingleNode, ExpandParents):
     """
     Separate an atom-wise tensor into sub-tensors for each species.
     """

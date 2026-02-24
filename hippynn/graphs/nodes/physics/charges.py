@@ -4,8 +4,8 @@
 from ....layers import physics as physics_layers
 from ...indextypes import IdxType, elementwise_compare_reduce, index_type_coercion
 from ..base import (
-    AutoKw,
-    AutoNoKw,
+    AutoModule,
+    AutoModule,
     ExpandParents,
     MultiNode,
     SingleNode,
@@ -17,7 +17,7 @@ from ..inputs import PositionsNode
 from ..tags import Charges
 
 
-class ChargeMomentNode(ExpandParents, AutoNoKw, SingleNode):
+class ChargeMomentNode(ExpandParents, AutoModule, SingleNode):
     input_names = "charges", "positions", "system_index", "n_systems"
 
     @parent_expander.matchlen(1)

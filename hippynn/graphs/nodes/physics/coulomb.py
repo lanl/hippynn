@@ -5,7 +5,7 @@ from ...._deprecations import _DeprecatedNamesMixin
 
 from ....layers import physics as physics_layers 
 
-from ..base import MultiNode, AutoKw, find_unique_relative, find_relatives, ExpandParents, Node
+from ..base import MultiNode, AutoModule, find_unique_relative, find_relatives, ExpandParents, Node
 from ...indextypes import IdxType
 from ..networks import Network
 from ..targets import HChargeNode
@@ -74,7 +74,7 @@ class ChargePairSetup(ExpandParents):
 
 
 
-class CoulombEnergyNode(AutoKw, ChargePairSetup, Energies,  MultiNode, _DeprecatedNamesMixin):
+class CoulombEnergyNode(AutoModule, ChargePairSetup, Energies,  MultiNode, _DeprecatedNamesMixin):
     """
     Besides the normal 'name' and 'parents' arguments, this node requires an `energy_conversion` parameter.
     This corresponds to coulomb's constant k in the equation E = kqq/r.
@@ -112,7 +112,7 @@ class CoulombEnergyNode(AutoKw, ChargePairSetup, Energies,  MultiNode, _Deprecat
             )
 
 
-class ScreenedCoulombEnergyNode(AutoKw, ChargePairSetup, Energies, MultiNode, _DeprecatedNamesMixin):
+class ScreenedCoulombEnergyNode(AutoModule, ChargePairSetup, Energies, MultiNode, _DeprecatedNamesMixin):
     """
     Besides the normal 'name' and 'parents' arguments, this node requires an `energy_conversion` parameter.
     This corresponds to coulomb's constant k in the equation E = kqq/r.
@@ -163,7 +163,7 @@ class ScreenedCoulombEnergyNode(AutoKw, ChargePairSetup, Energies, MultiNode, _D
                          **kwargs)
 
 
-class ChEQNode(ExpandParents, AutoKw, MultiNode):
+class ChEQNode(ExpandParents, AutoModule, MultiNode):
     input_names = "species", "coordinates", "U", "chi"
     output_names = "charge", "coul_energy", "dipole", "out_U", "out_chi"
     output_index_states = (

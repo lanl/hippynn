@@ -4,8 +4,8 @@ import warnings
 from ....layers import physics as physics_layers
 from ...indextypes import IdxType 
 from ..base import (
-    AutoKw,
-    AutoNoKw,
+    AutoModule,
+    AutoModule,
     ExpandParents,
     MultiNode,
     SingleNode,
@@ -17,7 +17,7 @@ from ..inputs import PositionsNode
 from ..tags import Encoder, Energies
 
 
-class GradientNode(AutoKw, SingleNode):
+class GradientNode(AutoModule, SingleNode):
     """
     Compute the gradient of a quantity.
     """
@@ -34,8 +34,8 @@ class GradientNode(AutoKw, SingleNode):
         self.index_state = position.index_state
         super().__init__(name, parents, sign=sign, **kwargs)
 
-        
-class MultiGradientNode(AutoKw, MultiNode):
+
+class MultiGradientNode(AutoModule, MultiNode):
     """
     Compute the gradient of a quantity.
     """
@@ -62,7 +62,7 @@ class MultiGradientNode(AutoKw, MultiNode):
         super().__init__(name, parents, signs=signs, **kwargs)
 
 
-class HessianNode(ExpandParents, AutoKw, MultiNode):
+class HessianNode(ExpandParents, AutoModule, MultiNode):
     """
     Node that computes the Hessian (second derivatives of energy)
     via gradients of force w.r.t. coordinates or
@@ -131,7 +131,7 @@ class HessianNode(ExpandParents, AutoKw, MultiNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class HVPVectorNode(ExpandParents, AutoKw, SingleNode):
+class HVPVectorNode(ExpandParents, AutoModule, SingleNode):
     """
     Outputs a tensor with a determined number of random or one-hot vectors per molecule
     """
@@ -154,7 +154,7 @@ class HVPVectorNode(ExpandParents, AutoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class HVPNode(ExpandParents, AutoKw, MultiNode):
+class HVPNode(ExpandParents, AutoModule, MultiNode):
     input_names = "source", "coordinates", "vector", "nonblank"
     output_names = "hvp", "mask"
     output_index_states = (IdxType.MolAtom, IdxType.MolAtom)
@@ -214,7 +214,7 @@ class HVPNode(ExpandParents, AutoKw, MultiNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class TrueHVPNode(ExpandParents, AutoNoKw, SingleNode):
+class TrueHVPNode(ExpandParents, AutoModule, SingleNode):
     """
     Computes true Hessian-vector product from database-stored Hessians and input vector
     """
@@ -237,7 +237,7 @@ class TrueHVPNode(ExpandParents, AutoNoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class StressForceNode(AutoNoKw, MultiNode):
+class StressForceNode(AutoModule, MultiNode):
     input_names = "energy", "strain", "coordinates", "cell"
     output_names = "forces", "stress"
     auto_module_class = physics_layers.StressForce
@@ -250,7 +250,7 @@ class StressForceNode(AutoNoKw, MultiNode):
         super().__init__(name, parents, module=module, **kwargs)
 
     
-class StrainInducer(AutoNoKw, MultiNode):
+class StrainInducer(AutoModule, MultiNode):
     input_names = "coordinates", "cell"
     output_names = "strained_coordinates", "strained_cell", "strain"
     output_index_states = NotImplemented

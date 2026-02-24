@@ -7,14 +7,14 @@ from .seqm_modules import Scale
 from .seqm_modules import SEQM_Energy, SEQM_All
 from .seqm_modules import SEQM_MolMask, AtomMask, SEQM_OrbitalMask
 from .seqm_modules import SEQM_MaskOnMol, SEQM_MaskOnMolAtom, SEQM_MaskOnMolOrbital, SEQM_MaskOnMolOrbitalAtom
-from hippynn.graphs.nodes.base import MultiNode, AutoKw, find_unique_relative, ExpandParents, SingleNode
+from hippynn.graphs.nodes.base import MultiNode, AutoModule, find_unique_relative, ExpandParents, SingleNode
 from hippynn.graphs.indextypes import IdxType
 from hippynn.graphs.nodes.networks import Network
 from hippynn.graphs.nodes.targets import HChargeNode, HBondNode
 from hippynn.graphs.nodes.inputs import PositionsNode, SpeciesNode
 
 
-class ScaleNode(AutoKw, SingleNode):
+class ScaleNode(AutoModule, SingleNode):
     input_names = "notconverged"
     auto_module_class = Scale
     index_state = IdxType.Scalar
@@ -24,7 +24,7 @@ class ScaleNode(AutoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class SEQM_MolMaskNode(AutoKw, SingleNode):
+class SEQM_MolMaskNode(AutoModule, SingleNode):
     input_names = "notconverged"
     auto_module_class = SEQM_MolMask
     index_state = IdxType.Systems
@@ -35,7 +35,7 @@ class SEQM_MolMaskNode(AutoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class AtomMaskNode(AutoKw, SingleNode):
+class AtomMaskNode(AutoModule, SingleNode):
     input_names = "species"
     auto_module_class = AtomMask
     index_state = IdxType.Systems
@@ -46,7 +46,7 @@ class AtomMaskNode(AutoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class SEQM_OrbitalMaskNode(AutoKw, SingleNode):
+class SEQM_OrbitalMaskNode(AutoModule, SingleNode):
     input_names = "species"
     auto_module_class = SEQM_OrbitalMask
     index_state = IdxType.Systems
@@ -57,7 +57,7 @@ class SEQM_OrbitalMaskNode(AutoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class SEQM_MaskOnMolNode(AutoKw, SingleNode):
+class SEQM_MaskOnMolNode(AutoModule, SingleNode):
     """
     used for quantity like total energy, Heat of formation
     with shape (molecules,)
@@ -72,7 +72,7 @@ class SEQM_MaskOnMolNode(AutoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class SEQM_MaskOnMolAtomNode(AutoKw, SingleNode):
+class SEQM_MaskOnMolAtomNode(AutoModule, SingleNode):
     """
     used for quantity like force
     with shape (molecules,atoms)
@@ -87,7 +87,7 @@ class SEQM_MaskOnMolAtomNode(AutoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class SEQM_MaskOnMolOrbitalNode(AutoKw, SingleNode):
+class SEQM_MaskOnMolOrbitalNode(AutoModule, SingleNode):
     """
     used for quantity like orbital energy
     with shape (molecules,orbitals)
@@ -102,7 +102,7 @@ class SEQM_MaskOnMolOrbitalNode(AutoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class SEQM_MaskOnMolOrbitalAtomNode(AutoKw, SingleNode):
+class SEQM_MaskOnMolOrbitalAtomNode(AutoModule, SingleNode):
     """
     used for quantity like orbital charge densit
     with shape (molecules,orbitals, atoms)
@@ -117,7 +117,7 @@ class SEQM_MaskOnMolOrbitalAtomNode(AutoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class SEQM_EnergyNode(ExpandParents, AutoKw, MultiNode):
+class SEQM_EnergyNode(ExpandParents, AutoModule, MultiNode):
     input_names = "par_atom", "Positions", "Species"
     output_names = "mol_energy", "Etot_m_Eiso", "notconverged"
     main_output_name = "mol_energy"

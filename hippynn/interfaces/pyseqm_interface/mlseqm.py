@@ -3,7 +3,7 @@ from seqm.basics import Energy, Force, parameterlist
 from seqm.seqm_functions.constants import Constants
 from seqm.seqm_functions.parameters import params
 import os
-from hippynn.graphs.nodes.base import MultiNode, AutoKw, find_unique_relative, ExpandParents, SingleNode
+from hippynn.graphs.nodes.base import MultiNode, AutoModule, find_unique_relative, ExpandParents, SingleNode
 from hippynn.graphs.indextypes import IdxType
 from hippynn.graphs.nodes.inputs import PositionsNode, SpeciesNode
 
@@ -79,7 +79,7 @@ class MLSEQM(torch.nn.Module):
         )
 
 
-class MLSEQM_Node(AutoKw, MultiNode):
+class MLSEQM_Node(AutoModule, MultiNode):
     input_names = "Positions", "Species"
     output_names = (
         "mol_energy",

@@ -35,9 +35,9 @@ def test_create_simple_henergy_class(neural_network_node):
     
     from hippynn.graphs import IdxType
     from hippynn.graphs.nodes.base import MultiNode
-    from hippynn.graphs.nodes.base.definition_helpers import AutoKw
+    from hippynn.graphs.nodes.base.definition_helpers import AutoModule
 
-    class SimpleHEnergyNode(AutoKw, MultiNode):
+    class SimpleHEnergyNode(AutoModule, MultiNode):
         input_names = "input_features", "system_index", "n_systems"
         output_names = "system_energies", "atom_energies", "energy_terms", "hierarchicality"
         main_output_name = "system_energies"

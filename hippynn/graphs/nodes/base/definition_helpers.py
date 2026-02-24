@@ -17,14 +17,9 @@ from . import Node
 from ...indextypes import index_type_coercion, elementwise_compare_reduce, get_reduced_index_state
 from typing import Dict, Union, Tuple, Optional
 
-class AutoNoKw:
-    def __init__(self, *args, module="auto", **kwargs):
-        if module == "auto":
-            module = self.auto_module_class()
-        super().__init__(*args,module=module,**kwargs)
 
 
-class AutoKw:
+class AutoModule:
     """
     Helper class for piping keyword arguments into an nn.module class.
 
@@ -46,21 +41,27 @@ class AutoKw:
     def __init__(self, *args, module="auto", module_kwargs=None, **kwargs):
 
 
+        # if none supplied, start with empty
         if module_kwargs is None:
             module_kwargs = {}
         
         auto_module_kwargs = self.auto_module_kwargs
 
+        # if automatic keyword forwarding is enabled,
+        # set that up
         if auto_module_kwargs is None:
             auto_module_kwargs = {}
         elif not isinstance(auto_module_kwargs, dict):
             # Assume list of keys-values which are identical.
             auto_module_kwargs=dict(zip(auto_module_kwargs, auto_module_kwargs))
 
+        # Pipe auto-forward keywords from node kwargs
+        # into module creation kwargs
         for k,v in auto_module_kwargs.items():
             if v in kwargs:
                 module_kwargs[k] = kwargs.pop(v)
 
+        # Add any that have been saved via self.module_kwargs
         module_kwargs |=  getattr(self, "module_kwargs", {})
 
         if module == "auto": 
@@ -68,7 +69,6 @@ class AutoKw:
             module = self.auto_module_class(**module_kwargs)            
 
         super().__init__(*args, module=module, **kwargs)
-
 
 
 @contextlib.contextmanager
