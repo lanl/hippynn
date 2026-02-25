@@ -14,14 +14,16 @@ import contextlib
 from .. import _debprint
 
 from . import Node
-from ...indextypes import index_type_coercion, elementwise_compare_reduce, get_reduced_index_state
+from ...indextypes import index_type_coercion, get_reduced_index_state
 from typing import Dict, Union, Tuple, Optional
 
 
 
 class AutoModule:
     """
-    Helper class for piping keyword arguments into an nn.module class.
+    Helper mixin class for piping keyword arguments into an nn.module class.
+
+    Using AutoModule is required for text-based graph serialization.
 
     Keyword Argument sources (lower precedence first):
 
@@ -66,9 +68,18 @@ class AutoModule:
 
         if module == "auto": 
             self.module_kwargs = module_kwargs                
-            module = self.auto_module_class(**module_kwargs)            
+            module = self.auto_module_class(**module_kwargs)     
+            self._auto_module_captured = True
+        else:
+            self._auto_module_captured = False
 
         super().__init__(*args, module=module, **kwargs)
+
+    _subclass_registry: set = set()
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        AutoModule._subclass_registry.add(cls)
+                
 
 
 @contextlib.contextmanager

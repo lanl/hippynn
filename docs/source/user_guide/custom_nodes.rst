@@ -66,7 +66,7 @@ Note that we have added the ``input_names`` tuple as well, this attribute can be
 both SingleNode and MultiNode classes.
 
 The ``main_output_name`` attribute specifies what tensor to use by default when sending information
-to a child node. This class also makes use of the ``AutoKw`` mix-in for defining a new module
+to a child node. This class also makes use of the ``AutoModule`` mix-in for defining a new module
 using keyword arguments. These arguments will be passed to a new instance of the attribute
 ``auto_module_class``. To use this node, we now only need to supply the arguments for the pytorch module:
 
