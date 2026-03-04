@@ -122,11 +122,13 @@ class HBondNode(ExpandParents, AutoKw, MultiNode):
         super().__init__(name, parents, **kwargs)
 
 
-class AtomizationEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, MultiNode):
+class AtomizationEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, MultiNode, _DeprecatedNamesMixin):
+    _DEPRECATED_NAMES = {"mol_energy": "system_energy"}
+
     input_names = "hier_features", "vac_features", "encoding", "system_index", "n_systems"
-    output_names = "mol_energy", "partial_energies", "hierarchicality"
+    output_names = "system_energy", "partial_energies", "hierarchicality"
     output_index_states = IdxType.Systems, None, IdxType.Systems
-    main_output_name = "mol_energy"
+    main_output_name = "system_energy"
     auto_module_class = target_modules.AtomizationEnergy
     auto_module_kwargs = "feature_sizes",
 

@@ -65,6 +65,8 @@ class PeriodicPairIndexer(AutoKw, ExpandParents,  PeriodicPairOutputs, PairIndex
         self.dist_hard_max = dist_hard_max
         super().__init__(name, parents, dist_hard_max=dist_hard_max, **kwargs)
 
+class SparsePairIndexer(PeriodicPairIndexer):
+    auto_module_class = pairs_modules.SparsePairIndexer
 
 class Memory:
     @property

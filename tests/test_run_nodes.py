@@ -36,7 +36,6 @@ def example_all_target_nodes(neural_network_node, bond_parameters):
     return all_targets
 
 
-
 @pytest.mark.parametrize("operation", ["add", "sub", "mul", "truediv", "pow"])
 def test_node_algebra(operation):
     from hippynn.graphs.nodes.base import ValueNode
@@ -109,9 +108,14 @@ def test_atomization_conversion(example_box, neural_network_node):
     hen_equivalent = energy.create_henergy_equivalent()
 
     input_nodes = energy.find_relatives(base.InputNode)
-    model = hippynn.GraphModule(input_nodes, [energy.mol_energy, hen_equivalent.mol_energy])
+    model = hippynn.GraphModule(input_nodes, [energy.system_energy, hen_equivalent.system_energy])
 
     args = [example_box[node.db_name] for node in input_nodes]
+    
+    # convert dtypes for better precision
+    args = [a.to(torch.float64 if a.dtype.is_floating_point else a.dtype) for a in args]
+    model = model.to(torch.float64)
+
     en_1, en_2 = model(*args)
 
     assert torch.allclose(en_1, en_2)
