@@ -1,0 +1,663 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>neighbor_algorithm module &mdash; hippynn 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c9d3d048"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="analysis module" href="hippynn.layers.pairs.analysis.html" />
+    <link rel="prev" title="csrtable module" href="hippynn.layers.pairs.csr_pairs.csrtable.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../what_is_hippynn.html">What is hippynn?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Research articles using hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/features.html">hippynn Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/concepts.html">hippynn Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/databases.html">Databases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/units.html">Units in hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/performance.html">Performance Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/ckernels.html">Custom Kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/loss_graph.html">Model and Loss Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/settings.html">Library Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/custom_nodes.html">Creating Custom Node Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/minimal_workflow.html">Minimal Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/controller.html">Controller</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/predictor.html">Predictor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/ensembles.html">Ensembling Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/periodic.html">Periodic Boundary Conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/forces.html">Force Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/restarting.html">Restarting training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/ase_calculator.html">ASE Calculators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/mliap_unified.html">LAMMPS interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/excited_states.html">Non-Adiabiatic Excited States</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/cheq.html">Charge Equilibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/weighted_loss.html">Weighted/Masked Loss Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/lightning.html">Pytorch Lightning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/hyperopt.html">Hyperparameter optimization with Ax and Ray</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="hippynn.html">Full API Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.settings"><code class="docutils literal notranslate"><span class="pre">settings</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.Database"><code class="docutils literal notranslate"><span class="pre">Database</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.DirectoryDatabase"><code class="docutils literal notranslate"><span class="pre">DirectoryDatabase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.GraphModule"><code class="docutils literal notranslate"><span class="pre">GraphModule</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.IdxType"><code class="docutils literal notranslate"><span class="pre">IdxType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.NPZDatabase"><code class="docutils literal notranslate"><span class="pre">NPZDatabase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.Predictor"><code class="docutils literal notranslate"><span class="pre">Predictor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.SetupParams"><code class="docutils literal notranslate"><span class="pre">SetupParams</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.active_directory"><code class="docutils literal notranslate"><span class="pre">active_directory()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.hierarchical_energy_initialization"><code class="docutils literal notranslate"><span class="pre">hierarchical_energy_initialization()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint"><code class="docutils literal notranslate"><span class="pre">load_checkpoint()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_model_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_model_from_cwd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.log_terminal"><code class="docutils literal notranslate"><span class="pre">log_terminal()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.make_ensemble"><code class="docutils literal notranslate"><span class="pre">make_ensemble()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.reload_settings"><code class="docutils literal notranslate"><span class="pre">reload_settings()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.set_custom_kernels"><code class="docutils literal notranslate"><span class="pre">set_custom_kernels()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.setup_and_profile"><code class="docutils literal notranslate"><span class="pre">setup_and_profile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.setup_and_train"><code class="docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.setup_training"><code class="docutils literal notranslate"><span class="pre">setup_training()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.test_model"><code class="docutils literal notranslate"><span class="pre">test_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.train_model"><code class="docutils literal notranslate"><span class="pre">train_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.html">custom_kernels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.databases.html">databases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.experiment.html">experiment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.graphs.html">graphs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.interfaces.html">interfaces</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="hippynn.layers.html">layers</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.hiplayers.html">hiplayers</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="hippynn.layers.pairs.html">pairs</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.html">csr_pairs</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.csrtable.html">csrtable module</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">neighbor_algorithm module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#pipeline-high-level">Pipeline (high level)</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_image_atoms"><code class="docutils literal notranslate"><span class="pre">build_image_atoms()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_image_offsets"><code class="docutils literal notranslate"><span class="pre">build_image_offsets()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_initial_data"><code class="docutils literal notranslate"><span class="pre">build_initial_data()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.calc_neighbors"><code class="docutils literal notranslate"><span class="pre">calc_neighbors()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.calculate_aabb"><code class="docutils literal notranslate"><span class="pre">calculate_aabb()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.expand_pairs"><code class="docutils literal notranslate"><span class="pre">expand_pairs()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.normalize_atoms"><code class="docutils literal notranslate"><span class="pre">normalize_atoms()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.prune_pairs"><code class="docutils literal notranslate"><span class="pre">prune_pairs()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.voxel_adjacency"><code class="docutils literal notranslate"><span class="pre">voxel_adjacency()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.voxelize_images"><code class="docutils literal notranslate"><span class="pre">voxelize_images()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.analysis.html">analysis module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.dispatch.html">dispatch module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.filters.html">filters module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.indexing.html">indexing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.open.html">open module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.periodic.html">periodic module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.physics.html">physics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.algebra.html">algebra module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.excited.html">excited module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.indexers.html">indexers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.regularization.html">regularization module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.targets.html">targets module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.transform.html">transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.molecular_dynamics.html">molecular_dynamics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.networks.html">networks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.optimizer.html">optimizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.plotting.html">plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.pretraining.html">pretraining module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.tools.html">tools module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api_summary/hippynn.html">API Summary Pages</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="hippynn.html">hippynn</a></li>
+          <li class="breadcrumb-item"><a href="hippynn.layers.html">layers</a></li>
+          <li class="breadcrumb-item"><a href="hippynn.layers.pairs.html">pairs</a></li>
+          <li class="breadcrumb-item"><a href="hippynn.layers.pairs.csr_pairs.html">csr_pairs</a></li>
+      <li class="breadcrumb-item active">neighbor_algorithm module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api_documentation/hippynn.layers.pairs.csr_pairs.neighbor_algorithm.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="hippynn.layers.pairs.csr_pairs.csrtable.html" class="btn btn-neutral float-left" title="csrtable module" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hippynn.layers.pairs.analysis.html" class="btn btn-neutral float-right" title="analysis module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="neighbor-algorithm-module">
+<h1>neighbor_algorithm module<a class="headerlink" href="#neighbor-algorithm-module" title="Link to this heading"></a></h1>
+<p>Full Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.layers.pairs.csr_pairs.neighbor_algorithm</span></code> module.
+<a class="reference internal" href="../api_summary/hippynn.layers.pairs.csr_pairs.neighbor_algorithm.html"><span class="doc">Click here for a summary page.</span></a></p>
+<p id="module-hippynn.layers.pairs.csr_pairs.neighbor_algorithm">This file was written with assistance from an LLM.</p>
+<p>Neighbor list construction over triclinic periodic cells using PyTorch + CSR.</p>
+<p>This module builds neighbor pairs for batched molecular/atomistic systems with
+triclinic cells. It uses a light CSR “algebra” (see <code class="xref py py-mod docutils literal notranslate"><span class="pre">csrtable</span></code>) to stage
+row-wise joins and filtering:</p>
+<section id="pipeline-high-level">
+<h2>Pipeline (high level)<a class="headerlink" href="#pipeline-high-level" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_initial_data" title="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_initial_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_initial_data()</span></code></a> — wrap raw inputs into CSRs for systems/atoms.</p></li>
+<li><p><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.normalize_atoms" title="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.normalize_atoms"><code class="xref py py-func docutils literal notranslate"><span class="pre">normalize_atoms()</span></code></a> — wrap positions to fractional [0,1)^3 and record integer image offsets.</p></li>
+<li><p><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_image_offsets" title="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_image_offsets"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_image_offsets()</span></code></a> — compute per-system image-shift stencils large enough for <code class="docutils literal notranslate"><span class="pre">cutoff</span></code>.</p></li>
+<li><p><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_image_atoms" title="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_image_atoms"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_image_atoms()</span></code></a> — cartesian-expand primary atoms × image shifts.</p></li>
+<li><p><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.voxelize_images" title="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.voxelize_images"><code class="xref py py-func docutils literal notranslate"><span class="pre">voxelize_images()</span></code></a> — voxel grid per system with edge ≈ <code class="docutils literal notranslate"><span class="pre">cutoff</span></code> and assign image-atoms to voxels.</p></li>
+<li><p><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.voxel_adjacency" title="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.voxel_adjacency"><code class="xref py py-func docutils literal notranslate"><span class="pre">voxel_adjacency()</span></code></a> — build voxel–voxel edges via a fixed stencil (includes self-edges).</p></li>
+<li><p><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.expand_pairs" title="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.expand_pairs"><code class="xref py py-func docutils literal notranslate"><span class="pre">expand_pairs()</span></code></a> — expand voxel edges into candidate atom pairs.</p></li>
+<li><p><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.prune_pairs" title="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.prune_pairs"><code class="xref py py-func docutils literal notranslate"><span class="pre">prune_pairs()</span></code></a> — filter by cutoff; drop same-atom self-edges for primary images.</p></li>
+<li><p><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.calc_neighbors" title="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.calc_neighbors"><code class="xref py py-func docutils literal notranslate"><span class="pre">calc_neighbors()</span></code></a> — orchestration entry point that returns final pairs.</p></li>
+</ol>
+<p>All tensor operations are batched and device/dtype agnostic. Index tensors are
+<code class="docutils literal notranslate"><span class="pre">torch.long</span></code>. Distances/displacements remain differentiable w.r.t. input positions.</p>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_image_atoms">
+<span class="sig-name descname"><span class="pre">build_image_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atomCSR</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">imageCSR</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">systemCSR</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/neighbor_algorithm.html#build_image_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_image_atoms" title="Link to this definition"></a></dt>
+<dd><p>Expand primary atoms across image offsets (row-wise outer join).</p>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>atomCSR<span class="classifier">CSRTable</span></dt><dd><p>Rows = systems; requires fields
+<code class="docutils literal notranslate"><span class="pre">&quot;positions&quot;:[N,3]</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;atom_gid&quot;:[N]</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;offsets&quot;:[N,3]</span></code> (base offsets).</p>
+</dd>
+<dt>imageCSR<span class="classifier">CSRTable</span></dt><dd><p>Rows = systems; requires fields
+<code class="docutils literal notranslate"><span class="pre">&quot;image_offsets&quot;:[I,3]</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;shift&quot;:[I,3]</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;is_primary&quot;:[I]</span></code>.</p>
+</dd>
+<dt>systemCSR<span class="classifier">CSRTable</span></dt><dd><p>Rows = systems; requires <code class="docutils literal notranslate"><span class="pre">&quot;cells&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;cutoff&quot;</span></code> (used for culling).</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h2>Returns<a class="headerlink" href="#returns" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>image_atomCSR<span class="classifier">CSRTable</span></dt><dd><p>Rows = systems; entries = atoms×images. Carries:
+<code class="docutils literal notranslate"><span class="pre">&quot;positions&quot;:[M,3]</span></code> (shifted),
+<code class="docutils literal notranslate"><span class="pre">&quot;atom_gid&quot;:[M]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">&quot;offsets&quot;:[M,3]</span></code> (total offset for that image),
+<code class="docutils literal notranslate"><span class="pre">&quot;is_primary&quot;:[M]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">&quot;system&quot;:[M]</span></code> (system id per entry).</p>
+</dd>
+</dl>
+</section>
+<section id="pruning">
+<h2>Pruning<a class="headerlink" href="#pruning" title="Link to this heading"></a></h2>
+<p>A coarse AABB check removes far-away images that cannot generate neighbors
+within <code class="docutils literal notranslate"><span class="pre">cutoff</span></code> (per system).</p>
+</section>
+<section id="complexity">
+<h2>Complexity<a class="headerlink" href="#complexity" title="Link to this heading"></a></h2>
+<p>O(N*I) per system in the worst case before pruning; typically much less after AABB culling.</p>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_image_offsets">
+<span class="sig-name descname"><span class="pre">build_image_offsets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">systemCSR</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_stencil</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/neighbor_algorithm.html#build_image_offsets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_image_offsets" title="Link to this definition"></a></dt>
+<dd><p>Compute per-system periodic image offsets sufficient for <code class="docutils literal notranslate"><span class="pre">cutoff</span></code>.</p>
+<p>The stencil size per axis is
+<code class="docutils literal notranslate"><span class="pre">n_rep[k]</span> <span class="pre">=</span> <span class="pre">ceil(cutoff</span> <span class="pre">*</span> <span class="pre">||(H^{-1})_{k,:}||_2)</span></code> with a symmetric range
+<code class="docutils literal notranslate"><span class="pre">{-n_rep[k],</span> <span class="pre">...,</span> <span class="pre">0,</span> <span class="pre">...,</span> <span class="pre">+n_rep[k]}</span></code>. The Cartesian shift for an integer
+offset <code class="docutils literal notranslate"><span class="pre">k</span></code> is <code class="docutils literal notranslate"><span class="pre">-k</span> <span class="pre">&#64;</span> <span class="pre">H</span></code> (so that adding it moves an image back into the
+primary cell).</p>
+<section id="id1">
+<h2>Parameters<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<dl>
+<dt>systemCSR<span class="classifier">CSRTable</span></dt><dd><p>Rows = systems; requires <code class="docutils literal notranslate"><span class="pre">&quot;cells&quot;</span> <span class="pre">:</span> <span class="pre">[S,3,3]</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;cutoff&quot;</span> <span class="pre">:</span> <span class="pre">[S]</span></code>.
+If present, <code class="docutils literal notranslate"><span class="pre">&quot;cells_inv&quot;</span></code> is reused; otherwise it is computed.</p>
+</dd>
+<dt>use_full_stencil<span class="classifier">bool, default <code class="docutils literal notranslate"><span class="pre">True</span></code></span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code> use the full symmetric 3D product. (Half-stencils or sparse
+variants can be added later.)</p>
+</dd>
+</dl>
+</section>
+<section id="id2">
+<h2>Returns<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>imageCSR<span class="classifier">CSRTable</span></dt><dd><p>Rows = systems; entries = image shifts for that system. Carries:
+<code class="docutils literal notranslate"><span class="pre">&quot;image_offsets&quot;</span> <span class="pre">:</span> <span class="pre">[nnz,3]</span></code> (long offsets),
+<code class="docutils literal notranslate"><span class="pre">&quot;shift&quot;</span> <span class="pre">:</span> <span class="pre">[nnz,3]</span></code> (Cartesian shift to apply),
+<code class="docutils literal notranslate"><span class="pre">&quot;is_primary&quot;</span> <span class="pre">:</span> <span class="pre">[nnz]</span></code> (True for <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">==</span> <span class="pre">(0,0,0)</span></code>).</p>
+</dd>
+</dl>
+</section>
+<section id="id3">
+<h2>Complexity<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<p>O(S) to compute per-axis replication counts; O(total images) to materialize.</p>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_initial_data">
+<span class="sig-name descname"><span class="pre">build_initial_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonblank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cells</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/neighbor_algorithm.html#build_initial_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_initial_data" title="Link to this definition"></a></dt>
+<dd><p>Package raw inputs (positions/mask/cells/cutoff) into CSR containers.</p>
+<section id="id4">
+<h2>Parameters<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<dl>
+<dt>positions<span class="classifier">Tensor, shape <code class="docutils literal notranslate"><span class="pre">[S,</span> <span class="pre">A,</span> <span class="pre">3]</span></code>, float</span></dt><dd><p>Cartesian positions per system (padded to a common <code class="docutils literal notranslate"><span class="pre">A</span></code>). Can be
+<code class="docutils literal notranslate"><span class="pre">float32</span></code>/<code class="docutils literal notranslate"><span class="pre">float64</span></code>. Unused (masked) atoms are ignored via <code class="docutils literal notranslate"><span class="pre">nonblank</span></code>.</p>
+</dd>
+<dt>nonblank<span class="classifier">BoolTensor, shape <code class="docutils literal notranslate"><span class="pre">[S,</span> <span class="pre">A]</span></code></span></dt><dd><p>Mask of real atoms per system. <code class="docutils literal notranslate"><span class="pre">True</span></code> entries become CSR rows’ entries.</p>
+</dd>
+<dt>cells<span class="classifier">Tensor, shape <code class="docutils literal notranslate"><span class="pre">[S,</span> <span class="pre">3,</span> <span class="pre">3]</span></code>, float</span></dt><dd><p>Triclinic cell matrices (row- or column-major consistent with einsum ops).</p>
+</dd>
+<dt>cutoff<span class="classifier">Tensor <code class="docutils literal notranslate"><span class="pre">[S]</span></code> or <code class="docutils literal notranslate"><span class="pre">float</span></code></span></dt><dd><p>Radial cutoff per system; a scalar is broadcast to all systems.</p>
+</dd>
+</dl>
+</section>
+<section id="id5">
+<h2>Returns<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>atomCSR<span class="classifier">CSRTable</span></dt><dd><p>Rows = systems; entries = real atoms. Carries at least:
+<code class="docutils literal notranslate"><span class="pre">&quot;raw_positions&quot;</span> <span class="pre">:</span> <span class="pre">[nnz,3]</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;atom_gid&quot;</span> <span class="pre">:</span> <span class="pre">[nnz]</span></code> (global id in the
+padded array), and any fields required downstream.</p>
+</dd>
+<dt>systemCSR<span class="classifier">CSRTable</span></dt><dd><p>One entry per system (<code class="docutils literal notranslate"><span class="pre">counts</span> <span class="pre">=</span> <span class="pre">1</span></code>). Carries:
+<code class="docutils literal notranslate"><span class="pre">&quot;cells&quot;</span> <span class="pre">:</span> <span class="pre">[S,3,3]</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;cutoff&quot;</span> <span class="pre">:</span> <span class="pre">[S]</span></code>.</p>
+</dd>
+</dl>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">atom_gid</span></code> preserves a mapping back to the original padded indices.</p></li>
+<li><p>No heavy validation is performed here.</p></li>
+</ul>
+</section>
+<section id="id6">
+<h2>Complexity<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<p>O(S*A) to build the mask-based CSR.</p>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.calc_neighbors">
+<span class="sig-name descname"><span class="pre">calc_neighbors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonblank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cells</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_stencil</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_displacements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/neighbor_algorithm.html#calc_neighbors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.calc_neighbors" title="Link to this definition"></a></dt>
+<dd><p>Full neighbor-list pipeline (batched triclinic PBC).</p>
+<dl class="simple">
+<dt>Pipeline Structure:</dt><dd><ol class="arabic simple">
+<li><p>normalize_atoms      -&gt; wrapped positions + base image offsets (integer)</p></li>
+<li><p>build_image_offsets  -&gt; per-system dynamic image CSR with (“image_offsets”,”shift”,”is_primary”)</p></li>
+<li><p>build_image_atoms    -&gt; CSR over systems with (“positions”,”atom_gid”,”offsets”,”is_primary”,”system”)</p></li>
+<li><p>voxelize_images      -&gt; (voxel_atomCSR, voxelCSR, per_system_grid_shape)</p></li>
+<li><p>voxel_adjancency     -&gt; (first_voxel_id, second_voxel_id), includes (0,0,0)</p></li>
+<li><p>expand edges -&gt; pairs via CSRTable.expand_cartesian_pairings on voxel_atomCSR</p></li>
+<li><p>prune: distance &lt; cutoff, drop self-connections</p></li>
+</ol>
+</dd>
+</dl>
+<section id="id7">
+<h2>Parameters<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<dl>
+<dt>positions<span class="classifier">Tensor, shape <code class="docutils literal notranslate"><span class="pre">[S,</span> <span class="pre">A,</span> <span class="pre">3]</span></code></span></dt><dd><p>Cartesian positions per system, padded to <code class="docutils literal notranslate"><span class="pre">A</span></code>.</p>
+</dd>
+<dt>nonblank<span class="classifier">BoolTensor, shape <code class="docutils literal notranslate"><span class="pre">[S,</span> <span class="pre">A]</span></code></span></dt><dd><p>Mask indicating valid atoms.</p>
+</dd>
+<dt>cells<span class="classifier">Tensor, shape <code class="docutils literal notranslate"><span class="pre">[S,</span> <span class="pre">3,</span> <span class="pre">3]</span></code></span></dt><dd><p>Triclinic cell matrices per system.</p>
+</dd>
+<dt>cutoff<span class="classifier">Tensor <code class="docutils literal notranslate"><span class="pre">[S]</span></code> or <code class="docutils literal notranslate"><span class="pre">float</span></code></span></dt><dd><p>Per-system radial cutoff; a scalar is broadcast.</p>
+</dd>
+<dt>use_full_stencil<span class="classifier">bool, default <code class="docutils literal notranslate"><span class="pre">True</span></code></span></dt><dd><p>Controls the image offset stencil in <a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_image_offsets" title="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_image_offsets"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_image_offsets()</span></code></a>.</p>
+</dd>
+<dt>return_displacements: bool, default <code class="docutils literal notranslate"><span class="pre">True</span></code></dt><dd><p>If true, return distances and displacments as well as discrete indices.</p>
+</dd>
+</dl>
+</section>
+<section id="id8">
+<h2>Returns<a class="headerlink" href="#id8" title="Link to this heading"></a></h2>
+<dl>
+<dt>idA<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[K]</span></code></span></dt><dd><p>Source atom global ids (within the padded input).</p>
+</dd>
+<dt>idB<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[K]</span></code></span></dt><dd><p>Target atom global ids.</p>
+</dd>
+<dt>rel_k<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[K,</span> <span class="pre">3]</span></code></span></dt><dd><p>Integer image offset for <code class="docutils literal notranslate"><span class="pre">B</span></code> relative to <code class="docutils literal notranslate"><span class="pre">A</span></code>.</p>
+</dd>
+<dt>dist<span class="classifier">Tensor, shape <code class="docutils literal notranslate"><span class="pre">[K]</span></code></span></dt><dd><p>Euclidean distances <code class="docutils literal notranslate"><span class="pre">||posB</span> <span class="pre">-</span> <span class="pre">posA||</span></code>.</p>
+</dd>
+<dt>disp<span class="classifier">Tensor, shape <code class="docutils literal notranslate"><span class="pre">[K,</span> <span class="pre">3]</span></code></span></dt><dd><p>Displacements <code class="docutils literal notranslate"><span class="pre">posB</span> <span class="pre">-</span> <span class="pre">posA</span></code> in Cartesian coordinates.</p>
+</dd>
+</dl>
+</section>
+<section id="guarantees">
+<h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Deterministic ordering given fixed inputs and a fixed CSR ordering policy.</p></li>
+<li><p>Includes cross-image neighbors due to explicit image expansion.</p></li>
+<li><p>Excludes trivial self-edges as described in <a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.prune_pairs" title="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.prune_pairs"><code class="xref py py-func docutils literal notranslate"><span class="pre">prune_pairs()</span></code></a>.</p></li>
+</ul>
+</section>
+<section id="id9">
+<h2>Complexity<a class="headerlink" href="#id9" title="Link to this heading"></a></h2>
+<p>Roughly linear in the number of candidate pairs after voxel pruning; memory
+peaks during pair expansion and can be controlled by voxel granularity.</p>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">idA</span><span class="p">,</span> <span class="n">idB</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">disp</span> <span class="o">=</span> <span class="n">calc_neighbors</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">nonblank</span><span class="p">,</span> <span class="n">cells</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.calculate_aabb">
+<span class="sig-name descname"><span class="pre">calculate_aabb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_systems</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/neighbor_algorithm.html#calculate_aabb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.calculate_aabb" title="Link to this definition"></a></dt>
+<dd><p>Compute per-system axis-aligned bounding boxes (AABB).</p>
+<section id="id10">
+<h2>Parameters<a class="headerlink" href="#id10" title="Link to this heading"></a></h2>
+<dl>
+<dt>positions<span class="classifier">Tensor, shape <code class="docutils literal notranslate"><span class="pre">[M,</span> <span class="pre">3]</span></code> (subset of atoms/images)</span></dt><dd><p>Cartesian coordinates to bound.</p>
+</dd>
+<dt>system_id<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[M]</span></code></span></dt><dd><p>Owning system id for each position.</p>
+</dd>
+<dt>n_systems<span class="classifier">int</span></dt><dd><p>Total number of systems.</p>
+</dd>
+</dl>
+</section>
+<section id="id11">
+<h2>Returns<a class="headerlink" href="#id11" title="Link to this heading"></a></h2>
+<dl>
+<dt>mins<span class="classifier">Tensor, shape <code class="docutils literal notranslate"><span class="pre">[S,</span> <span class="pre">3]</span></code></span></dt><dd><p>Per-system minima; systems without entries return zeros.</p>
+</dd>
+<dt>maxs<span class="classifier">Tensor, shape <code class="docutils literal notranslate"><span class="pre">[S,</span> <span class="pre">3]</span></code></span></dt><dd><p>Per-system maxima; systems without entries return zeros.</p>
+</dd>
+</dl>
+</section>
+<section id="id12">
+<h2>Notes<a class="headerlink" href="#id12" title="Link to this heading"></a></h2>
+<p>Uses <code class="docutils literal notranslate"><span class="pre">scatter_reduce_</span></code> with <code class="docutils literal notranslate"><span class="pre">amin</span></code>/<code class="docutils literal notranslate"><span class="pre">amax</span></code>. Handles empty systems by
+emitting <code class="docutils literal notranslate"><span class="pre">[0,0,0]</span></code> for both min/max.</p>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.expand_pairs">
+<span class="sig-name descname"><span class="pre">expand_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voxel_atomCSR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_vox</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_vox</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/neighbor_algorithm.html#expand_pairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.expand_pairs" title="Link to this definition"></a></dt>
+<dd><p>Expand voxel edges to candidate atom pairs.</p>
+<section id="id13">
+<h2>Parameters<a class="headerlink" href="#id13" title="Link to this heading"></a></h2>
+<dl>
+<dt>voxel_atomCSR<span class="classifier">CSRTable</span></dt><dd><p>Rows = global voxel ids; contains per-entry fields for image-atoms.</p>
+</dd>
+<dt>first_vox<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[E]</span></code></span></dt><dd><p>Global voxel ids (left endpoints).</p>
+</dd>
+<dt>second_vox<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[E]</span></code></span></dt><dd><p>Global voxel ids (right endpoints).</p>
+</dd>
+</dl>
+</section>
+<section id="id14">
+<h2>Returns<a class="headerlink" href="#id14" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>pairs<span class="classifier">CSRTable</span></dt><dd><p>Rows = edges (one row per <code class="docutils literal notranslate"><span class="pre">(first_vox[i],</span> <span class="pre">second_vox[i])</span></code>), entries =
+Cartesian product of atoms from the two voxels. Carries at least:
+<code class="docutils literal notranslate"><span class="pre">&quot;idA&quot;,&quot;idB&quot;,&quot;posA&quot;,&quot;posB&quot;,&quot;rel_k&quot;,&quot;is_primary_B&quot;</span></code> and any additional
+payload required for pruning.</p>
+</dd>
+</dl>
+</section>
+<section id="id15">
+<h2>Notes<a class="headerlink" href="#id15" title="Link to this heading"></a></h2>
+<p>Implemented via <code class="xref py py-meth docutils literal notranslate"><span class="pre">CSRTable.expand_pairings()</span></code>/<code class="docutils literal notranslate"><span class="pre">outer</span></code>-style joins for
+the specified voxel pairings.</p>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.normalize_atoms">
+<span class="sig-name descname"><span class="pre">normalize_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atomCSR</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">systemCSR</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/neighbor_algorithm.html#normalize_atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.normalize_atoms" title="Link to this definition"></a></dt>
+<dd><p>Wrap atoms into the primary triclinic cell and record image offsets.</p>
+<p>For each atom with Cartesian position <code class="docutils literal notranslate"><span class="pre">x</span></code> and cell <code class="docutils literal notranslate"><span class="pre">H</span></code>, compute
+fractional <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">=</span> <span class="pre">H^{-1}</span> <span class="pre">x</span></code>, integer image <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">floor(f)</span></code>, wrapped
+fractional <code class="docutils literal notranslate"><span class="pre">f'</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">-</span> <span class="pre">k</span></code> in <code class="docutils literal notranslate"><span class="pre">[0,1)^3</span></code>, and wrapped Cartesian
+<code class="docutils literal notranslate"><span class="pre">x'</span> <span class="pre">=</span> <span class="pre">H</span> <span class="pre">f'</span></code>. Store these plus <code class="docutils literal notranslate"><span class="pre">H^{-1}</span></code> for later use.</p>
+<section id="id16">
+<h2>Parameters<a class="headerlink" href="#id16" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>atomCSR<span class="classifier">CSRTable</span></dt><dd><p>Must carry <code class="docutils literal notranslate"><span class="pre">&quot;raw_positions&quot;</span> <span class="pre">:</span> <span class="pre">[nnz,3]</span></code> and rows aligned to systems.</p>
+</dd>
+<dt>systemCSR<span class="classifier">CSRTable</span></dt><dd><p>Must carry <code class="docutils literal notranslate"><span class="pre">&quot;cells&quot;</span> <span class="pre">:</span> <span class="pre">[S,3,3]</span></code>. <code class="docutils literal notranslate"><span class="pre">cells</span></code> are inverted in-place and
+stored as <code class="docutils literal notranslate"><span class="pre">&quot;cells_inv&quot;</span></code>.</p>
+</dd>
+</dl>
+</section>
+<section id="id17">
+<h2>Returns<a class="headerlink" href="#id17" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>atomCSR<span class="classifier">CSRTable</span></dt><dd><p>With added fields:
+<code class="docutils literal notranslate"><span class="pre">&quot;positions&quot;</span> <span class="pre">:</span> <span class="pre">[nnz,3]</span></code> (wrapped Cartesian),
+<code class="docutils literal notranslate"><span class="pre">&quot;offsets&quot;</span> <span class="pre">:</span> <span class="pre">[nnz,3]</span></code> (integer images, <code class="docutils literal notranslate"><span class="pre">long</span></code>).</p>
+</dd>
+<dt>systemCSR<span class="classifier">CSRTable</span></dt><dd><p>With added field <code class="docutils literal notranslate"><span class="pre">&quot;cells_inv&quot;</span> <span class="pre">:</span> <span class="pre">[S,3,3]</span></code>.</p>
+</dd>
+</dl>
+</section>
+<section id="determinism">
+<h2>Determinism<a class="headerlink" href="#determinism" title="Link to this heading"></a></h2>
+<p>Purely functional given inputs; no randomness.</p>
+</section>
+<section id="autograd">
+<h2>Autograd<a class="headerlink" href="#autograd" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">positions</span></code> remain differentiable w.r.t. input positions; <code class="docutils literal notranslate"><span class="pre">offsets</span></code>/<code class="docutils literal notranslate"><span class="pre">cells_inv</span></code> are non-differentiable.</p>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.prune_pairs">
+<span class="sig-name descname"><span class="pre">prune_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pairs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/neighbor_algorithm.html#prune_pairs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.prune_pairs" title="Link to this definition"></a></dt>
+<dd><p>Apply geometric/pruning predicates to candidate pairs.</p>
+<section id="predicates">
+<h2>Predicates<a class="headerlink" href="#predicates" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Radial cutoff: <code class="docutils literal notranslate"><span class="pre">||posB</span> <span class="pre">-</span> <span class="pre">posA||</span> <span class="pre">&lt;</span> <span class="pre">cutoff</span></code> (per-system).</p></li>
+<li><p>Self-edge removal: when <code class="docutils literal notranslate"><span class="pre">idA</span> <span class="pre">==</span> <span class="pre">idB</span></code>, drop if <code class="docutils literal notranslate"><span class="pre">is_primary_B</span></code> is True
+(i.e., the primary image would create a trivial self-connection).</p></li>
+</ol>
+</section>
+<section id="id18">
+<h2>Parameters<a class="headerlink" href="#id18" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>pairs<span class="classifier">CSRTable</span></dt><dd><p>Must carry fields:
+<code class="docutils literal notranslate"><span class="pre">&quot;idA&quot;,&quot;idB&quot;,&quot;posA&quot;,&quot;posB&quot;,&quot;rel_k&quot;,&quot;cutoff&quot;,&quot;is_primary_B&quot;</span></code> (names may vary
+slightly depending on upstream ops, but semantics match above).</p>
+</dd>
+</dl>
+</section>
+<section id="id19">
+<h2>Returns<a class="headerlink" href="#id19" title="Link to this heading"></a></h2>
+<p>idA : LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[K]</span></code>
+idB : LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[K]</span></code>
+rel_k : LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[K,3]</span></code>
+dist : Tensor, shape <code class="docutils literal notranslate"><span class="pre">[K]</span></code>
+disp : Tensor, shape <code class="docutils literal notranslate"><span class="pre">[K,3]</span></code></p>
+</section>
+<section id="id20">
+<h2>Autograd<a class="headerlink" href="#id20" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">dist</span></code> and <code class="docutils literal notranslate"><span class="pre">disp</span></code> are differentiable; discrete tensors are not.</p>
+</section>
+<section id="id21">
+<h2>Complexity<a class="headerlink" href="#id21" title="Link to this heading"></a></h2>
+<p>O(E_pairs) with simple boolean masking and a single norm.</p>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.voxel_adjacency">
+<span class="sig-name descname"><span class="pre">voxel_adjacency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voxelCSR</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">systemCSR</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/neighbor_algorithm.html#voxel_adjacency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.voxel_adjacency" title="Link to this definition"></a></dt>
+<dd><p>Build voxel–voxel edges using a fixed stencil (includes self-edges).</p>
+<section id="assumptions">
+<h2>Assumptions<a class="headerlink" href="#assumptions" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>PBC are handled by explicit image expansion; only in-bounds checks are needed.</p></li>
+<li><p>Keep an edge if at least one endpoint voxel is primary (cheap pruning).</p></li>
+<li><p>The stencil can be full (e.g., 3×3×3) or reduced; current code emits a
+symmetric set including (0,0,0).</p></li>
+</ul>
+</section>
+<section id="id22">
+<h2>Parameters<a class="headerlink" href="#id22" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>voxelCSR<span class="classifier">CSRTable</span></dt><dd><p>Rows = systems; entries = voxels with fields
+<code class="docutils literal notranslate"><span class="pre">&quot;v&quot;,&quot;m&quot;,&quot;s&quot;,&quot;voxel_gid&quot;,&quot;is_primary_voxel&quot;</span></code>.</p>
+</dd>
+<dt>systemCSR<span class="classifier">CSRTable</span></dt><dd><p>Provides per-system voxel grid shapes.</p>
+</dd>
+</dl>
+</section>
+<section id="id23">
+<h2>Returns<a class="headerlink" href="#id23" title="Link to this heading"></a></h2>
+<dl>
+<dt>first_global<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[E]</span></code></span></dt><dd><p>Global voxel ids for the first endpoint.</p>
+</dd>
+<dt>second_global<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[E]</span></code></span></dt><dd><p>Global voxel ids for the second endpoint.</p>
+</dd>
+</dl>
+</section>
+<section id="id24">
+<h2>Complexity<a class="headerlink" href="#id24" title="Link to this heading"></a></h2>
+<p>O(V * stencil_size), typically small constant factor per voxel.</p>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.voxelize_images">
+<span class="sig-name descname"><span class="pre">voxelize_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_atomCSR</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">systemCSR</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/neighbor_algorithm.html#voxelize_images"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.voxelize_images" title="Link to this definition"></a></dt>
+<dd><p>Partition image-atoms into near-cubic voxels of edge ≈ cutoff.</p>
+<section id="id25">
+<h2>Parameters<a class="headerlink" href="#id25" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>image_atomCSR<span class="classifier">CSRTable</span></dt><dd><p>Must carry (at least) <code class="docutils literal notranslate"><span class="pre">&quot;positions&quot;,&quot;atom_gid&quot;,&quot;offsets&quot;,&quot;is_primary&quot;,&quot;system&quot;</span></code>.</p>
+</dd>
+<dt>systemCSR<span class="classifier">CSRTable</span></dt><dd><p>Must carry per-system <code class="docutils literal notranslate"><span class="pre">&quot;cutoff&quot;</span></code>. Outputs grid metadata into this CSR.</p>
+</dd>
+</dl>
+</section>
+<section id="id26">
+<h2>Returns<a class="headerlink" href="#id26" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>voxel_atomCSR<span class="classifier">CSRTable</span></dt><dd><p>Rows = global voxel ids; entries = image-atoms in that voxel. Carries the
+same fields, plus a per-entry <code class="docutils literal notranslate"><span class="pre">&quot;voxel_gid&quot;</span></code> if helpful downstream.</p>
+</dd>
+<dt>voxelCSR<span class="classifier">CSRTable</span></dt><dd><p>Rows = systems; one entry per voxel. Carries:
+<code class="docutils literal notranslate"><span class="pre">&quot;v&quot;:[V,3]</span></code> (local voxel coords),
+<code class="docutils literal notranslate"><span class="pre">&quot;m&quot;:[V,3]</span></code> (per-system voxel grid shape),
+<code class="docutils literal notranslate"><span class="pre">&quot;s&quot;:[V,3]</span></code> (local strides),
+<code class="docutils literal notranslate"><span class="pre">&quot;voxel_gid&quot;:[V]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">&quot;is_primary_voxel&quot;:[V]</span></code> (voxel contains at least one primary image-atom).</p>
+</dd>
+<dt>systemCSR<span class="classifier">CSRTable</span></dt><dd><p>Augmented with per-system fields, e.g.:
+<code class="docutils literal notranslate"><span class="pre">&quot;voxel_grid_shape&quot;:[S,3]</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;voxel_origin&quot;:[S,3]</span></code>.</p>
+</dd>
+</dl>
+</section>
+<section id="id27">
+<h2>Notes<a class="headerlink" href="#id27" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>A small skin factor inflates the voxel edge slightly to avoid numerical
+misses on boundaries.</p></li>
+<li><p>Local voxel ids are unraveled/raveled with per-system strides.</p></li>
+</ul>
+</section>
+<section id="id28">
+<h2>Complexity<a class="headerlink" href="#id28" title="Link to this heading"></a></h2>
+<p>O(M) to assign atoms to voxels; O(V) to materialize per-system voxel metadata.</p>
+</section>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="hippynn.layers.pairs.csr_pairs.csrtable.html" class="btn btn-neutral float-left" title="csrtable module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hippynn.layers.pairs.analysis.html" class="btn btn-neutral float-right" title="analysis module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

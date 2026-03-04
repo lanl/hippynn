@@ -1,0 +1,733 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>csrtable module &mdash; hippynn 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=e3456cac" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c9d3d048"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="neighbor_algorithm module" href="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.html" />
+    <link rel="prev" title="csr_pairs" href="hippynn.layers.pairs.csr_pairs.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../what_is_hippynn.html">What is hippynn?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bibliography.html">Research articles using hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/features.html">hippynn Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/concepts.html">hippynn Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/databases.html">Databases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/units.html">Units in hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/performance.html">Performance Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/ckernels.html">Custom Kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/loss_graph.html">Model and Loss Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/settings.html">Library Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/custom_nodes.html">Creating Custom Node Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/minimal_workflow.html">Minimal Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/controller.html">Controller</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/predictor.html">Predictor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/ensembles.html">Ensembling Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/periodic.html">Periodic Boundary Conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/forces.html">Force Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/restarting.html">Restarting training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/ase_calculator.html">ASE Calculators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/mliap_unified.html">LAMMPS interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/excited_states.html">Non-Adiabiatic Excited States</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/cheq.html">Charge Equilibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/weighted_loss.html">Weighted/Masked Loss Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/lightning.html">Pytorch Lightning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/hyperopt.html">Hyperparameter optimization with Ax and Ray</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="hippynn.html">Full API Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.settings"><code class="docutils literal notranslate"><span class="pre">settings</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.Database"><code class="docutils literal notranslate"><span class="pre">Database</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.DirectoryDatabase"><code class="docutils literal notranslate"><span class="pre">DirectoryDatabase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.GraphModule"><code class="docutils literal notranslate"><span class="pre">GraphModule</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.IdxType"><code class="docutils literal notranslate"><span class="pre">IdxType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.NPZDatabase"><code class="docutils literal notranslate"><span class="pre">NPZDatabase</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.Predictor"><code class="docutils literal notranslate"><span class="pre">Predictor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.SetupParams"><code class="docutils literal notranslate"><span class="pre">SetupParams</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.active_directory"><code class="docutils literal notranslate"><span class="pre">active_directory()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.hierarchical_energy_initialization"><code class="docutils literal notranslate"><span class="pre">hierarchical_energy_initialization()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint"><code class="docutils literal notranslate"><span class="pre">load_checkpoint()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_checkpoint_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_checkpoint_from_cwd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.load_model_from_cwd"><code class="docutils literal notranslate"><span class="pre">load_model_from_cwd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.log_terminal"><code class="docutils literal notranslate"><span class="pre">log_terminal()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.make_ensemble"><code class="docutils literal notranslate"><span class="pre">make_ensemble()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.reload_settings"><code class="docutils literal notranslate"><span class="pre">reload_settings()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.set_custom_kernels"><code class="docutils literal notranslate"><span class="pre">set_custom_kernels()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.setup_and_profile"><code class="docutils literal notranslate"><span class="pre">setup_and_profile()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.setup_and_train"><code class="docutils literal notranslate"><span class="pre">setup_and_train()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.setup_training"><code class="docutils literal notranslate"><span class="pre">setup_training()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.test_model"><code class="docutils literal notranslate"><span class="pre">test_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.html#hippynn.train_model"><code class="docutils literal notranslate"><span class="pre">train_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.custom_kernels.html">custom_kernels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.databases.html">databases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.experiment.html">experiment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.graphs.html">graphs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.interfaces.html">interfaces</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="hippynn.layers.html">layers</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.hiplayers.html">hiplayers</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="hippynn.layers.pairs.html">pairs</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.html">csr_pairs</a><ul class="current">
+<li class="toctree-l5 current"><a class="current reference internal" href="#">csrtable module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#conventions">Conventions</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#invariants">Invariants</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><code class="docutils literal notranslate"><span class="pre">CSRTable</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.from_coo"><code class="docutils literal notranslate"><span class="pre">CSRTable.from_coo()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.from_counts"><code class="docutils literal notranslate"><span class="pre">CSRTable.from_counts()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.from_mask"><code class="docutils literal notranslate"><span class="pre">CSRTable.from_mask()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.make_empty"><code class="docutils literal notranslate"><span class="pre">CSRTable.make_empty()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.expand_pairings"><code class="docutils literal notranslate"><span class="pre">CSRTable.expand_pairings()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.filter_indices"><code class="docutils literal notranslate"><span class="pre">CSRTable.filter_indices()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.filter_mask"><code class="docutils literal notranslate"><span class="pre">CSRTable.filter_mask()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.outer"><code class="docutils literal notranslate"><span class="pre">CSRTable.outer()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.reindex"><code class="docutils literal notranslate"><span class="pre">CSRTable.reindex()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.nnz"><code class="docutils literal notranslate"><span class="pre">CSRTable.nnz</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.nrows"><code class="docutils literal notranslate"><span class="pre">CSRTable.nrows</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.find_indices"><code class="docutils literal notranslate"><span class="pre">find_indices()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.row_and_offset"><code class="docutils literal notranslate"><span class="pre">row_and_offset()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.starts_from_counts"><code class="docutils literal notranslate"><span class="pre">starts_from_counts()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.html">neighbor_algorithm module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.analysis.html">analysis module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.dispatch.html">dispatch module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.filters.html">filters module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.indexing.html">indexing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.open.html">open module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hippynn.layers.pairs.periodic.html">periodic module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.physics.html">physics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.algebra.html">algebra module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.excited.html">excited module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.indexers.html">indexers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.regularization.html">regularization module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.targets.html">targets module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.layers.transform.html">transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.molecular_dynamics.html">molecular_dynamics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.networks.html">networks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.optimizer.html">optimizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.plotting.html">plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.pretraining.html">pretraining module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.tools.html">tools module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api_summary/hippynn.html">API Summary Pages</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="hippynn.html">hippynn</a></li>
+          <li class="breadcrumb-item"><a href="hippynn.layers.html">layers</a></li>
+          <li class="breadcrumb-item"><a href="hippynn.layers.pairs.html">pairs</a></li>
+          <li class="breadcrumb-item"><a href="hippynn.layers.pairs.csr_pairs.html">csr_pairs</a></li>
+      <li class="breadcrumb-item active">csrtable module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api_documentation/hippynn.layers.pairs.csr_pairs.csrtable.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="hippynn.layers.pairs.csr_pairs.html" class="btn btn-neutral float-left" title="csr_pairs" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.html" class="btn btn-neutral float-right" title="neighbor_algorithm module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="csrtable-module">
+<h1>csrtable module<a class="headerlink" href="#csrtable-module" title="Link to this heading"></a></h1>
+<p>Full Documentation for <code class="docutils literal notranslate"><span class="pre">hippynn.layers.pairs.csr_pairs.csrtable</span></code> module.
+<a class="reference internal" href="../api_summary/hippynn.layers.pairs.csr_pairs.csrtable.html"><span class="doc">Click here for a summary page.</span></a></p>
+<p id="module-hippynn.layers.pairs.csr_pairs.csrtable">This file was written with assistance from an LLM.</p>
+<p>Light-weight CSRTable container built on PyTorch tensors and utilities.</p>
+<p>This module defines:
+- <a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.starts_from_counts" title="hippynn.layers.pairs.csr_pairs.csrtable.starts_from_counts"><code class="xref py py-func docutils literal notranslate"><span class="pre">starts_from_counts()</span></code></a> — fast CSR row-pointer construction.
+- <a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.row_and_offset" title="hippynn.layers.pairs.csr_pairs.csrtable.row_and_offset"><code class="xref py py-func docutils literal notranslate"><span class="pre">row_and_offset()</span></code></a> — decode flat indices to (row, in-row offset).
+- <a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><code class="xref py py-class docutils literal notranslate"><span class="pre">CSRTable</span></code></a> — a minimal, device/dtype-agnostic CSR container with</p>
+<blockquote>
+<div><p>constructors, filtering, row reindexing, and row-wise Cartesian joins.</p>
+</div></blockquote>
+<section id="conventions">
+<h2>Conventions<a class="headerlink" href="#conventions" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>All index tensors are <code class="docutils literal notranslate"><span class="pre">torch.long</span></code>.</p></li>
+<li><p>Shapes are given in brackets, e.g. <code class="docutils literal notranslate"><span class="pre">[R]</span></code> for rows, <code class="docutils literal notranslate"><span class="pre">[nnz]</span></code> for entries.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">device</span></code>/<code class="docutils literal notranslate"><span class="pre">dtype</span></code> follow the tensors you pass in; no implicit moves/casts.</p></li>
+<li><p>We avoid heavyweight validation in hot paths; use lightweight invariants below.</p></li>
+</ul>
+</section>
+<section id="invariants">
+<h2>Invariants<a class="headerlink" href="#invariants" title="Link to this heading"></a></h2>
+<p>Given a CSRTable with <code class="docutils literal notranslate"><span class="pre">starts:</span> <span class="pre">[R+1]</span></code>, <code class="docutils literal notranslate"><span class="pre">cols:</span> <span class="pre">[nnz]</span></code>, and <code class="docutils literal notranslate"><span class="pre">data</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">starts</span></code> is non-decreasing with <code class="docutils literal notranslate"><span class="pre">starts[0]</span> <span class="pre">==</span> <span class="pre">0</span></code> and <code class="docutils literal notranslate"><span class="pre">starts[-1]</span> <span class="pre">==</span> <span class="pre">nnz</span></code>.</p></li>
+<li><p>For each row <code class="docutils literal notranslate"><span class="pre">r</span></code>, <code class="docutils literal notranslate"><span class="pre">row_len[r]</span> <span class="pre">=</span> <span class="pre">starts[r+1]</span> <span class="pre">-</span> <span class="pre">starts[r]</span> <span class="pre">&gt;=</span> <span class="pre">0</span></code>.</p></li>
+<li><p>Every <code class="docutils literal notranslate"><span class="pre">v</span></code> in <code class="docutils literal notranslate"><span class="pre">data</span></code> has length <code class="docutils literal notranslate"><span class="pre">nnz</span></code> and aligns with <code class="docutils literal notranslate"><span class="pre">cols</span></code> order.</p></li>
+</ul>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">CSRTable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">starts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/csrtable.html#CSRTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A minimal CSR container allowing for multiple payload arrays..</p>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<dl>
+<dt>starts<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[R+1]</span></code></span></dt><dd><p>Row pointer. <code class="docutils literal notranslate"><span class="pre">starts[r+1]</span> <span class="pre">-</span> <span class="pre">starts[r]</span></code> is the length of row <code class="docutils literal notranslate"><span class="pre">r</span></code>.</p>
+</dd>
+<dt>cols<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[nnz]</span></code></span></dt><dd><p>Per-entry “column” payload. Its interpretation is user-defined:
+it can be a global column id, or a local index <code class="docutils literal notranslate"><span class="pre">0..row_len-1</span></code>.</p>
+</dd>
+<dt>data<span class="classifier">dict[str, Tensor]</span></dt><dd><p>Additional per-entry fields, each of length <code class="docutils literal notranslate"><span class="pre">nnz</span></code> and aligned to <code class="docutils literal notranslate"><span class="pre">cols</span></code>.</p>
+</dd>
+</dl>
+</section>
+<section id="design">
+<h2>Design<a class="headerlink" href="#design" title="Link to this heading"></a></h2>
+<p>The class favors simple, tensorized transformations:
+* No heavyweight validation on construction.
+* <code class="docutils literal notranslate"><span class="pre">filter_*</span></code> and <code class="docutils literal notranslate"><span class="pre">reindex</span></code> preserve per-row stability as documented.
+* <code class="docutils literal notranslate"><span class="pre">outer</span></code> performs row-wise Cartesian products with user-supplied ops.</p>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<p>starts_from_counts, row_and_offset</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.from_coo">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_coo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reorder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/csrtable.html#CSRTable.from_coo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.from_coo" title="Link to this definition"></a></dt>
+<dd><p>Build a CSRTable from COO-style row/col indices.</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
+<dl>
+<dt>rows<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[nnz]</span></code></span></dt><dd><p>Row id for each entry.</p>
+</dd>
+<dt>cols<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[nnz]</span></code></span></dt><dd><p>Column payload for each entry (can be global column ids).</p>
+</dd>
+<dt>data<span class="classifier">dict[str, Tensor], optional</span></dt><dd><p>Additional per-entry fields; each must be length <code class="docutils literal notranslate"><span class="pre">nnz</span></code>.</p>
+</dd>
+<dt>reorder<span class="classifier">bool, default <code class="docutils literal notranslate"><span class="pre">True</span></code></span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, rows are grouped and entries are made stable within-row
+(lexicographic by <code class="docutils literal notranslate"><span class="pre">(row,</span> <span class="pre">original_position)</span></code>). If <code class="docutils literal notranslate"><span class="pre">False</span></code>,
+current order is assumed already grouped by row.</p>
+</dd>
+<dt>nrows<span class="classifier">int, optional</span></dt><dd><p>If provided, fixes the number of rows; otherwise inferred as
+<code class="docutils literal notranslate"><span class="pre">rows.max()+1</span></code> (or <code class="docutils literal notranslate"><span class="pre">0</span></code> if empty).</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>CSRTable</dt><dd><p>A table whose <code class="docutils literal notranslate"><span class="pre">starts</span></code> encodes per-row cardinalities and whose
+<code class="docutils literal notranslate"><span class="pre">cols</span></code> contains the provided per-entry payloads.</p>
+</dd>
+</dl>
+</section>
+<section id="notes">
+<h3>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>All inputs must live on the same device.</p></li>
+<li><p>No deduplication is performed; repeated (row, col) pairs are allowed.</p></li>
+</ul>
+</section>
+<section id="complexity">
+<h3>Complexity<a class="headerlink" href="#complexity" title="Link to this heading"></a></h3>
+<p>O(nnz log nnz) if <code class="docutils literal notranslate"><span class="pre">reorder=True</span></code> (stable sort by row),
+otherwise O(nnz).</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.from_counts">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_counts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/csrtable.html#CSRTable.from_counts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.from_counts" title="Link to this definition"></a></dt>
+<dd><p>Create a CSR with locally indexed columns from per-row counts.</p>
+<section id="id1">
+<h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<dl>
+<dt>counts<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[R]</span></code></span></dt><dd><p>Number of entries per row.</p>
+</dd>
+<dt>row_data<span class="classifier">dict[str, Tensor], optional</span></dt><dd><p>Per-row fields to expand to length <code class="docutils literal notranslate"><span class="pre">nnz</span></code> using row indexing.</p>
+</dd>
+<dt>col_data<span class="classifier">dict[str, Tensor], optional</span></dt><dd><p>Per-column (local) fields to expand using the local column index
+<code class="docutils literal notranslate"><span class="pre">0..counts[r]-1</span></code> for each row.</p>
+</dd>
+</dl>
+</section>
+<section id="id2">
+<h3>Returns<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>CSRTable</dt><dd><p>With <code class="docutils literal notranslate"><span class="pre">cols</span></code> equal to the local in-row index and <code class="docutils literal notranslate"><span class="pre">data</span></code> containing
+expanded fields from <code class="docutils literal notranslate"><span class="pre">row_data</span></code>/<code class="docutils literal notranslate"><span class="pre">col_data</span></code>.</p>
+</dd>
+</dl>
+</section>
+<section id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h3>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">row_feat</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">10.0</span><span class="p">],[</span><span class="mf">20.0</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">col_feat</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># local 0..C-1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">CSRTable</span><span class="o">.</span><span class="n">from_counts</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="n">row_data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;rf&quot;</span><span class="p">:</span> <span class="n">row_feat</span><span class="p">},</span> <span class="n">col_data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;cf&quot;</span><span class="p">:</span> <span class="n">col_feat</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">cols</span>
+<span class="go">tensor([0, 1, 0])</span>
+</pre></div>
+</div>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.from_mask">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/csrtable.html#CSRTable.from_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.from_mask" title="Link to this definition"></a></dt>
+<dd><p>Build a CSR from a boolean mask.</p>
+<section id="id3">
+<h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<dl>
+<dt>mask<span class="classifier">BoolTensor, shape <code class="docutils literal notranslate"><span class="pre">[R,</span> <span class="pre">C]</span></code></span></dt><dd><p>For each <code class="docutils literal notranslate"><span class="pre">True</span></code> at <code class="docutils literal notranslate"><span class="pre">(r,</span> <span class="pre">c)</span></code>, one entry is emitted in row <code class="docutils literal notranslate"><span class="pre">r</span></code> with
+column payload <code class="docutils literal notranslate"><span class="pre">c</span></code>.</p>
+</dd>
+<dt>data<span class="classifier">dict[str, Tensor], optional</span></dt><dd><p>Per-entry fields aligned to <code class="docutils literal notranslate"><span class="pre">True</span></code> positions. If provided, each tensor
+must have shape <code class="docutils literal notranslate"><span class="pre">[R,</span> <span class="pre">C,</span> <span class="pre">...]</span></code> and will be gathered at <code class="docutils literal notranslate"><span class="pre">True</span></code> indices.</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h3>Returns<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>CSRTable</dt><dd><p>Grouped by row with stable within-row ordering (scan order).</p>
+</dd>
+</dl>
+</section>
+<section id="id5">
+<h3>Notes<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>This constructor is convenient when you have a dense predicate.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">mask</span></code> is all-false, an empty table with <code class="docutils literal notranslate"><span class="pre">R</span></code> rows is returned.</p></li>
+</ul>
+</section>
+<section id="id6">
+<h3>Complexity<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<p>O(R*C) for the boolean scan; storage scales with <code class="docutils literal notranslate"><span class="pre">nnz</span></code>.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.make_empty">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">make_empty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/csrtable.html#CSRTable.make_empty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.make_empty" title="Link to this definition"></a></dt>
+<dd><p>Create an empty CSRTable with <code class="docutils literal notranslate"><span class="pre">n_rows</span></code> rows and zero entries.</p>
+<section id="id7">
+<h3>Parameters<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>n_rows<span class="classifier">int</span></dt><dd><p>Number of rows.</p>
+</dd>
+<dt>dtype<span class="classifier">torch.dtype</span></dt><dd><p>Target dtype for the empty <code class="docutils literal notranslate"><span class="pre">cols</span></code> tensor.</p>
+</dd>
+<dt>device<span class="classifier">torch.device</span></dt><dd><p>Target device for all tensors.</p>
+</dd>
+</dl>
+</section>
+<section id="id8">
+<h3>Returns<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>CSRTable</dt><dd><p>A well-formed empty table with <code class="docutils literal notranslate"><span class="pre">starts</span> <span class="pre">==</span> <span class="pre">[0]*</span> <span class="pre">(n_rows+1)</span></code>.</p>
+</dd>
+</dl>
+</section>
+<section id="id9">
+<h3>Examples<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">CSRTable</span><span class="o">.</span><span class="n">make_empty</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">starts</span>
+<span class="go">tensor([0, 0, 0, 0])</span>
+</pre></div>
+</div>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.expand_pairings">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">expand_pairings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left_csr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_csr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">callable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/csrtable.html#CSRTable.expand_pairings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.expand_pairings" title="Link to this definition"></a></dt>
+<dd><p>Expand specific row pairings of two CSR tables (generalized join).</p>
+<section id="id10">
+<h3>Parameters<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<dl>
+<dt>left_csr<span class="classifier">CSRTable</span></dt><dd><p>Left-hand table.</p>
+</dd>
+<dt>right_csr<span class="classifier">CSRTable</span></dt><dd><p>Right-hand table.</p>
+</dd>
+<dt>left_rows<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[P]</span></code></span></dt><dd><p>Row ids in <code class="docutils literal notranslate"><span class="pre">left_csr</span></code> participating in pairings.</p>
+</dd>
+<dt>right_rows<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[P]</span></code></span></dt><dd><p>Row ids in <code class="docutils literal notranslate"><span class="pre">right_csr</span></code>; <code class="docutils literal notranslate"><span class="pre">left_rows[i]</span></code> is paired with <code class="docutils literal notranslate"><span class="pre">right_rows[i]</span></code>.</p>
+</dd>
+<dt>operations<span class="classifier">dict</span></dt><dd><p>Same contract as in <a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.outer" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.outer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">outer()</span></code></a>.</p>
+</dd>
+</dl>
+</section>
+<section id="id11">
+<h3>Returns<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>CSRTable</dt><dd><p>Output CSR with <code class="docutils literal notranslate"><span class="pre">R</span> <span class="pre">=</span> <span class="pre">P</span></code> rows (one row per pairing) and with entries
+equal to the Cartesian product of the paired source rows.</p>
+</dd>
+</dl>
+</section>
+<section id="id12">
+<h3>Notes<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Use this when you have a precomputed mapping between rows of two tables</p></li>
+</ul>
+<p>(e.g., voxel adjacency), not necessarily one-to-one by index.
+* Stability is per paired row based on the original per-row orders.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.filter_indices">
+<span class="sig-name descname"><span class="pre">filter_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keep_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/csrtable.html#CSRTable.filter_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.filter_indices" title="Link to this definition"></a></dt>
+<dd><p>Filter entries by absolute positions in the current value domain.</p>
+<section id="id13">
+<h3>Parameters<a class="headerlink" href="#id13" title="Link to this heading"></a></h3>
+<dl>
+<dt>keep_indices<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[K]</span></code></span></dt><dd><p>Absolute positions <code class="docutils literal notranslate"><span class="pre">0..nnz-1</span></code> to keep.</p>
+</dd>
+</dl>
+</section>
+<section id="id14">
+<h3>Returns<a class="headerlink" href="#id14" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>CSRTable</dt><dd><p>A new table with recomputed <code class="docutils literal notranslate"><span class="pre">starts</span></code> and per-row stable ordering
+(stability is defined by original positions within each row).</p>
+</dd>
+</dl>
+</section>
+<section id="id15">
+<h3>Notes<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
+<p>If <code class="docutils literal notranslate"><span class="pre">K</span> <span class="pre">==</span> <span class="pre">0</span></code>, returns an empty table with the same row count.</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.filter_mask">
+<span class="sig-name descname"><span class="pre">filter_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keep_mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/csrtable.html#CSRTable.filter_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.filter_mask" title="Link to this definition"></a></dt>
+<dd><p>Filter entries by a boolean mask while recomputing per-row pointers.</p>
+<section id="id16">
+<h3>Parameters<a class="headerlink" href="#id16" title="Link to this heading"></a></h3>
+<dl>
+<dt>keep_mask<span class="classifier">BoolTensor, shape <code class="docutils literal notranslate"><span class="pre">[nnz]</span></code></span></dt><dd><p>Entries with <code class="docutils literal notranslate"><span class="pre">True</span></code> are kept.</p>
+</dd>
+</dl>
+</section>
+<section id="id17">
+<h3>Returns<a class="headerlink" href="#id17" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>CSRTable</dt><dd><p>A new table with the same number of rows and with row-wise stable
+ordering among kept entries.</p>
+</dd>
+</dl>
+</section>
+<section id="id18">
+<h3>Notes<a class="headerlink" href="#id18" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Stability is per-row: relative order among kept entries from the same row
+matches their original order.</p></li>
+<li><p>If all entries are dropped, returns an empty table with the same row count.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.outer">
+<span class="sig-name descname"><span class="pre">outer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">operations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">callable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/csrtable.html#CSRTable.outer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.outer" title="Link to this definition"></a></dt>
+<dd><p>Row-wise Cartesian join between two CSR tables.</p>
+<p>For each row <code class="docutils literal notranslate"><span class="pre">r</span></code>, forms the Cartesian product <code class="docutils literal notranslate"><span class="pre">self[r]</span> <span class="pre">×</span> <span class="pre">other[r]</span></code> and
+builds output fields by applying user-provided operations.</p>
+<section id="id19">
+<h3>Parameters<a class="headerlink" href="#id19" title="Link to this heading"></a></h3>
+<dl>
+<dt>other<span class="classifier">CSRTable</span></dt><dd><p>Right-hand side table; must have the same number of rows.</p>
+</dd>
+<dt>operations<span class="classifier">dict[tuple[key_left, key_right, out_key], callable]</span></dt><dd><p>Operation spec:
+* <code class="docutils literal notranslate"><span class="pre">(None,</span> <span class="pre">None,</span> <span class="pre">out)</span></code> → <code class="docutils literal notranslate"><span class="pre">fn()</span></code> (nullary)
+* <code class="docutils literal notranslate"><span class="pre">(key,</span> <span class="pre">None,</span> <span class="pre">out)</span></code> → <code class="docutils literal notranslate"><span class="pre">fn(self[key])</span></code> (unary, left)
+* <code class="docutils literal notranslate"><span class="pre">(None,</span> <span class="pre">key,</span> <span class="pre">out)</span></code> → <code class="docutils literal notranslate"><span class="pre">fn(other[key])</span></code> (unary, right)
+* <code class="docutils literal notranslate"><span class="pre">(ka,</span> <span class="pre">kb,</span> <span class="pre">out)</span></code> → <code class="docutils literal notranslate"><span class="pre">fn(self[ka],</span> <span class="pre">other[kb])</span></code> (binary)</p>
+<p>Each callable is applied to the expanded positions; it must be
+broadcasting-compatible or indexable per expanded pair.</p>
+</dd>
+</dl>
+</section>
+<section id="id20">
+<h3>Returns<a class="headerlink" href="#id20" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>CSRTable</dt><dd><p>Output with the same row count and <code class="docutils literal notranslate"><span class="pre">nnz[r]</span> <span class="pre">=</span> <span class="pre">len(self[r])</span> <span class="pre">*</span> <span class="pre">len(other[r])</span></code>.</p>
+</dd>
+</dl>
+</section>
+<section id="id21">
+<h3>Notes<a class="headerlink" href="#id21" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>The output <code class="docutils literal notranslate"><span class="pre">cols</span></code> encodes the right-hand local index (or may be a
+local index depending on implementation); rely on output <code class="docutils literal notranslate"><span class="pre">data</span></code>
+for payloads you need downstream.</p></li>
+<li><p>If a row is empty on either side, the corresponding output row is empty.</p></li>
+</ul>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.reindex">
+<span class="sig-name descname"><span class="pre">reindex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_src_pos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_src_cols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable" title="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable"><span class="pre">CSRTable</span></a></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/csrtable.html#CSRTable.reindex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.reindex" title="Link to this definition"></a></dt>
+<dd><p>Materialize a new CSR by selecting rows in the given order.</p>
+<section id="id22">
+<h3>Parameters<a class="headerlink" href="#id22" title="Link to this heading"></a></h3>
+<dl>
+<dt>row_ids<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[E]</span></code></span></dt><dd><p>Row ids to take from this table. Duplicates are allowed; unspecified
+rows are dropped. Output row count equals <code class="docutils literal notranslate"><span class="pre">E</span></code>.</p>
+</dd>
+<dt>carry<span class="classifier">tuple[str, …] or None, optional</span></dt><dd><p>Names of <code class="docutils literal notranslate"><span class="pre">data</span></code> fields to carry over. <code class="docutils literal notranslate"><span class="pre">None</span></code> carries all fields.</p>
+</dd>
+<dt>include_src_pos<span class="classifier">bool, default <code class="docutils literal notranslate"><span class="pre">False</span></code></span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, adds <code class="docutils literal notranslate"><span class="pre">data[&quot;src_pos&quot;]</span></code> with absolute source positions.</p>
+</dd>
+<dt>include_src_cols<span class="classifier">bool, default <code class="docutils literal notranslate"><span class="pre">False</span></code></span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, adds <code class="docutils literal notranslate"><span class="pre">data[&quot;src_col&quot;]</span></code> with source <code class="docutils literal notranslate"><span class="pre">cols</span></code> values.</p>
+</dd>
+</dl>
+</section>
+<section id="id23">
+<h3>Returns<a class="headerlink" href="#id23" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>CSRTable</dt><dd><p>New table with rows arranged to match <code class="docutils literal notranslate"><span class="pre">row_ids</span></code> and with <code class="docutils literal notranslate"><span class="pre">cols</span></code>
+set to local in-row indices <code class="docutils literal notranslate"><span class="pre">0..len(row)-1</span></code>.</p>
+</dd>
+</dl>
+</section>
+<section id="stability">
+<h3>Stability<a class="headerlink" href="#stability" title="Link to this heading"></a></h3>
+<p>Within each emitted row, the original per-row order is preserved.</p>
+</section>
+<section id="id24">
+<h3>Examples<a class="headerlink" href="#id24" title="Link to this heading"></a></h3>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">t2</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]),</span> <span class="n">include_src_pos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.nnz">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">nnz</span></span><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.nnz" title="Link to this definition"></a></dt>
+<dd><p>Total number of entries (non-zeros) across all rows.</p>
+<section id="id25">
+<h3>Returns<a class="headerlink" href="#id25" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>int</dt><dd><p>Equal to <code class="docutils literal notranslate"><span class="pre">cols.numel()</span></code> and <code class="docutils literal notranslate"><span class="pre">starts[-1]</span></code>.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.nrows">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">nrows</span></span><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.nrows" title="Link to this definition"></a></dt>
+<dd><p>Number of rows in the table (<code class="docutils literal notranslate"><span class="pre">R</span></code>).</p>
+<section id="id26">
+<h3>Returns<a class="headerlink" href="#id26" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>int</dt><dd><p>Equal to <code class="docutils literal notranslate"><span class="pre">starts.numel()</span> <span class="pre">-</span> <span class="pre">1</span></code>.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.csrtable.find_indices">
+<span class="sig-name descname"><span class="pre">find_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query_vals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/csrtable.html#find_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.csrtable.find_indices" title="Link to this definition"></a></dt>
+<dd><p>Map query values to their indices in keys, or -1 if not found.</p>
+<p>This function allows you to look at the CSR rows for a table and see if they exist in another csr table.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>keys: [V] long tensor, strictly increasing 
+query_vals: […] long tensor</p>
+</dd>
+<dt>Returns:</dt><dd><p>Tuple: (locations, indices)
+locations: indices of query values which are in the key.
+indices: Index of the key corresponding to those query values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.csrtable.row_and_offset">
+<span class="sig-name descname"><span class="pre">row_and_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">starts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/csrtable.html#row_and_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.csrtable.row_and_offset" title="Link to this definition"></a></dt>
+<dd><p>Decode the flattened CSR value domain into row ids and in-row offsets.</p>
+<section id="id27">
+<h2>Parameters<a class="headerlink" href="#id27" title="Link to this heading"></a></h2>
+<dl>
+<dt>starts<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[R+1]</span></code></span></dt><dd><p>CSR row pointer. Must satisfy the standard CSR invariants.</p>
+</dd>
+</dl>
+</section>
+<section id="id28">
+<h2>Returns<a class="headerlink" href="#id28" title="Link to this heading"></a></h2>
+<dl>
+<dt>rows_of_entry<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[nnz]</span></code></span></dt><dd><p>For each entry position <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">∈</span> <span class="pre">[0,</span> <span class="pre">nnz)</span></code>, the owning row id.</p>
+</dd>
+<dt>offset_in_row<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[nnz]</span></code></span></dt><dd><p>For each entry position <code class="docutils literal notranslate"><span class="pre">t</span></code>, the offset within its row
+(i.e., <code class="docutils literal notranslate"><span class="pre">0..row_len[row)-1</span></code>).</p>
+</dd>
+</dl>
+</section>
+<section id="id29">
+<h2>Notes<a class="headerlink" href="#id29" title="Link to this heading"></a></h2>
+<p>If <code class="docutils literal notranslate"><span class="pre">nnz</span> <span class="pre">==</span> <span class="pre">0</span></code>, both outputs are empty tensors on the same device.</p>
+</section>
+<section id="id30">
+<h2>Examples<a class="headerlink" href="#id30" title="Link to this heading"></a></h2>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">starts</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rows</span><span class="p">,</span> <span class="n">offs</span> <span class="o">=</span> <span class="n">row_and_offset</span><span class="p">(</span><span class="n">starts</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rows</span><span class="p">,</span> <span class="n">offs</span>
+<span class="go">(tensor([0, 0, 2, 2, 2]), tensor([0, 1, 0, 1, 2]))</span>
+</pre></div>
+</div>
+</section>
+<section id="id31">
+<h2>Complexity<a class="headerlink" href="#id31" title="Link to this heading"></a></h2>
+<p>O(nnz) time, O(1) extra memory.</p>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.pairs.csr_pairs.csrtable.starts_from_counts">
+<span class="sig-name descname"><span class="pre">starts_from_counts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="../_modules/hippynn/layers/pairs/csr_pairs/csrtable.html#starts_from_counts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.pairs.csr_pairs.csrtable.starts_from_counts" title="Link to this definition"></a></dt>
+<dd><p>Build a CSR row-pointer (<cite>starts</cite>) from per-row counts.</p>
+<section id="id32">
+<h2>Parameters<a class="headerlink" href="#id32" title="Link to this heading"></a></h2>
+<dl>
+<dt>counts<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[R]</span></code></span></dt><dd><p>Number of entries in each row.</p>
+</dd>
+</dl>
+</section>
+<section id="id33">
+<h2>Returns<a class="headerlink" href="#id33" title="Link to this heading"></a></h2>
+<dl>
+<dt>starts<span class="classifier">LongTensor, shape <code class="docutils literal notranslate"><span class="pre">[R+1]</span></code></span></dt><dd><p>CSR row pointer with <code class="docutils literal notranslate"><span class="pre">starts[0]</span> <span class="pre">==</span> <span class="pre">0</span></code> and
+<code class="docutils literal notranslate"><span class="pre">torch.diff(starts)</span> <span class="pre">==</span> <span class="pre">counts</span></code>. The final element equals <code class="docutils literal notranslate"><span class="pre">nnz</span></code>.</p>
+</dd>
+</dl>
+</section>
+<section id="id34">
+<h2>Notes<a class="headerlink" href="#id34" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">counts</span></code> must be non-negative. No explicit check is performed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">device</span></code> and <code class="docutils literal notranslate"><span class="pre">dtype</span></code> are inherited from <code class="docutils literal notranslate"><span class="pre">counts</span></code> (cast to <code class="docutils literal notranslate"><span class="pre">long</span></code> if needed).</p></li>
+</ul>
+</section>
+<section id="id35">
+<h2>Examples<a class="headerlink" href="#id35" title="Link to this heading"></a></h2>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">starts</span> <span class="o">=</span> <span class="n">starts_from_counts</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">starts</span>
+<span class="go">tensor([0, 2, 2, 5])</span>
+</pre></div>
+</div>
+</section>
+<section id="id36">
+<h2>Complexity<a class="headerlink" href="#id36" title="Link to this heading"></a></h2>
+<p>O(R) time, O(1) extra memory.</p>
+</section>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="hippynn.layers.pairs.csr_pairs.html" class="btn btn-neutral float-left" title="csr_pairs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hippynn.layers.pairs.csr_pairs.neighbor_algorithm.html" class="btn btn-neutral float-right" title="neighbor_algorithm module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

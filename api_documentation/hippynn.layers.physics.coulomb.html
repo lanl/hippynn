@@ -119,9 +119,9 @@
 <li class="toctree-l4 current"><a class="current reference internal" href="#">coulomb module</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.coulomb.AlphaScreening"><code class="docutils literal notranslate"><span class="pre">AlphaScreening</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.coulomb.ChEQ"><code class="docutils literal notranslate"><span class="pre">ChEQ</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.physics.coulomb.ChEQ.dipole"><code class="docutils literal notranslate"><span class="pre">ChEQ.dipole()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.physics.coulomb.ChEQ.exact_charge"><code class="docutils literal notranslate"><span class="pre">ChEQ.exact_charge()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.physics.coulomb.ChEQ.forward"><code class="docutils literal notranslate"><span class="pre">ChEQ.forward()</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.physics.coulomb.ChEQ.dipole"><code class="docutils literal notranslate"><span class="pre">ChEQ.dipole</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="#hippynn.layers.physics.coulomb.ChEQ.exact_charge"><code class="docutils literal notranslate"><span class="pre">ChEQ.exact_charge</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.coulomb.CombineScreenings"><code class="docutils literal notranslate"><span class="pre">CombineScreenings</span></code></a><ul>
@@ -154,6 +154,7 @@
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.coulomb.change_tanh_range"><code class="docutils literal notranslate"><span class="pre">change_tanh_range()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#hippynn.layers.physics.coulomb.coul_J_with_Hubbard_U_screening"><code class="docutils literal notranslate"><span class="pre">coul_J_with_Hubbard_U_screening()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.layers.physics.derivatives.html">derivatives module</a></li>
@@ -225,6 +226,18 @@
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ChEQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'energy':</span> <span class="pre">'eV',</span> <span class="pre">'length':</span> <span class="pre">'Angstrom'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics/coulomb.html#ChEQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.coulomb.ChEQ" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
 <dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.physics.coulomb.ChEQ.dipole">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dipole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics/coulomb.html#ChEQ.dipole"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.coulomb.ChEQ.dipole" title="Link to this definition"></a></dt>
+<dd><p>q : charge, shape (n_molecule, n_atom, 1)
+coordinates : shape (n_molecule, n_atom, 3)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.layers.physics.coulomb.ChEQ.exact_charge">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">exact_charge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">U</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics/coulomb.html#ChEQ.exact_charge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.coulomb.ChEQ.exact_charge" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="hippynn.layers.physics.coulomb.ChEQ.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics/coulomb.html#ChEQ.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.coulomb.ChEQ.forward" title="Link to this definition"></a></dt>
 <dd><p>species : shape (n_molecule, n_atom)
@@ -232,16 +245,6 @@ coordinates : shape (n_molecule, n_atom, 3), unit Angstrom or bohr
 U : Hubbard U, diagonal part of A, shape (n_real_atom, 1), output from HCharge Node
 chi : Electronegatvitiy, shape (n_real_atom, 1), output from HCharge Node</p>
 </dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="hippynn.layers.physics.coulomb.ChEQ.dipole">
-<span class="sig-name descname"><span class="pre">dipole</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;torch.jit.torch.jit.ScriptFunction</span> <span class="pre">object&gt;</span></span><a class="headerlink" href="#hippynn.layers.physics.coulomb.ChEQ.dipole" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="hippynn.layers.physics.coulomb.ChEQ.exact_charge">
-<span class="sig-name descname"><span class="pre">exact_charge</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;torch.jit.torch.jit.ScriptFunction</span> <span class="pre">object&gt;</span></span><a class="headerlink" href="#hippynn.layers.physics.coulomb.ChEQ.exact_charge" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
@@ -411,6 +414,11 @@ registered hooks while the latter silently ignores them.</p>
 <span class="sig-name descname"><span class="pre">change_tanh_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics/coulomb.html#change_tanh_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.coulomb.change_tanh_range" title="Link to this definition"></a></dt>
 <dd><p>Map [-1,1] to [min,  max]</p>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.layers.physics.coulomb.coul_J_with_Hubbard_U_screening">
+<span class="sig-name descname"><span class="pre">coul_J_with_Hubbard_U_screening</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nonblank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/layers/physics/coulomb.html#coul_J_with_Hubbard_U_screening"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.layers.physics.coulomb.coul_J_with_Hubbard_U_screening" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </section>
 

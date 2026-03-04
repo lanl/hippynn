@@ -138,8 +138,10 @@ A simple node could be built as follows:</p>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">FooNode</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">):</span>
     <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">parents</span><span class="p">,</span><span class="n">module</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">parents</span><span class="p">,</span><span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
 </pre></div>
 </div>
 <p>At a basic level, that’s it. However, the parents of this node are completely unspecified;
@@ -147,7 +149,8 @@ there is no information about what tensors should go into the FooModule. Note th
 the module itself is not created when building the node, and a suitable pytorch module
 must be passed in. We could thus create this node using something like:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.layers.algebra</span><span class="w"> </span><span class="kn">import</span> <span class="n">LambdaModule</span>
-<span class="n">foo</span> <span class="o">=</span> <span class="n">FooNode</span><span class="p">(</span><span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">neural_network_node</span><span class="p">,),</span><span class="n">module</span><span class="o">=</span><span class="n">LambdaModule</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">))</span>
+
+<span class="n">foo</span> <span class="o">=</span> <span class="n">FooNode</span><span class="p">(</span><span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">neural_network_node</span><span class="p">,),</span> <span class="n">module</span><span class="o">=</span><span class="n">LambdaModule</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">))</span>
 </pre></div>
 </div>
 </section>
@@ -172,9 +175,10 @@ hierarchical energy regression target <a class="reference internal" href="../api
     <span class="n">output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">target_modules</span><span class="o">.</span><span class="n">HEnergy</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span><span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="n">module_kwargs</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
 </pre></div>
 </div>
 <p>Note that we have added the <code class="docutils literal notranslate"><span class="pre">input_names</span></code> tuple as well, this attribute can be set on
@@ -259,6 +263,7 @@ model definition where there are multiple AtomIndexers or none whatsoever, but t
 to the node can be provided by some other route, we can always pass the fully specified
 parents of the node, <code class="docutils literal notranslate"><span class="pre">hier_features</span></code>, <code class="docutils literal notranslate"><span class="pre">mol_index</span></code>, and <code class="docutils literal notranslate"><span class="pre">n_molecules</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.targets</span><span class="w"> </span><span class="kn">import</span> <span class="n">HEnergyNode</span>
+
 <span class="n">energy</span> <span class="o">=</span> <span class="n">HEnergyNode</span><span class="p">(</span><span class="s2">&quot;henergy&quot;</span><span class="p">,</span> <span class="n">neural_network_node</span><span class="p">)</span>
 </pre></div>
 </div>

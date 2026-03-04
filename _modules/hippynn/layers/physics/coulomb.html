@@ -254,7 +254,7 @@
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.WolfScreening">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">WolfScreening</span><span class="p">(</span><span class="n">AlphaScreening</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Wolf implemnetation uses exact derivative of the potential.&quot;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Wolf implementation currently uses exact derivative of the potential.&quot;</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
 
 <div class="viewcode-block" id="WolfScreening.forward">
@@ -452,8 +452,10 @@
         <span class="k">return</span> <span class="n">q</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_molecule</span><span class="p">,</span> <span class="n">n_atom</span><span class="p">),</span> <span class="n">Ecoul</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_scale</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">chi</span></div>
 
 
+<div class="viewcode-block" id="ChEQ.exact_charge">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.ChEQ.exact_charge">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
+    <span class="c1">#@torch.jit.script</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">exact_charge</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">chi</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">A0</span><span class="p">,</span> <span class="n">b0</span><span class="p">):</span>
         <span class="n">A</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">diag_embed</span><span class="p">(</span><span class="n">U</span><span class="p">)</span> <span class="o">+</span> <span class="n">J</span>
         <span class="n">A0</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">A</span>
@@ -463,19 +465,26 @@
         <span class="c1"># q: shape (n_molecule, n_atom, 1)</span>
         <span class="n">Ecoul</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">q</span><span class="p">))</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="n">chi</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
 
-        <span class="k">return</span> <span class="n">q</span><span class="p">,</span> <span class="n">Ecoul</span>
+        <span class="k">return</span> <span class="n">q</span><span class="p">,</span> <span class="n">Ecoul</span></div>
 
+
+<div class="viewcode-block" id="ChEQ.dipole">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.ChEQ.dipole">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
+    <span class="c1">#@torch.jit.script</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dipole</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        q : charge, shape (n_molecule, n_atom, 1)</span>
 <span class="sd">        coordinates : shape (n_molecule, n_atom, 3)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+</div>
 
 
-<span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
+
+<span class="c1">#@torch.compile</span>
+<div class="viewcode-block" id="coul_J_with_Hubbard_U_screening">
+<a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.coul_J_with_Hubbard_U_screening">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">coul_J_with_Hubbard_U_screening</span><span class="p">(</span><span class="n">nonblank</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">U</span><span class="p">):</span>
     <span class="n">a_0</span> <span class="o">=</span> <span class="mf">0.529177210903</span>  <span class="c1"># Bohr radius in Angstrom</span>
     <span class="n">E_h</span> <span class="o">=</span> <span class="mf">27.211386245988</span>  <span class="c1"># Hatree energy in eV</span>
@@ -527,7 +536,10 @@
     <span class="n">SE</span> <span class="o">=</span> <span class="n">EXPTJ</span> <span class="o">*</span> <span class="n">TI4</span> <span class="o">*</span> <span class="n">TJ</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="n">TI2MTJ2</span> <span class="o">/</span> <span class="n">TI2MTJ2</span>
     <span class="n">SF</span> <span class="o">=</span> <span class="n">EXPTJ</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">TI6</span> <span class="o">-</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">TI4</span> <span class="o">*</span> <span class="n">TJ2</span><span class="p">))</span> <span class="o">/</span> <span class="n">TI2MTJ2</span> <span class="o">/</span> <span class="n">TI2MTJ2</span> <span class="o">/</span> <span class="n">TI2MTJ2</span>
 
-    <span class="n">J0</span><span class="p">[</span><span class="n">different_element_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">J0</span><span class="p">[</span><span class="n">different_element_mask</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">SB</span> <span class="o">-</span> <span class="p">(</span><span class="n">SC</span> <span class="o">/</span> <span class="n">rij</span><span class="p">))</span> <span class="o">+</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">SE</span> <span class="o">-</span> <span class="p">(</span><span class="n">SF</span> <span class="o">/</span> <span class="n">rij</span><span class="p">)))[</span><span class="n">different_element_mask</span><span class="p">]</span>
+    <span class="c1"># compile-friendly write pattern with `where` instead of in-place operation on the mask</span>
+    <span class="n">sub</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">SB</span> <span class="o">-</span> <span class="p">(</span><span class="n">SC</span> <span class="o">/</span> <span class="n">rij</span><span class="p">))</span> <span class="o">+</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">SE</span> <span class="o">-</span> <span class="p">(</span><span class="n">SF</span> <span class="o">/</span> <span class="n">rij</span><span class="p">)))</span>
+    <span class="n">J0</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">different_element_mask</span><span class="p">,</span><span class="n">J0</span><span class="o">-</span><span class="n">sub</span><span class="p">,</span><span class="n">J0</span><span class="p">)</span>
+    
     <span class="c1"># Taylor expansion around ta - tb -&gt; 0</span>
     <span class="n">SSB</span> <span class="o">=</span> <span class="n">TI3</span> <span class="o">/</span> <span class="mf">48.0</span>
     <span class="n">SSC</span> <span class="o">=</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">TI2</span> <span class="o">/</span> <span class="mf">16.0</span>
@@ -552,19 +564,19 @@
     <span class="n">SSS</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">TI2</span> <span class="o">/</span> <span class="mf">320.0</span>
     <span class="n">SST</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">TI3</span> <span class="o">/</span> <span class="mf">1440.0</span>
 
-    <span class="n">J0</span><span class="p">[</span><span class="n">same_element_mask</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">J0</span><span class="p">[</span><span class="n">same_element_mask</span><span class="p">]</span>
-        <span class="o">-</span> <span class="p">(</span>
+    <span class="c1"># compile-friendly write pattern with `where` instead of in-place operation.</span>
+    <span class="n">sub</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">EXPTI</span> <span class="o">*</span> <span class="p">(</span><span class="n">SSB</span> <span class="o">*</span> <span class="n">rij_sq</span> <span class="o">+</span> <span class="n">SSC</span> <span class="o">*</span> <span class="n">rij</span> <span class="o">+</span> <span class="n">SSD</span> <span class="o">+</span> <span class="n">SSE</span> <span class="o">/</span> <span class="n">rij</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">EXPTI</span> <span class="o">*</span> <span class="p">(</span><span class="n">SSF</span> <span class="o">+</span> <span class="n">SSG</span> <span class="o">*</span> <span class="n">rij</span> <span class="o">+</span> <span class="n">SSH</span> <span class="o">*</span> <span class="n">rij_sq</span> <span class="o">+</span> <span class="n">SSI</span> <span class="o">*</span> <span class="n">rij_cube</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">TI</span> <span class="o">-</span> <span class="n">TJ</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">EXPTI</span> <span class="o">*</span> <span class="p">(</span><span class="n">SSJ</span> <span class="o">+</span> <span class="n">SSK</span> <span class="o">*</span> <span class="n">rij</span> <span class="o">+</span> <span class="n">SSL</span> <span class="o">*</span> <span class="n">rij_sq</span> <span class="o">+</span> <span class="n">SSM</span> <span class="o">*</span> <span class="n">rij_cube</span> <span class="o">+</span> <span class="n">SSN</span> <span class="o">*</span> <span class="n">rij_quad</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">TI</span> <span class="o">-</span> <span class="n">TJ</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">EXPTI</span> <span class="o">*</span> <span class="p">(</span><span class="n">SSO</span> <span class="o">+</span> <span class="n">SSP</span> <span class="o">*</span> <span class="n">rij</span> <span class="o">+</span> <span class="n">SSQ</span> <span class="o">*</span> <span class="n">rij_sq</span> <span class="o">+</span> <span class="n">SSR</span> <span class="o">*</span> <span class="n">rij_cube</span> <span class="o">+</span> <span class="n">SSS</span> <span class="o">*</span> <span class="n">rij_quad</span> <span class="o">+</span> <span class="n">SST</span> <span class="o">*</span> <span class="n">rij_penta</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">TI</span> <span class="o">-</span> <span class="n">TJ</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-        <span class="p">)[</span><span class="n">same_element_mask</span><span class="p">]</span>
-    <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="n">J0</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">same_element_mask</span><span class="p">,</span> <span class="n">J0</span><span class="o">-</span><span class="n">sub</span><span class="p">,</span> <span class="n">J0</span><span class="p">)</span>
 
     <span class="n">J</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">e2_over_four_pi_epsilon_0</span> <span class="o">*</span> <span class="n">J0</span><span class="p">,</span> <span class="n">zero</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">J</span>
+    <span class="k">return</span> <span class="n">J</span></div>
+
 </pre></div>
 
            </div>

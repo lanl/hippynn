@@ -1,0 +1,1044 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hippynn.layers.pairs.csr_pairs.neighbor_algorithm &mdash; hippynn 0+unknown documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/custom.css?v=e3456cac" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=c9d3d048"></script>
+      <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            hippynn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../what_is_hippynn.html">What is hippynn?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../installation.html">How to install hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../bibliography.html">Research articles using hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../license.html">License</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../user_guide/features.html">hippynn Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../user_guide/concepts.html">hippynn Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../user_guide/databases.html">Databases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../user_guide/units.html">Units in hippynn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../user_guide/performance.html">Performance Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../user_guide/ckernels.html">Custom Kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../user_guide/loss_graph.html">Model and Loss Graphs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../user_guide/settings.html">Library Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../user_guide/custom_nodes.html">Creating Custom Node Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/minimal_workflow.html">Minimal Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/controller.html">Controller</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/predictor.html">Predictor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/ensembles.html">Ensembling Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/periodic.html">Periodic Boundary Conditions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/forces.html">Force Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/restarting.html">Restarting training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/ase_calculator.html">ASE Calculators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/mliap_unified.html">LAMMPS interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/excited_states.html">Non-Adiabiatic Excited States</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/cheq.html">Charge Equilibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/weighted_loss.html">Weighted/Masked Loss Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/lightning.html">Pytorch Lightning module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/hyperopt.html">Hyperparameter optimization with Ax and Ray</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api_documentation/hippynn.html">Full API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api_summary/hippynn.html">API Summary Pages</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">hippynn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hippynn.layers.pairs.csr_pairs.neighbor_algorithm</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hippynn.layers.pairs.csr_pairs.neighbor_algorithm</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This file was written with assistance from an LLM.</span>
+
+
+<span class="sd">Neighbor list construction over triclinic periodic cells using PyTorch + CSR.</span>
+
+<span class="sd">This module builds neighbor pairs for batched molecular/atomistic systems with</span>
+<span class="sd">triclinic cells. It uses a light CSR “algebra” (see :mod:`csrtable`) to stage</span>
+<span class="sd">row-wise joins and filtering:</span>
+
+<span class="sd">Pipeline (high level)</span>
+<span class="sd">---------------------</span>
+<span class="sd">1) :func:`build_initial_data` — wrap raw inputs into CSRs for systems/atoms.</span>
+<span class="sd">2) :func:`normalize_atoms` — wrap positions to fractional [0,1)^3 and record integer image offsets.</span>
+<span class="sd">3) :func:`build_image_offsets` — compute per-system image-shift stencils large enough for ``cutoff``.</span>
+<span class="sd">4) :func:`build_image_atoms` — cartesian-expand primary atoms × image shifts.</span>
+<span class="sd">5) :func:`voxelize_images` — voxel grid per system with edge ≈ ``cutoff`` and assign image-atoms to voxels.</span>
+<span class="sd">6) :func:`voxel_adjacency` — build voxel–voxel edges via a fixed stencil (includes self-edges).</span>
+<span class="sd">7) :func:`expand_pairs` — expand voxel edges into candidate atom pairs.</span>
+<span class="sd">8) :func:`prune_pairs` — filter by cutoff; drop same-atom self-edges for primary images.</span>
+<span class="sd">9) :func:`calc_neighbors` — orchestration entry point that returns final pairs.</span>
+
+<span class="sd">All tensor operations are batched and device/dtype agnostic. Index tensors are</span>
+<span class="sd">``torch.long``. Distances/displacements remain differentiable w.r.t. input positions.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.csrtable</span><span class="w"> </span><span class="kn">import</span> <span class="n">CSRTable</span><span class="p">,</span> <span class="n">row_and_offset</span><span class="p">,</span> <span class="n">find_indices</span>
+
+
+<div class="viewcode-block" id="build_initial_data">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.neighbor_algorithm.html#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_initial_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_initial_data</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">nonblank</span><span class="p">,</span> <span class="n">cells</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Package raw inputs (positions/mask/cells/cutoff) into CSR containers.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    positions : Tensor, shape ``[S, A, 3]``, float</span>
+<span class="sd">        Cartesian positions per system (padded to a common ``A``). Can be</span>
+<span class="sd">        ``float32``/``float64``. Unused (masked) atoms are ignored via ``nonblank``.</span>
+<span class="sd">    nonblank : BoolTensor, shape ``[S, A]``</span>
+<span class="sd">        Mask of real atoms per system. ``True`` entries become CSR rows&#39; entries.</span>
+<span class="sd">    cells : Tensor, shape ``[S, 3, 3]``, float</span>
+<span class="sd">        Triclinic cell matrices (row- or column-major consistent with einsum ops).</span>
+<span class="sd">    cutoff : Tensor ``[S]`` or ``float``</span>
+<span class="sd">        Radial cutoff per system; a scalar is broadcast to all systems.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    atomCSR : CSRTable</span>
+<span class="sd">        Rows = systems; entries = real atoms. Carries at least:</span>
+<span class="sd">        ``&quot;raw_positions&quot; : [nnz,3]``, ``&quot;atom_gid&quot; : [nnz]`` (global id in the</span>
+<span class="sd">        padded array), and any fields required downstream.</span>
+<span class="sd">    systemCSR : CSRTable</span>
+<span class="sd">        One entry per system (``counts = 1``). Carries:</span>
+<span class="sd">        ``&quot;cells&quot; : [S,3,3]`` and ``&quot;cutoff&quot; : [S]``.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    * ``atom_gid`` preserves a mapping back to the original padded indices.</span>
+<span class="sd">    * No heavy validation is performed here.</span>
+
+<span class="sd">    Complexity</span>
+<span class="sd">    ----------</span>
+<span class="sd">    O(S*A) to build the mask-based CSR.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">device</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">device</span>
+    <span class="n">coord_dtype</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">dtype</span>
+
+    <span class="n">n_sys</span> <span class="o">=</span> <span class="n">cells</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">n_sys</span> <span class="o">==</span> <span class="n">positions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;number of systems not identical (</span><span class="si">{</span><span class="n">n_sys</span><span class="si">}</span><span class="s2"> vs </span><span class="si">{</span><span class="n">positions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cutoff</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">cutoff</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">coord_dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cutoff</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">cutoff</span> <span class="o">=</span> <span class="n">cutoff</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">n_sys</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">cutoff</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">n_sys</span>
+    <span class="n">sys_counts</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_sys</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+    <span class="n">systemCSR</span> <span class="o">=</span> <span class="n">CSRTable</span><span class="o">.</span><span class="n">from_counts</span><span class="p">(</span><span class="n">sys_counts</span><span class="p">,</span> <span class="n">row_data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;cells&quot;</span><span class="p">:</span> <span class="n">cells</span><span class="p">,</span> <span class="s2">&quot;cutoff&quot;</span><span class="p">:</span> <span class="n">cutoff</span><span class="p">})</span>
+    <span class="n">atomCSR</span> <span class="o">=</span> <span class="n">CSRTable</span><span class="o">.</span><span class="n">from_mask</span><span class="p">(</span><span class="n">nonblank</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;raw_positions&quot;</span><span class="p">:</span> <span class="n">positions</span><span class="p">})</span>
+    <span class="c1"># global atom id, including padding, to carry on for tracking.</span>
+    <span class="n">atomCSR</span><span class="p">[</span><span class="s2">&quot;atom_gid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">atomCSR</span><span class="o">.</span><span class="n">nnz</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">atomCSR</span><span class="p">,</span> <span class="n">systemCSR</span></div>
+
+
+
+<div class="viewcode-block" id="normalize_atoms">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.neighbor_algorithm.html#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.normalize_atoms">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">normalize_atoms</span><span class="p">(</span>
+    <span class="n">atomCSR</span><span class="p">:</span> <span class="n">CSRTable</span><span class="p">,</span>  <span class="c1"># [n_systems, n_atoms_max, 3]</span>
+    <span class="n">systemCSR</span><span class="p">:</span> <span class="n">CSRTable</span><span class="p">,</span>  <span class="c1"># [n_systems, n_atoms_max] bool</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrap atoms into the primary triclinic cell and record image offsets.</span>
+
+<span class="sd">    For each atom with Cartesian position ``x`` and cell ``H``, compute</span>
+<span class="sd">    fractional ``f = H^{-1} x``, integer image ``k = floor(f)``, wrapped</span>
+<span class="sd">    fractional ``f&#39; = f - k`` in ``[0,1)^3``, and wrapped Cartesian</span>
+<span class="sd">    ``x&#39; = H f&#39;``. Store these plus ``H^{-1}`` for later use.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    atomCSR : CSRTable</span>
+<span class="sd">        Must carry ``&quot;raw_positions&quot; : [nnz,3]`` and rows aligned to systems.</span>
+<span class="sd">    systemCSR : CSRTable</span>
+<span class="sd">        Must carry ``&quot;cells&quot; : [S,3,3]``. ``cells`` are inverted in-place and</span>
+<span class="sd">        stored as ``&quot;cells_inv&quot;``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    atomCSR : CSRTable</span>
+<span class="sd">        With added fields:</span>
+<span class="sd">        ``&quot;positions&quot; : [nnz,3]`` (wrapped Cartesian),</span>
+<span class="sd">        ``&quot;offsets&quot; : [nnz,3]`` (integer images, ``long``).</span>
+<span class="sd">    systemCSR : CSRTable</span>
+<span class="sd">        With added field ``&quot;cells_inv&quot; : [S,3,3]``.</span>
+
+<span class="sd">    Determinism</span>
+<span class="sd">    -----------</span>
+<span class="sd">    Purely functional given inputs; no randomness.</span>
+
+<span class="sd">    Autograd</span>
+<span class="sd">    --------</span>
+<span class="sd">    ``positions`` remain differentiable w.r.t. input positions; ``offsets``/``cells_inv`` are non-differentiable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">atomCSR</span><span class="p">[</span><span class="s2">&quot;raw_positions&quot;</span><span class="p">]</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">dtype</span>
+
+    <span class="c1"># Batched fractional coords and wrapping (triclinic)</span>
+    <span class="n">cells</span> <span class="o">=</span> <span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;cells&quot;</span><span class="p">]</span>
+    <span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;cells_inv&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cells_inv</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span>  <span class="c1"># [n_systems,3,3]</span>
+
+    <span class="n">sys_ID</span> <span class="o">=</span> <span class="n">atomCSR</span><span class="p">[</span><span class="s2">&quot;rows&quot;</span><span class="p">]</span>
+
+    <span class="n">frac</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ax, axb-&gt;ab&quot;</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">cells_inv</span><span class="p">[</span><span class="n">sys_ID</span><span class="p">])</span>  <span class="c1"># [n_atoms,3]</span>
+    <span class="n">offsets</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">frac</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>  <span class="c1"># integer images</span>
+    <span class="n">frac_wrapped</span> <span class="o">=</span> <span class="n">frac</span> <span class="o">-</span> <span class="n">offsets</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>  <span class="c1"># [n_systems,n_atoms_max,3] in [0,1)</span>
+    <span class="n">positions_wrapped</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ab, abx-&gt;ax&quot;</span><span class="p">,</span> <span class="n">frac_wrapped</span><span class="p">,</span> <span class="n">cells</span><span class="p">[</span><span class="n">sys_ID</span><span class="p">])</span>  <span class="c1"># back to Cartesian</span>
+
+    <span class="n">atomCSR</span><span class="p">[</span><span class="s2">&quot;positions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">positions_wrapped</span>
+    <span class="n">atomCSR</span><span class="p">[</span><span class="s2">&quot;offsets&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">offsets</span>
+
+    <span class="c1"># recon = (frac_wrapped + offsets.to(frac_wrapped.dtype)) @ systemCSR[&quot;cells&quot;][sys_ID]</span>
+    <span class="c1"># assert (recon - positions).abs().max() &lt;= (1e-5 if positions.dtype==torch.float32 else 1e-10), &quot;Failed reconstruction!!&quot;</span>
+
+    <span class="k">return</span> <span class="n">atomCSR</span><span class="p">,</span> <span class="n">systemCSR</span></div>
+
+
+
+<div class="viewcode-block" id="build_image_offsets">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.neighbor_algorithm.html#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_image_offsets">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_image_offsets</span><span class="p">(</span><span class="n">systemCSR</span><span class="p">:</span> <span class="n">CSRTable</span><span class="p">,</span> <span class="n">use_full_stencil</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CSRTable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute per-system periodic image offsets sufficient for ``cutoff``.</span>
+
+<span class="sd">    The stencil size per axis is</span>
+<span class="sd">    ``n_rep[k] = ceil(cutoff * ||(H^{-1})_{k,:}||_2)`` with a symmetric range</span>
+<span class="sd">    ``{-n_rep[k], ..., 0, ..., +n_rep[k]}``. The Cartesian shift for an integer</span>
+<span class="sd">    offset ``k`` is ``-k @ H`` (so that adding it moves an image back into the</span>
+<span class="sd">    primary cell).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    systemCSR : CSRTable</span>
+<span class="sd">        Rows = systems; requires ``&quot;cells&quot; : [S,3,3]`` and ``&quot;cutoff&quot; : [S]``.</span>
+<span class="sd">        If present, ``&quot;cells_inv&quot;`` is reused; otherwise it is computed.</span>
+<span class="sd">    use_full_stencil : bool, default ``True``</span>
+<span class="sd">        If ``True`` use the full symmetric 3D product. (Half-stencils or sparse</span>
+<span class="sd">        variants can be added later.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    imageCSR : CSRTable</span>
+<span class="sd">        Rows = systems; entries = image shifts for that system. Carries:</span>
+<span class="sd">        ``&quot;image_offsets&quot; : [nnz,3]`` (long offsets),</span>
+<span class="sd">        ``&quot;shift&quot; : [nnz,3]`` (Cartesian shift to apply),</span>
+<span class="sd">        ``&quot;is_primary&quot; : [nnz]`` (True for ``k == (0,0,0)``).</span>
+
+<span class="sd">    Complexity</span>
+<span class="sd">    ----------</span>
+<span class="sd">    O(S) to compute per-axis replication counts; O(total images) to materialize.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">use_full_stencil</span><span class="p">:</span>
+        <span class="c1"># TODO: Optional: Implement different stencils.</span>
+        <span class="c1"># # Calculate nonzero delta entries</span>
+        <span class="c1"># save dsome code which does this.</span>
+        <span class="c1"># nonzero = all_deltas.abs().to(torch.bool)</span>
+        <span class="c1"># # A mask where the first nonzero nonzero element is.</span>
+        <span class="c1"># first_nonzero_mask = nonzero &amp; (nonzero.to(torch.long).cumsum(dim=1)==1) # 2D mask of first nonzero values for each row.</span>
+        <span class="c1"># # Extract VALUE of first nonzero mask; mask out first values, and then clamp+bool to make indicator positive ones.</span>
+        <span class="c1"># # Run &quot;any&quot; to reduce and find if the first value was positive or not.</span>
+        <span class="c1"># first_nonzero_positive = (all_deltas*first_nonzero_mask).clamp(min=0).to(torch.bool).any(dim=1)</span>
+        <span class="c1"># one_way_deltas = first_nonzero_positive | (all_deltas==0).all(dim=1)</span>
+        <span class="c1"># deltas = all_deltas[one_way_deltas]</span>
+
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not implemented!&quot;</span><span class="p">)</span>
+
+    <span class="n">cells</span> <span class="o">=</span> <span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;cells&quot;</span><span class="p">]</span>
+    <span class="n">n_systems</span> <span class="o">=</span> <span class="n">cells</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">cells</span><span class="o">.</span><span class="n">device</span>
+    <span class="n">coord_dtype</span> <span class="o">=</span> <span class="n">cells</span><span class="o">.</span><span class="n">dtype</span>
+
+    <span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;reciprocol_norms&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row_norms</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;cells_inv&quot;</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">n_rep_per_axis</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;cutoff&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">row_norms</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># replication counts for periodic boundaries</span>
+    <span class="n">per_axis_counts</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n_rep_per_axis</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="n">per_axis_counts</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># build the CSR for the repetitions, data fields will be populated</span>
+    <span class="c1"># after explicit construction.</span>
+    <span class="n">imageCSR</span> <span class="o">=</span> <span class="n">CSRTable</span><span class="o">.</span><span class="n">from_counts</span><span class="p">(</span><span class="n">counts</span><span class="o">=</span><span class="n">counts</span><span class="p">)</span>
+
+    <span class="n">system</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">row_and_offset</span><span class="p">(</span><span class="n">imageCSR</span><span class="o">.</span><span class="n">starts</span><span class="p">)</span>
+
+    <span class="c1"># unravel the index of each shift in the overall count</span>
+    <span class="n">ax_s</span><span class="p">,</span> <span class="n">ay_s</span><span class="p">,</span> <span class="n">az_s</span> <span class="o">=</span> <span class="n">per_axis_counts</span><span class="p">[</span><span class="n">system</span><span class="p">]</span><span class="o">.</span><span class="n">unbind</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ayz</span> <span class="o">=</span> <span class="n">ay_s</span> <span class="o">*</span> <span class="n">az_s</span>
+    <span class="n">ix</span> <span class="o">=</span> <span class="n">t</span> <span class="o">//</span> <span class="n">ayz</span>
+    <span class="n">rem</span> <span class="o">=</span> <span class="n">t</span> <span class="o">%</span> <span class="n">ayz</span>
+    <span class="n">iy</span> <span class="o">=</span> <span class="n">rem</span> <span class="o">//</span> <span class="n">az_s</span>
+    <span class="n">iz</span> <span class="o">=</span> <span class="n">rem</span> <span class="o">%</span> <span class="n">az_s</span>
+
+    <span class="c1"># re-center the shifts</span>
+    <span class="n">kx</span> <span class="o">=</span> <span class="n">ix</span> <span class="o">-</span> <span class="n">n_rep_per_axis</span><span class="p">[</span><span class="n">system</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">ky</span> <span class="o">=</span> <span class="n">iy</span> <span class="o">-</span> <span class="n">n_rep_per_axis</span><span class="p">[</span><span class="n">system</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">kz</span> <span class="o">=</span> <span class="n">iz</span> <span class="o">-</span> <span class="n">n_rep_per_axis</span><span class="p">[</span><span class="n">system</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">image_offsets</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># [nnz,3] long</span>
+
+    <span class="n">shift</span> <span class="o">=</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;pk,pkj-&gt;pj&quot;</span><span class="p">,</span> <span class="n">image_offsets</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">coord_dtype</span><span class="p">),</span> <span class="n">cells</span><span class="p">[</span><span class="n">system</span><span class="p">])</span>
+    <span class="n">is_primary</span> <span class="o">=</span> <span class="p">(</span><span class="n">image_offsets</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">imageCSR</span><span class="p">[</span><span class="s2">&quot;image_offsets&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_offsets</span>
+    <span class="n">imageCSR</span><span class="p">[</span><span class="s2">&quot;shift&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span>
+    <span class="n">imageCSR</span><span class="p">[</span><span class="s2">&quot;is_primary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_primary</span>
+    <span class="k">return</span> <span class="n">imageCSR</span></div>
+
+
+
+<div class="viewcode-block" id="calculate_aabb">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.neighbor_algorithm.html#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.calculate_aabb">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_aabb</span><span class="p">(</span><span class="n">positions</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">system_id</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">n_systems</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute per-system axis-aligned bounding boxes (AABB).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    positions : Tensor, shape ``[M, 3]`` (subset of atoms/images)</span>
+<span class="sd">        Cartesian coordinates to bound.</span>
+<span class="sd">    system_id : LongTensor, shape ``[M]``</span>
+<span class="sd">        Owning system id for each position.</span>
+<span class="sd">    n_systems : int</span>
+<span class="sd">        Total number of systems.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mins : Tensor, shape ``[S, 3]``</span>
+<span class="sd">        Per-system minima; systems without entries return zeros.</span>
+<span class="sd">    maxs : Tensor, shape ``[S, 3]``</span>
+<span class="sd">        Per-system maxima; systems without entries return zeros.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Uses ``scatter_reduce_`` with ``amin``/``amax``. Handles empty systems by</span>
+<span class="sd">    emitting ``[0,0,0]`` for both min/max.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">dtype</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">device</span>
+    <span class="n">mins</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">n_systems</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">maxs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">n_systems</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">sys3</span> <span class="o">=</span> <span class="n">system_id</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># [M,3] # each column xyz reduced in parallel</span>
+    <span class="c1"># include_self=True works with ±inf init and covers empty systems safely</span>
+    <span class="n">mins</span><span class="o">.</span><span class="n">scatter_reduce_</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sys3</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">reduce</span><span class="o">=</span><span class="s2">&quot;amin&quot;</span><span class="p">,</span> <span class="n">include_self</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">maxs</span><span class="o">.</span><span class="n">scatter_reduce_</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sys3</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">reduce</span><span class="o">=</span><span class="s2">&quot;amax&quot;</span><span class="p">,</span> <span class="n">include_self</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1">## maybe not needed at all?</span>
+    <span class="c1"># If a system has no entries, give it a span of [0,0]</span>
+    <span class="n">system_present</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_systems</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">system_present</span><span class="p">[</span><span class="n">system_id</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">empty_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">system_present</span>
+    <span class="k">if</span> <span class="n">empty_mask</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="n">mins</span> <span class="o">=</span> <span class="n">mins</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="n">maxs</span> <span class="o">=</span> <span class="n">maxs</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="n">mins</span><span class="p">[</span><span class="n">empty_mask</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">maxs</span><span class="p">[</span><span class="n">empty_mask</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">mins</span><span class="p">,</span> <span class="n">maxs</span></div>
+
+
+
+<div class="viewcode-block" id="build_image_atoms">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.neighbor_algorithm.html#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.build_image_atoms">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_image_atoms</span><span class="p">(</span>
+    <span class="n">atomCSR</span><span class="p">:</span> <span class="n">CSRTable</span><span class="p">,</span>  <span class="c1"># rows are systems, cols are atoms in system</span>
+    <span class="n">imageCSR</span><span class="p">:</span> <span class="n">CSRTable</span><span class="p">,</span>  <span class="c1"># rows are displaced images of systems</span>
+    <span class="n">systemCSR</span><span class="p">:</span> <span class="n">CSRTable</span><span class="p">,</span>  <span class="c1"># rows are systems</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CSRTable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Expand primary atoms across image offsets (row-wise outer join).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    atomCSR : CSRTable</span>
+<span class="sd">        Rows = systems; requires fields</span>
+<span class="sd">        ``&quot;positions&quot;:[N,3]``, ``&quot;atom_gid&quot;:[N]``, ``&quot;offsets&quot;:[N,3]`` (base offsets).</span>
+<span class="sd">    imageCSR : CSRTable</span>
+<span class="sd">        Rows = systems; requires fields</span>
+<span class="sd">        ``&quot;image_offsets&quot;:[I,3]``, ``&quot;shift&quot;:[I,3]``, ``&quot;is_primary&quot;:[I]``.</span>
+<span class="sd">    systemCSR : CSRTable</span>
+<span class="sd">        Rows = systems; requires ``&quot;cells&quot;`` and ``&quot;cutoff&quot;`` (used for culling).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    image_atomCSR : CSRTable</span>
+<span class="sd">        Rows = systems; entries = atoms×images. Carries:</span>
+<span class="sd">        ``&quot;positions&quot;:[M,3]`` (shifted),</span>
+<span class="sd">        ``&quot;atom_gid&quot;:[M]``,</span>
+<span class="sd">        ``&quot;offsets&quot;:[M,3]`` (total offset for that image),</span>
+<span class="sd">        ``&quot;is_primary&quot;:[M]``,</span>
+<span class="sd">        ``&quot;system&quot;:[M]`` (system id per entry).</span>
+
+<span class="sd">    Pruning</span>
+<span class="sd">    -------</span>
+<span class="sd">    A coarse AABB check removes far-away images that cannot generate neighbors</span>
+<span class="sd">    within ``cutoff`` (per system).</span>
+
+<span class="sd">    Complexity</span>
+<span class="sd">    ----------</span>
+<span class="sd">    O(N*I) per system in the worst case before pruning; typically much less after AABB culling.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># ---------- Outer (row-wise Cartesian join): atomCSR × imageCSR ----------</span>
+    <span class="n">image_atomCSR</span> <span class="o">=</span> <span class="n">atomCSR</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span>
+        <span class="n">imageCSR</span><span class="p">,</span>
+        <span class="n">operations</span><span class="o">=</span><span class="p">{</span>
+            <span class="c1"># fmt: off</span>
+            <span class="c1"># Shift positions using the shift of the image</span>
+            <span class="p">(</span><span class="s2">&quot;positions&quot;</span><span class="p">,</span> <span class="s2">&quot;shift&quot;</span><span class="p">,</span> <span class="s2">&quot;positions&quot;</span><span class="p">):</span>     <span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="n">p</span> <span class="o">+</span> <span class="n">s</span><span class="p">,</span>  <span class="c1"># floatX</span>
+            <span class="c1"># Offsets shift like positions</span>
+            <span class="p">(</span><span class="s2">&quot;offsets&quot;</span><span class="p">,</span> <span class="s2">&quot;image_offsets&quot;</span><span class="p">,</span> <span class="s2">&quot;offsets&quot;</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">ka</span><span class="p">,</span> <span class="n">kd</span><span class="p">:</span> <span class="n">ka</span> <span class="o">+</span> <span class="n">kd</span><span class="p">,</span>  <span class="c1"># long</span>
+            <span class="c1"># Retain atom id</span>
+            <span class="p">(</span><span class="s2">&quot;atom_gid&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;atom_gid&quot;</span><span class="p">):</span>          <span class="k">lambda</span> <span class="n">f</span><span class="p">:</span> <span class="n">f</span><span class="p">,</span>  <span class="c1"># long</span>
+            <span class="c1"># Inherit primary images from image_cellCSR</span>
+            <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;is_primary&quot;</span><span class="p">,</span> <span class="s2">&quot;is_primary&quot;</span><span class="p">):</span>      <span class="k">lambda</span> <span class="n">ip</span><span class="p">:</span> <span class="n">ip</span><span class="p">,</span>  <span class="c1"># bool</span>
+            <span class="c1"># Inherit system number from the atomCSR</span>
+            <span class="p">(</span><span class="s2">&quot;rows&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;system&quot;</span><span class="p">):</span>                <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="p">,</span>  <span class="c1"># long</span>
+            <span class="c1"># fmt: on</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">primary_positions</span> <span class="o">=</span> <span class="n">atomCSR</span><span class="p">[</span><span class="s2">&quot;positions&quot;</span><span class="p">]</span>
+    <span class="n">primary_systems</span> <span class="o">=</span> <span class="n">atomCSR</span><span class="p">[</span><span class="s2">&quot;rows&quot;</span><span class="p">]</span>
+    <span class="n">n_systems</span> <span class="o">=</span> <span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;rows&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">mins</span><span class="p">,</span> <span class="n">maxs</span> <span class="o">=</span> <span class="n">calculate_aabb</span><span class="p">(</span><span class="n">primary_positions</span><span class="p">,</span> <span class="n">primary_systems</span><span class="p">,</span> <span class="n">n_systems</span><span class="p">)</span>
+    <span class="c1"># broadcast back to images</span>
+    <span class="n">image_system</span> <span class="o">=</span> <span class="n">image_atomCSR</span><span class="p">[</span><span class="s2">&quot;system&quot;</span><span class="p">]</span>
+    <span class="n">image_positions</span> <span class="o">=</span> <span class="n">image_atomCSR</span><span class="p">[</span><span class="s2">&quot;positions&quot;</span><span class="p">]</span>
+
+    <span class="n">mins</span> <span class="o">=</span> <span class="n">mins</span><span class="p">[</span><span class="n">image_system</span><span class="p">]</span>
+    <span class="n">maxs</span> <span class="o">=</span> <span class="n">maxs</span><span class="p">[</span><span class="n">image_system</span><span class="p">]</span>
+
+    <span class="n">gap_1</span> <span class="o">=</span> <span class="n">image_positions</span> <span class="o">-</span> <span class="n">maxs</span>  <span class="c1"># positive if image-atom is on right side of box</span>
+    <span class="n">gap_2</span> <span class="o">=</span> <span class="n">mins</span> <span class="o">-</span> <span class="n">image_positions</span>  <span class="c1"># positive of image-atom is on left side of box</span>
+
+    <span class="c1"># smallest positive gap wins, if both are negative, the particle is in the box range for that axis.</span>
+    <span class="c1"># total_gap = gap_2.clamp(min=gap_1).clamp(min=0) # alternate calculation</span>
+    <span class="n">total_gap</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">gap_1</span><span class="p">,</span> <span class="n">gap_2</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">gap_1</span><span class="p">))</span>
+    <span class="n">dist_to_box</span> <span class="o">=</span> <span class="n">total_gap</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">image_cutoffs</span> <span class="o">=</span> <span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;cutoff&quot;</span><span class="p">][</span><span class="n">image_system</span><span class="p">]</span>
+
+    <span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-5</span>
+    <span class="n">close_enough_to_aabb</span> <span class="o">=</span> <span class="n">dist_to_box</span> <span class="o">&lt;</span> <span class="n">image_cutoffs</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">eps</span><span class="p">)</span>
+
+    <span class="c1"># Drop images which cannot be relevant</span>
+    <span class="n">image_atomCSR</span> <span class="o">=</span> <span class="n">image_atomCSR</span><span class="o">.</span><span class="n">filter_mask</span><span class="p">(</span><span class="n">close_enough_to_aabb</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">image_atomCSR</span></div>
+
+
+
+<div class="viewcode-block" id="voxelize_images">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.neighbor_algorithm.html#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.voxelize_images">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">voxelize_images</span><span class="p">(</span>
+    <span class="n">image_atomCSR</span><span class="p">:</span> <span class="n">CSRTable</span><span class="p">,</span>  <span class="c1"># nnz-aligned fields: &quot;positions&quot;,&quot;atom_gid&quot;,&quot;offsets&quot;,&quot;is_primary&quot;,&quot;system&quot;</span>
+    <span class="n">systemCSR</span><span class="p">:</span> <span class="n">CSRTable</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">CSRTable</span><span class="p">,</span> <span class="n">CSRTable</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Partition image-atoms into near-cubic voxels of edge ≈ cutoff.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    image_atomCSR : CSRTable</span>
+<span class="sd">        Must carry (at least) ``&quot;positions&quot;,&quot;atom_gid&quot;,&quot;offsets&quot;,&quot;is_primary&quot;,&quot;system&quot;``.</span>
+<span class="sd">    systemCSR : CSRTable</span>
+<span class="sd">        Must carry per-system ``&quot;cutoff&quot;``. Outputs grid metadata into this CSR.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    voxel_atomCSR : CSRTable</span>
+<span class="sd">        Rows = global voxel ids; entries = image-atoms in that voxel. Carries the</span>
+<span class="sd">        same fields, plus a per-entry ``&quot;voxel_gid&quot;`` if helpful downstream.</span>
+<span class="sd">    voxelCSR : CSRTable</span>
+<span class="sd">        Rows = systems; one entry per voxel. Carries:</span>
+<span class="sd">        ``&quot;v&quot;:[V,3]`` (local voxel coords),</span>
+<span class="sd">        ``&quot;m&quot;:[V,3]`` (per-system voxel grid shape),</span>
+<span class="sd">        ``&quot;s&quot;:[V,3]`` (local strides),</span>
+<span class="sd">        ``&quot;voxel_gid&quot;:[V]``,</span>
+<span class="sd">        ``&quot;is_primary_voxel&quot;:[V]`` (voxel contains at least one primary image-atom).</span>
+<span class="sd">    systemCSR : CSRTable</span>
+<span class="sd">        Augmented with per-system fields, e.g.:</span>
+<span class="sd">        ``&quot;voxel_grid_shape&quot;:[S,3]``, ``&quot;voxel_origin&quot;:[S,3]``.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    * A small skin factor inflates the voxel edge slightly to avoid numerical</span>
+<span class="sd">      misses on boundaries.</span>
+<span class="sd">    * Local voxel ids are unraveled/raveled with per-system strides.</span>
+
+<span class="sd">    Complexity</span>
+<span class="sd">    ----------</span>
+<span class="sd">    O(M) to assign atoms to voxels; O(V) to materialize per-system voxel metadata.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># ---- shapes / device / dtype up-front ----</span>
+    <span class="n">cutoff</span> <span class="o">=</span> <span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;cutoff&quot;</span><span class="p">]</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">cutoff</span><span class="o">.</span><span class="n">dtype</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">cutoff</span><span class="o">.</span><span class="n">device</span>
+    <span class="n">n_systems</span> <span class="o">=</span> <span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;rows&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># calculate bounding boxes per system</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">image_atomCSR</span><span class="p">[</span><span class="s2">&quot;positions&quot;</span><span class="p">]</span>  <span class="c1"># [M,3]</span>
+    <span class="n">system_id</span> <span class="o">=</span> <span class="n">image_atomCSR</span><span class="p">[</span><span class="s2">&quot;system&quot;</span><span class="p">]</span>  <span class="c1"># [M]</span>
+    <span class="n">mins</span><span class="p">,</span> <span class="n">maxs</span> <span class="o">=</span> <span class="n">calculate_aabb</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">system_id</span><span class="p">,</span> <span class="n">n_systems</span><span class="p">)</span>
+
+    <span class="c1"># calculate grid shape per system</span>
+    <span class="n">span</span> <span class="o">=</span> <span class="n">maxs</span> <span class="o">-</span> <span class="n">mins</span>
+    <span class="n">per_system_grid_shape</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">span</span> <span class="o">/</span> <span class="n">cutoff</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># [n_systems,3]</span>
+    <span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;voxel_grid_shape&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">per_system_grid_shape</span>
+
+    <span class="c1"># setup voxel coordinate system.</span>
+    <span class="n">voxels_per_system</span> <span class="o">=</span> <span class="n">per_system_grid_shape</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># [n_systems]</span>
+    <span class="c1"># print(&quot;Voxels per system&quot;, voxels_per_system)</span>
+
+    <span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;n_voxels_per_system&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">voxels_per_system</span>
+    <span class="c1"># calculate voxel id offsets for each system</span>
+    <span class="n">voxel_offset</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_systems</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">voxels_per_system</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">out</span><span class="o">=</span><span class="n">voxel_offset</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="n">voxel_offset</span> <span class="o">=</span> <span class="n">voxel_offset</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;voxel_offset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">voxel_offset</span>
+
+    <span class="n">mx</span><span class="p">,</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span> <span class="o">=</span> <span class="n">per_system_grid_shape</span><span class="o">.</span><span class="n">unbind</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># We index the voxels in C-order:</span>
+    <span class="n">per_system_voxel_strides</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">mz</span> <span class="o">*</span> <span class="n">my</span><span class="p">,</span> <span class="n">mz</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">mz</span><span class="p">)],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># If you want to switch to Fortran order:</span>
+    <span class="c1"># per_system_voxel_strides = torch.stack([torch.ones_like(mx), mx, mx * my], dim=-1)</span>
+    <span class="c1"># (either order is fine.)</span>
+
+    <span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;voxel_strides&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">per_system_voxel_strides</span>
+
+
+    <span class="c1"># Now calculate which voxel each image-atom falls into.</span>
+
+    <span class="n">origin_per_entry</span> <span class="o">=</span> <span class="n">mins</span><span class="p">[</span><span class="n">system_id</span><span class="p">]</span>  <span class="c1"># [M,3]</span>
+    <span class="n">dims_per_entry</span> <span class="o">=</span> <span class="n">per_system_grid_shape</span><span class="p">[</span><span class="n">system_id</span><span class="p">]</span>  <span class="c1"># [M,3]</span>
+
+    <span class="c1"># tiny percentage extra in voxel size to ensure</span>
+    <span class="c1"># all pairs can be found regardless of numerical noise</span>
+    <span class="c1"># also should handle rightmost voxel coordinate being in range.</span>
+    <span class="n">skin_ratio</span> <span class="o">=</span> <span class="mf">1e-4</span>
+    <span class="n">cutoff_with_skin</span> <span class="o">=</span> <span class="n">cutoff</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">skin_ratio</span><span class="p">)</span>
+
+    <span class="n">voxel_nondim_coords</span> <span class="o">=</span> <span class="p">(</span><span class="n">positions</span> <span class="o">-</span> <span class="n">origin_per_entry</span><span class="p">)</span> <span class="o">/</span> <span class="n">cutoff_with_skin</span><span class="p">[</span><span class="n">system_id</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># clamp_min here handles if the leftmost point in the box encounters numerical noise.</span>
+    <span class="n">voxel_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">voxel_nondim_coords</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span><span class="o">.</span><span class="n">clamp_min</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="p">(</span><span class="n">voxel_indices</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="n">voxel_indices</span> <span class="o">&lt;</span> <span class="n">dims_per_entry</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="s2">&quot;Voxel index invalid.&quot;</span>
+
+    <span class="n">per_imageatom_strides</span> <span class="o">=</span> <span class="n">per_system_voxel_strides</span><span class="p">[</span><span class="n">system_id</span><span class="p">]</span>
+    <span class="c1"># could be a dot product but not usually efficient for very dot index:</span>
+    <span class="n">local_voxel_linear_id</span> <span class="o">=</span> <span class="p">(</span><span class="n">voxel_indices</span> <span class="o">*</span> <span class="n">per_imageatom_strides</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># [M]</span>
+
+    <span class="c1"># Re-index atoms into a voxel-aligned CSR (was in system-aligned)</span>
+    <span class="n">global_voxel_id_per_entry</span> <span class="o">=</span> <span class="n">voxel_offset</span><span class="p">[</span><span class="n">system_id</span><span class="p">]</span> <span class="o">+</span> <span class="n">local_voxel_linear_id</span>  <span class="c1"># [M]</span>
+
+    <span class="n">occupied_voxel_ids</span><span class="p">,</span> <span class="n">voxel_index_per_atom</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">global_voxel_id_per_entry</span><span class="p">,</span> <span class="n">return_inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">sorted</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">n_voxels</span> <span class="o">=</span> <span class="n">occupied_voxel_ids</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">voxel_arange</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_voxels</span><span class="p">,</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">image_atomCSR</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;positions&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_gid&quot;</span><span class="p">,</span> <span class="s2">&quot;offsets&quot;</span><span class="p">,</span> <span class="s2">&quot;is_primary&quot;</span><span class="p">,</span> <span class="s2">&quot;system&quot;</span><span class="p">)}</span>
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;voxel_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">global_voxel_id_per_entry</span>
+    <span class="n">voxel_atomCSR</span> <span class="o">=</span> <span class="n">CSRTable</span><span class="o">.</span><span class="n">from_coo</span><span class="p">(</span>
+        <span class="n">rows</span><span class="o">=</span><span class="n">voxel_index_per_atom</span><span class="p">,</span>
+        <span class="n">cols</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">image_atomCSR</span><span class="o">.</span><span class="n">nnz</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">),</span> <span class="c1"># each atom has its own column; we&#39;re just grouping rows.</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+        <span class="c1">#nrows=voxelCSR.nnz,</span>
+        <span class="n">reorder</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    
+    <span class="c1"># Note: the below scheme for populating voxel information looks like a race condition.</span>
+    <span class="c1"># Actually we&#39;re just writing the atom data back to the voxel table, </span>
+    <span class="c1"># instead of re-computing all the voxel info based on the GID.</span>
+    
+    <span class="n">occupied_voxel_sys</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">n_voxels</span><span class="p">,),</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">occupied_voxel_sys</span><span class="p">[</span><span class="n">voxel_index_per_atom</span><span class="p">]</span> <span class="o">=</span> <span class="n">system_id</span> 
+    <span class="n">occupied_voxel_stride</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">n_voxels</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">occupied_voxel_stride</span><span class="p">[</span><span class="n">voxel_index_per_atom</span><span class="p">]</span> <span class="o">=</span> <span class="n">per_imageatom_strides</span>
+    <span class="n">occupied_voxel_dims</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">n_voxels</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">occupied_voxel_dims</span><span class="p">[</span><span class="n">voxel_index_per_atom</span><span class="p">]</span> <span class="o">=</span> <span class="n">dims_per_entry</span>
+    
+    <span class="n">occupied_voxel_local_id</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">n_voxels</span><span class="p">,),</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">occupied_voxel_local_id</span><span class="p">[</span><span class="n">voxel_index_per_atom</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_voxel_linear_id</span>
+    <span class="n">occupied_voxel_coord</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">n_voxels</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">occupied_voxel_coord</span><span class="p">[</span><span class="n">voxel_index_per_atom</span><span class="p">]</span> <span class="o">=</span> <span class="n">voxel_indices</span>
+
+    <span class="c1"># The other strategy (could be implemented if needed for perforamnce)</span>
+    <span class="c1"># would be to unwrap the voxel offset and local id, then</span>
+    <span class="c1"># use offset to find the system -&gt; strides, dims</span>
+    <span class="c1"># use local id -&gt; coord</span>
+    <span class="c1"># actually that is irrelevant as each index is set to the same value;</span>
+    <span class="c1"># all atoms belonging to a given voxel also belong to a given system. </span>
+
+    <span class="c1"># Conversion to bool cannot be done before reduce because </span>
+    <span class="c1"># cuda backend cannot reduce bools; reduce using bool if available,</span>
+    <span class="c1"># but with int on cuda.</span>
+    
+    <span class="n">accum_dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">long</span> <span class="k">if</span> <span class="n">device</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">bool</span>
+
+    <span class="c1"># Note that this data is not constant on atoms so we must do a </span>
+    <span class="c1"># safe reduction using max.</span>
+    <span class="n">primary_vox_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_voxels</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">accum_dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+     
+    <span class="n">primary_vox_mask</span><span class="o">.</span><span class="n">scatter_reduce_</span><span class="p">(</span>
+        <span class="mi">0</span><span class="p">,</span>
+        <span class="n">voxel_index_per_atom</span><span class="p">,</span>
+        <span class="n">image_atomCSR</span><span class="p">[</span><span class="s2">&quot;is_primary&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">accum_dtype</span><span class="p">),</span>
+        <span class="n">reduce</span><span class="o">=</span><span class="s2">&quot;amax&quot;</span><span class="p">,</span>
+        <span class="n">include_self</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    
+    <span class="n">primary_vox_mask</span> <span class="o">=</span> <span class="n">primary_vox_mask</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+    
+    <span class="c1"># ^^^</span>
+    <span class="c1"># Note for future: if you are tempted to get &quot;is_priamry&quot; from</span>
+    <span class="c1"># the voxel_atomCSR then make sure to reduce on the rows of that CSR,</span>
+    <span class="c1"># as building it re-orders the atoms and puts the data in a different order than</span>
+    <span class="c1"># the array voxel_index_per_atom</span>
+    
+    <span class="n">data</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;voxel_gid&quot;</span><span class="p">:</span><span class="n">occupied_voxel_ids</span><span class="p">,</span>
+        <span class="s2">&quot;v&quot;</span><span class="p">:</span><span class="n">occupied_voxel_coord</span><span class="p">,</span>
+        <span class="s2">&quot;s&quot;</span><span class="p">:</span><span class="n">occupied_voxel_stride</span><span class="p">,</span>
+        <span class="s2">&quot;m&quot;</span><span class="p">:</span><span class="n">occupied_voxel_dims</span><span class="p">,</span>
+        <span class="s2">&quot;is_primary_voxel&quot;</span><span class="p">:</span><span class="n">primary_vox_mask</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="n">voxelCSR</span> <span class="o">=</span> <span class="n">CSRTable</span><span class="o">.</span><span class="n">from_coo</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="n">occupied_voxel_sys</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="n">voxel_arange</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
+    
+    <span class="k">return</span> <span class="n">voxel_atomCSR</span><span class="p">,</span> <span class="n">voxelCSR</span><span class="p">,</span> <span class="n">systemCSR</span></div>
+
+
+
+<div class="viewcode-block" id="voxel_adjacency">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.neighbor_algorithm.html#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.voxel_adjacency">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">voxel_adjacency</span><span class="p">(</span>
+    <span class="n">voxelCSR</span><span class="p">:</span> <span class="n">CSRTable</span><span class="p">,</span>
+    <span class="n">systemCSR</span><span class="p">:</span> <span class="n">CSRTable</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build voxel–voxel edges using a fixed stencil (includes self-edges).</span>
+
+<span class="sd">    Assumptions</span>
+<span class="sd">    -----------</span>
+<span class="sd">    * PBC are handled by explicit image expansion; only in-bounds checks are needed.</span>
+<span class="sd">    * Keep an edge if at least one endpoint voxel is primary (cheap pruning).</span>
+<span class="sd">    * The stencil can be full (e.g., 3×3×3) or reduced; current code emits a</span>
+<span class="sd">      symmetric set including (0,0,0).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    voxelCSR : CSRTable</span>
+<span class="sd">        Rows = systems; entries = voxels with fields</span>
+<span class="sd">        ``&quot;v&quot;,&quot;m&quot;,&quot;s&quot;,&quot;voxel_gid&quot;,&quot;is_primary_voxel&quot;``.</span>
+<span class="sd">    systemCSR : CSRTable</span>
+<span class="sd">        Provides per-system voxel grid shapes.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    first_global : LongTensor, shape ``[E]``</span>
+<span class="sd">        Global voxel ids for the first endpoint.</span>
+<span class="sd">    second_global : LongTensor, shape ``[E]``</span>
+<span class="sd">        Global voxel ids for the second endpoint.</span>
+
+<span class="sd">    Complexity</span>
+<span class="sd">    ----------</span>
+<span class="sd">    O(V * stencil_size), typically small constant factor per voxel.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">voxelCSR</span><span class="o">.</span><span class="n">cols</span><span class="o">.</span><span class="n">device</span>
+    <span class="n">per_system_grid_shape</span> <span class="o">=</span> <span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;voxel_grid_shape&quot;</span><span class="p">]</span>
+
+    <span class="n">n_systems</span> <span class="o">=</span> <span class="n">per_system_grid_shape</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># ---- Stencil: packed [S,3]; include (0,0,0) so intra-voxel pairs are produced ----</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+
+    <span class="n">deltas</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cartesian_prod</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">base</span><span class="p">)</span>  <span class="c1"># [27,3]</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">deltas</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Same stencil is applied to each system.</span>
+    <span class="n">stencilCSR</span> <span class="o">=</span> <span class="n">CSRTable</span><span class="o">.</span><span class="n">from_counts</span><span class="p">(</span>
+        <span class="n">counts</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">n_systems</span><span class="p">,),</span> <span class="n">S</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">),</span>
+        <span class="n">col_data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;delta&quot;</span><span class="p">:</span> <span class="n">deltas</span><span class="p">},</span>  <span class="c1"># packed [S,3]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># since the first particle is always primary, don&#39;t compute shifts from non-primary voxels,</span>
+    <span class="c1"># only from primary ones. This will reduce excess rows in the pairing table.</span>
+    <span class="n">primary_voxelCSR</span> <span class="o">=</span> <span class="n">voxelCSR</span><span class="o">.</span><span class="n">filter_mask</span><span class="p">(</span><span class="n">voxelCSR</span><span class="p">[</span><span class="s2">&quot;is_primary_voxel&quot;</span><span class="p">])</span>
+
+    <span class="c1"># ---- OUTER: voxelCSR × stencilCSR -&gt; candidate neighbors per voxel ----</span>
+    <span class="n">cand</span> <span class="o">=</span> <span class="n">primary_voxelCSR</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span>
+        <span class="n">stencilCSR</span><span class="p">,</span>
+        <span class="n">operations</span><span class="o">=</span><span class="p">{</span>
+            <span class="c1"># fmt: off</span>
+            <span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span>   <span class="s2">&quot;delta&quot;</span><span class="p">,</span> <span class="s2">&quot;v2&quot;</span><span class="p">):</span>  <span class="k">lambda</span> <span class="n">v</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">v</span> <span class="o">+</span> <span class="n">d</span><span class="p">,</span>  <span class="c1"># neighbor coords [E,3]</span>
+            <span class="c1">#(&quot;v&quot;,   None, &quot;v1&quot;):           lambda v:v,          # source voxel indices</span>
+            <span class="p">(</span><span class="s2">&quot;voxel_gid&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>    <span class="s2">&quot;gid1&quot;</span><span class="p">):</span>   <span class="k">lambda</span> <span class="n">gid</span><span class="p">:</span> <span class="n">gid</span><span class="p">,</span>     <span class="c1"># source voxel gid</span>
+            <span class="p">(</span><span class="s2">&quot;rows&quot;</span><span class="p">,</span>      <span class="kc">None</span><span class="p">,</span>    <span class="s2">&quot;system&quot;</span><span class="p">):</span>  <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="p">,</span>         <span class="c1"># system id</span>
+            <span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">,</span>      <span class="kc">None</span><span class="p">,</span>    <span class="s2">&quot;m&quot;</span><span class="p">):</span>          <span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">m</span><span class="p">,</span>         <span class="c1"># voxel dims [E,3]</span>
+            <span class="c1">#(None,&quot;delta&quot;, &quot;d&quot;): lambda d: d, # keep delta</span>
+            <span class="p">(</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">):</span>                  <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span><span class="n">s</span>           <span class="c1"># strides for each voxel.       </span>
+            <span class="c1"># fmt: on</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    
+    <span class="c1"># Drop neighbors voxels that are not in bounds.</span>
+    <span class="c1"># ;PBC is not required since image atoms are construted explictly)</span>
+    <span class="c1"># ;;If you don&#39;t do this you will get spurious duplicate instances of the second voxel as well as</span>
+    <span class="c1"># ;;invalid/corrupt voxel gids)</span>
+    <span class="n">v2</span> <span class="o">=</span> <span class="n">cand</span><span class="p">[</span><span class="s2">&quot;v2&quot;</span><span class="p">]</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">cand</span><span class="p">[</span><span class="s2">&quot;m&quot;</span><span class="p">]</span>
+    <span class="n">in_bounds</span> <span class="o">=</span> <span class="p">((</span><span class="n">v2</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">v2</span> <span class="o">&lt;</span> <span class="n">m</span><span class="p">))</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">cand</span> <span class="o">=</span> <span class="n">cand</span><span class="o">.</span><span class="n">filter_mask</span><span class="p">(</span><span class="n">in_bounds</span><span class="p">)</span>
+
+    <span class="n">second_local</span> <span class="o">=</span> <span class="p">(</span><span class="n">cand</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">cand</span><span class="p">[</span><span class="s2">&quot;v2&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># reconstruct the per-system voxel ID numbers</span>
+
+    <span class="c1"># reconstruct the global voxel ID numbers</span>
+    <span class="n">first_global</span> <span class="o">=</span> <span class="n">cand</span><span class="p">[</span><span class="s2">&quot;gid1&quot;</span><span class="p">]</span>
+    <span class="n">second_global</span> <span class="o">=</span> <span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;voxel_offset&quot;</span><span class="p">][</span><span class="n">cand</span><span class="p">[</span><span class="s2">&quot;system&quot;</span><span class="p">]]</span> <span class="o">+</span> <span class="n">second_local</span>
+
+    <span class="c1"># drop locations where the second voxel index is unpopulated.</span>
+    <span class="n">gids</span> <span class="o">=</span> <span class="n">voxelCSR</span><span class="p">[</span><span class="s2">&quot;voxel_gid&quot;</span><span class="p">]</span>
+    <span class="n">where_second_nonempty</span><span class="p">,</span> <span class="n">second_indices</span> <span class="o">=</span> <span class="n">find_indices</span><span class="p">(</span><span class="n">second_global</span><span class="p">,</span> <span class="n">gids</span><span class="p">)</span>
+    <span class="n">first_global</span> <span class="o">=</span> <span class="n">first_global</span><span class="p">[</span><span class="n">where_second_nonempty</span><span class="p">]</span>    
+
+    <span class="c1"># re-find the voxel index for the first voxel in the pair, as well.</span>
+    <span class="n">where_first_valid</span><span class="p">,</span> <span class="n">first_indices</span> <span class="o">=</span> <span class="n">find_indices</span><span class="p">(</span><span class="n">first_global</span><span class="p">,</span> <span class="n">gids</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">where_first_valid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">first_global</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;Not all first voxels were valid!&quot;</span>
+
+    <span class="k">return</span> <span class="n">first_indices</span><span class="p">,</span> <span class="n">second_indices</span></div>
+
+
+
+<div class="viewcode-block" id="expand_pairs">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.neighbor_algorithm.html#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.expand_pairs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">expand_pairs</span><span class="p">(</span><span class="n">voxel_atomCSR</span><span class="p">,</span> <span class="n">first_vox</span><span class="p">,</span> <span class="n">second_vox</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Expand voxel edges to candidate atom pairs.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    voxel_atomCSR : CSRTable</span>
+<span class="sd">        Rows = global voxel ids; contains per-entry fields for image-atoms.</span>
+<span class="sd">    first_vox : LongTensor, shape ``[E]``</span>
+<span class="sd">        Global voxel ids (left endpoints).</span>
+<span class="sd">    second_vox : LongTensor, shape ``[E]``</span>
+<span class="sd">        Global voxel ids (right endpoints).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pairs : CSRTable</span>
+<span class="sd">        Rows = edges (one row per ``(first_vox[i], second_vox[i])``), entries =</span>
+<span class="sd">        Cartesian product of atoms from the two voxels. Carries at least:</span>
+<span class="sd">        ``&quot;idA&quot;,&quot;idB&quot;,&quot;posA&quot;,&quot;posB&quot;,&quot;rel_k&quot;,&quot;is_primary_B&quot;`` and any additional</span>
+<span class="sd">        payload required for pruning.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Implemented via :meth:`CSRTable.expand_pairings`/``outer``-style joins for</span>
+<span class="sd">    the specified voxel pairings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">primary_voxelCSR</span> <span class="o">=</span> <span class="n">voxel_atomCSR</span><span class="o">.</span><span class="n">filter_mask</span><span class="p">(</span><span class="n">voxel_atomCSR</span><span class="p">[</span><span class="s2">&quot;is_primary&quot;</span><span class="p">])</span>
+
+    <span class="c1"># 6) build candidate pairs (new API: single CSR with mapped payloads)</span>
+    <span class="n">pairs</span> <span class="o">=</span> <span class="n">CSRTable</span><span class="o">.</span><span class="n">expand_pairings</span><span class="p">(</span>
+        <span class="n">left_csr</span><span class="o">=</span><span class="n">primary_voxelCSR</span><span class="p">,</span>
+        <span class="n">right_csr</span><span class="o">=</span><span class="n">voxel_atomCSR</span><span class="p">,</span>
+        <span class="n">left_rows</span><span class="o">=</span><span class="n">first_vox</span><span class="p">,</span>
+        <span class="n">right_rows</span><span class="o">=</span><span class="n">second_vox</span><span class="p">,</span>
+        <span class="n">operations</span><span class="o">=</span><span class="p">{</span>
+            <span class="c1"># fmt: off</span>
+            <span class="p">(</span><span class="s2">&quot;positions&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;posA&quot;</span><span class="p">):</span>                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">,</span>
+            <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;positions&quot;</span><span class="p">,</span> <span class="s2">&quot;posB&quot;</span><span class="p">):</span>                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">x</span><span class="p">,</span>
+            <span class="p">(</span><span class="s2">&quot;positions&quot;</span><span class="p">,</span> <span class="s2">&quot;positions&quot;</span><span class="p">,</span> <span class="s2">&quot;displacement&quot;</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">:</span><span class="n">y</span><span class="o">-</span><span class="n">x</span><span class="p">,</span>
+            <span class="p">(</span><span class="s2">&quot;atom_gid&quot;</span><span class="p">,</span>   <span class="kc">None</span><span class="p">,</span>        <span class="s2">&quot;idA&quot;</span><span class="p">):</span>         <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+            <span class="p">(</span><span class="kc">None</span><span class="p">,</span>         <span class="s2">&quot;atom_gid&quot;</span><span class="p">,</span>  <span class="s2">&quot;idB&quot;</span><span class="p">):</span>         <span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
+            <span class="p">(</span><span class="s2">&quot;offsets&quot;</span><span class="p">,</span>    <span class="s2">&quot;offsets&quot;</span><span class="p">,</span>  <span class="s2">&quot;offsets&quot;</span><span class="p">):</span>      <span class="k">lambda</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">:</span><span class="n">b</span><span class="o">-</span><span class="n">a</span><span class="p">,</span>
+            <span class="p">(</span><span class="kc">None</span><span class="p">,</span>         <span class="s2">&quot;is_primary&quot;</span><span class="p">,</span> <span class="s2">&quot;primB&quot;</span><span class="p">):</span>      <span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
+            <span class="p">(</span><span class="s2">&quot;system&quot;</span><span class="p">,</span>     <span class="kc">None</span><span class="p">,</span>        <span class="s2">&quot;system&quot;</span><span class="p">):</span>      <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+            <span class="c1"># fmt: on</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">pairs</span><span class="p">[</span><span class="s2">&quot;distance&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pairs</span><span class="p">[</span><span class="s2">&quot;displacement&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pairs</span></div>
+
+
+
+<div class="viewcode-block" id="prune_pairs">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.neighbor_algorithm.html#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.prune_pairs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">prune_pairs</span><span class="p">(</span><span class="n">pairs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply geometric/pruning predicates to candidate pairs.</span>
+
+<span class="sd">    Predicates</span>
+<span class="sd">    ----------</span>
+<span class="sd">    1) Radial cutoff: ``||posB - posA|| &lt; cutoff`` (per-system).</span>
+<span class="sd">    2) Self-edge removal: when ``idA == idB``, drop if ``is_primary_B`` is True</span>
+<span class="sd">       (i.e., the primary image would create a trivial self-connection).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pairs : CSRTable</span>
+<span class="sd">        Must carry fields:</span>
+<span class="sd">        ``&quot;idA&quot;,&quot;idB&quot;,&quot;posA&quot;,&quot;posB&quot;,&quot;rel_k&quot;,&quot;cutoff&quot;,&quot;is_primary_B&quot;`` (names may vary</span>
+<span class="sd">        slightly depending on upstream ops, but semantics match above).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    idA : LongTensor, shape ``[K]``</span>
+<span class="sd">    idB : LongTensor, shape ``[K]``</span>
+<span class="sd">    rel_k : LongTensor, shape ``[K,3]``</span>
+<span class="sd">    dist : Tensor, shape ``[K]``</span>
+<span class="sd">    disp : Tensor, shape ``[K,3]``</span>
+
+<span class="sd">    Autograd</span>
+<span class="sd">    --------</span>
+<span class="sd">    ``dist`` and ``disp`` are differentiable; discrete tensors are not.</span>
+
+<span class="sd">    Complexity</span>
+<span class="sd">    ----------</span>
+<span class="sd">    O(E_pairs) with simple boolean masking and a single norm.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="calc_neighbors">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.neighbor_algorithm.html#hippynn.layers.pairs.csr_pairs.neighbor_algorithm.calc_neighbors">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">calc_neighbors</span><span class="p">(</span>
+    <span class="n">positions</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>  <span class="c1"># [n_systems, n_atoms_max, 3] float</span>
+    <span class="n">nonblank</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>  <span class="c1"># [n_systems, n_atoms_max] bool</span>
+    <span class="n">cells</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>  <span class="c1"># [n_systems, 3, 3] float</span>
+    <span class="n">cutoff</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">use_full_stencil</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">return_displacements</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Full neighbor-list pipeline (batched triclinic PBC).</span>
+
+<span class="sd">    Pipeline Structure:</span>
+<span class="sd">      1) normalize_atoms      -&gt; wrapped positions + base image offsets (integer)</span>
+<span class="sd">      2) build_image_offsets  -&gt; per-system dynamic image CSR with (&quot;image_offsets&quot;,&quot;shift&quot;,&quot;is_primary&quot;)</span>
+<span class="sd">      3) build_image_atoms    -&gt; CSR over systems with (&quot;positions&quot;,&quot;atom_gid&quot;,&quot;offsets&quot;,&quot;is_primary&quot;,&quot;system&quot;)</span>
+<span class="sd">      4) voxelize_images      -&gt; (voxel_atomCSR, voxelCSR, per_system_grid_shape)</span>
+<span class="sd">      5) voxel_adjancency     -&gt; (first_voxel_id, second_voxel_id), includes (0,0,0)</span>
+<span class="sd">      6) expand edges -&gt; pairs via CSRTable.expand_cartesian_pairings on voxel_atomCSR</span>
+<span class="sd">      7) prune: distance &lt; cutoff, drop self-connections</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    positions : Tensor, shape ``[S, A, 3]``</span>
+<span class="sd">        Cartesian positions per system, padded to ``A``.</span>
+<span class="sd">    nonblank : BoolTensor, shape ``[S, A]``</span>
+<span class="sd">        Mask indicating valid atoms.</span>
+<span class="sd">    cells : Tensor, shape ``[S, 3, 3]``</span>
+<span class="sd">        Triclinic cell matrices per system.</span>
+<span class="sd">    cutoff : Tensor ``[S]`` or ``float``</span>
+<span class="sd">        Per-system radial cutoff; a scalar is broadcast.</span>
+<span class="sd">    use_full_stencil : bool, default ``True``</span>
+<span class="sd">        Controls the image offset stencil in :func:`build_image_offsets`.</span>
+<span class="sd">    return_displacements: bool, default ``True``</span>
+<span class="sd">        If true, return distances and displacments as well as discrete indices.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    idA : LongTensor, shape ``[K]``</span>
+<span class="sd">        Source atom global ids (within the padded input).</span>
+<span class="sd">    idB : LongTensor, shape ``[K]``</span>
+<span class="sd">        Target atom global ids.</span>
+<span class="sd">    rel_k : LongTensor, shape ``[K, 3]``</span>
+<span class="sd">        Integer image offset for ``B`` relative to ``A``.</span>
+<span class="sd">    dist : Tensor, shape ``[K]``</span>
+<span class="sd">        Euclidean distances ``||posB - posA||``.</span>
+<span class="sd">    disp : Tensor, shape ``[K, 3]``</span>
+<span class="sd">        Displacements ``posB - posA`` in Cartesian coordinates.</span>
+
+<span class="sd">    Guarantees</span>
+<span class="sd">    ----------</span>
+<span class="sd">    * Deterministic ordering given fixed inputs and a fixed CSR ordering policy.</span>
+<span class="sd">    * Includes cross-image neighbors due to explicit image expansion.</span>
+<span class="sd">    * Excludes trivial self-edges as described in :func:`prune_pairs`.</span>
+
+<span class="sd">    Complexity</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Roughly linear in the number of candidate pairs after voxel pruning; memory</span>
+<span class="sd">    peaks during pair expansion and can be controlled by voxel granularity.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; idA, idB, k, dist, disp = calc_neighbors(positions, nonblank, cells, cutoff)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">##TODO Check call sites for cutoff variable which used to use float, now use per-system tensor.</span>
+    <span class="c1"># Write test for per-system cutoffs</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">device</span>
+
+    <span class="c1">### TODO: use integer cell transforms to reduce skew during neighbor calculations!</span>
+    <span class="c1">### Remember to map back at the end?</span>
+
+    <span class="c1"># shape tests: (Not testing this can cause silent errors)</span>
+    <span class="k">assert</span> <span class="n">positions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">nonblank</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;mismatched batch size&quot;</span>
+    <span class="k">assert</span> <span class="n">positions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cells</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;mismatched batch size&quot;</span>
+    <span class="k">assert</span> <span class="n">positions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">nonblank</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;mismatched atom size&quot;</span>
+
+    <span class="c1"># 0) set up data structures</span>
+    <span class="n">atomCSR</span><span class="p">,</span> <span class="n">systemCSR</span> <span class="o">=</span> <span class="n">build_initial_data</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">nonblank</span><span class="p">,</span> <span class="n">cells</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">)</span>
+
+    <span class="c1"># 1) wrap + base offsets</span>
+
+    <span class="n">atomCSR</span><span class="p">,</span> <span class="n">systemCSR</span> <span class="o">=</span> <span class="n">normalize_atoms</span><span class="p">(</span><span class="n">atomCSR</span><span class="p">,</span> <span class="n">systemCSR</span><span class="p">)</span>
+
+    <span class="c1"># 2) dynamic image offsets per system (nnz-aligned fields on returned CSR)</span>
+    <span class="c1"># TODO: accept mixed boundary conditions.</span>
+    <span class="n">imageCSR</span> <span class="o">=</span> <span class="n">build_image_offsets</span><span class="p">(</span><span class="n">systemCSR</span><span class="p">,</span> <span class="n">use_full_stencil</span><span class="o">=</span><span class="n">use_full_stencil</span><span class="p">)</span>
+
+    <span class="c1"># 3) expand primary atoms to images (joins atoms × imageCSR)</span>
+    <span class="n">image_atomsCSR</span> <span class="o">=</span> <span class="n">build_image_atoms</span><span class="p">(</span><span class="n">atomCSR</span><span class="p">,</span> <span class="n">imageCSR</span><span class="p">,</span> <span class="n">systemCSR</span><span class="p">)</span>
+
+    <span class="n">voxel_atomCSR</span><span class="p">,</span> <span class="n">voxelCSR</span><span class="p">,</span> <span class="n">systemCSR</span> <span class="o">=</span> <span class="n">voxelize_images</span><span class="p">(</span><span class="n">image_atomsCSR</span><span class="p">,</span> <span class="n">systemCSR</span><span class="p">)</span>
+
+    <span class="c1"># Construct pairs of voxels where:</span>
+    <span class="c1"># 1) they are adjvacent to each other (or same as each other)</span>
+    <span class="c1"># 2) one of them contains primary atoms</span>
+    <span class="c1"># TODO Add logic to only perform this on filled voxels. Or maybe scale voxels</span>
+    <span class="c1"># per system so that we don&#39;t end up with many empty ones.</span>
+    <span class="c1"># Something to address bad scaling when systems get very sparse!</span>
+    <span class="c1"># (# of voxels scales like size of space, not size of particles)</span>
+    <span class="n">first_vox</span><span class="p">,</span> <span class="n">second_vox</span> <span class="o">=</span> <span class="n">voxel_adjacency</span><span class="p">(</span><span class="n">voxelCSR</span><span class="p">,</span> <span class="n">systemCSR</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">pairs</span> <span class="o">=</span> <span class="n">expand_pairs</span><span class="p">(</span><span class="n">voxel_atomCSR</span><span class="o">=</span><span class="n">voxel_atomCSR</span><span class="p">,</span> <span class="n">first_vox</span><span class="o">=</span><span class="n">first_vox</span><span class="p">,</span> <span class="n">second_vox</span><span class="o">=</span><span class="n">second_vox</span><span class="p">)</span>
+
+    <span class="n">posA</span> <span class="o">=</span> <span class="n">pairs</span><span class="p">[</span><span class="s2">&quot;posA&quot;</span><span class="p">]</span>  <span class="c1"># [P,3]</span>
+    <span class="n">posB</span> <span class="o">=</span> <span class="n">pairs</span><span class="p">[</span><span class="s2">&quot;posB&quot;</span><span class="p">]</span>  <span class="c1"># [P,3]</span>
+    <span class="n">prim_B</span> <span class="o">=</span> <span class="n">pairs</span><span class="p">[</span><span class="s2">&quot;primB&quot;</span><span class="p">]</span>  <span class="c1"># [P]</span>
+    <span class="n">idA</span> <span class="o">=</span> <span class="n">pairs</span><span class="p">[</span><span class="s2">&quot;idA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+    <span class="n">idB</span> <span class="o">=</span> <span class="n">pairs</span><span class="p">[</span><span class="s2">&quot;idB&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+    <span class="n">rel_k</span> <span class="o">=</span> <span class="n">pairs</span><span class="p">[</span><span class="s2">&quot;offsets&quot;</span><span class="p">]</span>
+    <span class="n">sys</span> <span class="o">=</span> <span class="n">pairs</span><span class="p">[</span><span class="s2">&quot;system&quot;</span><span class="p">]</span>
+
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+
+        <span class="n">pair_cutoffs</span> <span class="o">=</span> <span class="n">systemCSR</span><span class="p">[</span><span class="s2">&quot;cutoff&quot;</span><span class="p">][</span><span class="n">sys</span><span class="p">]</span>
+        <span class="n">keep</span> <span class="o">=</span> <span class="n">pairs</span><span class="p">[</span><span class="s2">&quot;distance&quot;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pair_cutoffs</span>
+        <span class="n">diff_atoms</span> <span class="o">=</span> <span class="n">idA</span> <span class="o">!=</span> <span class="n">idB</span>
+        <span class="c1"># For same atom pairs, we need to drop the self-connection,</span>
+        <span class="c1"># so if B is the primary (same position as A) then we drop it.</span>
+        <span class="n">keep</span> <span class="o">&amp;=</span> <span class="n">diff_atoms</span> <span class="o">|</span> <span class="o">~</span><span class="n">prim_B</span>
+
+    <span class="c1"># keep_ratio = keep.to(torch.long).sum().item()/keep.numel()</span>
+    <span class="c1"># print(f&quot;{keep_ratio=}&quot;)</span>
+
+    <span class="n">idA</span> <span class="o">=</span> <span class="n">idA</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+    <span class="n">idB</span> <span class="o">=</span> <span class="n">idB</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+    <span class="n">posA</span> <span class="o">=</span> <span class="n">posA</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+    <span class="n">posB</span> <span class="o">=</span> <span class="n">posB</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+    <span class="n">rel_k</span> <span class="o">=</span> <span class="n">rel_k</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+    <span class="n">sys</span> <span class="o">=</span> <span class="n">sys</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+
+    <span class="n">outs</span> <span class="o">=</span> <span class="p">(</span><span class="n">idA</span><span class="p">,</span> <span class="n">idB</span><span class="p">,</span> <span class="n">sys</span><span class="p">,</span> <span class="n">rel_k</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">return_displacements</span><span class="p">:</span>
+        <span class="c1"># Only recalculate if the calling code asks for it.</span>
+        <span class="c1"># (Layer wrapper does not; tests do)</span>
+        <span class="n">disp</span> <span class="o">=</span> <span class="n">posA</span> <span class="o">-</span> <span class="n">posB</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">disp</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">outs</span> <span class="o">=</span> <span class="o">*</span><span class="n">outs</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">disp</span>
+
+    <span class="k">return</span> <span class="n">outs</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Los Alamos National Laboratory.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

@@ -708,6 +708,7 @@
     <span class="n">profile_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
     <span class="n">batches_per_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
     <span class="n">record_shapes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">profile_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">with_stack</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">with_modules</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">with_flops</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -765,6 +766,7 @@
     <span class="n">step_function</span> <span class="o">=</span> <span class="n">get_step_function</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
     
     <span class="n">use_cuda</span> <span class="o">=</span> <span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+
     <span class="n">train_gen</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
     <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 
@@ -775,28 +777,34 @@
         <span class="n">batch_targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">batch_targets</span><span class="p">]</span>
         <span class="n">batch_model_outputs</span> <span class="o">=</span> <span class="n">step_function</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">batch_inputs</span><span class="p">,</span> <span class="n">batch_targets</span><span class="p">)</span>
         <span class="k">del</span> <span class="n">batch_model_outputs</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">step_batches</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">progress_bar</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">train_gen</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Batches&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;batch&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">batch_idx</span> <span class="o">&gt;=</span> <span class="n">batches_per_epoch</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">step_once</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>    
     
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running test batch.&quot;</span><span class="p">)</span>    
-    <span class="c1"># We run the test batch so that all necessary code is imported before tracing.</span>
-    <span class="n">step_once</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">train_gen</span><span class="p">)))</span>
-    
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Profiling </span><span class="si">{</span><span class="n">profile_epochs</span><span class="si">}</span><span class="s2"> epochs x </span><span class="si">{</span><span class="n">batches_per_epoch</span><span class="si">}</span><span class="s2"> batches on </span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    
-    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">profile</span><span class="p">(</span>
-        <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">use_cuda</span><span class="o">=</span><span class="n">use_cuda</span><span class="p">,</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Profiling </span><span class="si">{</span><span class="n">profile_epochs</span><span class="si">}</span><span class="s2"> epochs x </span><span class="si">{</span><span class="n">batches_per_epoch</span><span class="si">}</span><span class="s2"> batches on device &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running warmup batches.&quot;</span><span class="p">)</span>    
+    <span class="c1"># We run the test batches so that all necessary code is imported before tracing.</span>
+    <span class="c1"># This also warms up the GPU memory allocation.</span>
+    <span class="n">step_batches</span><span class="p">()</span>
+
+    <span class="n">activities</span> <span class="o">=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">ProfilerActivity</span><span class="o">.</span><span class="n">CPU</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">use_cuda</span><span class="p">:</span>
+        <span class="n">activities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">ProfilerActivity</span><span class="o">.</span><span class="n">CUDA</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">profile</span><span class="p">(</span>
+        <span class="n">activities</span><span class="o">=</span><span class="n">activities</span><span class="p">,</span>
         <span class="n">record_shapes</span><span class="o">=</span><span class="n">record_shapes</span><span class="p">,</span>
+        <span class="n">profile_memory</span><span class="o">=</span><span class="n">profile_memory</span><span class="p">,</span>
         <span class="n">with_stack</span><span class="o">=</span><span class="n">with_stack</span><span class="p">,</span>
-        <span class="n">with_modules</span><span class="o">=</span><span class="n">with_modules</span><span class="p">,</span>
         <span class="n">with_flops</span><span class="o">=</span><span class="n">with_flops</span><span class="p">,</span>
+        <span class="n">with_modules</span><span class="o">=</span><span class="n">with_modules</span><span class="p">,</span>
     <span class="p">)</span> <span class="k">as</span> <span class="n">prof</span><span class="p">:</span>
-        
         <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">progress_bar</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">profile_epochs</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Profiling Epochs&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;epoch&quot;</span><span class="p">):</span>
+            <span class="n">step_batches</span><span class="p">()</span>
             
-            <span class="k">for</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">progress_bar</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">train_gen</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Batches&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;batch&quot;</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">batch_idx</span> <span class="o">&gt;=</span> <span class="n">batches_per_epoch</span><span class="p">:</span>
-                    <span class="k">break</span>
-                <span class="n">step_once</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
     
     <span class="n">prof</span><span class="o">.</span><span class="n">export_chrome_trace</span><span class="p">(</span><span class="n">trace_file</span><span class="p">)</span>
     
