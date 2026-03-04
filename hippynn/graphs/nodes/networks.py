@@ -5,7 +5,7 @@ from .tags import Encoder, PairIndexer, Network, AtomIndexer
 from .base import Node, AutoKw, ExpandParents, SingleNode
 from .base.multi import IndexNode
 from .indexers import OneHotEncoder, PaddingIndexer, acquire_encoding_padding
-from .pairs import OpenPairIndexer, PeriodicPairIndexer
+from .pairs import OpenPairIndexer, PeriodicPairIndexer, SparsePairIndexer
 from .tags import PairIndexer
 from .inputs import SpeciesNode, PositionsNode, CellNode
 from ..indextypes import IdxType
@@ -47,9 +47,9 @@ class DefaultNetworkExpansion(ExpandParents):
             if isinstance(periodic, PairIndexer):
                 pair_cls = periodic
             elif isinstance(periodic,bool):
-                pair_cls = PeriodicPairIndexer                
+                pair_cls = SparsePairIndexer                
             pair_parents = (positions, encoder, pidxer, cell)
-            pair_cls = PeriodicPairIndexer
+            pair_cls = SparsePairIndexer
         else:
             assert cell is None, "When providing a cell node, periodic must be set to true"
             pair_parents = (positions, encoder, pidxer)

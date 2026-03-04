@@ -290,7 +290,7 @@ class ChEQ(torch.nn.Module):
         return q.reshape(n_molecule, n_atom), Ecoul.reshape(-1, 1) * self.energy_scale, d, U, chi
 
     @staticmethod
-    @torch.jit.script
+    #@torch.jit.script
     def exact_charge(U, chi, J, A0, b0):
         A = torch.diag_embed(U) + J
         A0[:, :-1, :-1] += A
@@ -303,7 +303,7 @@ class ChEQ(torch.nn.Module):
         return q, Ecoul
 
     @staticmethod
-    @torch.jit.script
+    #@torch.jit.script
     def dipole(q, coordinates):
         """
         q : charge, shape (n_molecule, n_atom, 1)
@@ -311,7 +311,8 @@ class ChEQ(torch.nn.Module):
         """
         return torch.sum(q * coordinates, dim=1)
 
-@torch.jit.script
+
+#@torch.compile
 def coul_J_with_Hubbard_U_screening(nonblank, coordinates, U):
     a_0 = 0.529177210903  # Bohr radius in Angstrom
     E_h = 27.211386245988  # Hatree energy in eV
@@ -363,7 +364,10 @@ def coul_J_with_Hubbard_U_screening(nonblank, coordinates, U):
     SE = EXPTJ * TI4 * TJ / 2.0 / TI2MTJ2 / TI2MTJ2
     SF = EXPTJ * (-(TI6 - 3.0 * TI4 * TJ2)) / TI2MTJ2 / TI2MTJ2 / TI2MTJ2
 
-    J0[different_element_mask] = J0[different_element_mask] - (1.0 * (SB - (SC / rij)) + 1.0 * (SE - (SF / rij)))[different_element_mask]
+    # compile-friendly write pattern with `where` instead of in-place operation on the mask
+    sub = (1.0 * (SB - (SC / rij)) + 1.0 * (SE - (SF / rij)))
+    J0 = torch.where(different_element_mask,J0-sub,J0)
+    
     # Taylor expansion around ta - tb -> 0
     SSB = TI3 / 48.0
     SSC = 3.0 * TI2 / 16.0
@@ -388,15 +392,14 @@ def coul_J_with_Hubbard_U_screening(nonblank, coordinates, U):
     SSS = 1.0 * TI2 / 320.0
     SST = 1.0 * TI3 / 1440.0
 
-    J0[same_element_mask] = (
-        J0[same_element_mask]
-        - (
+    # compile-friendly write pattern with `where` instead of in-place operation.
+    sub = (
             EXPTI * (SSB * rij_sq + SSC * rij + SSD + SSE / rij)
             + EXPTI * (SSF + SSG * rij + SSH * rij_sq + SSI * rij_cube) * (TI - TJ)
             + EXPTI * (SSJ + SSK * rij + SSL * rij_sq + SSM * rij_cube + SSN * rij_quad) * torch.pow(TI - TJ, 2)
             + EXPTI * (SSO + SSP * rij + SSQ * rij_sq + SSR * rij_cube + SSS * rij_quad + SST * rij_penta) * torch.pow(TI - TJ, 3)
-        )[same_element_mask]
-    )
+        )
+    J0 = torch.where(same_element_mask, J0-sub, J0)
 
     J = torch.where(mask, e2_over_four_pi_epsilon_0 * J0, zero)
 

@@ -320,6 +320,11 @@ class HOPInteractionLayer(InteractLayer):
         else:
             self.group_norm = None
 
+    def regularization_params(self):
+        p = super().regularization_params()
+        p += [self.mixing_weights]
+        return p
+
     def forward(self, in_features, pair_first, pair_second, dist_pairs, tensor_rhats):
 
         features_out_selfpart = self.selfint(in_features)
