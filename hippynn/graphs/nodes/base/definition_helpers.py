@@ -75,10 +75,10 @@ class AutoModule:
 
         super().__init__(*args, module=module, **kwargs)
 
-    _subclass_registry: set = set()
+    _unregistered_classes: list = []
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        AutoModule._subclass_registry.add(cls)
+        AutoModule._unregistered_classes.append(cls)
                 
 
 
