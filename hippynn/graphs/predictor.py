@@ -83,7 +83,8 @@ class Predictor:
         return cls(inputs, outputs, **kwargs)
 
     def to(self, *args, **kwargs):
-        return self.graph.to(*args, **kwargs)
+        self.graph.to(*args, **kwargs) # returns graph
+        return self
 
     @property
     def inputs(self):

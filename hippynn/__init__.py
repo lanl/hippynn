@@ -76,7 +76,8 @@ else:
 
 # Submodules that require lammps
 try:
-    import lammps
+    import lammps # lammps python module is installed 
+    import lammps.mliap # lammps MLIAP-python support is enabled.
 except ImportError:
     pass
 else:

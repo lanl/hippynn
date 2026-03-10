@@ -13,11 +13,8 @@ DATA_DIR = Path(__file__).parents[2] / "datasets"
 methane_small_1 = "methane_small.extxyz"
 methane_small_2 = "methane_small2.extxyz"
 
-@pytest.mark.xfail(
-    not (DATA_DIR / methane_small_1).exists(), 
-    reason="Data file not available",
-    strict=True
-)
+
+@pytest.mark.xfail(not (DATA_DIR / methane_small_1).exists(), reason="Data file not available", strict=True)
 def test_load_AseDatabase():
     database = AseDatabase(
         directory=DATA_DIR,
@@ -28,16 +25,14 @@ def test_load_AseDatabase():
         seed=0,
     )
 
-    expected_keys = {'numbers', 'positions', 'cell', 'forces', 'energy'}
+    expected_keys = {"numbers", "positions", "cell", "forces", "energy"}
     assert expected_keys.issubset(database.arr_dict.keys())
 
-    assert database.arr_dict["numbers"].shape == (10,5)
+    assert database.arr_dict["numbers"].shape == (10, 5)
 
 
 @pytest.mark.xfail(
-    not ((DATA_DIR / methane_small_1).exists() and (DATA_DIR / methane_small_2).exists()), 
-    reason="Data files not al available",
-    strict=True
+    not ((DATA_DIR / methane_small_1).exists() and (DATA_DIR / methane_small_2).exists()), reason="Data files not al available", strict=True
 )
 def test_load_multiple_AseDatabase():
     database = AseDatabase(
@@ -49,21 +44,17 @@ def test_load_multiple_AseDatabase():
         seed=0,
     )
 
-    assert database.arr_dict["numbers"].shape == (20,5)
+    assert database.arr_dict["numbers"].shape == (20, 5)
 
 
-@pytest.mark.xfail(
-    not (DATA_DIR / methane_small_1).exists(), 
-    reason="Data file not available",
-    strict=True
-)
+@pytest.mark.xfail(not (DATA_DIR / methane_small_1).exists(), reason="Data file not available", strict=True)
 def test_load_AseDatabaseIterable():
     database = AseDatabaseIterable(
-        iterable = read(DATA_DIR / methane_small_1, index=slice(0, 5)),
+        iterable=read(DATA_DIR / methane_small_1, index=slice(0, 5)),
         inputs=[],
         targets=[],
         allow_unfound=True,
         seed=0,
     )
 
-    assert database.arr_dict["numbers"].shape == (5,5)
+    assert database.arr_dict["numbers"].shape == (5, 5)

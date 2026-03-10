@@ -578,6 +578,7 @@ def setup_and_profile(
     profile_epochs: int = 3,
     batches_per_epoch: int = 3,
     record_shapes=False,
+    profile_memory=False,
     with_stack=False,
     with_modules=False,
     with_flops=False,
@@ -635,6 +636,7 @@ def setup_and_profile(
     step_function = get_step_function(optimizer)
     
     use_cuda = (device.type == "cuda")
+
     train_gen = database.make_generator("train", "train", batch_size=controller.batch_size)
     model.train()
 
@@ -645,28 +647,34 @@ def setup_and_profile(
         batch_targets = [x.requires_grad_(False) for x in batch_targets]
         batch_model_outputs = step_function(optimizer, model, loss, batch_inputs, batch_targets)
         del batch_model_outputs
+
+    def step_batches():
+        for batch_idx, batch in tools.progress_bar(enumerate(train_gen), desc="Batches", unit="batch"):
+            if batch_idx >= batches_per_epoch:
+                break
+            step_once(batch)    
     
-    print("Running test batch.")    
-    # We run the test batch so that all necessary code is imported before tracing.
-    step_once(next(iter(train_gen)))
-    
-    print(f"Profiling {profile_epochs} epochs x {batches_per_epoch} batches on {device}")
-    
-    with torch.autograd.profiler.profile(
-        enabled=True,
-        use_cuda=use_cuda,
+    print(f"Profiling {profile_epochs} epochs x {batches_per_epoch} batches on device '{device}'")
+
+    print("Running warmup batches.")    
+    # We run the test batches so that all necessary code is imported before tracing.
+    # This also warms up the GPU memory allocation.
+    step_batches()
+
+    activities = [torch.profiler.ProfilerActivity.CPU]
+    if use_cuda:
+        activities.append(torch.profiler.ProfilerActivity.CUDA)
+    with torch.profiler.profile(
+        activities=activities,
         record_shapes=record_shapes,
+        profile_memory=profile_memory,
         with_stack=with_stack,
-        with_modules=with_modules,
         with_flops=with_flops,
+        with_modules=with_modules,
     ) as prof:
-        
         for epoch in tools.progress_bar(range(profile_epochs), desc="Profiling Epochs", unit="epoch"):
+            step_batches()
             
-            for batch_idx, batch in tools.progress_bar(enumerate(train_gen), desc="Batches", unit="batch"):
-                if batch_idx >= batches_per_epoch:
-                    break
-                step_once(batch)
     
     prof.export_chrome_trace(trace_file)
     

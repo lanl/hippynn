@@ -21,7 +21,7 @@ from hippynn.molecular_dynamics.md import (
     MolecularDynamics,
 )
 
-from conftest import xfail_if_no_models, ignore_relocation, ignore_weights_only_warning, ignore_sensitivity_warning, MODEL_DIR
+from conftest import skip_if_no_models, ignore_relocation, ignore_weights_only_warning, ignore_sensitivity_warning, MODEL_DIR
 
 from ase import Atoms
 from ase.md.velocitydistribution import (
@@ -42,16 +42,18 @@ def generate_ase_results(hippynn_model_location, n_steps=3):
     a = 16.0  # Å box length
     symbols = "CCCHHHNO"
 
-    positions = np.array([
-        [2.0, 2.0, 2.0],   # C1
-        [3.5, 2.2, 2.1],   # C2 (bonded to C1)
-        [5.0, 2.5, 2.2],   # C3 (bonded to C2)
-        [1.2, 2.8, 2.1],   # H1 (near C1)
-        [3.7, 1.1, 2.8],   # H2 (near C2)
-        [5.5, 3.5, 1.8],   # H3 (near C3)
-        [6.2, 2.9, 2.4],   # N (bonded-ish to C3)
-        [7.5, 3.1, 3.0],   # O (near N)
-    ])
+    positions = np.array(
+        [
+            [2.0, 2.0, 2.0],  # C1
+            [3.5, 2.2, 2.1],  # C2 (bonded to C1)
+            [5.0, 2.5, 2.2],  # C3 (bonded to C2)
+            [1.2, 2.8, 2.1],  # H1 (near C1)
+            [3.7, 1.1, 2.8],  # H2 (near C2)
+            [5.5, 3.5, 1.8],  # H3 (near C3)
+            [6.2, 2.9, 2.4],  # N (bonded-ish to C3)
+            [7.5, 3.1, 3.0],  # O (near N)
+        ]
+    )
 
     atoms = Atoms(
         symbols=symbols,
@@ -87,6 +89,7 @@ def generate_ase_results(hippynn_model_location, n_steps=3):
     print(f"Initial accelerations:\n{atoms.get_forces() / atoms.get_masses()[:, None]}")
 
     from ase.md.verlet import VelocityVerlet as aseVelocityVerlet
+
     dyn = aseVelocityVerlet(atoms, 1 * units.fs)
     md_pos = []
     md_vel = []
@@ -103,16 +106,17 @@ def generate_ase_results(hippynn_model_location, n_steps=3):
     print(f"Velocities:\n{np.array(md_vel)}")
     print(f"Forces:\n{np.array(md_force)}")
 
-    return    
+    return
 
 
 @ignore_weights_only_warning
 @ignore_relocation
 @ignore_sensitivity_warning
-@xfail_if_no_models
+@skip_if_no_models
 def test_md_verlet():
     # Define coordinates and results from running the function `generate_ase_results` from above
 
+    # fmt: off ##
     species = torch.tensor(
         [6, 6, 6, 1, 1, 1, 7, 8],
         dtype=int,
@@ -123,6 +127,7 @@ def test_md_verlet():
         dtype=torch.float64,
     ).unsqueeze(0) # add a batch axis
 
+    # fmt: off ## Formatters tend to make these matrices hard to read.
     cell = torch.tensor(
         [[16.,  0.,  0.,],
          [ 0., 16.,  0.,],
@@ -256,6 +261,8 @@ def test_md_verlet():
         dtype=np.float64,
     ) / (units.kcal / units.mol) # ASE returns everything in its standard units
 
+    # fmt: on ## END matrices.
+
     # Load and prepare model
     with active_directory(MODEL_DIR / ANI_MODEL, create=False):
         check = load_checkpoint_from_cwd(map_location="cpu")
@@ -272,7 +279,7 @@ def test_md_verlet():
 
     cell_node = inputs.CellNode(name="C", db_name="C")
 
-    swap_pairfinders(positions_node, KDTreePairsMemory, cell_node=cell_node, module_kwargs={'skin': 1.0, 'dist_hard_max': cutoff})
+    swap_pairfinders(positions_node, KDTreePairsMemory, cell_node=cell_node, module_kwargs={"skin": 1.0, "dist_hard_max": cutoff})
 
     model = Predictor(inputs=[*model.input_nodes, cell_node], outputs=[force_node])
     model.to(torch.float64)
@@ -293,9 +300,9 @@ def test_md_verlet():
         },
         updater=VelocityVerlet(
             force_db_name="forces",
-            time_units = 1, # this will use the ASE default time unit 
+            time_units=1,  # this will use the ASE default time unit
             # position_units = units.Bohr,
-            force_units = (units.kcal / units.mol),
+            force_units=(units.kcal / units.mol),
         ),
     )
 
@@ -322,14 +329,12 @@ def test_md_verlet():
 
     data = emdee.get_data()
 
-    assert np.allclose(data["position_position"][:,0], result_pos) 
-    assert np.allclose(data["position_velocity"][:,0], result_vel) 
-    assert np.allclose(data["position_force"][:,0], result_forces) 
+    assert np.allclose(data["position_position"][:, 0], result_pos)
+    assert np.allclose(data["position_velocity"][:, 0], result_vel)
+    assert np.allclose(data["position_force"][:, 0], result_forces)
 
     return
 
 
 if __name__ == "__main__":
     generate_ase_results(MODEL_DIR / ANI_MODEL)
-
-

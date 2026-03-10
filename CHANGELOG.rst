@@ -3,19 +3,22 @@ Breaking changes:
 
 - Alterations to data after loading as a hippynn Database but prior to 
   splitting the data (eg. as in the examples ani_aluminum_example\*.py, 
-  ani1x_training.py, and \*SNAPExample.py) must be performed using 
+  ani1x_training.py, and \*SNAPExample.py) are be performed using 
   PyTorch rather than NumPy. 
 - The hippynn Database object and any functions which return this object 
   now accept only an int or a torch.Generator for the ``seed`` argument. 
 - The arguments on the MD objects LangevinDynamics and ASELangevinDynamics
   have changed slightly. 
-- Refactoring of core node logic. Most old names are still available and backwards
-  compatibility with loading previously trained models is still being maintained, although
+- Refactoring of core node logic has changed the names for many attributes. 
+  Most old names are still available and backwards compatibility with loading
+  previously trained models is still being maintained, although
   you will likely see warnings when loading said models.
 
 New Features:
 -------------
 
+- Added new linear-scaling neighbor list capability, allowing training
+  to very large systems.
 - Added new network type, HIP-HOP-NN.
 - Added capability to use LAMMPS-MLIAP comm features to remove the need
   for extensive halo regions when using multiple interaction layers.
@@ -28,6 +31,14 @@ New Features:
   AA data to use in training CG model, capability to use a species-pair-specific 
   repulsive potential, extended processing of data from CG MD, and a notebook 
   for visualizing the repulsive potentials. 
+- Additional examples for pytorch lightning and simple inference
+- Efficient Hessian training using matrix probing techniques.
+- New profiling tool for easily capturing the CPU/GPU efficiency of your experiment.
+- Additional example for multi-fidelity training
+- Additional example for knowledge distillation
+- Added classical charge equilibration methods and associated examples
+
+
 
 Improvements:
 -------------
@@ -46,6 +57,7 @@ Bug Fixes:
 - Fix issue with friction coefficient being calculated incorrectly in 
   LangevinDynamics.
 - Fix issue with optional dependencies being required by molecular dynamics subpackage
+- Fix bug in Predictor.add_output
 
 
 0.1.0

@@ -28,7 +28,7 @@ def test_unique_node_from_name_pass(energy_graph):
 
 def test_unique_node_from_name_fail_notfound(energy_graph):
     from hippynn.graphs.nodes.base import NodeNotFound
-    
+
     with pytest.raises(NodeNotFound):
         energy_graph.unique_node_from_name("cowabunga")
 
@@ -45,6 +45,3 @@ def test_node_from_name_depreciation(energy_graph):
 
     with pytest.warns(HippynnNameDeprecation):
         energy_graph.node_from_name("T")
-
-
-    
