@@ -51,7 +51,7 @@ class GaussianSensitivityModule(SensitivityModule):
         self.mu = torch.nn.Parameter(init_mu.unsqueeze(0))
 
         self.sigma = torch.nn.Parameter(torch.Tensor(n_dist).unsqueeze(0))
-        init_sigma = (max_dist_soft - min_dist_soft) / n_dist  # pulled from theano code
+        init_sigma = (max_dist_soft - min_dist_soft) / n_dist / 2
         self.sigma.data.fill_(init_sigma)
 
     def forward(self, distflat, warn_low_distances=None):
@@ -62,7 +62,7 @@ class GaussianSensitivityModule(SensitivityModule):
                 mu, argmin = self.mu.min(dim=1)
                 sig = self.sigma[:, argmin]
                 # Warn if distance is less than the -inside- edge of the shortest sensitivity function
-                thresh = mu + sig
+                thresh = mu - sig
                 warn_if_under(distflat, thresh)
         distflat_ds = distflat.unsqueeze(1)
         mu_ds = self.mu
