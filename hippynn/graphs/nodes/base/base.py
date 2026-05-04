@@ -112,7 +112,14 @@ class AtLeast2D(SingleNode):
         self.origin_node = p.origin_node
 
 
-class InputNode(SingleNode):
+class _SerializableNodeMixin():
+    _unregistered_classes: list = []
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        _SerializableNodeMixin._unregistered_classes.append(cls)
+
+
+class InputNode(SingleNode, _SerializableNodeMixin):
     input_names = ()
     """Node for getting information for the database."""
     requires_grad = False

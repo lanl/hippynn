@@ -15,11 +15,12 @@ from .. import _debprint
 
 from . import Node
 from ...indextypes import index_type_coercion, get_reduced_index_state
+from .base import _SerializableNodeMixin
 from typing import Dict, Union, Tuple, Optional
 
 
 
-class AutoModule:
+class AutoModule(_SerializableNodeMixin):
     """
     Helper mixin class for piping keyword arguments into an nn.module class.
 
@@ -75,10 +76,6 @@ class AutoModule:
 
         super().__init__(*args, module=module, **kwargs)
 
-    _unregistered_classes: list = []
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        AutoModule._unregistered_classes.append(cls)
                 
 
 

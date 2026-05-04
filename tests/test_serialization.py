@@ -7,6 +7,27 @@ from conftest import ignore_cusp_warning, ignore_relocation, ignore_weights_only
 import torch
 
 
+
+def test_write_nodes(network_parameters):
+    from hippynn.experiment.serialization.node_serializer import serialize, _populate_registry
+    _populate_registry()
+
+    from hippynn.graphs.nodes import inputs, networks, targets
+    # model inputs
+    species = inputs.SpeciesNode(db_name="Z")
+    positions = inputs.PositionsNode(db_name="R")
+
+    # Model computations
+    network = networks.Hipnn("HIPNN", (species, positions), module_kwargs=network_parameters)
+    henergy = targets.HEnergyNode("HEnergy", network)
+    molecule_energy = henergy.system_energy
+    molecule_energy.db_name = "T"
+
+    graph = hippynn.GraphModule([species,positions],[molecule_energy])
+    output = serialize(graph)
+
+    print(output)
+
 @ignore_relocation
 @ignore_weights_only_warning
 @ignore_cusp_warning
@@ -104,3 +125,4 @@ def test_validate_old():
     assert maxreldiff < 1.e-12, f"Output of network changed. (relative difference = {maxreldiff}, absdiff = {absdiff})"
 
     return
+

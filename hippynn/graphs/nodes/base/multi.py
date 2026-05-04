@@ -3,13 +3,16 @@ A base node that provides several output tensors.
 """
 from ....layers.algebra import Idx
 from .base import SingleNode, Node
+from .definition_helpers import AutoModule
 from .. import _debprint
 from ...indextypes import IdxType
 from ...._deprecations import _DeprecatedNamesMixin
 
 
-class IndexNode(SingleNode):
+class IndexNode(AutoModule, SingleNode):
     input_names = ("parent",)
+    auto_module_class = Idx
+    auto_module_kwargs = ("repr_info","index")
 
     def __init__(self, name, parents, index, index_state=None):
         if len(parents) != 1:
@@ -17,10 +20,11 @@ class IndexNode(SingleNode):
         par = parents[0]
         iname = par.output_names[index] if hasattr(par, "output_names") else "<{index}>".format(index=index)
         repr_info = {"parent_name": par.name, "index": iname}
-        module = Idx(index, repr_info=repr_info)
-        self.index = index
+        #module = Idx(index, repr_info=repr_info)
+        #self.index = index
         self.index_state = IdxType.Unlabeled if index_state is None else index_state
-        super().__init__(name, parents, module=module)
+        super().__init__(name, parents, repr_info=repr_info, index=index,  module="auto")
+        #super().__init__(name, parents, module=module)
             
 
 class MultiNode(Node,_DeprecatedNamesMixin):  # Multinode
