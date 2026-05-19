@@ -156,6 +156,10 @@ class MAELoss(_BaseCompareLoss, op=torch.nn.functional.l1_loss):
     pass
 
 
+class HuberLoss(_BaseCompareLoss, op=torch.nn.functional.huber_loss):
+    pass
+
+
 class _LPReg(AutoKw, SingleNode):
     index_state = IdxType.Scalar
     auto_module_class = reg_modules.LPReg
