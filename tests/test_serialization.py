@@ -24,9 +24,22 @@ def test_write_nodes(network_parameters):
     molecule_energy.db_name = "T"
 
     graph = hippynn.GraphModule([species,positions],[molecule_energy])
-    output = serialize(graph)
+    output,tensor_data = serialize(graph)
 
     print(output)
+    return output_tensor_data
+
+@pytest.fixture
+def written_nodes(network_parameters):
+    output = test_write_nodes(network_parameters)
+    return output
+
+def test_read_nodes(written_nodes):
+    from hippynn.experiment.serialization.node_serializer import deserialize_nodes
+    nodes, tensor_data = written_nodes
+    output = deserialize_nodes(written_nodes)
+    pass
+
 
 @ignore_relocation
 @ignore_weights_only_warning
