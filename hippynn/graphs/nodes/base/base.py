@@ -14,7 +14,7 @@ from typing import Optional
 
 
 class Node(_NodeFunctions, _NodeAlgebra):
-    pass
+    disables_hard_cutoff = False
 
 
 
@@ -160,4 +160,3 @@ class LossTrueNode(LossInputNode):
     @property
     def main_output(self):
         return self._main_output
-    

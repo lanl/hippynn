@@ -4,12 +4,12 @@ Nodes for networks.
 from .tags import Encoder, PairIndexer, Network, AtomIndexer
 from .base import Node, AutoKw, ExpandParents, SingleNode
 from .base.multi import IndexNode
-from .indexers import OneHotEncoder, PaddingIndexer, acquire_encoding_padding
-from .pairs import OpenPairIndexer, PeriodicPairIndexer, SparsePairIndexer
-from .tags import PairIndexer
-from .inputs import SpeciesNode, PositionsNode, CellNode
+from .indexers import acquire_encoding_padding
+from .pairs import OpenPairIndexer, SparsePairIndexer, PreDefinedEdgePairIndexer
+from .inputs import SpeciesNode, PositionsNode, CellNode, PreDefinedEdgeIndicesNode
 from ..indextypes import IdxType
 from ... import networks as network_modules
+from ...layers.hiplayers import NoCutoff
 
 
 class DefaultNetworkExpansion(ExpandParents):
@@ -21,6 +21,7 @@ class DefaultNetworkExpansion(ExpandParents):
 
     @parent_expander.match(SpeciesNode, PositionsNode)
     @parent_expander.match(SpeciesNode, PositionsNode, CellNode)
+    @parent_expander.match(SpeciesNode, PositionsNode, PreDefinedEdgeIndicesNode)
     def expansion0(self, species, *other_parents, species_set, purpose, **kwargs):
         """
         Finds or sets up a default one-hot encoder if species are passed as first argument.
@@ -30,6 +31,13 @@ class DefaultNetworkExpansion(ExpandParents):
         """
         encoder, pidxer = acquire_encoding_padding(species, species_set, purpose=purpose)
         return (encoder, pidxer, *other_parents)
+
+    @parent_expander.match(Encoder, AtomIndexer, PositionsNode, PreDefinedEdgeIndicesNode)
+    def expansion_predefined_edges(self, encoder, pidxer, positions, edge_indices, *, dist_hard_max, **kwargs):
+        pairfinder = PreDefinedEdgePairIndexer(
+            "PreDefinedEdgePairIndexer", (positions, pidxer, edge_indices), dist_hard_max=dist_hard_max
+        )
+        return pidxer, pairfinder
 
     @parent_expander.match(Encoder, AtomIndexer, PositionsNode)
     @parent_expander.match(Encoder, AtomIndexer, PositionsNode, CellNode)
@@ -115,6 +123,8 @@ class Hipnn(AutoKw, DefaultNetworkExpansion,  Network, SingleNode, _FeatureNodes
     parent_expander.require_idx_states(IdxType.Atoms, None, None, None)
 
     def __init__(self, name, parents, periodic=False, **kwargs):
+        if parents[-1].disables_hard_cutoff:
+            kwargs["module_kwargs"]["cutoff_type"] = NoCutoff
         super().__init__(name, parents, periodic=periodic, **kwargs)
 
 
@@ -137,6 +147,8 @@ class HipnnVec(AutoKw, DefaultNetworkExpansion, Network, SingleNode, _FeatureNod
     parent_expander.require_idx_states(IdxType.Atoms, None, None, None, None)
 
     def __init__(self, name, parents, periodic=False, **kwargs):
+        if parents[-1].disables_hard_cutoff:
+            kwargs["module_kwargs"]["cutoff_type"] = NoCutoff
         super().__init__(name, parents, periodic=periodic, **kwargs)
 
 
