@@ -30,6 +30,33 @@ class ExternalNeighbors(_PairIndexer):
         return filter_pairs(self.hard_dist_cutoff, distflat, pair_first, pair_second, paircoord)
 
 
+class PreDefinedEdgePairIndexer(torch.nn.Module):
+    """
+    Convert user-supplied padded edge indices into hippynn pair tensors.
+    """
+
+    def forward(self, coordinates, real_atoms, inv_real_atoms, edge_indices):
+        n_systems, n_atoms, _ = coordinates.shape
+        edge_indices = edge_indices.to(device=coordinates.device, dtype=torch.long)
+        edge_first = edge_indices[:, 0, :]
+        edge_second = edge_indices[:, 1, :]
+
+        edge_present = (edge_first >= 0) & (edge_second >= 0)
+        system_ids = torch.arange(n_systems, dtype=torch.long, device=coordinates.device).unsqueeze(1)
+        flat_offset = system_ids * n_atoms
+
+        pair_first_abs = (edge_first + flat_offset)[edge_present]
+        pair_second_abs = (edge_second + flat_offset)[edge_present]
+        pair_first = inv_real_atoms[pair_first_abs]
+        pair_second = inv_real_atoms[pair_second_abs]
+
+        atom_coordinates = coordinates.reshape(n_systems * n_atoms, 3)[real_atoms]
+        paircoord = atom_coordinates[pair_second] - atom_coordinates[pair_first]
+        distflat = paircoord.norm(dim=1)
+
+        return distflat, pair_first, pair_second, paircoord
+
+
 class PairReIndexer(torch.nn.Module):
     def forward(self, sysatomatom_thing, system_index, atom_index, pair_first, pair_second):
 

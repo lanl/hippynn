@@ -6,7 +6,7 @@ from .base.node_functions import NodeNotFound
 from .base import AutoNoKw, AutoKw, ExpandParents, SingleNode, MultiNode, find_unique_relative, Node
 from .indexers import PaddingIndexer, acquire_encoding_padding, OneHotEncoder
 from .tags import Encoder, PairIndexer, AtomIndexer, PairCache
-from .inputs import PositionsNode, CellNode, SpeciesNode
+from .inputs import PositionsNode, CellNode, SpeciesNode, PreDefinedEdgeIndicesNode
 from ..indextypes import IdxType
 from ...layers import pairs as pairs_modules
 
@@ -115,6 +115,40 @@ class ExternalNeighborIndexer(AutoKw, ExpandParents, PairIndexer,  MultiNode):
     parent_expander.get_main_outputs()
     parent_expander.assertlen(len(input_names))
     parent_expander.require_idx_states(IdxType.SysAtom, None, None, None, None, None)
+
+
+class PreDefinedEdgePairIndexer(AutoNoKw, ExpandParents, PairIndexer, MultiNode):
+    input_names = "coordinates", "real_atoms", "inv_real_atoms", "edge_indices"
+    auto_module_class = pairs_modules.PreDefinedEdgePairIndexer
+    parent_expansion_kwargs = {
+        "species_set": "possible_species",
+    }
+    disables_hard_cutoff = True
+
+    @parent_expander.match(PositionsNode, SpeciesNode, PreDefinedEdgeIndicesNode)
+    def expand0(self, pos, spec, edge_indices, *, species_set=None, purpose, **kwargs):
+        _enc, padidx = acquire_encoding_padding(spec, species_set=species_set, purpose=purpose)
+        return pos, padidx, edge_indices
+
+    @parent_expander.match(PositionsNode, PreDefinedEdgeIndicesNode, AtomIndexer)
+    def expand1(self, pos, edge_indices, atomidx, **kwargs):
+        return pos, atomidx, edge_indices
+
+    @parent_expander.match(PositionsNode, AtomIndexer, PreDefinedEdgeIndicesNode)
+    def expand2(self, pos, atomidx, edge_indices, **kwargs):
+        return pos, atomidx, edge_indices
+
+    @parent_expander.match(PositionsNode, AtomIndexer, Node)
+    def expand3(self, pos, atomidx, edge_indices, **kwargs):
+        return pos, atomidx.real_atoms, atomidx.inv_real_atoms, edge_indices
+
+    parent_expander.assertlen(4)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.SysAtom, None, None, None)
+
+    def __init__(self, name, parents, dist_hard_max=None, module="auto", **kwargs):
+        self.dist_hard_max = dist_hard_max
+        super().__init__(name, parents, module=module, **kwargs)
 
 
 # Pair reindexer to re-use existing pairs

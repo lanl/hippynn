@@ -36,6 +36,15 @@ class CosCutoff(torch.nn.Module):
         return cutoff_sense
 
 
+class NoCutoff(torch.nn.Module):
+    def __init__(self, hard_max_dist):
+        super().__init__()
+        self.hard_max_dist = hard_max_dist
+
+    def forward(self, dist_tensor):
+        return torch.ones_like(dist_tensor)
+
+
 class SensitivityModule(torch.nn.Module):
     def __init__(self, hard_max_dist, cutoff_type):
         super().__init__()

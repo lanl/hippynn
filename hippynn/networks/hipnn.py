@@ -3,12 +3,14 @@ Implementation of HIPNN.
 """
 import warnings
 import torch
+import functools
 
 from typing import Union, List
 
 from ..layers.hiplayers import (
     GaussianSensitivityModule,
     InverseSensitivityModule,
+    CosCutoff,
     InteractLayer,
     InteractLayerVec,
     InteractLayerQuad,
@@ -78,6 +80,7 @@ class Hipnn(torch.nn.Module):
         possible_species=None,
         n_input_features=None,
         sensitivity_type="inverse",
+        cutoff_type=CosCutoff,
         resnet=True,
         activation=torch.nn.Softplus,
         **kwargs,
@@ -96,6 +99,10 @@ class Hipnn(torch.nn.Module):
         :param n_input_features: number of input features to the model
         :param sensitivity_type: str or callable, type of sensitivity, default of
            'inverse' is what is in hip-nn original paper.
+        :param cutoff_type: callable cutoff module class. Defaults to
+           :class:`hippynn.layers.hiplayers.CosCutoff`. Set to
+           :class:`hippynn.layers.hiplayers.NoCutoff` for predefined pairs that
+           should communicate without a distance-based hard cutoff.
         :param resnet: bool or int, if int, size of internal resnet width
         :param activation: activation function or subclass of nn.module.
 
@@ -172,6 +179,8 @@ class Hipnn(torch.nn.Module):
             pass
         else:
             raise TypeError("Invalid sensitivity type:", sensitivity_type)
+        if cutoff_type is not CosCutoff:
+            sensitivity_type = functools.partial(sensitivity_type, cutoff_type=cutoff_type)
 
         interaction_kwargs = {k: kwargs.pop(k) for k in self._interaction_kwargs if k in kwargs}
 
