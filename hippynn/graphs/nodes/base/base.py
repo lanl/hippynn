@@ -14,7 +14,7 @@ from typing import Optional
 
 
 class Node(_NodeFunctions, _NodeAlgebra):
-    disables_hard_cutoff = False
+    pass
 
 
 

@@ -123,7 +123,8 @@ class Hipnn(AutoKw, DefaultNetworkExpansion,  Network, SingleNode, _FeatureNodes
     parent_expander.require_idx_states(IdxType.Atoms, None, None, None)
 
     def __init__(self, name, parents, periodic=False, **kwargs):
-        if parents[-1].disables_hard_cutoff:
+        last_parent = parents[-1]
+        if hasattr(last_parent, "disables_hard_cutoff") and last_parent.disables_hard_cutoff:
             kwargs["module_kwargs"]["cutoff_type"] = NoCutoff
         super().__init__(name, parents, periodic=periodic, **kwargs)
 
@@ -147,7 +148,8 @@ class HipnnVec(AutoKw, DefaultNetworkExpansion, Network, SingleNode, _FeatureNod
     parent_expander.require_idx_states(IdxType.Atoms, None, None, None, None)
 
     def __init__(self, name, parents, periodic=False, **kwargs):
-        if parents[-1].disables_hard_cutoff:
+        last_parent = parents[-1]
+        if hasattr(last_parent, "disables_hard_cutoff") and last_parent.disables_hard_cutoff:
             kwargs["module_kwargs"]["cutoff_type"] = NoCutoff
         super().__init__(name, parents, periodic=periodic, **kwargs)
 
