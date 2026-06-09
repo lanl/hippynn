@@ -288,19 +288,7 @@ def train_model(
     metric_tracker.quiet = quiet
 
     # Ensure database inputs and targets are available and ordered correctly.
-    db_input_set = set(database.inputs)
-    db_target_set = set(database.targets)
-    evaluator_input_set = set(evaluator.db_info['inputs'])
-    evaluator_target_set = set(evaluator.db_info['targets'])
-
-    if db_input_set != evaluator_input_set:        
-        raise ValueError("Evaluator and database have incompatible input sets: "
-                        f"{db_input_set} vs {evaluator_input_set}")
-    if db_target_set != evaluator_target_set:
-        raise ValueError("Evaluator and database have incompatible target sets: "
-                        f"{db_target_set} vs {evaluator_target_set}")
-    database.inputs = evaluator.db_info['inputs']
-    database.targets = evaluator.db_info['targets']
+    database.align(**evaluator.db_info)
 
     if store_structure_file:
         serialization.create_structure_file(training_modules, database, controller)
@@ -370,6 +358,8 @@ def test_model(database, evaluator, batch_size, when, metric_tracker=None):
     if metric_tracker is None:
         metric_tracker = MetricTracker(evaluator.loss_names, stopping_key=None)
 
+    # Ensure database inputs and targets are ordered correctly for evaluation.
+    database.align(**evaluator.db_info)
     # Determine splits which are complete and can be evaluated:
     evaluatable_splits = []
     required_variables = set(database.inputs + database.targets)
@@ -626,8 +616,7 @@ def setup_and_profile(
     
     if not database.splitting_completed:
         raise ValueError("Database has not been split. Please split the database before profiling.")
-    database.inputs = evaluator.db_info['inputs']
-    database.targets = evaluator.db_info['targets']
+    database.align(**evaluator.db_info)
     
     n_inputs = len(database.inputs)
     n_targets = len(database.targets)

@@ -1,8 +1,8 @@
 """
-Base database functionality from dictionary of numpy arrays
+Base database functionality from dictionary of pytorch tensors
 """
 
-from typing import Union
+from typing import Union, Optional
 import warnings
 import numpy as np
 import torch
@@ -802,6 +802,28 @@ class Database:
         )
         # now reload cached file.
         return NPZDatabase(**arguments)
+
+    def align(self, inputs: Optional[list[str]] = None, targets: Optional[list[str]]=None) -> None:
+        
+        if inputs is not None:
+            db_input_set = set(self.inputs)
+            input_set = set(inputs)
+            if db_input_set != input_set:
+                raise ValueError(
+                    "Database not input sets. "
+                    f"Database has {db_input_set} vs required: {input_set}"
+                )
+            self.inputs = inputs
+
+        if targets is not None:
+            target_set = set(targets)
+            db_target_set = set(self.targets)
+            if db_target_set != target_set:
+                raise ValueError(
+                    "Database and provided targets have incompatible target sets. "
+                    f"Database has {db_target_set} vs required: {target_set}"
+                )
+            self.targets = targets
 
 
 def compute_index_mask(indices: torch.Tensor, index_pool: torch.Tensor) -> torch.Tensor:

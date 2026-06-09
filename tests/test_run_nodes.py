@@ -121,3 +121,25 @@ def test_atomization_conversion(example_box, neural_network_node):
     assert torch.allclose(en_1, en_2)
 
     return
+
+@ignore_sensitivity_warning
+def test_predictor_apply_to_database(example_all_target_nodes, example_database):
+    from hippynn.graphs import Predictor
+    from hippynn.databases.database import Database
+
+    # Build the predictor from the graph of all target nodes (same as in test_build_predictor).
+    targets = [t.main_output for t in example_all_target_nodes]
+    from hippynn.graphs import find_relatives, inputs
+    graph_inputs = find_relatives(targets, inputs.InputNode)
+    from hippynn.graphs import GraphModule
+    graph = GraphModule(graph_inputs, targets)
+    predictor = Predictor.from_graph(graph)
+
+    input_names = [node.db_name for node in graph_inputs]
+    input_names = list(reversed(input_names))
+
+    example_database.make_trainvalidtest_split(test_size=0.25, valid_size=0.25)
+    results = predictor.apply_to_database(example_database)
+    
+
+
