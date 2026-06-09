@@ -23,23 +23,23 @@ def _edge_network_params():
 def test_build_network_from_explicit_edges():
     species = inputs.SpeciesNode(db_name="Z")
     positions = inputs.PositionsNode(db_name="R")
-    edge_indices = inputs.PreDefinedEdgeIndicesNode(db_name="edge_indices")
+    edge_indices = inputs.PredefinedEdgeIndicesNode(db_name="edge_indices")
 
     network = networks.Hipnn("HIPNN", (species, positions, edge_indices), module_kwargs=_edge_network_params())
-    pairfinder = find_unique_relative(network, pairs.PreDefinedEdgePairIndexer)
+    pairfinder = find_unique_relative(network, pairs.PredefinedEdgePairIndexer)
 
-    assert isinstance(pairfinder, pairs.PreDefinedEdgePairIndexer)
-    assert pairfinder.name == "PreDefinedEdgePairIndexer"
+    assert isinstance(pairfinder, pairs.PredefinedEdgePairIndexer)
+    assert pairfinder.name == "PredefinedEdgePairIndexer"
     assert isinstance(network.torch_module.sensitivity_layers[0].cutoff, NoCutoff)
 
 
 def test_explicit_edges_convert_to_directed_pair_tensors_for_multiple_frames():
     species = inputs.SpeciesNode(db_name="Z")
     positions = inputs.PositionsNode(db_name="R")
-    edge_indices = inputs.PreDefinedEdgeIndicesNode(db_name="edge_indices")
+    edge_indices = inputs.PredefinedEdgeIndicesNode(db_name="edge_indices")
 
     network = networks.Hipnn("HIPNN", (species, positions, edge_indices), module_kwargs=_edge_network_params())
-    pairfinder = find_unique_relative(network, pairs.PreDefinedEdgePairIndexer)
+    pairfinder = find_unique_relative(network, pairs.PredefinedEdgePairIndexer)
     graph = GraphModule(
         [species, positions, edge_indices],
         [pairfinder.pair_first, pairfinder.pair_second, pairfinder.pair_dist, pairfinder.pair_coord],
@@ -86,10 +86,10 @@ def test_explicit_edges_convert_to_directed_pair_tensors_for_multiple_frames():
 def test_explicit_edges_disable_sensitivity_cutoff_but_radial_path_does_not():
     species = inputs.SpeciesNode(db_name="Z")
     positions = inputs.PositionsNode(db_name="R")
-    edge_indices = inputs.PreDefinedEdgeIndicesNode(db_name="edge_indices")
+    edge_indices = inputs.PredefinedEdgeIndicesNode(db_name="edge_indices")
 
     explicit_network = networks.Hipnn(
-        "PreDefinedEdgeHIPNN", (species, positions, edge_indices), module_kwargs=_edge_network_params()
+        "PredefinedEdgeHIPNN", (species, positions, edge_indices), module_kwargs=_edge_network_params()
     )
     explicit_cutoff = explicit_network.torch_module.sensitivity_layers[0].cutoff
 

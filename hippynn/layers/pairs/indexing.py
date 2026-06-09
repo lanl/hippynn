@@ -30,7 +30,7 @@ class ExternalNeighbors(_PairIndexer):
         return filter_pairs(self.hard_dist_cutoff, distflat, pair_first, pair_second, paircoord)
 
 
-class PreDefinedEdgePairIndexer(torch.nn.Module):
+class PredefinedEdgePairIndexer(torch.nn.Module):
     """
     Convert user-supplied padded edge indices into hippynn pair tensors.
     """

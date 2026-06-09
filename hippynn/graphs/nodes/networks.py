@@ -5,8 +5,8 @@ from .tags import Encoder, PairIndexer, Network, AtomIndexer
 from .base import Node, AutoKw, ExpandParents, SingleNode
 from .base.multi import IndexNode
 from .indexers import acquire_encoding_padding
-from .pairs import OpenPairIndexer, SparsePairIndexer, PreDefinedEdgePairIndexer
-from .inputs import SpeciesNode, PositionsNode, CellNode, PreDefinedEdgeIndicesNode
+from .pairs import OpenPairIndexer, SparsePairIndexer, PredefinedEdgePairIndexer
+from .inputs import SpeciesNode, PositionsNode, CellNode, PredefinedEdgeIndicesNode
 from ..indextypes import IdxType
 from ... import networks as network_modules
 from ...layers.hiplayers import NoCutoff
@@ -21,7 +21,7 @@ class DefaultNetworkExpansion(ExpandParents):
 
     @parent_expander.match(SpeciesNode, PositionsNode)
     @parent_expander.match(SpeciesNode, PositionsNode, CellNode)
-    @parent_expander.match(SpeciesNode, PositionsNode, PreDefinedEdgeIndicesNode)
+    @parent_expander.match(SpeciesNode, PositionsNode, PredefinedEdgeIndicesNode)
     def expansion0(self, species, *other_parents, species_set, purpose, **kwargs):
         """
         Finds or sets up a default one-hot encoder if species are passed as first argument.
@@ -32,10 +32,10 @@ class DefaultNetworkExpansion(ExpandParents):
         encoder, pidxer = acquire_encoding_padding(species, species_set, purpose=purpose)
         return (encoder, pidxer, *other_parents)
 
-    @parent_expander.match(Encoder, AtomIndexer, PositionsNode, PreDefinedEdgeIndicesNode)
+    @parent_expander.match(Encoder, AtomIndexer, PositionsNode, PredefinedEdgeIndicesNode)
     def expansion_predefined_edges(self, encoder, pidxer, positions, edge_indices, *, dist_hard_max, **kwargs):
-        pairfinder = PreDefinedEdgePairIndexer(
-            "PreDefinedEdgePairIndexer", (positions, pidxer, edge_indices), dist_hard_max=dist_hard_max
+        pairfinder = PredefinedEdgePairIndexer(
+            "PredefinedEdgePairIndexer", (positions, pidxer, edge_indices), dist_hard_max=dist_hard_max
         )
         return pidxer, pairfinder
 

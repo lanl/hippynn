@@ -44,9 +44,9 @@ class PairIndices(PairCache, InputNode):
     input_type_str = "PairIndices"
 
 
-class PreDefinedEdgeIndicesNode(InputNode):
+class PredefinedEdgeIndicesNode(InputNode):
     index_state = IdxType.Unlabeled
-    input_type_str = "PreDefinedEdgeIndices"
+    input_type_str = "PredefinedEdgeIndices"
     disables_hard_cutoff = True
 
 

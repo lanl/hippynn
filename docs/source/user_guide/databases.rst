@@ -27,7 +27,7 @@ supported.
 Predefined edges
 -----------------------
 
-When using :class:`~hippynn.graphs.nodes.inputs.PreDefinedEdgeIndicesNode`,
+When using :class:`~hippynn.graphs.nodes.inputs.PredefinedEdgeIndicesNode`,
 the corresponding database array should have shape
 ``(n_systems, 2, num_edges)``. For each system, first array is the source of
 directed edge and the second array is the target of the edge. The source and target 
@@ -61,7 +61,7 @@ is stored as::
 The graph input should use the same database name as the stored array, for
 example::
 
-    edge_indices = inputs.PreDefinedEdgeIndicesNode(db_name="edge_indices")
+    edge_indices = inputs.PredefinedEdgeIndicesNode(db_name="edge_indices")
     network = networks.Hipnn("HIPNN", (species, positions, edge_indices), module_kwargs=network_params)
 
 Supplying predefined edge indices makes hippynn build pairs from these
