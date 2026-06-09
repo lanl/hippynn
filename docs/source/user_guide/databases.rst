@@ -24,6 +24,50 @@ Note that input of bond variables for periodic systems can be ill-defined
 if there are multiple bonds between the same pairs of atoms. This is not yet
 supported.
 
+Predefined edges
+-----------------------
+
+When using :class:`~hippynn.graphs.nodes.inputs.PreDefinedEdgeIndicesNode`,
+the corresponding database array should have shape
+``(n_systems, 2, num_edges)``. For each system, first array is the source of
+directed edge and the second array is the target of the edge. The source and target 
+rows are matched by the index.
+
+For example, for a single system with the edges ``0 -> 1``, 
+``0 -> 2``, ``1 -> 0``, and ``2 -> 0`` are stored as four columns:
+
+    [[0, 0, 1, 2],
+     [1, 2, 0, 0]]
+
+Where:
+- column ``0`` is ``[0, 1]``, so the edge is ``0 -> 1``.
+- column ``1`` is ``[0, 2]``, so the edge is ``0 -> 2``.
+- column ``2`` is ``[1, 0]``, so the edge is ``1 -> 0``.
+- column ``3`` is ``[2, 0]``, so the edge is ``2 -> 0``.
+
+Batched with a second two-atom system and padded to four edge columns, this 
+is stored as::
+
+    edge_indices = np.array(
+        [
+            [[0, 0, 1, 2],
+             [1, 2, 0, 0]],
+            [[0, 1, -1, -1],
+             [1, 0, -1, -1]],
+        ],
+        dtype=np.int64,
+    )
+
+The graph input should use the same database name as the stored array, for
+example::
+
+    edge_indices = inputs.PreDefinedEdgeIndicesNode(db_name="edge_indices")
+    network = networks.Hipnn("HIPNN", (species, positions, edge_indices), module_kwargs=network_params)
+
+Supplying predefined edge indices makes hippynn build pairs from these
+given edges instead of finding neighbors by radial distance. The hard cutoff is
+therefore not used to remove pairs.
+
 A note on *cell* variables. The shape of a cell variable should be specified as (n_systems,3,3), as described above.
 It is important to know that there are two common conventions for the cell matrix itself; we use the convention that the basis index
 comes first, and the cartesian index comes second. That is, similar to the ``ase`` package,
