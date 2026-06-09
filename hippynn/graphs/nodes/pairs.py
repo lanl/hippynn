@@ -130,16 +130,8 @@ class PredefinedEdgePairIndexer(AutoNoKw, ExpandParents, PairIndexer, MultiNode)
         _enc, padidx = acquire_encoding_padding(spec, species_set=species_set, purpose=purpose)
         return pos, padidx, edge_indices
 
-    @parent_expander.match(PositionsNode, PredefinedEdgeIndicesNode, AtomIndexer)
-    def expand1(self, pos, edge_indices, atomidx, **kwargs):
-        return pos, atomidx, edge_indices
-
     @parent_expander.match(PositionsNode, AtomIndexer, PredefinedEdgeIndicesNode)
-    def expand2(self, pos, atomidx, edge_indices, **kwargs):
-        return pos, atomidx, edge_indices
-
-    @parent_expander.match(PositionsNode, AtomIndexer, Node)
-    def expand3(self, pos, atomidx, edge_indices, **kwargs):
+    def expand1(self, pos, atomidx, edge_indices, **kwargs):
         return pos, atomidx.real_atoms, atomidx.inv_real_atoms, edge_indices
 
     parent_expander.assertlen(4)
