@@ -22,6 +22,7 @@ class DefaultNetworkExpansion(ExpandParents):
     @parent_expander.match(SpeciesNode, PositionsNode)
     @parent_expander.match(SpeciesNode, PositionsNode, CellNode)
     @parent_expander.match(SpeciesNode, PositionsNode, PredefinedEdgeIndicesNode)
+    @parent_expander.match(SpeciesNode, PositionsNode, CellNode, PredefinedEdgeIndicesNode)
     def expansion0(self, species, *other_parents, species_set, purpose, **kwargs):
         """
         Finds or sets up a default one-hot encoder if species are passed as first argument.
@@ -36,6 +37,15 @@ class DefaultNetworkExpansion(ExpandParents):
     def expansion_predefined_edges(self, encoder, pidxer, positions, edge_indices, *, dist_hard_max, **kwargs):
         pairfinder = PredefinedEdgePairIndexer(
             "PredefinedEdgePairIndexer", (positions, pidxer, edge_indices), dist_hard_max=dist_hard_max
+        )
+        return pidxer, pairfinder
+
+    @parent_expander.match(Encoder, AtomIndexer, PositionsNode, CellNode, PredefinedEdgeIndicesNode)
+    def expansion_predefined_periodic_edges(
+        self, encoder, pidxer, positions, cell, edge_indices, *, dist_hard_max, **kwargs
+    ):
+        pairfinder = PredefinedEdgePairIndexer(
+            "PredefinedEdgePairIndexer", (positions, pidxer, edge_indices, cell), dist_hard_max=dist_hard_max
         )
         return pidxer, pairfinder
 

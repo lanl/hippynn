@@ -224,6 +224,95 @@ def test_explicit_edges_convert_to_directed_pair_tensors_for_multiple_frames(
     )
 
 
+def test_pair_cacher_sparse_cache_feeds_pair_uncacher():
+    from hippynn.layers.pairs import PairCacher, PairUncacher
+
+    coordinates = torch.tensor([[[0.1, 0.0, 0.0], [9.9, 0.0, 0.0]]])
+    cell = torch.tensor([[[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]]])
+    real_atoms = torch.tensor([0, 1])
+    inv_real_atoms = torch.tensor([0, 1])
+    system_index = torch.tensor([0, 0])
+    pair_first = torch.tensor([0])
+    pair_second = torch.tensor([1])
+    cell_offsets = torch.tensor([[1, 0, 0]])
+    offset_index = torch.tensor([0])
+
+    sparse_cache = PairCacher()(
+        pair_first,
+        pair_second,
+        cell_offsets,
+        offset_index,
+        real_atoms,
+        system_index,
+        1,
+        2,
+    )
+    pair_dist, cached_first, cached_second, pair_coord, cached_offsets, cached_offset_index = PairUncacher()(
+        sparse_cache, coordinates, cell, real_atoms, inv_real_atoms, 2, 1
+    )
+
+    assert sparse_cache.is_sparse
+    assert torch.equal(cached_first, pair_first)
+    assert torch.equal(cached_second, pair_second)
+    assert torch.equal(cached_offsets, cell_offsets)
+    assert torch.equal(cached_offset_index, offset_index)
+    assert torch.allclose(pair_dist, torch.tensor([0.2]), atol=1e-6)
+    assert torch.allclose(pair_coord, torch.tensor([[0.2, 0.0, 0.0]]), atol=1e-6)
+
+
+def test_pair_uncacher_reads_dense_predefined_edges():
+    from hippynn.layers.pairs import PairUncacher
+
+    coordinates = torch.tensor([[[0.1, 0.0, 0.0], [9.9, 0.0, 0.0]]])
+    cell = torch.tensor([[[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]]])
+    real_atoms = torch.tensor([0, 1])
+    inv_real_atoms = torch.tensor([0, 1])
+    edge_indices = torch.tensor([[[0], [1], [1], [0], [0]]])
+
+    pair_dist, pair_first, pair_second, pair_coord, cell_offsets, offset_index = PairUncacher()(
+        edge_indices, coordinates, cell, real_atoms, inv_real_atoms, 2, 1
+    )
+
+    assert torch.equal(pair_first, torch.tensor([0]))
+    assert torch.equal(pair_second, torch.tensor([1]))
+    assert torch.equal(cell_offsets, torch.tensor([[1, 0, 0]]))
+    assert offset_index is None
+    assert torch.allclose(pair_dist, torch.tensor([0.2]), atol=1e-6)
+    assert torch.allclose(pair_coord, torch.tensor([[0.2, 0.0, 0.0]]), atol=1e-6)
+
+
+def test_periodic_predefined_edges_build_from_network_inputs(explicit_edge_network_params):
+    from hippynn.graphs import GraphModule, find_unique_relative, inputs, networks
+    from hippynn.graphs.nodes import pairs
+
+    species = inputs.SpeciesNode(db_name="Z")
+    positions = inputs.PositionsNode(db_name="R")
+    cell = inputs.CellNode(db_name="cell")
+    edge_indices = inputs.PredefinedEdgeIndicesNode(db_name="edge_indices")
+    network = networks.Hipnn(
+        "PeriodicPredefinedHIPNN",
+        (species, positions, cell, edge_indices),
+        module_kwargs=dict(explicit_edge_network_params),
+    )
+    pairfinder = find_unique_relative(network, pairs.PredefinedEdgePairIndexer)
+    graph = GraphModule(
+        [species, positions, cell, edge_indices],
+        [pairfinder.pair_first, pairfinder.pair_second, pairfinder.pair_dist, pairfinder.pair_coord],
+    )
+
+    z = torch.tensor([[1, 1]], dtype=torch.long)
+    r = torch.tensor([[[0.1, 0.0, 0.0], [9.9, 0.0, 0.0]]])
+    c = torch.tensor([[[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]]])
+    edges = torch.tensor([[[0], [1], [1], [0], [0]]], dtype=torch.long)
+
+    pair_first, pair_second, pair_dist, pair_coord = graph(z, r, c, edges)
+
+    assert torch.equal(pair_first, torch.tensor([0]))
+    assert torch.equal(pair_second, torch.tensor([1]))
+    assert torch.allclose(pair_dist, torch.tensor([0.2]), atol=1e-6)
+    assert torch.allclose(pair_coord, torch.tensor([[0.2, 0.0, 0.0]]), atol=1e-6)
+
+
 def test_explicit_edges_disable_sensitivity_cutoff_but_radial_path_does_not(
     explicit_edge_input_nodes, explicit_edge_network_params
 ):
