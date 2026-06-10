@@ -330,8 +330,17 @@ def test_explicit_edges_disable_sensitivity_cutoff_but_radial_path_does_not(
     )
     radial_cutoff = radial_network.torch_module.sensitivity_layers[0].cutoff
 
+    explicit_cosine_params = dict(explicit_edge_network_params)
+    explicit_cosine_params["cutoff_type"] = CosCutoff
+    explicit_cosine_network = networks.Hipnn(
+        "PredefinedEdgeCosineHIPNN", explicit_edge_input_nodes, module_kwargs=explicit_cosine_params
+    )
+    explicit_cosine_cutoff = explicit_cosine_network.torch_module.sensitivity_layers[0].cutoff
+
     long_dist = torch.tensor([2.0])
     assert isinstance(explicit_cutoff, NoCutoff)
     assert isinstance(radial_cutoff, CosCutoff)
+    assert isinstance(explicit_cosine_cutoff, CosCutoff)
     assert torch.equal(explicit_cutoff(long_dist), torch.ones_like(long_dist))
     assert torch.equal(radial_cutoff(long_dist), torch.zeros_like(long_dist))
+    assert torch.equal(explicit_cosine_cutoff(long_dist), torch.zeros_like(long_dist))
