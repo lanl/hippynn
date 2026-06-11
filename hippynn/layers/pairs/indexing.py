@@ -36,7 +36,6 @@ class _ExternalPairReader(torch.nn.Module):
     """
 
     def _forward_dense_edges(self, coordinates, real_atoms, inv_real_atoms, edge_indices, cell=None):
-        # Dense edges are padded lists: (system, first/second[/offsets], edge).
         n_systems, n_atoms, _ = coordinates.shape
         edge_indices = edge_indices.to(device=coordinates.device, dtype=torch.long)
         if edge_indices.ndim != 3 or edge_indices.shape[1] not in (2, 5):
@@ -74,7 +73,6 @@ class _ExternalPairReader(torch.nn.Module):
         return distflat, pair_first, pair_second, paircoord, cell_offsets, None
 
     def _forward_sparse_cache(self, sparse, coordinates, cell, real_atoms, inv_real_atoms, n_atoms_max, _n_systems):
-        # Sparse caches are the legacy PairCacher format.
         if cell is None:
             raise ValueError("Sparse pair caches require a cell tensor.")
 
