@@ -344,3 +344,29 @@ def test_explicit_edges_disable_sensitivity_cutoff_but_radial_path_does_not(
     assert torch.equal(explicit_cutoff(long_dist), torch.ones_like(long_dist))
     assert torch.equal(radial_cutoff(long_dist), torch.zeros_like(long_dist))
     assert torch.equal(explicit_cosine_cutoff(long_dist), torch.zeros_like(long_dist))
+
+
+def test_expanded_explicit_edge_parents_disable_sensitivity_cutoff(
+    explicit_edge_input_nodes, explicit_edge_network_params
+):
+    from hippynn.graphs import networks
+    from hippynn.layers.hiplayers import CosCutoff, NoCutoff
+
+    explicit_network = networks.Hipnn(
+        "PredefinedEdgeHIPNN", explicit_edge_input_nodes, module_kwargs=dict(explicit_edge_network_params)
+    )
+    expanded_network = networks.Hipnn(
+        "ExpandedPredefinedEdgeHIPNN", explicit_network.parents, module_kwargs=dict(explicit_edge_network_params)
+    )
+
+    explicit_cosine_params = dict(explicit_edge_network_params)
+    explicit_cosine_params["cutoff_type"] = CosCutoff
+    expanded_cosine_network = networks.Hipnn(
+        "ExpandedPredefinedEdgeCosineHIPNN", explicit_network.parents, module_kwargs=explicit_cosine_params
+    )
+
+    expanded_cutoff = expanded_network.torch_module.sensitivity_layers[0].cutoff
+    expanded_cosine_cutoff = expanded_cosine_network.torch_module.sensitivity_layers[0].cutoff
+
+    assert isinstance(expanded_cutoff, NoCutoff)
+    assert isinstance(expanded_cosine_cutoff, CosCutoff)
