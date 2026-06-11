@@ -24,6 +24,13 @@ Note that input of bond variables for periodic systems can be ill-defined
 if there are multiple bonds between the same pairs of atoms. This is not yet
 supported.
 
+A note on *cell* variables. The shape of a cell variable should be specified as (n_systems,3,3), as described above.
+It is important to know that there are two common conventions for the cell matrix itself; we use the convention that the basis index
+comes first, and the cartesian index comes second. That is, similar to the ``ase`` package,
+the element ``cell[sys,i,j]`` gives the ``j`` cartesian coordinate of cell vector ``i`` in system ``sys``. If you experience
+massive errors while fitting to periodic boundary conditions, you may check the transposed version
+of your cell data, or compute the RDF.
+
 Predefined edges
 -----------------------
 
@@ -58,6 +65,12 @@ is stored as::
         dtype=np.int64,
     )
 
+For periodic predefined edges, the array may instead have shape
+``(n_systems, 5, num_edges)``. The first two rows are still the source and
+target atom indices, and rows ``2:5`` give the integer cell offset vector for
+each edge. These offsets are used together with the system cell to compute the
+periodic displacement for the supplied edge.
+
 The graph input should use the same database name as the stored array, for
 example::
 
@@ -65,15 +78,17 @@ example::
     network = networks.Hipnn("HIPNN", (species, positions, edge_indices), module_kwargs=network_params)
 
 Supplying predefined edge indices makes hippynn build pairs from these
-given edges instead of finding neighbors by radial distance. The hard cutoff is
-therefore not used to remove pairs.
+given edges instead of finding neighbors by radial distance. The pair list is
+therefore not filtered by ``dist_hard_max``. By default, HIP-NN networks built
+from predefined edges also use ``NoCutoff`` for the sensitivity cutoff, so
+messages along the supplied edges are not zeroed by distance. To keep the usual
+cosine sensitivity cutoff while using predefined edges, pass
+``cutoff_type=CosCutoff`` in ``module_kwargs``.
 
-A note on *cell* variables. The shape of a cell variable should be specified as (n_systems,3,3), as described above.
-It is important to know that there are two common conventions for the cell matrix itself; we use the convention that the basis index
-comes first, and the cartesian index comes second. That is, similar to the ``ase`` package,
-the element ``cell[sys,i,j]`` gives the ``j`` cartesian coordinate of cell vector ``i`` in system ``sys``. If you experience
-massive errors while fitting to periodic boundary conditions, you may check the transposed version
-of your cell data, or compute the RDF.
+For periodic predefined edges, the array may instead have shape
+``(n_systems, 5, num_edges)``. The first two rows are still the source and
+target atom indices, and rows ``2:5`` give the integer cell offset vector for
+each edge.
 
 Database Formats and notes
 ---------------------------
