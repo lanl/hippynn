@@ -125,24 +125,20 @@ class PredefinedEdgePairIndexer(AutoNoKw, ExpandParents, PairIndexer, MultiNode)
     }
     disables_hard_cutoff = True
 
-    # Public non-periodic form: build atom indexing from species.
     @parent_expander.match(PositionsNode, SpeciesNode, PredefinedEdgeIndicesNode)
     def expand_from_species(self, pos, spec, edge_indices, *, species_set=None, purpose, **kwargs):
         _enc, padidx = acquire_encoding_padding(spec, species_set=species_set, purpose=purpose)
         return pos, padidx, edge_indices
 
-    # Public periodic form: build atom indexing from species and keep the cell.
     @parent_expander.match(PositionsNode, SpeciesNode, PredefinedEdgeIndicesNode, CellNode)
     def expand_from_species_cell(self, pos, spec, edge_indices, cell, *, species_set=None, purpose, **kwargs):
         _enc, padidx = acquire_encoding_padding(spec, species_set=species_set, purpose=purpose)
         return pos, padidx, edge_indices, cell
 
-    # Internal non-periodic form: atom indexing was already created upstream.
     @parent_expander.match(PositionsNode, AtomIndexer, PredefinedEdgeIndicesNode)
     def expand_from_atom_indexer(self, pos, atomidx, edge_indices, **kwargs):
         return pos, atomidx.real_atoms, atomidx.inv_real_atoms, edge_indices, ValueNode(None, convert=False)
 
-    # Internal periodic form: atom indexing and cell were already provided.
     @parent_expander.match(PositionsNode, AtomIndexer, PredefinedEdgeIndicesNode, CellNode)
     def expand_from_atom_indexer_cell(self, pos, atomidx, edge_indices, cell, **kwargs):
         return pos, atomidx.real_atoms, atomidx.inv_real_atoms, edge_indices, cell
