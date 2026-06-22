@@ -33,6 +33,7 @@ class ExternalNeighbors(_PairIndexer):
 class _ExternalPairReader(torch.nn.Module):
     """
     Convert externally supplied pair topology into hippynn pair tensors.
+    TODO: In the future it would be nice to have dense and sparse tensor logic combined into one. 
     """
 
     def _forward_dense_edges(self, coordinates, real_atoms, inv_real_atoms, edge_indices, cell=None):
