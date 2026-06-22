@@ -30,6 +30,96 @@ class ExternalNeighbors(_PairIndexer):
         return filter_pairs(self.hard_dist_cutoff, distflat, pair_first, pair_second, paircoord)
 
 
+class _ExternalPairReader(torch.nn.Module):
+    """
+    Convert externally supplied pair topology into hippynn pair tensors.
+    TODO: In the future it would be nice to have dense and sparse tensor logic combined into one. 
+    """
+
+    def _forward_dense_edges(self, coordinates, real_atoms, inv_real_atoms, edge_indices, cell=None):
+        n_systems, n_atoms, _ = coordinates.shape
+        edge_indices = edge_indices.to(device=coordinates.device, dtype=torch.long)
+        if edge_indices.ndim != 3 or edge_indices.shape[1] not in (2, 5):
+            raise ValueError(
+                "edge_indices must have shape (n_systems, 2, n_edges) or (n_systems, 5, n_edges)."
+            )
+
+        edge_first = edge_indices[:, 0, :]
+        edge_second = edge_indices[:, 1, :]
+
+        edge_present = (edge_first >= 0) & (edge_second >= 0)
+        system_ids = torch.arange(n_systems, dtype=torch.long, device=coordinates.device).unsqueeze(1)
+        flat_offset = system_ids * n_atoms
+
+        pair_first_abs = (edge_first + flat_offset)[edge_present]
+        pair_second_abs = (edge_second + flat_offset)[edge_present]
+        pair_first = inv_real_atoms[pair_first_abs]
+        pair_second = inv_real_atoms[pair_second_abs]
+
+        atom_coordinates = coordinates.reshape(n_systems * n_atoms, 3)[real_atoms]
+
+        if edge_indices.shape[1] == 5:
+            if cell is None:
+                raise ValueError("Periodic predefined edges with cell offsets require a cell tensor.")
+            pair_system = system_ids.expand_as(edge_first)[edge_present]
+            cell_offsets = edge_indices[:, 2:5, :].permute(0, 2, 1)[edge_present]
+            pair_shifts = torch.bmm(cell_offsets.to(cell.dtype).unsqueeze(1), cell[pair_system]).squeeze(1)
+            paircoord = atom_coordinates[pair_first] - atom_coordinates[pair_second] + pair_shifts
+        else:
+            cell_offsets = None
+            paircoord = atom_coordinates[pair_second] - atom_coordinates[pair_first]
+
+        distflat = paircoord.norm(dim=1)
+
+        return distflat, pair_first, pair_second, paircoord, cell_offsets, None
+
+    def _forward_sparse_cache(self, sparse, coordinates, cell, real_atoms, inv_real_atoms, n_atoms_max, _n_systems):
+        if cell is None:
+            raise ValueError("Sparse pair caches require a cell tensor.")
+
+        n_systems = coordinates.shape[0]
+        if not sparse.is_sparse:
+            sparse = sparse.to_sparse(sparse_dim=4)
+        sparse = sparse.coalesce()
+        index = sparse.indices()
+        values = sparse.values()
+
+        mol, pfabs, psabs, offset_index = index.unbind(0)
+        pfb = pfabs + mol * n_atoms_max
+        psb = psabs + mol * n_atoms_max
+        cell_offsets = values
+
+        pair_first = inv_real_atoms[pfb]
+        pair_second = inv_real_atoms[psb]
+
+        atom_coordinates = coordinates.reshape(n_systems * n_atoms_max, 3)[real_atoms]
+        offsets = torch.bmm(cell_offsets.to(cell.dtype).unsqueeze(1), cell[mol]).squeeze(1)
+        paircoord = atom_coordinates[pair_first] - atom_coordinates[pair_second] + offsets
+        distflat = paircoord.norm(dim=1)
+
+        return distflat, pair_first, pair_second, paircoord, cell_offsets, offset_index
+
+    def _forward_pair_data(self, pair_data, coordinates, cell, real_atoms, inv_real_atoms, n_atoms_max, n_systems):
+        pair_data = pair_data.to(device=coordinates.device)
+        if pair_data.is_sparse or pair_data.ndim == 5:
+            return self._forward_sparse_cache(
+                pair_data, coordinates, cell, real_atoms, inv_real_atoms, n_atoms_max, n_systems
+            )
+        return self._forward_dense_edges(coordinates, real_atoms, inv_real_atoms, pair_data, cell)
+
+
+class PredefinedEdgePairIndexer(_ExternalPairReader):
+    """
+    Convert user-supplied padded edge indices into hippynn pair tensors.
+    """
+
+    def forward(self, coordinates, real_atoms, inv_real_atoms, edge_indices, cell=None):
+        distflat, pair_first, pair_second, paircoord, _cell_offsets, _offset_index = self._forward_dense_edges(
+            coordinates, real_atoms, inv_real_atoms, edge_indices, cell
+        )
+        return distflat, pair_first, pair_second, paircoord
+
+
 class PairReIndexer(torch.nn.Module):
     def forward(self, sysatomatom_thing, system_index, atom_index, pair_first, pair_second):
 
@@ -111,7 +201,7 @@ class PairCacher(torch.nn.Module):
         return s
 
 
-class PairUncacher(torch.nn.Module):
+class PairUncacher(_ExternalPairReader):
     def __init__(self, n_images=1):
         super().__init__()
         self.set_images(n_images=n_images)
@@ -119,30 +209,8 @@ class PairUncacher(torch.nn.Module):
     def set_images(self, n_images):
         self.n_images = n_images
 
-    def forward(self, sparse, coordinates, cell, real_atoms, inv_real_atoms, n_atoms_max, n_systems):
-
-        if not sparse.is_sparse:
-            sparse = sparse.to_sparse(sparse_dim=4)
-        sparse = sparse.coalesce()
-        index = sparse.indices()
-        values = sparse.values()
-
-        mol, pfabs, psabs, offset_index = index.unbind(0)
-        pfb = pfabs + mol * n_atoms_max
-        psb = psabs + mol * n_atoms_max
-        cell_offsets = values
-
-        pair_first = inv_real_atoms[pfb]
-        pair_second = inv_real_atoms[psb]
-
-        atom_coordinates = coordinates.reshape(n_systems * n_atoms_max, 3)[real_atoms]
-        offsets = torch.bmm(cell_offsets.to(cell.dtype).unsqueeze(1), cell[mol]).squeeze(1)
-
-        paircoord = atom_coordinates[pair_first] - atom_coordinates[pair_second] + offsets
-
-        distflat = paircoord.norm(dim=1)
-
-        return distflat, pair_first, pair_second, paircoord, cell_offsets, offset_index
+    def forward(self, pair_data, coordinates, cell, real_atoms, inv_real_atoms, n_atoms_max, n_systems):
+        return self._forward_pair_data(pair_data, coordinates, cell, real_atoms, inv_real_atoms, n_atoms_max, n_systems)
 
 
 def padded_neighlist(pair_first, pair_second, pair_coord, atom_array):

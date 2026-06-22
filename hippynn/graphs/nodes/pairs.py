@@ -3,10 +3,10 @@ Nodes for finding and manipulating pairs and distances.
 """
 
 from .base.node_functions import NodeNotFound
-from .base import AutoNoKw, AutoKw, ExpandParents, SingleNode, MultiNode, find_unique_relative, Node
+from .base import AutoNoKw, AutoKw, ExpandParents, SingleNode, MultiNode, find_unique_relative, Node, ValueNode
 from .indexers import PaddingIndexer, acquire_encoding_padding, OneHotEncoder
 from .tags import Encoder, PairIndexer, AtomIndexer, PairCache
-from .inputs import PositionsNode, CellNode, SpeciesNode
+from .inputs import PositionsNode, CellNode, SpeciesNode, PredefinedEdgeIndicesNode
 from ..indextypes import IdxType
 from ...layers import pairs as pairs_modules
 
@@ -117,6 +117,41 @@ class ExternalNeighborIndexer(AutoKw, ExpandParents, PairIndexer,  MultiNode):
     parent_expander.require_idx_states(IdxType.SysAtom, None, None, None, None, None)
 
 
+class PredefinedEdgePairIndexer(AutoNoKw, ExpandParents, PairIndexer, MultiNode):
+    input_names = "coordinates", "real_atoms", "inv_real_atoms", "edge_indices", "cell"
+    auto_module_class = pairs_modules.PredefinedEdgePairIndexer
+    parent_expansion_kwargs = {
+        "species_set": "possible_species",
+    }
+    disables_hard_cutoff = True
+
+    @parent_expander.match(PositionsNode, SpeciesNode, PredefinedEdgeIndicesNode)
+    def expand_from_species(self, pos, spec, edge_indices, *, species_set=None, purpose, **kwargs):
+        _enc, padidx = acquire_encoding_padding(spec, species_set=species_set, purpose=purpose)
+        return pos, padidx, edge_indices
+
+    @parent_expander.match(PositionsNode, SpeciesNode, PredefinedEdgeIndicesNode, CellNode)
+    def expand_from_species_cell(self, pos, spec, edge_indices, cell, *, species_set=None, purpose, **kwargs):
+        _enc, padidx = acquire_encoding_padding(spec, species_set=species_set, purpose=purpose)
+        return pos, padidx, edge_indices, cell
+
+    @parent_expander.match(PositionsNode, AtomIndexer, PredefinedEdgeIndicesNode)
+    def expand_from_atom_indexer(self, pos, atomidx, edge_indices, **kwargs):
+        return pos, atomidx.real_atoms, atomidx.inv_real_atoms, edge_indices, ValueNode(None, convert=False)
+
+    @parent_expander.match(PositionsNode, AtomIndexer, PredefinedEdgeIndicesNode, CellNode)
+    def expand_from_atom_indexer_cell(self, pos, atomidx, edge_indices, cell, **kwargs):
+        return pos, atomidx.real_atoms, atomidx.inv_real_atoms, edge_indices, cell
+
+    parent_expander.assertlen(5)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.SysAtom, None, None, None, None)
+
+    def __init__(self, name, parents, dist_hard_max=None, module="auto", **kwargs):
+        self.dist_hard_max = dist_hard_max
+        super().__init__(name, parents, module=module, **kwargs)
+
+
 # Pair reindexer to re-use existing pairs
 class PairReIndexer(ExpandParents, AutoNoKw, SingleNode):
     """
@@ -201,8 +236,8 @@ class PairCacher(AutoKw, ExpandParents, PairCache, SingleNode):
         "offset_index",
         "real_atoms",
         "system_index",
-        "n_atoms_max",
         "n_systems",
+        "n_atoms_max",
     )
     auto_module_class = pairs_modules.PairCacher
     index_state = IdxType.Unlabeled
@@ -210,7 +245,7 @@ class PairCacher(AutoKw, ExpandParents, PairCache, SingleNode):
     @parent_expander.match(PairIndexer)
     def expand0(self, pair_indexer, *args, purpose, **kwargs):
         atomidx = find_unique_relative(pair_indexer, AtomIndexer)
-        if "n_images" not in self.module_kwargs:
+        if "n_images" not in self.module_kwargs and hasattr(pair_indexer.torch_module, "n_images"):
             self.module_kwargs["n_images"] = pair_indexer.torch_module.n_images
         return pair_indexer, atomidx
 

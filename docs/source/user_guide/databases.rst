@@ -31,6 +31,65 @@ the element ``cell[sys,i,j]`` gives the ``j`` cartesian coordinate of cell vecto
 massive errors while fitting to periodic boundary conditions, you may check the transposed version
 of your cell data, or compute the RDF.
 
+Predefined edges
+-----------------------
+
+When using :class:`~hippynn.graphs.nodes.inputs.PredefinedEdgeIndicesNode`,
+the corresponding database array should have shape
+``(n_systems, 2, num_edges)``. For each system, first array is the source of
+directed edge and the second array is the target of the edge. The source and target 
+rows are matched by the index.
+
+For example, for a single system with the edges ``0 -> 1``, 
+``0 -> 2``, ``1 -> 0``, and ``2 -> 0`` are stored as four columns:
+
+    [[0, 0, 1, 2],
+     [1, 2, 0, 0]]
+
+Where:
+- column ``0`` is ``[0, 1]``, so the edge is ``0 -> 1``.
+- column ``1`` is ``[0, 2]``, so the edge is ``0 -> 2``.
+- column ``2`` is ``[1, 0]``, so the edge is ``1 -> 0``.
+- column ``3`` is ``[2, 0]``, so the edge is ``2 -> 0``.
+
+Batched with a second two-atom system and padded to four edge columns, this 
+is stored as::
+
+    edge_indices = np.array(
+        [
+            [[0, 0, 1, 2],
+             [1, 2, 0, 0]],
+            [[0, 1, -1, -1],
+             [1, 0, -1, -1]],
+        ],
+        dtype=np.int64,
+    )
+
+For periodic predefined edges, the array may instead have shape
+``(n_systems, 5, num_edges)``. The first two rows are still the source and
+target atom indices, and rows ``2:5`` give the integer cell offset vector for
+each edge. These offsets are used together with the system cell to compute the
+periodic displacement for the supplied edge.
+
+The graph input should use the same database name as the stored array, for
+example::
+
+    edge_indices = inputs.PredefinedEdgeIndicesNode(db_name="edge_indices")
+    network = networks.Hipnn("HIPNN", (species, positions, edge_indices), module_kwargs=network_params)
+
+Supplying predefined edge indices makes hippynn build pairs from these
+given edges instead of finding neighbors by radial distance. The pair list is
+therefore not filtered by ``dist_hard_max``. By default, HIP-NN networks built
+from predefined edges also use ``NoCutoff`` for the sensitivity cutoff, so
+messages along the supplied edges are not zeroed by distance. To keep the usual
+cosine sensitivity cutoff while using predefined edges, pass
+``cutoff_type=CosCutoff`` in ``module_kwargs``.
+
+For periodic predefined edges, the array may instead have shape
+``(n_systems, 5, num_edges)``. The first two rows are still the source and
+target atom indices, and rows ``2:5`` give the integer cell offset vector for
+each edge.
+
 Database Formats and notes
 ---------------------------
 

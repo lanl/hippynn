@@ -13,6 +13,7 @@ from .filters import FilterDistance
 
 from .indexing import (
     ExternalNeighbors,
+    PredefinedEdgePairIndexer,
     PairDeIndexer,
     PairReIndexer,
     PairCacher,
