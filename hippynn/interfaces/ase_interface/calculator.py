@@ -13,8 +13,7 @@ from hippynn.graphs.nodes.base.node_functions import NodeOperationError, NodeNot
 from hippynn.graphs.nodes.base import InputNode
 from hippynn.graphs.nodes.tags import Encoder, AtomIndexer, PairIndexer, Energies, Charges
 from hippynn.graphs.nodes.pairs import ExternalNeighborIndexer
-from hippynn.graphs.nodes.misc import StrainInducer
-from hippynn.graphs.nodes.physics import CoulombEnergyNode, DipoleNode, StressForceNode
+from hippynn.graphs.nodes.physics import CoulombEnergyNode, DipoleNode, StressForceNode, StrainInducer
 from hippynn.graphs.nodes.pairs import PairFilter
 from hippynn.graphs.nodes.targets import AtomizationEnergyNode
 from hippynn.graphs.nodes.inputs import SpeciesNode, PositionsNode, CellNode

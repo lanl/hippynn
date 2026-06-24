@@ -4,17 +4,13 @@ import torch
 import hippynn
 
 
-
 from pathlib import Path
+
 MODEL_DIR = Path(__file__).parents[2] / "collected_models"
 
 
-def xfail_if_no_models(func):
-    if MODEL_DIR.exists():
-        wrapper = lambda f: f
-    else:
-        wrapper = pytest.mark.xfail(strict=False)
-    return wrapper(func)
+skip_if_no_models = pytest.mark.skipif(not MODEL_DIR.exists(), reason="test model resources not found")
+
 
 ignore_relocation = pytest.mark.filterwarnings("ignore:.*HIPPYNN_DEPRECATION_WARNINGS=ignore*.")
 ignore_weights_only_warning = pytest.mark.filterwarnings("ignore:.*weights_only=False*.")
@@ -59,11 +55,13 @@ def input_nodes():
 
     return species, positions, cell
 
+
 @pytest.fixture()
 def neural_network_node(input_nodes, network_parameters):
     from hippynn.graphs import networks
 
     return networks.Hipnn("HIPNN", input_nodes, module_kwargs=network_parameters, periodic=True)
+
 
 @pytest.fixture()
 def energy_node(neural_network_node):
@@ -90,3 +88,65 @@ def example_box():
     r = l * torch.rand((batch_size, n_atom, n_dim), dtype=torch.float)
     c = l * torch.eye(n_dim, dtype=torch.float).unsqueeze(0).expand((batch_size, n_dim, n_dim))
     return {"species": z, "coordinates": r, "cell": c}  # must match names in input_nodes
+
+@pytest.fixture
+def example_database(example_box):
+    from hippynn.databases.database import Database
+
+    n_duplicates = 10
+    duplicated_box = {}
+    for k, v in example_box.items():
+        repeats = [1 for _ in v.shape]
+        repeats[0] = n_duplicates
+        duplicated_box[k] = v.repeat(repeats)
+
+    # Determine input names from the example box keys.
+    input_names = list(example_box.keys())
+    # Start with no targets; they will be added later.
+    database = Database(
+        arr_dict=duplicated_box,
+        inputs=input_names,
+        targets=[],
+        seed=0,
+        quiet=False,
+    )
+    return database
+
+@pytest.fixture
+def example_training_setup(energy_node, example_database):
+    """Prepare training modules and a database.
+    """
+    from hippynn.graphs.nodes.loss import MAELoss
+    from hippynn.experiment.assembly import assemble_for_training
+    from hippynn.experiment.routines import SetupParams
+    import torch
+
+    loss_node = MAELoss.of_node(energy_node)
+    training_modules, db_info = assemble_for_training(
+        train_loss=loss_node, validation_losses={"val": loss_node}
+    )
+
+    # Add a random target column matching the expected shape.
+    en_name = energy_node.main_output.db_name
+    batch_size = example_database.arr_dict["species"].shape[0]
+    example_database.arr_dict[en_name] = torch.randn(batch_size, 1)
+    example_database.targets = [en_name]
+
+    # Align the database with the inputs/targets expected by the training modules.
+    example_database.align(**db_info)
+    example_database.make_trainvalidtest_split(test_size=0.2, valid_size=0.2)
+
+    setup_params = SetupParams(batch_size=1, max_epochs=1, stopping_key="val", learning_rate=0.001)
+    return training_modules, example_database, setup_params
+
+
+@pytest.fixture
+def temporary_directory():
+
+    import tempfile
+    
+    temp_name = "TEST_TMP_DIRECTORY"
+    with tempfile.TemporaryDirectory(prefix=temp_name) as tempdir:
+        with hippynn.active_directory(tempdir, create=False):
+            yield tempdir   # test runs here.
+

@@ -237,7 +237,8 @@ def calculate_adf(positions, cutoffs, cells=None, species=None):
         if len(pairs) == 0:
             continue
 
-        vecs = find_mic(positions[i][pairs[:,0]] - positions[i][pairs[:,1]], cell=np.diag(cell))
+        cell = (np.diag(cell) if cell is not None else None)
+        vecs = find_mic(positions[i][pairs[:,0]] - positions[i][pairs[:,1]], cell=cell)
         vecs = np.array(vecs)
 
         vecs = vecs

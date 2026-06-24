@@ -89,7 +89,7 @@ class PyAniMethods:
         # the algorithm would treat the coordinates as needing padding.
         if n_atoms < 7:
             try:
-                return self.determine_key_structure(batch_list[1:], species_key=species_key)
+                return self.determine_key_structure(batch_list[1:], sys_count, n_atoms_max, species_key=species_key)
             except RecursionError as re:
                 msg = "Automatic detection of arrays is only compatible with datasets of at least 6 atoms -- this is not supported."
                 raise ValueError(msg) from re
@@ -390,7 +390,7 @@ def write_h5(
         for k in is_atom_var.keys():
             mol[k] = np.asarray(mol[k])
 
-            if np.issubdtype(mol[k].dtype, np.unicode_):
+            if np.issubdtype(mol[k].dtype, np.str_):
                 mol[k] = [el.encode("utf-8") for el in list(mol[k])]
                 mol[k] = np.array(mol[k])
     # Store data

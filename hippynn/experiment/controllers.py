@@ -235,7 +235,7 @@ class RaiseBatchSizeOnPlateau(ReduceLROnPlateau):
 
     def load_state_dict(self, state_dict):
         self.boredom = state_dict["boredom"]
-        self.best_metric = state_dict["boredom"]
+        self.best_metric = state_dict["best_metric"]
         self.inner.load_state_dict(state_dict["inner"])
         self.last_epoch = state_dict["last_epoch"]
 

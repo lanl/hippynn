@@ -373,6 +373,7 @@ class FormTransformer(FormHandler):
         _debprint("Expanding form", self.form)
         _debprint("Input parents:", parents)
         _debprint("Match function:", self.fn)
+        _debprint("Supplied kwargs:", kwargs)
         if purpose is None:
             purpose = "{}: Expanding parents {} based on form {}".format(type(self), parents, self.form)
         with temporary_parents(node_self, parents):

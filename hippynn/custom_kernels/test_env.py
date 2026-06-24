@@ -322,6 +322,8 @@ class EnvOpsTester:
         print("Checking forward methods on large data {} times...".format(n_large), flush=True)
         self.check_allclose(repeats=n_large, use_large=True, device=device)
         print("Passed large tensor forward checks!")
+        
+        return 
 
 
     def check_speed(self, n_repetitions=10, device=torch.device("cpu"), data_size=TEST_LARGE_PARAMS, compare_against="pytorch"):
@@ -469,6 +471,7 @@ def main(args=None):
 
     tester = EnvOpsTester(name=args.implementation)
 
+    # Set up backends to test.
     test_gpu = not args.no_gpu
     device = torch.device(args.accelerator)
     if test_gpu:
@@ -490,9 +493,10 @@ def main(args=None):
     speed = not args.no_speed
     compare_against = args.compare_against
     if speed:
-        # just so that we error early if a bad name is specified.
+        # This line is just so that we error early if a bad name is specified.
         compare_impl = MessagePassingKernels.get_implementation(args.compare_against)
     correctness = not args.no_correctness
+
 
     # Standard test numbers.
     speed_tests = dict(mega=3, large=5, medium=100, small=100)
@@ -556,6 +560,8 @@ def main(args=None):
             print("Skipped speed tests.")
     else:
         print("Skipped CPU tests.")
+    
+    return
 
 
 # reference implementation

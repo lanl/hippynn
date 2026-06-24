@@ -83,7 +83,8 @@ class Predictor:
         return cls(inputs, outputs, **kwargs)
 
     def to(self, *args, **kwargs):
-        return self.graph.to(*args, **kwargs)
+        self.graph.to(*args, **kwargs) # returns graph
+        return self
 
     @property
     def inputs(self):
@@ -186,8 +187,9 @@ class Predictor:
         Note: kwargs are passed to self.__call__, e.g. the ``batch_size`` parameter.
         """
         results = {}
+        input_names = [x.db_name for x in self.graph.input_nodes]
+
         for split_name, split_arrdict in db.splits.items():
-            input_names = [x.db_name for x in self.graph.input_nodes]
             dict_inputs = {k: split_arrdict[k] for k in input_names}
             results[split_name] = self(**dict_inputs, **kwargs)
         return results

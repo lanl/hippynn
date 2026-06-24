@@ -5,7 +5,8 @@ from .tags import Encoder, PairIndexer, Network, AtomIndexer
 from .base import Node, AutoKw, ExpandParents, SingleNode
 from .base.multi import IndexNode
 from .indexers import OneHotEncoder, PaddingIndexer, acquire_encoding_padding
-from .pairs import OpenPairIndexer, PeriodicPairIndexer
+from .pairs import OpenPairIndexer, PeriodicPairIndexer, SparsePairIndexer
+from .tags import PairIndexer
 from .inputs import SpeciesNode, PositionsNode, CellNode
 from ..indextypes import IdxType
 from ... import networks as network_modules
@@ -36,12 +37,18 @@ class DefaultNetworkExpansion(ExpandParents):
         """
         Setup pair finder if positions and cell are passed with encoding.
 
+        :param periodic: [bool | PairIndexer]: if True, use default pair indexer. if False, use open boundary conditions. If node, use that node for pair indexing.
+
         :return: (padding_indexer, pairfinder)
         """
         if periodic:
-            assert isinstance(cell, CellNode), "Periodic networks require a cell input"
+            assert isinstance(cell, CellNode), f"Processsing periodic data requires a cell input (got: {cell})"
+
+            if isinstance(periodic, PairIndexer):
+                pair_cls = periodic
+            elif isinstance(periodic,bool):
+                pair_cls = SparsePairIndexer                
             pair_parents = (positions, encoder, pidxer, cell)
-            pair_cls = PeriodicPairIndexer
         else:
             assert cell is None, "When providing a cell node, periodic must be set to true"
             pair_parents = (positions, encoder, pidxer)
@@ -142,4 +149,4 @@ class HipHopnn(HipnnVec):
     """
     Node for HIP-HOP_NN neural network.
     """
-    auto_module_class = network_modules.hiphop.HipHopNNModule
+    auto_module_class = network_modules.hiphop.HipHopnnModule
