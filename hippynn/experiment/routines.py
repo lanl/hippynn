@@ -288,19 +288,7 @@ def train_model(
     metric_tracker.quiet = quiet
 
     # Ensure database inputs and targets are available and ordered correctly.
-    db_input_set = set(database.inputs)
-    db_target_set = set(database.targets)
-    evaluator_input_set = set(evaluator.db_info['inputs'])
-    evaluator_target_set = set(evaluator.db_info['targets'])
-
-    if db_input_set != evaluator_input_set:        
-        raise ValueError("Evaluator and database have incompatible input sets: "
-                        f"{db_input_set} vs {evaluator_input_set}")
-    if db_target_set != evaluator_target_set:
-        raise ValueError("Evaluator and database have incompatible target sets: "
-                        f"{db_target_set} vs {evaluator_target_set}")
-    database.inputs = evaluator.db_info['inputs']
-    database.targets = evaluator.db_info['targets']
+    database.align(**evaluator.db_info)
 
     if store_structure_file:
         serialization.create_structure_file(training_modules, database, controller)
@@ -350,7 +338,7 @@ def train_model(
     return metric_tracker
 
 
-def test_model(database, evaluator, batch_size, when, metric_tracker=None):
+def test_model(database, evaluator, batch_size, when, metric_tracker=None, splits: Optional[list[str]]=None):
     """
     Tests the model on the database according to the model_evaluator metrics.
     If a plot_maker is attached to the model evaluator, it will make plots.
@@ -359,9 +347,11 @@ def test_model(database, evaluator, batch_size, when, metric_tracker=None):
 
     :param database: The database test the model on.
     :param evaluator: The evaluator containing model and evaluation losses to measure.
-    :param when: A string to specify what plots are currently to be used.
+    :param when: A string to specify when this evaluation occurred, both for plotting
+        purposes and for reaclling the evaluation metrics from the metric tracker.
     :param metric_tracker: (Optional) metric tracker to save metrics on. If not provided,
         a blank one will be constructed.
+    :param split_list: a list of splits to evaluate. If None, the list will be automatically determined.
 
     :return: metric tracker
     """
@@ -370,22 +360,29 @@ def test_model(database, evaluator, batch_size, when, metric_tracker=None):
     if metric_tracker is None:
         metric_tracker = MetricTracker(evaluator.loss_names, stopping_key=None)
 
-    # Determine splits which are complete and can be evaluated:
-    evaluatable_splits = []
-    required_variables = set(database.inputs + database.targets)
-    for sname, split in database.splits.items():
-        if all(k in split for k in required_variables):
-            evaluatable_splits.append(sname)
-        else:
-            missing_arrays = set(k for k in required_variables if k not in split)
-            warnings.warn(f"Database contains split '{sname}' which"
-                          f" cannot be evaluated because it does not contain the"
-                          f" required quantities: {missing_arrays}")
+    # Ensure database inputs and targets are ordered correctly for evaluation.
+    database.align(**evaluator.db_info)
+    
+    if splits is None:
+        # Determine splits which are complete and can be evaluated:
+        evaluatable_splits = []
+        required_variables = set(database.inputs + database.targets)
+        splits = database.splits.keys()
+        for sname in splits:
+            split = database.splits[sname]
+            if all(k in split for k in required_variables):
+                evaluatable_splits.append(sname)
+            else:
+                missing_arrays = set(k for k in required_variables if k not in split)
+                warnings.warn(f"Database contains split '{sname}' which"
+                            f" cannot be evaluated because it does not contain the"
+                            f" required quantities: {missing_arrays}."
+                             " It will be skipped.")
 
-    # A little dance to make sure train, valid, test always come first, when present.
-    basic_splits = ["train", "valid", "test"]
-    basic_splits = [s for s in basic_splits if s in evaluatable_splits]
-    splits = basic_splits + [s for s in evaluatable_splits if s not in basic_splits]
+        # A little dance to make sure train, valid, test always come first, when present.
+        basic_splits = ["train", "valid", "test"]
+        basic_splits = [s for s in basic_splits if s in evaluatable_splits]
+        splits = basic_splits + [s for s in evaluatable_splits if s not in basic_splits]
 
     evaluation_data = collections.OrderedDict(
         (
@@ -626,8 +623,7 @@ def setup_and_profile(
     
     if not database.splitting_completed:
         raise ValueError("Database has not been split. Please split the database before profiling.")
-    database.inputs = evaluator.db_info['inputs']
-    database.targets = evaluator.db_info['targets']
+    database.align(**evaluator.db_info)
     
     n_inputs = len(database.inputs)
     n_targets = len(database.targets)
