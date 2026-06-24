@@ -338,7 +338,7 @@ def train_model(
     return metric_tracker
 
 
-def test_model(database, evaluator, batch_size, when, metric_tracker=None):
+def test_model(database, evaluator, batch_size, when, metric_tracker=None, splits: Optional[list[str]]=None):
     """
     Tests the model on the database according to the model_evaluator metrics.
     If a plot_maker is attached to the model evaluator, it will make plots.
@@ -347,9 +347,11 @@ def test_model(database, evaluator, batch_size, when, metric_tracker=None):
 
     :param database: The database test the model on.
     :param evaluator: The evaluator containing model and evaluation losses to measure.
-    :param when: A string to specify what plots are currently to be used.
+    :param when: A string to specify when this evaluation occurred, both for plotting
+        purposes and for reaclling the evaluation metrics from the metric tracker.
     :param metric_tracker: (Optional) metric tracker to save metrics on. If not provided,
         a blank one will be constructed.
+    :param split_list: a list of splits to evaluate. If None, the list will be automatically determined.
 
     :return: metric tracker
     """
@@ -360,22 +362,27 @@ def test_model(database, evaluator, batch_size, when, metric_tracker=None):
 
     # Ensure database inputs and targets are ordered correctly for evaluation.
     database.align(**evaluator.db_info)
-    # Determine splits which are complete and can be evaluated:
-    evaluatable_splits = []
-    required_variables = set(database.inputs + database.targets)
-    for sname, split in database.splits.items():
-        if all(k in split for k in required_variables):
-            evaluatable_splits.append(sname)
-        else:
-            missing_arrays = set(k for k in required_variables if k not in split)
-            warnings.warn(f"Database contains split '{sname}' which"
-                          f" cannot be evaluated because it does not contain the"
-                          f" required quantities: {missing_arrays}")
+    
+    if splits is None:
+        # Determine splits which are complete and can be evaluated:
+        evaluatable_splits = []
+        required_variables = set(database.inputs + database.targets)
+        splits = database.splits.keys()
+        for sname in splits:
+            split = database.splits[sname]
+            if all(k in split for k in required_variables):
+                evaluatable_splits.append(sname)
+            else:
+                missing_arrays = set(k for k in required_variables if k not in split)
+                warnings.warn(f"Database contains split '{sname}' which"
+                            f" cannot be evaluated because it does not contain the"
+                            f" required quantities: {missing_arrays}."
+                             " It will be skipped.")
 
-    # A little dance to make sure train, valid, test always come first, when present.
-    basic_splits = ["train", "valid", "test"]
-    basic_splits = [s for s in basic_splits if s in evaluatable_splits]
-    splits = basic_splits + [s for s in evaluatable_splits if s not in basic_splits]
+        # A little dance to make sure train, valid, test always come first, when present.
+        basic_splits = ["train", "valid", "test"]
+        basic_splits = [s for s in basic_splits if s in evaluatable_splits]
+        splits = basic_splits + [s for s in evaluatable_splits if s not in basic_splits]
 
     evaluation_data = collections.OrderedDict(
         (

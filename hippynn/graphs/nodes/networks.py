@@ -49,7 +49,6 @@ class DefaultNetworkExpansion(ExpandParents):
             elif isinstance(periodic,bool):
                 pair_cls = SparsePairIndexer                
             pair_parents = (positions, encoder, pidxer, cell)
-            pair_cls = SparsePairIndexer
         else:
             assert cell is None, "When providing a cell node, periodic must be set to true"
             pair_parents = (positions, encoder, pidxer)
@@ -150,4 +149,4 @@ class HipHopnn(HipnnVec):
     """
     Node for HIP-HOP_NN neural network.
     """
-    auto_module_class = network_modules.hiphop.HipHopNNModule
+    auto_module_class = network_modules.hiphop.HipHopnnModule
