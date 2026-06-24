@@ -390,7 +390,7 @@ to a fresh directory with a descriptive name for your experiment.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hippynn.experiment.routines.test_model">
-<span class="sig-name descname"><span class="pre">test_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">when</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_tracker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/routines.html#test_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.routines.test_model" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">test_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">when</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_tracker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/experiment/routines.html#test_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.experiment.routines.test_model" title="Link to this definition"></a></dt>
 <dd><p>Tests the model on the database according to the model_evaluator metrics.
 If a plot_maker is attached to the model evaluator, it will make plots.
 The plots will go in a sub-folder specified by <cite>when</cite> the testing is taking place.
@@ -400,9 +400,11 @@ The results are then printed.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>database</strong> – The database test the model on.</p></li>
 <li><p><strong>evaluator</strong> – The evaluator containing model and evaluation losses to measure.</p></li>
-<li><p><strong>when</strong> – A string to specify what plots are currently to be used.</p></li>
+<li><p><strong>when</strong> – A string to specify when this evaluation occurred, both for plotting
+purposes and for reaclling the evaluation metrics from the metric tracker.</p></li>
 <li><p><strong>metric_tracker</strong> – (Optional) metric tracker to save metrics on. If not provided,
 a blank one will be constructed.</p></li>
+<li><p><strong>split_list</strong> – a list of splits to evaluate. If None, the list will be automatically determined.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

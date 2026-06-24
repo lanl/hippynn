@@ -409,19 +409,7 @@
     <span class="n">metric_tracker</span><span class="o">.</span><span class="n">quiet</span> <span class="o">=</span> <span class="n">quiet</span>
 
     <span class="c1"># Ensure database inputs and targets are available and ordered correctly.</span>
-    <span class="n">db_input_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">database</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
-    <span class="n">db_target_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">database</span><span class="o">.</span><span class="n">targets</span><span class="p">)</span>
-    <span class="n">evaluator_input_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">db_info</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">])</span>
-    <span class="n">evaluator_target_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">db_info</span><span class="p">[</span><span class="s1">&#39;targets&#39;</span><span class="p">])</span>
-
-    <span class="k">if</span> <span class="n">db_input_set</span> <span class="o">!=</span> <span class="n">evaluator_input_set</span><span class="p">:</span>        
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Evaluator and database have incompatible input sets: &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">db_input_set</span><span class="si">}</span><span class="s2"> vs </span><span class="si">{</span><span class="n">evaluator_input_set</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">db_target_set</span> <span class="o">!=</span> <span class="n">evaluator_target_set</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Evaluator and database have incompatible target sets: &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">db_target_set</span><span class="si">}</span><span class="s2"> vs </span><span class="si">{</span><span class="n">evaluator_target_set</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">database</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">db_info</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">]</span>
-    <span class="n">database</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">db_info</span><span class="p">[</span><span class="s1">&#39;targets&#39;</span><span class="p">]</span>
+    <span class="n">database</span><span class="o">.</span><span class="n">align</span><span class="p">(</span><span class="o">**</span><span class="n">evaluator</span><span class="o">.</span><span class="n">db_info</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">store_structure_file</span><span class="p">:</span>
         <span class="n">serialization</span><span class="o">.</span><span class="n">create_structure_file</span><span class="p">(</span><span class="n">training_modules</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">controller</span><span class="p">)</span>
@@ -474,7 +462,7 @@
 
 <div class="viewcode-block" id="test_model">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.routines.html#hippynn.test_model">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">test_model</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">when</span><span class="p">,</span> <span class="n">metric_tracker</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_model</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">when</span><span class="p">,</span> <span class="n">metric_tracker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">splits</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Tests the model on the database according to the model_evaluator metrics.</span>
 <span class="sd">    If a plot_maker is attached to the model evaluator, it will make plots.</span>
@@ -483,9 +471,11 @@
 
 <span class="sd">    :param database: The database test the model on.</span>
 <span class="sd">    :param evaluator: The evaluator containing model and evaluation losses to measure.</span>
-<span class="sd">    :param when: A string to specify what plots are currently to be used.</span>
+<span class="sd">    :param when: A string to specify when this evaluation occurred, both for plotting</span>
+<span class="sd">        purposes and for reaclling the evaluation metrics from the metric tracker.</span>
 <span class="sd">    :param metric_tracker: (Optional) metric tracker to save metrics on. If not provided,</span>
 <span class="sd">        a blank one will be constructed.</span>
+<span class="sd">    :param split_list: a list of splits to evaluate. If None, the list will be automatically determined.</span>
 
 <span class="sd">    :return: metric tracker</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -494,22 +484,29 @@
     <span class="k">if</span> <span class="n">metric_tracker</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">metric_tracker</span> <span class="o">=</span> <span class="n">MetricTracker</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">loss_names</span><span class="p">,</span> <span class="n">stopping_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
-    <span class="c1"># Determine splits which are complete and can be evaluated:</span>
-    <span class="n">evaluatable_splits</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">required_variables</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">database</span><span class="o">.</span><span class="n">inputs</span> <span class="o">+</span> <span class="n">database</span><span class="o">.</span><span class="n">targets</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">sname</span><span class="p">,</span> <span class="n">split</span> <span class="ow">in</span> <span class="n">database</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="n">split</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">required_variables</span><span class="p">):</span>
-            <span class="n">evaluatable_splits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">missing_arrays</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">required_variables</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">split</span><span class="p">)</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Database contains split &#39;</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">&#39; which&quot;</span>
-                          <span class="sa">f</span><span class="s2">&quot; cannot be evaluated because it does not contain the&quot;</span>
-                          <span class="sa">f</span><span class="s2">&quot; required quantities: </span><span class="si">{</span><span class="n">missing_arrays</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># Ensure database inputs and targets are ordered correctly for evaluation.</span>
+    <span class="n">database</span><span class="o">.</span><span class="n">align</span><span class="p">(</span><span class="o">**</span><span class="n">evaluator</span><span class="o">.</span><span class="n">db_info</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">splits</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Determine splits which are complete and can be evaluated:</span>
+        <span class="n">evaluatable_splits</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">required_variables</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">database</span><span class="o">.</span><span class="n">inputs</span> <span class="o">+</span> <span class="n">database</span><span class="o">.</span><span class="n">targets</span><span class="p">)</span>
+        <span class="n">splits</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">sname</span> <span class="ow">in</span> <span class="n">splits</span><span class="p">:</span>
+            <span class="n">split</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">sname</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="n">split</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">required_variables</span><span class="p">):</span>
+                <span class="n">evaluatable_splits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">missing_arrays</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">required_variables</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">split</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Database contains split &#39;</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">&#39; which&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot; cannot be evaluated because it does not contain the&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot; required quantities: </span><span class="si">{</span><span class="n">missing_arrays</span><span class="si">}</span><span class="s2">.&quot;</span>
+                             <span class="s2">&quot; It will be skipped.&quot;</span><span class="p">)</span>
 
-    <span class="c1"># A little dance to make sure train, valid, test always come first, when present.</span>
-    <span class="n">basic_splits</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;valid&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">]</span>
-    <span class="n">basic_splits</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">basic_splits</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">evaluatable_splits</span><span class="p">]</span>
-    <span class="n">splits</span> <span class="o">=</span> <span class="n">basic_splits</span> <span class="o">+</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">evaluatable_splits</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">basic_splits</span><span class="p">]</span>
+        <span class="c1"># A little dance to make sure train, valid, test always come first, when present.</span>
+        <span class="n">basic_splits</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;valid&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">]</span>
+        <span class="n">basic_splits</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">basic_splits</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">evaluatable_splits</span><span class="p">]</span>
+        <span class="n">splits</span> <span class="o">=</span> <span class="n">basic_splits</span> <span class="o">+</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">evaluatable_splits</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">basic_splits</span><span class="p">]</span>
 
     <span class="n">evaluation_data</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
         <span class="p">(</span>
@@ -756,8 +753,7 @@
     
     <span class="k">if</span> <span class="ow">not</span> <span class="n">database</span><span class="o">.</span><span class="n">splitting_completed</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Database has not been split. Please split the database before profiling.&quot;</span><span class="p">)</span>
-    <span class="n">database</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">db_info</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">]</span>
-    <span class="n">database</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">db_info</span><span class="p">[</span><span class="s1">&#39;targets&#39;</span><span class="p">]</span>
+    <span class="n">database</span><span class="o">.</span><span class="n">align</span><span class="p">(</span><span class="o">**</span><span class="n">evaluator</span><span class="o">.</span><span class="n">db_info</span><span class="p">)</span>
     
     <span class="n">n_inputs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">database</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
     <span class="n">n_targets</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">database</span><span class="o">.</span><span class="n">targets</span><span class="p">)</span>

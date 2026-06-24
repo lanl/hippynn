@@ -114,9 +114,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">..layers.hiplayers</span><span class="w"> </span><span class="kn">import</span> <span class="n">HOPInteractionLayer</span><span class="p">,</span> <span class="n">TensorExtractor</span>
 
 
-<div class="viewcode-block" id="HipHopNNModule">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hiphop.html#hippynn.networks.hiphop.HipHopNNModule">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">HipHopNNModule</span><span class="p">(</span><span class="n">Hipnn</span><span class="p">):</span>
+<div class="viewcode-block" id="HipHopnnModule">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hiphop.html#hippynn.networks.hiphop.HipHopnnModule">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HipHopnnModule</span><span class="p">(</span><span class="n">Hipnn</span><span class="p">):</span>
     <span class="n">_interaction_class</span> <span class="o">=</span> <span class="n">HOPInteractionLayer</span>
     <span class="n">_interaction_kwargs</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;l_max&quot;</span><span class="p">,</span> <span class="s2">&quot;n_max&quot;</span><span class="p">,</span> <span class="s2">&quot;group_norm&quot;</span><span class="p">,</span> <span class="s2">&quot;group_norm_eps&quot;</span><span class="p">)</span>
 
@@ -127,14 +127,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_max</span> <span class="o">=</span> <span class="n">n_max</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tensor_extractor</span> <span class="o">=</span> <span class="n">TensorExtractor</span><span class="p">(</span><span class="n">l_max</span><span class="o">=</span><span class="n">l_max</span><span class="p">)</span>
 
-<div class="viewcode-block" id="HipHopNNModule.extra_repr">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hiphop.html#hippynn.networks.hiphop.HipHopNNModule.extra_repr">[docs]</a>
+<div class="viewcode-block" id="HipHopnnModule.extra_repr">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hiphop.html#hippynn.networks.hiphop.HipHopnnModule.extra_repr">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">extra_repr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;n_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_max</span><span class="si">}</span><span class="s2">, l_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">l_max</span><span class="si">}</span><span class="s2">&quot;</span></div>
 
 
-<div class="viewcode-block" id="HipHopNNModule.forward">
-<a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hiphop.html#hippynn.networks.hiphop.HipHopNNModule.forward">[docs]</a>
+<div class="viewcode-block" id="HipHopnnModule.forward">
+<a class="viewcode-back" href="../../../api_documentation/hippynn.networks.hiphop.html#hippynn.networks.hiphop.HipHopnnModule.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">pair_coord</span><span class="p">):</span>
         <span class="n">features</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">pair_dist</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>  <span class="c1"># Convert one-hot features to floating point features.</span>
 
@@ -168,6 +168,18 @@
         <span class="k">return</span> <span class="n">output_features</span></div>
 </div>
 
+
+<span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;HipHopNNModule&quot;</span><span class="p">:</span>
+        <span class="c1"># Backwards compatibility for unpickling prior models</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;&#39;HipHopNNModule&#39; is a deprecated class name, please use &#39;HipHopnnModule&#39;.&quot;</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">HipHopnnModule</span>
+    <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;module </span><span class="si">{</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s2"> has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 
            </div>
