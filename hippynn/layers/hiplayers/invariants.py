@@ -51,7 +51,6 @@ default_invariants_list = [
     "ij,ijk,kab,ab->,two,three,three,two",
 ]
 
-
 def split_invariant(invariants):
     """
     splits an invariant string into a list of indices and tensors.
@@ -69,7 +68,6 @@ def split_invariant(invariants):
         tensors.append( invars_split[term_idx + num_terms].strip().replace("\n", "") )
 
     return indices, tensors
-
 
 def computeInvariantPolynomial(tensor_bases, invariant_input_offsets, invariant_code):
     """
