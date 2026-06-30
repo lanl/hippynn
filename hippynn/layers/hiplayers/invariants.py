@@ -32,30 +32,6 @@ try:
 except:
     triton_available_with_gather = False
 
-    class PolynomialCollection:
-        """
-        Minimal polynomial wrapper used when Triton is unavailable.
-        """
-
-        def __init__(self, coefs, terms, polynomial_sizes, input_dimension):
-            self.polynomials = (coefs, terms, polynomial_sizes, input_dimension)
-
-        def get_device(self):
-            return self.polynomials[0].device
-
-        def set_device(self, device):
-            if self.get_device() != device:
-                coefs, terms, polynomial_sizes, input_dimension = self.polynomials
-                self.polynomials = (
-                    coefs.to(device),
-                    terms.to(device),
-                    polynomial_sizes.to(device),
-                    input_dimension,
-                )
-
-        def get_polynomials(self):
-            return self.polynomials
-
 # tensor ordering and list of invariants for the default invariants.
 default_tensor_ordering = ["zero", "one", "two", "three"]
 

@@ -3,7 +3,13 @@ import torch
 import time
 
 from hippynn.layers.hiplayers.tensors import HopInvariantLayerTorch, TensorExtractor
-from hippynn.layers.hiplayers.invariants import HopInvariantLayer, compute_invariant_polynomial_collection, default_invariants_list, split_invariant
+from hippynn.layers.hiplayers.invariants import (
+    HopInvariantLayer,
+    compute_invariant_polynomial_collection,
+    default_invariants_list,
+    split_invariant,
+    triton_available_with_gather,
+)
 from hippynn.layers.hiplayers.interactions import _invariant_counts
 
 
@@ -17,17 +23,22 @@ def test_default_invariant_definitions_parse():
 
 
 def test_polynomial_invariant_counts_match_interaction_lmax3():
-    unit_tensor_bases = {order: torch.ones(*([1] * order), 1) for order in range(4)}
     for n_max in range(1, 5):
-        polyCollection = compute_invariant_polynomial_collection(
-            n_max,
-            3,
-            tensor_bases=unit_tensor_bases,
-            input_tensor_ordering=["zero", "one", "two", "three"],
-        )
-        _, _, polynomial_sizes, _ = polyCollection.get_polynomials()
+        if triton_available_with_gather:
+            unit_tensor_bases = {order: torch.ones(*([1] * order), 1) for order in range(4)}
+            polyCollection = compute_invariant_polynomial_collection(
+                n_max,
+                3,
+                tensor_bases=unit_tensor_bases,
+                input_tensor_ordering=["zero", "one", "two", "three"],
+            )
+            _, _, polynomial_sizes, _ = polyCollection.get_polynomials()
+            n_invariants = len(polynomial_sizes)
+        else:
+            tensor_features = torch.randn((3, 16))
+            n_invariants = HopInvariantLayerTorch(n_max, 3)(tensor_features).shape[1]
 
-        assert len(polynomial_sizes) == _invariant_counts[n_max, 3]
+        assert n_invariants == _invariant_counts[n_max, 3]
 
 
 def evaluate_polynomial_collection_torch(x, polyCollection):
@@ -63,24 +74,22 @@ def test_polynomial_invariants_are_rotation_invariant_lmax3():
     tensor_features = torch.cat(tensor_extractor(rhats)[:4], dim=1)
     rotated_tensor_features = torch.cat(tensor_extractor(rhats @ rotation)[:4], dim=1)
 
-    start = time.perf_counter()
-    print("beginning polynomial construction", flush=True)
-    polyCollection = compute_invariant_polynomial_collection(
-        n_max=4,
-        l_max=3,
-        input_tensor_ordering=["zero", "one", "two", "three"],
-    )
-    print(f"construct polynomial collection: {time.perf_counter() - start:.6f} s", flush=True)
+    if triton_available_with_gather:
+        start = time.perf_counter()
+        polyCollection = compute_invariant_polynomial_collection(
+            n_max=4,
+            l_max=3,
+            input_tensor_ordering=["zero", "one", "two", "three"],
+        )
 
-    start = time.perf_counter()
-    print("beginning original invariant evaluation", flush=True)
-    invariants = evaluate_polynomial_collection_torch(tensor_features, polyCollection)
-    print(f"evaluate original invariants: {time.perf_counter() - start:.6f} s", flush=True)
-
-    start = time.perf_counter()
-    print("beginning rotated invariant evaluation", flush=True)
-    rotated_invariants = evaluate_polynomial_collection_torch(rotated_tensor_features, polyCollection)
-    print(f"evaluate rotated invariants: {time.perf_counter() - start:.6f} s", flush=True)
+        start = time.perf_counter()
+        invariants = evaluate_polynomial_collection_torch(tensor_features, polyCollection)
+        rotated_invariants = evaluate_polynomial_collection_torch(rotated_tensor_features, polyCollection)
+    else:
+        start = time.perf_counter()
+        invariant_layer = HopInvariantLayerTorch(n_max=4, l_max=3)
+        invariants = invariant_layer(tensor_features)
+        rotated_invariants = invariant_layer(rotated_tensor_features)
 
     assert torch.allclose(invariants, rotated_invariants, rtol=1e-4, atol=1e-4)
 
@@ -89,13 +98,7 @@ def test_polynomial_invariants():
     n_point = 3
     torch.manual_seed(0)
 
-    try:
-        import triton
-        triton_available = True
-    except:
-        triton_available = False
-
-    if triton_available and torch.cuda.is_available():
+    if triton_available_with_gather and torch.cuda.is_available():
 
         from hippynn.custom_kernels.poly_triton import EvaluatePolynomials
 
@@ -133,12 +136,6 @@ def test_invariants_wrapper():
     else:
         device = 'cpu'
 
-    try:
-        import triton
-        triton_available = True
-    except:
-        triton_available = False
-
     for l_max in range(4):
         for n_max in range(1, 5):
 
@@ -149,7 +146,7 @@ def test_invariants_wrapper():
             invariantLayer = invariantLayer.to(device)
             invars_poly = invariantLayer(tensor_features)
 
-            if triton_available and torch.cuda.is_available():
+            if triton_available_with_gather and torch.cuda.is_available():
                 polyCollection = compute_invariant_polynomial_collection(
                     n_max,
                     l_max,
@@ -168,7 +165,7 @@ def test_invariants_wrapper():
             # old HopInvariantLayerTorch only supports float32
             # Thus, we can only gradcheck if triton is available
 
-            if triton_available and torch.cuda.is_available() and n_max < 6:
+            if triton_available_with_gather and torch.cuda.is_available() and n_max < 6:
                 tensor_features = tensor_features.to(torch.float64)
 
                 assert torch.autograd.gradcheck(invariantLayer, (tensor_features,))
