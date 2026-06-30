@@ -39,16 +39,16 @@ default_invariants_list = [
     "->,zero",
     "i,i->,one,one",
     "ij,ij->,two,two",
-    "ij,ik,jk->,two,two,two",
     "ijk,ijk->,three,three",
-    "ijk,ijl,abk,abl->,three,three,three,three",
     "i,ij,j->,one,two,one",
-    "i,ij,jk,k->,one,two,two,one",
-    "i,j,k,ijk->,one,one,one,three",
-    "i,ijk,jkl,l->,one,three,three,one",
+    "ij,ik,jk->,two,two,two",
     "ij,jkl,ikl->,two,three,three",
+    "i,j,k,ijk->,one,one,one,three",
+    "i,ij,jk,k->,one,two,two,one",
+    "i,ijk,jkl,l->,one,three,three,one",
     "ij,jk,ilm,klm->,two,two,three,three",
     "ij,ijk,kab,ab->,two,three,three,two",
+    "ijk,ijl,abk,abl->,three,three,three,three",
 ]
 
 
