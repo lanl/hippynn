@@ -183,7 +183,7 @@ def calculate_min_dists(
     species_set = list(np.unique(array_dict[species_name]))
 
     if 0 not in species_set:
-        species_set = np.concatenate([[0], species_set], axis=0)
+        species_set = [0] + species_set
 
     if not len(species_set) or set(species_set) == {0}:
         raise ValueError("Species set empty!")
@@ -271,7 +271,7 @@ def calculate_max_system_force(
 
     species_set = list(np.unique(array_dict[species_name]))
     if 0 not in species_set:
-        species_set = np.concatenate([[0], species_set], axis=0)
+        species_set = [0] + species_set
 
     if not len(species_set) or set(species_set) == {0}:
         raise ValueError("Species set empty!")

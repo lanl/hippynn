@@ -1,5 +1,5 @@
 import os
-import sys
+import argparse
 import torch
 
 # Dataset loaders
@@ -7,12 +7,43 @@ from hippynn.databases.h5_pyanitools import PyAniFileDB
 from hippynn.databases import NPZDatabase
 from hippynn.databases.metadatabase import MetaDatabase
 
-# Read dataset filename from command line; determine file type
-if len(sys.argv) < 2:
-    print(f"Usage: python {os.path.basename(__file__)} [dataset_file_name]")
-    raise SystemExit(1)
+# Read dataset filename and database keys from command line
+parser = argparse.ArgumentParser(
+    description='Load a dataset and compute metadata statistics using MetaDatabase.',
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter
+)
+default_dataset_path = os.path.join(
+    os.path.dirname(__file__), '../../datasets/ani1x_release/ani1x-release.h5'
+)
+parser.add_argument(
+    'dataset_path',
+    nargs='?',
+    default=default_dataset_path,
+    help='Path to the dataset file (.h5, .hdf5, or .npz)'
+)
+parser.add_argument(
+    '--species-key',
+    default='atomic_numbers',
+    help='Key name for species/atomic numbers in the dataset'
+)
+parser.add_argument(
+    '--coordinates-key',
+    default='coordinates',
+    help='Key name for atomic coordinates in the dataset'
+)
+parser.add_argument(
+    '--energy-key',
+    default='wb97x_dz.energy',
+    help='Key name for energies in the dataset'
+)
+parser.add_argument(
+    '--forces-key',
+    default='wb97x_dz.forces',
+    help='Key name for forces in the dataset'
+)
+args = parser.parse_args()
 
-DATA_FILE = os.path.expanduser(sys.argv[1])
+DATA_FILE = os.path.expanduser(args.dataset_path)
 filetype = os.path.splitext(DATA_FILE)[1].lower()
 
 # ANI specific helpers
@@ -30,10 +61,10 @@ ANI1X_DSETS_KEYS = [
     'ccsd(t)_cbs.energy', 'wb97x_dz.forces'
 ]
 
-def load_db(db_info, en_name, force_name, seed, location, n_workers):
+def load_db(db_info, en_name, force_name, seed, location, n_workers, species_key):
     torch.set_default_dtype(torch.float64)
     return PyAniFileDB(
-        file=location, species_key='species', seed=seed, num_workers=n_workers, 
+        file=location, species_key=species_key, seed=seed, num_workers=n_workers, 
         allow_unfound=True, 
         **db_info
     )
@@ -59,9 +90,8 @@ en_name, force_name = get_data_names(qm_method, basis_set, force_training)
 
 # Define base_database by the file extension
 if filetype == ".npz":
-    inputs  = ['coordinates', 'species']
-    targets = ['energy', 'forces']
-    energies_key_sel = 'energy'
+    inputs  = [args.coordinates_key, args.species_key]
+    targets = [args.energy_key, args.forces_key]
     base_database = NPZDatabase(
         file=DATA_FILE,
         seed=101,
@@ -72,38 +102,32 @@ if filetype == ".npz":
     )
 
 elif filetype in (".h5", ".hdf5"):
-    inputs  = ['coordinates', 'species']
-    targets = ['energies', 'forces']
+    inputs  = [args.coordinates_key, args.species_key]
+    targets = [args.energy_key, args.forces_key]
     db_info = {"inputs": inputs , "targets": targets}
-    energies_key_sel = 'energies'
     base_database = load_db(
         db_info,
         en_name,
         force_name,
         seed=101,
         location=DATA_FILE,
-        n_workers=2
+        n_workers=2,
+        species_key=args.species_key
     )
 
 else:
     raise ValueError(f"Unrecognized dataset file extension: {filetype}. Supported file extensions are: .h5, .hdf5, .npz.")
 
 # ---------------------------------------------------------------------------
+print("Database loaded. Constructing MetaDatabase.")
 
-# Build MetaDatabase using the selected base_database; plot metadata statistics
+# Build MetaDatabase using the selected base_database; compute metadata statistics
 meta_database = MetaDatabase(
     arr_dict=base_database.arr_dict,
-    inputs=inputs,
-    targets=targets,
-    seed=12345,
-    num_workers=1,
-    pin_memory=True,
-    allow_unfound=True,
-    quiet=True,        
-    species_key='species',
-    coordinates_key='coordinates',
-    energies_key=energies_key_sel,
-    forces_key='forces',
+    species_key=args.species_key,
+    coordinates_key=args.coordinates_key,
+    energies_key=args.energy_key,
+    forces_key=args.forces_key,
     metadata={ 
         "Energy_unit" : 'eV',
         "Mass_unit" : 'grams/mol', 
@@ -114,10 +138,11 @@ meta_database = MetaDatabase(
         "Input_Proceedure" : '' 
     },
     populate_metadata=True,
-    write_metadata_to_json=True,
-    json_filename='metadata.json',
-    distribution_plots=True,
 )
 
+# Save metadata to files
+meta_database.save_metadata_to_json('TEST_metadata.json')
+meta_database.save_metadata_to_csv('TEST_metadata.csv')
+
 # Plot metadata statistics
-#meta_database.plot_distributions()
+meta_database.plot_distributions()
