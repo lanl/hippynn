@@ -30,7 +30,7 @@ def network_parameters():
 
 
 @pytest.mark.parametrize(
-    "net_class,",
+    "net_class",
     [
         networks.Hipnn,
         networks.HipnnVec,
