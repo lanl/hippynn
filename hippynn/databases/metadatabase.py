@@ -21,74 +21,14 @@ import re
 from ..layers.indexers import OneHotSpecies
 from ..pretraining import calculate_min_dists, compute_hipnn_e0
 from ..tools import progress_bar
-import warnings
-
-
-# Key name sets for auto-detection
-SPECIES_KEYSET = ['species', 'atomic_numbers', 'z', 'atom_types', 'atomic_number']
-COORDINATES_KEYSET = ['coordinates', 'positions', 'pos', 'coords', 'r']
-ENERGIES_KEYSET = ['energy', 'energies', 'e', 'total_energy']
-FORCES_KEYSET = ['forces', 'force', 'f']
-CELL_KEYSET = ['cell', 'lattice', 'box', 'unit_cell', 'c']
-
-
-def auto_detect_key(keys, keyset, key_name, required=True):
-    """
-    Auto-detect a database key from a set of possible names using case-insensitive matching.
-    
-    This function searches for keys in a case-insensitive manner and returns the first unique match.
-    If multiple matches are found, a ValueError is raised to avoid ambiguity. If no matches are found
-    and the key is required, a ValueError is raised with available keys listed.
-    
-    **Common Keysets:**
-    
-    - **SPECIES_KEYSET**: 'species', 'atomic_numbers', 'z', 'atom_types', 'atomic_number'
-    - **COORDINATES_KEYSET**: 'coordinates', 'positions', 'pos', 'coords', 'r'
-    - **ENERGIES_KEYSET**: 'energy', 'energies', 'e', 'total_energy'
-    - **FORCES_KEYSET**: 'forces', 'force', 'f'
-    - **CELL_KEYSET**: 'cell', 'lattice', 'box', 'unit_cell'
-    
-    :param keys: available keys in the array dictionary
-    :param keyset: list of possible key name patterns to match
-    :param key_name: descriptive name for error messages (e.g., 'species_key')
-    :param required: whether this key is required (if False, returns None with warning if not found)
-    :return: detected key name or None
-    :raises ValueError: if ambiguous (multiple matches) or missing required key
-    
-    Examples
-    --------
-    >>> from hippynn.databases.metadatabase import auto_detect_key, SPECIES_KEYSET
-    >>> keys = ['Species', 'coordinates', 'energy']
-    >>> auto_detect_key(keys, SPECIES_KEYSET, 'species_key')
-    'Species'
-    
-    >>> keys_ambiguous = ['species', 'atomic_numbers', 'coordinates']
-    >>> auto_detect_key(keys_ambiguous, SPECIES_KEYSET, 'species_key')  # doctest: +SKIP
-    ValueError: Multiple candidates found
-    """
-    # Normalize keys for case-insensitive matching
-    normalized_keyset = [alias.casefold() for alias in keyset]
-    
-    # Find matches
-    matches = [k for k in keys if k.casefold() in normalized_keyset]
-    
-    if len(matches) == 0:
-        if required:
-            raise ValueError(
-                f"Could not auto-detect {key_name}. No matches found for aliases: {keyset}.\n"
-                f"Available keys: {list(keys)}\n"
-                f"Please specify {key_name} explicitly."
-            )
-        else:
-            warnings.warn(f"Optional key {key_name} not found in arr_dict. Proceeding without it.")
-            return None
-    elif len(matches) == 1:
-        return matches[0]
-    else:
-        raise ValueError(
-            f"Could not auto-detect {key_name}. Multiple candidates found: {matches}.\n"
-            f"Please specify {key_name} explicitly to resolve ambiguity."
-        )
+from .utils import (
+    auto_detect_key,
+    SPECIES_KEYSET,
+    COORDINATES_KEYSET,
+    ENERGIES_KEYSET,
+    FORCES_KEYSET,
+    CELL_KEYSET,
+)
 
 
 class MetaDatabase:
@@ -493,6 +433,27 @@ class MetaDatabase:
         if self.min_force is None:
             self._calculate_force_extrema()
         return self.min_force
+
+    def calculate_volume(self, coordinates, cell=None):
+        """
+        Compute the bounding-box volume, and cell volume if a cell is given, for a single entry.
+
+        :param coordinates: atomic positions, shape ``(n_atoms, 3)``
+        :param cell: optional cell matrix, shape ``(3, 3)``
+        :return: dict with keys ``bounding_box_volume`` and ``cell_volume`` (``None`` if ``cell`` not given)
+        """
+        coords = self._to_tensor(coordinates).to(dtype=torch.float64)
+        result = {"bounding_box_volume": None, "cell_volume": None}
+        if coords.numel() > 0:
+            mins = coords.min(dim=0).values
+            maxs = coords.max(dim=0).values
+            result["bounding_box_volume"] = (maxs - mins).prod().item()
+        if cell is not None:
+            cell_t = self._to_tensor(cell).to(dtype=torch.float64)
+            if tuple(cell_t.shape) != (3, 3):
+                raise ValueError("Cell must be 3x3")
+            result["cell_volume"] = torch.abs(torch.linalg.det(cell_t)).item()
+        return result
 
     def calculate_densities(self):
         """

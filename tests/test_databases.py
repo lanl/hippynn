@@ -424,7 +424,7 @@ def test_metadatabase_validation_and_optional_inputs() -> None:
 
 def test_auto_detect_key():
     """Test auto-detection: standard names, case-insensitive, alternatives, and errors."""
-    from hippynn.databases.metadatabase import auto_detect_key, SPECIES_KEYSET, COORDINATES_KEYSET, CELL_KEYSET
+    from hippynn.databases.utils import auto_detect_key, SPECIES_KEYSET, COORDINATES_KEYSET, CELL_KEYSET
     
     # Standard names and case-insensitive matching
     keys = ['SPECIES', 'coordinates', 'energy']
@@ -469,4 +469,110 @@ def test_metadatabase_auto_detection():
     assert meta.energies_key == 'energy'
     assert meta.forces_key is None
     assert meta.cell_key is None
+
+
+# ---------------------------------------------------------------------------
+# Tests for hippynn.databases.utils xyz tools
+# ---------------------------------------------------------------------------
+
+@pytest.fixture
+def xyz_db() -> Database:
+    """A small synthetic Database with coordinates/species/forces/energy, each system with >= 7 real atoms.
+
+    Each system needs at least 7 non-padding atoms because PyAniFileDB's key-structure
+    auto-detection (hippynn.databases.h5_pyanitools.PyAniMethods.determine_key_structure)
+    requires n_atoms >= 7 to disambiguate padded axes, and write_h5 trims each system's
+    species down to its actual (non-padded) atom count before storing.
+    """
+    species = torch.tensor([[1, 6, 8, 1, 1, 6, 6], [8, 1, 1, 6, 6, 7, 7]], dtype=torch.int64)
+    coordinates = torch.zeros((2, 7, 3), dtype=torch.float64)
+    forces = torch.zeros((2, 7, 3), dtype=torch.float64)
+    energy = torch.tensor([1.0, 2.0], dtype=torch.float64)
+    return Database(
+        arr_dict={"species": species, "coordinates": coordinates, "forces": forces, "energy": energy},
+        inputs=["coordinates", "species"],
+        targets=["energy", "forces"],
+        seed=0,
+        quiet=True,
+    )
+
+
+def test_write_extxyz(xyz_db: Database, temporary_directory) -> None:
+    """Covers basic writing/round-trip, split selection, overwrite guard, and error paths."""
+    from hippynn.databases.utils import write_extxyz
+
+    pytest.importorskip("ase")
+    from ase.io import read as ase_read
+
+    out_path = Path(temporary_directory) / "out.extxyz"
+    write_extxyz(xyz_db, out_path)
+    frames = ase_read(str(out_path), index=":")
+    assert len(frames) == 2
+    assert len(frames[0]) == 7
+    assert len(frames[1]) == 7
+    assert frames[0].get_potential_energy() == pytest.approx(1.0)
+
+    # overwrite guard
+    with pytest.raises(FileExistsError):
+        write_extxyz(xyz_db, out_path, overwrite=False)
+    write_extxyz(xyz_db, out_path, overwrite=True)  # succeeds
+
+    # named-split selection
+    xyz_db.make_explicit_split("only", xyz_db.arr_dict["indices"][:1])
+    out_split = Path(temporary_directory) / "split.extxyz"
+    write_extxyz(xyz_db, out_split, split="only")
+    assert len(ase_read(str(out_split), index=":")) == 1
+
+    # invalid split raises
+    with pytest.raises(ValueError, match="split must be"):
+        write_extxyz(xyz_db, Path(temporary_directory) / "bad.extxyz", split="nope")
+
+    # invalid pbc raises
+    with pytest.raises(ValueError, match="pbc must be"):
+        write_extxyz(xyz_db, Path(temporary_directory) / "badpbc.extxyz", pbc=(True, False))
+
+
+def test_load_base_database(xyz_db: Database, temporary_directory) -> None:
+    """Backend and energies_key are chosen by file extension; unknown extensions raise."""
+    from hippynn.databases.utils import load_base_database
+    from hippynn.databases.ondisk import NPZDatabase
+
+    xyz_db.split_the_rest("all")
+
+    npz_path = Path(temporary_directory) / "data.npz"
+    xyz_db.write_npz(str(npz_path), record_split_masks=False)
+    db, energies_key = load_base_database(npz_path)
+    assert isinstance(db, NPZDatabase)
+    assert energies_key == "energy"
+
+    h5py = pytest.importorskip("h5py")
+    from hippynn.databases.h5_pyanitools import PyAniFileDB
+
+    h5_path = Path(temporary_directory) / "data.h5"
+    xyz_db.write_h5(split=True, h5path=str(h5_path), overwrite=True)
+    db, energies_key = load_base_database(h5_path)
+    assert isinstance(db, PyAniFileDB)
+    assert energies_key == "energies"
+
+    bad_path = Path(temporary_directory) / "data.txt"
+    bad_path.write_text("not a database")
+    with pytest.raises(ValueError, match="Unrecognized dataset file extension"):
+        load_base_database(bad_path)
+
+
+def test_database_to_extxyz(xyz_db: Database, temporary_directory) -> None:
+    """End-to-end wrapper: load a database from file and write it to EXTXYZ."""
+    from hippynn.databases.utils import database_to_extxyz
+
+    pytest.importorskip("ase")
+    from ase.io import read as ase_read
+
+    xyz_db.split_the_rest("all")
+
+    npz_path = Path(temporary_directory) / "data.npz"
+    xyz_db.write_npz(str(npz_path), record_split_masks=False)
+
+    database_to_extxyz(npz_path)  # default output filename derived from input basename
+    out_path = Path(temporary_directory) / "data.extxyz"
+    assert len(ase_read(str(out_path), index=":")) == 2
 

@@ -1,6 +1,15 @@
+"""
+Generic, reusable database helpers that are not tied to a specific
+:class:`~hippynn.databases.database.Database` subclass.
+
+Includes tools for loading and exporting databases in EXTXYZ format, and for
+auto-detecting standard database key names (e.g. species, coordinates, energy,
+forces, cell) from a dictionary of arrays.
+"""
 from __future__ import annotations
 
 import os
+import warnings
 from pathlib import Path
 from typing import Optional, Tuple, Union
 
@@ -9,8 +18,75 @@ import torch
 from ase import Atoms
 from ase.io import write as ase_write
 
-from hippynn.databases import NPZDatabase
-from hippynn.databases.h5_pyanitools import PyAniFileDB
+from .ondisk import NPZDatabase
+from .h5_pyanitools import PyAniFileDB
+
+
+# Key name sets for auto-detection
+SPECIES_KEYSET = ['species', 'atomic_numbers', 'z', 'atom_types', 'atomic_number']
+COORDINATES_KEYSET = ['coordinates', 'positions', 'pos', 'coords', 'r']
+ENERGIES_KEYSET = ['energy', 'energies', 'e', 'total_energy']
+FORCES_KEYSET = ['forces', 'force', 'f']
+CELL_KEYSET = ['cell', 'lattice', 'box', 'unit_cell', 'c']
+
+
+def auto_detect_key(keys, keyset, key_name, required=True):
+    """
+    Auto-detect a database key from a set of possible names using case-insensitive matching.
+
+    This function searches for keys in a case-insensitive manner and returns the first unique match.
+    If multiple matches are found, a ValueError is raised to avoid ambiguity. If no matches are found
+    and the key is required, a ValueError is raised with available keys listed.
+
+    **Common Keysets:**
+
+    - **SPECIES_KEYSET**: 'species', 'atomic_numbers', 'z', 'atom_types', 'atomic_number'
+    - **COORDINATES_KEYSET**: 'coordinates', 'positions', 'pos', 'coords', 'r'
+    - **ENERGIES_KEYSET**: 'energy', 'energies', 'e', 'total_energy'
+    - **FORCES_KEYSET**: 'forces', 'force', 'f'
+    - **CELL_KEYSET**: 'cell', 'lattice', 'box', 'unit_cell'
+
+    :param keys: available keys in the array dictionary
+    :param keyset: list of possible key name patterns to match
+    :param key_name: descriptive name for error messages (e.g., 'species_key')
+    :param required: whether this key is required (if False, returns None with warning if not found)
+    :return: detected key name or None
+    :raises ValueError: if ambiguous (multiple matches) or missing required key
+
+    Examples
+    --------
+    >>> from hippynn.databases.utils import auto_detect_key, SPECIES_KEYSET
+    >>> keys = ['Species', 'coordinates', 'energy']
+    >>> auto_detect_key(keys, SPECIES_KEYSET, 'species_key')
+    'Species'
+
+    >>> keys_ambiguous = ['species', 'atomic_numbers', 'coordinates']
+    >>> auto_detect_key(keys_ambiguous, SPECIES_KEYSET, 'species_key')  # doctest: +SKIP
+    ValueError: Multiple candidates found
+    """
+    # Normalize keys for case-insensitive matching
+    normalized_keyset = [alias.casefold() for alias in keyset]
+
+    # Find matches
+    matches = [k for k in keys if k.casefold() in normalized_keyset]
+
+    if len(matches) == 0:
+        if required:
+            raise ValueError(
+                f"Could not auto-detect {key_name}. No matches found for aliases: {keyset}.\n"
+                f"Available keys: {list(keys)}\n"
+                f"Please specify {key_name} explicitly."
+            )
+        else:
+            warnings.warn(f"Optional key {key_name} not found in arr_dict. Proceeding without it.")
+            return None
+    elif len(matches) == 1:
+        return matches[0]
+    else:
+        raise ValueError(
+            f"Could not auto-detect {key_name}. Multiple candidates found: {matches}.\n"
+            f"Please specify {key_name} explicitly to resolve ambiguity."
+        )
 
 
 def load_base_database(
@@ -38,7 +114,7 @@ def load_base_database(
             targets=targets,
             quiet=False,
         )
-    
+
     elif ext in (".h5", ".hdf5"):
         inputs  = ['coordinates', 'species']
         targets = ['energies', 'forces']
@@ -52,10 +128,10 @@ def load_base_database(
             inputs=inputs,
             targets=targets,
         )
-    
+
     else:
         raise ValueError(f"Unrecognized dataset file extension: {ext}. Supported file extensions are: .h5, .hdf5, .npz.")
-    
+
     return db, energies_key
 
 
@@ -68,6 +144,10 @@ def write_extxyz(
 ):
     """
     Write a hippynn Database to an EXTXYZ file using ASE.
+
+    .. seealso::
+       :func:`hippynn.molecular_dynamics.writers.write_extxyz` for exporting MD trajectories
+       instead of a :class:`~hippynn.databases.database.Database`.
 
     Expected keys in database.arr_dict:
       coordinates: (n, max_atoms, 3)
