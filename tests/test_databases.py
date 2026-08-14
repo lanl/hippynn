@@ -7,6 +7,8 @@ import os
 from pathlib import Path
 import pytest
 
+from conftest import ignore_optional_key_warning
+
 
 @pytest.fixture
 def dummy_db() -> Database:
@@ -68,6 +70,9 @@ def test_metadatabase_ani_aluminum() -> None:
         targets=None,
     )
 
+    # Keep only a small random fraction of the data to keep this test fast.
+    raw_db.make_random_split("delete", 0.95)
+    del raw_db.splits["delete"]
 
     # Construct the MetaDatabase without auto‑populating metadata to keep the
     # test lightweight.
@@ -181,6 +186,7 @@ def synthetic_metadb():
     )
 
 
+@ignore_optional_key_warning
 def test_metadatabase_core_functionality(synthetic_metadb) -> None:
     """Test statistics, plotting, search, species helpers, and caching behavior."""
     import warnings
@@ -264,6 +270,7 @@ def test_metadatabase_core_functionality(synthetic_metadb) -> None:
 
 
 
+@ignore_optional_key_warning
 def test_metadatabase_min_distance_behavior() -> None:
     """Test periodic boundaries and fallback behavior for minimum distance calculations."""
     from hippynn.databases.metadatabase import MetaDatabase
@@ -329,6 +336,7 @@ def test_metadatabase_min_distance_behavior() -> None:
 
 
 
+@ignore_optional_key_warning
 def test_metadatabase_validation_and_optional_inputs() -> None:
     """Test shape validation, missing optional inputs, and metadata access patterns."""
     from hippynn.databases.metadatabase import MetaDatabase
@@ -451,6 +459,7 @@ def test_auto_detect_key():
     assert result is None
 
 
+@ignore_optional_key_warning
 def test_metadatabase_auto_detection():
     """Test MetaDatabase with auto-detected keys."""
     import numpy as np
@@ -533,31 +542,93 @@ def test_write_extxyz(xyz_db: Database, temporary_directory) -> None:
 
 
 def test_load_base_database(xyz_db: Database, temporary_directory) -> None:
-    """Backend and energies_key are chosen by file extension; unknown extensions raise."""
+    """Backend is chosen based on `data_file`: by file extension for a file, by directory contents for a
+    directory. Unknown/unsupported inputs raise an informative error."""
+    import numpy as np
+
     from hippynn.databases.utils import load_base_database
-    from hippynn.databases.ondisk import NPZDatabase
+    from hippynn.databases.ondisk import NPZDatabase, DirectoryDatabase
 
     xyz_db.split_the_rest("all")
 
+    def check(db, energies_key, expected_class, label):
+        assert isinstance(db, expected_class), f"{label}: expected {expected_class.__name__}, got {type(db).__name__}"
+        assert energies_key == "energy", f"{label}: expected energies_key 'energy', got {energies_key!r}"
+        assert db.arr_dict["energy"].shape == (2,), f"{label}: unexpected arr_dict['energy'] shape {db.arr_dict['energy'].shape}"
+
+    # .npz file -> NPZDatabase
     npz_path = Path(temporary_directory) / "data.npz"
     xyz_db.write_npz(str(npz_path), record_split_masks=False)
-    db, energies_key = load_base_database(npz_path)
-    assert isinstance(db, NPZDatabase)
-    assert energies_key == "energy"
+    check(*load_base_database(npz_path), NPZDatabase, "npz file")
 
+    # .h5 file -> PyAniFileDB
     h5py = pytest.importorskip("h5py")
-    from hippynn.databases.h5_pyanitools import PyAniFileDB
+    from hippynn.databases.h5_pyanitools import PyAniFileDB, PyAniDirectoryDB
 
     h5_path = Path(temporary_directory) / "data.h5"
     xyz_db.write_h5(split=True, h5path=str(h5_path), overwrite=True)
-    db, energies_key = load_base_database(h5_path)
-    assert isinstance(db, PyAniFileDB)
-    assert energies_key == "energies"
+    check(*load_base_database(h5_path), PyAniFileDB, "h5 file")
 
+    # directory of .h5 files -> PyAniDirectoryDB
+    h5_dir = Path(temporary_directory) / "h5_dir"
+    h5_dir.mkdir()
+    xyz_db.write_h5(split=True, h5path=str(h5_dir / "data.h5"), overwrite=True)
+    check(*load_base_database(h5_dir), PyAniDirectoryDB, "h5 directory")
+
+    # directory of .npy files -> DirectoryDatabase (requires `name`)
+    npy_dir = Path(temporary_directory) / "npy_dir"
+    npy_dir.mkdir()
+    for key, arr in xyz_db.splits["all"].items():
+        np.save(npy_dir / f"prefix_{key}.npy", arr.detach().cpu().numpy() if hasattr(arr, "detach") else arr)
+
+    with pytest.raises(ValueError, match="requires `name`"):
+        load_base_database(npy_dir)
+    check(*load_base_database(npy_dir, name="prefix_"), DirectoryDatabase, "npy directory")
+
+    # unrecognized file extension raises an informative error
     bad_path = Path(temporary_directory) / "data.txt"
     bad_path.write_text("not a database")
     with pytest.raises(ValueError, match="Unrecognized dataset file extension"):
         load_base_database(bad_path)
+
+
+def test_load_base_database_custom_keys(temporary_directory) -> None:
+    """Custom species/coordinates/energies/forces key names are honored, not just the defaults."""
+    from hippynn.databases.utils import load_base_database
+    from hippynn.databases.ondisk import NPZDatabase
+
+    species = torch.tensor([[1, 6, 8, 1, 1, 6, 6], [8, 1, 1, 6, 6, 7, 7]], dtype=torch.int64)
+    coordinates = torch.zeros((2, 7, 3), dtype=torch.float64)
+    forces = torch.zeros((2, 7, 3), dtype=torch.float64)
+    energy = torch.tensor([1.0, 2.0], dtype=torch.float64)
+    custom_db = Database(
+        arr_dict={
+            "atomic_numbers": species,
+            "positions": coordinates,
+            "custom_force": forces,
+            "custom_energy": energy,
+        },
+        inputs=["positions", "atomic_numbers"],
+        targets=["custom_energy", "custom_force"],
+        seed=0,
+        quiet=True,
+    )
+    custom_db.split_the_rest("all")
+
+    npz_path = Path(temporary_directory) / "custom.npz"
+    custom_db.write_npz(str(npz_path), record_split_masks=False)
+    db, energies_key = load_base_database(
+        npz_path,
+        species_key="atomic_numbers",
+        coordinates_key="positions",
+        energies_key="custom_energy",
+        forces_key="custom_force",
+    )
+    assert isinstance(db, NPZDatabase)
+    assert energies_key == "custom_energy"
+    assert set(db.inputs) == {"positions", "atomic_numbers"}
+    assert set(db.targets) == {"custom_energy", "custom_force"}
+    assert db.arr_dict["custom_energy"].shape == (2,)
 
 
 def test_database_to_extxyz(xyz_db: Database, temporary_directory) -> None:

@@ -18,8 +18,8 @@ import torch
 from ase import Atoms
 from ase.io import write as ase_write
 
-from .ondisk import NPZDatabase
-from .h5_pyanitools import PyAniFileDB
+from .ondisk import NPZDatabase, DirectoryDatabase
+from .h5_pyanitools import PyAniFileDB, PyAniDirectoryDB
 
 
 # Key name sets for auto-detection
@@ -89,48 +89,103 @@ def auto_detect_key(keys, keyset, key_name, required=True):
         )
 
 
+# Backend database class for each supported file extension
+_BASE_DATABASE_BACKENDS = {
+    ".npz": NPZDatabase,
+    ".h5": PyAniFileDB,
+    ".hdf5": PyAniFileDB,
+}
+
+
 def load_base_database(
     data_file: Union[str, os.PathLike],
     seed: int = 101,
     num_workers: int = 2,
+    species_key: str = "species",
+    coordinates_key: str = "coordinates",
+    energies_key: str = "energy",
+    forces_key: str = "forces",
+    name: Optional[str] = None,
+    files: Optional[list] = None,
 ):
     """
-    Load either an NPZDatabase (.npz) or PyAniFileDB (.h5/.hdf5) with a consistent interface.
-    Returns (database, energies_key), where energies_key is 'energy' (npz) or 'energies' (h5).
+    Load a database with a consistent interface, dispatching on ``data_file``:
+
+    - ``.npz`` file -> NPZDatabase
+    - ``.h5``/``.hdf5`` file -> PyAniFileDB
+    - directory containing ``.h5``/``.hdf5`` files -> PyAniDirectoryDB
+    - directory containing ``.npy`` files -> DirectoryDatabase (requires ``name``)
+
+    :param data_file: path to the dataset file or directory
+    :param seed: random seed for the database split
+    :param num_workers: number of dataloader workers (see :class:`~hippynn.databases.database.Database`)
+    :param species_key: key name for species/atomic numbers in the dataset
+    :param coordinates_key: key name for atomic coordinates in the dataset
+    :param energies_key: key name for energies in the dataset
+    :param forces_key: key name for forces in the dataset
+    :param name: filename prefix for a directory of ``.npy`` files; required only in that case
+    :param files: explicit list of ``.h5`` filenames to load from a directory; if None, all ``.h5`` files in the directory are used
+    :return: (database, energies_key)
     """
     data_file = os.path.expanduser(str(data_file))
+    inputs = [coordinates_key, species_key]
+    targets = [energies_key, forces_key]
+
+    if os.path.isdir(data_file):
+        has_h5_files = any(f.lower().endswith((".h5", ".hdf5")) for f in os.listdir(data_file))
+        if has_h5_files:
+            db = PyAniDirectoryDB(
+                directory=data_file,
+                inputs=inputs,
+                targets=targets,
+                files=files,
+                species_key=species_key,
+                seed=seed,
+                num_workers=num_workers,
+                allow_unfound=True,
+            )
+        else:
+            if name is None:
+                raise ValueError("Loading a directory of .npy files requires `name` (the filename prefix) to be specified.")
+            db = DirectoryDatabase(
+                directory=data_file,
+                name=name,
+                inputs=inputs,
+                targets=targets,
+                seed=seed,
+                num_workers=num_workers,
+                allow_unfound=True,
+                quiet=False,
+            )
+        return db, energies_key
+
     ext = Path(data_file).suffix.lower()
 
-    # Define base_database by the file extension
-    if ext == ".npz":
-        inputs  = ['coordinates', 'species']
-        targets = ['energy', 'forces']
-        energies_key = 'energy'
-        db = NPZDatabase(
-            file=data_file,
-            seed=seed,
-            allow_unfound=True,
-            inputs=inputs,
-            targets=targets,
-            quiet=False,
-        )
+    try:
+        db_class = _BASE_DATABASE_BACKENDS[ext]
+    except KeyError:
+        raise ValueError(f"Unrecognized dataset file extension: {ext}. Supported file extensions are: .h5, .hdf5, .npz.")
 
-    elif ext in (".h5", ".hdf5"):
-        inputs  = ['coordinates', 'species']
-        targets = ['energies', 'forces']
-        energies_key = 'energies'
-        db = PyAniFileDB(
+    if db_class is PyAniFileDB:
+        db = db_class(
             file=data_file,
-            species_key="species",
+            species_key=species_key,
             seed=seed,
             num_workers=num_workers,
             allow_unfound=True,
             inputs=inputs,
             targets=targets,
         )
-
     else:
-        raise ValueError(f"Unrecognized dataset file extension: {ext}. Supported file extensions are: .h5, .hdf5, .npz.")
+        db = db_class(
+            file=data_file,
+            seed=seed,
+            num_workers=num_workers,
+            allow_unfound=True,
+            inputs=inputs,
+            targets=targets,
+            quiet=False,
+        )
 
     return db, energies_key
 

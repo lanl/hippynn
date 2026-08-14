@@ -16,6 +16,7 @@ ignore_relocation = pytest.mark.filterwarnings("ignore:.*HIPPYNN_DEPRECATION_WAR
 ignore_weights_only_warning = pytest.mark.filterwarnings("ignore:.*weights_only=False*.")
 ignore_cusp_warning = pytest.mark.filterwarnings("ignore:.*'cusp_reg' parameter*.")
 ignore_sensitivity_warning = pytest.mark.filterwarnings("ignore:.*underneath sensitivity range*.")
+ignore_optional_key_warning = pytest.mark.filterwarnings("ignore:.*Optional key .* not found in arr_dict.*")
 
 
 @pytest.fixture
