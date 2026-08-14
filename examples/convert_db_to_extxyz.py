@@ -2,7 +2,7 @@ import os
 import sys
 from pathlib import Path
 
-from hippynn.databases.utils import load_base_database, write_extxyz
+from hippynn.databases.utils import load_database, write_extxyz
 
 def main():
     if len(sys.argv) < 2:
@@ -17,7 +17,7 @@ def main():
         else Path(os.path.splitext(os.path.basename(data_file))[0] + ".extxyz")
     )
 
-    db, _energies_key = load_base_database(data_file)
+    db, _energies_key = load_database(data_file)
     write_extxyz(db, output_xyz, overwrite=True, pbc=(False, False, False))
 
     # Alternative one-liner:

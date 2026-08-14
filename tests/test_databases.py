@@ -541,12 +541,12 @@ def test_write_extxyz(xyz_db: Database, temporary_directory) -> None:
         write_extxyz(xyz_db, Path(temporary_directory) / "badpbc.extxyz", pbc=(True, False))
 
 
-def test_load_base_database(xyz_db: Database, temporary_directory) -> None:
+def test_load_database(xyz_db: Database, temporary_directory) -> None:
     """Backend is chosen based on `data_file`: by file extension for a file, by directory contents for a
     directory. Unknown/unsupported inputs raise an informative error."""
     import numpy as np
 
-    from hippynn.databases.utils import load_base_database
+    from hippynn.databases.utils import load_database
     from hippynn.databases.ondisk import NPZDatabase, DirectoryDatabase
 
     xyz_db.split_the_rest("all")
@@ -559,7 +559,7 @@ def test_load_base_database(xyz_db: Database, temporary_directory) -> None:
     # .npz file -> NPZDatabase
     npz_path = Path(temporary_directory) / "data.npz"
     xyz_db.write_npz(str(npz_path), record_split_masks=False)
-    check(*load_base_database(npz_path), NPZDatabase, "npz file")
+    check(*load_database(npz_path), NPZDatabase, "npz file")
 
     # .h5 file -> PyAniFileDB
     h5py = pytest.importorskip("h5py")
@@ -567,13 +567,13 @@ def test_load_base_database(xyz_db: Database, temporary_directory) -> None:
 
     h5_path = Path(temporary_directory) / "data.h5"
     xyz_db.write_h5(split=True, h5path=str(h5_path), overwrite=True)
-    check(*load_base_database(h5_path), PyAniFileDB, "h5 file")
+    check(*load_database(h5_path), PyAniFileDB, "h5 file")
 
     # directory of .h5 files -> PyAniDirectoryDB
     h5_dir = Path(temporary_directory) / "h5_dir"
     h5_dir.mkdir()
     xyz_db.write_h5(split=True, h5path=str(h5_dir / "data.h5"), overwrite=True)
-    check(*load_base_database(h5_dir), PyAniDirectoryDB, "h5 directory")
+    check(*load_database(h5_dir), PyAniDirectoryDB, "h5 directory")
 
     # directory of .npy files -> DirectoryDatabase (requires `name`)
     npy_dir = Path(temporary_directory) / "npy_dir"
@@ -582,19 +582,19 @@ def test_load_base_database(xyz_db: Database, temporary_directory) -> None:
         np.save(npy_dir / f"prefix_{key}.npy", arr.detach().cpu().numpy() if hasattr(arr, "detach") else arr)
 
     with pytest.raises(ValueError, match="requires `name`"):
-        load_base_database(npy_dir)
-    check(*load_base_database(npy_dir, name="prefix_"), DirectoryDatabase, "npy directory")
+        load_database(npy_dir)
+    check(*load_database(npy_dir, name="prefix_"), DirectoryDatabase, "npy directory")
 
     # unrecognized file extension raises an informative error
     bad_path = Path(temporary_directory) / "data.txt"
     bad_path.write_text("not a database")
     with pytest.raises(ValueError, match="Unrecognized dataset file extension"):
-        load_base_database(bad_path)
+        load_database(bad_path)
 
 
-def test_load_base_database_custom_keys(temporary_directory) -> None:
+def test_load_database_custom_keys(temporary_directory) -> None:
     """Custom species/coordinates/energies/forces key names are honored, not just the defaults."""
-    from hippynn.databases.utils import load_base_database
+    from hippynn.databases.utils import load_database
     from hippynn.databases.ondisk import NPZDatabase
 
     species = torch.tensor([[1, 6, 8, 1, 1, 6, 6], [8, 1, 1, 6, 6, 7, 7]], dtype=torch.int64)
@@ -617,7 +617,7 @@ def test_load_base_database_custom_keys(temporary_directory) -> None:
 
     npz_path = Path(temporary_directory) / "custom.npz"
     custom_db.write_npz(str(npz_path), record_split_masks=False)
-    db, energies_key = load_base_database(
+    db, energies_key = load_database(
         npz_path,
         species_key="atomic_numbers",
         coordinates_key="positions",

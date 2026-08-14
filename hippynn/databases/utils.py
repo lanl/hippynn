@@ -97,7 +97,7 @@ _BASE_DATABASE_BACKENDS = {
 }
 
 
-def load_base_database(
+def load_database(
     data_file: Union[str, os.PathLike],
     seed: int = 101,
     num_workers: int = 2,
@@ -310,7 +310,7 @@ def database_to_extxyz(
     """
     Convenience wrapper: load a database from file and write it to EXTXYZ.
     """
-    db, _energies_key = load_base_database(data_file)
+    db, _energies_key = load_database(data_file)
     out = (
         Path(str(output_file))
         if output_file is not None
