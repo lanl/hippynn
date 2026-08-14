@@ -27,11 +27,12 @@ if has_ase:
     from .SNAPJson import SNAPDirectoryDatabase
     if has_h5:
         from .h5_pyanitools import PyAniFileDB, PyAniDirectoryDB
+        from .utils import auto_detect_key, database_to_extxyz, load_database, write_extxyz
 
 all_list = ["Database", "DirectoryDatabase", "NPZDatabase"]
 
 if has_ase:
     all_list += ["AseDatabase", "AseDatabaseIterable", "SNAPDirectoryDatabase"]
     if has_h5:
-        all_list += ["PyAniFileDB", "PyAniDirectoryDB"]
+        all_list += ["PyAniFileDB", "PyAniDirectoryDB", "auto_detect_key", "database_to_extxyz", "load_database", "write_extxyz"]
 __all__ = all_list

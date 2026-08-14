@@ -3,7 +3,7 @@ import argparse
 import torch
 
 # Dataset loaders
-from hippynn.databases.utils import load_database
+from hippynn.databases import load_database
 from hippynn.databases.metadatabase import MetaDatabase
 
 # Read dataset filename and database keys from command line

@@ -2,7 +2,7 @@ import os
 import sys
 from pathlib import Path
 
-from hippynn.databases.utils import load_database, write_extxyz
+from hippynn.databases import load_database, write_extxyz
 
 def main():
     if len(sys.argv) < 2:
@@ -21,7 +21,7 @@ def main():
     write_extxyz(db, output_xyz, overwrite=True, pbc=(False, False, False))
 
     # Alternative one-liner:
-    # from hippynn.databases.utils import database_to_extxyz
+    # from hippynn.databases import database_to_extxyz
     # database_to_extxyz(data_file, output_xyz, overwrite=True, pbc=(False, False, False))
 
 if __name__ == "__main__":

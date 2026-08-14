@@ -2,6 +2,7 @@ import pytest
 import torch
 
 from hippynn.databases.database import Database
+from hippynn.databases import auto_detect_key, database_to_extxyz, load_database, write_extxyz
 
 import os
 from pathlib import Path
@@ -432,8 +433,8 @@ def test_metadatabase_validation_and_optional_inputs() -> None:
 
 def test_auto_detect_key():
     """Test auto-detection: standard names, case-insensitive, alternatives, and errors."""
-    from hippynn.databases.utils import auto_detect_key, SPECIES_KEYSET, COORDINATES_KEYSET, CELL_KEYSET
-    
+    from hippynn.databases.utils import SPECIES_KEYSET, COORDINATES_KEYSET, CELL_KEYSET
+
     # Standard names and case-insensitive matching
     keys = ['SPECIES', 'coordinates', 'energy']
     assert auto_detect_key(keys, SPECIES_KEYSET, 'species_key') == 'SPECIES'
@@ -508,8 +509,6 @@ def xyz_db() -> Database:
 
 def test_write_extxyz(xyz_db: Database, temporary_directory) -> None:
     """Covers basic writing/round-trip, split selection, overwrite guard, and error paths."""
-    from hippynn.databases.utils import write_extxyz
-
     pytest.importorskip("ase")
     from ase.io import read as ase_read
 
@@ -546,7 +545,6 @@ def test_load_database(xyz_db: Database, temporary_directory) -> None:
     directory. Unknown/unsupported inputs raise an informative error."""
     import numpy as np
 
-    from hippynn.databases.utils import load_database
     from hippynn.databases.ondisk import NPZDatabase, DirectoryDatabase
 
     xyz_db.split_the_rest("all")
@@ -594,7 +592,6 @@ def test_load_database(xyz_db: Database, temporary_directory) -> None:
 
 def test_load_database_custom_keys(temporary_directory) -> None:
     """Custom species/coordinates/energies/forces key names are honored, not just the defaults."""
-    from hippynn.databases.utils import load_database
     from hippynn.databases.ondisk import NPZDatabase
 
     species = torch.tensor([[1, 6, 8, 1, 1, 6, 6], [8, 1, 1, 6, 6, 7, 7]], dtype=torch.int64)
@@ -633,8 +630,6 @@ def test_load_database_custom_keys(temporary_directory) -> None:
 
 def test_database_to_extxyz(xyz_db: Database, temporary_directory) -> None:
     """End-to-end wrapper: load a database from file and write it to EXTXYZ."""
-    from hippynn.databases.utils import database_to_extxyz
-
     pytest.importorskip("ase")
     from ase.io import read as ase_read
 
