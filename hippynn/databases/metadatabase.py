@@ -21,14 +21,7 @@ import re
 from ..layers.indexers import OneHotSpecies
 from ..pretraining import calculate_min_dists, compute_hipnn_e0
 from ..tools import progress_bar
-from .utils import (
-    auto_detect_key,
-    SPECIES_KEYSET,
-    COORDINATES_KEYSET,
-    ENERGIES_KEYSET,
-    FORCES_KEYSET,
-    CELL_KEYSET,
-)
+from .utils import auto_detect_key
 
 
 class MetaDatabase:
@@ -171,11 +164,11 @@ class MetaDatabase:
 
         # Auto-detect keys if not provided, with explicit keys taking precedence
         arr_dict_keys = self.arr_dict.keys()
-        self.species_key = species_key or auto_detect_key(arr_dict_keys, SPECIES_KEYSET, 'species_key', required=True)
-        self.coordinates_key = coordinates_key or auto_detect_key(arr_dict_keys, COORDINATES_KEYSET, 'coordinates_key', required=True)
-        self.energies_key = energies_key or auto_detect_key(arr_dict_keys, ENERGIES_KEYSET, 'energies_key', required=False)
-        self.forces_key = forces_key or auto_detect_key(arr_dict_keys, FORCES_KEYSET, 'forces_key', required=False)
-        self.cell_key = cell_key or auto_detect_key(arr_dict_keys, CELL_KEYSET, 'cell_key', required=False)
+        self.species_key = species_key or auto_detect_key(arr_dict_keys, 'species', required=True)
+        self.coordinates_key = coordinates_key or auto_detect_key(arr_dict_keys, 'coordinates', required=True)
+        self.energies_key = energies_key or auto_detect_key(arr_dict_keys, 'energy', required=False)
+        self.forces_key = forces_key or auto_detect_key(arr_dict_keys, 'forces', required=False)
+        self.cell_key = cell_key or auto_detect_key(arr_dict_keys, 'cell', required=False)
 
         # Cached validated tensors for required and optional arrays.
         # Initialize these explicitly so later methods do not depend on

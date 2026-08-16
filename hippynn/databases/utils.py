@@ -22,48 +22,64 @@ from .ondisk import NPZDatabase, DirectoryDatabase
 from .h5_pyanitools import PyAniFileDB, PyAniDirectoryDB
 
 
-# Key name sets for auto-detection
-SPECIES_KEYSET = ['species', 'atomic_numbers', 'z', 'atom_types', 'atomic_number']
-COORDINATES_KEYSET = ['coordinates', 'positions', 'pos', 'coords', 'r']
-ENERGIES_KEYSET = ['energy', 'energies', 'e', 'total_energy']
-FORCES_KEYSET = ['forces', 'force', 'f']
-CELL_KEYSET = ['cell', 'lattice', 'box', 'unit_cell', 'c']
+#: Built-in key name sets for auto-detection, searched when auto_detect_key is given a hint instead of a keyset.
+BUILTIN_AUTO_KEYSETS = {
+    'SPECIES_KEYSET': ['species', 'atomic_numbers', 'z', 'atom_types', 'atomic_number'],
+    'COORDINATES_KEYSET': ['coordinates', 'positions', 'pos', 'coords', 'r'],
+    'ENERGIES_KEYSET': ['energy', 'energies', 'e', 'total_energy'],
+    'FORCES_KEYSET': ['forces', 'force', 'f'],
+    'CELL_KEYSET': ['cell', 'lattice', 'box', 'unit_cell', 'c'],
+    'CHARGES_KEYSET': ['charges', 'charge', 'partial_charges', 'q'],
+    'DIPOLE_KEYSET': ['dipole', 'dipoles', 'dipole_moment', 'mu'],
+    'QUADRUPOLE_KEYSET': ['quadrupole', 'quadrupoles'],
+    'STRESS_KEYSET': ['stress', 'stresses', 'virial'],
+    'HESSIAN_KEYSET': ['hessian', 'hessians'],
+}
 
 
-def auto_detect_key(keys, keyset, key_name, required=True):
+def auto_detect_key(keys, keyset_or_hint: Union[list[str], str], required=True):
     """
     Auto-detect a database key from a set of possible names using case-insensitive matching.
 
-    This function searches for keys in a case-insensitive manner and returns the first unique match.
+    This function searches among keys returns the first unique match.
     If multiple matches are found, a ValueError is raised to avoid ambiguity. If no matches are found
     and the key is required, a ValueError is raised with available keys listed.
 
-    **Common Keysets:**
-
-    - **SPECIES_KEYSET**: 'species', 'atomic_numbers', 'z', 'atom_types', 'atomic_number'
-    - **COORDINATES_KEYSET**: 'coordinates', 'positions', 'pos', 'coords', 'r'
-    - **ENERGIES_KEYSET**: 'energy', 'energies', 'e', 'total_energy'
-    - **FORCES_KEYSET**: 'forces', 'force', 'f'
-    - **CELL_KEYSET**: 'cell', 'lattice', 'box', 'unit_cell'
+    See BUILTIN_AUTO_KEYSETS for valid hints.
 
     :param keys: available keys in the array dictionary
-    :param keyset: list of possible key name patterns to match
-    :param key_name: descriptive name for error messages (e.g., 'species_key')
+    :param keyset_or_hint: list of possible key name patterns to match, or a single hint string. If a hint
+        string is given, it is matched (case-insensitively) against the aliases in the built-in
+        keysets above, and the matching keyset is used in its place.
     :param required: whether this key is required (if False, returns None with warning if not found)
     :return: detected key name or None
-    :raises ValueError: if ambiguous (multiple matches) or missing required key
+    :raises ValueError: if a hint matches zero or more than one built-in keyset, if ambiguous
+        (multiple matches), or if missing a required key
 
     Examples
     --------
-    >>> from hippynn.databases.utils import auto_detect_key, SPECIES_KEYSET
-    >>> keys = ['Species', 'coordinates', 'energy']
-    >>> auto_detect_key(keys, SPECIES_KEYSET, 'species_key')
+    >>> from hippynn.databases.utils import auto_detect_key, 
+    >>> auto_detect_key(keys, 'atomic_numbers')  # hint resolves to SPECIES_KEYSET
     'Species'
 
-    >>> keys_ambiguous = ['species', 'atomic_numbers', 'coordinates']
-    >>> auto_detect_key(keys_ambiguous, SPECIES_KEYSET, 'species_key')  # doctest: +SKIP
-    ValueError: Multiple candidates found
     """
+
+    # Process a keyset
+    if isinstance(keyset_or_hint, str):
+        folded_hint = keyset_or_hint.casefold()
+        candidates = [ks for ks in BUILTIN_AUTO_KEYSETS.values() if any(alias.casefold() == folded_hint for alias in ks)]
+        if len(candidates) == 0:
+            raise ValueError(
+                f"Could not match hint {keyset_or_hint!r} against any built-in keyset.\n"
+                f"Built-in keysets: {', '.join(BUILTIN_AUTO_KEYSETS)}.\n"
+                f"Please pass an explicit keyset (list of aliases) instead."
+            )
+        elif len(candidates) > 1:
+            raise ValueError(f"Hint {keyset_or_hint!r} matches multiple built-in keysets; please pass an explicit keyset instead.")
+        keyset = candidates[0]
+    else:
+        keyset = keyset_or_hint
+
     # Normalize keys for case-insensitive matching
     normalized_keyset = [alias.casefold() for alias in keyset]
 
@@ -73,19 +89,19 @@ def auto_detect_key(keys, keyset, key_name, required=True):
     if len(matches) == 0:
         if required:
             raise ValueError(
-                f"Could not auto-detect {key_name}. No matches found for aliases: {keyset}.\n"
+                f"Could not auto-detect key. No matches found for possible keys: {keyset}.\n"
                 f"Available keys: {list(keys)}\n"
-                f"Please specify {key_name} explicitly."
+                f"Please specify the key explicitly."
             )
         else:
-            warnings.warn(f"Optional key {key_name} not found in arr_dict. Proceeding without it.")
+            warnings.warn(f"Optional key not found for possible keys: {keyset}. Proceeding without it.")
             return None
     elif len(matches) == 1:
         return matches[0]
-    else:
+    else:  # len(matches) > 1, ambiguous
         raise ValueError(
-            f"Could not auto-detect {key_name}. Multiple candidates found: {matches}.\n"
-            f"Please specify {key_name} explicitly to resolve ambiguity."
+            f"Could not auto-detect key. Multiple candidates found: {matches}.\n"
+            f"Please specify the key explicitly to resolve ambiguity."
         )
 
 

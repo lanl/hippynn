@@ -427,37 +427,54 @@ def test_metadatabase_validation_and_optional_inputs() -> None:
     }
 
 
-# ---------------------------------------------------------------------------
-# Tests for auto_detect_key functionality
-# ---------------------------------------------------------------------------
-
 def test_auto_detect_key():
     """Test auto-detection: standard names, case-insensitive, alternatives, and errors."""
-    from hippynn.databases.utils import SPECIES_KEYSET, COORDINATES_KEYSET, CELL_KEYSET
+    from hippynn.databases.utils import BUILTIN_AUTO_KEYSETS
 
-    # Standard names and case-insensitive matching
+    species_keyset = BUILTIN_AUTO_KEYSETS['SPECIES_KEYSET']
+    coordinates_keyset = BUILTIN_AUTO_KEYSETS['COORDINATES_KEYSET']
+
     keys = ['SPECIES', 'coordinates', 'energy']
-    assert auto_detect_key(keys, SPECIES_KEYSET, 'species_key') == 'SPECIES'
-    assert auto_detect_key(keys, COORDINATES_KEYSET, 'coordinates_key') == 'coordinates'
-    
-    # Alternative names
-    keys_alt = ['atomic_numbers', 'positions', 'total_energy']
-    assert auto_detect_key(keys_alt, SPECIES_KEYSET, 'species_key') == 'atomic_numbers'
-    assert auto_detect_key(keys_alt, COORDINATES_KEYSET, 'coordinates_key') == 'positions'
-    
+    assert auto_detect_key(keys, species_keyset) == 'SPECIES'
+    assert auto_detect_key(keys, coordinates_keyset) == 'coordinates'
+
     # Ambiguous keys raise ValueError
     keys_ambig = ['species', 'atomic_numbers', 'coordinates']
     with pytest.raises(ValueError, match="Multiple candidates"):
-        auto_detect_key(keys_ambig, SPECIES_KEYSET, 'species_key')
-    
+        auto_detect_key(keys_ambig, species_keyset)
+
     # Missing required keys raise ValueError
     with pytest.raises(ValueError, match="Could not auto-detect"):
-        auto_detect_key(['coordinates'], SPECIES_KEYSET, 'species_key', required=True)
-    
+        auto_detect_key(['coordinates'], species_keyset, required=True)
+
     # Missing optional keys return None with warning
     with pytest.warns(UserWarning, match="not found"):
-        result = auto_detect_key(['species'], CELL_KEYSET, 'cell_key', required=False)
+        result = auto_detect_key(['species'], coordinates_keyset, required=False)
     assert result is None
+
+
+def test_auto_detect_key_hint():
+    # soft matching
+
+    keys = ['atomic_numbers', 'coordinates', 'energy']
+    assert auto_detect_key(keys, 'atomic_numbers') == 'atomic_numbers'
+    assert auto_detect_key(keys, 'Z') == 'atomic_numbers'
+    assert auto_detect_key(keys, 'pos') == 'coordinates'
+
+    # Test that it breaks
+    with pytest.raises(ValueError, match="Could not match hint"):
+        auto_detect_key(keys, 'not_a_good_hint')
+
+
+def test_builtin_keysets_have_no_overlap():
+    from hippynn.databases.utils import BUILTIN_AUTO_KEYSETS
+
+    seen = {}
+    for name, keyset in BUILTIN_AUTO_KEYSETS.items():
+        for alias in keyset:
+            folded = alias.casefold()
+            assert folded not in seen, f"Alias {alias!r} appears in both {seen.get(folded)} and {name}"
+            seen[folded] = name
 
 
 @ignore_optional_key_warning
@@ -480,10 +497,6 @@ def test_metadatabase_auto_detection():
     assert meta.forces_key is None
     assert meta.cell_key is None
 
-
-# ---------------------------------------------------------------------------
-# Tests for hippynn.databases.utils xyz tools
-# ---------------------------------------------------------------------------
 
 @pytest.fixture
 def xyz_db() -> Database:
