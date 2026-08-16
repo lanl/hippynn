@@ -22,33 +22,40 @@ parser.add_argument(
 )
 parser.add_argument(
     '--species-key',
-    default='atomic_numbers',
-    help='Key name for species/atomic numbers in the dataset'
+    default=None,
+    help='Key name for species in the dataset. If omitted, auto-detected from the dataset keys.',
 )
 parser.add_argument(
     '--coordinates-key',
-    default='coordinates',
-    help='Key name for atomic coordinates in the dataset'
+    default=None,
+    help='Key name for coordinates in the dataset. If omitted, auto-detected from the dataset keys.',
 )
 parser.add_argument(
     '--energy-key',
-    default='wb97x_dz.energy',
-    help='Key name for energies in the dataset'
+    default=None,
+    help='Key name for energies in the dataset. If omitted, auto-detected from the dataset keys.',
 )
 parser.add_argument(
     '--forces-key',
-    default='wb97x_dz.forces',
-    help='Key name for forces in the dataset'
+    default=None,
+    help='Key name for forces in the dataset. If omitted, auto-detected from the dataset keys ',
 )
 args = parser.parse_args()
 
 DATA_FILE = os.path.expanduser(args.dataset_path)
 
+# Default energy/force names for ANI-1x (which is default dataset)
+# are supplied here.
+if args.dataset_path == default_dataset_path:
+    if args.energy_key is None:
+        args.energy_key = 'wb97x_dz.energy'
+    if args.forces_key is None:
+        args.forces_key = 'wb97x_dz.forces'
+
 torch.set_default_dtype(torch.float64)
 base_database, _energies_key = load_database(
     DATA_FILE,
     seed=101,
-    num_workers=2,
     species_key=args.species_key,
     coordinates_key=args.coordinates_key,
     energies_key=args.energy_key,
@@ -65,8 +72,8 @@ meta_database = MetaDatabase(
     coordinates_key=args.coordinates_key,
     energies_key=args.energy_key,
     forces_key=args.forces_key,
-    metadata={ 
-        "Energy_unit" : 'eV',
+    metadata={
+        "Energy_unit" : 'Ha',
         "Mass_unit" : 'grams/mol', 
         "Distance_unit" : 'Angstroms',
         "Electronic_Structure_Package" : '',

@@ -62,26 +62,21 @@ def main():
 
     print(f"Loading ANI-Aluminum dataset from: {dataset_path}")
 
-    # Load the raw ANI-Aluminum data using PyAniDirectoryDB
+    # Load the raw ANI-Aluminum data using PyAniDirectoryDB.
     base_db = PyAniDirectoryDB(
         directory=str(dataset_path),
         seed=101,
-        num_workers=2,
         allow_unfound=True,
         inputs=None,
         targets=None,
     )
 
-    print(f"Loaded {len(base_db.arr_dict['species'])} structures")
+    print(f"Loaded {len(base_db.arr_dict[base_db.species_key])} structures")
 
     # Build MetaDatabase – this will compute statistics automatically
     # Note: keys are auto-detected from arr_dict if not explicitly provided
     meta_db = MetaDatabase(
         arr_dict=base_db.arr_dict,
-        # species_key="species",  # Auto-detected
-        # coordinates_key="coordinates",  # Auto-detected
-        # energies_key="energy",  # Auto-detected
-        # forces_key="force",  # Auto-detected
         metadata={
             "Energy_unit": "eV",
             "Mass_unit": "grams/mol",

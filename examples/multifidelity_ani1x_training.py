@@ -143,7 +143,6 @@ def load_db(db_info, en_name1, force_name1, en_name2, force_name2, seed, anidata
     import os
     database = PyAniFileDB(
         file=anidata_location1,
-        species_key='atomic_numbers',
         seed=seed,
         num_workers=n_workers,
         allow_unfound=True,

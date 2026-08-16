@@ -31,7 +31,6 @@ def load_data(file, quiet=False):
     database = PyAniFileDB(
         #file="../../datasets/gau-files-12k.h5", # Change this to your h5 file dataset location
         file=file,
-        species_key="species",  # or "Z", etc
         allow_unfound=False, # Note: file has extraneous "iform" variable which can't beloaded with hippynn; this skips that.
         seed=2025,
         quiet=quiet,
