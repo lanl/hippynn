@@ -31,7 +31,7 @@ if __name__ == "__main__":
     )
 
     # test remove_high_property
-    db1.remove_high_property("E", species_key="Z", atomwise=False, norm_per_atom=True, std_factor=5)
+    db1.remove_high_property("E", atomwise=False, norm_per_atom=True, std_factor=5)
 
     # throw stuff away
     db1.make_random_split("random stuff", 0.99)

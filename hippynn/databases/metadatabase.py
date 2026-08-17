@@ -387,7 +387,7 @@ class MetaDatabase:
             self.coordinates_key: self._coordinates_tensor,
         }
 
-        cell_name = None
+        cell_name = False
         if periodic and self.has_cell:
             array_dict[self.cell_key] = self._cell_tensor
             cell_name = self.cell_key

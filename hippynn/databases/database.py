@@ -542,12 +542,17 @@ class Database:
         :param key: The property key in the dataset to check for high values
         :param atomwise: True if the property is defined per atom in axis 1, otherwise property is treated as whole-system value
         :param norm_per_atom: True if the property should be normalized by atom counts
-        :param species_key: Which array represents the atom presence; required if per_atom is True
+        :param species_key: Which array represents the atom presence; required if per_atom is True. If None, auto-detected.
         :param cut: If values > mu + cut, the system is removed. The step done first.
         :param std_factor: If (value-mu)/std > std_fact, the system is trimmed. This step done second.
         :param norm_axis: if not None, the property array is normed on the axis. Useful for vector properties like force.
         :return:
         """
+        if species_key is None and (atomwise or norm_per_atom):
+            from .utils import auto_detect_key
+
+            species_key = auto_detect_key(self.arr_dict.keys(), 'species', required=False)
+
         print(f"Cutting on variable: {key}")
         if cut is not None:
             prop, mean, std = self._array_stat_helper(key, species_key, atomwise, norm_per_atom, norm_axis)

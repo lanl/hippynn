@@ -520,6 +520,26 @@ def xyz_db() -> Database:
     )
 
 
+def test_remove_high_property_auto_detects_species_key(xyz_db: Database) -> None:
+    """species_key=None should auto-detect 'species' when atomwise/norm_per_atom needs it."""
+    xyz_db.remove_high_property("energy", atomwise=False, norm_per_atom=True, std_factor=5)
+
+
+def test_calculate_min_dists_auto_detects_keys(xyz_db: Database) -> None:
+    from hippynn.pretraining import calculate_min_dists
+
+    calculate_min_dists(xyz_db.arr_dict, dist_hard_max=5.0)
+
+
+def test_calculate_min_dists_warns_on_unused_cell_key(xyz_db: Database) -> None:
+    from hippynn.pretraining import calculate_min_dists
+
+    arr_dict = dict(xyz_db.arr_dict)
+    arr_dict["cell"] = torch.eye(3).unsqueeze(0).repeat(2, 1, 1)
+    with pytest.warns(UserWarning, match="cell_name"):
+        calculate_min_dists(arr_dict, dist_hard_max=5.0)
+
+
 def test_write_extxyz(xyz_db: Database, temporary_directory) -> None:
     """Covers basic writing/round-trip, split selection, overwrite guard, and error paths."""
     pytest.importorskip("ase")

@@ -31,10 +31,8 @@ from hippynn.pretraining import calculate_min_dists
 
 min_dist_array = calculate_min_dists(
     database.arr_dict,
-    species_name="species",
-    positions_name="coordinates",
-    cell_name="cell",  # for open boundaries, do not pass a cell name (or pass None)
     dist_hard_max=4.0,  # check for distances up to this radius
+    cell_name=True,  # periodic boundaries, auto-detecting the cell key; pass False for open boundaries
     batch_size=50,
 )
 
