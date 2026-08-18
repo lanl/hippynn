@@ -226,8 +226,8 @@ def test_metadatabase_core_functionality(synthetic_metadb) -> None:
     assert not any("FigureCanvasAgg is non-interactive" in str(w.message) for w in caught)
 
     # Test species helpers are independent
-    assert synthetic_metadb.extract_unique_numbers_large() == [1, 6, 8]
-    assert synthetic_metadb.extract_element_combinations_large(chunk_size=1) == {
+    assert synthetic_metadb.extract_unique_numbers() == [1, 6, 8]
+    assert synthetic_metadb.extract_element_combinations() == {
         (1, 6): 1,
         (1, 8): 1,
         (6, 8): 1,

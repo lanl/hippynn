@@ -352,20 +352,19 @@ class MetaDatabase:
         return masses.get(sym, 0.0)
 
 
-    # ─── Parsing & Extraction ────────────────────────────────────────────────────
+    # ─── Element math ────────────────────────────────────────────────────
 
-    def extract_element_combinations_large(self, chunk_size=100_000):
+    def extract_element_combinations(self):
         combos = Counter()
-        chunk_size = max(int(chunk_size), 1)
-        n_entries = len(self._species_tensor)
-        chunks = range(0, n_entries, chunk_size)
-        for start in progress_bar(chunks, desc="Element combinations", unit="chunk"):
-            for species_row in self._species_tensor[start : start + chunk_size]:
-                combos[self._entry_species_combo(species_row)] += 1
+        rows = self._species_tensor.tolist()
+        for row in progress_bar(rows, desc="Element combinations", unit="entry"):
+            s = set(row)
+            s.discard(0)
+            combos[tuple(sorted(s))] += 1
         self.element_combinations = dict(combos)
         return self.element_combinations
 
-    def extract_unique_numbers_large(self):
+    def extract_unique_numbers(self):
         species = self._species_tensor[self._species_tensor != 0]
         self.atomic_numbers_in_dataset = sorted(species.unique().tolist())
         return self.atomic_numbers_in_dataset
@@ -507,7 +506,7 @@ class MetaDatabase:
     def calculate_E0_regression(self):
         if not self.has_energies:
             return None
-        nums = self.atomic_numbers_in_dataset or self.extract_unique_numbers_large()
+        nums = self.atomic_numbers_in_dataset or self.extract_unique_numbers()
         if 0 not in nums:
             nums = [0] + nums
         encoder = OneHotSpecies(nums)
@@ -525,7 +524,7 @@ class MetaDatabase:
 
     def calculate_atom_counts(self):
         if self.atomic_numbers_in_dataset is None:
-            self.extract_unique_numbers_large()
+            self.extract_unique_numbers()
         self.atom_counts = {n: self.count_atoms_by_type(n) for n in self.atomic_numbers_in_dataset}
         return self.atom_counts
 
@@ -590,7 +589,7 @@ class MetaDatabase:
 
     def get_element_combinations(self):
         if self.element_combinations is None:
-            raise RuntimeError("Run extract_element_combinations_large() first")
+            self.extract_element_combinations()
         return {"".join(self.ATOMIC_NUMBER_TO_SYMBOL[n] for n in combo): cnt
                 for combo, cnt in self.element_combinations.items()}
 
@@ -678,7 +677,7 @@ class MetaDatabase:
             return self._empty_statistics(include_outliers=True)
         if self.E0_regression is None:
             self.calculate_E0_regression()
-        nums = self.atomic_numbers_in_dataset or self.extract_unique_numbers_large()
+        nums = self.atomic_numbers_in_dataset or self.extract_unique_numbers()
         if 0 not in nums:
             nums = [0] + nums
         enc = OneHotSpecies(nums)
@@ -753,9 +752,9 @@ class MetaDatabase:
         self.calculate_min_distance()
         md_upd["min_distance_statistics"] = self.get_min_distance_statistics()
 
-        self.extract_unique_numbers_large()
+        self.extract_unique_numbers()
         self.calculate_atom_counts()
-        self.extract_element_combinations_large()
+        self.extract_element_combinations()
         md_upd["atom_count"] = self.get_atom_counts_by_symbol()
         md_upd["element_combinations"] = self.get_element_combinations()
 
