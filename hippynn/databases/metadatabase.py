@@ -96,7 +96,7 @@ class MetaDatabase:
     >>> meta_db.search_entries_by_max_force([0.0,0.1])
 
     >>> # Search for indicies out of all database entries with a calculated maximum pairwise atomic distance in the range of [0,0.9]
-    >>> meta_db.search_entries_by_distance_range([0.0,0.9])
+    >>> meta_db.search_entries_by_distance([0.0,0.9])
     
     >>> # Plot Distributions
 
@@ -192,8 +192,8 @@ class MetaDatabase:
         self.peratom = peratom
 
         # Computed caches
-        self.atomic_numbers_in_dataset = None
-        self.element_combinations = None
+        self.unique_species_in_dataset = None
+        self.species_combinations = None
         self.atom_counts = None
         self.entry_species_index = None
         self.densities = None
@@ -352,22 +352,22 @@ class MetaDatabase:
         return masses.get(sym, 0.0)
 
 
-    # ─── Element math ────────────────────────────────────────────────────
+    # ─── Species math ────────────────────────────────────────────────────
 
-    def extract_element_combinations(self):
+    def extract_species_combinations(self):
         combos = Counter()
         rows = self._species_tensor.tolist()
-        for row in progress_bar(rows, desc="Element combinations", unit="entry"):
+        for row in progress_bar(rows, desc="Species combinations", unit="entry"):
             s = set(row)
             s.discard(0)
             combos[tuple(sorted(s))] += 1
-        self.element_combinations = dict(combos)
-        return self.element_combinations
+        self.species_combinations = dict(combos)
+        return self.species_combinations
 
-    def extract_unique_numbers(self):
+    def extract_unique_species(self):
         species = self._species_tensor[self._species_tensor != 0]
-        self.atomic_numbers_in_dataset = sorted(species.unique().tolist())
-        return self.atomic_numbers_in_dataset
+        self.unique_species_in_dataset = sorted(species.unique().tolist())
+        return self.unique_species_in_dataset
 
     
     # ─── Geometric & Physical Calculations ─────────────────────────────────────
@@ -506,7 +506,7 @@ class MetaDatabase:
     def calculate_E0_regression(self):
         if not self.has_energies:
             return None
-        nums = self.atomic_numbers_in_dataset or self.extract_unique_numbers()
+        nums = self.unique_species_in_dataset or self.extract_unique_species()
         if 0 not in nums:
             nums = [0] + nums
         encoder = OneHotSpecies(nums)
@@ -519,13 +519,13 @@ class MetaDatabase:
 
     # ─── Atom Counts & Combinations ────────────────────────────────────────────
 
-    def count_atoms_by_type(self, atomic_number):
-        return int((self._species_tensor == atomic_number).sum())
+    def count_atoms_by_species(self, species):
+        return int((self._species_tensor == species).sum())
 
     def calculate_atom_counts(self):
-        if self.atomic_numbers_in_dataset is None:
-            self.extract_unique_numbers()
-        self.atom_counts = {n: self.count_atoms_by_type(n) for n in self.atomic_numbers_in_dataset}
+        if self.unique_species_in_dataset is None:
+            self.extract_unique_species()
+        self.atom_counts = {n: self.count_atoms_by_species(n) for n in self.unique_species_in_dataset}
         return self.atom_counts
 
     def build_entry_species_index(self):
@@ -580,20 +580,20 @@ class MetaDatabase:
             self.calculate_max_force()
         return self._search_entries_by_range(self.max_force, force_range)
 
-    def search_entries_by_distance_range(self, distance_range):
+    def search_entries_by_distance(self, distance_range):
         if self.min_distance is None:
             self.calculate_min_distance()
         return self._search_entries_by_range(self.min_distance, distance_range)
 
     # ─── Getters & Statistics ──────────────────────────────────────────────────
 
-    def get_element_combinations(self):
-        if self.element_combinations is None:
-            self.extract_element_combinations()
+    def get_species_combinations(self):
+        if self.species_combinations is None:
+            self.extract_species_combinations()
         return {"".join(self.ATOMIC_NUMBER_TO_SYMBOL[n] for n in combo): cnt
-                for combo, cnt in self.element_combinations.items()}
+                for combo, cnt in self.species_combinations.items()}
 
-    def get_atom_counts_by_symbol(self):
+    def get_species_counts(self):
         if self.atom_counts is None:
             raise RuntimeError("Run calculate_atom_counts() first")
         return {self.ATOMIC_NUMBER_TO_SYMBOL[n]: cnt for n, cnt in self.atom_counts.items()}
@@ -677,7 +677,7 @@ class MetaDatabase:
             return self._empty_statistics(include_outliers=True)
         if self.E0_regression is None:
             self.calculate_E0_regression()
-        nums = self.atomic_numbers_in_dataset or self.extract_unique_numbers()
+        nums = self.unique_species_in_dataset or self.extract_unique_species()
         if 0 not in nums:
             nums = [0] + nums
         enc = OneHotSpecies(nums)
@@ -752,11 +752,11 @@ class MetaDatabase:
         self.calculate_min_distance()
         md_upd["min_distance_statistics"] = self.get_min_distance_statistics()
 
-        self.extract_unique_numbers()
+        self.extract_unique_species()
         self.calculate_atom_counts()
-        self.extract_element_combinations()
-        md_upd["atom_count"] = self.get_atom_counts_by_symbol()
-        md_upd["element_combinations"] = self.get_element_combinations()
+        self.extract_species_combinations()
+        md_upd["species_counts"] = self.get_species_counts()
+        md_upd["species_combinations"] = self.get_species_combinations()
 
         if update:
             self.metadata.update(md_upd)
@@ -843,7 +843,7 @@ class MetaDatabase:
                 ax.set(title=empty_title)
 
         # Atom counts
-        counts = self.get_atom_counts_by_symbol()
+        counts = self.get_species_counts()
         if counts:
             syms, cnts = zip(*counts.items())
             axs[1, 1].bar(syms, cnts, alpha=a)

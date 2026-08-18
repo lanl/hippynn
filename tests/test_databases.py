@@ -112,15 +112,15 @@ def test_metadatabase_ani_aluminum() -> None:
     assert force_stats["max"] >= force_stats["min"], "Max force should be >= min"
     assert isinstance(force_stats["mean"], float), "Mean force should be a float"
     
-    # Validate atom count is a dictionary with positive values
-    atom_count = meta.metadata["atom_count"]
-    assert isinstance(atom_count, dict), "Atom count should be a dictionary"
-    assert all(count > 0 for count in atom_count.values()), "All atom counts should be positive"
-    
-    # Validate element combinations
-    element_combinations = meta.metadata["element_combinations"]
-    assert isinstance(element_combinations, dict), "Element combinations should be a dictionary"
-    assert len(element_combinations) > 0, "Should have at least one element combination"
+    # Validate species counts is a dictionary with positive values
+    species_counts = meta.metadata["species_counts"]
+    assert isinstance(species_counts, dict), "Species counts should be a dictionary"
+    assert all(count > 0 for count in species_counts.values()), "All species counts should be positive"
+
+    # Validate species combinations
+    species_combinations = meta.metadata["species_combinations"]
+    assert isinstance(species_combinations, dict), "Species combinations should be a dictionary"
+    assert len(species_combinations) > 0, "Should have at least one species combination"
 
     # Verify that densities were computed and have the correct length
     assert meta.densities is not None
@@ -226,8 +226,8 @@ def test_metadatabase_core_functionality(synthetic_metadb) -> None:
     assert not any("FigureCanvasAgg is non-interactive" in str(w.message) for w in caught)
 
     # Test species helpers are independent
-    assert synthetic_metadb.extract_unique_numbers() == [1, 6, 8]
-    assert synthetic_metadb.extract_element_combinations() == {
+    assert synthetic_metadb.extract_unique_species() == [1, 6, 8]
+    assert synthetic_metadb.extract_species_combinations() == {
         (1, 6): 1,
         (1, 8): 1,
         (6, 8): 1,
@@ -237,14 +237,14 @@ def test_metadatabase_core_functionality(synthetic_metadb) -> None:
     assert synthetic_metadb.search_entries_by_species(["H"], exact_match=False) == [0, 1]
     assert synthetic_metadb.search_entries_by_species(["HO"], exact_match=True) == [1]
     assert synthetic_metadb.search_entries_by_max_force((0.15, 0.35)) == [0, 1]
-    assert synthetic_metadb.search_entries_by_distance_range((0.75, 1.0)) == [0, 1]
+    assert synthetic_metadb.search_entries_by_distance((0.75, 1.0)) == [0, 1]
 
     # Test validation of search ranges
     with pytest.raises(ValueError, match="min > max"):
         synthetic_metadb.search_entries_by_max_force((1.0, 0.0))
 
     with pytest.raises(ValueError, match="min > max"):
-        synthetic_metadb.search_entries_by_distance_range((1.0, 0.0))
+        synthetic_metadb.search_entries_by_distance((1.0, 0.0))
 
     # Test density calculations with cell volume
     species_dens = torch.tensor([[1, 1]], dtype=torch.int64)
@@ -329,7 +329,7 @@ def test_metadatabase_min_distance_behavior() -> None:
     min_distance = meta_fallback.calculate_min_distance(periodic=False)
     assert min_distance.tolist() == pytest.approx([0.8, 0.8], abs=1e-6)
 
-    assert meta_fallback.search_entries_by_distance_range((0.0, 1.0)) == [0, 1]
+    assert meta_fallback.search_entries_by_distance((0.0, 1.0)) == [0, 1]
 
     distance_stats = meta_fallback.get_min_distance_statistics()
     assert distance_stats["min"] == pytest.approx(0.8, abs=1e-6)
@@ -403,8 +403,8 @@ def test_metadatabase_validation_and_optional_inputs() -> None:
     assert meta.metadata["Source"] == "synthetic"
     assert "density_statistics" in meta.metadata
     assert "min_distance_statistics" in meta.metadata
-    assert "atom_count" in meta.metadata
-    assert "element_combinations" in meta.metadata
+    assert "species_counts" in meta.metadata
+    assert "species_combinations" in meta.metadata
     assert "max_force_statistics" not in meta.metadata
     assert "energy_statistics" not in meta.metadata
 
