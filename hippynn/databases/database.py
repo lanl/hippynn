@@ -340,8 +340,8 @@ class Database:
 
                 if mask_name in split:
                     # Check that the mask is correct and in the dict
-                    old_mask = dict_to_add_to[sprime][mask_name]
-                    if (old_mask != mask).all():
+                    old_mask = torch.as_tensor(dict_to_add_to[sprime][mask_name])
+                    if (old_mask != mask).any():
                         raise ValueError(f"Mask in database did not match existing split structure: {mask_name} ")
                 else:
                     # if not present, write it.
@@ -558,9 +558,10 @@ class Database:
             prop, mean, std = self._array_stat_helper(key, species_key, atomwise, norm_per_atom, norm_axis)
 
             large_property_mask = torch.abs(prop - mean) > cut
-            # Scan over all non-batch indices.
+            # Scan over all non-batch indices. torch.sum with dim=() reduces over ALL axes, not none,
+            # so the reduction must be skipped when there are no non-batch axes to collapse.
             non_batch_axes = tuple(range(1, prop.ndim))
-            drop_mask = torch.sum(large_property_mask, dim=non_batch_axes) > 0
+            drop_mask = torch.sum(large_property_mask, dim=non_batch_axes) > 0 if non_batch_axes else large_property_mask
             indices = self.arr_dict["indices"][drop_mask]
             if drop_mask.any():
                 print(f"Removed {drop_mask.to(int).sum()} outlier systems in variable {key} due to static cut.")
@@ -569,9 +570,10 @@ class Database:
         if std_factor is not None:
             prop, mean, std = self._array_stat_helper(key, species_key, atomwise, norm_per_atom, norm_axis)
             large_property_mask = torch.abs(prop - mean) / std > std_factor
-            # Scan over all non-batch indices.
+            # Scan over all non-batch indices. torch.sum with dim=() reduces over ALL axes, not none,
+            # so the reduction must be skipped when there are no non-batch axes to collapse.
             non_batch_axes = tuple(range(1, prop.ndim))
-            drop_mask = torch.sum(large_property_mask, dim=non_batch_axes) > 0
+            drop_mask = torch.sum(large_property_mask, dim=non_batch_axes) > 0 if non_batch_axes else large_property_mask
             indices = self.arr_dict["indices"][drop_mask]
             if drop_mask.any():
                 print(f"Removed {drop_mask.to(int).sum()} outlier systems in variable {key} due to std. factor.")

@@ -675,3 +675,174 @@ def test_database_to_extxyz(xyz_db: Database, temporary_directory) -> None:
     out_path = Path(temporary_directory) / "data.extxyz"
     assert len(ase_read(str(out_path), index=":")) == 2
 
+
+_QM9_DATASET = Path(__file__).resolve().parents[2] / "datasets" / "new_qm9_clean.npz"
+skip_if_no_qm9 = pytest.mark.skipif(not _QM9_DATASET.exists(), reason="qm9 dataset resource not found")
+
+
+@skip_if_no_qm9
+def test_roundtrip_npz_h5_qm9(temporary_directory) -> None:
+    """Round-trip a qm9 dataset through NPZDatabase and PyAniFileDB across splits, trimming,
+    sorting, and caching, checking that the reloaded databases agree split-by-split."""
+    from hippynn.databases import NPZDatabase
+    from hippynn.databases.h5_pyanitools import PyAniFileDB
+    from hippynn.tools import is_equal_state_dict
+
+    seed = 1
+    num_workers = 0
+    db1 = NPZDatabase(
+        file=_QM9_DATASET,
+        seed=seed,
+        num_workers=num_workers,
+        allow_unfound=True,
+        inputs=None,
+        targets=None,
+        quiet=True,
+    )
+
+    db1.remove_high_property("E", atomwise=False, norm_per_atom=True, std_factor=5)
+
+    db1.make_random_split("random stuff", 0.99)
+    del db1.splits["random stuff"]
+
+    db1.make_random_split("first", 0.5)
+    db1.make_random_split("second", 0.2)
+    db1.make_random_split("third", 3)
+    db1.split_the_rest("remaining")
+
+    new_npz_file = Path(temporary_directory) / "clean_ani1x.npz"
+    db1.write_npz(file=new_npz_file, record_split_masks=True, overwrite=True)
+    db3 = NPZDatabase(
+        file=new_npz_file, seed=seed, num_workers=num_workers, allow_unfound=True, inputs=None, targets=None, auto_split=True, quiet=True
+    )
+
+    new_ani_file = Path(temporary_directory) / "clean_ani1x.h5"
+    db1.write_h5(split=True, h5path=new_ani_file, species_key="Z", overwrite=True)
+    db2 = PyAniFileDB(
+        file=new_ani_file,
+        species_key="Z",
+        seed=seed,
+        num_workers=num_workers,
+        allow_unfound=True,
+        inputs=None,
+        targets=None,
+        auto_split=True,
+        quiet=True,
+    )
+
+    new_ani_filetwo = Path(temporary_directory) / "clean_ani1x_2.h5"
+    db2.trim_by_species("Z")
+    db2.write_h5(split=True, h5path=new_ani_filetwo, species_key="Z", overwrite=True)
+    db4 = PyAniFileDB(
+        file=new_ani_filetwo,
+        species_key="Z",
+        seed=seed,
+        num_workers=num_workers,
+        allow_unfound=True,
+        inputs=None,
+        targets=None,
+        auto_split=True,
+        quiet=True,
+    )
+
+    for d in (db1, db2, db3, db4):
+        d.sort_by_index()
+        d.trim_by_species("Z", keep_splits_same_size=True)
+
+    # "sys_number" is written by the h5 format only, so it isn't present on the npz-backed databases.
+    for d in (db2, db4):
+        for s in d.splits:
+            del d.splits[s]["sys_number"]
+
+    db1.add_split_masks()  # db1 is the only one that didn't get split masks from a write/reload cycle.
+
+    is_equal_state_dict(db1.splits, db3.splits, raise_where=True)
+    is_equal_state_dict(db2.splits, db4.splits, raise_where=True)
+    is_equal_state_dict(db1.splits, db2.splits, raise_where=True)
+    is_equal_state_dict(db2.splits, db3.splits, raise_where=True)
+
+    db2p = db2.make_database_cache(file=str(Path(temporary_directory) / "cache_fromh5.npz"), overwrite=True, quiet=True)
+    is_equal_state_dict(db2.splits, db2p.splits, raise_where=True)
+    db3p = db3.make_database_cache(file=str(Path(temporary_directory) / "cache_fromnpz.npz"), overwrite=True, quiet=True)
+    is_equal_state_dict(db3.splits, db3p.splits, raise_where=True)
+
+
+@pytest.fixture
+def methane_extxyz(temporary_directory):
+    pytest.importorskip("ase")
+    from ase.build import molecule
+    from ase.calculators.singlepoint import SinglePointCalculator
+    from ase.io import write
+
+    n_frames = 10
+    frames = []
+    for i in range(n_frames):
+        atoms = molecule("CH4")
+        atoms.set_cell(10.0 * torch.eye(3).numpy())
+        atoms.pbc = True
+        forces = torch.zeros(5, 3).numpy()
+        atoms.calc = SinglePointCalculator(atoms, energy=float(i), forces=forces)
+        frames.append(atoms)
+
+    path = Path(temporary_directory) / "methane_small.extxyz"
+    write(str(path), frames)
+    return path
+
+
+def test_load_ase_database(methane_extxyz) -> None:
+    from hippynn.databases import AseDatabase
+
+    database = AseDatabase(
+        directory=methane_extxyz.parent,
+        name=methane_extxyz.name,
+        inputs=[],
+        targets=[],
+        allow_unfound=True,
+        seed=0,
+        quiet=True,
+    )
+
+    expected_keys = {"numbers", "positions", "cell", "forces", "energy"}
+    assert expected_keys.issubset(database.arr_dict.keys())
+
+    assert database.arr_dict["numbers"].shape == (10, 5)
+
+
+def test_load_multiple_ase_database(methane_extxyz) -> None:
+    from ase.io import read, write
+
+    from hippynn.databases import AseDatabase
+
+    frames = read(str(methane_extxyz), index=":")
+    second_path = methane_extxyz.parent / "methane_small2.extxyz"
+    write(str(second_path), frames)
+
+    database = AseDatabase(
+        directory=methane_extxyz.parent,
+        name=[methane_extxyz.name, second_path.name],
+        inputs=[],
+        targets=[],
+        allow_unfound=True,
+        seed=0,
+        quiet=True,
+    )
+
+    assert database.arr_dict["numbers"].shape == (20, 5)
+
+
+def test_load_ase_database_iterable(methane_extxyz) -> None:
+    from ase.io import read
+
+    from hippynn.databases import AseDatabaseIterable
+
+    database = AseDatabaseIterable(
+        iterable=read(str(methane_extxyz), index=slice(0, 5)),
+        inputs=[],
+        targets=[],
+        allow_unfound=True,
+        seed=0,
+        quiet=True,
+    )
+
+    assert database.arr_dict["numbers"].shape == (5, 5)
+
