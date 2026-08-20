@@ -4,9 +4,6 @@ Parses a dictionary of arrays (e.g. from a :class:`~hippynn.databases.database.D
 to extract species, positions, forces, and other relevant data, organizing them into
 structured metadata. Calculates metrics such as force magnitudes, pairwise atomic
 distances, and simulation box densities to facilitate data searching and visualization.
-
-The implementation follows the project's coding conventions: relative imports,
-reStructuredText docstrings, and type hints on public methods.
 """
 
 from ase.data import atomic_masses, chemical_symbols
@@ -29,7 +26,7 @@ class MetaDatabase:
     Parse a dictionary of arrays and generate a metadata representation.
 
     This metadata facilitates searching, filtering, and visualization of molecular database contents.
-    
+
     Database keys (species_key, coordinates_key, etc.) can be explicitly provided or auto-detected.
     See :func:`auto_detect_key` for details on auto-detection behavior and supported key names.
 
@@ -45,9 +42,9 @@ class MetaDatabase:
     >>> forces_key='forces',
     >>> cell_key="cell",
     >>> pair_dist_hard_max = 4.0,
-    >>> metadata={ 
+    >>> metadata={
     >>>    "Energy_unit" : 'eV',
-    >>>    "Mass_unit" : 'grams/mol', 
+    >>>    "Mass_unit" : 'grams/mol',
     >>>    "Distance_unit" : 'Angstroms',
     >>>    "Electronic_Structure_Package" : 'VASP',
     >>>    "Electronic_Structure_Package_Version" : '6.4.3',
@@ -56,30 +53,27 @@ class MetaDatabase:
     >>> },
     >>> populate_metadata=True,
     >>> )
-    >>> 
+    >>>
     >>> # Save metadata to files
     >>> meta_db.save_metadata_to_json('metadata.json')
     >>> meta_db.save_metadata_to_csv('metadata.csv')
-    >>> 
+    >>>
     >>> # Generate plots
     >>> meta_db.plot_distributions(density_range=(0.1, 1.5), bins=100, alpha=0.5)
-    
+
     >>> # Calculate atom counts and densities
-    >>> meta_db.calculate_atom_counts()
-    >>> meta_db.calculate_densities()
-    
-    >>> # Search for entries with density between 1.0 and 5.0
-    >>> results = meta_db.search({'density': {'min': 1.0, 'max': 5.0}})
-    
+    >>> meta_db.species_counts
+    >>> meta_db.density
+
     >>> # Plot the Force Magnitude Distribution, Density Distribution and Pairwise Distance Distribution
     >>> meta_db.plot_distributions(
-    >>> density_range=(0.1, 1.5), 
-    >>>     max_force_range=(0, 1),   
-    >>>     min_distance_range=(0, 5), 
-    >>>     bins=100,                  
-    >>>     alpha=0.5       
+    >>> density_range=(0.1, 1.5),
+    >>>     max_force_range=(0, 1),
+    >>>     min_distance_range=(0, 5),
+    >>>     bins=100,
+    >>>     alpha=0.5
     >>>     )
-    
+
     >>> # Update metadata with a single "Comments" key
     >>> meta_db.metadata["Comments"] = ''
 
@@ -88,18 +82,15 @@ class MetaDatabase:
 
     >>> # Search for indicies out of all entries containing atleast Carbon
     >>> meta_db.search_entries_by_species(['C'], exact_match=False)
-    
+
     >>> # Search for indicies out of all databaseentries containing exactly Hydrogen, Carbon and Oxygen
     >>> meta_db.search_entries_by_species(['CHO'], exact_match=True)
-    
+
     >>> # Search for indicies out of all database entries with a calculated maximum atomic force in the range of [0,0.1]
     >>> meta_db.search_entries_by_max_force([0.0,0.1])
 
     >>> # Search for indicies out of all database entries with a calculated maximum pairwise atomic distance in the range of [0,0.9]
-    >>> meta_db.search_entries_by_distance([0.0,0.9])
-    
-    >>> # Plot Distributions
-
+    >>> meta_db.search_entries_by_min_distance([0.0,0.9])
 
     **Key Functionalities:**
 
@@ -118,12 +109,11 @@ class MetaDatabase:
        - Provides methods to visualize database distributions (e.g., pairwise atomic distances, density, force, histograms).
        - Generates plots for atom counts to understand elemental compositions of database.
 
-        """
-    
+    """
+
     # ---------------------------------------------------------------------
     # Class‑level constants and cached mappings
     # ---------------------------------------------------------------------
-    # Default configuration values (UPPER_SNAKE_CASE per project conventions)
     PAIR_DIST_HARD_MAX_DEFAULT = 5.0
     DEFAULT_BINS = 50
     DEFAULT_ALPHA = 0.7
@@ -153,7 +143,6 @@ class MetaDatabase:
         self.metadata = copy.deepcopy(metadata) if metadata else {}
         self.entry_metadata = copy.deepcopy(entry_metadata) if entry_metadata else {}
 
-        # Convert arr_dict values to tensors
         self.arr_dict = {}
         for k, v in arr_dict.items():
             try:
@@ -162,13 +151,12 @@ class MetaDatabase:
                 # Skip non-tensor-convertible values
                 pass
 
-        # Auto-detect keys if not provided, with explicit keys taking precedence
         arr_dict_keys = self.arr_dict.keys()
-        self.species_key = species_key or auto_detect_key(arr_dict_keys, 'species', required=True)
-        self.coordinates_key = coordinates_key or auto_detect_key(arr_dict_keys, 'coordinates', required=True)
-        self.energies_key = energies_key or auto_detect_key(arr_dict_keys, 'energy', required=False)
-        self.forces_key = forces_key or auto_detect_key(arr_dict_keys, 'forces', required=False)
-        self.cell_key = cell_key or auto_detect_key(arr_dict_keys, 'cell', required=False)
+        self.species_key = species_key or auto_detect_key(arr_dict_keys, "species", required=True)
+        self.coordinates_key = coordinates_key or auto_detect_key(arr_dict_keys, "coordinates", required=True)
+        self.energies_key = energies_key or auto_detect_key(arr_dict_keys, "energy", required=False)
+        self.forces_key = forces_key or auto_detect_key(arr_dict_keys, "forces", required=False)
+        self.cell_key = cell_key or auto_detect_key(arr_dict_keys, "cell", required=False)
 
         # Cached validated tensors for required and optional arrays.
         # Initialize these explicitly so later methods do not depend on
@@ -179,33 +167,30 @@ class MetaDatabase:
         self._forces_tensor = None
         self._cell_tensor = None
 
-        # ------------------------------------------------------------------
-        # Centralized validation of tensor shapes and dtypes
-        # ------------------------------------------------------------------
         self._validate_inputs()
         self.has_energies = self._energies_tensor is not None
         self.has_forces = self._forces_tensor is not None
         self.has_cell = self._cell_tensor is not None
 
-        # Settings
         self.pair_dist_hard_max = pair_dist_hard_max
         self.peratom = peratom
 
-        # Computed caches
-        self.unique_species_in_dataset = None
-        self.species_combinations = None
-        self.atom_counts = None
-        self.entry_species_index = None
-        self.densities = None
-        self.volumes = None
-        self.max_force = None
-        self.min_force = None
-        self.min_distance = None
-        self.E0_regression = None
+        # Computed caches (backing storage for the lazy properties below)
+        self._unique_species = None
+        self._species_combination_counts = None
+        self._symbols_combination_counts = None
+        self._species_combination_index = None
+        self._species_counts = None
+        self._symbols_counts = None
+        self._density = None
+        self._volume = None
+        self._max_force = None
+        self._min_force = None
+        self._min_distance = None
+        self._E0_regression = None
 
-        # Auto-populate metadata
         if populate_metadata:
-            self.populate_metadata(update=True, quiet=False)
+            self.populate_metadata(quiet=False)
 
     # ─── Utility ────────────────────────────────────────────────────────────────
 
@@ -253,11 +238,11 @@ class MetaDatabase:
     def _calculate_force_extrema(self):
         mags = self._force_magnitudes()
         if mags is None:
-            self.max_force = None
-            self.min_force = None
+            self._max_force = None
+            self._min_force = None
             return None
-        self.max_force = mags.max(dim=1).values
-        self.min_force = mags.min(dim=1).values
+        self._max_force = mags.max(dim=1).values
+        self._min_force = mags.min(dim=1).values
         return mags
 
     def _search_entries_by_range(self, values, value_range):
@@ -323,8 +308,6 @@ class MetaDatabase:
             shape=(n_entries, 3, 3),
         )
 
-
-
     # ─── Atom/Mass Mapping ───────────────────────────────────────────────────────
 
     def atomic_masses(self):
@@ -338,46 +321,46 @@ class MetaDatabase:
         if unit not in conv:
             raise ValueError(f"Unsupported Mass_unit: {unit}")
         factor = conv[unit]
-        return {sym: atomic_masses[i] * factor
-                for i, sym in enumerate(chemical_symbols) if sym}
+        return {sym: atomic_masses[i] * factor for i, sym in enumerate(chemical_symbols) if sym}
 
-    def get_mass_from_species(self, species):
+    def get_mass_by_species(self, species):
         if species == 0:
             return 0.0
         masses = self.atomic_masses()
         sym = self.ATOMIC_NUMBER_TO_SYMBOL.get(species)
         return masses.get(sym, 0.0)
 
-
     # ─── Species math ────────────────────────────────────────────────────
 
-    def _extract_species_combinations_and_index(self):
+    def _extract_species_combination_data(self):
         index = defaultdict(list)
         rows = self._species_tensor.tolist()
         for i, row in enumerate(progress_bar(rows, desc="Species combinations", unit="entry")):
             s = set(row)
             s.discard(0)
             index[tuple(sorted(s))].append(i)
-        self.entry_species_index = dict(index)
-        self.species_combinations = {combo: len(idxs) for combo, idxs in self.entry_species_index.items()}
-        return self.entry_species_index
+        self._species_combination_index = dict(index)
+        self._species_combination_counts = {combo: len(idxs) for combo, idxs in self._species_combination_index.items()}
 
-    def extract_species_combinations(self):
-        if self.species_combinations is None:
-            self._extract_species_combinations_and_index()
-        return self.species_combinations
+    @property
+    def species_combination_counts(self):
+        if self._species_combination_counts is None:
+            self._extract_species_combination_data()
+        return self._species_combination_counts
 
-    def extract_entry_species_index(self):
-        if self.entry_species_index is None:
-            self._extract_species_combinations_and_index()
-        return self.entry_species_index
+    @property
+    def species_combination_index(self):
+        if self._species_combination_index is None:
+            self._extract_species_combination_data()
+        return self._species_combination_index
 
-    def extract_unique_species(self):
-        species = self._species_tensor[self._species_tensor != 0]
-        self.unique_species_in_dataset = sorted(species.unique().tolist())
-        return self.unique_species_in_dataset
+    @property
+    def unique_species(self):
+        if self._unique_species is None:
+            species = self._species_tensor[self._species_tensor != 0]
+            self._unique_species = sorted(species.unique().tolist())
+        return self._unique_species
 
-    
     # ─── Geometric & Physical Calculations ─────────────────────────────────────
 
     def calculate_min_distance(self, periodic=True, batch_size=50):
@@ -388,7 +371,7 @@ class MetaDatabase:
         :param batch_size: batch size for distance calculation (also enables progress bar)
         :return: tensor of minimum distances for each entry
         """
-        
+
         array_dict = {
             self.species_key: self._species_tensor.to(dtype=torch.int64),
             self.coordinates_key: self._coordinates_tensor,
@@ -399,7 +382,7 @@ class MetaDatabase:
             array_dict[self.cell_key] = self._cell_tensor
             cell_name = self.cell_key
 
-        min_distance = calculate_min_dists(
+        self._min_distance = calculate_min_dists(
             array_dict=array_dict,
             species_name=self.species_key,
             positions_name=self.coordinates_key,
@@ -408,31 +391,28 @@ class MetaDatabase:
             device=self._coordinates_tensor.device,
             batch_size=batch_size,
         )
+        return self._min_distance
 
-        self.min_distance = torch.as_tensor(
-            min_distance,
-            dtype=torch.float64,
-            device=self._coordinates_tensor.device,
-        )
-        return self.min_distance
+    @property
+    def min_distance(self):
+        """Minimum pairwise atomic distance per entry, shape ``(N,)``."""
+        if self._min_distance is None:
+            self.calculate_min_distance()
+        return self._min_distance
 
-    def calculate_max_force(self):
-        """Calculate the maximum force magnitude per entry.
-
-        Returns a ``torch.Tensor`` of shape ``(N,)`` where ``N`` is the number of entries.
-        """
-        if self.max_force is None:
+    @property
+    def max_force(self):
+        """Maximum force magnitude per entry, shape ``(N,)``."""
+        if self._max_force is None:
             self._calculate_force_extrema()
-        return self.max_force
+        return self._max_force
 
-    def calculate_min_force(self):
-        """Calculate the minimum force magnitude per entry.
-
-        Returns a ``torch.Tensor`` of shape ``(N,)`` where ``N`` is the number of entries.
-        """
-        if self.min_force is None:
+    @property
+    def min_force(self):
+        """Minimum force magnitude per entry, shape ``(N,)``."""
+        if self._min_force is None:
             self._calculate_force_extrema()
-        return self.min_force
+        return self._min_force
 
     def calculate_volume(self, coordinates, cell=None):
         """
@@ -455,101 +435,97 @@ class MetaDatabase:
             result["cell_volume"] = torch.abs(torch.linalg.det(cell_t)).item()
         return result
 
-    def calculate_densities(self):
+    @property
+    def density(self):
         """
-        Calculate density for each entry using vectorized operations.
-        
+        Density for each entry, computed lazily using vectorized operations.
+
         Computes mass from atomic species and volume from either periodic cells
-        or bounding boxes. Caches both densities and volumes for later use.
-        
-        :return: tensor of densities for each entry
+        or bounding boxes. Caches both density and volumes for later use.
         """
+        if self._density is not None:
+            return self._density
+
         species_arr = self._species_tensor
         coords_arr = self._coordinates_tensor
         cell_arr = self._cell_tensor
-        
-        # Get atomic masses and create a lookup tensor
+
         masses = self.atomic_masses()
         unique_sp = torch.unique(species_arr[species_arr != 0]).tolist()
-        
-        # Create a mass lookup tensor: index by atomic number, get mass
+
         max_z = max(unique_sp) if unique_sp else 1
         mass_lookup = torch.zeros(max_z + 1, dtype=torch.float64)
         for sp in unique_sp:
             sym = self.ATOMIC_NUMBER_TO_SYMBOL.get(int(sp))
             mass_lookup[int(sp)] = masses.get(sym, 0.0)
-        
-        # Vectorized mass calculation: sum masses for each entry
-        # species_arr shape: (n_entries, n_atoms)
-        # Clamp to avoid index errors, then lookup masses and sum
+
+        # Clamp to avoid indexing errors from any stray out-of-range species values
         species_clamped = torch.clamp(species_arr, 0, max_z).long()
         entry_masses = mass_lookup[species_clamped].sum(dim=1)  # (n_entries,)
-        
-        # Vectorized volume calculation
+
         if cell_arr is not None:
-            # Batch determinant calculation for periodic cells
             volumes = torch.abs(torch.linalg.det(cell_arr.to(dtype=torch.float64)))  # (n_entries,)
         else:
-            # Bounding box volumes: max - min along each dimension, then product
-            # coords_arr shape: (n_entries, n_atoms, 3)
             mins = coords_arr.min(dim=1).values  # (n_entries, 3)
             maxs = coords_arr.max(dim=1).values  # (n_entries, 3)
             volumes = (maxs - mins).prod(dim=1)  # (n_entries,)
-        
-        # Store volumes for reuse
-        self.volumes = volumes
-        
-        # Compute densities: mass / volume
-        # Handle division by zero and invalid values
+
+        self._volume = volumes
+
         densities = entry_masses / volumes
         densities = torch.where(
-            (entry_masses > 0) & (volumes > 0) & torch.isfinite(volumes),
-            densities,
-            torch.tensor(float('nan'), dtype=torch.float64)
+            (entry_masses > 0) & (volumes > 0) & torch.isfinite(volumes), densities, torch.tensor(float("nan"), dtype=torch.float64)
         )
-        
-        self.densities = densities
-        return self.densities
 
-    def calculate_E0_regression(self):
+        self._density = densities
+        return self._density
+
+    @property
+    def volume(self):
+        """Volume for each entry, computed lazily via the :attr:`density` property."""
+        if self._volume is None:
+            self.density
+        return self._volume
+
+    @property
+    def E0_regression(self):
         if not self.has_energies:
             return None
-        nums = self.unique_species_in_dataset or self.extract_unique_species()
-        if 0 not in nums:
-            nums = [0] + nums
-        encoder = OneHotSpecies(nums)
-        sp_t = self._species_tensor.long()
-        energies_t = self._energies_tensor.float()
-        e0 = compute_hipnn_e0(encoder, sp_t, energies_t, peratom=self.peratom)
-        # Store as a torch tensor to avoid NumPy conversion
-        self.E0_regression = e0.detach()
-        return self.E0_regression
+        if self._E0_regression is None:
+            nums = self.unique_species
+            if 0 not in nums:
+                nums = [0] + nums
+            encoder = OneHotSpecies(nums)
+            sp_t = self._species_tensor.long()
+            energies_t = self._energies_tensor.float()
+            e0 = compute_hipnn_e0(encoder, sp_t, energies_t, peratom=self.peratom)
+            # Store as a torch tensor to avoid NumPy conversion
+            self._E0_regression = e0.detach()
+        return self._E0_regression
 
     # ─── Atom Counts & Combinations ────────────────────────────────────────────
 
     def count_atoms_by_species(self, species):
         return int((self._species_tensor == species).sum())
 
-    def calculate_atom_counts(self):
-        if self.unique_species_in_dataset is None:
-            self.extract_unique_species()
-        self.atom_counts = {n: self.count_atoms_by_species(n) for n in self.unique_species_in_dataset}
-        return self.atom_counts
+    @property
+    def species_counts(self):
+        """Atom counts keyed by atomic number."""
+        if self._species_counts is None:
+            self._species_counts = {n: self.count_atoms_by_species(n) for n in self.unique_species}
+        return self._species_counts
 
     # ─── Search ────────────────────────────────────────────────────────────────
 
     def search_entries_by_species(self, target_species, exact_match=True, use_symbols=True):
         """
         Search for entries containing specified atomic species.
-        
+
         :param target_species: list of element symbols or atomic numbers to search for
         :param exact_match: if True, entry must contain exactly these species; if False, at least these species
         :param use_symbols: if True, interpret input as element symbols; if False, as atomic numbers
         :return: list of matching entry indices
         """
-        if self.entry_species_index is None:
-            self.extract_entry_species_index()
-
         if use_symbols:
             valid_nums = set(self._species_tensor.flatten().tolist())
             valid_syms = {s for s, n in self.SYMBOL_TO_ATOMIC_NUMBER.items() if n in valid_nums}
@@ -571,45 +547,44 @@ class MetaDatabase:
 
         tgt = set(target_nums)
         matches = []
-        for combo, idxs in self.entry_species_index.items():
+        for combo, idxs in self.species_combination_index.items():
             s = set(combo)
             if (exact_match and s == tgt) or (not exact_match and tgt.issubset(s)):
                 matches += idxs
         return matches
 
     def search_entries_by_max_force(self, force_range):
-        if self.max_force is None:
-            self.calculate_max_force()
         return self._search_entries_by_range(self.max_force, force_range)
 
-    def search_entries_by_distance(self, distance_range):
-        if self.min_distance is None:
-            self.calculate_min_distance()
+    def search_entries_by_min_distance(self, distance_range):
         return self._search_entries_by_range(self.min_distance, distance_range)
 
     # ─── Getters & Statistics ──────────────────────────────────────────────────
 
-    def get_species_combinations(self):
-        if self.species_combinations is None:
-            self.extract_species_combinations()
-        return {"".join(self.ATOMIC_NUMBER_TO_SYMBOL[n] for n in combo): cnt
-                for combo, cnt in self.species_combinations.items()}
+    @property
+    def symbols_combination_counts(self):
+        """Species-combination counts keyed by concatenated element symbols, e.g. ``"CHO"``."""
+        if self._symbols_combination_counts is None:
+            self._symbols_combination_counts = {
+                "".join(self.ATOMIC_NUMBER_TO_SYMBOL[n] for n in combo): cnt for combo, cnt in self.species_combination_counts.items()
+            }
+        return self._symbols_combination_counts
 
-    def get_species_counts(self):
-        if self.atom_counts is None:
-            raise RuntimeError("Run calculate_atom_counts() first")
-        return {self.ATOMIC_NUMBER_TO_SYMBOL[n]: cnt for n, cnt in self.atom_counts.items()}
-
+    @property
+    def symbols_counts(self):
+        """Atom counts keyed by element symbol, e.g. ``"C"``."""
+        if self._symbols_counts is None:
+            self._symbols_counts = {self.ATOMIC_NUMBER_TO_SYMBOL[n]: cnt for n, cnt in self.species_counts.items()}
+        return self._symbols_counts
 
     def calculate_range(self, data, manual_range):
         if manual_range is not None:
             return manual_range
         if data.numel() > 0:
-            # Use torch.quantile for percentile calculation
             q1 = torch.quantile(data, 0.25).item()
             q3 = torch.quantile(data, 0.75).item()
             iqr = q3 - q1
-            return (q1 - 2.5*iqr, q3 + 2.5*iqr)
+            return (q1 - 2.5 * iqr, q3 + 2.5 * iqr)
         return (None, None)
 
     def _finite_values(self, values):
@@ -648,25 +623,19 @@ class MetaDatabase:
         return stats
 
     def get_density_statistics(self):
-        if self.densities is None:
-            self.calculate_densities()
         return self._filtered_statistics(
-            self.densities,
+            self.density,
             None,
             include_outliers=True,
-            total_count=len(self.densities),
+            total_count=len(self.density),
         )
 
     def get_min_distance_statistics(self):
-        if self.min_distance is None:
-            self.calculate_min_distance()
         return self._filtered_statistics(self.min_distance)
 
     def get_max_force_statistics(self):
         if not self.has_forces:
             return self._empty_statistics(include_outliers=True)
-        if self.max_force is None:
-            self.calculate_max_force()
         return self._filtered_statistics(
             self.max_force,
             None,
@@ -677,18 +646,13 @@ class MetaDatabase:
     def get_energy_statistics(self):
         if not self.has_energies:
             return self._empty_statistics(include_outliers=True)
-        if self.E0_regression is None:
-            self.calculate_E0_regression()
-        nums = self.unique_species_in_dataset or self.extract_unique_species()
+        nums = self.unique_species
         if 0 not in nums:
             nums = [0] + nums
         enc = OneHotSpecies(nums)
         sp_t = self._species_tensor.long()
         enc_sp = enc(sp_t)[0].to(torch.float64)
-        lin_e = torch.tensordot(enc_sp,
-                                self.E0_regression.to(dtype=torch.float64),
-                                dims=([2], [0])
-                                ).sum(dim=1)
+        lin_e = torch.tensordot(enc_sp, self.E0_regression.to(dtype=torch.float64), dims=([2], [0])).sum(dim=1)
         defects = self._energies_tensor.to(dtype=torch.float64) - lin_e
         return self._filtered_statistics(
             defects,
@@ -698,10 +662,9 @@ class MetaDatabase:
         )
 
     # ─── Populate & Save ──────────────────────────────────────────────────────
-  
+
     def make_json_serializable(self):
         def convert(v):
-            # Handle torch scalar types and tensors
             if isinstance(v, torch.Tensor):
                 return v.tolist()
             if isinstance(v, dict):
@@ -709,22 +672,24 @@ class MetaDatabase:
             if isinstance(v, list):
                 return [convert(vv) for vv in v]
             return v
+
         return {k: convert(v) for k, v in self.metadata.items()}
-  
-    def save_metadata_to_json(self, filename='metadata.json'):
+
+    def save_metadata_to_json(self, filename="metadata.json"):
         """Save metadata to a JSON file.
-        
+
         :param filename: Output JSON filename
         """
         with open(filename, "w") as f:
             json.dump(self.make_json_serializable(), f, indent=4)
-  
-    def save_metadata_to_csv(self, filename='metadata.csv'):
+
+    def save_metadata_to_csv(self, filename="metadata.csv"):
         """Save metadata to a CSV file.
-        
+
         :param filename: Output CSV filename
         """
         flat = {}
+
         def _flat(d, prefix=None):
             for k, v in d.items():
                 key = f"{prefix}_{k}" if prefix else k
@@ -732,56 +697,48 @@ class MetaDatabase:
                     _flat(v, key)
                 else:
                     flat[key] = str(v)
+
         _flat(self.make_json_serializable())
         with open(filename, "w") as f:
             for k, v in flat.items():
                 f.write(f"{k},{v}\n")
 
-    def populate_metadata(self, update=True, quiet=False):
-        md_upd = {}
-        self.calculate_densities()
-        md_upd["density_statistics"] = self.get_density_statistics()
+    def populate_metadata(self, quiet=False):
+        self._density = None
+        self.metadata["density_statistics"] = self.get_density_statistics()
 
         if self.has_forces:
-            self.calculate_max_force()
-            self.calculate_min_force()
-            md_upd["max_force_statistics"] = self.get_max_force_statistics()
+            self._max_force = None
+            self._min_force = None
+            self.metadata["max_force_statistics"] = self.get_max_force_statistics()
 
         if self.has_energies:
-            self.calculate_E0_regression()
-            md_upd["energy_statistics"] = self.get_energy_statistics()
+            self._E0_regression = None
+            self.metadata["energy_statistics"] = self.get_energy_statistics()
 
         self.calculate_min_distance()
-        md_upd["min_distance_statistics"] = self.get_min_distance_statistics()
+        self.metadata["min_distance_statistics"] = self.get_min_distance_statistics()
 
-        self.extract_unique_species()
-        self.calculate_atom_counts()
-        self.extract_species_combinations()
-        md_upd["species_counts"] = self.get_species_counts()
-        md_upd["species_combinations"] = self.get_species_combinations()
-
-        if update:
-            self.metadata.update(md_upd)
+        self._unique_species = None
+        self._species_counts = None
+        self._symbols_counts = None
+        self._species_combination_counts = None
+        self._species_combination_index = None
+        self._symbols_combination_counts = None
+        self.metadata["symbols_counts"] = self.symbols_counts
+        self.metadata["symbols_combination_counts"] = self.symbols_combination_counts
 
         if not quiet:
             print("Metadata populated:")
-            for k, v in md_upd.items():
+            for k, v in self.metadata.items():
                 print(f"  {k}: {v}")
 
     # ─── Plotting ──────────────────────────────────────────────────────────────
 
-    def plot_distributions(
-        self,
-        density_range=None,
-        max_force_range=None,
-        min_distance_range=None,
-        bins=None,
-        alpha=None,
-        figsize=(12, 9)
-    ):
+    def plot_distributions(self, density_range=None, max_force_range=None, min_distance_range=None, bins=None, alpha=None, figsize=(12, 9)):
         """
         Plot distribution histograms for density, max force, min distance, and atom counts.
-        
+
         :param density_range: manual range for density filtering
         :param max_force_range: manual range for max force filtering
         :param min_distance_range: manual range for min distance filtering
@@ -793,18 +750,7 @@ class MetaDatabase:
 
         max_len = 10000
 
-        # Ensure data is computed
-        if self.densities is None:
-            self.calculate_densities()
-        if self.has_forces and self.max_force is None:
-            self.calculate_max_force()
-        if self.min_distance is None:
-            self.calculate_min_distance()
-        if self.atom_counts is None:
-            self.calculate_atom_counts()
-
-        # Sanitize arrays
-        dvals = self._finite_values(self.densities)[:max_len]
+        dvals = self._finite_values(self.density)[:max_len]
         if dvals.numel() == 0:
             print("[Warning] No finite values found for densities. Skipping plot.")
 
@@ -819,16 +765,13 @@ class MetaDatabase:
         if mvals.numel() == 0:
             print("[Warning] No finite values found for min_distance. Skipping plot.")
 
-        # Compute plot ranges
         dr = self.calculate_range(dvals, density_range)
         fr = self.calculate_range(fvals, max_force_range)
         mr = self.calculate_range(mvals, min_distance_range)
 
-        # Use defaults if not provided
         b = bins or self.DEFAULT_BINS
         a = alpha or self.DEFAULT_ALPHA
 
-        # Start plotting
         fig, axs = plt.subplots(2, 2, figsize=figsize)
 
         histogram_specs = [
@@ -844,8 +787,7 @@ class MetaDatabase:
             else:
                 ax.set(title=empty_title)
 
-        # Atom counts
-        counts = self.get_species_counts()
+        counts = self.symbols_counts
         if counts:
             syms, cnts = zip(*counts.items())
             axs[1, 1].bar(syms, cnts, alpha=a)
@@ -859,6 +801,3 @@ class MetaDatabase:
             return fig, axs
         plt.show()
         return fig, axs
-    
-    
-

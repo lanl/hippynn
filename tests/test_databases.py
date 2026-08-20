@@ -87,8 +87,8 @@ def test_metadatabase_ani_aluminum() -> None:
 
 
     # Run a subset of metadata calculations.
-    meta.calculate_atom_counts()
-    meta.calculate_densities()
+    meta.species_counts
+    meta.density
 
     # Basic sanity check – metadata dictionary should exist (may be empty).
     assert isinstance(meta.metadata, dict)
@@ -97,7 +97,7 @@ def test_metadatabase_ani_aluminum() -> None:
     # Additional checks: populate metadata and ensure expected keys are present
     # ---------------------------------------------------------------------------
     # Populate metadata (quiet to avoid noisy prints)
-    meta.populate_metadata(update=True, quiet=True)
+    meta.populate_metadata(quiet=True)
     
     # Validate density statistics contain reasonable values
     density_stats = meta.metadata["density_statistics"]
@@ -112,19 +112,19 @@ def test_metadatabase_ani_aluminum() -> None:
     assert force_stats["max"] >= force_stats["min"], "Max force should be >= min"
     assert isinstance(force_stats["mean"], float), "Mean force should be a float"
     
-    # Validate species counts is a dictionary with positive values
-    species_counts = meta.metadata["species_counts"]
-    assert isinstance(species_counts, dict), "Species counts should be a dictionary"
-    assert all(count > 0 for count in species_counts.values()), "All species counts should be positive"
+    # Validate symbol-keyed species counts is a dictionary with positive values
+    symbols_counts = meta.metadata["symbols_counts"]
+    assert isinstance(symbols_counts, dict), "Symbols counts should be a dictionary"
+    assert all(count > 0 for count in symbols_counts.values()), "All symbols counts should be positive"
 
-    # Validate species combinations
-    species_combinations = meta.metadata["species_combinations"]
-    assert isinstance(species_combinations, dict), "Species combinations should be a dictionary"
-    assert len(species_combinations) > 0, "Should have at least one species combination"
+    # Validate symbol-keyed species combinations
+    symbols_combination_counts = meta.metadata["symbols_combination_counts"]
+    assert isinstance(symbols_combination_counts, dict), "Symbols combination counts should be a dictionary"
+    assert len(symbols_combination_counts) > 0, "Should have at least one species combination"
 
     # Verify that densities were computed and have the correct length
-    assert meta.densities is not None
-    assert len(meta.densities) == len(raw_db.arr_dict[meta.species_key])
+    assert meta.density is not None
+    assert len(meta.density) == len(raw_db.arr_dict[meta.species_key])
 
     # ---------------------------------------------------------------------------
     # Plotting: ensure plot_distributions runs without error (using Agg backend)
@@ -210,7 +210,7 @@ def test_metadatabase_core_functionality(synthetic_metadb) -> None:
         assert isinstance(stats["max"], float)
 
     # Test metadata population preserves computed statistics
-    synthetic_metadb.populate_metadata(update=True, quiet=True)
+    synthetic_metadb.populate_metadata(quiet=True)
 
     assert synthetic_metadb.metadata["density_statistics"] == density_stats
     assert synthetic_metadb.metadata["max_force_statistics"] == force_stats
@@ -226,8 +226,8 @@ def test_metadatabase_core_functionality(synthetic_metadb) -> None:
     assert not any("FigureCanvasAgg is non-interactive" in str(w.message) for w in caught)
 
     # Test species helpers are independent
-    assert synthetic_metadb.extract_unique_species() == [1, 6, 8]
-    assert synthetic_metadb.extract_species_combinations() == {
+    assert synthetic_metadb.unique_species == [1, 6, 8]
+    assert synthetic_metadb.species_combination_counts == {
         (1, 6): 1,
         (1, 8): 1,
         (6, 8): 1,
@@ -237,14 +237,14 @@ def test_metadatabase_core_functionality(synthetic_metadb) -> None:
     assert synthetic_metadb.search_entries_by_species(["H"], exact_match=False) == [0, 1]
     assert synthetic_metadb.search_entries_by_species(["HO"], exact_match=True) == [1]
     assert synthetic_metadb.search_entries_by_max_force((0.15, 0.35)) == [0, 1]
-    assert synthetic_metadb.search_entries_by_distance((0.75, 1.0)) == [0, 1]
+    assert synthetic_metadb.search_entries_by_min_distance((0.75, 1.0)) == [0, 1]
 
     # Test validation of search ranges
     with pytest.raises(ValueError, match="min > max"):
         synthetic_metadb.search_entries_by_max_force((1.0, 0.0))
 
     with pytest.raises(ValueError, match="min > max"):
-        synthetic_metadb.search_entries_by_distance((1.0, 0.0))
+        synthetic_metadb.search_entries_by_min_distance((1.0, 0.0))
 
     # Test density calculations with cell volume
     species_dens = torch.tensor([[1, 1]], dtype=torch.int64)
@@ -262,11 +262,11 @@ def test_metadatabase_core_functionality(synthetic_metadb) -> None:
     )
 
     volumes = meta_dens.calculate_volume(coordinates_dens[0], cell=cell[0])
-    expected_density = 2.0 * meta_dens.get_mass_from_species(1) / volumes["cell_volume"]
+    expected_density = 2.0 * meta_dens.get_mass_by_species(1) / volumes["cell_volume"]
 
     assert volumes["bounding_box_volume"] == pytest.approx(0.125, abs=1e-8)
     assert volumes["cell_volume"] == pytest.approx(8.0, abs=1e-8)
-    assert meta_dens.calculate_densities()[0].item() == pytest.approx(expected_density, rel=1e-6)
+    assert meta_dens.density[0].item() == pytest.approx(expected_density, rel=1e-6)
 
 
 
@@ -329,7 +329,7 @@ def test_metadatabase_min_distance_behavior() -> None:
     min_distance = meta_fallback.calculate_min_distance(periodic=False)
     assert min_distance.tolist() == pytest.approx([0.8, 0.8], abs=1e-6)
 
-    assert meta_fallback.search_entries_by_distance((0.0, 1.0)) == [0, 1]
+    assert meta_fallback.search_entries_by_min_distance((0.0, 1.0)) == [0, 1]
 
     distance_stats = meta_fallback.get_min_distance_statistics()
     assert distance_stats["min"] == pytest.approx(0.8, abs=1e-6)
@@ -398,13 +398,13 @@ def test_metadatabase_validation_and_optional_inputs() -> None:
     assert meta.entry_metadata == {0: {"split": "valid"}}
 
     # Populate and verify optional statistics are skipped
-    meta.populate_metadata(update=True, quiet=True)
+    meta.populate_metadata(quiet=True)
 
     assert meta.metadata["Source"] == "synthetic"
     assert "density_statistics" in meta.metadata
     assert "min_distance_statistics" in meta.metadata
-    assert "species_counts" in meta.metadata
-    assert "species_combinations" in meta.metadata
+    assert "symbols_counts" in meta.metadata
+    assert "symbols_combination_counts" in meta.metadata
     assert "max_force_statistics" not in meta.metadata
     assert "energy_statistics" not in meta.metadata
 
