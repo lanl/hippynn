@@ -239,6 +239,9 @@ def test_metadatabase_core_functionality(synthetic_metadb) -> None:
     assert synthetic_metadb.search_entries_by_max_force((0.15, 0.35)) == [0, 1]
     assert synthetic_metadb.search_entries_by_min_distance((0.75, 1.0)) == [0, 1]
 
+    # Test min_force ignores the zero-padded atom slot in each row (species == 0)
+    assert synthetic_metadb.min_force.tolist() == pytest.approx([0.1, 0.1, 0.2], abs=1e-6)
+
     # Test validation of search ranges
     with pytest.raises(ValueError, match="min > max"):
         synthetic_metadb.search_entries_by_max_force((1.0, 0.0))
@@ -384,6 +387,10 @@ def test_metadatabase_validation_and_optional_inputs() -> None:
     assert not meta.has_forces
     assert not meta.has_energies
     assert not meta.has_cell
+
+    # search_entries_by_max_force should raise a clear error rather than a bare TypeError
+    with pytest.raises(MetaDatabase.MetaDatabaseError, match="no forces"):
+        meta.search_entries_by_max_force((0.0, 1.0))
 
     # Test direct dictionary manipulation
     meta.metadata["Comments"] = "updated"

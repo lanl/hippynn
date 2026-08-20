@@ -15,11 +15,6 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 import torch
-from ase import Atoms
-from ase.io import write as ase_write
-
-from .ondisk import NPZDatabase, DirectoryDatabase
-from .h5_pyanitools import PyAniFileDB, PyAniDirectoryDB
 
 
 #: Built-in key name sets for auto-detection, searched when auto_detect_key is given a hint instead of a keyset.
@@ -105,14 +100,6 @@ def auto_detect_key(keys, keyset_or_hint: Union[list[str], str], required=True):
         )
 
 
-# Backend database class for each supported file extension
-_BASE_DATABASE_BACKENDS = {
-    ".npz": NPZDatabase,
-    ".h5": PyAniFileDB,
-    ".hdf5": PyAniFileDB,
-}
-
-
 def load_database(
     data_file: Union[str, os.PathLike],
     seed: int = 101,
@@ -143,6 +130,16 @@ def load_database(
     :param files: explicit list of ``.h5`` filenames to load from a directory; if None, all ``.h5`` files in the directory are used
     :return: database
     """
+    from .ondisk import NPZDatabase, DirectoryDatabase
+    from .h5_pyanitools import PyAniFileDB, PyAniDirectoryDB
+
+    # Backend database class for each supported file extension
+    _BASE_DATABASE_BACKENDS = {
+        ".npz": NPZDatabase,
+        ".h5": PyAniFileDB,
+        ".hdf5": PyAniFileDB,
+    }
+
     data_file = os.path.expanduser(str(data_file))
     inputs = [coordinates_key, species_key]
     targets = [energies_key, forces_key]
@@ -220,20 +217,23 @@ def write_extxyz(
        :func:`hippynn.molecular_dynamics.writers.write_extxyz` for exporting MD trajectories
        instead of a :class:`~hippynn.databases.database.Database`.
 
-    Expected keys in database.arr_dict:
-      coordinates: (n, max_atoms, 3)
-      species:     (n, max_atoms) int, padded with <= 0
-      forces:      (n, max_atoms, 3)
-      atomenergies:(n, max_atoms, 1) or (n, max_atoms)
-      energy or energies: (n,)
-      cell:        (n, 3, 3)
-      stress:      (n, 3, 3) or (n, 9)
+    Expected keys in ``database.arr_dict``, all optional except ``coordinates`` and ``species``:
+    ``coordinates`` (n, max_atoms, 3), ``species`` (n, max_atoms) int padded with <= 0,
+    ``forces`` (n, max_atoms, 3), ``atomenergies`` (n, max_atoms, 1) or (n, max_atoms),
+    ``energy``/``energies`` (n,), ``cell`` (n, 3, 3), ``stress`` (n, 3, 3) or (n, 9).
 
-    pbc can be:
-      - False (default, non-periodic)
-      - True (periodic in all directions)
-      - tuple(bool, bool, bool) for per-axis periodicity
+    :param database: hippynn Database (or any object exposing ``arr_dict`` and, for ``split``,
+     ``splits``/``write_npz``) to export
+    :param filename: output path for the EXTXYZ file
+    :param overwrite: if False, raise ``FileExistsError`` when ``filename`` already exists
+    :param pbc: ``False`` for non-periodic (default), ``True`` for periodic in all directions,
+     or a tuple/list of three bools for per-axis periodicity
+    :param split: if a split name, write only that split; if ``True``, write the full dataset
+     (as it would be written to NPZ); if ``None`` (default), write ``database.arr_dict`` directly
     """
+    from ase import Atoms
+    from ase.io import write as ase_write
+
     out_path = Path(str(filename))
     if out_path.exists():
         if not overwrite:
@@ -279,6 +279,7 @@ def write_extxyz(
             raise ValueError("pbc must be a bool or a tuple/list of 3 bools.")
         pbc_tuple = tuple(bool(b) for b in pbc)
 
+    atoms_list = []
     for i in range(n_frames):
         sp = A["species"][i]                      # (max_atoms,)
         mask = sp > 0                             # valid atoms
@@ -314,4 +315,8 @@ def write_extxyz(
             # write up to 9 components if present
             atoms.info["stress"] = st[:9]
 
-        ase_write(str(out_path), atoms, format="extxyz", append=True)
+        atoms_list.append(atoms)
+
+    if not atoms_list:
+        warnings.warn("No frames with valid atoms found; writing an empty EXTXYZ file.", stacklevel=2)
+    ase_write(str(out_path), atoms_list, format="extxyz")

@@ -220,8 +220,6 @@ class MetaDatabase:
         if squeeze_trailing_column and tensor.ndim == 2 and tensor.shape[1] == 1:
             tensor = tensor.squeeze(1)
 
-        if not isinstance(tensor, torch.Tensor):
-            raise self.MetaDatabaseError(f"{name} must be a torch.Tensor")
         if tensor.ndim != expected_ndim:
             raise self.MetaDatabaseError(f"{name} must have {expected_ndim} dimensions, got {tensor.ndim}")
         if not dtype_check(tensor.dtype):
@@ -242,7 +240,8 @@ class MetaDatabase:
             self._min_force = None
             return None
         self._max_force = mags.max(dim=1).values
-        self._min_force = mags.min(dim=1).values
+        padding_mask = self._species_tensor == 0
+        self._min_force = mags.masked_fill(padding_mask, float("inf")).min(dim=1).values
         return mags
 
     def _search_entries_by_range(self, values, value_range):
@@ -554,6 +553,8 @@ class MetaDatabase:
         return matches
 
     def search_entries_by_max_force(self, force_range):
+        if not self.has_forces:
+            raise self.MetaDatabaseError("Database has no forces; cannot search by max force.")
         return self._search_entries_by_range(self.max_force, force_range)
 
     def search_entries_by_min_distance(self, distance_range):
