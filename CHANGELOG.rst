@@ -1,7 +1,11 @@
 Breaking changes:
 -----------------
 
-- Alterations to data after loading as a hippynn Database but prior to 
+- ``calculate_min_dists`` signature changed: ``dist_hard_max`` is now the second
+  positional argument, and ``species_name``/``positions_name`` are now optional
+  keyword arguments that are auto-detected if omitted. ``cell_name`` now also
+  accepts ``True``/``False`` to control auto-detection of periodic boundaries.
+- Alterations to data after loading as a hippynn Database but prior to
   splitting the data (eg. as in the examples ani_aluminum_example\*.py, 
   ani1x_training.py, and \*SNAPExample.py) are be performed using 
   PyTorch rather than NumPy. 
@@ -17,6 +21,15 @@ Breaking changes:
 New Features:
 -------------
 
+- Added ``hippynn.databases.utils`` with tools to load databases from multiple
+  formats (``load_database``), auto-detect relevant keys (``auto_detect_key``:
+  species, coordinates, cell, etc.), and write databases to ``.extxyz``
+  (``write_extxyz``).
+- Added ``hippynn.databases.metadatabase`` to generate and inspect metadata
+  (e.g. species combinations) from npz/h5 databases, with new examples.
+- Auto-key-detection is now used throughout: ``PyAniFileDB``/``PyAniDirectoryDB``,
+  ``Database`` outlier-trimming, and ``calculate_min_dists`` no longer require
+  hardcoded/explicit key names.
 - Added new linear-scaling neighbor list capability, allowing training
   to very large systems.
 - Added new network type, HIP-HOP-NN.
@@ -54,7 +67,11 @@ Improvements:
 
 Bug Fixes:
 ----------
-- Fix issue with friction coefficient being calculated incorrectly in 
+- Fixed dtype bug in ``OneHotSpecies`` species indexing.
+- Fixed ``Database`` split-mask comparison (tensor cast, ``.any()`` instead of
+  ``.all()``) and a ``torch.sum`` reduction bug when trimming outliers on
+  scalar per-system properties.
+- Fix issue with friction coefficient being calculated incorrectly in
   LangevinDynamics.
 - Fix issue with optional dependencies being required by molecular dynamics subpackage
 - Fix bug in Predictor.add_output
