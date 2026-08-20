@@ -503,10 +503,9 @@ class Database:
                 raise RuntimeError("species_key must be given to trim an atom-normalized quantity")
 
             n_atoms = (self.arr_dict[species_key] > 0).sum(dim=1)
-            # Transposes broadcast the result rightwards instead of leftwards.
-            # numpy transpose on higher-order arrays reverses all dimensions.
-            prop = (prop.T / n_atoms).T
-            stat_prop = (stat_prop.T / n_atoms).T
+            # Temporarily swap the batch axis to the end so it broadcasts against n_atoms, then swap back.
+            prop = prop.swapdims(0, -1).div(n_atoms).swapdims(0, -1)
+            stat_prop = stat_prop.swapdims(0, -1).div(n_atoms).swapdims(0, -1)
 
         mean = stat_prop.mean()
         std = stat_prop.std()

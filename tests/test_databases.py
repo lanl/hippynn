@@ -525,6 +525,7 @@ def test_remove_high_property_auto_detects_species_key(xyz_db: Database) -> None
     xyz_db.remove_high_property("energy", atomwise=False, norm_per_atom=True, std_factor=5)
 
 
+@ignore_optional_key_warning
 def test_calculate_min_dists_auto_detects_keys(xyz_db: Database) -> None:
     from hippynn.pretraining import calculate_min_dists
 
