@@ -53,7 +53,7 @@ if args.dataset_path == default_dataset_path:
         args.forces_key = 'wb97x_dz.forces'
 
 torch.set_default_dtype(torch.float64)
-base_database, _energies_key = load_database(
+base_database = load_database(
     DATA_FILE,
     seed=101,
     species_key=args.species_key,

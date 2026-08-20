@@ -199,7 +199,8 @@ def calculate_min_dists(
             warnings.warn(
                 f"cell_name was not specified, but a candidate cell key {detected_cell!r} was found in "
                 f"array_dict. Open boundaries will be used. Pass cell_name={detected_cell!r} explicitly "
-                f"if periodic boundary conditions were intended."
+                f"if periodic boundary conditions were intended.",
+                stacklevel=2,
             )
     else:
         cell_name = None

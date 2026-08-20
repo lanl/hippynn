@@ -94,7 +94,7 @@ def auto_detect_key(keys, keyset_or_hint: Union[list[str], str], required=True):
                 f"Please specify the key explicitly."
             )
         else:
-            warnings.warn(f"Optional key not found for possible keys: {keyset}. Proceeding without it.")
+            warnings.warn(f"Optional key not found for possible keys: {keyset}. Proceeding without it.", stacklevel=2)
             return None
     elif len(matches) == 1:
         return matches[0]
@@ -141,7 +141,7 @@ def load_database(
     :param forces_key: key name for forces in the dataset
     :param name: filename prefix for a directory of ``.npy`` files; required only in that case
     :param files: explicit list of ``.h5`` filenames to load from a directory; if None, all ``.h5`` files in the directory are used
-    :return: (database, energies_key)
+    :return: database
     """
     data_file = os.path.expanduser(str(data_file))
     inputs = [coordinates_key, species_key]
@@ -173,7 +173,7 @@ def load_database(
                 allow_unfound=True,
                 quiet=False,
             )
-        return db, energies_key
+        return db
 
     ext = Path(data_file).suffix.lower()
 
@@ -203,7 +203,7 @@ def load_database(
             quiet=False,
         )
 
-    return db, energies_key
+    return db
 
 
 def write_extxyz(
@@ -315,21 +315,3 @@ def write_extxyz(
             atoms.info["stress"] = st[:9]
 
         ase_write(str(out_path), atoms, format="extxyz", append=True)
-
-
-def database_to_extxyz(
-    data_file: Union[str, os.PathLike],
-    output_file: Optional[Union[str, os.PathLike]] = None,
-    overwrite: bool = True,
-    pbc: Union[bool, Tuple[bool, bool, bool]] = (False, False, False),
-):
-    """
-    Convenience wrapper: load a database from file and write it to EXTXYZ.
-    """
-    db, _energies_key = load_database(data_file)
-    out = (
-        Path(str(output_file))
-        if output_file is not None
-        else Path(os.path.splitext(os.path.basename(str(data_file)))[0] + ".extxyz")
-    )
-    write_extxyz(db, out, overwrite=overwrite, pbc=pbc)

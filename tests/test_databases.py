@@ -2,7 +2,7 @@ import pytest
 import torch
 
 from hippynn.databases.database import Database
-from hippynn.databases import auto_detect_key, database_to_extxyz, load_database, write_extxyz
+from hippynn.databases import auto_detect_key, load_database, write_extxyz
 
 import os
 from pathlib import Path
@@ -582,15 +582,14 @@ def test_load_database(xyz_db: Database, temporary_directory) -> None:
 
     xyz_db.split_the_rest("all")
 
-    def check(db, energies_key, expected_class, label):
+    def check(db, expected_class, label):
         assert isinstance(db, expected_class), f"{label}: expected {expected_class.__name__}, got {type(db).__name__}"
-        assert energies_key == "energy", f"{label}: expected energies_key 'energy', got {energies_key!r}"
         assert db.arr_dict["energy"].shape == (2,), f"{label}: unexpected arr_dict['energy'] shape {db.arr_dict['energy'].shape}"
 
     # .npz file -> NPZDatabase
     npz_path = Path(temporary_directory) / "data.npz"
     xyz_db.write_npz(str(npz_path), record_split_masks=False)
-    check(*load_database(npz_path), NPZDatabase, "npz file")
+    check(load_database(npz_path), NPZDatabase, "npz file")
 
     # .h5 file -> PyAniFileDB
     h5py = pytest.importorskip("h5py")
@@ -598,13 +597,13 @@ def test_load_database(xyz_db: Database, temporary_directory) -> None:
 
     h5_path = Path(temporary_directory) / "data.h5"
     xyz_db.write_h5(split=True, h5path=str(h5_path), overwrite=True)
-    check(*load_database(h5_path), PyAniFileDB, "h5 file")
+    check(load_database(h5_path), PyAniFileDB, "h5 file")
 
     # directory of .h5 files -> PyAniDirectoryDB
     h5_dir = Path(temporary_directory) / "h5_dir"
     h5_dir.mkdir()
     xyz_db.write_h5(split=True, h5path=str(h5_dir / "data.h5"), overwrite=True)
-    check(*load_database(h5_dir), PyAniDirectoryDB, "h5 directory")
+    check(load_database(h5_dir), PyAniDirectoryDB, "h5 directory")
 
     # directory of .npy files -> DirectoryDatabase (requires `name`)
     npy_dir = Path(temporary_directory) / "npy_dir"
@@ -614,7 +613,7 @@ def test_load_database(xyz_db: Database, temporary_directory) -> None:
 
     with pytest.raises(ValueError, match="requires `name`"):
         load_database(npy_dir)
-    check(*load_database(npy_dir, name="prefix_"), DirectoryDatabase, "npy directory")
+    check(load_database(npy_dir, name="prefix_"), DirectoryDatabase, "npy directory")
 
     # unrecognized file extension raises an informative error
     bad_path = Path(temporary_directory) / "data.txt"
@@ -647,7 +646,7 @@ def test_load_database_custom_keys(temporary_directory) -> None:
 
     npz_path = Path(temporary_directory) / "custom.npz"
     custom_db.write_npz(str(npz_path), record_split_masks=False)
-    db, energies_key = load_database(
+    db = load_database(
         npz_path,
         species_key="atomic_numbers",
         coordinates_key="positions",
@@ -655,25 +654,9 @@ def test_load_database_custom_keys(temporary_directory) -> None:
         forces_key="custom_force",
     )
     assert isinstance(db, NPZDatabase)
-    assert energies_key == "custom_energy"
     assert set(db.inputs) == {"positions", "atomic_numbers"}
     assert set(db.targets) == {"custom_energy", "custom_force"}
     assert db.arr_dict["custom_energy"].shape == (2,)
-
-
-def test_database_to_extxyz(xyz_db: Database, temporary_directory) -> None:
-    """End-to-end wrapper: load a database from file and write it to EXTXYZ."""
-    pytest.importorskip("ase")
-    from ase.io import read as ase_read
-
-    xyz_db.split_the_rest("all")
-
-    npz_path = Path(temporary_directory) / "data.npz"
-    xyz_db.write_npz(str(npz_path), record_split_masks=False)
-
-    database_to_extxyz(npz_path)  # default output filename derived from input basename
-    out_path = Path(temporary_directory) / "data.extxyz"
-    assert len(ase_read(str(out_path), index=":")) == 2
 
 
 _QM9_DATASET = Path(__file__).resolve().parents[2] / "datasets" / "new_qm9_clean.npz"
