@@ -15,7 +15,7 @@ from ase.units import _amu
 import json
 import copy
 import torch
-from collections import defaultdict, Counter
+from collections import defaultdict
 import re
 
 from ..layers.indexers import OneHotSpecies
@@ -245,9 +245,6 @@ class MetaDatabase:
             raise self.MetaDatabaseError(f"{name} must have shape {tuple(shape)}, got {tuple(tensor.shape)}")
         return tensor
 
-    def _entry_species_combo(self, species_row):
-        return tuple(sorted(set(species_row[species_row != 0].tolist())))
-
     def _force_magnitudes(self):
         if not self.has_forces:
             return None
@@ -354,15 +351,26 @@ class MetaDatabase:
 
     # ─── Species math ────────────────────────────────────────────────────
 
-    def extract_species_combinations(self):
-        combos = Counter()
+    def _extract_species_combinations_and_index(self):
+        index = defaultdict(list)
         rows = self._species_tensor.tolist()
-        for row in progress_bar(rows, desc="Species combinations", unit="entry"):
+        for i, row in enumerate(progress_bar(rows, desc="Species combinations", unit="entry")):
             s = set(row)
             s.discard(0)
-            combos[tuple(sorted(s))] += 1
-        self.species_combinations = dict(combos)
+            index[tuple(sorted(s))].append(i)
+        self.entry_species_index = dict(index)
+        self.species_combinations = {combo: len(idxs) for combo, idxs in self.entry_species_index.items()}
+        return self.entry_species_index
+
+    def extract_species_combinations(self):
+        if self.species_combinations is None:
+            self._extract_species_combinations_and_index()
         return self.species_combinations
+
+    def extract_entry_species_index(self):
+        if self.entry_species_index is None:
+            self._extract_species_combinations_and_index()
+        return self.entry_species_index
 
     def extract_unique_species(self):
         species = self._species_tensor[self._species_tensor != 0]
@@ -528,12 +536,6 @@ class MetaDatabase:
         self.atom_counts = {n: self.count_atoms_by_species(n) for n in self.unique_species_in_dataset}
         return self.atom_counts
 
-    def build_entry_species_index(self):
-        self.entry_species_index = defaultdict(list)
-        for i, sp in enumerate(self._species_tensor):
-            self.entry_species_index[self._entry_species_combo(sp)].append(i)
-        return self.entry_species_index
-
     # ─── Search ────────────────────────────────────────────────────────────────
 
     def search_entries_by_species(self, target_species, exact_match=True, use_symbols=True):
@@ -546,7 +548,7 @@ class MetaDatabase:
         :return: list of matching entry indices
         """
         if self.entry_species_index is None:
-            self.build_entry_species_index()
+            self.extract_entry_species_index()
 
         if use_symbols:
             valid_nums = set(self._species_tensor.flatten().tolist())
