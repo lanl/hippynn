@@ -11,28 +11,26 @@ Organized datasets for training and prediction.
 """
 from .database import Database
 from .ondisk import DirectoryDatabase, NPZDatabase
-has_ase = False
-has_h5 = False
+from .utils import auto_detect_key
 
-try: 
+__all__ = ["Database", "DirectoryDatabase", "NPZDatabase", "auto_detect_key"]
+
+try:
     import ase
-    has_ase = True
-    import h5py
-    has_h5 = True
 except ImportError:
     pass
-
-if has_ase:
+else:
+    del ase
     from ..interfaces.ase_interface import AseDatabase, AseDatabaseIterable
     from .SNAPJson import SNAPDirectoryDatabase
-    if has_h5:
+    from .utils import load_database, write_extxyz
+    __all__ += ["AseDatabase", "AseDatabaseIterable", "SNAPDirectoryDatabase", "load_database", "write_extxyz"]
+
+    try:
+        import h5py
+    except ImportError:
+        pass
+    else:
+        del h5py
         from .h5_pyanitools import PyAniFileDB, PyAniDirectoryDB
-        from .utils import auto_detect_key, load_database, write_extxyz
-
-all_list = ["Database", "DirectoryDatabase", "NPZDatabase"]
-
-if has_ase:
-    all_list += ["AseDatabase", "AseDatabaseIterable", "SNAPDirectoryDatabase"]
-    if has_h5:
-        all_list += ["PyAniFileDB", "PyAniDirectoryDB", "auto_detect_key", "load_database", "write_extxyz"]
-__all__ = all_list
+        __all__ += ["PyAniFileDB", "PyAniDirectoryDB"]
