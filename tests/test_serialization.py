@@ -8,37 +8,65 @@ import torch
 
 
 
-def test_write_nodes(network_parameters):
-    from hippynn.experiment.serialization.node_serializer import serialize, _populate_registry
-    _populate_registry()
+def test_serialize_autonode_graph(energy_graph):
+    """
+    Serializing a graph built entirely from AutoModule-based nodes (and InputNodes)
+    already works today; this pins down the expected shape of the returned record.
+    """
+    from hippynn.experiment.serialization.node_serializer import serialize, NodeInfo, SerializedGraphModule
 
-    from hippynn.graphs.nodes import inputs, networks, targets
-    # model inputs
-    species = inputs.SpeciesNode(db_name="Z")
-    positions = inputs.PositionsNode(db_name="R")
+    record, tensor_data = serialize(energy_graph)
 
-    # Model computations
-    network = networks.Hipnn("HIPNN", (species, positions), module_kwargs=network_parameters)
-    henergy = targets.HEnergyNode("HEnergy", network)
-    molecule_energy = henergy.system_energy
-    molecule_energy.db_name = "T"
+    assert isinstance(record.graph.node_list, list)
+    assert len(record.graph.node_list) > 0
+    assert all(isinstance(info, NodeInfo) for info in record.graph.node_list)
+    assert isinstance(record.module, SerializedGraphModule)
+    assert isinstance(tensor_data, dict)
+    
 
-    graph = hippynn.GraphModule([species,positions],[molecule_energy])
-    output,tensor_data = serialize(graph)
+@pytest.mark.xfail(raises=KeyError, reason="ValueNode is not yet registered for serialization.")
+def test_serialize_simple_nodes():
+    """
+    ValueNode should be serializable once it is converted onto AutoModule.
+    """
+    from hippynn.experiment.serialization.node_serializer import serialize_nodes
+    from hippynn.graphs.nodes.base import ValueNode
 
-    print(output)
-    return output_tensor_data
+    value = ValueNode(1.0)
+
+    serial_data, tensor_data, identifier_map = serialize_nodes([value])
+    assert len(serial_data.node_list) == 1
+
+    left = ValueNode(1.0)
+    right = ValueNode(2.0)
+    combined = left + right
+
+    serial_data, tensor_data, identifier_map = serialize_nodes([left, right, combined])
+    assert len(serial_data.node_list) == 3
+
 
 @pytest.fixture
-def written_nodes(network_parameters):
-    output = test_write_nodes(network_parameters)
-    return output
+def written_energy_graph(energy_graph):
+    from hippynn.experiment.serialization.node_serializer import serialize
 
-def test_read_nodes(written_nodes):
+    return serialize(energy_graph)
+
+
+@pytest.mark.xfail(raises=ImportError, reason="deserialize_nodes is not implemented yet; see route-to-completion plan.")
+def test_serialize_roundtrip(written_energy_graph, energy_graph, example_box):
+    record, tensor_data = written_energy_graph
+
     from hippynn.experiment.serialization.node_serializer import deserialize_nodes
-    nodes, tensor_data = written_nodes
-    output = deserialize_nodes(written_nodes)
-    pass
+
+    rebuilt_graph = deserialize_nodes(record, tensor_data)
+
+    args = (example_box["species"], example_box["coordinates"], example_box["cell"])
+
+    original_outputs = energy_graph(*args)
+    rebuilt_outputs = rebuilt_graph(*args)
+
+    for orig, new in zip(original_outputs, rebuilt_outputs):
+        assert torch.allclose(orig, new)
 
 
 @ignore_relocation
