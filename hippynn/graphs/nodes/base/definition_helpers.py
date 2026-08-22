@@ -39,7 +39,7 @@ class AutoModule(_SerializableNodeMixin):
     After constructing the kwargs, they are saved as self.module_kwargs.
 
     """
-
+    # developer note: dictionary form is a bit sensitive for node serialization, handle with care.
     auto_module_kwargs: Optional[Union[Tuple[str], Dict[str, str]]] = None
 
     def __init__(self, *args, module="auto", module_kwargs=None, **kwargs):
@@ -50,7 +50,7 @@ class AutoModule(_SerializableNodeMixin):
 
         auto_module_kwargs = self.auto_module_kwargs
 
-        # if automatic keyword forwarding is enabled,
+        # if automatic keyword translation is enabled,
         # set that up
         if auto_module_kwargs is None:
             auto_module_kwargs = {}

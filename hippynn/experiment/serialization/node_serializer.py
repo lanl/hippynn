@@ -263,7 +263,13 @@ def serialize_node_list(node_list):
         except KeyError as ee:
             raise ValueError(f"Invalid toposort for serializing nodes.") from ee
 
-        module_kwargs, tensor_data = lower_serializable(node.module_kwargs, tensor_data=tensor_data, counter=tensor_counter)
+
+        node_kwargs = node.module_kwargs
+        # If name translation was applied, translate back here so the node reconstructs from the kwargs.
+        if (auto_module_kwargs := getattr(node, "auto_module_kwargs", None)) and isinstance(auto_module_kwargs, dict):
+            node_kwargs = {auto_module_kwargs.get(k, k): v for k, v in node_kwargs.items()}
+
+        module_kwargs, tensor_data = lower_serializable(node_kwargs, tensor_data=tensor_data, counter=tensor_counter)
 
         node_info = NodeInfo(
             identifier=ident,

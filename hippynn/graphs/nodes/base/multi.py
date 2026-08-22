@@ -12,7 +12,7 @@ from ...._deprecations import _DeprecatedNamesMixin
 class IndexNode(AutoModule, SingleNode):
     input_names = ("parent",)
     auto_module_class = Idx
-    auto_module_kwargs = ("repr_info","index")
+    auto_module_kwargs = ("repr_info", "index")
 
     def __init__(self, name, parents, index, index_state=None):
         if len(parents) != 1:
