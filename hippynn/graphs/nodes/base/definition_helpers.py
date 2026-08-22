@@ -9,6 +9,7 @@ but are not required.
    of nodes. They are not strictly necessary; they only aid in defining more
    complex node behavior in a simple fashion.
 """
+
 import functools
 import contextlib
 from .. import _debprint
@@ -17,7 +18,6 @@ from . import Node
 from ...indextypes import index_type_coercion, get_reduced_index_state
 from .base import _SerializableNodeMixin
 from typing import Dict, Union, Tuple, Optional
-
 
 
 class AutoModule(_SerializableNodeMixin):
@@ -39,15 +39,15 @@ class AutoModule(_SerializableNodeMixin):
     After constructing the kwargs, they are saved as self.module_kwargs.
 
     """
-    auto_module_kwargs: Optional[Union[Tuple[str], Dict[str,str]]] = None
+
+    auto_module_kwargs: Optional[Union[Tuple[str], Dict[str, str]]] = None
 
     def __init__(self, *args, module="auto", module_kwargs=None, **kwargs):
-
 
         # if none supplied, start with empty
         if module_kwargs is None:
             module_kwargs = {}
-        
+
         auto_module_kwargs = self.auto_module_kwargs
 
         # if automatic keyword forwarding is enabled,
@@ -56,27 +56,25 @@ class AutoModule(_SerializableNodeMixin):
             auto_module_kwargs = {}
         elif not isinstance(auto_module_kwargs, dict):
             # Assume list of keys-values which are identical.
-            auto_module_kwargs=dict(zip(auto_module_kwargs, auto_module_kwargs))
+            auto_module_kwargs = dict(zip(auto_module_kwargs, auto_module_kwargs))
 
         # Pipe auto-forward keywords from node kwargs
         # into module creation kwargs
-        for k,v in auto_module_kwargs.items():
+        for k, v in auto_module_kwargs.items():
             if v in kwargs:
                 module_kwargs[k] = kwargs.pop(v)
 
         # Add any that have been saved via self.module_kwargs
-        module_kwargs |=  getattr(self, "module_kwargs", {})
+        module_kwargs |= getattr(self, "module_kwargs", {})
 
-        if module == "auto": 
-            self.module_kwargs = module_kwargs                
-            module = self.auto_module_class(**module_kwargs)     
+        if module == "auto":
+            self.module_kwargs = module_kwargs
+            module = self.auto_module_class(**module_kwargs)
             self._auto_module_captured = True
         else:
             self._auto_module_captured = False
 
         super().__init__(*args, module=module, **kwargs)
-
-                
 
 
 @contextlib.contextmanager
@@ -93,8 +91,7 @@ def temporary_parents(child, parents):
     """
     # Raise error if this is called on an already-build child.
     # (This function could be refactored to deal with this case... delicately.)
-    assert not hasattr(child, "children"), \
-        "Temporary connection to node requires that it is not initialized."
+    assert not hasattr(child, "children"), "Temporary connection to node requires that it is not initialized."
 
     if hasattr(child, "parents"):
         old_parents = child.parents
@@ -116,14 +113,13 @@ def temporary_parents(child, parents):
         yield
     finally:
         for p in disconnect_child_set:
-            p.children = tuple(c for c in p.children if c is not child) 
-        
-        if old_parents is not None: # non-empty
+            p.children = tuple(c for c in p.children if c is not child)
+
+        if old_parents is not None:  # non-empty
             child.parents = old_parents
         else:
             del child.parents
         del child.children
-    
 
 
 class TupleTypeMismatch(Exception):
@@ -160,8 +156,7 @@ def _assert_tupleform(input_tuple, type_tuple):
     # If not, it must at least have the same length
     if not len(input_tuple) == len(type_tuple):
         raise TupleTypeMismatch(
-            "Wrong length. {}!={}".format(len(input_tuple), len(type_tuple))
-            + " \nInput: {} \nExpected: {}".format(input_tuple, type_tuple)
+            "Wrong length. {}!={}".format(len(input_tuple), len(type_tuple)) + " \nInput: {} \nExpected: {}".format(input_tuple, type_tuple)
         )
 
     # If it does, it needs to have the correct type for each entry in the tuple.
@@ -296,9 +291,7 @@ class ParentExpander:
         *true_bases, cls = reversed(bases)
 
         relevant_classes = tuple(
-            sup_class
-            for sup_class in true_bases
-            if issubclass(sup_class, ExpandParents) and sup_class is not ExpandParents
+            sup_class for sup_class in true_bases if issubclass(sup_class, ExpandParents) and sup_class is not ExpandParents
         )
 
         base_matches = tuple(form for sup_class in relevant_classes for form in sup_class.parent_expander.matches)
@@ -377,7 +370,7 @@ class FormTransformer(FormHandler):
         except TupleTypeMismatch:
             _debprint("Didn't pass form!")
             return parents
-    
+
         _debprint("Expanding form", self.form)
         _debprint("Input parents:", parents)
         _debprint("Match function:", self.fn)
@@ -515,7 +508,7 @@ def _append_docs(cls):
 
 
 class ExpandParents(metaclass=ExpandParentMeta):
-    """ 
+    """
     Keyword Argument sources (lower precedence first):
 
         - expansion_kwargs argument to init.
@@ -527,11 +520,12 @@ class ExpandParents(metaclass=ExpandParentMeta):
         a list of keys for an identity key-value mapping.
 
     """
+
     parent_expander: ParentExpander
-    parent_expansion_kwargs: Optional[Union[Tuple[str], Dict[str,str]]] = None
-    
+    parent_expansion_kwargs: Optional[Union[Tuple[str], Dict[str, str]]] = None
+
     def __init__(self, name, parents, *args, **kwargs):
-        
+
         expansion_kwargs = kwargs.pop("expansion_kwargs", {})
 
         parent_expansion_kwargs = getattr(self, "parent_expansion_kwargs")
@@ -549,8 +543,8 @@ class ExpandParents(metaclass=ExpandParentMeta):
             for k, v in parent_expansion_kwargs.items():
                 if v in self.module_kwargs:
                     expansion_kwargs[k] = self.module_kwargs[v]
-        
-        parents = self.expand_parents(parents, **expansion_kwargs)  
+
+        parents = self.expand_parents(parents, **expansion_kwargs)
         super().__init__(name, parents, *args, **kwargs)
 
     def __init_subclass__(cls, **kwargs):
@@ -572,12 +566,11 @@ class ExpandParents(metaclass=ExpandParentMeta):
     def __getattr__(self, item):
         if item == "_parent_expander":
             from ....tools import warn_name_change
+
             warn_name_change("_parent_expander", "parent_expander")
             return self.parent_expander
         else:
             return super().__getattr__(item)
-
-            
 
     def expand_parents(self, parents, *, purpose=None, **kwargs):
         if isinstance(parents, Node):
@@ -593,3 +586,16 @@ class ExpandParents(metaclass=ExpandParentMeta):
             parents = form_handler(self, *parents, purpose=purpose, **kwargs)
 
         return parents
+
+
+def __getattr__(name: str):
+    """
+    Module-level getattr for backwards compatibility with the prior
+    AutoKw/AutoNoKw class names, which were merged into AutoModule.
+    """
+    if name in ("AutoKw", "AutoNoKw"):
+        from ...._deprecations import warn_name_change
+
+        warn_name_change(name, AutoModule, old_module=__name__, stacklevel=2)
+        return AutoModule
+    raise AttributeError(f"module {__name__!r} has no attribute {name}")
