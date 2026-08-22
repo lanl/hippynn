@@ -340,8 +340,8 @@ class Database:
 
                 if mask_name in split:
                     # Check that the mask is correct and in the dict
-                    old_mask = dict_to_add_to[sprime][mask_name]
-                    if (old_mask != mask).all():
+                    old_mask = torch.as_tensor(dict_to_add_to[sprime][mask_name])
+                    if (old_mask != mask).any():
                         raise ValueError(f"Mask in database did not match existing split structure: {mask_name} ")
                 else:
                     # if not present, write it.
@@ -503,10 +503,9 @@ class Database:
                 raise RuntimeError("species_key must be given to trim an atom-normalized quantity")
 
             n_atoms = (self.arr_dict[species_key] > 0).sum(dim=1)
-            # Transposes broadcast the result rightwards instead of leftwards.
-            # numpy transpose on higher-order arrays reverses all dimensions.
-            prop = (prop.T / n_atoms).T
-            stat_prop = (stat_prop.T / n_atoms).T
+            # Temporarily swap the batch axis to the end so it broadcasts against n_atoms, then swap back.
+            prop = prop.swapdims(0, -1).div(n_atoms).swapdims(0, -1)
+            stat_prop = stat_prop.swapdims(0, -1).div(n_atoms).swapdims(0, -1)
 
         mean = stat_prop.mean()
         std = stat_prop.std()
@@ -542,20 +541,26 @@ class Database:
         :param key: The property key in the dataset to check for high values
         :param atomwise: True if the property is defined per atom in axis 1, otherwise property is treated as whole-system value
         :param norm_per_atom: True if the property should be normalized by atom counts
-        :param species_key: Which array represents the atom presence; required if per_atom is True
+        :param species_key: Which array represents the atom presence; required if per_atom is True. If None, auto-detected.
         :param cut: If values > mu + cut, the system is removed. The step done first.
         :param std_factor: If (value-mu)/std > std_fact, the system is trimmed. This step done second.
         :param norm_axis: if not None, the property array is normed on the axis. Useful for vector properties like force.
         :return:
         """
+        if species_key is None and (atomwise or norm_per_atom):
+            from .utils import auto_detect_key
+
+            species_key = auto_detect_key(self.arr_dict.keys(), 'species', required=False)
+
         print(f"Cutting on variable: {key}")
         if cut is not None:
             prop, mean, std = self._array_stat_helper(key, species_key, atomwise, norm_per_atom, norm_axis)
 
             large_property_mask = torch.abs(prop - mean) > cut
-            # Scan over all non-batch indices.
+            # Scan over all non-batch indices. torch.sum with dim=() reduces over ALL axes, not none,
+            # so the reduction must be skipped when there are no non-batch axes to collapse.
             non_batch_axes = tuple(range(1, prop.ndim))
-            drop_mask = torch.sum(large_property_mask, dim=non_batch_axes) > 0
+            drop_mask = torch.sum(large_property_mask, dim=non_batch_axes) > 0 if non_batch_axes else large_property_mask
             indices = self.arr_dict["indices"][drop_mask]
             if drop_mask.any():
                 print(f"Removed {drop_mask.to(int).sum()} outlier systems in variable {key} due to static cut.")
@@ -564,9 +569,10 @@ class Database:
         if std_factor is not None:
             prop, mean, std = self._array_stat_helper(key, species_key, atomwise, norm_per_atom, norm_axis)
             large_property_mask = torch.abs(prop - mean) / std > std_factor
-            # Scan over all non-batch indices.
+            # Scan over all non-batch indices. torch.sum with dim=() reduces over ALL axes, not none,
+            # so the reduction must be skipped when there are no non-batch axes to collapse.
             non_batch_axes = tuple(range(1, prop.ndim))
-            drop_mask = torch.sum(large_property_mask, dim=non_batch_axes) > 0
+            drop_mask = torch.sum(large_property_mask, dim=non_batch_axes) > 0 if non_batch_axes else large_property_mask
             indices = self.arr_dict["indices"][drop_mask]
             if drop_mask.any():
                 print(f"Removed {drop_mask.to(int).sum()} outlier systems in variable {key} due to std. factor.")

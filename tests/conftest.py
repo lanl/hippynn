@@ -16,6 +16,8 @@ ignore_relocation = pytest.mark.filterwarnings("ignore:.*HIPPYNN_DEPRECATION_WAR
 ignore_weights_only_warning = pytest.mark.filterwarnings("ignore:.*weights_only=False*.")
 ignore_cusp_warning = pytest.mark.filterwarnings("ignore:.*'cusp_reg' parameter*.")
 ignore_sensitivity_warning = pytest.mark.filterwarnings("ignore:.*underneath sensitivity range*.")
+ignore_optional_key_warning = pytest.mark.filterwarnings("ignore:.*Optional key not found for possible keys.*")
+ignore_pin_memory_mps_warning = pytest.mark.filterwarnings("ignore:.*pin_memory.*not supported on MPS.*")
 
 
 @pytest.fixture

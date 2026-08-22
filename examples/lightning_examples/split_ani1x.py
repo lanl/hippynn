@@ -40,7 +40,7 @@ def load_db(en_name, force_name, seed, anidata_location, use_ccx_subset):
     CCX_EN_NAME = "ccsd(t)_cbs.energy"
     #if use_ccx_subset and en_name != CCX_EN_NAME:
     #    db_info["targets"].append(CCX_EN_NAME) # note, this is in-place and affects the evaluator.
-    database = PyAniFileDB(file=anidata_location, allow_unfound=True, species_key="atomic_numbers", seed=seed, num_workers=0,inputs=None,targets=None)
+    database = PyAniFileDB(file=anidata_location, allow_unfound=True, seed=seed, num_workers=0,inputs=None,targets=None)
     if use_ccx_subset and en_name != CCX_EN_NAME:
         database.targets.remove(CCX_EN_NAME) # undo in-place addition
 
