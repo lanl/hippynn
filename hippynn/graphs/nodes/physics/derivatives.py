@@ -5,7 +5,6 @@ from ....layers import physics as physics_layers
 from ...indextypes import IdxType 
 from ..base import (
     AutoModule,
-    AutoModule,
     ExpandParents,
     MultiNode,
     SingleNode,

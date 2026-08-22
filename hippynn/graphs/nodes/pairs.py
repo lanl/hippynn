@@ -3,7 +3,7 @@ Nodes for finding and manipulating pairs and distances.
 """
 
 from .base.node_functions import NodeNotFound
-from .base import AutoModule, AutoModule, ExpandParents, SingleNode, MultiNode, find_unique_relative, Node
+from .base import AutoModule, ExpandParents, SingleNode, MultiNode, find_unique_relative, Node
 from .indexers import PaddingIndexer, acquire_encoding_padding, OneHotEncoder
 from .tags import Encoder, PairIndexer, AtomIndexer, PairCache
 from .inputs import PositionsNode, CellNode, SpeciesNode

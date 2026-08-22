@@ -8,7 +8,6 @@ from ....layers import physics as physics_layers
 from ...indextypes import IdxType, elementwise_compare_reduce, index_type_coercion
 from ..base import (
     AutoModule,
-    AutoModule,
     ExpandParents,
     MultiNode,
     SingleNode,

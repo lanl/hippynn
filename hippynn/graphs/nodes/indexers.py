@@ -2,7 +2,7 @@
 Nodes for indexing information.
 """
 from .tags import Encoder, AtomIndexer
-from .base import SingleNode, AutoModule, AutoModule, find_unique_relative, MultiNode, ExpandParents, Node, IndexNode
+from .base import SingleNode, AutoModule, find_unique_relative, MultiNode, ExpandParents, Node, IndexNode
 from .base.node_functions import NodeNotFound
 from .inputs import SpeciesNode
 

@@ -28,7 +28,7 @@ from .base import Node, SingleNode, InputNode, LossInputNode, LossPredNode, Loss
 from .multi import MultiNode, IndexNode
 
 # Optional mixins for simplifying the process of defining BaseNode subclasses
-from .definition_helpers import AutoModule, AutoModule, ExpandParents
+from .definition_helpers import AutoModule, ExpandParents
 
 def __getattr__(name: str):
     import warnings
