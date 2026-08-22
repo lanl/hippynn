@@ -109,11 +109,11 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.custom_kernels.utils</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 
 <span class="sd">Utilities for the custom kernels, including pre-sorting the indices.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
@@ -144,10 +144,10 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">_CacheEntry</span><span class="p">:</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">cache</span><span class="p">):</span>
         <span class="c1"># Cache key is stored this way because sometimes</span>
-        <span class="c1"># pytorch &#39;resurrects&#39; a Tensor from C++ to pytorch</span>
+        <span class="c1"># pytorch 'resurrects' a Tensor from C++ to pytorch</span>
         <span class="c1"># during an autograd calculation as a completely</span>
         <span class="c1"># new pyobject, so id(key) is not a completely safe way</span>
-        <span class="c1"># to know if it&#39;s the same tensor.</span>
+        <span class="c1"># to know if it's the same tensor.</span>
         <span class="c1"># This effect seems to go away when tensor is cached</span>
         <span class="c1"># (possibly because the pyobject is not garbage collected)</span>
         <span class="c1"># But can we do better to ensure we have the exact same data</span>
@@ -172,7 +172,7 @@
             <span class="c1"># For now raise an error since this feature is experimental.</span>
             <span class="c1"># Most of the benefits seem to work from the `is` check.</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">torch</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">key</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Caching by key does not work! Please raise an issue.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"Caching by key does not work! Please raise an issue."</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="kc">False</span>
 
@@ -193,10 +193,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">compute_and_store</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">computed</span><span class="p">:</span>
-            <span class="c1"># This shouldn&#39;t happen! The guard is here because</span>
+            <span class="c1"># This shouldn't happen! The guard is here because</span>
             <span class="c1"># this code path could activate if someone calls this class in the</span>
             <span class="c1"># wrong way from outside the clss.</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;A key that was marked computed was asked to be re-computed.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"A key that was marked computed was asked to be re-computed."</span><span class="p">)</span>
         <span class="n">keysort</span><span class="p">,</span> <span class="n">argsort</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
         <span class="n">key_ids</span><span class="p">,</span> <span class="n">key_starts</span> <span class="o">=</span> <span class="n">get_id_and_starts</span><span class="p">(</span><span class="n">keysort</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">argsort</span> <span class="o">=</span> <span class="n">argsort</span>

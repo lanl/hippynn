@@ -108,14 +108,14 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.graphs.indextypes.registry</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Storage for the logical relationships between index states,</span>
 <span class="sd">and a cache reduce redundant computations. Also includes</span>
 <span class="sd">the indextransformer decorator which registers computations</span>
 <span class="sd">that change index states.</span>
 <span class="sd">The index transformers do not live here because they are themselves</span>
 <span class="sd">nodes, and this package should be minimally dependent on the nodes themselves.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_debprint</span>
@@ -176,17 +176,17 @@
 <div class="viewcode-block" id="clear_index_cache">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.registry.html#hippynn.graphs.indextypes.clear_index_cache">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">clear_index_cache</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Remove any cached index types for nodes.</span>
 
 <span class="sd">    The index cache holds global references to nodes that have been</span>
-<span class="sd">    transformed automatically, so these nodes won&#39;t be garbage collected</span>
+<span class="sd">    transformed automatically, so these nodes won't be garbage collected</span>
 <span class="sd">    automatically. Clearing the cache will free any reference to them.</span>
 
 <span class="sd">    If you modify the index dispatch table or type comparison table on the fly,</span>
 <span class="sd">    you may want to clear the cache to remove references to nodes created</span>
 <span class="sd">    using the old rules.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">global</span> <span class="n">_index_cache</span>
     <span class="n">_index_cache</span> <span class="o">=</span> <span class="p">{}</span></div>
 
@@ -195,14 +195,14 @@
 <div class="viewcode-block" id="assign_index_aliases">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.registry.html#hippynn.graphs.indextypes.assign_index_aliases">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">assign_index_aliases</span><span class="p">(</span><span class="o">*</span><span class="n">nodes</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Store the input set of nodes in the index cache as index aliases of each other.</span>
 
 <span class="sd">    Errors if the nodes contain two different nodes with the same index state.</span>
 
 <span class="sd">    :param nodes:</span>
 <span class="sd">    :return: None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Developer node:</span>
     <span class="c1"># In the interest of safety this function currently errors rather than over-write information.</span>
     <span class="c1"># Operationally, it is not clear if it really needs to be safe or not.</span>
@@ -212,9 +212,9 @@
     <span class="n">nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
     <span class="n">state_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="o">.</span><span class="n">index_state</span><span class="p">:</span> <span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">}</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">state_map</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Input nodes did not each have a unique index state!</span><span class="se">\n</span><span class="s2">&quot;</span>
-                         <span class="sa">f</span><span class="s2">&quot;Nodes and corresponding states: </span><span class="se">\n</span><span class="s2">&quot;</span>
-                         <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t</span><span class="si">{</span><span class="p">[(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="o">.</span><span class="n">index_state</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">nodes</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Input nodes did not each have a unique index state!</span><span class="se">\n</span><span class="s2">"</span>
+                         <span class="sa">f</span><span class="s2">"Nodes and corresponding states: </span><span class="se">\n</span><span class="s2">"</span>
+                         <span class="sa">f</span><span class="s2">"</span><span class="se">\t</span><span class="si">{</span><span class="p">[(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="o">.</span><span class="n">index_state</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">nodes</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">target_state</span><span class="p">,</span> <span class="n">target_node</span> <span class="ow">in</span> <span class="n">state_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
@@ -222,7 +222,7 @@
                 <span class="k">continue</span>
             <span class="n">idxcache_info</span> <span class="o">=</span> <span class="p">(</span><span class="n">target_state</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">idxcache_info</span> <span class="ow">in</span> <span class="n">_index_cache</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Index state for node is already cached: </span><span class="si">{</span><span class="n">idxcache_info</span><span class="p">,</span><span class="n">_index_cache</span><span class="p">[</span><span class="n">idxcache_info</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Index state for node is already cached: </span><span class="si">{</span><span class="n">idxcache_info</span><span class="p">,</span><span class="n">_index_cache</span><span class="p">[</span><span class="n">idxcache_info</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">_index_cache</span><span class="p">[</span><span class="n">idxcache_info</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_node</span></div>
 
@@ -232,7 +232,7 @@
 <div class="viewcode-block" id="register_index_transformer">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextypes.registry.html#hippynn.graphs.indextypes.register_index_transformer">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_index_transformer</span><span class="p">(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Decorator for registering a transformer from one IdxType to another.</span>
 
 <span class="sd">    An index transformer should have a signature::</span>
@@ -260,36 +260,36 @@
 <span class="sd">    table for index transformations. No two functions may be registered for the</span>
 <span class="sd">    same index type conversion simultaneously.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_index_dispatch_table</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Index dispatch for (</span><span class="si">{}</span><span class="s2">)-&gt;(</span><span class="si">{}</span><span class="s2">) already defined!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Index dispatch for (</span><span class="si">{}</span><span class="s2">)-&gt;(</span><span class="si">{}</span><span class="s2">) already defined!"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">))</span>
 
         <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">wrapped</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="n">idxcache_info</span> <span class="o">=</span> <span class="p">(</span><span class="n">output_idxstate</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">idxcache_info</span> <span class="ow">in</span> <span class="n">_index_cache</span><span class="p">:</span>
                 <span class="n">output_node</span> <span class="o">=</span> <span class="n">_index_cache</span><span class="p">[</span><span class="n">idxcache_info</span><span class="p">]</span>
-                <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Found in node cache: </span><span class="si">{}</span><span class="s2"> : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output_node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">output_node</span><span class="p">))</span>
+                <span class="n">_debprint</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2">Found in node cache: </span><span class="si">{}</span><span class="s2"> : </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output_node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">output_node</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">parents</span><span class="p">,</span> <span class="n">indexer_nodetype</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-                <span class="n">name</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">output_idxstate</span><span class="si">}</span><span class="s2">]&quot;</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">"[</span><span class="si">{</span><span class="n">output_idxstate</span><span class="si">}</span><span class="s2">]"</span>
                 <span class="n">output_node</span> <span class="o">=</span> <span class="n">indexer_nodetype</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">)</span>
 
                 <span class="c1"># Forward-link this new node so we can avoid creating</span>
                 <span class="c1"># redundant nodes.</span>
                 <span class="n">_index_cache</span><span class="p">[</span><span class="n">idxcache_info</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_node</span>
-                <span class="c1"># Back-link this new node to the old node&#39;s index state,</span>
+                <span class="c1"># Back-link this new node to the old node's index state,</span>
                 <span class="c1"># so if we end up with the reverse index transformation we</span>
                 <span class="c1"># can just substitute the original node.</span>
                 <span class="n">_index_cache</span><span class="p">[(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_node</span><span class="p">)]</span> <span class="o">=</span> <span class="n">node</span>
 
-                <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Generated new indexer: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output_node</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                <span class="n">_debprint</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2">Generated new indexer: </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output_node</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">output_node</span>
 
         <span class="n">_index_dispatch_table</span><span class="p">[</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">]</span> <span class="o">=</span> <span class="n">wrapped</span>
-        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Index dispatch for (</span><span class="si">{}</span><span class="s2">)-&gt;(</span><span class="si">{}</span><span class="s2">) defined!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">))</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">"Index dispatch for (</span><span class="si">{}</span><span class="s2">)-&gt;(</span><span class="si">{}</span><span class="s2">) defined!"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_idxstate</span><span class="p">,</span> <span class="n">output_idxstate</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">wrapped</span>
 
     <span class="k">return</span> <span class="n">decorator</span></div>
@@ -304,11 +304,11 @@
     <span class="c1"># register no-op transformer</span>
     <span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span> <span class="n">idxt</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">scalar_promote</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">__idxt</span><span class="o">=</span><span class="n">idxt</span><span class="p">,</span> <span class="n">hints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> Allowing view of Scalar </span><span class="si">{}</span><span class="s2"> as type </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">__idxt</span><span class="p">))</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2"> Allowing view of Scalar </span><span class="si">{}</span><span class="s2"> as type </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">__idxt</span><span class="p">))</span>
 
         <span class="c1"># Node index transformers (see #register_index_transformer) return</span>
         <span class="c1"># a set of parents and the node type to create.</span>
-        <span class="c1"># So here we&#39;ll define a trivial factory function which mimics this</span>
+        <span class="c1"># So here we'll define a trivial factory function which mimics this</span>
         <span class="c1"># behavior and passes the node through unchanged.</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="n">node</span><span class="p">,</span>  <span class="c1"># Parents are defined as a tuple</span>
 

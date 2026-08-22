@@ -108,9 +108,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.layers.transform</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Layers that wrap other layers.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
@@ -119,19 +119,19 @@
 <div class="viewcode-block" id="ResNetWrapper">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.transform.html#hippynn.layers.transform.ResNetWrapper">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ResNetWrapper</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Resnet Wrapper Class</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_layer</span><span class="p">,</span> <span class="n">nf_in</span><span class="p">,</span> <span class="n">nf_middle</span><span class="p">,</span> <span class="n">nf_out</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">softplus</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Constructor</span>
 
 <span class="sd">        :param base_layer: The ResLayer pytorch module</span>
 <span class="sd">        :param nf_in: Input dimensions</span>
 <span class="sd">        :param nf_out: Output dimensions</span>
 <span class="sd">        :param activation: a nonlinearity function</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="n">activation</span>
@@ -148,7 +148,7 @@
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.transform.html#hippynn.layers.transform.ResNetWrapper.regularization_params">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">regularization_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">res_layer</span><span class="o">.</span><span class="n">weight</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_layer</span><span class="p">,</span> <span class="s2">&quot;regularization_params&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_layer</span><span class="p">,</span> <span class="s2">"regularization_params"</span><span class="p">):</span>
             <span class="n">params</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_layer</span><span class="o">.</span><span class="n">regularization_params</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_layer</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
@@ -160,12 +160,12 @@
 <div class="viewcode-block" id="ResNetWrapper.forward">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.transform.html#hippynn.layers.transform.ResNetWrapper.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="nb">input</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param input: list of inputs for the layer;</span>
 <span class="sd">            the first one is taken to be the features which will be computed as a residual</span>
 <span class="sd">        :return: Pytorch module output</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">middle_activation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_layer</span><span class="p">(</span><span class="o">*</span><span class="nb">input</span><span class="p">))</span>
         <span class="n">difference_activation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">res_layer</span><span class="p">(</span><span class="n">middle_activation</span><span class="p">)</span>
 

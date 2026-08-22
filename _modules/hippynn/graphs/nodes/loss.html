@@ -108,9 +108,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.graphs.nodes.loss</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Nodes for constructing loss functions.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span>
 
@@ -132,10 +132,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">inputs</span><span class="p">):</span>
         <span class="n">shapes</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG BROADCASTING shapes:&quot;</span><span class="p">,</span> <span class="n">shapes</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"DEBUG BROADCASTING shapes:"</span><span class="p">,</span> <span class="n">shapes</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">shapes</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">s</span> <span class="o">==</span> <span class="n">shapes</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Broadcasting in loss shapes:&quot;</span><span class="p">,</span> <span class="n">shapes</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Broadcasting in loss shapes:"</span><span class="p">,</span> <span class="n">shapes</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">)</span>
 
 
@@ -145,7 +145,7 @@
     <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classname</span> <span class="o">+</span> <span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classname</span> <span class="o">+</span> <span class="s2">"(</span><span class="si">{}</span><span class="s2">)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">parent</span> <span class="o">=</span> <span class="n">elementwise_compare_reduce</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">main_output</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">parent</span><span class="p">,))</span>
 
@@ -206,7 +206,7 @@
         <span class="n">predicted</span> <span class="o">=</span> <span class="n">predicted</span><span class="o">.</span><span class="n">main_output</span>
         <span class="n">true</span> <span class="o">=</span> <span class="n">true</span><span class="o">.</span><span class="n">main_output</span>
 
-        <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classname</span><span class="p">,</span> <span class="n">predicted</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">true</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s2">"</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classname</span><span class="p">,</span> <span class="n">predicted</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">true</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">predicted</span><span class="p">,</span> <span class="n">true</span> <span class="o">=</span> <span class="n">elementwise_compare_reduce</span><span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">true</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">true</span><span class="p">),</span> <span class="n">module</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
@@ -222,19 +222,19 @@
                 <span class="bp">cls</span><span class="o">.</span><span class="n">torch_module</span> <span class="o">=</span> <span class="n">_DebugBroadCast</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Note: as of now, we need to wrap raw operations as a loss module because</span>
-                <span class="c1"># the graph module&#39;s ModuleList can&#39;t take non-torch operations.</span>
+                <span class="c1"># the graph module's ModuleList can't take non-torch operations.</span>
                 <span class="c1"># Add the lambda to the graph module instead to put the problem nearer to the solution?</span>
                 <span class="bp">cls</span><span class="o">.</span><span class="n">torch_module</span> <span class="o">=</span> <span class="n">algebra_modules</span><span class="o">.</span><span class="n">LambdaModule</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">_WeightedCompareLoss</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">):</span>
     <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span><span class="n">true</span><span class="p">,</span> <span class="n">weight</span><span class="p">):</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classname</span><span class="p">,</span> <span class="n">predicted</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">true</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">weight</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s2">"</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">,</span><span class="si">{}</span><span class="s2">)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classname</span><span class="p">,</span> <span class="n">predicted</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">true</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">weight</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">predicted</span><span class="p">,</span> <span class="n">true</span><span class="p">,</span> <span class="n">weight</span> <span class="o">=</span> <span class="n">elementwise_compare_reduce</span><span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">true</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">true</span><span class="p">,</span> <span class="n">weight</span><span class="p">),</span> <span class="n">module</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">of_node</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">weight</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Create a weighted loss comparing the true and predicted to the given `node`. </span>
 
 <span class="sd">        :param node:</span>
@@ -242,7 +242,7 @@
 <span class="sd">          and an input node will be constructed with the given str as a db_name.</span>
 <span class="sd">        :return new loss node comparing true to predicted using given weights.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         
         <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">main_output</span>
         
@@ -264,14 +264,14 @@
 <div class="viewcode-block" id="WeightedMSELoss">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.WeightedMSELoss">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">WeightedMSELoss</span><span class="p">(</span><span class="n">_WeightedCompareLoss</span><span class="p">):</span>
-    <span class="n">_classname</span> <span class="o">=</span> <span class="s2">&quot;WeightedMSE&quot;</span>
+    <span class="n">_classname</span> <span class="o">=</span> <span class="s2">"WeightedMSE"</span>
     <span class="n">torch_module</span> <span class="o">=</span> <span class="n">algebra_modules</span><span class="o">.</span><span class="n">WeightedMSELoss</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="WeightedMAELoss">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.WeightedMAELoss">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">WeightedMAELoss</span><span class="p">(</span><span class="n">_WeightedCompareLoss</span><span class="p">):</span>
-    <span class="n">_classname</span> <span class="o">=</span> <span class="s2">&quot;WeightedMAE&quot;</span>
+    <span class="n">_classname</span> <span class="o">=</span> <span class="s2">"WeightedMAE"</span>
     <span class="n">torch_module</span> <span class="o">=</span> <span class="n">algebra_modules</span><span class="o">.</span><span class="n">WeightedMAELoss</span><span class="p">()</span></div>
 
 
@@ -290,7 +290,7 @@
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.Rsq">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Rsq</span><span class="p">(</span><span class="n">_BaseCompareLoss</span><span class="p">):</span>
     <span class="n">torch_module</span> <span class="o">=</span> <span class="n">RsqMod</span><span class="p">()</span>
-    <span class="n">_classname</span> <span class="o">=</span> <span class="s2">&quot;Rsq&quot;</span></div>
+    <span class="n">_classname</span> <span class="o">=</span> <span class="s2">"Rsq"</span></div>
 
 
 
@@ -318,10 +318,10 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">_LPReg</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
     <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">reg_modules</span><span class="o">.</span><span class="n">LPReg</span>
-    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">&quot;network&quot;</span><span class="p">,</span>
+    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">"network"</span><span class="p">,</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;L^P_Reg(</span><span class="si">{}</span><span class="s2">,p=</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">network</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s2">"L^P_Reg(</span><span class="si">{}</span><span class="s2">,p=</span><span class="si">{}</span><span class="s2">)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">network</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="p">(</span><span class="n">network</span><span class="p">,)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">p</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="o">.</span><span class="n">torch_module</span><span class="p">)</span>
@@ -351,7 +351,7 @@
 <div class="viewcode-block" id="absolute_errors">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.loss.html#hippynn.graphs.nodes.loss.absolute_errors">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">absolute_errors</span><span class="p">(</span><span class="n">predict</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">true</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the absolute errors with phases between predicted and true values. In</span>
+<span class="w">    </span><span class="sd">"""Compute the absolute errors with phases between predicted and true values. In</span>
 <span class="sd">    other words, prediction should be close to the absolute value of true, and the sign</span>
 <span class="sd">    does not matter.</span>
 
@@ -361,7 +361,7 @@
 <span class="sd">    :type true: torch.Tensor</span>
 <span class="sd">    :return: errors</span>
 <span class="sd">    :rtype: torch.Tensor</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">true</span> <span class="o">-</span> <span class="n">predict</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">true</span> <span class="o">+</span> <span class="n">predict</span><span class="p">))</span></div>
 

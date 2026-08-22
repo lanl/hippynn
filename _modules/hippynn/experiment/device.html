@@ -108,11 +108,11 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.experiment.device</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">This file is used to host the function `set_devices`, as it is needed by both</span>
 <span class="sd">serialization and routines. We may find a better place for this function in the</span>
 <span class="sd">future.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -130,7 +130,7 @@
     <span class="n">optimizer</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">,</span>
     <span class="n">device</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sets the model, loss, and optimizer to the specified device if necessary.</span>
+<span class="w">    </span><span class="sd">"""Sets the model, loss, and optimizer to the specified device if necessary.</span>
 <span class="sd">    Evaluation loss is performed on CPU.</span>
 
 <span class="sd">    :param model: current model on CPU</span>
@@ -141,15 +141,15 @@
 <span class="sd">    :type optimizer: torch.optim.Optimizer</span>
 <span class="sd">    :param device: target device for training. If device is a tuple or list, wrap</span>
 <span class="sd">        the model using torch.nn.DataParallel and use the first specified device</span>
-<span class="sd">        as the &quot;primary: one.</span>
+<span class="sd">        as the "primary: one.</span>
 <span class="sd">    :type device: Union[torch.devices, string, tuple, list]</span>
 <span class="sd">    :return: model, evaluator, optimizer</span>
 <span class="sd">    :rtype: Tuple</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using device: &quot;</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Using device: "</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">DataParallel</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device_ids</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using multi GPU compute on devices:&quot;</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Using multi GPU compute on devices:"</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
         <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>  <span class="c1"># Will throw a more explicit error if the device specification is invalid</span>
 

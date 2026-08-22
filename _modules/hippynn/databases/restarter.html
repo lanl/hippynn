@@ -108,10 +108,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.databases.restarter</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Classes for allowing reload of database.</span>
 
-<span class="sd">This isn&#39;t meant to cover all possible use cases,</span>
+<span class="sd">This isn't meant to cover all possible use cases,</span>
 <span class="sd">but the conveniently allow restarting from a checkpoint</span>
 <span class="sd">file without manually re-loading the database.</span>
 
@@ -119,10 +119,10 @@
 <span class="sd">if no preprocessing is applied, i.e. in order</span>
 <span class="sd">for this functionality to work automatically, you should</span>
 <span class="sd">save a copy of your database completely preprocessed.</span>
-<span class="sd">Otherwise you&#39;ll need to reproduce the processing</span>
+<span class="sd">Otherwise you'll need to reproduce the processing</span>
 <span class="sd">that was applied between constructing the database object</span>
 <span class="sd">and constructing the checkpoint.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 
 <div class="viewcode-block" id="Restarter">
@@ -142,7 +142,7 @@
 <div class="viewcode-block" id="NoRestart.attempt_restart">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.NoRestart.attempt_restart">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">attempt_restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Couldn&#39;t reload database. It might have been generated in-memory.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Couldn't reload database. It might have been generated in-memory."</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 </div>
 
@@ -159,35 +159,35 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">cls_spec</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="o">.</span><span class="vm">__qualname__</span><span class="p">)</span>
-        <span class="n">state</span><span class="p">[</span><span class="s2">&quot;cls&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cls_spec</span>
+        <span class="n">state</span><span class="p">[</span><span class="s2">"cls"</span><span class="p">]</span> <span class="o">=</span> <span class="n">cls_spec</span>
         <span class="k">return</span> <span class="n">state</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-        <span class="n">cls_state</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;cls&quot;</span><span class="p">]</span>
+        <span class="n">cls_state</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">"cls"</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cls_state</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
             <span class="n">cls_module</span><span class="p">,</span> <span class="n">cls_name</span> <span class="o">=</span> <span class="n">cls_state</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
 
                 <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">cls_module</span><span class="p">)</span>
-                <span class="n">state</span><span class="p">[</span><span class="s2">&quot;cls&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">cls_name</span><span class="p">)</span>
+                <span class="n">state</span><span class="p">[</span><span class="s2">"cls"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">cls_name</span><span class="p">)</span>
             <span class="k">except</span> <span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
                 <span class="c1"># Save the message, not the full exception object</span>
                 <span class="c1"># including traceback etc.</span>
-                <span class="n">state</span><span class="p">[</span><span class="s2">&quot;cls&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ee</span><span class="o">.</span><span class="n">msg</span>
+                <span class="n">state</span><span class="p">[</span><span class="s2">"cls"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ee</span><span class="o">.</span><span class="n">msg</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 
 <div class="viewcode-block" id="RestartDB.attempt_restart">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.restarter.html#hippynn.databases.restarter.RestartDB.attempt_restart">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">attempt_restart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;restarting&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"restarting"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not restartable due to class error: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Not restartable due to class error: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">eee</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Exception while attempting to reload the database.&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">eee</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"Exception while attempting to reload the database."</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">eee</span>
         <span class="k">return</span> <span class="n">db</span></div>
 </div>
 

@@ -111,24 +111,24 @@
 <span></span><span class="c1"># Calculate box shape needed to achieve specified density</span>
 <span class="c1"># Portions of this code were written with assistance from an LLM.</span>
 
-<span class="c1"># Avogadro&#39;s number (molecules per mole)</span>
+<span class="c1"># Avogadro's number (molecules per mole)</span>
 <span class="n">AVOGADRO</span> <span class="o">=</span> <span class="mf">6.022e23</span>
 
 <span class="c1"># Molar masses in g/mol</span>
 <span class="n">molar_masses</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;choline&quot;</span><span class="p">:</span> <span class="mf">104.17</span><span class="p">,</span>
-    <span class="s2">&quot;chloride&quot;</span><span class="p">:</span> <span class="mf">35.45</span><span class="p">,</span>
-    <span class="s2">&quot;urea&quot;</span><span class="p">:</span> <span class="mf">60.06</span><span class="p">,</span>
-    <span class="s2">&quot;ethylene glycol&quot;</span><span class="p">:</span> <span class="mf">62.07</span><span class="p">,</span>
-    <span class="s2">&quot;methanol&quot;</span><span class="p">:</span> <span class="mf">32.04</span><span class="p">,</span>
-    <span class="s2">&quot;methane&quot;</span><span class="p">:</span> <span class="mf">16.04</span><span class="p">,</span>
-    <span class="s2">&quot;benzene&quot;</span><span class="p">:</span> <span class="mf">78.11</span><span class="p">,</span>
+    <span class="s2">"choline"</span><span class="p">:</span> <span class="mf">104.17</span><span class="p">,</span>
+    <span class="s2">"chloride"</span><span class="p">:</span> <span class="mf">35.45</span><span class="p">,</span>
+    <span class="s2">"urea"</span><span class="p">:</span> <span class="mf">60.06</span><span class="p">,</span>
+    <span class="s2">"ethylene glycol"</span><span class="p">:</span> <span class="mf">62.07</span><span class="p">,</span>
+    <span class="s2">"methanol"</span><span class="p">:</span> <span class="mf">32.04</span><span class="p">,</span>
+    <span class="s2">"methane"</span><span class="p">:</span> <span class="mf">16.04</span><span class="p">,</span>
+    <span class="s2">"benzene"</span><span class="p">:</span> <span class="mf">78.11</span><span class="p">,</span>
 <span class="p">}</span>
 
 <div class="viewcode-block" id="calculate_box_side_length">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.box_volume_calculator.html#hippynn.molecular_dynamics.box_volume_calculator.calculate_box_side_length">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">calculate_box_side_length</span><span class="p">(</span><span class="n">molecule_counts</span><span class="p">,</span> <span class="n">density</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Calculate the side length of a cubic box that has the specified density.</span>
 
 <span class="sd">    Parameters:</span>
@@ -137,7 +137,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">      float: side length in Angstroms.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">total_mass</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="k">for</span> <span class="n">molecule</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">molecule_counts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">key</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -145,8 +145,8 @@
             <span class="n">total_mass</span> <span class="o">+=</span> <span class="p">(</span><span class="n">count</span> <span class="o">/</span> <span class="n">AVOGADRO</span><span class="p">)</span> <span class="o">*</span> <span class="n">molar_masses</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Molecule &#39;</span><span class="si">{</span><span class="n">molecule</span><span class="si">}</span><span class="s2">&#39; not found in molar_masses dictionary. Please add an entry for it and try again.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;Existing molecules: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">molar_masses</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">"Molecule '</span><span class="si">{</span><span class="n">molecule</span><span class="si">}</span><span class="s2">' not found in molar_masses dictionary. Please add an entry for it and try again.</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">"Existing molecules: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">molar_masses</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">"</span>
             <span class="p">)</span>
 
     <span class="n">volume</span> <span class="o">=</span> <span class="n">total_mass</span> <span class="o">/</span> <span class="n">density</span>
@@ -161,11 +161,11 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">print_results</span><span class="p">(</span><span class="n">molecule_counts</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">side_length_ang</span><span class="p">):</span>
     <span class="n">max_mol_name_length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">molecule_counts</span><span class="o">.</span><span class="n">keys</span><span class="p">()])</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Box contains:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Box contains:"</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">molecule_counts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">key</span><span class="o">+</span><span class="s1">&#39;:&#39;</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">max_mol_name_length</span><span class="o">+</span><span class="mi">3</span><span class="si">}}</span><span class="s2"> </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> molecules&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Density: </span><span class="si">{</span><span class="n">density</span><span class="si">}</span><span class="s2"> g/cm^3&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cube side length: </span><span class="si">{</span><span class="n">side_length_ang</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> Ang&quot;</span><span class="p">)</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">key</span><span class="o">+</span><span class="s1">':'</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">max_mol_name_length</span><span class="o">+</span><span class="mi">3</span><span class="si">}}</span><span class="s2"> </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> molecules"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Density: </span><span class="si">{</span><span class="n">density</span><span class="si">}</span><span class="s2"> g/cm^3"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Cube side length: </span><span class="si">{</span><span class="n">side_length_ang</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> Ang"</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="main">
@@ -175,8 +175,8 @@
     <span class="n">print_results</span><span class="p">(</span><span class="n">molecule_counts</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">side_length_ang</span><span class="p">)</span></div>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">molecule_counts</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;choline&#39;</span><span class="p">:</span> <span class="mi">250</span><span class="p">,</span> <span class="s1">&#39;chloride&#39;</span><span class="p">:</span> <span class="mi">250</span><span class="p">,</span> <span class="s1">&#39;urea&#39;</span><span class="p">:</span> <span class="mi">500</span><span class="p">}</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">molecule_counts</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'choline'</span><span class="p">:</span> <span class="mi">250</span><span class="p">,</span> <span class="s1">'chloride'</span><span class="p">:</span> <span class="mi">250</span><span class="p">,</span> <span class="s1">'urea'</span><span class="p">:</span> <span class="mi">500</span><span class="p">}</span>
     <span class="n">density</span> <span class="o">=</span> <span class="mf">1.178</span> <span class="c1"># g/cm^3</span>
 
     <span class="n">main</span><span class="p">(</span><span class="n">molecule_counts</span><span class="p">,</span> <span class="n">density</span><span class="p">)</span>

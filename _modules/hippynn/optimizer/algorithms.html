@@ -108,11 +108,11 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.optimizer.algorithms</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 
 <span class="sd">Abstract optimizers that could be used with other force functions.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="kn">import</span> <span class="n">normalize</span>
 
@@ -120,7 +120,7 @@
 <div class="viewcode-block" id="GeometryOptimizer">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.GeometryOptimizer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GeometryOptimizer</span><span class="p">:</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">coords</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_steps</span> <span class="o">=</span> <span class="n">max_steps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_step</span> <span class="o">=</span> <span class="mi">0</span>
@@ -141,15 +141,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">current_step</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stop_signal</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">""</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;step </span><span class="si">%d</span><span class="s2"> :</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_step</span><span class="p">))</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="s2">"a"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">"step </span><span class="si">%d</span><span class="s2"> :</span><span class="se">\n</span><span class="s2">"</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_step</span><span class="p">))</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="c1"># f.write(&#39;coordinates:\n&#39;)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+                <span class="c1"># f.write('coordinates:\n')</span>
                 <span class="c1"># f.write(str(self.coords))</span>
-                <span class="c1"># f.write(&#39;\n&#39;)</span>
+                <span class="c1"># f.write('\n')</span>
 
 <div class="viewcode-block" id="GeometryOptimizer.fmax_criteria">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.GeometryOptimizer.fmax_criteria">[docs]</a>
@@ -194,7 +194,7 @@
         <span class="n">f_alpha</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span>
         <span class="n">fmax</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+        <span class="n">device</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">max_steps</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
 
@@ -278,11 +278,11 @@
 
 <div class="viewcode-block" id="FIRE.log">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.FIRE.log">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;dt: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">))</span>
-        <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;v: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">))</span>
-        <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;a: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">))</span>
-        <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;Nsteps: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nsteps</span><span class="p">))</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s2">""</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">"dt: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">"</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">))</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="s2">"v: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">"</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">))</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="s2">"a: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">"</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">))</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="s2">"Nsteps: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">"</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nsteps</span><span class="p">))</span>
         <span class="n">message</span> <span class="o">+=</span> <span class="n">extra_message</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
@@ -293,7 +293,7 @@
 <div class="viewcode-block" id="NewtonRaphson">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.NewtonRaphson">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NewtonRaphson</span><span class="p">(</span><span class="n">GeometryOptimizer</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">etol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">etol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">max_steps</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">etol</span> <span class="o">=</span> <span class="n">etol</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fmax</span> <span class="o">=</span> <span class="n">fmax</span>
@@ -327,7 +327,7 @@
 
         <span class="n">mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">fmax_mask</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">etol_mask</span>
 
-        <span class="c1"># x_{n+1} = x_n - f(x_n)/f&#39;(x_n)</span>
+        <span class="c1"># x_{n+1} = x_n - f(x_n)/f'(x_n)</span>
         <span class="n">dr</span> <span class="o">=</span> <span class="n">energies</span> <span class="o">/</span> <span class="n">forces</span>
         <span class="n">dr</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duq</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
 
@@ -345,9 +345,9 @@
 <div class="viewcode-block" id="BFGSv1">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv1">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BFGSv1</span><span class="p">(</span><span class="n">GeometryOptimizer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    BFGS algorithm for batch of coordinates, forces will be input to step() function</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># BFGS algorithm for batch of coordinates, forces will be input to step() function</span>
     <span class="c1"># assuming the input coordinates are in the shape of (batch_size, n_atoms, 3)</span>
@@ -357,7 +357,7 @@
     <span class="c1">###TODO: BFGS may not be suitable for batch coordinates with zero-paddings</span>
     <span class="c1"># because the Hessian matrix will no longer be positive definite</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">H0</span><span class="o">=</span><span class="mf">70.0</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">H0</span><span class="o">=</span><span class="mf">70.0</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">):</span>
         <span class="c1"># hyperpamaters H0=70.0 &amp; maxstep=0.2 are learned from ASE implementation</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">max_steps</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">H0</span> <span class="o">=</span> <span class="n">H0</span>  <span class="c1"># initialize Hessian to diagonal matrices with H0</span>
@@ -428,7 +428,7 @@
         <span class="n">flattened_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="n">s</span> <span class="o">=</span> <span class="n">flattened_coords</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_coords</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="c1"># Note that forces are -f&#39;(x)</span>
+        <span class="c1"># Note that forces are -f'(x)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">flattened_forces</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_forces</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
 
         <span class="n">alpha</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">@</span> <span class="n">s</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
@@ -443,8 +443,8 @@
 
 <div class="viewcode-block" id="BFGSv1.log">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv1.log">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Hessian: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">))</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s2">""</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">"Hessian: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">"</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">))</span>
         <span class="n">message</span> <span class="o">+=</span> <span class="n">extra_message</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
@@ -455,16 +455,16 @@
 <div class="viewcode-block" id="BFGSv2">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv2">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BFGSv2</span><span class="p">(</span><span class="n">GeometryOptimizer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    batch BFGS algorithm with Moore-Penrose pseudoinverse</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># BFGS algorithm for batch of coordinates, forces will be input to step() function</span>
     <span class="c1"># assuming the input coordinates are in the shape of (batch_size, n_atoms, 3)</span>
     <span class="c1"># for convenience, notations follow the wikipedia page:</span>
     <span class="c1"># https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%93Goldfarb%E2%80%93Shanno_algorithm</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">H0</span><span class="o">=</span><span class="mf">70.0</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">H0</span><span class="o">=</span><span class="mf">70.0</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">):</span>
         <span class="c1"># hyperpamaters H0=70.0 &amp; maxstep=0.2 are learned from ASE implementation</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">max_steps</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">H0</span> <span class="o">=</span> <span class="n">H0</span>  <span class="c1"># initialize Hessian to diagonal matrices with H0</span>
@@ -537,7 +537,7 @@
         <span class="n">flattened_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="n">s</span> <span class="o">=</span> <span class="n">flattened_coords</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_coords</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="c1"># Note that forces are -f&#39;(x)</span>
+        <span class="c1"># Note that forces are -f'(x)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">flattened_forces</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_forces</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
 
         <span class="n">alpha</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">@</span> <span class="n">s</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
@@ -552,8 +552,8 @@
 
 <div class="viewcode-block" id="BFGSv2.log">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv2.log">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Hessian: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">))</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s2">""</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">"Hessian: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">"</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">H</span><span class="p">))</span>
         <span class="n">message</span> <span class="o">+=</span> <span class="n">extra_message</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
@@ -564,20 +564,20 @@
 <div class="viewcode-block" id="BFGSv3">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv3">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">BFGSv3</span><span class="p">(</span><span class="n">GeometryOptimizer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    BFGS algorithm for batch of coordinates, forces will be input to step() function</span>
 
 <span class="sd">     In this version, instead of maintain the Hessian itself,</span>
 <span class="sd">      we maintain inverse of Hessian and update it with Sherman–Morrison formula</span>
 
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># assuming the input coordinates are in the shape of (batch_size, n_atoms, 3)</span>
     <span class="c1"># for convenience, notations follow the wikipedia page:</span>
     <span class="c1"># https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%93Goldfarb%E2%80%93Shanno_algorithm</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">H0</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mi">70</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">H0</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mi">70</span><span class="p">,</span> <span class="n">maxstep</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">fmax</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">logfile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">):</span>
         <span class="c1"># hyperpamaters H0=70.0 &amp; maxstep=0.2 are learned from ASE implementation</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">max_steps</span><span class="p">,</span> <span class="n">logfile</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">H0</span> <span class="o">=</span> <span class="n">H0</span>  <span class="c1"># initialize Hessian to diagonal matrices with H0</span>
@@ -649,7 +649,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Binv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># the initial B mask is bool matrix</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Binv</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_atoms</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Binv_mask</span>
             <span class="c1"># after the first update, we no longer need to save the boolean Binv_mask, but we need to save</span>
-            <span class="c1"># the &quot;padded identity matrices&quot;, which has the same shape as Binv_mask, so I simply save it into self.Binv_mask</span>
+            <span class="c1"># the "padded identity matrices", which has the same shape as Binv_mask, so I simply save it into self.Binv_mask</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Binv_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Binv</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Binv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Binv</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">H0</span>
             <span class="k">return</span>
@@ -657,7 +657,7 @@
         <span class="n">flattened_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="n">s</span> <span class="o">=</span> <span class="n">flattened_coords</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_coords</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="c1"># Note that forces are -f&#39;(x)</span>
+        <span class="c1"># Note that forces are -f'(x)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">flattened_forces</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_forces</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
 
         <span class="n">alpha</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">@</span> <span class="n">s</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
@@ -672,8 +672,8 @@
 
 <div class="viewcode-block" id="BFGSv3.log">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.optimizer.algorithms.html#hippynn.optimizer.algorithms.BFGSv3.log">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Binv: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Binv</span><span class="p">))</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extra_message</span><span class="o">=</span><span class="s2">""</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">"Binv: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">"</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Binv</span><span class="p">))</span>
         <span class="n">message</span> <span class="o">+=</span> <span class="n">extra_message</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>

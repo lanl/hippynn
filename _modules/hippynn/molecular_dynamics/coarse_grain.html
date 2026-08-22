@@ -121,7 +121,7 @@
     <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">n_atoms</span><span class="p">,</span> <span class="p">):</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">n_frames</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="k">elif</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">n_frames</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected shape found for &#39;</span><span class="si">{</span><span class="n">value_name</span><span class="si">}</span><span class="s2">&#39;. Expected (</span><span class="si">{</span><span class="n">n_frames</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">n_atoms</span><span class="si">}</span><span class="s2">) or (</span><span class="si">{</span><span class="n">n_atoms</span><span class="si">}</span><span class="s2">,). Found </span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unexpected shape found for '</span><span class="si">{</span><span class="n">value_name</span><span class="si">}</span><span class="s2">'. Expected (</span><span class="si">{</span><span class="n">n_frames</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">n_atoms</span><span class="si">}</span><span class="s2">) or (</span><span class="si">{</span><span class="n">n_atoms</span><span class="si">}</span><span class="s2">,). Found </span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">value</span></div>
 
 
@@ -132,7 +132,7 @@
     <span class="k">if</span> <span class="n">cells</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
         <span class="n">cells</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="p">(</span><span class="n">n_frames</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="k">elif</span> <span class="n">cells</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">n_frames</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected shape found for &#39;cells&#39;. Expected (</span><span class="si">{</span><span class="n">n_frames</span><span class="si">}</span><span class="s2">, 3, 3) or (3, 3). Found </span><span class="si">{</span><span class="n">cells</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unexpected shape found for 'cells'. Expected (</span><span class="si">{</span><span class="n">n_frames</span><span class="si">}</span><span class="s2">, 3, 3) or (3, 3). Found </span><span class="si">{</span><span class="n">cells</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">cells</span></div>
 
 
@@ -144,21 +144,21 @@
     <span class="k">if</span> <span class="n">bead_species</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">max_bead_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">,):</span>
         <span class="n">bead_species</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">bead_species</span><span class="p">,</span> <span class="p">(</span><span class="n">n_frames</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="k">elif</span> <span class="n">bead_species</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">n_frames</span><span class="p">,</span> <span class="n">max_bead_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected shape found for &#39;bead_species&#39;. Expected (</span><span class="si">{</span><span class="n">n_frames</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">max_bead_idx</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">) or (</span><span class="si">{</span><span class="n">max_bead_idx</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">,). Found </span><span class="si">{</span><span class="n">bead_species</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unexpected shape found for 'bead_species'. Expected (</span><span class="si">{</span><span class="n">n_frames</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">max_bead_idx</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">) or (</span><span class="si">{</span><span class="n">max_bead_idx</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">,). Found </span><span class="si">{</span><span class="n">bead_species</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">bead_species</span></div>
 
 
 <div class="viewcode-block" id="compute_bead_indices">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.coarse_grain.html#hippynn.molecular_dynamics.compute_bead_indices">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_bead_indices</span><span class="p">(</span><span class="n">atom_to_bead</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute bead indices from an atom-to-bead mapping.</span>
 
 <span class="sd">    :param atom_to_bead: Array of shape (n_atoms,) mapping each atom to a bead.</span>
 <span class="sd">    :return: Tuple (beads, bead_indices) where:</span>
 <span class="sd">             - beads is a sorted array of unique bead labels.</span>
 <span class="sd">             - bead_indices is a dict mapping each bead label to its atom indices.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">beads</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">atom_to_bead</span><span class="p">)</span>
     <span class="n">bead_indices</span> <span class="o">=</span> <span class="p">{</span><span class="n">bead</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">atom_to_bead</span> <span class="o">==</span> <span class="n">bead</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">bead</span> <span class="ow">in</span> <span class="n">beads</span><span class="p">}</span>
     <span class="k">return</span> <span class="n">beads</span><span class="p">,</span> <span class="n">bead_indices</span></div>
@@ -175,7 +175,7 @@
 <div class="viewcode-block" id="coarse_grain_all">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.coarse_grain.html#hippynn.molecular_dynamics.coarse_grain_all">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">coarse_grain_all</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">atom_to_bead</span><span class="p">,</span> <span class="n">coarse_grain_one</span><span class="p">,</span> <span class="n">masses</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cells</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">atom_species</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bead_species</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">single_frame</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Apply a user-defined ``coarse_grain_one`` function to all beads across all frames.</span>
 
 <span class="sd">    The user-supplied function, ``coarse_grain_one``, should take ``bead_values`` as an argument, which will correspond the the values</span>
@@ -191,7 +191,7 @@
 <span class="sd">    :param values: Array of data to coarse-grain. Shape (n_frames, n_atoms, d) if single_frame=False or </span>
 <span class="sd">                  (n_atoms, d) if single_frame=True.</span>
 <span class="sd">    :param atom_to_bead: Integer array of shape (n_frames, n_atoms,) or (n_atoms,) mapping each atom to a bead.</span>
-<span class="sd">    :param coarse_grain_one: Function to coarse-grain one bead&#39;s data.</span>
+<span class="sd">    :param coarse_grain_one: Function to coarse-grain one bead's data.</span>
 <span class="sd">    :param masses: (Optional) Array of shape (n_frames, n_atoms,) or (n_atoms,) of masses. Values for the current frame/bead passed</span>
 <span class="sd">                  to ``coarse_grain_one`` if provided.</span>
 <span class="sd">    :param cells: (Optional) Array of shape (n_frames, 3, 3) or (3, 3) of cell matrices. The cell for the current frame</span>
@@ -204,7 +204,7 @@
 <span class="sd">    :param single_frame: (Optional) Use to specify if data arrays contain a frame axis. Defaults to False. </span>
 <span class="sd">    :return: Array of coarse-grained values. Shape (n_frames, n_beads, ...) if single_frame=False or </span>
 <span class="sd">                  (n_beads, ...) if single_frame=True.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">single_frame</span><span class="p">:</span>
         <span class="n">n_frames</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">n_atoms</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -212,10 +212,10 @@
         <span class="n">n_frames</span><span class="p">,</span> <span class="n">n_atoms</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
     
     <span class="c1"># Validation</span>
-    <span class="n">atom_to_bead</span> <span class="o">=</span> <span class="n">validate_nframes_natoms</span><span class="p">(</span><span class="n">atom_to_bead</span><span class="p">,</span> <span class="s2">&quot;atom_to_bead&quot;</span><span class="p">,</span> <span class="n">n_frames</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">masses</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">masses</span> <span class="o">=</span> <span class="n">validate_nframes_natoms</span><span class="p">(</span><span class="n">masses</span><span class="p">,</span> <span class="s2">&quot;masses&quot;</span><span class="p">,</span> <span class="n">n_frames</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">)</span>
+    <span class="n">atom_to_bead</span> <span class="o">=</span> <span class="n">validate_nframes_natoms</span><span class="p">(</span><span class="n">atom_to_bead</span><span class="p">,</span> <span class="s2">"atom_to_bead"</span><span class="p">,</span> <span class="n">n_frames</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">masses</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">masses</span> <span class="o">=</span> <span class="n">validate_nframes_natoms</span><span class="p">(</span><span class="n">masses</span><span class="p">,</span> <span class="s2">"masses"</span><span class="p">,</span> <span class="n">n_frames</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">cells</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">cells</span> <span class="o">=</span> <span class="n">validate_cells</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="n">n_frames</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">atom_species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">atom_species</span> <span class="o">=</span> <span class="n">validate_nframes_natoms</span><span class="p">(</span><span class="n">atom_species</span><span class="p">,</span> <span class="s2">&quot;atom_species&quot;</span><span class="p">,</span> <span class="n">n_frames</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">atom_species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">atom_species</span> <span class="o">=</span> <span class="n">validate_nframes_natoms</span><span class="p">(</span><span class="n">atom_species</span><span class="p">,</span> <span class="s2">"atom_species"</span><span class="p">,</span> <span class="n">n_frames</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">bead_species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">bead_species</span> <span class="o">=</span> <span class="n">validate_bead_species</span><span class="p">(</span><span class="n">bead_species</span><span class="p">,</span> <span class="n">atom_to_bead</span><span class="p">,</span> <span class="n">n_frames</span><span class="p">)</span>
 
     <span class="c1"># Begin computation</span>
@@ -225,15 +225,15 @@
         <span class="n">frame_result</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">bead</span> <span class="ow">in</span> <span class="n">beads</span><span class="p">:</span>
             <span class="n">indices</span> <span class="o">=</span> <span class="n">bead_indices</span><span class="p">[</span><span class="n">bead</span><span class="p">]</span>
-            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;bead_values&#39;</span><span class="p">:</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">indices</span><span class="p">]}</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'bead_values'</span><span class="p">:</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">indices</span><span class="p">]}</span>
             <span class="k">if</span> <span class="n">masses</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;bead_masses&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">masses</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">indices</span><span class="p">]</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s1">'bead_masses'</span><span class="p">]</span> <span class="o">=</span> <span class="n">masses</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">indices</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">cells</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;frame_cell&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cells</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s1">'frame_cell'</span><span class="p">]</span> <span class="o">=</span> <span class="n">cells</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">atom_species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;bead_atom_species&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">atom_species</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">indices</span><span class="p">]</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s1">'bead_atom_species'</span><span class="p">]</span> <span class="o">=</span> <span class="n">atom_species</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">indices</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">bead_species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;bead_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bead_species</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">bead</span><span class="p">]</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s1">'bead_type'</span><span class="p">]</span> <span class="o">=</span> <span class="n">bead_species</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">bead</span><span class="p">]</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">coarse_grain_one</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="n">frame_result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">single_frame</span><span class="p">:</span>
@@ -249,7 +249,7 @@
 <div class="viewcode-block" id="cg_one_center_of_mass_pbc">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.coarse_grain.html#hippynn.molecular_dynamics.cg_one_center_of_mass_pbc">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">cg_one_center_of_mass_pbc</span><span class="p">(</span><span class="n">bead_values</span><span class="p">,</span> <span class="n">bead_masses</span><span class="p">,</span> <span class="n">frame_cell</span><span class="p">,</span> <span class="n">wrap_into_cell</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Position center of mass using PBC&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Position center of mass using PBC"""</span>
     <span class="n">validate_diagonal_cell</span><span class="p">(</span><span class="n">cell</span><span class="o">=</span><span class="n">frame_cell</span><span class="p">)</span>
     <span class="n">mic_dists</span> <span class="o">=</span> <span class="n">find_mic</span><span class="p">(</span><span class="n">bead_values</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">bead_values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cell</span><span class="o">=</span><span class="n">frame_cell</span><span class="p">)</span>
     <span class="n">com</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mic_dists</span> <span class="o">*</span> <span class="n">bead_masses</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">bead_masses</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">bead_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -262,7 +262,7 @@
 <div class="viewcode-block" id="cg_one_center_of_geometry_pbc">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.coarse_grain.html#hippynn.molecular_dynamics.cg_one_center_of_geometry_pbc">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">cg_one_center_of_geometry_pbc</span><span class="p">(</span><span class="n">bead_values</span><span class="p">,</span> <span class="n">frame_cell</span><span class="p">,</span> <span class="n">wrap_into_cell</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Position center of geometry using PBC&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Position center of geometry using PBC"""</span>
     <span class="n">validate_diagonal_cell</span><span class="p">(</span><span class="n">cell</span><span class="o">=</span><span class="n">frame_cell</span><span class="p">)</span>
     <span class="n">mic_dists</span> <span class="o">=</span> <span class="n">find_mic</span><span class="p">(</span><span class="n">bead_values</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">bead_values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cell</span><span class="o">=</span><span class="n">frame_cell</span><span class="p">)</span>
     <span class="n">cog</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mic_dists</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">bead_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">bead_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -275,21 +275,21 @@
 <div class="viewcode-block" id="cg_one_mass_weighted_average">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.coarse_grain.html#hippynn.molecular_dynamics.cg_one_mass_weighted_average">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">cg_one_mass_weighted_average</span><span class="p">(</span><span class="n">bead_values</span><span class="p">,</span> <span class="n">bead_masses</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;General mass-weighted average (eg. for velocities when using COM position mapping)&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""General mass-weighted average (eg. for velocities when using COM position mapping)"""</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">bead_values</span> <span class="o">*</span> <span class="n">bead_masses</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">bead_masses</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="cg_one_average">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.coarse_grain.html#hippynn.molecular_dynamics.cg_one_average">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">cg_one_average</span><span class="p">(</span><span class="n">bead_values</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unweighted average&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Unweighted average"""</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">bead_values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="cg_one_sum">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.coarse_grain.html#hippynn.molecular_dynamics.cg_one_sum">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">cg_one_sum</span><span class="p">(</span><span class="n">bead_values</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sum of values&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Sum of values"""</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">bead_values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 </pre></div>

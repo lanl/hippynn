@@ -108,7 +108,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.experiment.lightning_trainer</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Pytorch Lightning training interface.</span>
 
 <span class="sd">This module is somewhat experimental. Using pytorch lightning</span>
@@ -120,7 +120,7 @@
 <span class="sd">Some features of hippynn experiments may not be implemented yet.</span>
 <span class="sd">    - The plotmaker is currently not supported.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
@@ -144,9 +144,9 @@
 <div class="viewcode-block" id="HippynnLightningModule">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnLightningModule">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HippynnLightningModule</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A pytorch lightning module for running a hippynn experiment.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">GraphModule</span><span class="p">,</span>
@@ -166,7 +166,7 @@
     <span class="p">):</span>  <span class="c1"># forwards args and kwargs to where?</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">save_hyperparameters</span><span class="p">(</span><span class="n">ignore</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;eval_loss&quot;</span><span class="p">,</span> <span class="s2">&quot;controller&quot;</span><span class="p">,</span> <span class="s2">&quot;optimizer_list&quot;</span><span class="p">,</span> <span class="s2">&quot;scheduler_list&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_hyperparameters</span><span class="p">(</span><span class="n">ignore</span><span class="o">=</span><span class="p">[</span><span class="s2">"loss"</span><span class="p">,</span> <span class="s2">"model"</span><span class="p">,</span> <span class="s2">"eval_loss"</span><span class="p">,</span> <span class="s2">"controller"</span><span class="p">,</span> <span class="s2">"optimizer_list"</span><span class="p">,</span> <span class="s2">"scheduler_list"</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span>
@@ -193,16 +193,16 @@
 
         <span class="k">for</span> <span class="n">optimizer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_list</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">step_fn</span> <span class="o">:=</span> <span class="n">get_step_function</span><span class="p">(</span><span class="n">optimizer</span><span class="p">),</span> <span class="n">StandardStep</span><span class="p">):</span>  <span class="c1"># :=</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Optimzers with non-standard steps are not yet supported. </span><span class="si">{</span><span class="n">optimizer</span><span class="p">,</span><span class="n">step_fn</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Optimzers with non-standard steps are not yet supported. </span><span class="si">{</span><span class="n">optimizer</span><span class="p">,</span><span class="n">step_fn</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">args</span> <span class="ow">or</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Generic args and kwargs not supported.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"Generic args and kwargs not supported."</span><span class="p">)</span>
 
 <div class="viewcode-block" id="HippynnLightningModule.from_experiment_setup">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnLightningModule.from_experiment_setup">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_experiment_setup</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">training_modules</span><span class="p">:</span> <span class="n">TrainingModules</span><span class="p">,</span> <span class="n">database</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Database</span><span class="p">],</span> <span class="n">setup_params</span><span class="p">:</span> <span class="n">SetupParams</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Create a lightning module using the same arguments as for :func:`hippynn.experiment.setup_and_train`.</span>
 
 <span class="sd">        :param training_modules:</span>
@@ -210,7 +210,7 @@
 <span class="sd">        :param setup_params:</span>
 <span class="sd">        :param kwargs:</span>
 <span class="sd">        :return: lightning_module, database</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">training_modules</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">metric_tracker</span> <span class="o">=</span> <span class="n">setup_training</span><span class="p">(</span><span class="n">training_modules</span><span class="p">,</span> <span class="n">setup_params</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_train_setup</span><span class="p">(</span><span class="n">training_modules</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">metric_tracker</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
@@ -228,7 +228,7 @@
         <span class="n">batch_callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Create a lightning module from the same arguments as for :func:`hippynn.experiment.train_model`.</span>
 
 <span class="sd">        :param training_modules:</span>
@@ -239,15 +239,15 @@
 <span class="sd">        :param batch_callbacks:</span>
 <span class="sd">        :param kwargs:</span>
 <span class="sd">        :return: lightning_module, database</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
 
         <span class="n">model</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">evaluator</span> <span class="o">=</span> <span class="n">training_modules</span>
 
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;PytorchLightning hippynn trainer is still experimental.&quot;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">"PytorchLightning hippynn trainer is still experimental."</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">plot_maker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;plot_maker is not currently supported in pytorch lightning. The current plot_maker will be ignored.&quot;</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">"plot_maker is not currently supported in pytorch lightning. The current plot_maker will be ignored."</span><span class="p">)</span>
 
         <span class="n">trainer</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
@@ -269,7 +269,7 @@
         <span class="n">controller</span><span class="o">.</span><span class="n">scheduler_list</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">if</span> <span class="n">callbacks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">batch_callbacks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">NotImplemented</span><span class="p">(</span><span class="s2">&quot;arbitrary callbacks are not yet supported with pytorch lightning.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span><span class="p">(</span><span class="s2">"arbitrary callbacks are not yet supported with pytorch lightning."</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">database</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">database</span> <span class="o">=</span> <span class="n">HippynnDataModule</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">controller</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
@@ -280,11 +280,11 @@
 <div class="viewcode-block" id="HippynnLightningModule.on_save_checkpoint">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_save_checkpoint">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">on_save_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checkpoint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param checkpoint:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="c1"># Note to future developers:</span>
         <span class="c1"># trainer.log_dir property needs to be called on all ranks! This is weird but important;</span>
@@ -299,7 +299,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">structure_file</span> <span class="o">=</span> <span class="n">sf</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_rank</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure_file</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;creating structure file.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">"creating structure file."</span><span class="p">)</span>
             <span class="n">structure</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
                 <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
                 <span class="n">loss</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span>
@@ -309,10 +309,10 @@
                 <span class="n">scheduler_list</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scheduler_list</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">log_dir</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">sf</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;Saving structure file at&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">"Saving structure file at"</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
 
-        <span class="n">checkpoint</span><span class="p">[</span><span class="s2">&quot;controller_state&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+        <span class="n">checkpoint</span><span class="p">[</span><span class="s2">"controller_state"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
         <span class="k">return</span></div>
 
 
@@ -320,7 +320,7 @@
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnLightningModule.load_from_checkpoint">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">load_from_checkpoint</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">checkpoint_path</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">structure_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hparams_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        :param checkpoint_path:</span>
 <span class="sd">        :param map_location:</span>
 <span class="sd">        :param structure_file:</span>
@@ -337,7 +337,7 @@
 
 <span class="sd">        :return:</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">if</span> <span class="n">structure_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Assume checkpoint_path is like &lt;model_name&gt;/version_&lt;n&gt;/checkpoints/&lt;something&gt;.chkpt</span>
@@ -356,12 +356,12 @@
 <div class="viewcode-block" id="HippynnLightningModule.on_load_checkpoint">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_load_checkpoint">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">on_load_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checkpoint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param checkpoint:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">cstate</span> <span class="o">=</span> <span class="n">checkpoint</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;controller_state&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="n">cstate</span> <span class="o">=</span> <span class="n">checkpoint</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"controller_state"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">cstate</span><span class="p">)</span>
         <span class="k">return</span></div>
 
@@ -369,20 +369,20 @@
 <div class="viewcode-block" id="HippynnLightningModule.configure_optimizers">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnLightningModule.configure_optimizers">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">scheduler_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler_list</span><span class="p">:</span>
             <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;scheduler&quot;</span><span class="p">:</span> <span class="n">s</span><span class="p">,</span>
-                <span class="s2">&quot;interval&quot;</span><span class="p">:</span> <span class="s2">&quot;epoch&quot;</span><span class="p">,</span>  <span class="c1"># can be epoch or step</span>
-                <span class="s2">&quot;frequency&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># How many intervals should pass between calls to  `scheduler.step()`.</span>
-                <span class="s2">&quot;monitor&quot;</span><span class="p">:</span> <span class="s2">&quot;valid_&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopping_key</span><span class="p">,</span>  <span class="c1"># Metric to monitor for schedulers like `ReduceLROnPlateau`</span>
-                <span class="s2">&quot;strict&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;learning_rate&quot;</span><span class="p">,</span>
+                <span class="s2">"scheduler"</span><span class="p">:</span> <span class="n">s</span><span class="p">,</span>
+                <span class="s2">"interval"</span><span class="p">:</span> <span class="s2">"epoch"</span><span class="p">,</span>  <span class="c1"># can be epoch or step</span>
+                <span class="s2">"frequency"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># How many intervals should pass between calls to  `scheduler.step()`.</span>
+                <span class="s2">"monitor"</span><span class="p">:</span> <span class="s2">"valid_"</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopping_key</span><span class="p">,</span>  <span class="c1"># Metric to monitor for schedulers like `ReduceLROnPlateau`</span>
+                <span class="s2">"strict"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"learning_rate"</span><span class="p">,</span>
             <span class="p">}</span>
             <span class="n">scheduler_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
@@ -394,24 +394,24 @@
 <div class="viewcode-block" id="HippynnLightningModule.on_train_epoch_start">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_train_epoch_start">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">on_train_epoch_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">for</span> <span class="n">optimizer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_list</span><span class="p">:</span>
             <span class="n">print_lr</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">print_</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;Batch size:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">train_dataloader</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">"Batch size:"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">train_dataloader</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HippynnLightningModule.training_step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnLightningModule.training_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param batch:</span>
 <span class="sd">        :param batch_idx:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">batch_inputs</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_inputs</span><span class="p">]</span>
         <span class="n">batch_targets</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">n_targets</span><span class="p">:]</span>
@@ -419,7 +419,7 @@
         <span class="n">batch_model_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="n">batch_inputs</span><span class="p">)</span>
         <span class="n">batch_train_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">(</span><span class="o">*</span><span class="n">batch_model_outputs</span><span class="p">,</span> <span class="o">*</span><span class="n">batch_targets</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;train_loss&quot;</span><span class="p">,</span> <span class="n">batch_train_loss</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">"train_loss"</span><span class="p">,</span> <span class="n">batch_train_loss</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">batch_train_loss</span></div>
 
 
@@ -441,33 +441,33 @@
 <div class="viewcode-block" id="HippynnLightningModule.validation_step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnLightningModule.validation_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param batch:</span>
 <span class="sd">        :param batch_idx:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eval_step</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HippynnLightningModule.test_step">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnLightningModule.test_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">test_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param batch:</span>
 <span class="sd">        :param batch_idx:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eval_step</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_eval_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
 
         <span class="n">all_batch_predictions</span><span class="p">,</span> <span class="n">all_batch_targets</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">eval_step_outputs</span><span class="p">)</span>
-        <span class="c1"># now &#39;shape&#39; (n_batch, n_outputs) -&gt; need to transpose.</span>
+        <span class="c1"># now 'shape' (n_batch, n_outputs) -&gt; need to transpose.</span>
         <span class="n">all_batch_predictions</span> <span class="o">=</span> <span class="p">[[</span><span class="n">bpred</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">bpred</span> <span class="ow">in</span> <span class="n">all_batch_predictions</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_outputs</span><span class="p">)]</span>
-        <span class="c1"># now &#39;shape&#39; (n_batch, n_targets) -&gt; need to transpose.</span>
+        <span class="c1"># now 'shape' (n_batch, n_targets) -&gt; need to transpose.</span>
         <span class="n">all_batch_targets</span> <span class="o">=</span> <span class="p">[[</span><span class="n">bpred</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">bpred</span> <span class="ow">in</span> <span class="n">all_batch_targets</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_targets</span><span class="p">)]</span>
 
         <span class="c1"># now cat each prediction and target across the batch index.</span>
@@ -486,29 +486,29 @@
 <div class="viewcode-block" id="HippynnLightningModule.on_validation_epoch_end">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_validation_epoch_end">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">on_validation_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_eval_epoch_end</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;valid_&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eval_epoch_end</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">"valid_"</span><span class="p">)</span>
         <span class="k">return</span></div>
 
 
 <div class="viewcode-block" id="HippynnLightningModule.on_test_epoch_end">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_test_epoch_end">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">on_test_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_eval_epoch_end</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;test_&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eval_epoch_end</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">"test_"</span><span class="p">)</span>
         <span class="k">return</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_eval_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">when</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">when</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">sanity_checking</span><span class="p">:</span>
-                <span class="n">when</span> <span class="o">=</span> <span class="s2">&quot;Sanity Check&quot;</span>
+                <span class="n">when</span> <span class="o">=</span> <span class="s2">"Sanity Check"</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">when</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span>
 
@@ -522,7 +522,7 @@
         <span class="n">loss_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">prefix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span> <span class="n">loss_dict</span><span class="p">}</span>  <span class="c1"># strip underscore from prefix and wrap.</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">sanity_checking</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;Sanity check metric values:&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">"Sanity check metric values:"</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metric_tracker</span><span class="o">.</span><span class="n">evaluation_print</span><span class="p">(</span><span class="n">loss_dict</span><span class="p">,</span> <span class="n">_print</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">)</span>
             <span class="k">return</span>
 
@@ -534,11 +534,11 @@
         <span class="n">continue_training</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">push_epoch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">,</span> <span class="n">stopping_metric</span><span class="p">,</span> <span class="n">_print</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">continue_training</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;Controller is terminating training.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">"Controller is terminating training."</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">should_stop</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># Step 3: Logic for changing the batch size without always requiring new dataloaders.</span>
-        <span class="c1"># Step 3a: don&#39;t do this when not testing.</span>
+        <span class="c1"># Step 3a: don't do this when not testing.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">training</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -550,7 +550,7 @@
                 <span class="c1"># save the original value of this variable to the pl module</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_last_reload_dlene</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">reload_dataloaders_every_n_epochs</span>
 
-            <span class="c1"># TODO: Make this run even if there isn&#39;t an explicit datamodule?</span>
+            <span class="c1"># TODO: Make this run even if there isn't an explicit datamodule?</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">controller_batch_size</span>
             <span class="c1"># Tell PL lightning to reload the dataloaders now.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">reload_dataloaders_every_n_epochs</span> <span class="o">=</span> <span class="mi">1</span>
@@ -560,29 +560,29 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">reload_dataloaders_every_n_epochs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_reload_dlene</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_last_reload_dlene</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Batch sizes match, and there&#39;s no variable to restore.</span>
+            <span class="c1"># Batch sizes match, and there's no variable to restore.</span>
             <span class="k">pass</span>
         <span class="k">return</span>
 
 <div class="viewcode-block" id="HippynnLightningModule.on_validation_end">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_validation_end">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">on_validation_end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_eval_end</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;valid_&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eval_end</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">"valid_"</span><span class="p">)</span>
         <span class="k">return</span></div>
 
 
 <div class="viewcode-block" id="HippynnLightningModule.on_test_end">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnLightningModule.on_test_end">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">on_test_end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_eval_end</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;test_&quot;</span><span class="p">,</span> <span class="n">when</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eval_end</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">"test_"</span><span class="p">,</span> <span class="n">when</span><span class="o">=</span><span class="s2">"test"</span><span class="p">)</span>
         <span class="k">return</span></div>
 </div>
 
@@ -591,21 +591,21 @@
 <div class="viewcode-block" id="LightingPrintStagesCallback">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.LightingPrintStagesCallback">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">LightingPrintStagesCallback</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Callback</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    This callback is for debugging only.</span>
 <span class="sd">    It prints whenever a callback stage is entered in pytorch lightning.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">Callback</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;on_&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"on_"</span><span class="p">):</span>
 
             <span class="k">def</span><span class="w"> </span><span class="nf">some_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">_k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
                 <span class="n">all_args</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
                 <span class="n">all_args</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">i</span><span class="p">:</span> <span class="n">a</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">)})</span>
                 <span class="n">int_args</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">all_args</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">int</span><span class="p">)}</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Callback stage:&quot;</span><span class="p">,</span> <span class="n">_k</span><span class="p">,</span> <span class="s2">&quot;with integer arguments:&quot;</span><span class="p">,</span> <span class="n">int_args</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">"Callback stage:"</span><span class="p">,</span> <span class="n">_k</span><span class="p">,</span> <span class="s2">"with integer arguments:"</span><span class="p">,</span> <span class="n">int_args</span><span class="p">)</span>
 
-            <span class="n">exec</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> = some_method&quot;</span><span class="p">)</span>
+            <span class="n">exec</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> = some_method"</span><span class="p">)</span>
             <span class="k">del</span> <span class="n">some_method</span></div>
 
 
@@ -621,31 +621,31 @@
 <div class="viewcode-block" id="HippynnDataModule.train_dataloader">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnDataModule.train_dataloader">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">train_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span></div>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span><span class="s2">"train"</span><span class="p">,</span> <span class="s2">"train"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HippynnDataModule.val_dataloader">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnDataModule.val_dataloader">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">val_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span><span class="s2">&quot;valid&quot;</span><span class="p">,</span> <span class="s2">&quot;eval&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span></div>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span><span class="s2">"valid"</span><span class="p">,</span> <span class="s2">"eval"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HippynnDataModule.test_dataloader">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.lightning_trainer.html#hippynn.experiment.lightning_trainer.HippynnDataModule.test_dataloader">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">test_dataloader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="s2">&quot;eval&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span></div>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span><span class="s2">"test"</span><span class="p">,</span> <span class="s2">"eval"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

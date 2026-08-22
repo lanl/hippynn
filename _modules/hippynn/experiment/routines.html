@@ -108,11 +108,11 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.experiment.routines</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 
 <span class="sd">Routines for setting up and performing training</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
@@ -142,7 +142,7 @@
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.routines.html#hippynn.SetupParams">[docs]</a>
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SetupParams</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    :param stopping_key:  name of validation metric for stopping</span>
 <span class="sd">    :param controller: Optional -- Controller object for LR scheduling and ending experiment.</span>
 <span class="sd">                        If not provided, will be constructed from parameters below.</span>
@@ -166,7 +166,7 @@
 <span class="sd">    .. Note::</span>
 
 <span class="sd">        Multiple GPUs is an experimental feature that is currently under debugging.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">controller</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Controller</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -180,14 +180,14 @@
     <span class="n">fraction_train_eval</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.1</span>
 
     <span class="n">_controller_params</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="s2">&quot;stopping_key&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;optimizer&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;learning_rate&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;scheduler&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;batch_size&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;eval_batch_size&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;max_epochs&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;fraction_train_eval&quot;</span><span class="p">,</span>
+        <span class="s2">"stopping_key"</span><span class="p">,</span>
+        <span class="s2">"optimizer"</span><span class="p">,</span>
+        <span class="s2">"learning_rate"</span><span class="p">,</span>
+        <span class="s2">"scheduler"</span><span class="p">,</span>
+        <span class="s2">"batch_size"</span><span class="p">,</span>
+        <span class="s2">"eval_batch_size"</span><span class="p">,</span>
+        <span class="s2">"max_epochs"</span><span class="p">,</span>
+        <span class="s2">"fraction_train_eval"</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -200,18 +200,18 @@
                 <span class="n">classpval</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">param_str</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">pval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">classpval</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span>
-                        <span class="s2">&quot;Warning: When controller is specified, argument &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">param_str</span><span class="si">}</span><span class="s2">&#39; should be given to the controller. &quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot;Value (</span><span class="si">{</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">param_str</span><span class="p">)</span><span class="si">}</span><span class="s2">) ignored.&quot;</span><span class="p">,</span>
+                        <span class="s2">"Warning: When controller is specified, argument "</span>
+                        <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">param_str</span><span class="si">}</span><span class="s2">' should be given to the controller. "</span>
+                        <span class="sa">f</span><span class="s2">"Value (</span><span class="si">{</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">param_str</span><span class="p">)</span><span class="si">}</span><span class="s2">) ignored."</span><span class="p">,</span>
                         <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
                     <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Throw error if not enough arguments specified</span>
             <span class="k">for</span> <span class="n">param_str</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_controller_params</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">param_str</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;scheduler&quot;</span><span class="p">,</span> <span class="s2">&quot;eval_batch_size&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">param_str</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"scheduler"</span><span class="p">,</span> <span class="s2">"eval_batch_size"</span><span class="p">):</span>
                     <span class="k">continue</span>
                 <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param_str</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;When controller is not specified, argument &#39;</span><span class="si">{</span><span class="n">param_str</span><span class="si">}</span><span class="s2">&#39; must be specified.&quot;</span><span class="p">)</span></div>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"When controller is not specified, argument '</span><span class="si">{</span><span class="n">param_str</span><span class="si">}</span><span class="s2">' must be specified."</span><span class="p">)</span></div>
 
 
 
@@ -225,7 +225,7 @@
     <span class="n">store_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">store_every</span><span class="o">=</span><span class="mi">0</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    :param: training_modules: see :func:`setup_training`</span>
 <span class="sd">    :param: database: see :func:`train_model`</span>
 <span class="sd">    :param: setup_params: see :func:`setup_training`</span>
@@ -243,7 +243,7 @@
 <span class="sd">        Saves files in the current running directory; recommend you switch</span>
 <span class="sd">        to a fresh directory with a descriptive name for your experiment.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Set up objects for training.</span>
 
     <span class="n">training_modules</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">metric_tracker</span> <span class="o">=</span> <span class="n">setup_training</span><span class="p">(</span>
@@ -271,7 +271,7 @@
     <span class="n">training_modules</span><span class="p">:</span> <span class="n">TrainingModules</span><span class="p">,</span>
     <span class="n">setup_params</span><span class="p">:</span> <span class="n">SetupParams</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Prepares training_modules for training with experiment_params.</span>
 
 <span class="sd">    :param: training_modules: Tuple of model, training loss, and evaluation losses</span>
@@ -290,7 +290,7 @@
 <span class="sd">    * creates a MetricTracker for storing the training metrics</span>
 
 <span class="sd">    :return: (optimizer,evaluator,controller,metrics,callbacks)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">setup_params</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="n">setup_params</span> <span class="o">=</span> <span class="n">SetupParams</span><span class="p">(</span><span class="o">**</span><span class="n">setup_params</span><span class="p">)</span>
 
@@ -298,17 +298,17 @@
 
     <span class="n">controller</span> <span class="o">=</span> <span class="n">setup_params</span><span class="o">.</span><span class="n">controller</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">controller</span><span class="p">,</span> <span class="n">Controller</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generating controller using values from setup params.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Generating controller using values from setup params."</span><span class="p">)</span>
 
         <span class="n">optimizer</span> <span class="o">=</span> <span class="n">setup_params</span><span class="o">.</span><span class="n">optimizer</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">optimizer</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generating Optimizer from setup params, defaulting to parameters in model that require grad.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"Generating Optimizer from setup params, defaulting to parameters in model that require grad."</span><span class="p">)</span>
             <span class="n">params</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
             <span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">setup_params</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">)</span>
 
         <span class="n">scheduler</span> <span class="o">=</span> <span class="n">setup_params</span><span class="o">.</span><span class="n">scheduler</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_scheduler_like</span><span class="p">(</span><span class="n">scheduler</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">scheduler</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generating Scheduler from setup params&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"Generating Scheduler from setup params"</span><span class="p">)</span>
             <span class="n">scheduler</span> <span class="o">=</span> <span class="n">scheduler</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
 
         <span class="n">controller_cls</span> <span class="o">=</span> <span class="n">Controller</span> <span class="k">if</span> <span class="n">controller</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">controller</span>
@@ -350,7 +350,7 @@
     <span class="n">store_metrics</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Performs training loop, allows keyboard interrupt. When done,</span>
 <span class="sd">    reinstate the best model, make plots and metrics over time, and test the model.</span>
 
@@ -387,23 +387,23 @@
 <span class="sd">        callback state is not managed by ``hippynn``. If your wish to save or load callback state, you will</span>
 <span class="sd">        have to manage that manually (possibly with a callback itself).</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">model</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">evaluator</span> <span class="o">=</span> <span class="n">training_modules</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Beginning training.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Beginning training."</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">DataParallel</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">parallel</span><span class="o">.</span><span class="n">DistributedDataParallel</span><span class="p">)):</span>
             <span class="n">print_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">module</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Distributed training with &quot;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"Distributed training with "</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">print_model</span> <span class="o">=</span> <span class="n">model</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Model:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"Model:"</span><span class="p">)</span>
             <span class="n">print_model</span><span class="o">.</span><span class="n">print_structure</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">eee</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model structure couldn&#39;t be printed. (Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">eee</span><span class="p">)</span><span class="si">}</span><span class="s2">). Skipping.&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Model Params:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Model structure couldn't be printed. (Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">eee</span><span class="p">)</span><span class="si">}</span><span class="s2">). Skipping."</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Model Params:"</span><span class="p">)</span>
         <span class="n">tools</span><span class="o">.</span><span class="n">param_print</span><span class="p">(</span><span class="n">print_model</span><span class="p">)</span>
 
     <span class="n">metric_tracker</span><span class="o">.</span><span class="n">quiet</span> <span class="o">=</span> <span class="n">quiet</span>
@@ -429,33 +429,33 @@
         <span class="p">)</span>
 
     <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;******* TRAINING INTERRUPTED *******&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Finishing up...&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Training phase ended.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"******* TRAINING INTERRUPTED *******"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Finishing up..."</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Training phase ended."</span><span class="p">)</span>
 
-    <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">metric_tracker</span><span class="p">,</span> <span class="s2">&quot;training_metrics.pt&quot;</span><span class="p">)</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">metric_tracker</span><span class="p">,</span> <span class="s2">"training_metrics.pt"</span><span class="p">)</span>
 
     <span class="n">best_model</span> <span class="o">=</span> <span class="n">metric_tracker</span><span class="o">.</span><span class="n">best_model</span>
     <span class="k">if</span> <span class="n">best_model</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reverting to best model found.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Reverting to best model found."</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">best_model</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Making plots over training time...&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Making plots over training time..."</span><span class="p">)</span>
     <span class="n">metric_tracker</span><span class="o">.</span><span class="n">plot_over_time</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Testing model...&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Testing model..."</span><span class="p">)</span>
     <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>
     <span class="n">test_model</span><span class="p">(</span>
         <span class="n">database</span><span class="p">,</span>
         <span class="n">evaluator</span><span class="p">,</span>
-        <span class="n">when</span><span class="o">=</span><span class="s2">&quot;FinalTraining&quot;</span><span class="p">,</span>
+        <span class="n">when</span><span class="o">=</span><span class="s2">"FinalTraining"</span><span class="p">,</span>
         <span class="n">batch_size</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">eval_batch_size</span><span class="p">,</span>
         <span class="n">metric_tracker</span><span class="o">=</span><span class="n">metric_tracker</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">store_metrics</span><span class="p">:</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;training_metrics.pkl&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"training_metrics.pkl"</span><span class="p">,</span> <span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
             <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">metric_tracker</span><span class="p">,</span> <span class="n">pfile</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Training complete.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Training complete."</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">metric_tracker</span></div>
 
 
@@ -463,7 +463,7 @@
 <div class="viewcode-block" id="test_model">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.routines.html#hippynn.test_model">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">test_model</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">when</span><span class="p">,</span> <span class="n">metric_tracker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">splits</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Tests the model on the database according to the model_evaluator metrics.</span>
 <span class="sd">    If a plot_maker is attached to the model evaluator, it will make plots.</span>
 <span class="sd">    The plots will go in a sub-folder specified by `when` the testing is taking place.</span>
@@ -478,7 +478,7 @@
 <span class="sd">    :param split_list: a list of splits to evaluate. If None, the list will be automatically determined.</span>
 
 <span class="sd">    :return: metric tracker</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">evaluator</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">metric_tracker</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -498,19 +498,19 @@
                 <span class="n">evaluatable_splits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sname</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">missing_arrays</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">required_variables</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">split</span><span class="p">)</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Database contains split &#39;</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">&#39; which&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot; cannot be evaluated because it does not contain the&quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot; required quantities: </span><span class="si">{</span><span class="n">missing_arrays</span><span class="si">}</span><span class="s2">.&quot;</span>
-                             <span class="s2">&quot; It will be skipped.&quot;</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Database contains split '</span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2">' which"</span>
+                            <span class="sa">f</span><span class="s2">" cannot be evaluated because it does not contain the"</span>
+                            <span class="sa">f</span><span class="s2">" required quantities: </span><span class="si">{</span><span class="n">missing_arrays</span><span class="si">}</span><span class="s2">."</span>
+                             <span class="s2">" It will be skipped."</span><span class="p">)</span>
 
         <span class="c1"># A little dance to make sure train, valid, test always come first, when present.</span>
-        <span class="n">basic_splits</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;valid&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">]</span>
+        <span class="n">basic_splits</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"train"</span><span class="p">,</span> <span class="s2">"valid"</span><span class="p">,</span> <span class="s2">"test"</span><span class="p">]</span>
         <span class="n">basic_splits</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">basic_splits</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">evaluatable_splits</span><span class="p">]</span>
         <span class="n">splits</span> <span class="o">=</span> <span class="n">basic_splits</span> <span class="o">+</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">evaluatable_splits</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">basic_splits</span><span class="p">]</span>
 
     <span class="n">evaluation_data</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
         <span class="p">(</span>
-            <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;eval&quot;</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">))</span>
+            <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s2">"eval"</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">splits</span>
         <span class="p">)</span>
     <span class="p">)</span>
@@ -535,7 +535,7 @@
     <span class="n">store_every</span><span class="p">,</span>
     <span class="n">quiet</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Performs a high-level training loop.</span>
 
 <span class="sd">    :param training_modules:  training modules from ``assemble_modules``</span>
@@ -547,7 +547,7 @@
 <span class="sd">    :param store_best: Save a checkpoint for the best model</span>
 <span class="sd">    :param store_all_better: Save the state dict for each model doing better than a previous one</span>
 <span class="sd">    :param store_every: Save a checkpoint for every certain epochs</span>
-<span class="sd">    :param quiet: whether to print information. Setting quiet to true won&#39;t prevent progress bars.</span>
+<span class="sd">    :param quiet: whether to print information. Setting quiet to true won't prevent progress bars.</span>
 
 <span class="sd">    :return: metrics -- the state of the experiment after training</span>
 
@@ -570,7 +570,7 @@
 <span class="sd">    - Epoch callbacks</span>
 <span class="sd">    - If new best, save the model state_dict and a checkpoint</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">if</span> <span class="n">quiet</span><span class="p">:</span>
         <span class="n">qprint</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="kc">None</span>
@@ -581,12 +581,12 @@
 
     <span class="c1">### Trigger better error message if inputs or targets is not set!</span>
     <span class="n">database</span><span class="o">.</span><span class="n">var_list</span>
-    <span class="c1"># (If we remove this line, we&#39;ll still get an error but it will be more obscure.)</span>
+    <span class="c1"># (If we remove this line, we'll still get an error but it will be more obscure.)</span>
     <span class="c1">###</span>
     <span class="n">n_inputs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">database</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
     <span class="n">n_targets</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">database</span><span class="o">.</span><span class="n">targets</span><span class="p">)</span>
 
-    <span class="n">qprint</span><span class="p">(</span><span class="s2">&quot;At least </span><span class="si">{}</span><span class="s2"> epochs will be run&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">controller</span><span class="o">.</span><span class="n">max_epochs</span><span class="p">))</span>
+    <span class="n">qprint</span><span class="p">(</span><span class="s2">"At least </span><span class="si">{}</span><span class="s2"> epochs will be run"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">controller</span><span class="o">.</span><span class="n">max_epochs</span><span class="p">))</span>
 
     <span class="n">epoch</span> <span class="o">=</span> <span class="n">metric_tracker</span><span class="o">.</span><span class="n">current_epoch</span>
     <span class="n">device</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">model_device</span>
@@ -597,18 +597,18 @@
 
     <span class="k">while</span> <span class="n">continue_training</span><span class="p">:</span>
 
-        <span class="n">qprint</span><span class="p">(</span><span class="s2">&quot;_&quot;</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
-        <span class="n">qprint</span><span class="p">(</span><span class="s2">&quot;Epoch </span><span class="si">{}</span><span class="s2">:&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">epoch</span><span class="p">))</span>
+        <span class="n">qprint</span><span class="p">(</span><span class="s2">"_"</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+        <span class="n">qprint</span><span class="p">(</span><span class="s2">"Epoch </span><span class="si">{}</span><span class="s2">:"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">epoch</span><span class="p">))</span>
         <span class="n">tools</span><span class="o">.</span><span class="n">print_lr</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
-        <span class="n">qprint</span><span class="p">(</span><span class="s2">&quot;Batch Size:&quot;</span><span class="p">,</span> <span class="n">controller</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+        <span class="n">qprint</span><span class="p">(</span><span class="s2">"Batch Size:"</span><span class="p">,</span> <span class="n">controller</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
 
-        <span class="n">qprint</span><span class="p">(</span><span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">qprint</span><span class="p">(</span><span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
 
         <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
         <span class="n">epoch_run_time</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">default_timer</span><span class="p">()</span>
-        <span class="n">train_generator</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+        <span class="n">train_generator</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span><span class="s2">"train"</span><span class="p">,</span> <span class="s2">"train"</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">progress_bar</span><span class="p">(</span><span class="n">train_generator</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Training Batches&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;batch&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">progress_bar</span><span class="p">(</span><span class="n">train_generator</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"Training Batches"</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">"batch"</span><span class="p">):</span>
 
             <span class="n">batch</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">]</span>
             <span class="n">batch_inputs</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[:</span><span class="n">n_inputs</span><span class="p">]</span>
@@ -624,20 +624,20 @@
             <span class="k">del</span> <span class="n">batch_model_outputs</span>
 
         <span class="n">elapsed_epoch_run_time</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">default_timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">epoch_run_time</span>
-        <span class="n">qprint</span><span class="p">(</span><span class="s2">&quot;Training time: &quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">elapsed_epoch_run_time</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s2">&quot;s&quot;</span><span class="p">)</span>
-        <span class="n">qprint</span><span class="p">(</span><span class="s2">&quot;Validating...&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">qprint</span><span class="p">(</span><span class="s2">"Training time: "</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">elapsed_epoch_run_time</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s2">"s"</span><span class="p">)</span>
+        <span class="n">qprint</span><span class="p">(</span><span class="s2">"Validating..."</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
 
         <span class="n">evaluation_data</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
             <span class="p">(</span>
                 <span class="p">(</span>
-                    <span class="s2">&quot;train&quot;</span><span class="p">,</span>
+                    <span class="s2">"train"</span><span class="p">,</span>
                     <span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span>
-                        <span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;eval&quot;</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">eval_batch_size</span><span class="p">,</span> <span class="n">subsample</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">fraction_train_eval</span>
+                        <span class="s2">"train"</span><span class="p">,</span> <span class="s2">"eval"</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">eval_batch_size</span><span class="p">,</span> <span class="n">subsample</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">fraction_train_eval</span>
                     <span class="p">),</span>
                 <span class="p">),</span>
-                <span class="p">(</span><span class="s2">&quot;valid&quot;</span><span class="p">,</span> <span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span><span class="s2">&quot;valid&quot;</span><span class="p">,</span> <span class="s2">&quot;eval&quot;</span><span class="p">,</span> <span class="n">controller</span><span class="o">.</span><span class="n">eval_batch_size</span><span class="p">)),</span>
+                <span class="p">(</span><span class="s2">"valid"</span><span class="p">,</span> <span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span><span class="s2">"valid"</span><span class="p">,</span> <span class="s2">"eval"</span><span class="p">,</span> <span class="n">controller</span><span class="o">.</span><span class="n">eval_batch_size</span><span class="p">)),</span>
             <span class="p">)</span>
         <span class="p">)</span>
         <span class="n">evaluation_metrics</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="n">eval_type</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">when</span><span class="o">=</span><span class="n">epoch</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">gen</span> <span class="ow">in</span> <span class="n">evaluation_data</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
@@ -650,43 +650,43 @@
 
         <span class="n">elapsed_epoch_run_time</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">default_timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">epoch_run_time</span>
         <span class="n">metric_tracker</span><span class="o">.</span><span class="n">epoch_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elapsed_epoch_run_time</span><span class="p">)</span>
-        <span class="n">qprint</span><span class="p">(</span><span class="s2">&quot;Total epoch time: &quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">elapsed_epoch_run_time</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s2">&quot;s&quot;</span><span class="p">)</span>
+        <span class="n">qprint</span><span class="p">(</span><span class="s2">"Total epoch time: "</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">elapsed_epoch_run_time</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s2">"s"</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">callbacks</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="n">callbacks</span><span class="p">:</span>
                 <span class="n">cb</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">better_model</span><span class="p">:</span>
-            <span class="n">qprint</span><span class="p">(</span><span class="s2">&quot;**** NEW BEST MODEL - Saving! ****&quot;</span><span class="p">)</span>
+            <span class="n">qprint</span><span class="p">(</span><span class="s2">"**** NEW BEST MODEL - Saving! ****"</span><span class="p">)</span>
             <span class="n">best_model</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">())</span>
             <span class="n">metric_tracker</span><span class="o">.</span><span class="n">best_model</span> <span class="o">=</span> <span class="n">best_model</span>
 
             <span class="k">if</span> <span class="n">store_all_better</span><span class="p">:</span>
                 <span class="c1"># Save a copy of every network doing better</span>
                 <span class="c1"># Note: epoch has already been incremented, so decrement in saving file.</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;better_model_epoch_</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">"better_model_epoch_</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">.pt"</span><span class="p">,</span> <span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
                     <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">best_model</span><span class="p">,</span> <span class="n">pfile</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">store_best</span><span class="p">:</span>
-                <span class="c1"># Overwrite the &quot;best model so far&quot;</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;best_model.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
+                <span class="c1"># Overwrite the "best model so far"</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"best_model.pt"</span><span class="p">,</span> <span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
                     <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">best_model</span><span class="p">,</span> <span class="n">pfile</span><span class="p">)</span>
 
                 <span class="n">state</span> <span class="o">=</span> <span class="n">serialization</span><span class="o">.</span><span class="n">create_state</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">metric_tracker</span><span class="p">)</span>
 
                 <span class="c1"># Write the checkpoint</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;best_checkpoint.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"best_checkpoint.pt"</span><span class="p">,</span> <span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
                     <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">pfile</span><span class="p">)</span>
             
         <span class="k">if</span> <span class="n">store_every</span> <span class="ow">and</span> <span class="n">epoch</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">%</span> <span class="n">store_every</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># Save a copy every &quot;store_every&quot; epoch</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;model_epoch_</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
+            <span class="c1"># Save a copy every "store_every" epoch</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">"model_epoch_</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">.pt"</span><span class="p">,</span> <span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">pfile</span><span class="p">)</span>
             
             <span class="n">state</span> <span class="o">=</span> <span class="n">serialization</span><span class="o">.</span><span class="n">create_state</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">metric_tracker</span><span class="p">)</span>
 
             <span class="c1"># Write the checkpoint</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;checkpoint_epoch_</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">"checkpoint_epoch_</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">.pt"</span><span class="p">,</span> <span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">pfile</span><span class="p">)</span>
 
         <span class="n">epoch</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -709,9 +709,9 @@
     <span class="n">with_stack</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">with_modules</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">with_flops</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">trace_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;profile_trace.json&quot;</span><span class="p">,</span>
+    <span class="n">trace_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"profile_trace.json"</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Profile training for performance analysis.</span>
 
 <span class="sd">    For documentation information, see :doc:`/user_guide/performance`</span>
@@ -725,7 +725,7 @@
 <span class="sd">    :param setup_params: see :func:`setup_training`</span>
 <span class="sd">    :param profile_epochs: Number of epochs to profile (default: 3)</span>
 <span class="sd">    :param batches_per_epoch: Number of batches per epoch to profile (default: 5)</span>
-<span class="sd">    :param trace_file: Output path for Chrome trace file (default: &quot;profile_trace.json&quot;)</span>
+<span class="sd">    :param trace_file: Output path for Chrome trace file (default: "profile_trace.json")</span>
 
 <span class="sd">    :return: Path to the saved trace file</span>
 
@@ -735,13 +735,13 @@
 <span class="sd">    .. Note::</span>
 <span class="sd">        Open chrome://tracing in Chrome browser to visualize the trace file.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># informs users that epoch number is overwritten temporarily </span>
     <span class="n">max_epochs</span> <span class="o">=</span> <span class="n">setup_params</span><span class="o">.</span><span class="n">max_epochs</span>
     <span class="k">if</span> <span class="n">max_epochs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">max_epochs</span> <span class="o">&gt;</span> <span class="n">profile_epochs</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Note: setup_and_profile uses </span><span class="si">{</span><span class="n">profile_epochs</span><span class="si">}</span><span class="s2"> epochs for profiling &quot;</span>
-              <span class="sa">f</span><span class="s2">&quot;(your setting of </span><span class="si">{</span><span class="n">setup_params</span><span class="o">.</span><span class="n">max_epochs</span><span class="si">}</span><span class="s2"> epochs is temporarily ignored). &quot;</span>
-              <span class="sa">f</span><span class="s2">&quot;This provides enough data to analyze performance without excessive runtime.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Note: setup_and_profile uses </span><span class="si">{</span><span class="n">profile_epochs</span><span class="si">}</span><span class="s2"> epochs for profiling "</span>
+              <span class="sa">f</span><span class="s2">"(your setting of </span><span class="si">{</span><span class="n">setup_params</span><span class="o">.</span><span class="n">max_epochs</span><span class="si">}</span><span class="s2"> epochs is temporarily ignored). "</span>
+              <span class="sa">f</span><span class="s2">"This provides enough data to analyze performance without excessive runtime."</span><span class="p">)</span>
     
     
     <span class="n">training_modules</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">metric_tracker</span> <span class="o">=</span> <span class="n">setup_training</span><span class="p">(</span>
@@ -752,7 +752,7 @@
     <span class="n">model</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">evaluator</span> <span class="o">=</span> <span class="n">training_modules</span>
     
     <span class="k">if</span> <span class="ow">not</span> <span class="n">database</span><span class="o">.</span><span class="n">splitting_completed</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Database has not been split. Please split the database before profiling.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Database has not been split. Please split the database before profiling."</span><span class="p">)</span>
     <span class="n">database</span><span class="o">.</span><span class="n">align</span><span class="p">(</span><span class="o">**</span><span class="n">evaluator</span><span class="o">.</span><span class="n">db_info</span><span class="p">)</span>
     
     <span class="n">n_inputs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">database</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
@@ -761,9 +761,9 @@
     <span class="n">optimizer</span> <span class="o">=</span> <span class="n">controller</span><span class="o">.</span><span class="n">optimizer</span>
     <span class="n">step_function</span> <span class="o">=</span> <span class="n">get_step_function</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
     
-    <span class="n">use_cuda</span> <span class="o">=</span> <span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+    <span class="n">use_cuda</span> <span class="o">=</span> <span class="p">(</span><span class="n">device</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">"cuda"</span><span class="p">)</span>
 
-    <span class="n">train_gen</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+    <span class="n">train_gen</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">make_generator</span><span class="p">(</span><span class="s2">"train"</span><span class="p">,</span> <span class="s2">"train"</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">controller</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
     <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">step_once</span><span class="p">(</span><span class="n">batch</span><span class="p">):</span>
@@ -775,14 +775,14 @@
         <span class="k">del</span> <span class="n">batch_model_outputs</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">step_batches</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">progress_bar</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">train_gen</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Batches&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;batch&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">progress_bar</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">train_gen</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"Batches"</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">"batch"</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">batch_idx</span> <span class="o">&gt;=</span> <span class="n">batches_per_epoch</span><span class="p">:</span>
                 <span class="k">break</span>
             <span class="n">step_once</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>    
     
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Profiling </span><span class="si">{</span><span class="n">profile_epochs</span><span class="si">}</span><span class="s2"> epochs x </span><span class="si">{</span><span class="n">batches_per_epoch</span><span class="si">}</span><span class="s2"> batches on device &#39;</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Profiling </span><span class="si">{</span><span class="n">profile_epochs</span><span class="si">}</span><span class="s2"> epochs x </span><span class="si">{</span><span class="n">batches_per_epoch</span><span class="si">}</span><span class="s2"> batches on device '</span><span class="si">{</span><span class="n">device</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running warmup batches.&quot;</span><span class="p">)</span>    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Running warmup batches."</span><span class="p">)</span>    
     <span class="c1"># We run the test batches so that all necessary code is imported before tracing.</span>
     <span class="c1"># This also warms up the GPU memory allocation.</span>
     <span class="n">step_batches</span><span class="p">()</span>
@@ -798,15 +798,15 @@
         <span class="n">with_flops</span><span class="o">=</span><span class="n">with_flops</span><span class="p">,</span>
         <span class="n">with_modules</span><span class="o">=</span><span class="n">with_modules</span><span class="p">,</span>
     <span class="p">)</span> <span class="k">as</span> <span class="n">prof</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">progress_bar</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">profile_epochs</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Profiling Epochs&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;epoch&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">tools</span><span class="o">.</span><span class="n">progress_bar</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">profile_epochs</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">"Profiling Epochs"</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">"epoch"</span><span class="p">):</span>
             <span class="n">step_batches</span><span class="p">()</span>
             
     
     <span class="n">prof</span><span class="o">.</span><span class="n">export_chrome_trace</span><span class="p">(</span><span class="n">trace_file</span><span class="p">)</span>
     
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Profile saved to: </span><span class="si">{</span><span class="n">trace_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Open chrome://tracing in Chrome to visualize.&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">prof</span><span class="o">.</span><span class="n">key_averages</span><span class="p">()</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="n">sort_by</span><span class="o">=</span><span class="s2">&quot;cpu_time_total&quot;</span><span class="p">,</span> <span class="n">row_limit</span><span class="o">=</span><span class="mi">15</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Profile saved to: </span><span class="si">{</span><span class="n">trace_file</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Open chrome://tracing in Chrome to visualize."</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">prof</span><span class="o">.</span><span class="n">key_averages</span><span class="p">()</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="n">sort_by</span><span class="o">=</span><span class="s2">"cpu_time_total"</span><span class="p">,</span> <span class="n">row_limit</span><span class="o">=</span><span class="mi">15</span><span class="p">))</span>
     
     <span class="k">return</span> <span class="n">trace_file</span></div>
 

@@ -108,9 +108,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.layers.physics.coulomb</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Layers for physical operations</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -121,16 +121,16 @@
 <div class="viewcode-block" id="CoulombEnergy">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.CoulombEnergy">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CoulombEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Computes the Coulomb Energy of the molecule/configuration. </span>
+<span class="w">    </span><span class="sd">""" Computes the Coulomb Energy of the molecule/configuration. </span>
 <span class="sd">    </span>
 <span class="sd">    Coulomb energies is defined for pairs of atoms. Here, we adopt the </span>
 <span class="sd">    convention that the Coulomby energy for a pair of atoms is evenly</span>
-<span class="sd">    partitioned to both atoms as the &#39;per-atom energies&#39;. Therefore, the </span>
+<span class="sd">    partitioned to both atoms as the 'per-atom energies'. Therefore, the </span>
 <span class="sd">    atom energies sum to the molecular energy; similar to the HEnergy. </span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_conversion_factor</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;energy_conversion_factor&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">energy_conversion_factor</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">"energy_conversion_factor"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">energy_conversion_factor</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">summer</span> <span class="o">=</span> <span class="n">indexers</span><span class="o">.</span><span class="n">MolSummer</span><span class="p">()</span>
 
 <div class="viewcode-block" id="CoulombEnergy.forward">
@@ -150,18 +150,18 @@
 <div class="viewcode-block" id="ScreenedCoulombEnergy">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.ScreenedCoulombEnergy">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ScreenedCoulombEnergy</span><span class="p">(</span><span class="n">CoulombEnergy</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Computes the Coulomb Energy of the molecule/configuration. </span>
+<span class="w">    </span><span class="sd">""" Computes the Coulomb Energy of the molecule/configuration. </span>
 <span class="sd">    </span>
 <span class="sd">    The convention for the atom energies is the same as CoulombEnergy</span>
 <span class="sd">    and the HEnergy. </span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">energy_conversion_factor</span><span class="p">,</span> <span class="n">screening</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">energy_conversion_factor</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">screening</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Screened Coulomb requires specification of a screening type.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Screened Coulomb requires specification of a screening type."</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">radius</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Screened Coulomb requires specification of a radius&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Screened Coulomb requires specification of a radius"</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">screening</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
             <span class="n">screening</span> <span class="o">=</span> <span class="n">screening</span><span class="p">()</span>
@@ -194,8 +194,8 @@
 <div class="viewcode-block" id="CombineScreenings">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.CombineScreenings">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CombineScreenings</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Returns products of different screenings for Screened Coulomb Interactions.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">""" Returns products of different screenings for Screened Coulomb Interactions.</span>
+<span class="sd">    """</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screening_list</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SL</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span><span class="n">screening_list</span><span class="p">)</span>
@@ -203,12 +203,12 @@
 <div class="viewcode-block" id="CombineScreenings.forward">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.CombineScreenings.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Product of different screenings applied to pair_dist upto radius.</span>
+<span class="w">        </span><span class="sd">""" Product of different screenings applied to pair_dist upto radius.</span>
 
-<span class="sd">        :param pair_dist: torch.tensor, dtype=float64: &#39;Neighborlist&#39; distances for coulomb energies.</span>
+<span class="sd">        :param pair_dist: torch.tensor, dtype=float64: 'Neighborlist' distances for coulomb energies.</span>
 <span class="sd">        :param radius: Maximum radius that Screened-Coulomb is evaluated upto.</span>
 <span class="sd">        :return screening: Weights for screening for all pair_dist.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">screening</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SL</span><span class="p">:</span>
@@ -236,7 +236,7 @@
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.EwaldRealSpaceScreening">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">EwaldRealSpaceScreening</span><span class="p">(</span><span class="n">AlphaScreening</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Ewald implementation incomplete, does not include k-space contributions.&quot;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">"Ewald implementation incomplete, does not include k-space contributions."</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
 
 <div class="viewcode-block" id="EwaldRealSpaceScreening.forward">
@@ -254,7 +254,7 @@
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.WolfScreening">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">WolfScreening</span><span class="p">(</span><span class="n">AlphaScreening</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Wolf implementation currently uses exact derivative of the potential.&quot;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">"Wolf implementation currently uses exact derivative of the potential."</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
 
 <div class="viewcode-block" id="WolfScreening.forward">
@@ -270,25 +270,25 @@
 <div class="viewcode-block" id="LocalDampingCosine">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.LocalDampingCosine">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">LocalDampingCosine</span><span class="p">(</span><span class="n">AlphaScreening</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Local damping using complement of the hipnn cutoff function. (&#39;glue-on&#39; method)</span>
+<span class="w">    </span><span class="sd">""" Local damping using complement of the hipnn cutoff function. ('glue-on' method)</span>
 <span class="sd">        g = 1 if pair_dist &gt; R_cutoff, 1 - [cos(pi/2 * dist * R_cutoff)]^2  otherwise</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span> 
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="w">        </span><span class="sd">""" </span>
 <span class="sd">        :param alpha: R_cutoff for glue-on function to ensure </span>
 <span class="sd">            smooth crossover from hipnn energy to long-range coulomb energy.  </span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span> 
 
 
 <div class="viewcode-block" id="LocalDampingCosine.forward">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.LocalDampingCosine.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_dist</span><span class="p">,</span> <span class="n">radius</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :param pair_dist: torch.tensor, dtype=float64: &#39;Neighborlist&#39; distances for coulomb energies.</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        :param pair_dist: torch.tensor, dtype=float64: 'Neighborlist' distances for coulomb energies.</span>
 <span class="sd">        :param radius: Maximum radius that Screened-Coulomb is evaluated upto. </span>
 <span class="sd">        :return screening: Weights for screening for each pair.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">pi</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">3.141592653589793238</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">pair_dist</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>        
         <span class="n">screening</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">pair_dist</span><span class="o">.</span><span class="n">device</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">pair_dist</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)))</span>
     
@@ -316,7 +316,7 @@
         <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_p_value</span> <span class="o">=</span> <span class="n">value</span>
         <span class="n">powers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">value</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;powers&quot;</span><span class="p">,</span> <span class="n">powers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">"powers"</span><span class="p">,</span> <span class="n">powers</span><span class="p">)</span>
 
 <div class="viewcode-block" id="QScreening.forward">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.QScreening.forward">[docs]</a>
@@ -333,9 +333,9 @@
 <div class="viewcode-block" id="change_tanh_range">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.change_tanh_range">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">change_tanh_range</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">minn</span><span class="p">,</span> <span class="n">maxx</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    Map [-1,1] to [min,  max]</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    '''</span>
     <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="n">vals</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="c1"># [0,1]</span>
     <span class="n">vals</span> <span class="o">=</span> <span class="n">vals</span> <span class="o">*</span> <span class="p">(</span><span class="n">maxx</span> <span class="o">-</span> <span class="n">minn</span><span class="p">)</span> <span class="o">+</span> <span class="n">minn</span>
     <span class="k">return</span> <span class="n">vals</span></div>
@@ -344,33 +344,33 @@
 <div class="viewcode-block" id="ChEQ">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.ChEQ">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ChEQ</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;energy&quot;</span><span class="p">:</span> <span class="s2">&quot;eV&quot;</span><span class="p">,</span> <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="s2">&quot;Angstrom&quot;</span><span class="p">},</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="p">{</span><span class="s2">"energy"</span><span class="p">:</span> <span class="s2">"eV"</span><span class="p">,</span> <span class="s2">"length"</span><span class="p">:</span> <span class="s2">"Angstrom"</span><span class="p">},</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        default unit used here</span>
 <span class="sd">        Length: Angstom</span>
 <span class="sd">        Charge: elementary charge +e</span>
 <span class="sd">        Energy: eV</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">units</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bound</span> <span class="o">=</span> <span class="n">lower_bound</span>  <span class="c1"># It was used to enforece Hubbard U to be positive (together with softplus), but it is replaced by using Tanh() here</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Angstrom&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">"length"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"Angstrom"</span><span class="p">:</span>
             <span class="n">length_scale</span> <span class="o">=</span> <span class="mf">1.0</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Bohr&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">"length"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"Bohr"</span><span class="p">:</span>
             <span class="n">length_scale</span> <span class="o">=</span> <span class="mf">0.529177210903</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;length with unit </span><span class="si">{}</span><span class="s2"> not supported yet&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"length with unit </span><span class="si">{}</span><span class="s2"> not supported yet"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">"length"</span><span class="p">]))</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;eV&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">"energy"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"eV"</span><span class="p">:</span>
             <span class="n">energy_scale</span> <span class="o">=</span> <span class="mf">1.0</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Hartree&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">"energy"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"Hartree"</span><span class="p">:</span>
             <span class="n">energy_scale</span> <span class="o">=</span> <span class="mf">27.211386245988</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;kcal/mol&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">"energy"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"kcal/mol"</span><span class="p">:</span>
             <span class="n">energy_scale</span> <span class="o">=</span> <span class="mf">23.0609</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;energy with unit </span><span class="si">{}</span><span class="s2"> not supported yet&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"energy with unit </span><span class="si">{}</span><span class="s2"> not supported yet"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="s2">"energy"</span><span class="p">]))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">conversion_factor</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">length_scale</span> <span class="o">/</span> <span class="n">energy_scale</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">length_scale</span> <span class="o">=</span> <span class="n">length_scale</span>
@@ -385,12 +385,12 @@
 <div class="viewcode-block" id="ChEQ.forward">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.coulomb.html#hippynn.layers.physics.coulomb.ChEQ.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">chi</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        species : shape (n_molecule, n_atom)</span>
 <span class="sd">        coordinates : shape (n_molecule, n_atom, 3), unit Angstrom or bohr</span>
 <span class="sd">        U : Hubbard U, diagonal part of A, shape (n_real_atom, 1), output from HCharge Node</span>
 <span class="sd">        chi : Electronegatvitiy, shape (n_real_atom, 1), output from HCharge Node</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">dtype</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">dtype</span>
         <span class="n">device</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">device</span>
         <span class="n">nonblank</span> <span class="o">=</span> <span class="n">species</span> <span class="o">&gt;</span> <span class="mi">0</span>
@@ -473,10 +473,10 @@
     <span class="nd">@staticmethod</span>
     <span class="c1">#@torch.jit.script</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dipole</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        q : charge, shape (n_molecule, n_atom, 1)</span>
 <span class="sd">        coordinates : shape (n_molecule, n_atom, 3)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">q</span> <span class="o">*</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
 </div>
 

@@ -117,7 +117,7 @@
 <div class="viewcode-block" id="StaticImagePeriodicPairIndexer">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.periodic.html#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StaticImagePeriodicPairIndexer</span><span class="p">(</span><span class="n">_PairIndexer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finds Pairs within a given number of images&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Finds Pairs within a given number of images"""</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">n_images</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
@@ -125,7 +125,7 @@
         <span class="c1"># shape is (n_images+2)**3 by 3</span>
         <span class="n">combinator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">n_images</span><span class="p">,</span> <span class="n">n_images</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">3</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_images</span> <span class="o">=</span> <span class="n">n_images</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;combinator&quot;</span><span class="p">,</span> <span class="n">combinator</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">"combinator"</span><span class="p">,</span> <span class="n">combinator</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float</span><span class="p">))</span>
 
 <div class="viewcode-block" id="StaticImagePeriodicPairIndexer.forward">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.periodic.html#hippynn.layers.pairs.periodic.StaticImagePeriodicPairIndexer.forward">[docs]</a>
@@ -179,7 +179,7 @@
             <span class="n">pair_offsets</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[</span><span class="n">cp_offset</span><span class="p">,</span> <span class="n">cp_pair</span><span class="p">]</span>
             <span class="n">cell_offsets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">combinator</span><span class="p">[</span><span class="n">cp_offset</span><span class="p">]</span>
 
-            <span class="c1"># This converts the atom index from an index that counts blank atoms to one that doesn&#39;t;</span>
+            <span class="c1"># This converts the atom index from an index that counts blank atoms to one that doesn't;</span>
             <span class="c1"># Afterwards it indexes the flat array of atoms in the batch.</span>
             <span class="n">pair_first</span> <span class="o">=</span> <span class="n">inv_real_atoms</span><span class="p">[</span><span class="n">pair_first</span><span class="p">]</span>
             <span class="n">pair_second</span> <span class="o">=</span> <span class="n">inv_real_atoms</span><span class="p">[</span><span class="n">pair_second</span><span class="p">]</span>
@@ -197,10 +197,10 @@
 
 <span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">tracebatch</span><span class="p">(</span><span class="n">mat</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Trace of  of batch of matrices.</span>
 <span class="sd">    Defaults to last two dimensions.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">dim1</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># For some reason torch.linalg on GPU tends to</span>
@@ -210,9 +210,9 @@
 <span class="c1"># Without calling any linalg functions.</span>
 <span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">cayley_inv</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Inverse of a batch of 3x3 matrices.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Uses A^-1 = 1/det(A) ([tr(A)**2-tr(A**2)]I/2 - Atr(A) + A**2)</span>
     <span class="k">assert</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span>
     <span class="k">assert</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span>
@@ -229,7 +229,7 @@
 
 <span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">wrap_systems_torch</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Wraps coordinates to within the unit cell.</span>
 
 <span class="sd">    Returns Inverse cells of shape (n_systems, 3 [cartesian], 3 [basis])</span>
@@ -242,7 +242,7 @@
 <span class="sd">    :param cell: cells of shape (n_systems, 3 [basis], 3 [cartesian])</span>
 <span class="sd">    :param cutoff: cutoff radius to search.</span>
 <span class="sd">    :return: inv_cells, wrapped_coords, wrapped_offset, n_bounds</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># cell is (sys,basis,cartesian)</span>
 
     <span class="c1"># This is faster than calling the torch.linalg.inv directly as of torch 1.10</span>
@@ -250,7 +250,7 @@
     <span class="c1"># inv is (sys,cartesian,basis)</span>
     <span class="n">projections</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">bmm</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">inv_cell</span><span class="p">)</span>
     <span class="n">fractional_coords</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">projections</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">wrapped_offset</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="n">projections</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">rounding_mode</span><span class="o">=</span><span class="s2">&quot;floor&quot;</span><span class="p">)</span>
+    <span class="n">wrapped_offset</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="n">projections</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">rounding_mode</span><span class="o">=</span><span class="s2">"floor"</span><span class="p">)</span>
     <span class="n">wrapped_coords</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">bmm</span><span class="p">(</span><span class="n">fractional_coords</span><span class="p">,</span> <span class="n">cell</span><span class="p">)</span>
     <span class="c1"># wrapped_coords is (system,atoms,cartesian)</span>
 
@@ -273,7 +273,7 @@
 <div class="viewcode-block" id="union_indices_2d_masks">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.periodic.html#hippynn.layers.pairs.periodic.union_indices_2d_masks">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">union_indices_2d_masks</span><span class="p">(</span><span class="o">*</span><span class="n">arrays</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute the indices of the union of a list of 2D mask arrays.</span>
 
 <span class="sd">    Assume a set of arrays a_1...a_n, each with shape (b,f_1),(b,f_2)...(b,f_n)</span>
@@ -287,13 +287,13 @@
 
 <span class="sd">    Performance heuristic note: Provide the arrays in ascending sparsity order.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Standalone function, so could be moved to elsewhere if needed.</span>
 
     <span class="n">n_masks</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">n_masks</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Union function requires masks.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Union function requires masks."</span><span class="p">)</span>
         <span class="c1"># Also possible: return zero-length batch indices if passed no masks?</span>
 
     <span class="n">full_shapes</span> <span class="o">=</span> <span class="p">[</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span> <span class="k">for</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">arrays</span><span class="p">]</span>
@@ -301,7 +301,7 @@
 
     <span class="c1"># Validate shapes.</span>
     <span class="n">b</span> <span class="o">=</span> <span class="n">batch_sizes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">b</span> <span class="o">==</span> <span class="n">bb</span> <span class="k">for</span> <span class="n">bb</span> <span class="ow">in</span> <span class="n">batch_sizes</span><span class="p">),</span> <span class="s2">&quot;batch broadcasting must be possible.&quot;</span>
+    <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">b</span> <span class="o">==</span> <span class="n">bb</span> <span class="k">for</span> <span class="n">bb</span> <span class="ow">in</span> <span class="n">batch_sizes</span><span class="p">),</span> <span class="s2">"batch broadcasting must be possible."</span>
 
     <span class="n">start_mask</span><span class="p">,</span> <span class="o">*</span><span class="n">arrays</span> <span class="o">=</span> <span class="n">arrays</span>
 
@@ -329,9 +329,9 @@
 <div class="viewcode-block" id="PeriodicPairIndexer">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.periodic.html#hippynn.layers.pairs.periodic.PeriodicPairIndexer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PeriodicPairIndexer</span><span class="p">(</span><span class="n">_PairIndexer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Finds pairs in general periodic conditions.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 <div class="viewcode-block" id="PeriodicPairIndexer.forward">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.periodic.html#hippynn.layers.pairs.periodic.PeriodicPairIndexer.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">nonblank</span><span class="p">,</span> <span class="n">real_atoms</span><span class="p">,</span> <span class="n">inv_real_atoms</span><span class="p">,</span> <span class="n">cells</span><span class="p">):</span>
@@ -372,17 +372,17 @@
 
 
             <span class="c1"># ## Begin expensive part. ## #</span>
-            <span class="c1"># In this zone we aggressively `del` things we don&#39;t need anymore</span>
+            <span class="c1"># In this zone we aggressively `del` things we don't need anymore</span>
             <span class="c1"># to allow pytorch to free memory. Delete anything that looks proportional</span>
             <span class="c1"># to the number of pairs. Many variables are proportional to the number of</span>
-            <span class="c1"># &#39;possible&#39; pairs when counting which atoms to compare and which image offsets</span>
+            <span class="c1"># 'possible' pairs when counting which atoms to compare and which image offsets</span>
             <span class="c1"># to consider.</span>
 
             <span class="c1"># First. we compute the indices of boolean factors that exclude</span>
             <span class="c1"># combinations of system,atom,atom,image based on padding</span>
             <span class="c1"># and image size for the corresponding cell.</span>
             <span class="c1"># Then a helper function makes the product of these boolean factors.</span>
-            <span class="c1"># We call the product of these factors &quot;nb&quot; for &quot;nonblank&quot;</span>
+            <span class="c1"># We call the product of these factors "nb" for "nonblank"</span>
             <span class="c1"># in that this extends the nonblank concept of</span>
             <span class="c1"># filtering pairs to the PBC neighbor finder.</span>
 
@@ -447,7 +447,7 @@
             <span class="k">del</span> <span class="n">int_offsets</span><span class="p">,</span> <span class="n">close_pairs</span>
             <span class="c1"># ## End expensive part ## #</span>
 
-            <span class="c1"># This converts the atom index from an index that counts blank atoms (SysAtom) to one that doesn&#39;t;</span>
+            <span class="c1"># This converts the atom index from an index that counts blank atoms (SysAtom) to one that doesn't;</span>
             <span class="c1"># Afterwards it indexes the flat array of atoms in the batch. (Atoms format)</span>
             <span class="n">pair_first</span> <span class="o">=</span> <span class="n">inv_real_atoms</span><span class="p">[</span><span class="n">pair_first</span><span class="p">]</span>
             <span class="n">pair_second</span> <span class="o">=</span> <span class="n">inv_real_atoms</span><span class="p">[</span><span class="n">pair_second</span><span class="p">]</span>
@@ -473,17 +473,17 @@
 <div class="viewcode-block" id="PeriodicPairIndexerMemory">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.pairs.periodic.html#hippynn.layers.pairs.periodic.PeriodicPairIndexerMemory">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PeriodicPairIndexerMemory</span><span class="p">(</span><span class="n">PairMemory</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    Implementation of PeriodicPairIndexer with additional memory component.</span>
 
 <span class="sd">    Stores current pair indices in memory and reuses them to compute the pair distances if no </span>
 <span class="sd">    particle has moved more than skin/2 since last pair calculation. Otherwise uses the</span>
 <span class="sd">    _pair_indexer_class to recompute the pairs.</span>
 
-<span class="sd">    Increasing the value of &#39;skin&#39; will increase the number of pair distances computed at</span>
+<span class="sd">    Increasing the value of 'skin' will increase the number of pair distances computed at</span>
 <span class="sd">    each step, but decrease the number of times new pairs must be computed. Skin should be </span>
 <span class="sd">    set to zero while training for fastest results.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    '''</span>
     <span class="n">_pair_indexer_class</span> <span class="o">=</span> <span class="n">PeriodicPairIndexer</span>
 
 <div class="viewcode-block" id="PeriodicPairIndexerMemory.forward">
@@ -498,13 +498,13 @@
             <span class="n">distflat</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">paircoord</span><span class="p">,</span> <span class="n">cell_offsets</span><span class="p">,</span> <span class="n">offset_num</span><span class="p">,</span> <span class="n">pair_mol</span> <span class="o">=</span> <span class="n">outputs</span>
 
             <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="p">[</span>
-                <span class="p">(</span><span class="s2">&quot;cell_offsets&quot;</span><span class="p">,</span> <span class="n">cell_offsets</span><span class="p">),</span>
-                <span class="p">(</span><span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">),</span>
-                <span class="p">(</span><span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">),</span>
-                <span class="p">(</span><span class="s2">&quot;offset_num&quot;</span><span class="p">,</span> <span class="n">offset_num</span><span class="p">),</span>
-                <span class="p">(</span><span class="s2">&quot;positions&quot;</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">),</span>
-                <span class="p">(</span><span class="s2">&quot;cells&quot;</span><span class="p">,</span> <span class="n">cells</span><span class="p">),</span>
-                <span class="p">(</span><span class="s2">&quot;pair_mol&quot;</span><span class="p">,</span> <span class="n">pair_mol</span><span class="p">)</span>
+                <span class="p">(</span><span class="s2">"cell_offsets"</span><span class="p">,</span> <span class="n">cell_offsets</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">"pair_first"</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">"pair_second"</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">"offset_num"</span><span class="p">,</span> <span class="n">offset_num</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">"positions"</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">"cells"</span><span class="p">,</span> <span class="n">cells</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">"pair_mol"</span><span class="p">,</span> <span class="n">pair_mol</span><span class="p">)</span>
                 <span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
 

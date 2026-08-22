@@ -108,13 +108,13 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.experiment.step_functions</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">This file implements various stepping protocols used by different optimizer APIs.</span>
 
 <span class="sd">In particular:</span>
-<span class="sd">    - The &quot;standard&quot; step function which only requires that backwards has been called.</span>
-<span class="sd">    - The &quot;closure&quot; step function for when line search is required (currently only active on LBFGS)</span>
-<span class="sd">    - The &quot;two step&quot; style of Sharpness Aware Minimization algorithms</span>
+<span class="sd">    - The "standard" step function which only requires that backwards has been called.</span>
+<span class="sd">    - The "closure" step function for when line search is required (currently only active on LBFGS)</span>
+<span class="sd">    - The "two step" style of Sharpness Aware Minimization algorithms</span>
 
 <span class="sd">The main output function here is `get_step_function(optimizer)-&gt; callable`.</span>
 
@@ -122,7 +122,7 @@
 <span class="sd">This is to provide for the possibility of extension, for example, to schemes with</span>
 <span class="sd">stepping schemes that require additional state, or for the possibility to specifiy</span>
 <span class="sd">the step function explicitly within the controller.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch.optim</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optimizer</span><span class="p">,</span> <span class="n">LBFGS</span>
 
 
@@ -215,7 +215,7 @@
 <div class="viewcode-block" id="get_step_function">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.step_functions.html#hippynn.experiment.step_functions.get_step_function">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_step_function</span><span class="p">(</span><span class="n">optimizer</span><span class="p">:</span> <span class="n">Optimizer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">callable</span><span class="p">:</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;SAM&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"SAM"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">TwoStep</span><span class="p">()</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="p">(</span><span class="n">LBFGS</span><span class="p">,)):</span>
         <span class="k">return</span> <span class="n">ClosureStep</span><span class="p">()</span>

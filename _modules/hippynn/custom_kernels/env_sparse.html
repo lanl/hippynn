@@ -109,9 +109,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.custom_kernels.env_sparse</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Pure pytorch implementation of envsum operations</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">MessagePassingKernels</span>
@@ -123,7 +123,7 @@
 <div class="viewcode-block" id="make_sparse_sense">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_sparse.html#hippynn.custom_kernels.env_sparse.make_sparse_sense">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">make_sparse_sense</span><span class="p">(</span><span class="n">sensitivities</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">,</span> <span class="n">n_atom</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Construct sensitivities as a sparse matrix with shape</span>
 <span class="sd">    (n_atoms * n_nu, n_atoms).</span>
 
@@ -138,7 +138,7 @@
 <span class="sd">    :param pair_second:</span>
 <span class="sd">    :param n_atom:</span>
 <span class="sd">    :return:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span> <span class="o">=</span> <span class="n">sensitivities</span><span class="o">.</span><span class="n">shape</span>
 
     <span class="n">pf_unsqueeze</span> <span class="o">=</span> <span class="n">pair_first</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">n_pairs</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">)</span>
@@ -176,7 +176,7 @@
 <div class="viewcode-block" id="sensesum">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.custom_kernels.env_sparse.html#hippynn.custom_kernels.env_sparse.sensesum">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">sensesum</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">pair_first</span><span class="p">,</span> <span class="n">pair_second</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 
 <span class="sd">    Sparse sensesum implementation uses a sparsity matrix</span>
 <span class="sd">    of zeros with shape (n_atoms x n_atoms), combined with</span>
@@ -187,7 +187,7 @@
 <span class="sd">    :param pair_first:</span>
 <span class="sd">    :param pair_second:</span>
 <span class="sd">    :return:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">n_atoms</span><span class="p">,</span> <span class="n">n_nu</span><span class="p">,</span> <span class="n">n_feat</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">shape</span>
 
@@ -215,10 +215,10 @@
         <span class="n">sense_values</span> <span class="o">=</span> <span class="n">sense_values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_nu</span><span class="p">,</span> <span class="n">n_pair</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Sensitivity values shape changed. Likely more than one pair entry &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;connecting the same atoms. The &#39;sparse&#39; implementation custom kernels do not support &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;pair lists containing duplicate items. &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;Input shape: </span><span class="si">{</span><span class="n">n_pair</span><span class="si">}</span><span class="s2"> Output shape: </span><span class="si">{</span><span class="n">sense_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">n_nu</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ee</span>
+            <span class="sa">f</span><span class="s2">"Sensitivity values shape changed. Likely more than one pair entry "</span>
+            <span class="sa">f</span><span class="s2">"connecting the same atoms. The 'sparse' implementation custom kernels do not support "</span>
+            <span class="sa">f</span><span class="s2">"pair lists containing duplicate items. "</span>
+            <span class="sa">f</span><span class="s2">"Input shape: </span><span class="si">{</span><span class="n">n_pair</span><span class="si">}</span><span class="s2"> Output shape: </span><span class="si">{</span><span class="n">sense_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">n_nu</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ee</span>
 
     <span class="n">sense_values</span> <span class="o">=</span> <span class="n">sense_values</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
@@ -247,12 +247,12 @@
 
 
 <span class="n">sparse_kernels</span> <span class="o">=</span> <span class="n">MessagePassingKernels</span><span class="p">(</span>
-    <span class="s2">&quot;sparse&quot;</span><span class="p">,</span>
+    <span class="s2">"sparse"</span><span class="p">,</span>
     <span class="n">envsum</span><span class="p">,</span> <span class="n">sensesum</span><span class="p">,</span> <span class="n">featsum</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Note: no sparse_jit because try/except not supported.</span>
-<span class="c1"># to sparse_compile because it won&#39;t transpose a matrix??</span>
+<span class="c1"># to sparse_compile because it won't transpose a matrix??</span>
 </pre></div>
 
            </div>

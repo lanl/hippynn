@@ -141,10 +141,10 @@
 <div class="viewcode-block" id="CombineEnergy">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.transforms.html#hippynn.layers.physics.transforms.CombineEnergy">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CombineEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Combines the energies (molecular and atom energies) from two different </span>
 <span class="sd">    nodes, e.g. HEnergy, Coulomb, or ScreenedCoulomb Energy Nodes. </span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">summer</span> <span class="o">=</span> <span class="n">indexers</span><span class="o">.</span><span class="n">MolSummer</span><span class="p">()</span>
@@ -152,13 +152,13 @@
 <div class="viewcode-block" id="CombineEnergy.forward">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.layers.physics.transforms.html#hippynn.layers.physics.transforms.CombineEnergy.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom_energy_1</span><span class="p">,</span> <span class="n">atom_energy_2</span><span class="p">,</span> <span class="n">system_index</span><span class="p">,</span> <span class="n">n_systems</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        :param: atom_energy_1 per-atom energy from first node. </span>
 <span class="sd">        :param: atom_energy_2 per atom energy from second node. </span>
 <span class="sd">        :param: system_index the molecular index for atoms in the batch</span>
 <span class="sd">        :param: total number of molecules in the batch</span>
 <span class="sd">        :return: Total Energy</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">total_atom_energy</span> <span class="o">=</span> <span class="n">atom_energy_1</span> <span class="o">+</span> <span class="n">atom_energy_2</span>
         <span class="n">mol_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="n">total_atom_energy</span><span class="p">,</span> <span class="n">system_index</span><span class="p">,</span> <span class="n">n_systems</span><span class="p">)</span>
         

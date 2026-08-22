@@ -118,9 +118,9 @@
 <span class="c1"># hippynn.custom_kernels.set_custom_kernels (False)</span>
 
 <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
-    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">"cuda"</span><span class="p">)</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">"cpu"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="gen_par">
@@ -128,20 +128,20 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">gen_par</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">model_file</span><span class="o">=</span><span class="s2">&quot;experiment_structure.pt&quot;</span><span class="p">,</span>
-        <span class="n">state_file</span><span class="o">=</span><span class="s2">&quot;best_checkpoint.pt&quot;</span><span class="p">,</span>
-        <span class="n">par_atom_node_name</span><span class="o">=</span><span class="s2">&quot;SEQM_Atom_Params&quot;</span><span class="p">,</span>
-        <span class="n">seqm_node_name</span><span class="o">=</span><span class="s2">&quot;SEQM_Energy&quot;</span><span class="p">,</span>
+        <span class="n">model_file</span><span class="o">=</span><span class="s2">"experiment_structure.pt"</span><span class="p">,</span>
+        <span class="n">state_file</span><span class="o">=</span><span class="s2">"best_checkpoint.pt"</span><span class="p">,</span>
+        <span class="n">par_atom_node_name</span><span class="o">=</span><span class="s2">"SEQM_Atom_Params"</span><span class="p">,</span>
+        <span class="n">seqm_node_name</span><span class="o">=</span><span class="s2">"SEQM_Energy"</span><span class="p">,</span>
         <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
         <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="w">        </span><span class="sd">""" </span>
 <span class="sd">        .. Warning::</span>
 <span class="sd">            This function uses ``torch.load`` with ``weights_only=False`` by default,</span>
 <span class="sd">            which can run arbitrary code from the loaded file. Only use it with files</span>
 <span class="sd">            you trust. You can set ``weights_only=True`` for better security, but</span>
 <span class="sd">            it may cause loading of the structure file to fail. </span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_file</span> <span class="o">=</span> <span class="n">model_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state_file</span> <span class="o">=</span> <span class="n">state_file</span>
@@ -149,9 +149,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">seqm_node_name</span> <span class="o">=</span> <span class="n">seqm_node_name</span>
         <span class="n">structure</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_file</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="n">weights_only</span><span class="p">)</span>
         <span class="n">state</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">state_file</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;training_modules&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">])</span>
-        <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;controller&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;controller&quot;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;training_modules&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">structure</span><span class="p">[</span><span class="s2">"training_modules"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">"model"</span><span class="p">])</span>
+        <span class="n">structure</span><span class="p">[</span><span class="s2">"controller"</span><span class="p">]</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">"controller"</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">"training_modules"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">DataParallel</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">module</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
@@ -159,7 +159,7 @@
         <span class="n">par_atom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">node_from_name</span><span class="p">(</span><span class="n">par_atom_node_name</span><span class="p">)</span>
         <span class="n">seqm_par</span> <span class="o">=</span> <span class="n">par_atom</span><span class="o">.</span><span class="n">atom_charges</span>
         <span class="n">train_loss</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">MeanSq</span><span class="p">(</span><span class="n">seqm_par</span><span class="o">.</span><span class="n">pred</span><span class="p">)</span>
-        <span class="n">validation_losses</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;par_atom&quot;</span><span class="p">:</span> <span class="n">train_loss</span><span class="p">}</span>
+        <span class="n">validation_losses</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"par_atom"</span><span class="p">:</span> <span class="n">train_loss</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_par</span> <span class="o">=</span> <span class="n">assemble_for_training</span><span class="p">(</span><span class="n">train_loss</span><span class="p">,</span> <span class="n">validation_losses</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_par</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_par</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">SpeciesNode</span><span class="p">):</span>

@@ -108,10 +108,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.databases.ondisk</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Dataset stored as NPY files in directory or</span>
 <span class="sd">as NPZ dictionary.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -125,24 +125,24 @@
 <div class="viewcode-block" id="DirectoryDatabase">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.databases.ondisk.html#hippynn.DirectoryDatabase">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DirectoryDatabase</span><span class="p">(</span><span class="n">Database</span><span class="p">,</span> <span class="n">Restartable</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Database stored as NPY files in a directory.</span>
 
 <span class="sd">    :param directory: directory path where the files are stored</span>
 <span class="sd">    :param name: prefix for the arrays.</span>
 
-<span class="sd">    This function loads arrays of the format f&quot;{name}{db_name}.npy&quot; for each variable db_name in inputs and targets.</span>
+<span class="sd">    This function loads arrays of the format f"{name}{db_name}.npy" for each variable db_name in inputs and targets.</span>
 
 <span class="sd">    Other arguments: See ``Database``.</span>
 
 <span class="sd">    .. Note::</span>
 <span class="sd">       This database loader does not support the ``allow_unfound`` setting in the base ``Database``. The</span>
 <span class="sd">       variables to load must be set explicitly in the inputs and targets.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1">#if allow_unfound:</span>
-        <span class="c1">#    raise ValueError(&quot;DirectoryDatabase class does not support allow_unfound argument.&quot;)</span>
+        <span class="c1">#    raise ValueError("DirectoryDatabase class does not support allow_unfound argument.")</span>
 
         <span class="n">arr_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_arrays</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">arr_dict</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="n">quiet</span><span class="p">,</span> <span class="n">allow_unfound</span><span class="o">=</span><span class="n">allow_unfound</span><span class="p">)</span>
@@ -165,18 +165,18 @@
             <span class="n">file_list</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">fee</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
-                <span class="s2">&quot;ERROR: Couldn&#39;t find directory </span><span class="si">{}</span><span class="s2"> containing files.&quot;</span>
-                <span class="s1">&#39;A solution is to explicitly specify &quot;path&quot; in database_params &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+                <span class="s2">"ERROR: Couldn't find directory </span><span class="si">{}</span><span class="s2"> containing files."</span>
+                <span class="s1">'A solution is to explicitly specify "path" in database_params '</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">fee</span>
 
         <span class="n">data_labels</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">file</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="p">:</span> <span class="o">-</span><span class="mi">4</span><span class="p">]:</span> <span class="n">file</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span> <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="ow">and</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.npy&quot;</span><span class="p">)</span>
+            <span class="n">file</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="p">:</span> <span class="o">-</span><span class="mi">4</span><span class="p">]:</span> <span class="n">file</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span> <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="ow">and</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">".npy"</span><span class="p">)</span>
         <span class="p">}</span>
 
         <span class="c1"># Make sure we actually found some files</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">data_labels</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
-                <span class="s2">&quot;No files found at </span><span class="si">{}</span><span class="s2"> .&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;for database prefix </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+                <span class="s2">"No files found at </span><span class="si">{}</span><span class="s2"> ."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"for database prefix </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">data_labels</span></div>
 
@@ -190,12 +190,12 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># Backward compatibility.</span>
-            <span class="n">data_labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_file_dict</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;data-&quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">data_labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_file_dict</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"data-"</span> <span class="o">+</span> <span class="n">name</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
             <span class="n">data_labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_file_dict</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Arrays found: &quot;</span><span class="p">,</span> <span class="n">data_labels</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"Arrays found: "</span><span class="p">,</span> <span class="n">data_labels</span><span class="p">)</span>
 
         <span class="c1"># Load files</span>
         <span class="n">arr_dict</span> <span class="o">=</span> <span class="p">{</span>
@@ -207,11 +207,11 @@
         <span class="c1"># Put float64 data in pytorch default dtype</span>
         <span class="n">floatX</span> <span class="o">=</span> <span class="n">np_of_torchdefaultdtype</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">arr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;float64&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s2">"float64"</span><span class="p">:</span>
                 <span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">floatX</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data types:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"Data types:"</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">dtype</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">arr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
 
         <span class="k">return</span> <span class="n">arr_dict</span></div>
@@ -236,7 +236,7 @@
         <span class="n">arr_dict</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
         <span class="c1"># Make sure the path actually exists</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Arrays found: &quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">arr_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"Arrays found: "</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">arr_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 
         <span class="c1"># Load files</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">allow_unfound</span><span class="p">:</span>
@@ -248,11 +248,11 @@
         <span class="c1"># Put float64 data in pytorch default dtype</span>
         <span class="n">floatX</span> <span class="o">=</span> <span class="n">np_of_torchdefaultdtype</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">arr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;float64&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s2">"float64"</span><span class="p">:</span>
                 <span class="n">arr_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">floatX</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data types:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"Data types:"</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">dtype</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">arr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
 
         <span class="k">return</span> <span class="n">arr_dict</span></div>

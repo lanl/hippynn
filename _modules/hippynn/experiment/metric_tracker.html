@@ -108,9 +108,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.experiment.metric_tracker</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Keep track of training metrics over the experiment</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -120,14 +120,14 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_all_over_time</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="n">plot_all_over_time</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-        <span class="s2">&quot;Could not import plotting module. Make sure matplotlib is installed to enable plotting&quot;</span>
+        <span class="s2">"Could not import plotting module. Make sure matplotlib is installed to enable plotting"</span>
     <span class="p">)</span>
 
 
 <div class="viewcode-block" id="MetricTracker">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MetricTracker</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    MetricTracker instances keep track of metrics and models for an experiment</span>
 
 <span class="sd">    :ivar metric_names: the tracked metrics</span>
@@ -142,17 +142,17 @@
 <span class="sd">    :ivar epoch_times: timing info for each epoch</span>
 <span class="sd">    :ivar quiet: whether to print the values registered.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_names</span><span class="p">,</span> <span class="n">stopping_key</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param metric_names:</span>
 <span class="sd">        :param stopping_key:</span>
 <span class="sd">        :param quiet:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">stopping_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metric_names</span> <span class="ow">and</span> <span class="n">stopping_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Stopping key </span><span class="si">{}</span><span class="s2"> is not in metric names </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stopping_key</span><span class="p">,</span> <span class="n">metric_names</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Stopping key </span><span class="si">{}</span><span class="s2"> is not in metric names </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stopping_key</span><span class="p">,</span> <span class="n">metric_names</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metric_names</span> <span class="o">=</span> <span class="n">metric_names</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stopping_key</span> <span class="o">=</span> <span class="n">stopping_key</span>
 
@@ -178,15 +178,15 @@
 <div class="viewcode-block" id="MetricTracker.register_metrics">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.MetricTracker.register_metrics">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">register_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_info</span><span class="p">,</span> <span class="n">when</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        :param metric_info: dictionary of metric names: metric values</span>
 <span class="sd">        :param when: string or integer specifying epoch number.</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        """</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Updates the metrics for this epoch and computers which ones are better.</span>
 <span class="sd">        </span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">better_metrics</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_metric_values</span><span class="p">}</span>
         <span class="k">for</span> <span class="n">split_type</span><span class="p">,</span> <span class="n">typevals</span> <span class="ow">in</span> <span class="n">metric_info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">mname</span><span class="p">,</span> <span class="n">mval</span> <span class="ow">in</span> <span class="n">typevals</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -196,7 +196,7 @@
                     <span class="k">del</span> <span class="n">old_best</span>  <span class="c1"># marking not needed.</span>
                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">split_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_metric_values</span><span class="p">:</span>
-                        <span class="c1"># Haven&#39;t seen this split before!</span>
+                        <span class="c1"># Haven't seen this split before!</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">best_metric_values</span><span class="p">[</span><span class="n">split_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
                         <span class="n">better_metrics</span><span class="p">[</span><span class="n">split_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
                     <span class="n">better</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># old best was not found!</span>
@@ -210,9 +210,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">other_metric_values</span><span class="p">[</span><span class="n">when</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_info</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopping_key</span> <span class="ow">and</span> <span class="s2">&quot;valid&quot;</span> <span class="ow">in</span> <span class="n">metric_info</span><span class="p">:</span>
-            <span class="n">better_model</span> <span class="o">=</span> <span class="n">better_metrics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;valid&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stopping_key</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-            <span class="n">stopping_key_metric</span> <span class="o">=</span> <span class="n">metric_info</span><span class="p">[</span><span class="s2">&quot;valid&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">stopping_key</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopping_key</span> <span class="ow">and</span> <span class="s2">"valid"</span> <span class="ow">in</span> <span class="n">metric_info</span><span class="p">:</span>
+            <span class="n">better_model</span> <span class="o">=</span> <span class="n">better_metrics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"valid"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stopping_key</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="n">stopping_key_metric</span> <span class="o">=</span> <span class="n">metric_info</span><span class="p">[</span><span class="s2">"valid"</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">stopping_key</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">better_model</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">stopping_key_metric</span> <span class="o">=</span> <span class="kc">None</span>
@@ -240,8 +240,8 @@
         <span class="n">table_evaluation_print_better</span><span class="p">(</span><span class="n">evaluation_dict</span><span class="p">,</span> <span class="n">better_dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name_column_width</span><span class="p">,</span> <span class="n">_print</span><span class="o">=</span><span class="nb">print</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopping_key</span><span class="p">:</span>
             <span class="n">_print</span><span class="p">(</span>
-                <span class="s2">&quot;Best </span><span class="si">{}</span><span class="s2"> so far: </span><span class="si">{:&gt;8.5g}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">stopping_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_metric_values</span><span class="p">[</span><span class="s2">&quot;valid&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">stopping_key</span><span class="p">]</span>
+                <span class="s2">"Best </span><span class="si">{}</span><span class="s2"> so far: </span><span class="si">{:&gt;8.5g}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">stopping_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_metric_values</span><span class="p">[</span><span class="s2">"valid"</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">stopping_key</span><span class="p">]</span>
                 <span class="p">)</span>
             <span class="p">)</span></div>
 
@@ -261,17 +261,17 @@
 <div class="viewcode-block" id="table_evaluation_print_better">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.table_evaluation_print_better">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">table_evaluation_print_better</span><span class="p">(</span><span class="n">evaluation_dict</span><span class="p">,</span> <span class="n">better_dict</span><span class="p">,</span> <span class="n">metric_names</span><span class="p">,</span> <span class="n">n_columns</span><span class="p">,</span> <span class="n">_print</span><span class="o">=</span><span class="nb">print</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Print metric results as a table, add a &#39;*&#39; character for metrics in better_dict.</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Print metric results as a table, add a '*' character for metrics in better_dict.</span>
 
 <span class="sd">    :param evaluation_dict: dict[eval type]-&gt;dict[metric]-&gt;value</span>
 <span class="sd">    :param better_dict: dict[eval type]-&gt;dict[metric]-&gt;bool</span>
 <span class="sd">    :param metric_names: Names</span>
 <span class="sd">    :param n_columns: Number of columns for name fields.</span>
 <span class="sd">    :return: None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">type_names</span> <span class="o">=</span> <span class="n">evaluation_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-    <span class="n">better_labels</span> <span class="o">=</span> <span class="p">{</span><span class="kc">True</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="s2">&quot; &quot;</span><span class="p">}</span>
+    <span class="n">better_labels</span> <span class="o">=</span> <span class="p">{</span><span class="kc">True</span><span class="p">:</span> <span class="s2">"*"</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="s2">" "</span><span class="p">}</span>
 
     <span class="n">transposed_values_better</span> <span class="o">=</span> <span class="p">[</span>
         <span class="p">[(</span><span class="n">better_labels</span><span class="p">[</span><span class="n">better_dict</span><span class="p">[</span><span class="n">tname</span><span class="p">][</span><span class="n">mname</span><span class="p">]],</span> <span class="n">evaluation_dict</span><span class="p">[</span><span class="n">tname</span><span class="p">][</span><span class="n">mname</span><span class="p">])</span> <span class="k">for</span> <span class="n">tname</span> <span class="ow">in</span> <span class="n">type_names</span><span class="p">]</span>
@@ -280,11 +280,11 @@
 
     <span class="n">n_types</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_names</span><span class="p">)</span>
 
-    <span class="n">header</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_columns</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:&gt;14}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tn</span><span class="p">)</span> <span class="k">for</span> <span class="n">tn</span> <span class="ow">in</span> <span class="n">type_names</span><span class="p">)</span>
-    <span class="n">rowstring</span> <span class="o">=</span> <span class="s2">&quot;{:&lt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_columns</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}: &quot;</span> <span class="o">+</span> <span class="s2">&quot;   </span><span class="si">{}{:&gt;10.5g}</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="n">n_types</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="s2">" "</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_columns</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">"</span><span class="si">{:&gt;14}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tn</span><span class="p">)</span> <span class="k">for</span> <span class="n">tn</span> <span class="ow">in</span> <span class="n">type_names</span><span class="p">)</span>
+    <span class="n">rowstring</span> <span class="o">=</span> <span class="s2">"{:&lt;"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_columns</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"}: "</span> <span class="o">+</span> <span class="s2">"   </span><span class="si">{}{:&gt;10.5g}</span><span class="s2">"</span> <span class="o">*</span> <span class="n">n_types</span>
 
     <span class="n">_print</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
-    <span class="n">_print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">))</span>
+    <span class="n">_print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">valsbet</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">metric_names</span><span class="p">,</span> <span class="n">transposed_values_better</span><span class="p">):</span>
         <span class="n">rowoutput</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">bv</span> <span class="ow">in</span> <span class="n">valsbet</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">bv</span><span class="p">]</span>
         <span class="n">_print</span><span class="p">(</span><span class="n">rowstring</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="o">*</span><span class="n">rowoutput</span><span class="p">))</span></div>
@@ -296,28 +296,28 @@
 <div class="viewcode-block" id="table_evaluation_print">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.metric_tracker.html#hippynn.experiment.metric_tracker.table_evaluation_print">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">table_evaluation_print</span><span class="p">(</span><span class="n">evaluation_dict</span><span class="p">,</span> <span class="n">metric_names</span><span class="p">,</span> <span class="n">n_columns</span><span class="p">,</span> <span class="n">_print</span><span class="o">=</span><span class="nb">print</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Print metric results as a table.</span>
 
 <span class="sd">    :param evaluation_dict: dict[eval type]-&gt;dict[metric]-&gt;value</span>
 <span class="sd">    :param metric_names: Names</span>
 <span class="sd">    :param n_columns: Number of columns for name fields.</span>
 <span class="sd">    :return: None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">type_names</span><span class="p">,</span> <span class="n">type_values</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">evaluation_dict</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
     <span class="n">transposed_values</span> <span class="o">=</span> <span class="p">[[</span><span class="n">t</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">type_values</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metric_names</span><span class="p">]</span>
 
     <span class="n">n_types</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_names</span><span class="p">)</span>
 
-    <span class="n">header</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_columns</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:&gt;14}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tn</span><span class="p">)</span> <span class="k">for</span> <span class="n">tn</span> <span class="ow">in</span> <span class="n">type_names</span><span class="p">)</span>
-    <span class="n">rowstring</span> <span class="o">=</span> <span class="s2">&quot;{:&lt;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_columns</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}: &quot;</span> <span class="o">+</span> <span class="s2">&quot;    </span><span class="si">{:&gt;10.5g}</span><span class="s2">&quot;</span> <span class="o">*</span> <span class="n">n_types</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="s2">" "</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_columns</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">"</span><span class="si">{:&gt;14}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tn</span><span class="p">)</span> <span class="k">for</span> <span class="n">tn</span> <span class="ow">in</span> <span class="n">type_names</span><span class="p">)</span>
+    <span class="n">rowstring</span> <span class="o">=</span> <span class="s2">"{:&lt;"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_columns</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"}: "</span> <span class="o">+</span> <span class="s2">"    </span><span class="si">{:&gt;10.5g}</span><span class="s2">"</span> <span class="o">*</span> <span class="n">n_types</span>
 
     <span class="n">_print</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
-    <span class="n">_print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">))</span>
+    <span class="n">_print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">vals</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">metric_names</span><span class="p">,</span> <span class="n">transposed_values</span><span class="p">):</span>
         <span class="n">_print</span><span class="p">(</span><span class="n">rowstring</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="o">*</span><span class="n">vals</span><span class="p">))</span>
-    <span class="n">_print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">))</span></div>
+    <span class="n">_print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">))</span></div>
 
 </pre></div>
 

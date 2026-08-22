@@ -108,11 +108,11 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.molecular_dynamics.readers</h1><div class="highlight"><pre>
-<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span></span><span class="sd">'''</span>
 <span class="sd">Read outputs from LAMMPS, Gromacs.</span>
 
 <span class="sd">This module is only available if the `MDAnalysis` package is installed.</span>
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">'''</span>
 <span class="c1"># Portions of this code were written with assistance from an LLM.</span>
 
 
@@ -135,26 +135,26 @@
         <span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">types</span><span class="p">]</span>
         <span class="n">species_numbers</span> <span class="o">=</span> <span class="n">types</span>
         <span class="n">species_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">Z2SYMB</span><span class="p">[</span><span class="n">num</span><span class="p">]</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">species_numbers</span><span class="p">]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found atom types </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">types</span><span class="p">)</span><span class="si">}</span><span class="s2">, which were infered to be atomic numbers. If this is not correct, please rerun the function and pass a `type_correction_dict`. The keys should be of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">types</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Found atom types </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">types</span><span class="p">)</span><span class="si">}</span><span class="s2">, which were infered to be atomic numbers. If this is not correct, please rerun the function and pass a `type_correction_dict`. The keys should be of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">types</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
         <span class="n">species_symbols</span> <span class="o">=</span> <span class="n">types</span>
         <span class="n">species_numbers</span> <span class="o">=</span> <span class="p">[</span><span class="n">SYMB2Z</span><span class="p">[</span><span class="n">sym</span><span class="p">]</span> <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="n">species_symbols</span><span class="p">]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found atom types </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">types</span><span class="p">)</span><span class="si">}</span><span class="s2">, which were infered to be chemical symbols. If this is not correct, please rerun the function and pass a `type_correction_dict`. The keys should be of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">types</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Found atom types </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">types</span><span class="p">)</span><span class="si">}</span><span class="s2">, which were infered to be chemical symbols. If this is not correct, please rerun the function and pass a `type_correction_dict`. The keys should be of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">types</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">species_numbers</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">species_symbols</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="extract_trajectory_data">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.readers.html#hippynn.molecular_dynamics.readers.extract_trajectory_data">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">extract_trajectory_data</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">type_correction_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">guess_masses</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mda_universe_kwargs</span><span class="o">=</span><span class="p">{}):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Extracts trajectory data using MDAnalysis.</span>
 
-<span class="sd">    E.g., for Gromacs: extract_trajectory_data(topology=&quot;output.gro&quot;, trajectory=&quot;output.trr&quot;)</span>
-<span class="sd">    E.g., for LAMMPS: extract_trajectory_data(topology=&quot;system.data&quot;, trajectory=&quot;output.lammpstrj&quot;)</span>
+<span class="sd">    E.g., for Gromacs: extract_trajectory_data(topology="output.gro", trajectory="output.trr")</span>
+<span class="sd">    E.g., for LAMMPS: extract_trajectory_data(topology="system.data", trajectory="output.lammpstrj")</span>
 
-<span class="sd">    :param topology: Path to topology file (e.g., &#39;init.data&#39;, &#39;md.gro&#39;).</span>
+<span class="sd">    :param topology: Path to topology file (e.g., 'init.data', 'md.gro').</span>
 <span class="sd">    :type topology: str</span>
-<span class="sd">    :param trajectory: Path to trajectory file (e.g., &#39;traj.lammpstrj&#39;, &#39;md.trr&#39;).</span>
+<span class="sd">    :param trajectory: Path to trajectory file (e.g., 'traj.lammpstrj', 'md.trr').</span>
 <span class="sd">    :type trajectory: str</span>
 <span class="sd">    :param start: Starting frame index (inclusive). Default is 0.</span>
 <span class="sd">    :type start: int</span>
@@ -163,7 +163,7 @@
 <span class="sd">    :param stride: Step size between frames. Default is 1.</span>
 <span class="sd">    :type stride: int</span>
 <span class="sd">    :param type_correction_dict: If types inferred from files are not atomic numbers or symbols, pass {force_field_type: atomic_number} </span>
-<span class="sd">                                 to correct this. The keys&#39; types must Default is None. </span>
+<span class="sd">                                 to correct this. The keys' types must Default is None. </span>
 <span class="sd">    :type type_correction_dict: dict(str, int)</span>
 <span class="sd">    :param guess_masses: If true, will try to infer masses based on types. Default is True.</span>
 <span class="sd">    :type guess_masses: bool</span>
@@ -178,26 +178,26 @@
 <span class="sd">        - species: ndarray (n_atoms,)</span>
 <span class="sd">        - mol_ids: ndarray (n_atoms,)</span>
 <span class="sd">    :rtype: dict</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Give it help if trajectory file is a LAMMPS dump file</span>
     <span class="n">_</span><span class="p">,</span> <span class="n">extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">extension</span> <span class="o">==</span> <span class="s2">&quot;.lammpstrj&quot;</span><span class="p">:</span>
-        <span class="n">ext_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="s2">&quot;LAMMPSDUMP&quot;</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">extension</span> <span class="o">==</span> <span class="s2">".lammpstrj"</span><span class="p">:</span>
+        <span class="n">ext_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"format"</span><span class="p">:</span> <span class="s2">"LAMMPSDUMP"</span><span class="p">}</span>
         <span class="n">ext_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">mda_universe_kwargs</span><span class="p">)</span> <span class="c1"># allow it to still be overridden by user</span>
         <span class="n">mda_universe_kwargs</span> <span class="o">=</span> <span class="n">ext_kwargs</span>
 
-    <span class="k">if</span> <span class="s1">&#39;to_guess&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mda_universe_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="k">if</span> <span class="s1">'to_guess'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mda_universe_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">guess_masses</span><span class="p">:</span>
-            <span class="n">mda_universe_kwargs</span><span class="p">[</span><span class="s1">&#39;to_guess&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;types&#39;</span><span class="p">,)</span>
+            <span class="n">mda_universe_kwargs</span><span class="p">[</span><span class="s1">'to_guess'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'types'</span><span class="p">,)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">mda_universe_kwargs</span><span class="p">[</span><span class="s1">&#39;to_guess&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;types&#39;</span><span class="p">,</span> <span class="s1">&#39;masses&#39;</span><span class="p">)</span>
+            <span class="n">mda_universe_kwargs</span><span class="p">[</span><span class="s1">'to_guess'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'types'</span><span class="p">,</span> <span class="s1">'masses'</span><span class="p">)</span>
 
     <span class="n">u</span> <span class="o">=</span> <span class="n">mda</span><span class="o">.</span><span class="n">Universe</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">,</span> <span class="o">**</span><span class="n">mda_universe_kwargs</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">type_correction_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">u</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="n">type_correction_dict</span><span class="p">[</span><span class="n">typ</span><span class="p">]</span> <span class="k">if</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">type_correction_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="n">typ</span> <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">u</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">types</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">guess_masses</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">guess_TopologyAttrs</span><span class="p">(</span><span class="n">force_guess</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;masses&#39;</span><span class="p">,))</span>
+        <span class="k">if</span> <span class="n">guess_masses</span><span class="p">:</span> <span class="n">u</span><span class="o">.</span><span class="n">guess_TopologyAttrs</span><span class="p">(</span><span class="n">force_guess</span><span class="o">=</span><span class="p">(</span><span class="s1">'masses'</span><span class="p">,))</span>
 
     <span class="n">total_frames</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">trajectory</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">stop</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">stop</span> <span class="o">&gt;</span> <span class="n">total_frames</span><span class="p">:</span>
@@ -238,14 +238,14 @@
             <span class="n">forces</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">forces</span>
 
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s1">&#39;positions&#39;</span><span class="p">:</span> <span class="n">positions</span><span class="p">,</span>
-        <span class="s1">&#39;velocities&#39;</span><span class="p">:</span> <span class="n">velocities</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">velocities</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="s1">&#39;forces&#39;</span><span class="p">:</span> <span class="n">forces</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">forces</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="s1">&#39;cells&#39;</span><span class="p">:</span> <span class="n">cells</span><span class="p">,</span>
-        <span class="s1">&#39;masses&#39;</span><span class="p">:</span> <span class="n">masses</span><span class="p">,</span>
-        <span class="s1">&#39;species_numbers&#39;</span><span class="p">:</span> <span class="n">species_numbers</span><span class="p">,</span>
-        <span class="s1">&#39;species_symbols&#39;</span><span class="p">:</span> <span class="n">species_symbols</span><span class="p">,</span>
-        <span class="s1">&#39;mol_ids&#39;</span><span class="p">:</span> <span class="n">mol_ids</span><span class="p">,</span>
+        <span class="s1">'positions'</span><span class="p">:</span> <span class="n">positions</span><span class="p">,</span>
+        <span class="s1">'velocities'</span><span class="p">:</span> <span class="n">velocities</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">velocities</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">'forces'</span><span class="p">:</span> <span class="n">forces</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">forces</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">'cells'</span><span class="p">:</span> <span class="n">cells</span><span class="p">,</span>
+        <span class="s1">'masses'</span><span class="p">:</span> <span class="n">masses</span><span class="p">,</span>
+        <span class="s1">'species_numbers'</span><span class="p">:</span> <span class="n">species_numbers</span><span class="p">,</span>
+        <span class="s1">'species_symbols'</span><span class="p">:</span> <span class="n">species_symbols</span><span class="p">,</span>
+        <span class="s1">'mol_ids'</span><span class="p">:</span> <span class="n">mol_ids</span><span class="p">,</span>
     <span class="p">}</span></div>
 
 </pre></div>

@@ -108,7 +108,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.layers.pairs.csr_pairs.csrtable</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">This file was written with assistance from an LLM.</span>
 
 <span class="sd">Light-weight CSRTable container built on PyTorch tensors and utilities.</span>
@@ -133,7 +133,7 @@
 <span class="sd">* ``starts`` is non-decreasing with ``starts[0] == 0`` and ``starts[-1] == nnz``.</span>
 <span class="sd">* For each row ``r``, ``row_len[r] = starts[r+1] - starts[r] &gt;= 0``.</span>
 <span class="sd">* Every ``v`` in ``data`` has length ``nnz`` and aligns with ``cols`` order.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
@@ -142,7 +142,7 @@
 <div class="viewcode-block" id="starts_from_counts">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.starts_from_counts">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">starts_from_counts</span><span class="p">(</span><span class="n">counts</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a CSR row-pointer (`starts`) from per-row counts.</span>
+<span class="w">    </span><span class="sd">"""Build a CSR row-pointer (`starts`) from per-row counts.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -170,7 +170,7 @@
 <span class="sd">    Complexity</span>
 <span class="sd">    ----------</span>
 <span class="sd">    O(R) time, O(1) extra memory.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">starts</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">counts</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
     <span class="n">starts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">starts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -181,7 +181,7 @@
 <div class="viewcode-block" id="row_and_offset">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.row_and_offset">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">row_and_offset</span><span class="p">(</span><span class="n">starts</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Decode the flattened CSR value domain into row ids and in-row offsets.</span>
+<span class="w">    </span><span class="sd">"""Decode the flattened CSR value domain into row ids and in-row offsets.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -210,7 +210,7 @@
 <span class="sd">    Complexity</span>
 <span class="sd">    ----------</span>
 <span class="sd">    O(nnz) time, O(1) extra memory.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">device</span> <span class="o">=</span> <span class="n">starts</span><span class="o">.</span><span class="n">device</span>
     <span class="n">nnz</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">starts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
     <span class="n">t</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nnz</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
@@ -225,14 +225,14 @@
 <div class="viewcode-block" id="CSRTable">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CSRTable</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A minimal CSR container allowing for multiple payload arrays..</span>
+<span class="w">    </span><span class="sd">"""A minimal CSR container allowing for multiple payload arrays..</span>
 
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    starts : LongTensor, shape ``[R+1]``</span>
 <span class="sd">        Row pointer. ``starts[r+1] - starts[r]`` is the length of row ``r``.</span>
 <span class="sd">    cols : LongTensor, shape ``[nnz]``</span>
-<span class="sd">        Per-entry &quot;column&quot; payload. Its interpretation is user-defined:</span>
+<span class="sd">        Per-entry "column" payload. Its interpretation is user-defined:</span>
 <span class="sd">        it can be a global column id, or a local index ``0..row_len-1``.</span>
 <span class="sd">    data : dict[str, Tensor]</span>
 <span class="sd">        Additional per-entry fields, each of length ``nnz`` and aligned to ``cols``.</span>
@@ -247,7 +247,7 @@
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
 <span class="sd">    starts_from_counts, row_and_offset</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -256,7 +256,7 @@
         <span class="n">data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">reorder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># (only meaningful in from_coo)</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct a CSRTable.</span>
+<span class="w">        </span><span class="sd">"""Construct a CSRTable.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -275,13 +275,13 @@
 <span class="sd">        * This initializer does not validate or coerce devices/dtypes.</span>
 <span class="sd">        * Use a separate ``validate(strict=False)`` (not provided here) if you</span>
 <span class="sd">          need explicit invariant checks in debug contexts.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">starts</span> <span class="o">=</span> <span class="n">starts</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cols</span> <span class="o">=</span> <span class="n">cols</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">data</span>
 
-        <span class="c1"># infer a single device and a single &quot;coord&quot; dtype (first floating dtype wins;</span>
-        <span class="c1"># if none are floating, fall back to the first tensor&#39;s dtype)</span>
+        <span class="c1"># infer a single device and a single "coord" dtype (first floating dtype wins;</span>
+        <span class="c1"># if none are floating, fall back to the first tensor's dtype)</span>
         <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># for floating point only.</span>
 
@@ -296,24 +296,24 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">nnz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Total number of entries (non-zeros) across all rows.</span>
+<span class="w">        </span><span class="sd">"""Total number of entries (non-zeros) across all rows.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        int</span>
 <span class="sd">            Equal to ``cols.numel()`` and ``starts[-1]``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">nrows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of rows in the table (``R``).</span>
+<span class="w">        </span><span class="sd">"""Number of rows in the table (``R``).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        int</span>
 <span class="sd">            Equal to ``starts.numel() - 1``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">starts</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
 
     <span class="c1"># constructors</span>
@@ -321,8 +321,8 @@
 <div class="viewcode-block" id="CSRTable.make_empty">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.make_empty">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">make_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">n_rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CSRTable&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create an empty CSRTable with ``n_rows`` rows and zero entries.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">n_rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"CSRTable"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create an empty CSRTable with ``n_rows`` rows and zero entries.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -340,9 +340,9 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; CSRTable.make_empty(3, dtype=torch.long, device=torch.device(&quot;cpu&quot;)).starts</span>
+<span class="sd">        &gt;&gt;&gt; CSRTable.make_empty(3, dtype=torch.long, device=torch.device("cpu")).starts</span>
 <span class="sd">        tensor([0, 0, 0, 0])</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">starts</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_rows</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
         <span class="n">cols</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">starts</span><span class="o">=</span><span class="n">starts</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{},</span> <span class="n">reorder</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
@@ -358,8 +358,8 @@
         <span class="n">data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">reorder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">nrows</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CSRTable&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build a CSRTable from COO-style row/col indices.</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"CSRTable"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Build a CSRTable from COO-style row/col indices.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -392,7 +392,7 @@
 <span class="sd">        ----------</span>
 <span class="sd">        O(nnz log nnz) if ``reorder=True`` (stable sort by row),</span>
 <span class="sd">        otherwise O(nnz).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">rows</span> <span class="o">=</span> <span class="n">rows</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
         <span class="n">cols</span> <span class="o">=</span> <span class="n">cols</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
 
@@ -403,12 +403,12 @@
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">nnz</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;from_coo: data[&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39;] length </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> != nnz </span><span class="si">{</span><span class="n">nnz</span><span class="si">}</span><span class="s2">. Ensure payloads are already aligned to entries.&quot;</span>
+                        <span class="sa">f</span><span class="s2">"from_coo: data['</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">'] length </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> != nnz </span><span class="si">{</span><span class="n">nnz</span><span class="si">}</span><span class="s2">. Ensure payloads are already aligned to entries."</span>
                     <span class="p">)</span>
                 <span class="n">d0</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
 
         <span class="k">if</span> <span class="n">reorder</span><span class="p">:</span>
-            <span class="c1"># Group by rows (stable); we don&#39;t require an intra-row sort by cols.</span>
+            <span class="c1"># Group by rows (stable); we don't require an intra-row sort by cols.</span>
             <span class="n">order</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">stable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">rows_sorted</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
             <span class="n">cols_sorted</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
@@ -436,8 +436,8 @@
         <span class="n">counts</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>  <span class="c1"># LongTensor [R]</span>
         <span class="n">row_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># each [R,(...)] → expands by row id</span>
         <span class="n">col_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># each [.,C] → expands by col id</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CSRTable&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a CSR with locally indexed columns from per-row counts.</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"CSRTable"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create a CSR with locally indexed columns from per-row counts.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -460,10 +460,10 @@
 <span class="sd">        &gt;&gt;&gt; counts = torch.tensor([2, 1], dtype=torch.long)</span>
 <span class="sd">        &gt;&gt;&gt; row_feat = torch.tensor([[10.0],[20.0]])</span>
 <span class="sd">        &gt;&gt;&gt; col_feat = torch.arange(2)  # local 0..C-1</span>
-<span class="sd">        &gt;&gt;&gt; t = CSRTable.from_counts(counts, row_data={&quot;rf&quot;: row_feat}, col_data={&quot;cf&quot;: col_feat})</span>
+<span class="sd">        &gt;&gt;&gt; t = CSRTable.from_counts(counts, row_data={"rf": row_feat}, col_data={"cf": col_feat})</span>
 <span class="sd">        &gt;&gt;&gt; t.cols</span>
 <span class="sd">        tensor([0, 1, 0])</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">starts</span> <span class="o">=</span> <span class="n">starts_from_counts</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">))</span>  <span class="c1"># [R+1]</span>
         <span class="n">rows_of_entry</span><span class="p">,</span> <span class="n">local_col</span> <span class="o">=</span> <span class="n">row_and_offset</span><span class="p">(</span><span class="n">starts</span><span class="p">)</span>  <span class="c1"># [nnz], [nnz]</span>
 
@@ -485,8 +485,8 @@
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>  <span class="c1"># BoolTensor [R, C]</span>
         <span class="n">data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CSRTable&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build a CSR from a boolean mask.</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"CSRTable"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Build a CSR from a boolean mask.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -510,7 +510,7 @@
 <span class="sd">        Complexity</span>
 <span class="sd">        ----------</span>
 <span class="sd">        O(R*C) for the boolean scan; storage scales with ``nnz``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">as_tuple</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># shape nnz, 2</span>
 
         <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">unbind</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># if there are more indices what do we do?</span>
@@ -520,13 +520,13 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a derived field or a stored per-entry tensor.</span>
+<span class="w">        </span><span class="sd">"""Return a derived field or a stored per-entry tensor.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        key : {&quot;rows&quot;, &quot;cols&quot;} | str</span>
-<span class="sd">            * ``&quot;rows&quot;`` — derived LongTensor ``[nnz]`` with row id per entry.</span>
-<span class="sd">            * ``&quot;cols&quot;`` — the stored per-entry column payload.</span>
+<span class="sd">        key : {"rows", "cols"} | str</span>
+<span class="sd">            * ``"rows"`` — derived LongTensor ``[nnz]`` with row id per entry.</span>
+<span class="sd">            * ``"cols"`` — the stored per-entry column payload.</span>
 <span class="sd">            * other string — returned from ``self.data[key]``.</span>
 
 <span class="sd">        Returns</span>
@@ -538,21 +538,21 @@
 <span class="sd">        ------</span>
 <span class="sd">        KeyError</span>
 <span class="sd">            If ``key`` is not present in ``data`` and is not a special key.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;rows&quot;</span><span class="p">:</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"rows"</span><span class="p">:</span>
             <span class="n">rows_of_entry</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">row_and_offset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">starts</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">rows_of_entry</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;cols&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"cols"</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set or replace a per-entry field in ``data``.</span>
+<span class="w">        </span><span class="sd">"""Set or replace a per-entry field in ``data``.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        key : str</span>
-<span class="sd">            Name of the field to store. Special keys ``&quot;rows&quot;`` and ``&quot;cols&quot;``</span>
+<span class="sd">            Name of the field to store. Special keys ``"rows"`` and ``"cols"``</span>
 <span class="sd">            are disallowed.</span>
 <span class="sd">        value : Tensor, shape ``[nnz, ...]``</span>
 <span class="sd">            Must align with the current CSR order.</span>
@@ -560,16 +560,16 @@
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        KeyError</span>
-<span class="sd">            If attempting to set ``&quot;rows&quot;`` or ``&quot;cols&quot;``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;rows&quot;</span><span class="p">,</span> <span class="s2">&quot;cols&quot;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid key for data: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="sd">            If attempting to set ``"rows"`` or ``"cols"``.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"rows"</span><span class="p">,</span> <span class="s2">"cols"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid key for data: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
 <div class="viewcode-block" id="CSRTable.filter_mask">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.filter_mask">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">filter_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keep_mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CSRTable&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter entries by a boolean mask while recomputing per-row pointers.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keep_mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"CSRTable"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Filter entries by a boolean mask while recomputing per-row pointers.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -587,7 +587,7 @@
 <span class="sd">        * Stability is per-row: relative order among kept entries from the same row</span>
 <span class="sd">          matches their original order.</span>
 <span class="sd">        * If all entries are dropped, returns an empty table with the same row count.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">keep_mask</span> <span class="o">=</span> <span class="n">keep_mask</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
 
         <span class="c1"># Filter values</span>
@@ -595,7 +595,7 @@
         <span class="n">data_new</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="n">keep_mask</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
         <span class="c1"># Recompute per-row counts from kept entries</span>
-        <span class="n">rows_of_entry</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;rows&quot;</span><span class="p">]</span>
+        <span class="n">rows_of_entry</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">"rows"</span><span class="p">]</span>
         <span class="n">rows_kept</span> <span class="o">=</span> <span class="n">rows_of_entry</span><span class="p">[</span><span class="n">keep_mask</span><span class="p">]</span>
         <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">starts</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="n">counts_new</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">rows_kept</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">R</span><span class="p">)</span>
@@ -611,8 +611,8 @@
 
 <div class="viewcode-block" id="CSRTable.filter_indices">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.filter_indices">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">filter_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keep_indices</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CSRTable&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter entries by absolute positions in the current value domain.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keep_indices</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"CSRTable"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Filter entries by absolute positions in the current value domain.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -628,7 +628,7 @@
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
 <span class="sd">        If ``K == 0``, returns an empty table with the same row count.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">keep_indices</span> <span class="o">=</span> <span class="n">keep_indices</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">keep_indices</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">starts</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
@@ -642,7 +642,7 @@
         <span class="n">cols_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">[</span><span class="n">keep_indices</span><span class="p">]</span>
         <span class="n">data_new</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="n">keep_indices</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
-        <span class="n">rows_of_entry</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;rows&quot;</span><span class="p">]</span>
+        <span class="n">rows_of_entry</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">"rows"</span><span class="p">]</span>
         <span class="n">rows_kept</span> <span class="o">=</span> <span class="n">rows_of_entry</span><span class="p">[</span><span class="n">keep_indices</span><span class="p">]</span>
         <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">starts</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="n">counts_new</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">rows_kept</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">R</span><span class="p">)</span>
@@ -667,8 +667,8 @@
         <span class="n">carry</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># None → carry all fields</span>
         <span class="n">include_src_pos</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">include_src_cols</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CSRTable&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Materialize a new CSR by selecting rows in the given order.</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"CSRTable"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Materialize a new CSR by selecting rows in the given order.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -678,9 +678,9 @@
 <span class="sd">        carry : tuple[str, ...] or None, optional</span>
 <span class="sd">            Names of ``data`` fields to carry over. ``None`` carries all fields.</span>
 <span class="sd">        include_src_pos : bool, default ``False``</span>
-<span class="sd">            If ``True``, adds ``data[&quot;src_pos&quot;]`` with absolute source positions.</span>
+<span class="sd">            If ``True``, adds ``data["src_pos"]`` with absolute source positions.</span>
 <span class="sd">        include_src_cols : bool, default ``False``</span>
-<span class="sd">            If ``True``, adds ``data[&quot;src_col&quot;]`` with source ``cols`` values.</span>
+<span class="sd">            If ``True``, adds ``data["src_col"]`` with source ``cols`` values.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -695,7 +695,7 @@
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; t2 = t.reindex(torch.tensor([3, 1, 3]), include_src_pos=True)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">row_ids</span> <span class="o">=</span> <span class="n">row_ids</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
         <span class="n">src_starts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">starts</span>
         <span class="n">row_beg</span> <span class="o">=</span> <span class="n">src_starts</span><span class="p">[</span><span class="n">row_ids</span><span class="p">]</span>
@@ -715,9 +715,9 @@
 
         <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">src_pos</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">carry</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">include_src_pos</span><span class="p">:</span>
-            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;src_pos&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">src_pos</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">"src_pos"</span><span class="p">]</span> <span class="o">=</span> <span class="n">src_pos</span>
         <span class="k">if</span> <span class="n">include_src_cols</span><span class="p">:</span>
-            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;src_col&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">[</span><span class="n">src_pos</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">"src_col"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">[</span><span class="n">src_pos</span><span class="p">]</span>
 
         <span class="n">out_cols</span> <span class="o">=</span> <span class="n">local_off</span>  <span class="c1"># local 0..len(row)-1</span>
         <span class="k">return</span> <span class="n">CSRTable</span><span class="p">(</span><span class="n">starts</span><span class="o">=</span><span class="n">out_starts</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="n">out_cols</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">reorder</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
@@ -727,10 +727,10 @@
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.outer">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">outer</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;CSRTable&quot;</span><span class="p">,</span>
+        <span class="n">other</span><span class="p">:</span> <span class="s2">"CSRTable"</span><span class="p">,</span>
         <span class="n">operations</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span> <span class="nb">callable</span><span class="p">],</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CSRTable&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Row-wise Cartesian join between two CSR tables.</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"CSRTable"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Row-wise Cartesian join between two CSR tables.</span>
 
 <span class="sd">        For each row ``r``, forms the Cartesian product ``self[r] × other[r]`` and</span>
 <span class="sd">        builds output fields by applying user-provided operations.</span>
@@ -760,8 +760,8 @@
 <span class="sd">          local index depending on implementation); rely on output ``data``</span>
 <span class="sd">          for payloads you need downstream.</span>
 <span class="sd">        * If a row is empty on either side, the corresponding output row is empty.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Note, if this arrange construct is somehow costly (doesn&#39;t seem like it would be)</span>
+<span class="sd">        """</span>
+        <span class="c1"># Note, if this arrange construct is somehow costly (doesn't seem like it would be)</span>
         <span class="c1"># then this can be rewritten to avoid it.</span>
         <span class="n">rows</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nrows</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">starts</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">CSRTable</span><span class="o">.</span><span class="n">expand_pairings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">operations</span><span class="p">)</span></div>
@@ -771,13 +771,13 @@
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.CSRTable.expand_pairings">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expand_pairings</span><span class="p">(</span>
-        <span class="n">left_csr</span><span class="p">:</span> <span class="s2">&quot;CSRTable&quot;</span><span class="p">,</span>
-        <span class="n">right_csr</span><span class="p">:</span> <span class="s2">&quot;CSRTable&quot;</span><span class="p">,</span>
+        <span class="n">left_csr</span><span class="p">:</span> <span class="s2">"CSRTable"</span><span class="p">,</span>
+        <span class="n">right_csr</span><span class="p">:</span> <span class="s2">"CSRTable"</span><span class="p">,</span>
         <span class="n">left_rows</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">right_rows</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">operations</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span> <span class="nb">callable</span><span class="p">],</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CSRTable&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Expand specific row pairings of two CSR tables (generalized join).</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"CSRTable"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Expand specific row pairings of two CSR tables (generalized join).</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -803,7 +803,7 @@
 <span class="sd">        * Use this when you have a precomputed mapping between rows of two tables</span>
 <span class="sd">        (e.g., voxel adjacency), not necessarily one-to-one by index.</span>
 <span class="sd">        * Stability is per paired row based on the original per-row orders.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="c1">##TODO: change how `operations` API works to allow for more complex, multi-argument operations.</span>
 
@@ -812,7 +812,7 @@
 
         <span class="c1"># Sanity (rows must have same length E)</span>
         <span class="k">if</span> <span class="n">left_rows</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">!=</span> <span class="n">right_rows</span><span class="o">.</span><span class="n">numel</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;first_rows and second_rows must have identical length. </span><span class="si">{</span><span class="n">right_rows</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span><span class="si">=}</span><span class="s2"> ; </span><span class="si">{</span><span class="n">left_rows</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"first_rows and second_rows must have identical length. </span><span class="si">{</span><span class="n">right_rows</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span><span class="si">=}</span><span class="s2"> ; </span><span class="si">{</span><span class="n">left_rows</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="c1"># shapes: number of rows:</span>
         <span class="n">begA</span><span class="p">,</span> <span class="n">endA</span> <span class="o">=</span> <span class="n">A_st</span><span class="p">[</span><span class="n">left_rows</span><span class="p">],</span> <span class="n">A_st</span><span class="p">[</span><span class="n">left_rows</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
@@ -827,7 +827,7 @@
         <span class="n">rows_of_out</span><span class="p">,</span> <span class="n">cols_of_out</span> <span class="o">=</span> <span class="n">row_and_offset</span><span class="p">(</span><span class="n">out_starts</span><span class="p">)</span>
         <span class="n">lenB_per_out_row</span> <span class="o">=</span> <span class="n">lenB</span><span class="p">[</span><span class="n">rows_of_out</span><span class="p">]</span>
         <span class="c1"># mod out the local counter by number of B items from that row. (B is faster varying)</span>
-        <span class="n">cols_A</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="n">cols_of_out</span><span class="p">,</span> <span class="n">lenB_per_out_row</span><span class="p">,</span> <span class="n">rounding_mode</span><span class="o">=</span><span class="s2">&quot;floor&quot;</span><span class="p">)</span>
+        <span class="n">cols_A</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="n">cols_of_out</span><span class="p">,</span> <span class="n">lenB_per_out_row</span><span class="p">,</span> <span class="n">rounding_mode</span><span class="o">=</span><span class="s2">"floor"</span><span class="p">)</span>
         <span class="n">cols_B</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">cols_of_out</span><span class="p">,</span> <span class="n">lenB_per_out_row</span><span class="p">)</span>
 
         <span class="c1"># Flat position indices</span>
@@ -858,7 +858,7 @@
 <div class="viewcode-block" id="find_indices">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.layers.pairs.csr_pairs.csrtable.html#hippynn.layers.pairs.csr_pairs.csrtable.find_indices">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">find_indices</span><span class="p">(</span><span class="n">query_vals</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Map query values to their indices in keys, or -1 if not found.</span>
 
 <span class="sd">    This function allows you to look at the CSR rows for a table and see if they exist in another csr table.</span>
@@ -872,7 +872,7 @@
 <span class="sd">        locations: indices of query values which are in the key.</span>
 <span class="sd">        indices: Index of the key corresponding to those query values.</span>
 <span class="sd">    </span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     
     <span class="c1">#Example:</span>
     <span class="c1">#    keys = [1, 5, 10, 15, 20]</span>

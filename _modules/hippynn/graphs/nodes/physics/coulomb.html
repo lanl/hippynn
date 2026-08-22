@@ -108,9 +108,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.graphs.nodes.physics.coulomb</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Node for charge equilibration model.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...._deprecations</span><span class="w"> </span><span class="kn">import</span> <span class="n">_DeprecatedNamesMixin</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">....layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">physics</span> <span class="k">as</span> <span class="n">physics_layers</span> 
@@ -130,7 +130,7 @@
 <div class="viewcode-block" id="ChargePairSetup">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.coulomb.html#hippynn.graphs.nodes.physics.coulomb.ChargePairSetup">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ChargePairSetup</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">):</span>
-    <span class="n">parent_expansion_kwargs</span> <span class="o">=</span> <span class="s2">&quot;_pe_cutoff_distance&quot;</span><span class="p">,</span>
+    <span class="n">parent_expansion_kwargs</span> <span class="o">=</span> <span class="s2">"_pe_cutoff_distance"</span><span class="p">,</span>
     
 
     <span class="nd">@staticmethod</span>
@@ -179,9 +179,9 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">pairfinder</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">((</span><span class="n">charges</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">pidxer</span><span class="p">),</span> <span class="n">PairIndexer</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">NodeNotFound</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Boundary conditions not specified, Building open boundary conditions.&quot;</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">"Boundary conditions not specified, Building open boundary conditions."</span><span class="p">)</span>
             <span class="n">encoder</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">pidxer</span><span class="p">,</span> <span class="n">Encoder</span><span class="p">)</span>
-            <span class="n">pairfinder</span> <span class="o">=</span> <span class="n">OpenPairIndexer</span><span class="p">(</span><span class="s2">&quot;PairIndexer&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">encoder</span><span class="p">,</span> <span class="n">pidxer</span><span class="p">),</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">_pe_cutoff_distance</span><span class="p">)</span>
+            <span class="n">pairfinder</span> <span class="o">=</span> <span class="n">OpenPairIndexer</span><span class="p">(</span><span class="s2">"PairIndexer"</span><span class="p">,</span> <span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">encoder</span><span class="p">,</span> <span class="n">pidxer</span><span class="p">),</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">_pe_cutoff_distance</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">charges</span><span class="p">,</span> <span class="n">pairfinder</span><span class="p">,</span> <span class="n">pidxer</span></div>
 
 
@@ -205,19 +205,19 @@
 <div class="viewcode-block" id="CoulombEnergyNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.coulomb.html#hippynn.graphs.nodes.physics.coulomb.CoulombEnergyNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CoulombEnergyNode</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">ChargePairSetup</span><span class="p">,</span> <span class="n">Energies</span><span class="p">,</span>  <span class="n">MultiNode</span><span class="p">,</span> <span class="n">_DeprecatedNamesMixin</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Besides the normal &#39;name&#39; and &#39;parents&#39; arguments, this node requires an `energy_conversion` parameter.</span>
-<span class="sd">    This corresponds to coulomb&#39;s constant k in the equation E = kqq/r.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_DEPRECATED_NAMES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mol_energies&quot;</span><span class="p">:</span> <span class="s2">&quot;system_energies&quot;</span><span class="p">}</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;charges&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_dist&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="s2">&quot;system_index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_systems&quot;</span>
-    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;system_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_voltages&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Besides the normal 'name' and 'parents' arguments, this node requires an `energy_conversion` parameter.</span>
+<span class="sd">    This corresponds to coulomb's constant k in the equation E = kqq/r.</span>
+<span class="sd">    """</span>
+    <span class="n">_DEPRECATED_NAMES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"mol_energies"</span><span class="p">:</span> <span class="s2">"system_energies"</span><span class="p">}</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"charges"</span><span class="p">,</span> <span class="s2">"pair_dist"</span><span class="p">,</span> <span class="s2">"pair_first"</span><span class="p">,</span> <span class="s2">"pair_second"</span><span class="p">,</span> <span class="s2">"system_index"</span><span class="p">,</span> <span class="s2">"n_systems"</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"system_energies"</span><span class="p">,</span> <span class="s2">"atom_energies"</span><span class="p">,</span> <span class="s2">"atom_voltages"</span>
     <span class="n">output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
-    <span class="n">main_output_name</span> <span class="o">=</span> <span class="s2">&quot;system_energies&quot;</span>
+    <span class="n">main_output_name</span> <span class="o">=</span> <span class="s2">"system_energies"</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">CoulombEnergy</span>
-    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">&quot;energy_conversion_factor&quot;</span><span class="p">,</span>
+    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">"energy_conversion_factor"</span><span class="p">,</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">energy_conversion_factor</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">energy_conversion_factor</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span>
                          <span class="n">energy_conversion_factor</span><span class="o">=</span><span class="n">energy_conversion_factor</span><span class="p">,</span>
@@ -231,14 +231,14 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_pairfinder</span><span class="p">(</span><span class="n">pairfinder</span><span class="p">,</span> <span class="n">cutoff_distance</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pairfinder</span><span class="p">,</span> <span class="n">OpenPairIndexer</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;Closed boundary conditions detected.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot;Coulomb energy module is not compatible with closed boundary conditions.&quot;</span>
+                <span class="s2">"Closed boundary conditions detected.</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="s2">"Coulomb energy module is not compatible with closed boundary conditions."</span>
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">hard_dist_cutoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;hard_dist_cutoff is set to a finite value,</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot;coulomb energy requires summing over the entire set of pairs&quot;</span>
+                <span class="s2">"hard_dist_cutoff is set to a finite value,</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="s2">"coulomb energy requires summing over the entire set of pairs"</span>
             <span class="p">)</span></div>
 
 
@@ -246,20 +246,20 @@
 <div class="viewcode-block" id="ScreenedCoulombEnergyNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.coulomb.html#hippynn.graphs.nodes.physics.coulomb.ScreenedCoulombEnergyNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ScreenedCoulombEnergyNode</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">ChargePairSetup</span><span class="p">,</span> <span class="n">Energies</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">_DeprecatedNamesMixin</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Besides the normal &#39;name&#39; and &#39;parents&#39; arguments, this node requires an `energy_conversion` parameter.</span>
-<span class="sd">    This corresponds to coulomb&#39;s constant k in the equation E = kqq/r.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_DEPRECATED_NAMES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mol_energies&quot;</span><span class="p">:</span> <span class="s2">&quot;system_energies&quot;</span><span class="p">}</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;charges&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_dist&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="s2">&quot;system_index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_systems&quot;</span>
-    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;system_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_voltages&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Besides the normal 'name' and 'parents' arguments, this node requires an `energy_conversion` parameter.</span>
+<span class="sd">    This corresponds to coulomb's constant k in the equation E = kqq/r.</span>
+<span class="sd">    """</span>
+    <span class="n">_DEPRECATED_NAMES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"mol_energies"</span><span class="p">:</span> <span class="s2">"system_energies"</span><span class="p">}</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"charges"</span><span class="p">,</span> <span class="s2">"pair_dist"</span><span class="p">,</span> <span class="s2">"pair_first"</span><span class="p">,</span> <span class="s2">"pair_second"</span><span class="p">,</span> <span class="s2">"system_index"</span><span class="p">,</span> <span class="s2">"n_systems"</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"system_energies"</span><span class="p">,</span> <span class="s2">"atom_energies"</span><span class="p">,</span> <span class="s2">"atom_voltages"</span>
     <span class="n">output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
-    <span class="n">main_output_name</span> <span class="o">=</span> <span class="s2">&quot;system_energies&quot;</span>
+    <span class="n">main_output_name</span> <span class="o">=</span> <span class="s2">"system_energies"</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">ScreenedCoulombEnergy</span>
     <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;energy_conversion_factor&quot;</span><span class="p">:</span><span class="s2">&quot;energy_conversion_factor&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="s2">&quot;cutoff_distance&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;screening&quot;</span><span class="p">:</span> <span class="s2">&quot;screening&quot;</span><span class="p">,</span>
+        <span class="s2">"energy_conversion_factor"</span><span class="p">:</span><span class="s2">"energy_conversion_factor"</span><span class="p">,</span>
+        <span class="s2">"radius"</span><span class="p">:</span> <span class="s2">"cutoff_distance"</span><span class="p">,</span>
+        <span class="s2">"screening"</span><span class="p">:</span> <span class="s2">"screening"</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="nd">@staticmethod</span>
@@ -267,24 +267,24 @@
         <span class="n">existing_cutoff</span> <span class="o">=</span> <span class="n">pairfinder</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">hard_dist_cutoff</span>
         <span class="k">if</span> <span class="n">existing_cutoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">existing_cutoff</span> <span class="o">&lt;</span> <span class="n">cutoff_distance</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Distance cutoff (</span><span class="si">{</span><span class="n">existing_cutoff</span><span class="si">}</span><span class="s2">) is set to less than</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;pair finder distance (</span><span class="si">{</span><span class="n">cutoff_distance</span><span class="si">}</span><span class="s2">). Increase the cutoff distance</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;for the pair_finder (named: </span><span class="si">{</span><span class="n">pairfinder</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)&quot;</span>
+                <span class="sa">f</span><span class="s2">"Distance cutoff (</span><span class="si">{</span><span class="n">existing_cutoff</span><span class="si">}</span><span class="s2">) is set to less than</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"pair finder distance (</span><span class="si">{</span><span class="n">cutoff_distance</span><span class="si">}</span><span class="s2">). Increase the cutoff distance</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"for the pair_finder (named: </span><span class="si">{</span><span class="n">pairfinder</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)"</span>
             <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">energy_conversion_factor</span><span class="p">,</span> <span class="n">cutoff_distance</span><span class="p">,</span> <span class="n">screening</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">energy_conversion_factor</span><span class="p">,</span> <span class="n">cutoff_distance</span><span class="p">,</span> <span class="n">screening</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         
-        <span class="k">if</span> <span class="n">screening</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">screening</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">"auto"</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;To build this module automatically a screening module must</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot;be provided (e.g. layers.physiscs.QScreening(p_value=4))&quot;</span>
+                <span class="s2">"To build this module automatically a screening module must</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="s2">"be provided (e.g. layers.physiscs.QScreening(p_value=4))"</span>
             <span class="p">)</span>
         
         
         <span class="c1"># Dev Note: the _pe_cutoff_distance argument duplicates the cutoff_distance argument</span>
         <span class="c1"># because the AutoKw and ExpandParent mixins both consume their keywords.</span>
         <span class="c1"># Since both of them require the cutoff, we have it supplied with two different names.</span>
-        <span class="c1"># Would be nice if the workflow didn&#39;t require this, but the workaround is not costly,</span>
+        <span class="c1"># Would be nice if the workflow didn't require this, but the workaround is not costly,</span>
         <span class="c1"># just confusing to find.</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span>
@@ -300,8 +300,8 @@
 <div class="viewcode-block" id="ChEQNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.coulomb.html#hippynn.graphs.nodes.physics.coulomb.ChEQNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ChEQNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;U&quot;</span><span class="p">,</span> <span class="s2">&quot;chi&quot;</span>
-    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;charge&quot;</span><span class="p">,</span> <span class="s2">&quot;coul_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;dipole&quot;</span><span class="p">,</span> <span class="s2">&quot;out_U&quot;</span><span class="p">,</span> <span class="s2">&quot;out_chi&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"species"</span><span class="p">,</span> <span class="s2">"coordinates"</span><span class="p">,</span> <span class="s2">"U"</span><span class="p">,</span> <span class="s2">"chi"</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"charge"</span><span class="p">,</span> <span class="s2">"coul_energy"</span><span class="p">,</span> <span class="s2">"dipole"</span><span class="p">,</span> <span class="s2">"out_U"</span><span class="p">,</span> <span class="s2">"out_chi"</span>
     <span class="n">output_index_states</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">IdxType</span><span class="o">.</span><span class="n">SysAtom</span><span class="p">,</span>
         <span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span><span class="p">,</span>
@@ -310,15 +310,15 @@
         <span class="n">IdxType</span><span class="o">.</span><span class="n">SysAtom</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">main_output</span> <span class="o">=</span> <span class="s2">&quot;charge&quot;</span>
+    <span class="n">main_output</span> <span class="o">=</span> <span class="s2">"charge"</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">ChEQ</span>
 
 <div class="viewcode-block" id="ChEQNode.expand0">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.coulomb.html#hippynn.graphs.nodes.physics.coulomb.ChEQNode.expand0">[docs]</a>
     <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Network</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expand0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">U</span> <span class="o">=</span> <span class="n">HChargeNode</span><span class="p">(</span><span class="s2">&quot;ChEQ_U&quot;</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
-        <span class="n">chi</span> <span class="o">=</span> <span class="n">HChargeNode</span><span class="p">(</span><span class="s2">&quot;ChEQ_chi&quot;</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">HChargeNode</span><span class="p">(</span><span class="s2">"ChEQ_U"</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="n">chi</span> <span class="o">=</span> <span class="n">HChargeNode</span><span class="p">(</span><span class="s2">"ChEQ_chi"</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">U</span><span class="p">,</span> <span class="n">chi</span></div>
 
 
@@ -326,8 +326,8 @@
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.coulomb.html#hippynn.graphs.nodes.physics.coulomb.ChEQNode.expand1">[docs]</a>
     <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="n">Network</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expand1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network1</span><span class="p">,</span> <span class="n">network2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">U</span> <span class="o">=</span> <span class="n">HChargeNode</span><span class="p">(</span><span class="s2">&quot;ChEQ_U&quot;</span><span class="p">,</span> <span class="n">network1</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
-        <span class="n">chi</span> <span class="o">=</span> <span class="n">HChargeNode</span><span class="p">(</span><span class="s2">&quot;ChEQ_chi&quot;</span><span class="p">,</span> <span class="n">network2</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">HChargeNode</span><span class="p">(</span><span class="s2">"ChEQ_U"</span><span class="p">,</span> <span class="n">network1</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="n">chi</span> <span class="o">=</span> <span class="n">HChargeNode</span><span class="p">(</span><span class="s2">"ChEQ_chi"</span><span class="p">,</span> <span class="n">network2</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">U</span><span class="p">,</span> <span class="n">chi</span></div>
 
 
@@ -349,15 +349,15 @@
             <span class="n">cell_nodes</span> <span class="o">=</span> <span class="n">find_relatives</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="n">CellNode</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Periodic boundaries were detected in the graph; &quot;</span> <span class="o">+</span>\
-                          <span class="s2">&quot;This ChEQ node computes using open boundary conditions only&quot;</span><span class="p">,</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">"Periodic boundaries were detected in the graph; "</span> <span class="o">+</span>\
+                          <span class="s2">"This ChEQ node computes using open boundary conditions only"</span><span class="p">,</span>
                           <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span>
                           <span class="p">)</span>
         <span class="k">return</span> <span class="n">parents</span></div>
 
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;energy&quot;</span><span class="p">:</span> <span class="s2">&quot;eV&quot;</span><span class="p">,</span> <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="s2">&quot;Angstrom&quot;</span><span class="p">},</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="p">{</span><span class="s2">"energy"</span><span class="p">:</span> <span class="s2">"eV"</span><span class="p">,</span> <span class="s2">"length"</span><span class="p">:</span> <span class="s2">"Angstrom"</span><span class="p">},</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">lower_bound</span><span class="o">=</span><span class="n">lower_bound</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>

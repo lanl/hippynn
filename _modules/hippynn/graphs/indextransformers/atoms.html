@@ -108,9 +108,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.graphs.indextransformers.atoms</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Nodes for atom index state conversion</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">find_relatives</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_index_transformer</span><span class="p">,</span> <span class="n">IdxType</span><span class="p">,</span> <span class="n">_debprint</span> <span class="k">as</span> <span class="n">idx_debprint</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..nodes.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">InputNode</span>
@@ -127,7 +127,7 @@
         <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="n">node</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">hints</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;None cannot be a hint!&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"None cannot be a hint!"</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="n">node</span><span class="p">,</span> <span class="o">*</span><span class="n">hints</span><span class="p">])</span></div>
 
     
@@ -136,15 +136,15 @@
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.indextransformers.atoms.html#hippynn.graphs.indextransformers.atoms.idx_sysatom_atom">[docs]</a>
 <span class="nd">@register_index_transformer</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">SysAtom</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">idx_sysatom_atom</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">hints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;auto-generating indexing for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+    <span class="n">purpose</span> <span class="o">=</span> <span class="s2">"auto-generating indexing for </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
 
     <span class="n">search_nodes</span> <span class="o">=</span> <span class="n">make_search_nodes</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">hints</span><span class="p">)</span>
     
-    <span class="c1"># This &#39;if&#39; call can raise NodeAmbiguity Error, but we want it to error in that case.</span>
+    <span class="c1"># This 'if' call can raise NodeAmbiguity Error, but we want it to error in that case.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">is_in_loss_graph</span><span class="p">(</span><span class="n">search_nodes</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">):</span>
         <span class="c1"># If we are auto-indexing in the model graph, it should be easy.</span>
         <span class="n">pidxer</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">search_nodes</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
-        <span class="n">idx_debprint</span><span class="p">(</span><span class="s2">&quot;Using reindexer for &quot;</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+        <span class="n">idx_debprint</span><span class="p">(</span><span class="s2">"Using reindexer for "</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># If we are auto-indexing in the loss graph, it gets a bit complicated.</span>
         <span class="c1"># We want to find the species by examining the corresponding model graph.</span>
@@ -158,13 +158,13 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">encoder</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">NodeOperationError</span> <span class="k">as</span> <span class="n">ne</span><span class="p">:</span>
-            <span class="n">idx_debprint</span><span class="p">(</span><span class="s2">&quot;Creating new encoder in loss graph.&quot;</span><span class="p">)</span>
+            <span class="n">idx_debprint</span><span class="p">(</span><span class="s2">"Creating new encoder in loss graph."</span><span class="p">)</span>
             <span class="c1"># If this fails, something bad has happened -- the loss graph is trying to do something not defined by the</span>
             <span class="c1"># model graph</span>
             <span class="n">origin_encoder</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">species</span><span class="o">.</span><span class="n">origin_node</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
-            <span class="n">encoder</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="s2">&quot;Auto(One-hot)&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">species</span><span class="p">,),</span> <span class="n">species_set</span><span class="o">=</span><span class="n">origin_encoder</span><span class="o">.</span><span class="n">species_set</span><span class="p">)</span>
-            <span class="c1"># If we can&#39;t find an encoder, let&#39;s assume we won&#39;t find an indexer</span>
-            <span class="n">pidxer</span> <span class="o">=</span> <span class="n">PaddingIndexer</span><span class="p">(</span><span class="s2">&quot;Auto(PaddingIndexer)&quot;</span><span class="p">,</span> <span class="n">encoder</span><span class="p">)</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">(</span><span class="s2">"Auto(One-hot)"</span><span class="p">,</span> <span class="p">(</span><span class="n">species</span><span class="p">,),</span> <span class="n">species_set</span><span class="o">=</span><span class="n">origin_encoder</span><span class="o">.</span><span class="n">species_set</span><span class="p">)</span>
+            <span class="c1"># If we can't find an encoder, let's assume we won't find an indexer</span>
+            <span class="n">pidxer</span> <span class="o">=</span> <span class="n">PaddingIndexer</span><span class="p">(</span><span class="s2">"Auto(PaddingIndexer)"</span><span class="p">,</span> <span class="n">encoder</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># If we did find an encoder, look for an indexer and assume it exists</span>
             <span class="n">pidxer</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">why_desc</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
@@ -184,7 +184,7 @@
         <span class="n">parents</span> <span class="o">=</span> <span class="p">(</span><span class="n">node</span><span class="p">,)</span>
         <span class="k">return</span> <span class="n">parents</span><span class="p">,</span> <span class="n">AtomDeIndexer</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;De-indexing not yet implemented in loss graph&quot;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"De-indexing not yet implemented in loss graph"</span><span class="p">)</span></div>
 
         <span class="c1"># TODO: refactor out padding indexer creation for loss from the sysatom-atom indexer, then re-use it here.</span>
 </pre></div>

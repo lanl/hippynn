@@ -130,13 +130,13 @@
 <div class="viewcode-block" id="GradientNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.derivatives.html#hippynn.graphs.nodes.physics.derivatives.GradientNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GradientNode</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute the gradient of a quantity.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;energy&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"energy"</span><span class="p">,</span> <span class="s2">"coordinates"</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">Gradient</span>
-    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">&quot;sign&quot;</span><span class="p">,</span>
+    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">"sign"</span><span class="p">,</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">energy</span><span class="p">,</span> <span class="n">position</span> <span class="o">=</span> <span class="n">parents</span>
@@ -151,12 +151,12 @@
 <div class="viewcode-block" id="MultiGradientNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.derivatives.html#hippynn.graphs.nodes.physics.derivatives.MultiGradientNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MultiGradientNode</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute the gradient of a quantity.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">MultiGradient</span>
-    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">&quot;signs&quot;</span><span class="p">,</span>
+    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">"signs"</span><span class="p">,</span>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">molecular_energies_parent</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span> <span class="n">generalized_coordinates_parents</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Node</span><span class="p">],</span> <span class="n">signs</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -171,7 +171,7 @@
             <span class="n">parent</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">True</span>        
 
         <span class="bp">self</span><span class="o">.</span><span class="n">input_names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">parents</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_grad&quot;</span> <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">generalized_coordinates_parents</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">"_grad"</span> <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">generalized_coordinates_parents</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_index_states</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">index_state</span> <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">generalized_coordinates_parents</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">signs</span><span class="o">=</span><span class="n">signs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -181,14 +181,14 @@
 <div class="viewcode-block" id="HessianNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.derivatives.html#hippynn.graphs.nodes.physics.derivatives.HessianNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HessianNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Node that computes the Hessian (second derivatives of energy)</span>
 <span class="sd">    via gradients of force w.r.t. coordinates or</span>
 <span class="sd">    second gradients of enery w.r.t. coordinates.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;forces&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;nonblank&quot;</span>
-    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;hessian&quot;</span><span class="p">,</span> <span class="s2">&quot;mask&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"forces"</span><span class="p">,</span> <span class="s2">"coordinates"</span><span class="p">,</span> <span class="s2">"nonblank"</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"hessian"</span><span class="p">,</span> <span class="s2">"mask"</span>
     <span class="n">output_index_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">)</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">Hessian</span>
 
@@ -212,9 +212,9 @@
             <span class="n">force</span> <span class="o">=</span> <span class="n">possible_grads</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_grads</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
             <span class="c1"># if no gradient was found, make our own</span>
-            <span class="n">force</span> <span class="o">=</span> <span class="n">GradientNode</span><span class="p">(</span><span class="s2">&quot;forces&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">positions</span><span class="p">),</span> <span class="n">sign</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">force</span> <span class="o">=</span> <span class="n">GradientNode</span><span class="p">(</span><span class="s2">"forces"</span><span class="p">,</span> <span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">positions</span><span class="p">),</span> <span class="n">sign</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_grads</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">NodeAmbiguityError</span><span class="p">(</span><span class="s2">&quot;Unable to automatically determine correct gradient of energy, as multiple gradient nodes are already present.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">NodeAmbiguityError</span><span class="p">(</span><span class="s2">"Unable to automatically determine correct gradient of energy, as multiple gradient nodes are already present."</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">force</span><span class="p">,</span> <span class="n">positions</span></div>
 
@@ -251,7 +251,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">check_for_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">encoder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">self_and_parents</span> <span class="o">=</span> <span class="p">{</span><span class="n">force</span><span class="p">,</span> <span class="o">*</span><span class="n">force</span><span class="o">.</span><span class="n">get_ancestors</span><span class="p">()}</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="p">(</span><span class="n">GradientNode</span><span class="p">,</span> <span class="n">MultiGradientNode</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">self_and_parents</span><span class="p">):</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Input to hessian node doesn&#39;t appear to be a force or child of a force! This node: </span><span class="si">{</span><span class="n">force</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Input to hessian node doesn't appear to be a force or child of a force! This node: </span><span class="si">{</span><span class="n">force</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">force</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">encoder</span></div>
 
 
@@ -260,7 +260,7 @@
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
@@ -271,10 +271,10 @@
 <div class="viewcode-block" id="HVPVectorNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.derivatives.html#hippynn.graphs.nodes.physics.derivatives.HVPVectorNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HVPVectorNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Outputs a tensor with a determined number of random or one-hot vectors per molecule</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;nonblank&quot;</span>
+<span class="sd">    """</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"coordinates"</span><span class="p">,</span> <span class="s2">"nonblank"</span>
     <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">HVPVector</span>
 
@@ -290,8 +290,8 @@
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span>  <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">vector_type</span><span class="o">=</span><span class="s2">&quot;random&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;vector_type&quot;</span><span class="p">:</span> <span class="n">vector_type</span><span class="p">}</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span>  <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="n">vector_type</span><span class="o">=</span><span class="s2">"random"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"vector_type"</span><span class="p">:</span> <span class="n">vector_type</span><span class="p">}</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
@@ -300,8 +300,8 @@
 <div class="viewcode-block" id="HVPNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.derivatives.html#hippynn.graphs.nodes.physics.derivatives.HVPNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HVPNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;vector&quot;</span><span class="p">,</span> <span class="s2">&quot;nonblank&quot;</span>
-    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;hvp&quot;</span><span class="p">,</span> <span class="s2">&quot;mask&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"source"</span><span class="p">,</span> <span class="s2">"coordinates"</span><span class="p">,</span> <span class="s2">"vector"</span><span class="p">,</span> <span class="s2">"nonblank"</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"hvp"</span><span class="p">,</span> <span class="s2">"mask"</span>
     <span class="n">output_index_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">)</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">HVP</span>
 
@@ -326,9 +326,9 @@
             <span class="n">force</span> <span class="o">=</span> <span class="n">possible_grads</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_grads</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
             <span class="c1"># if no gradient was found, make our own</span>
-            <span class="n">force</span> <span class="o">=</span> <span class="n">GradientNode</span><span class="p">(</span><span class="s2">&quot;forces&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">positions</span><span class="p">),</span> <span class="n">sign</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">force</span> <span class="o">=</span> <span class="n">GradientNode</span><span class="p">(</span><span class="s2">"forces"</span><span class="p">,</span> <span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">positions</span><span class="p">),</span> <span class="n">sign</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_grads</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">NodeAmbiguityError</span><span class="p">(</span><span class="s2">&quot;Unable to automatically determine gradient of energy as multiple gradient nodes are present.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">NodeAmbiguityError</span><span class="p">(</span><span class="s2">"Unable to automatically determine gradient of energy as multiple gradient nodes are present."</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">force</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">vector</span></div>
 
@@ -349,7 +349,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">expansion3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">force</span><span class="p">,</span> <span class="n">GradientNode</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">GradientNode</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">force</span><span class="o">.</span><span class="n">get_all_parents</span><span class="p">()):</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Input to HVP node doesn&#39;t appear to be a force or child of a force! Got node: </span><span class="si">{</span><span class="n">force</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Input to HVP node doesn't appear to be a force or child of a force! Got node: </span><span class="si">{</span><span class="n">force</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="n">encoder</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">acquire_encoding_padding</span><span class="p">((</span><span class="n">force</span><span class="p">,</span> <span class="n">positions</span><span class="p">),</span> <span class="n">species_set</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">purpose</span><span class="o">=</span><span class="n">purpose</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">force</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">encoder</span></div>
@@ -367,7 +367,7 @@
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
@@ -378,10 +378,10 @@
 <div class="viewcode-block" id="TrueHVPNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.derivatives.html#hippynn.graphs.nodes.physics.derivatives.TrueHVPNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TrueHVPNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Computes true Hessian-vector product from database-stored Hessians and input vector</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;hessian&quot;</span><span class="p">,</span> <span class="s2">&quot;vector&quot;</span>
+<span class="sd">    """</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"hessian"</span><span class="p">,</span> <span class="s2">"vector"</span>
     <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">TrueHVP</span>
 
@@ -390,14 +390,14 @@
     <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Node</span><span class="p">,</span> <span class="n">HVPVectorNode</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expand_from_hessian_and_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hessian</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">hessian</span><span class="o">.</span><span class="n">_index_state</span> <span class="o">!=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected Molecules-indexed Hessian, got </span><span class="si">{</span><span class="n">hessian</span><span class="o">.</span><span class="n">_index_state</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Expected Molecules-indexed Hessian, got </span><span class="si">{</span><span class="n">hessian</span><span class="o">.</span><span class="n">_index_state</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">hessian</span><span class="p">,</span> <span class="n">vector</span></div>
 
 
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">MolAtom</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -407,11 +407,11 @@
 <div class="viewcode-block" id="StressForceNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.derivatives.html#hippynn.graphs.nodes.physics.derivatives.StressForceNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StressForceNode</span><span class="p">(</span><span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;energy&quot;</span><span class="p">,</span> <span class="s2">&quot;strain&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;cell&quot;</span>
-    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;forces&quot;</span><span class="p">,</span> <span class="s2">&quot;stress&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"energy"</span><span class="p">,</span> <span class="s2">"strain"</span><span class="p">,</span> <span class="s2">"coordinates"</span><span class="p">,</span> <span class="s2">"cell"</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"forces"</span><span class="p">,</span> <span class="s2">"stress"</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">StressForce</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">energy</span><span class="p">,</span> <span class="n">strain</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">cell</span> <span class="o">=</span> <span class="n">parents</span>
         <span class="n">coordinates</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="n">energy</span><span class="o">.</span><span class="n">main_output</span><span class="p">,</span> <span class="n">strain</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">cell</span>
@@ -423,12 +423,12 @@
 <div class="viewcode-block" id="StrainInducer">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.derivatives.html#hippynn.graphs.nodes.physics.derivatives.StrainInducer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StrainInducer</span><span class="p">(</span><span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;cell&quot;</span>
-    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;strained_coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;strained_cell&quot;</span><span class="p">,</span> <span class="s2">&quot;strain&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"coordinates"</span><span class="p">,</span> <span class="s2">"cell"</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"strained_coordinates"</span><span class="p">,</span> <span class="s2">"strained_cell"</span><span class="p">,</span> <span class="s2">"strain"</span>
     <span class="n">output_index_states</span> <span class="o">=</span> <span class="bp">NotImplemented</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">physics_layers</span><span class="o">.</span><span class="n">CellScaleInducer</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">position</span><span class="p">,</span> <span class="n">cell</span> <span class="o">=</span> <span class="n">parents</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_index_states</span> <span class="o">=</span> <span class="n">position</span><span class="o">.</span><span class="n">index_state</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Unlabeled</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Unlabeled</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -437,32 +437,32 @@
     
 <div class="viewcode-block" id="setup_stressforce_nodes">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.derivatives.html#hippynn.graphs.nodes.physics.derivatives.setup_stressforce_nodes">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">setup_stressforce_nodes</span><span class="p">(</span><span class="n">energy_node</span><span class="p">,</span> <span class="n">return_transformed_inputs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">positions_node</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">cell_node</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">strain_node</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">setup_stressforce_nodes</span><span class="p">(</span><span class="n">energy_node</span><span class="p">,</span> <span class="n">return_transformed_inputs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">positions_node</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="n">cell_node</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="n">strain_node</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""_summary_</span>
 
 <span class="sd">    :param energy_node: the energy to differenitate</span>
 <span class="sd">    :param return_transformed_inputs: If true, return the strained positions, strained cell, and strain</span>
-<span class="sd">    :param position_node: defaults to &quot;auto&quot;</span>
-<span class="sd">    :param cell_node: defaults to &quot;auto&quot;</span>
-<span class="sd">    :param strain_node: defaults to &quot;auto&quot;</span>
+<span class="sd">    :param position_node: defaults to "auto"</span>
+<span class="sd">    :param cell_node: defaults to "auto"</span>
+<span class="sd">    :param strain_node: defaults to "auto"</span>
 
-<span class="sd">    Using &quot;auto&quot; will cause a failure if the corresponding node cannot be found or is ambiguous.</span>
+<span class="sd">    Using "auto" will cause a failure if the corresponding node cannot be found or is ambiguous.</span>
 
 <span class="sd">    :return: (forces, stress) or (forces, stress, strained_positions, strained_cell, strain) depending on return_transformed_inputs flag.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">..tags</span><span class="w"> </span><span class="kn">import</span> <span class="n">Positions</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">..inputs</span><span class="w"> </span><span class="kn">import</span> <span class="n">CellNode</span>
     
-    <span class="k">if</span> <span class="n">positions_node</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">positions_node</span> <span class="o">==</span> <span class="s2">"auto"</span><span class="p">:</span>
         <span class="n">positions_node</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">energy_node</span><span class="p">,</span> <span class="n">Positions</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">cell_node</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cell_node</span> <span class="o">==</span> <span class="s2">"auto"</span><span class="p">:</span>
         <span class="n">cell_node</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">energy_node</span><span class="p">,</span> <span class="n">CellNode</span><span class="p">)</span>
     
-    <span class="k">if</span> <span class="n">strain_node</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
-        <span class="n">strain_node</span> <span class="o">=</span> <span class="n">StrainInducer</span><span class="p">(</span><span class="s2">&quot;Strain_inducer&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">positions_node</span><span class="p">,</span> <span class="n">cell_node</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">strain_node</span> <span class="o">==</span> <span class="s2">"auto"</span><span class="p">:</span>
+        <span class="n">strain_node</span> <span class="o">=</span> <span class="n">StrainInducer</span><span class="p">(</span><span class="s2">"Strain_inducer"</span><span class="p">,</span> <span class="p">(</span><span class="n">positions_node</span><span class="p">,</span> <span class="n">cell_node</span><span class="p">))</span>
     
     <span class="n">strained_coords</span> <span class="o">=</span> <span class="n">strain_node</span><span class="o">.</span><span class="n">strained_coordinates</span>
     <span class="n">strained_cell</span> <span class="o">=</span> <span class="n">strain_node</span><span class="o">.</span><span class="n">strained_cell</span>
@@ -473,7 +473,7 @@
     <span class="n">replace_node</span><span class="p">(</span><span class="n">positions_node</span><span class="p">,</span> <span class="n">strained_coords</span><span class="p">)</span>
     <span class="n">replace_node</span><span class="p">(</span><span class="n">cell_node</span><span class="p">,</span> <span class="n">strained_cell</span><span class="p">)</span>
 
-    <span class="n">derivatives</span> <span class="o">=</span> <span class="n">StressForceNode</span><span class="p">(</span><span class="s2">&quot;StressForceCalculator&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">energy_node</span><span class="p">,</span> <span class="n">strain</span><span class="p">,</span> <span class="n">positions_node</span><span class="p">,</span> <span class="n">cell_node</span><span class="p">))</span>
+    <span class="n">derivatives</span> <span class="o">=</span> <span class="n">StressForceNode</span><span class="p">(</span><span class="s2">"StressForceCalculator"</span><span class="p">,</span> <span class="p">(</span><span class="n">energy_node</span><span class="p">,</span> <span class="n">strain</span><span class="p">,</span> <span class="n">positions_node</span><span class="p">,</span> <span class="n">cell_node</span><span class="p">))</span>
     <span class="n">forces</span><span class="p">,</span> <span class="n">stress</span> <span class="o">=</span> <span class="n">derivatives</span><span class="o">.</span><span class="n">forces</span><span class="p">,</span> <span class="n">derivatives</span><span class="o">.</span><span class="n">stress</span>
 
     <span class="k">if</span> <span class="n">return_transformed_inputs</span><span class="p">:</span>

@@ -110,6 +110,7 @@
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.html#hippynn.databases.Database"><code class="docutils literal notranslate"><span class="pre">Database</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.html#hippynn.databases.DirectoryDatabase"><code class="docutils literal notranslate"><span class="pre">DirectoryDatabase</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.html#hippynn.databases.NPZDatabase"><code class="docutils literal notranslate"><span class="pre">NPZDatabase</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.html#hippynn.databases.auto_detect_key"><code class="docutils literal notranslate"><span class="pre">auto_detect_key()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.SNAPJson.html">SNAPJson module</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">database module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.databases.database.Database"><code class="docutils literal notranslate"><span class="pre">Database</span></code></a><ul>
@@ -141,8 +142,10 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.h5_pyanitools.html">h5_pyanitools module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.metadatabase.html">metadatabase module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.ondisk.html">ondisk module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hippynn.databases.restarter.html">restarter module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hippynn.databases.utils.html">utils module</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.experiment.html">experiment</a></li>
@@ -370,7 +373,7 @@ the per_atom and atom_var properties are exclusive; they cannot both be true.</p
 <li><p><strong>key</strong> – The property key in the dataset to check for high values</p></li>
 <li><p><strong>atomwise</strong> – True if the property is defined per atom in axis 1, otherwise property is treated as whole-system value</p></li>
 <li><p><strong>norm_per_atom</strong> – True if the property should be normalized by atom counts</p></li>
-<li><p><strong>species_key</strong> – Which array represents the atom presence; required if per_atom is True</p></li>
+<li><p><strong>species_key</strong> – Which array represents the atom presence; required if per_atom is True. If None, auto-detected.</p></li>
 <li><p><strong>cut</strong> – If values &gt; mu + cut, the system is removed. The step done first.</p></li>
 <li><p><strong>std_factor</strong> – If (value-mu)/std &gt; std_fact, the system is trimmed. This step done second.</p></li>
 <li><p><strong>norm_axis</strong> – if not None, the property array is normed on the axis. Useful for vector properties like force.</p></li>

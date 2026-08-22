@@ -150,7 +150,7 @@ the module itself is not created when building the node, and a suitable pytorch 
 must be passed in. We could thus create this node using something like:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.layers.algebra</span><span class="w"> </span><span class="kn">import</span> <span class="n">LambdaModule</span>
 
-<span class="n">foo</span> <span class="o">=</span> <span class="n">FooNode</span><span class="p">(</span><span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">neural_network_node</span><span class="p">,),</span> <span class="n">module</span><span class="o">=</span><span class="n">LambdaModule</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">))</span>
+<span class="n">foo</span> <span class="o">=</span> <span class="n">FooNode</span><span class="p">(</span><span class="s2">"foo"</span><span class="p">,</span> <span class="p">(</span><span class="n">neural_network_node</span><span class="p">,),</span> <span class="n">module</span><span class="o">=</span><span class="n">LambdaModule</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">))</span>
 </pre></div>
 </div>
 </section>
@@ -169,13 +169,13 @@ hierarchical energy regression target <a class="reference internal" href="../api
 <span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.base.definition_helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoKw</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">SimpleHEnergyNode</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;input_features&quot;</span><span class="p">,</span> <span class="s2">&quot;system_index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_systems&quot;</span>
-    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;system_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;energy_terms&quot;</span><span class="p">,</span> <span class="s2">&quot;hierarchicality&quot;</span>
-    <span class="n">main_output_name</span> <span class="o">=</span> <span class="s2">&quot;system_energies&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"input_features"</span><span class="p">,</span> <span class="s2">"system_index"</span><span class="p">,</span> <span class="s2">"n_systems"</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"system_energies"</span><span class="p">,</span> <span class="s2">"atom_energies"</span><span class="p">,</span> <span class="s2">"energy_terms"</span><span class="p">,</span> <span class="s2">"hierarchicality"</span>
+    <span class="n">main_output_name</span> <span class="o">=</span> <span class="s2">"system_energies"</span>
     <span class="n">output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Molecules</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">target_modules</span><span class="o">.</span><span class="n">HEnergy</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="n">module_kwargs</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -194,7 +194,7 @@ using keyword arguments. These arguments will be passed to a new instance of the
 <span class="n">parents</span> <span class="o">=</span> <span class="n">neural_network_node</span><span class="p">,</span> <span class="n">padding_indexer</span><span class="o">.</span><span class="n">system_index</span><span class="p">,</span> <span class="n">padding_indexer</span><span class="o">.</span><span class="n">n_systems</span>
 <span class="n">module_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">feature_sizes</span><span class="o">=</span><span class="n">neural_network_node</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">feature_sizes</span><span class="p">)</span>
 
-<span class="n">energy</span> <span class="o">=</span> <span class="n">SimpleHEnergyNode</span><span class="p">(</span><span class="s2">&quot;HEnergy&quot;</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="n">module_kwargs</span><span class="p">)</span>
+<span class="n">energy</span> <span class="o">=</span> <span class="n">SimpleHEnergyNode</span><span class="p">(</span><span class="s2">"HEnergy"</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="n">module_kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>However because the HEnergy nn.Module requires multiple input tensors,
@@ -211,27 +211,27 @@ the <code class="docutils literal notranslate"><span class="pre">ExpandParents</
 optional step during the construction of the node.</p>
 <p>Let’s take a look  at the full definition of <a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HEnergyNode" title="hippynn.graphs.nodes.targets.HEnergyNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">HEnergyNode</span></code></a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">HEnergyNode</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">_DeprecatedNamesMixin</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Predict a system-level scalar such as energy from a sum over local components.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_DEPRECATED_NAMES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mol_energy&quot;</span><span class="p">:</span> <span class="s2">&quot;system_energy&quot;</span><span class="p">}</span>
+<span class="sd">    """</span>
+    <span class="n">_DEPRECATED_NAMES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"mol_energy"</span><span class="p">:</span> <span class="s2">"system_energy"</span><span class="p">}</span>
 
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;hier_features&quot;</span><span class="p">,</span> <span class="s2">&quot;system_index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_systems&quot;</span>
-    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;system_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_energies&quot;</span><span class="p">,</span> <span class="s2">&quot;energy_terms&quot;</span><span class="p">,</span> <span class="s2">&quot;hierarchicality&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_hier&quot;</span><span class="p">,</span> <span class="s2">&quot;mol_hier&quot;</span><span class="p">,</span> <span class="s2">&quot;batch_hier&quot;</span>
-    <span class="n">main_output_name</span> <span class="o">=</span> <span class="s2">&quot;system_energy&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"hier_features"</span><span class="p">,</span> <span class="s2">"system_index"</span><span class="p">,</span> <span class="s2">"n_systems"</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"system_energy"</span><span class="p">,</span> <span class="s2">"atom_energies"</span><span class="p">,</span> <span class="s2">"energy_terms"</span><span class="p">,</span> <span class="s2">"hierarchicality"</span><span class="p">,</span> <span class="s2">"atom_hier"</span><span class="p">,</span> <span class="s2">"mol_hier"</span><span class="p">,</span> <span class="s2">"batch_hier"</span>
+    <span class="n">main_output_name</span> <span class="o">=</span> <span class="s2">"system_energy"</span>
     <span class="n">output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">target_modules</span><span class="o">.</span><span class="n">HEnergy</span>
-    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">&quot;first_is_interacting&quot;</span><span class="p">,</span> <span class="s2">&quot;feature_sizes&quot;</span>
+    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">"first_is_interacting"</span><span class="p">,</span> <span class="s2">"feature_sizes"</span>
 
     <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Network</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expansion0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">if</span> <span class="s2">&quot;feature_sizes&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">[</span><span class="s2">&quot;feature_sizes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">feature_sizes</span>
+        <span class="k">if</span> <span class="s2">"feature_sizes"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">[</span><span class="s2">"feature_sizes"</span><span class="p">]</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">feature_sizes</span>
         <span class="n">pdindexer</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">net</span><span class="p">,</span> <span class="n">pdindexer</span><span class="o">.</span><span class="n">system_index</span><span class="p">,</span> <span class="n">pdindexer</span><span class="o">.</span><span class="n">n_systems</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        :param name:</span>
 <span class="sd">        :param parents:</span>
 <span class="sd">        :param first_is_interacting: If True, drop the first feature</span>
@@ -239,7 +239,7 @@ optional step during the construction of the node.</p>
 <span class="sd">        :param module:</span>
 <span class="sd">        :param module_kwargs: other module keywords to use in initialization.</span>
 <span class="sd">        :param kwargs:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="n">module_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">first_is_interacting</span><span class="o">=</span><span class="n">first_is_interacting</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
@@ -264,7 +264,7 @@ to the node can be provided by some other route, we can always pass the fully sp
 parents of the node, <code class="docutils literal notranslate"><span class="pre">hier_features</span></code>, <code class="docutils literal notranslate"><span class="pre">mol_index</span></code>, and <code class="docutils literal notranslate"><span class="pre">n_molecules</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.targets</span><span class="w"> </span><span class="kn">import</span> <span class="n">HEnergyNode</span>
 
-<span class="n">energy</span> <span class="o">=</span> <span class="n">HEnergyNode</span><span class="p">(</span><span class="s2">&quot;henergy&quot;</span><span class="p">,</span> <span class="n">neural_network_node</span><span class="p">)</span>
+<span class="n">energy</span> <span class="o">=</span> <span class="n">HEnergyNode</span><span class="p">(</span><span class="s2">"henergy"</span><span class="p">,</span> <span class="n">neural_network_node</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>

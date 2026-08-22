@@ -108,9 +108,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.graphs.nodes.excited</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Nodes for excited state modeling.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
@@ -124,16 +124,16 @@
 <div class="viewcode-block" id="NACRNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.excited.html#hippynn.graphs.nodes.excited.NACRNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NACRNode</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute the non-adiabatic coupling vector multiplied by the energy difference</span>
 <span class="sd">    between two states.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;charges i&quot;</span><span class="p">,</span> <span class="s2">&quot;charges j&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;energy i&quot;</span><span class="p">,</span> <span class="s2">&quot;energy j&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"charges i"</span><span class="p">,</span> <span class="s2">"charges j"</span><span class="p">,</span> <span class="s2">"coordinates"</span><span class="p">,</span> <span class="s2">"energy i"</span><span class="p">,</span> <span class="s2">"energy j"</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">excited_layers</span><span class="o">.</span><span class="n">NACR</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">parents</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Automatically build the node for calculating NACR * ΔE between two states i</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">parents</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Automatically build the node for calculating NACR * ΔE between two states i</span>
 <span class="sd">        and j.</span>
 
 <span class="sd">        :param name: name of the node</span>
@@ -141,12 +141,12 @@
 <span class="sd">        :param parents: parents of the NACR node in the sequence of (charges i, \</span>
 <span class="sd">                charges j, positions, energy i, energy j)</span>
 <span class="sd">        :type parents: Tuple</span>
-<span class="sd">        :param module: _description_, defaults to &quot;auto&quot;</span>
+<span class="sd">        :param module: _description_, defaults to "auto"</span>
 <span class="sd">        :type module: str, optional</span>
 <span class="sd">        :param module_kwargs: keyword arguments passed to the corresponding layer,</span>
 <span class="sd">            defaults to None</span>
 <span class="sd">        :type module_kwargs: dict, optional</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">module_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -169,16 +169,16 @@
 <div class="viewcode-block" id="NACRMultiStateNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.excited.html#hippynn.graphs.nodes.excited.NACRMultiStateNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NACRMultiStateNode</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute the non-adiabatic coupling vector multiplied by the energy difference</span>
 <span class="sd">    between all pairs of states.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;charges&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;energies&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"charges"</span><span class="p">,</span> <span class="s2">"coordinates"</span><span class="p">,</span> <span class="s2">"energies"</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">excited_layers</span><span class="o">.</span><span class="n">NACRMultiState</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Automatically build the node for calculating NACR * ΔE between all pairs of</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Automatically build the node for calculating NACR * ΔE between all pairs of</span>
 <span class="sd">        states.</span>
 
 <span class="sd">        :param name: name of the node</span>
@@ -186,12 +186,12 @@
 <span class="sd">        :param parents: parents of the NACR node in the sequence of (charges, \</span>
 <span class="sd">                positions, energies)</span>
 <span class="sd">        :type parents: Tuple</span>
-<span class="sd">        :param module: _description_, defaults to &quot;auto&quot;</span>
+<span class="sd">        :param module: _description_, defaults to "auto"</span>
 <span class="sd">        :type module: str, optional</span>
 <span class="sd">        :param module_kwargs: keyword arguments passed to the corresponding layer,</span>
 <span class="sd">            defaults to None</span>
 <span class="sd">        :type module_kwargs: dict, optional</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">module_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -212,13 +212,13 @@
 <div class="viewcode-block" id="LocalEnergyNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.excited.html#hippynn.graphs.nodes.excited.LocalEnergyNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">LocalEnergyNode</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Predict a localized energy, with contributions from implicitly computed atoms.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;hier_features&quot;</span><span class="p">,</span> <span class="s2">&quot;system_index&quot;</span><span class="p">,</span> <span class="s2">&quot;atom index&quot;</span><span class="p">,</span> <span class="s2">&quot;n_systems&quot;</span><span class="p">,</span> <span class="s2">&quot;n_atoms_max&quot;</span>
-    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;mol_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_energy&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_preenergy&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_probabilities&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_propensities&quot;</span>
-    <span class="n">main_output_name</span> <span class="o">=</span> <span class="s2">&quot;mol_energy&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"hier_features"</span><span class="p">,</span> <span class="s2">"system_index"</span><span class="p">,</span> <span class="s2">"atom index"</span><span class="p">,</span> <span class="s2">"n_systems"</span><span class="p">,</span> <span class="s2">"n_atoms_max"</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"mol_energy"</span><span class="p">,</span> <span class="s2">"atom_energy"</span><span class="p">,</span> <span class="s2">"atom_preenergy"</span><span class="p">,</span> <span class="s2">"atom_probabilities"</span><span class="p">,</span> <span class="s2">"atom_propensities"</span>
+    <span class="n">main_output_name</span> <span class="o">=</span> <span class="s2">"mol_energy"</span>
     <span class="n">output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">excited_layers</span><span class="o">.</span><span class="n">LocalEnergy</span>
 
@@ -239,9 +239,9 @@
 
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;first_is_interacting&quot;</span><span class="p">:</span> <span class="n">first_is_interacting</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"first_is_interacting"</span><span class="p">:</span> <span class="n">first_is_interacting</span><span class="p">}</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="LocalEnergyNode.auto_module">
@@ -254,7 +254,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_mae_with_phases</span><span class="p">(</span><span class="n">predict</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">true</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;MAE with phases</span>
+<span class="w">    </span><span class="sd">"""MAE with phases</span>
 
 <span class="sd">    :param predict: predicted values</span>
 <span class="sd">    :type predict: torch.Tensor</span>
@@ -262,7 +262,7 @@
 <span class="sd">    :type true: torch.Tensor</span>
 <span class="sd">    :return: MAE with phases</span>
 <span class="sd">    :rtype: torch.Tensor</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">errors</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">true</span> <span class="o">-</span> <span class="n">predict</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
@@ -273,7 +273,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_mse_with_phases</span><span class="p">(</span><span class="n">predict</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">true</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;MSE with phases</span>
+<span class="w">    </span><span class="sd">"""MSE with phases</span>
 
 <span class="sd">    :param predict: predicted values</span>
 <span class="sd">    :type predict: torch.Tensor</span>
@@ -281,7 +281,7 @@
 <span class="sd">    :type true: torch.Tensor</span>
 <span class="sd">    :return: MSE with phases</span>
 <span class="sd">    :rtype: torch.Tensor</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">errors</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">true</span> <span class="o">-</span> <span class="n">predict</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>

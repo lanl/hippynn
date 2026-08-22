@@ -108,7 +108,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.graphs.nodes.base.definition_helpers</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Tools for organizing node definitions.</span>
 
 <span class="sd">Usage of these tools is optional; they support node definitions</span>
@@ -118,7 +118,7 @@
 <span class="sd">   The functions in this module are intended purely for defining new types</span>
 <span class="sd">   of nodes. They are not strictly necessary; they only aid in defining more</span>
 <span class="sd">   complex node behavior in a simple fashion.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_debprint</span>
@@ -130,8 +130,8 @@
 <div class="viewcode-block" id="AutoNoKw">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoNoKw">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AutoNoKw</span><span class="p">:</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">"auto"</span><span class="p">:</span>
             <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_module_class</span><span class="p">()</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
@@ -140,7 +140,7 @@
 <div class="viewcode-block" id="AutoKw">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.AutoKw">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AutoKw</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Helper class for piping keyword arguments into an nn.module class.</span>
 
 <span class="sd">    Keyword Argument sources (lower precedence first):</span>
@@ -155,10 +155,10 @@
 
 <span class="sd">    After constructing the kwargs, they are saved as self.module_kwargs.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">auto_module_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
 
         <span class="k">if</span> <span class="n">module_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -176,9 +176,9 @@
             <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
                 <span class="n">module_kwargs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
 
-        <span class="n">module_kwargs</span> <span class="o">|=</span>  <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;module_kwargs&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">module_kwargs</span> <span class="o">|=</span>  <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"module_kwargs"</span><span class="p">,</span> <span class="p">{})</span>
 
-        <span class="k">if</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span> 
+        <span class="k">if</span> <span class="n">module</span> <span class="o">==</span> <span class="s2">"auto"</span><span class="p">:</span> 
             <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="n">module_kwargs</span>                
             <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_module_class</span><span class="p">(</span><span class="o">**</span><span class="n">module_kwargs</span><span class="p">)</span>            
 
@@ -191,7 +191,7 @@
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.temporary_parents">[docs]</a>
 <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">temporary_parents</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">parents</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Context manager for temporarily connecting a node to a set of parents.</span>
 <span class="sd">    This is used during parent expansion so that `find_relatives` and</span>
 <span class="sd">    `find_unique_relatives` can treat the nodes as connected even though</span>
@@ -200,21 +200,21 @@
 <span class="sd">    :param child:</span>
 <span class="sd">    :param parents:</span>
 <span class="sd">    :return: None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Raise error if this is called on an already-build child.</span>
     <span class="c1"># (This function could be refactored to deal with this case... delicately.)</span>
-    <span class="k">assert</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="s2">&quot;children&quot;</span><span class="p">),</span> \
-        <span class="s2">&quot;Temporary connection to node requires that it is not initialized.&quot;</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="s2">"children"</span><span class="p">),</span> \
+        <span class="s2">"Temporary connection to node requires that it is not initialized."</span>
 
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="s2">&quot;parents&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="s2">"parents"</span><span class="p">):</span>
         <span class="n">old_parents</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">parents</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">old_parents</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># No parents!</span>
 
-    <span class="n">parents_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>  <span class="c1"># don&#39;t iterate over the same thing twice.</span>
+    <span class="n">parents_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>  <span class="c1"># don't iterate over the same thing twice.</span>
     <span class="n">disconnect_child_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="c1"># it is important only to disconnect a parent from this child at the end</span>
-    <span class="c1"># if the parent didn&#39;t already include the child.</span>
+    <span class="c1"># if the parent didn't already include the child.</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parents_set</span><span class="p">:</span>
@@ -256,15 +256,15 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">format_form_name</span><span class="p">(</span><span class="n">form</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="nb">iter</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
-        <span class="n">formname</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">form</span><span class="p">))</span>
+        <span class="n">formname</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">form</span><span class="p">))</span>
     <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
         <span class="n">formname</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="vm">__name__</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">formname</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">formname</span><span class="si">}</span><span class="s2">)"</span></div>
 
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_assert_tupleform</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">,</span> <span class="n">type_tuple</span><span class="p">):</span>
-    <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;ASSERTING FORM: &quot;</span><span class="p">,</span> <span class="n">input_tuple</span><span class="p">,</span> <span class="n">type_tuple</span><span class="p">)</span>
+    <span class="n">_debprint</span><span class="p">(</span><span class="s2">"ASSERTING FORM: "</span><span class="p">,</span> <span class="n">input_tuple</span><span class="p">,</span> <span class="n">type_tuple</span><span class="p">)</span>
 
     <span class="c1"># If it is a type of base node: return if it is the right type, or error.</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_tuple</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
@@ -275,19 +275,19 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">,</span> <span class="n">type_tuple</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">TupleTypeMismatch</span><span class="p">(</span><span class="s2">&quot;Parent node did not match required type: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">type_tuple</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">TupleTypeMismatch</span><span class="p">(</span><span class="s2">"Parent node did not match required type: </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">type_tuple</span><span class="p">))</span>
 
     <span class="c1"># If not, it must at least have the same length</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_tuple</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">TupleTypeMismatch</span><span class="p">(</span>
-            <span class="s2">&quot;Wrong length. </span><span class="si">{}</span><span class="s2">!=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_tuple</span><span class="p">))</span>
-            <span class="o">+</span> <span class="s2">&quot; </span><span class="se">\n</span><span class="s2">Input: </span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">Expected: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">,</span> <span class="n">type_tuple</span><span class="p">)</span>
+            <span class="s2">"Wrong length. </span><span class="si">{}</span><span class="s2">!=</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_tuple</span><span class="p">))</span>
+            <span class="o">+</span> <span class="s2">" </span><span class="se">\n</span><span class="s2">Input: </span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">Expected: </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">,</span> <span class="n">type_tuple</span><span class="p">)</span>
         <span class="p">)</span>
 
     <span class="c1"># If it does, it needs to have the correct type for each entry in the tuple.</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">,</span> <span class="n">type_tuple</span><span class="p">)):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">TupleTypeMismatch</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">type_tuple</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;: wrong type at index </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">TupleTypeMismatch</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">type_tuple</span><span class="p">)</span> <span class="o">+</span> <span class="s2">": wrong type at index </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
     <span class="k">return</span> <span class="kc">True</span>
 
 
@@ -309,10 +309,10 @@
 <div class="viewcode-block" id="ParentExpander">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ParentExpander</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Manager object to register and implement</span>
 <span class="sd">    optional steps in building a graph node.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Matches is a tuple of tuples of (form, matching function)</span>
@@ -324,7 +324,7 @@
 <div class="viewcode-block" id="ParentExpander.match">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander.match">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">form</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Decorator: the applied function will be a generic FormTransformer&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Decorator: the applied function will be a generic FormTransformer"""</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">inner</span><span class="p">(</span><span class="n">matchfn</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">matches</span> <span class="ow">is</span> <span class="bp">NotImplemented</span><span class="p">:</span>
@@ -338,12 +338,12 @@
 <div class="viewcode-block" id="ParentExpander.matchlen">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander.matchlen">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">matchlen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Decorator: The decorated function will be applied if the number</span>
 <span class="sd">        of parents matches the given length.</span>
 <span class="sd">        :param length:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="o">*</span><span class="p">((</span><span class="n">Node</span><span class="p">,)</span> <span class="o">*</span> <span class="n">length</span><span class="p">))</span></div>
 
 
@@ -351,12 +351,12 @@
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander.assertion">[docs]</a>
     <span class="nd">@adds_to_forms</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">assertion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">form</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Assert that the parents match a given form.</span>
 
 <span class="sd">        :param form:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">FormAssertion</span><span class="p">(</span><span class="n">form</span><span class="p">)</span></div>
 
 
@@ -364,7 +364,7 @@
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander.assertlen">[docs]</a>
     <span class="nd">@adds_to_forms</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">assertlen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Assert that there are a given number of parents.</span>
 
 <span class="sd">        :param length:</span>
@@ -372,10 +372,10 @@
 
 <span class="sd">        .. Note::</span>
 <span class="sd">           It is recommended only to use this function once as the final stage</span>
-<span class="sd">           of expanding a node&#39;s parents, to ensure that a node can be constructed</span>
-<span class="sd">           directly from a satisfactory set of parents that doesn&#39;t require</span>
+<span class="sd">           of expanding a node's parents, to ensure that a node can be constructed</span>
+<span class="sd">           directly from a satisfactory set of parents that doesn't require</span>
 <span class="sd">           any expansion.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">FormAssertLength</span><span class="p">(</span><span class="n">length</span><span class="p">)</span></div>
 
 
@@ -383,11 +383,11 @@
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander.get_main_outputs">[docs]</a>
     <span class="nd">@adds_to_forms</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_main_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Return the main outputs for any multinodes in the parents.</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">MainOutputTransformer</span><span class="p">(</span><span class="n">AlwaysMatch</span><span class="p">)</span></div>
 
 
@@ -395,12 +395,12 @@
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander.matched_idx_coercion">[docs]</a>
     <span class="nd">@adds_to_forms</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">matched_idx_coercion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">needed_index_states</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Apply coercion to the needed index states if the given form is present.</span>
 <span class="sd">        :param form:</span>
 <span class="sd">        :param needed_index_states:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">IndexFormTransformer</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">needed_index_states</span><span class="p">)</span></div>
 
 
@@ -408,10 +408,10 @@
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander.require_compatible_idx_states">[docs]</a>
     <span class="nd">@adds_to_forms</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">require_compatible_idx_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Ensure that all parents have commensurate index states.</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">CompatibleIdxTypeTransformer</span><span class="p">(</span><span class="n">AlwaysMatch</span><span class="p">)</span></div>
 
 
@@ -419,7 +419,7 @@
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander.require_idx_states">[docs]</a>
     <span class="nd">@adds_to_forms</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">require_idx_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">needed_index_states</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Always coerce the nodes into a needed index state.</span>
 
 <span class="sd">        :param needed_index_states:</span>
@@ -427,20 +427,20 @@
 
 <span class="sd">        .. Note::</span>
 <span class="sd">           It is recommended only to use this function once as the final stage</span>
-<span class="sd">           of expanding a node&#39;s parents, to ensure that a node can be constructed</span>
-<span class="sd">           directly from a satisfactory set of parents that doesn&#39;t require</span>
+<span class="sd">           of expanding a node's parents, to ensure that a node can be constructed</span>
+<span class="sd">           directly from a satisfactory set of parents that doesn't require</span>
 <span class="sd">           any expansion.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">IndexFormTransformer</span><span class="p">(</span><span class="n">AlwaysMatch</span><span class="p">,</span> <span class="n">needed_index_states</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">bases</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Used for merging</span>
 
 <span class="sd">        :param bases: base classes to merge with (from MRO)</span>
 <span class="sd">        :return: None</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="o">*</span><span class="n">true_bases</span><span class="p">,</span> <span class="bp">cls</span> <span class="o">=</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">bases</span><span class="p">)</span>
 
@@ -452,7 +452,7 @@
 
         <span class="n">base_matches</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">form</span> <span class="k">for</span> <span class="n">sup_class</span> <span class="ow">in</span> <span class="n">relevant_classes</span> <span class="k">for</span> <span class="n">form</span> <span class="ow">in</span> <span class="n">sup_class</span><span class="o">.</span><span class="n">parent_expander</span><span class="o">.</span><span class="n">matches</span><span class="p">)</span>
 
-        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Bases found for merging:&quot;</span><span class="p">,</span> <span class="n">relevant_classes</span><span class="p">)</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">"Bases found for merging:"</span><span class="p">,</span> <span class="n">relevant_classes</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">base_matches</span><span class="p">):</span>
             <span class="c1"># Filter only to contain the earliest copy of each form.</span>
@@ -462,18 +462,18 @@
             <span class="n">base_match_list</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">base_matches</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">match</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">base_form_set</span><span class="p">:</span>
-                    <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Adding&quot;</span><span class="p">,</span> <span class="n">match</span><span class="p">)</span>
+                    <span class="n">_debprint</span><span class="p">(</span><span class="s2">"Adding"</span><span class="p">,</span> <span class="n">match</span><span class="p">)</span>
                     <span class="n">base_form_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
                     <span class="n">base_match_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Already applied&quot;</span><span class="p">,</span> <span class="n">match</span><span class="p">)</span>
+                    <span class="n">_debprint</span><span class="p">(</span><span class="s2">"Already applied"</span><span class="p">,</span> <span class="n">match</span><span class="p">)</span>
             <span class="n">base_matches</span> <span class="o">=</span> <span class="n">base_match_list</span>
-            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Forms found for merging:&quot;</span><span class="p">,</span> <span class="n">base_matches</span><span class="p">)</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">"Forms found for merging:"</span><span class="p">,</span> <span class="n">base_matches</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">matches</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">base_matches</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
 
-            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;No matches found for merging!&quot;</span><span class="p">)</span></div>
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">"No matches found for merging!"</span><span class="p">)</span></div>
 
 
 
@@ -492,23 +492,23 @@
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_fn_doc_adjust</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">fn</span><span class="o">.</span><span class="vm">__module__</span> <span class="ow">is</span> <span class="vm">__name__</span><span class="p">:</span>
-        <span class="c1"># Don&#39;t document functions that live here, they are used many many times.</span>
+        <span class="c1"># Don't document functions that live here, they are used many many times.</span>
         <span class="k">return</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">existing</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="vm">__doc__</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="n">existing</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="vm">__doc__</span> <span class="ow">or</span> <span class="s2">""</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">existing</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
         <span class="c1"># Count spaces in each non-blank line</span>
-        <span class="n">spaces</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">))</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
+        <span class="n">spaces</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">" "</span><span class="p">))</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">""</span><span class="p">]</span>
         <span class="c1"># Strip those with no spaces</span>
         <span class="n">spaces</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">spaces</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
         <span class="c1"># Grab the min, if non exist, use 0</span>
         <span class="n">spaces</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">spaces</span><span class="p">)</span> <span class="k">if</span> <span class="n">spaces</span> <span class="k">else</span> <span class="mi">0</span>
-        <span class="n">spaces</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="n">spaces</span>
+        <span class="n">spaces</span> <span class="o">=</span> <span class="s2">" "</span> <span class="o">*</span> <span class="n">spaces</span>
         <span class="n">formname</span> <span class="o">=</span> <span class="n">format_form_name</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
-        <span class="n">fn</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">existing</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">spaces</span><span class="si">}</span><span class="s2">Used for creation from parents with signature </span><span class="si">{</span><span class="n">formname</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">spaces</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">fn</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">existing</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="n">spaces</span><span class="si">}</span><span class="s2">Used for creation from parents with signature </span><span class="si">{</span><span class="n">formname</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">spaces</span><span class="si">}</span><span class="s2">"</span>
 
     <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-        <span class="c1"># Can&#39;t modify doc of a method dynamically.</span>
+        <span class="c1"># Can't modify doc of a method dynamically.</span>
         <span class="c1"># This occurs when calling one of the explicit form handlers such as</span>
         <span class="c1"># AssertTypes or AssertLen</span>
         <span class="k">pass</span>
@@ -526,25 +526,25 @@
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.FormTransformer.add_class_doc">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_class_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">form_name</span> <span class="o">=</span> <span class="n">format_form_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;If matching </span><span class="si">{</span><span class="n">form_name</span><span class="si">}</span><span class="s2">, then apply &quot;</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"If matching </span><span class="si">{</span><span class="n">form_name</span><span class="si">}</span><span class="s2">, then apply "</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;ParentTransformer(sig=</span><span class="si">{</span><span class="n">format_form_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span><span class="si">}</span><span class="s2">,fn=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"ParentTransformer(sig=</span><span class="si">{</span><span class="n">format_form_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span><span class="si">}</span><span class="s2">,fn=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="si">}</span><span class="s2">)"</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_self</span><span class="p">,</span> <span class="o">*</span><span class="n">parents</span><span class="p">,</span> <span class="n">purpose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">_assert_tupleform</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">TupleTypeMismatch</span><span class="p">:</span>
-            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Didn&#39;t pass form!&quot;</span><span class="p">)</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">"Didn't pass form!"</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">parents</span>
     
-        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Expanding form&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
-        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Input parents:&quot;</span><span class="p">,</span> <span class="n">parents</span><span class="p">)</span>
-        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Match function:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">)</span>
-        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Supplied kwargs:&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">"Expanding form"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">"Input parents:"</span><span class="p">,</span> <span class="n">parents</span><span class="p">)</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">"Match function:"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">)</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">"Supplied kwargs:"</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">purpose</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">purpose</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: Expanding parents </span><span class="si">{}</span><span class="s2"> based on form </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">parents</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
+            <span class="n">purpose</span> <span class="o">=</span> <span class="s2">"</span><span class="si">{}</span><span class="s2">: Expanding parents </span><span class="si">{}</span><span class="s2"> based on form </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">parents</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">temporary_parents</span><span class="p">(</span><span class="n">node_self</span><span class="p">,</span> <span class="n">parents</span><span class="p">):</span>
             <span class="c1"># We have to pass self here explicitly because the form handler stores unbound functions.</span>
             <span class="n">new_parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="n">node_self</span><span class="p">,</span> <span class="o">*</span><span class="n">parents</span><span class="p">,</span> <span class="n">purpose</span><span class="o">=</span><span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -563,16 +563,16 @@
 <div class="viewcode-block" id="IndexFormTransformer.add_class_doc">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.IndexFormTransformer.add_class_doc">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_class_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Transforms the parents to have index states </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">idxstates</span><span class="si">}</span><span class="s2">&quot;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Transforms the parents to have index states </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">idxstates</span><span class="si">}</span><span class="s2">"</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;IndexTransformer from </span><span class="si">{</span><span class="n">format_form_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">idxstates</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"IndexTransformer from </span><span class="si">{</span><span class="n">format_form_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">idxstates</span><span class="si">}</span><span class="s2">"</span>
 
 <div class="viewcode-block" id="IndexFormTransformer.fn">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.IndexFormTransformer.fn">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_self</span><span class="p">,</span> <span class="o">*</span><span class="n">parents</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Coerces index states for all parents&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Coerces index states for all parents"""</span>
         <span class="n">new_parents</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">idxstate</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">idxstates</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">idxstate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -594,16 +594,16 @@
 <div class="viewcode-block" id="MainOutputTransformer.add_class_doc">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.MainOutputTransformer.add_class_doc">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_class_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;Gets main_output of nodes: casts MultiNodes to their main output&quot;&quot;&quot;</span></div>
+        <span class="k">return</span> <span class="s2">"""Gets main_output of nodes: casts MultiNodes to their main output"""</span></div>
 
 
 <div class="viewcode-block" id="MainOutputTransformer.fn">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.MainOutputTransformer.fn">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fn</span><span class="p">(</span><span class="n">node_self</span><span class="p">,</span> <span class="o">*</span><span class="n">parents</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Gets main_output of nodes: casts multinodes to single nodes</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">main_output</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parents</span><span class="p">)</span></div>
 </div>
 
@@ -618,16 +618,16 @@
 <div class="viewcode-block" id="CompatibleIdxTypeTransformer.add_class_doc">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.CompatibleIdxTypeTransformer.add_class_doc">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_class_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;Attempts coercion of all inputs to the same index state.&quot;&quot;&quot;</span></div>
+        <span class="k">return</span> <span class="s2">"""Attempts coercion of all inputs to the same index state."""</span></div>
 
 
 <div class="viewcode-block" id="CompatibleIdxTypeTransformer.fn">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.CompatibleIdxTypeTransformer.fn">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fn</span><span class="p">(</span><span class="n">node_self</span><span class="p">,</span> <span class="o">*</span><span class="n">parents</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Enforces that all parents have compatible index states.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">index_state</span> <span class="o">=</span> <span class="n">get_reduced_index_state</span><span class="p">(</span><span class="o">*</span><span class="n">parents</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">parents</span></div>
 </div>
@@ -639,25 +639,25 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">FormAssertion</span><span class="p">(</span><span class="n">FormHandler</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">form</span> <span class="o">=</span> <span class="n">form</span>
-        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Assertion created:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">"Assertion created:"</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
 <div class="viewcode-block" id="FormAssertion.add_class_doc">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.FormAssertion.add_class_doc">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_class_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">form_name</span> <span class="o">=</span> <span class="n">format_form_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Asserts that the parents have the form </span><span class="si">{</span><span class="n">form_name</span><span class="si">}</span><span class="s2">.&quot;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Asserts that the parents have the form </span><span class="si">{</span><span class="n">form_name</span><span class="si">}</span><span class="s2">."</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">self_cls</span><span class="p">,</span> <span class="o">*</span><span class="n">parents</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Attempting Assertion&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">"Attempting Assertion"</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">_assert_tupleform</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">TupleTypeMismatch</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Input does not meet required form: </span><span class="se">\n</span><span class="s2">Input: </span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">Form: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ee</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"Input does not meet required form: </span><span class="se">\n</span><span class="s2">Input: </span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">Form: </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ee</span>
         <span class="k">return</span> <span class="n">parents</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">"(</span><span class="si">{}</span><span class="s2">)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form</span><span class="p">)</span></div>
 
 
 
@@ -671,11 +671,11 @@
 <div class="viewcode-block" id="FormAssertLength.add_class_doc">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.FormAssertLength.add_class_doc">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_class_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Asserts that the number of parents is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s2">&quot;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Asserts that the number of parents is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s2">"</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;FormLengthAssertion(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="s2">"FormLengthAssertion(</span><span class="si">{}</span><span class="s2">)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
 
 
 
@@ -693,35 +693,35 @@
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__prepare__</span><span class="p">(</span><span class="n">mcl</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">cls_dict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ExpandParentMeta</span><span class="p">,</span> <span class="n">mcl</span><span class="p">)</span><span class="o">.</span><span class="fm">__prepare__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">cls_dict</span><span class="p">[</span><span class="s2">&quot;parent_expander&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ParentExpander</span><span class="p">()</span>
+        <span class="n">cls_dict</span><span class="p">[</span><span class="s2">"parent_expander"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ParentExpander</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">cls_dict</span></div>
 
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_append_docs</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Add a note to documentation on parent expansion process.</span>
 
 <span class="sd">    .. Note::</span>
 <span class="sd">       This function assumes the class is defined at module-level scope.</span>
 <span class="sd">       If not the indentation may be funny.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">new_doc</span> <span class="o">=</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
-    <span class="n">new_doc</span> <span class="o">+=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\n</span><span class="s2">    .. Note::</span><span class="se">\n</span><span class="s2">       This node has parent expansion, following these procedures.</span><span class="se">\n\n</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="sd">    """</span>
+    <span class="n">new_doc</span> <span class="o">=</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span> <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span> <span class="k">else</span> <span class="s2">""</span>
+    <span class="n">new_doc</span> <span class="o">+=</span> <span class="s2">"""</span><span class="se">\n</span><span class="s2">    .. Note::</span><span class="se">\n</span><span class="s2">       This node has parent expansion, following these procedures.</span><span class="se">\n\n</span><span class="s2">"""</span>
     <span class="k">for</span> <span class="n">form_handler</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">parent_expander</span><span class="p">:</span>
         <span class="n">add</span> <span class="o">=</span> <span class="n">form_handler</span><span class="o">.</span><span class="n">add_class_doc</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">add</span><span class="p">:</span>
-            <span class="n">new_doc</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;       #. </span><span class="si">{</span><span class="n">add</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">new_doc</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"       #. </span><span class="si">{</span><span class="n">add</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No documentation for transformation!&quot;</span><span class="p">)</span>
-    <span class="n">new_doc</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"No documentation for transformation!"</span><span class="p">)</span>
+    <span class="n">new_doc</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span>
     <span class="k">return</span> <span class="n">new_doc</span>
 
 
 <div class="viewcode-block" id="ExpandParents">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ExpandParents">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExpandParents</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">ExpandParentMeta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="w">    </span><span class="sd">""" </span>
 <span class="sd">    Keyword Argument sources (lower precedence first):</span>
 
 <span class="sd">        - expansion_kwargs argument to init.</span>
@@ -732,15 +732,15 @@
 <span class="sd">    If self.parent_expansion_kwargs is not a dictionary it will be interpreted as</span>
 <span class="sd">        a list of keys for an identity key-value mapping.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">parent_expander</span><span class="p">:</span> <span class="n">ParentExpander</span>
     <span class="n">parent_expansion_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span>
     
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         
-        <span class="n">expansion_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;expansion_kwargs&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">expansion_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"expansion_kwargs"</span><span class="p">,</span> <span class="p">{})</span>
 
-        <span class="n">parent_expansion_kwargs</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;parent_expansion_kwargs&quot;</span><span class="p">)</span>
+        <span class="n">parent_expansion_kwargs</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"parent_expansion_kwargs"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">parent_expansion_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parent_expansion_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_expansion_kwargs</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -751,7 +751,7 @@
             <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
                 <span class="n">expansion_kwargs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;module_kwargs&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"module_kwargs"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">parent_expansion_kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">:</span>
                     <span class="n">expansion_kwargs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">[</span><span class="n">v</span><span class="p">]</span>
@@ -760,11 +760,11 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Takes care of parent expansion setup and documentation for expansion of parents.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Constructing parent expansion for &quot;</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span>
+        <span class="n">_debprint</span><span class="p">(</span><span class="s2">"Constructing parent expansion for "</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span>
         <span class="c1">#  Note: Forms are applied in opposite order to MRO.</span>
         <span class="c1">#  This makes sense because initialization typically</span>
         <span class="c1">#  begins with the base class and then is customized or added to</span>
@@ -776,9 +776,9 @@
             <span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">_append_docs</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="s2">&quot;_parent_expander&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="s2">"_parent_expander"</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">....tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">warn_name_change</span>
-            <span class="n">warn_name_change</span><span class="p">(</span><span class="s2">&quot;_parent_expander&quot;</span><span class="p">,</span> <span class="s2">&quot;parent_expander&quot;</span><span class="p">)</span>
+            <span class="n">warn_name_change</span><span class="p">(</span><span class="s2">"_parent_expander"</span><span class="p">,</span> <span class="s2">"parent_expander"</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_expander</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
@@ -791,10 +791,10 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parents</span><span class="p">,</span> <span class="n">Node</span><span class="p">):</span>
             <span class="n">parents</span> <span class="o">=</span> <span class="p">(</span><span class="n">parents</span><span class="p">,)</span>
         <span class="k">for</span> <span class="n">form_handler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_expander</span><span class="p">:</span>
-            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;Processing form:&quot;</span><span class="p">)</span>
-            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Form:&quot;</span><span class="p">,</span> <span class="n">form_handler</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
-            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">args:&quot;</span><span class="p">,</span> <span class="n">parents</span><span class="p">)</span>
-            <span class="n">_debprint</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">kwargs:&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">"Processing form:"</span><span class="p">)</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2">Form:"</span><span class="p">,</span> <span class="n">form_handler</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">"</span><span class="se">\t\t</span><span class="s2">args:"</span><span class="p">,</span> <span class="n">parents</span><span class="p">)</span>
+            <span class="n">_debprint</span><span class="p">(</span><span class="s2">"</span><span class="se">\t\t</span><span class="s2">kwargs:"</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
             <span class="c1"># We have to pass self here explicitly because the form handler stores unbound functions,</span>
             <span class="c1"># rather than bound methods.</span>
             <span class="c1">### Note: used to exception chain here, was too verbose.</span>

@@ -121,7 +121,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">update_scf_eps</span><span class="p">(</span><span class="n">seqm</span><span class="p">,</span> <span class="n">decay_factor</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span> <span class="n">minimal</span><span class="o">=</span><span class="mf">27.2114e-6</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">better_model</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;from callback update_scf_eps&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"from callback update_scf_eps"</span><span class="p">)</span>
             <span class="n">p0</span> <span class="o">=</span> <span class="n">seqm</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">hamiltonian</span><span class="o">.</span><span class="n">eps</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
             <span class="n">p1</span> <span class="o">=</span> <span class="n">p0</span> <span class="o">*</span> <span class="n">decay_factor</span>
             <span class="k">if</span> <span class="n">p1</span> <span class="o">&lt;</span> <span class="n">minimal</span><span class="p">:</span>
@@ -130,7 +130,7 @@
                 <span class="n">dtype</span> <span class="o">=</span> <span class="n">seqm</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">hamiltonian</span><span class="o">.</span><span class="n">eps</span><span class="o">.</span><span class="n">dtype</span>
                 <span class="n">device</span> <span class="o">=</span> <span class="n">seqm</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">hamiltonian</span><span class="o">.</span><span class="n">eps</span><span class="o">.</span><span class="n">device</span>
                 <span class="n">seqm</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">hamiltonian</span><span class="o">.</span><span class="n">eps</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SCF eps is updated: &quot;</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span> <span class="s2">&quot;==&gt;&quot;</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">"SCF eps is updated: "</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span> <span class="s2">"==&gt;"</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">func</span></div>
 
@@ -141,7 +141,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">update_scf_backward_eps</span><span class="p">(</span><span class="n">seqm</span><span class="p">,</span> <span class="n">decay_factor</span><span class="o">=</span><span class="mf">0.96</span><span class="p">,</span> <span class="n">minimal</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">func</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">better_model</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">better_model</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;from callback update_scf_backward_eps&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"from callback update_scf_backward_eps"</span><span class="p">)</span>
             <span class="n">p0</span> <span class="o">=</span> <span class="n">seqm</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">hamiltonian</span><span class="o">.</span><span class="n">scf_backward_eps</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
             <span class="n">p1</span> <span class="o">=</span> <span class="n">p0</span> <span class="o">*</span> <span class="n">decay_factor</span>
             <span class="k">if</span> <span class="n">p1</span> <span class="o">&lt;</span> <span class="n">minimal</span><span class="p">:</span>
@@ -150,7 +150,7 @@
                 <span class="n">dtype</span> <span class="o">=</span> <span class="n">seqm</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">hamiltonian</span><span class="o">.</span><span class="n">scf_backward_eps</span><span class="o">.</span><span class="n">dtype</span>
                 <span class="n">device</span> <span class="o">=</span> <span class="n">seqm</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">hamiltonian</span><span class="o">.</span><span class="n">scf_backward_eps</span><span class="o">.</span><span class="n">device</span>
                 <span class="n">seqm</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">hamiltonian</span><span class="o">.</span><span class="n">scf_backward_eps</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SCF scf_backward eps is updated: &quot;</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span> <span class="s2">&quot;==&gt;&quot;</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">"SCF scf_backward eps is updated: "</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span> <span class="s2">"==&gt;"</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">func</span></div>
 
@@ -171,40 +171,40 @@
         <span class="k">if</span> <span class="n">available_time</span> <span class="o">&lt;</span> <span class="n">max_time_per_epoch</span> <span class="o">*</span> <span class="mf">2.0</span><span class="p">:</span>
             <span class="c1"># save before stop</span>
             <span class="n">model</span> <span class="o">=</span> <span class="n">training_modules</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;last_model.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"last_model.pt"</span><span class="p">,</span> <span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()),</span> <span class="n">pfile</span><span class="p">)</span>
 
             <span class="n">state</span> <span class="o">=</span> <span class="n">serialization</span><span class="o">.</span><span class="n">create_state</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">metric_tracker</span><span class="p">)</span>
 
             <span class="c1"># Write the checkpoint</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;last_checkpoint.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"last_checkpoint.pt"</span><span class="p">,</span> <span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
                 <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">pfile</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">better_model</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;**** NEW BEST MODEL - Saving! ****&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">"**** NEW BEST MODEL - Saving! ****"</span><span class="p">)</span>
                 <span class="n">best_model</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">())</span>
                 <span class="n">metric_tracker</span><span class="o">.</span><span class="n">best_model</span> <span class="o">=</span> <span class="n">best_model</span>
 
                 <span class="k">if</span> <span class="n">store_all_better</span><span class="p">:</span>
                     <span class="c1"># Save a copy of every network doing better</span>
                     <span class="c1"># Note: epoch has already been incremented, so decrement in saving file.</span>
-                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;better_model_epoch_</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">"better_model_epoch_</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">.pt"</span><span class="p">,</span> <span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
                         <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">best_model</span><span class="p">,</span> <span class="n">pfile</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">store_best</span><span class="p">:</span>
-                    <span class="c1"># Overwrite the &quot;best model so far&quot;</span>
-                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;best_model.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
+                    <span class="c1"># Overwrite the "best model so far"</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"best_model.pt"</span><span class="p">,</span> <span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
                         <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">best_model</span><span class="p">,</span> <span class="n">pfile</span><span class="p">)</span>
 
                     <span class="n">state</span> <span class="o">=</span> <span class="n">serialization</span><span class="o">.</span><span class="n">create_state</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">metric_tracker</span><span class="p">)</span>
 
                     <span class="c1"># Write the checkpoint</span>
-                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;best_checkpoint.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"best_checkpoint.pt"</span><span class="p">,</span> <span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
                         <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">pfile</span><span class="p">)</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;time for each epoch: &quot;</span><span class="p">,</span> <span class="n">time_epoch</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time remaining in sec: &quot;</span><span class="p">,</span> <span class="n">available_time</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">KeyboardInterrupt</span><span class="p">(</span><span class="s2">&quot;time to stop&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"time for each epoch: "</span><span class="p">,</span> <span class="n">time_epoch</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"Time remaining in sec: "</span><span class="p">,</span> <span class="n">available_time</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">KeyboardInterrupt</span><span class="p">(</span><span class="s2">"time to stop"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">func</span></div>
 

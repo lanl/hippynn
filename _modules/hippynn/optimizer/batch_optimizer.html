@@ -134,7 +134,7 @@
             <span class="n">force_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">force_sign</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        :param model: graphmodule of model.</span>
 <span class="sd">        :param algorithm: base optimizer algorithm to use. see algorithms.py</span>
 <span class="sd">        :param dump_traj: whether to safe the optimization paths.</span>
@@ -144,7 +144,7 @@
 <span class="sd">            if None, try to auto-detect</span>
 <span class="sd">        :param force_sign: whether the above about it force (sign=-1) or gradient (sign=+1).</span>
 <span class="sd">         If none, try ot auto-detect from force key.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
             <span class="n">algorithm</span> <span class="o">=</span> <span class="n">algorithm</span><span class="p">()</span>
@@ -160,9 +160,9 @@
             <span class="k">except</span> <span class="n">NodeNotFound</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="c1"># Could be refactored into a search_by_name?</span>
-                    <span class="n">force_node</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="s1">&#39;force&#39;</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,)</span>
+                    <span class="n">force_node</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="s1">'force'</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,)</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No automatic force node could be found for optimizer.&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ee</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"No automatic force node could be found for optimizer."</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ee</span>
                 <span class="c1"># TODO even find an energy node if we can and add forces to it?</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Could be refactored into a search_by_name?</span>
@@ -195,8 +195,8 @@
 
         <span class="k">if</span> <span class="n">dump_traj</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;Dump batch trajectories every step requires copying </span><span class="se">\n</span><span class="s2"> </span><span class="se">\</span>
-<span class="s2">                  and moving tensors to cpu, which is slow!&quot;</span>
+                <span class="s2">"Dump batch trajectories every step requires copying </span><span class="se">\n</span><span class="s2"> </span><span class="se">\</span>
+<span class="s2">                  and moving tensors to cpu, which is slow!"</span>
             <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">padding_number</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">prefix_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -213,8 +213,8 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dump_traj</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">dump_a_step</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">padding_number</span><span class="p">,</span> <span class="n">prefix_list</span><span class="p">)</span>
             <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="p">(</span><span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
-            <span class="c1"># forces = -ret[&#39;Grad&#39;]</span>
-            <span class="c1"># set this tunable, although I suggest to simply have &#39;F&#39; in the model output</span>
+            <span class="c1"># forces = -ret['Grad']</span>
+            <span class="c1"># set this tunable, although I suggest to simply have 'F' in the model output</span>
             <span class="n">forces</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">force_key</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_sign</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="n">forces</span><span class="p">)</span>
@@ -235,7 +235,7 @@
         <span class="n">prefix_list</span> <span class="o">=</span> <span class="n">prefix_list</span> <span class="ow">or</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">debatched_numbers</span><span class="p">,</span> <span class="n">debatched_coords</span><span class="p">,</span> <span class="n">prefix_list</span><span class="p">):</span>
             <span class="n">atoms</span> <span class="o">=</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">numbers</span><span class="o">=</span><span class="n">n</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">positions</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">cpu</span><span class="p">())</span>
-            <span class="n">atoms</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_traj.xyz&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">),</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+            <span class="n">atoms</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">_traj.xyz"</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">),</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

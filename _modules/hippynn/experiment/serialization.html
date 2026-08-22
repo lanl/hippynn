@@ -108,11 +108,11 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.experiment.serialization</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Checkpoint and state generation.</span>
 
 <span class="sd">As a user, in most cases you will only need the `load` functions here.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
@@ -128,7 +128,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.device</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_devices</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.metric_tracker</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetricTracker</span>
 
-<span class="n">DEFAULT_STRUCTURE_FNAME</span> <span class="o">=</span> <span class="s2">&quot;experiment_structure.pt&quot;</span>
+<span class="n">DEFAULT_STRUCTURE_FNAME</span> <span class="o">=</span> <span class="s2">"experiment_structure.pt"</span>
 
 
 <div class="viewcode-block" id="create_state">
@@ -138,19 +138,19 @@
     <span class="n">controller</span><span class="p">:</span> <span class="n">Controller</span><span class="p">,</span>
     <span class="n">metric_tracker</span><span class="p">:</span> <span class="n">MetricTracker</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create an experiment state dictionary.</span>
+<span class="w">    </span><span class="sd">"""Create an experiment state dictionary.</span>
 
 <span class="sd">    :param model: current model</span>
 <span class="sd">    :param controller:  controller</span>
 <span class="sd">    :param metric_tracker: current metrics</span>
 <span class="sd">    :return: dictionary containing experiment state.</span>
 <span class="sd">    :rtype: dict</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
-        <span class="s2">&quot;controller&quot;</span><span class="p">:</span> <span class="n">controller</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
-        <span class="s2">&quot;metric_tracker&quot;</span><span class="p">:</span> <span class="n">metric_tracker</span><span class="p">,</span>
-        <span class="s2">&quot;torch_rng_state&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">get_rng_state</span><span class="p">(),</span>
+        <span class="s2">"model"</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
+        <span class="s2">"controller"</span><span class="p">:</span> <span class="n">controller</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span>
+        <span class="s2">"metric_tracker"</span><span class="p">:</span> <span class="n">metric_tracker</span><span class="p">,</span>
+        <span class="s2">"torch_rng_state"</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">get_rng_state</span><span class="p">(),</span>
     <span class="p">}</span></div>
 
 
@@ -163,7 +163,7 @@
     <span class="n">controller</span><span class="p">:</span> <span class="n">Controller</span><span class="p">,</span>
     <span class="n">fname</span><span class="o">=</span><span class="n">DEFAULT_STRUCTURE_FNAME</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Save an experiment structure. (i.e. full model, not just state_dict).</span>
 
 <span class="sd">    :param training_modules: contains model, controller, and loss</span>
@@ -172,15 +172,15 @@
 <span class="sd">    :param fname: filename to save the checkpoint</span>
 
 <span class="sd">    :return: None</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">structure</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;training_modules&quot;</span><span class="p">:</span> <span class="n">training_modules</span><span class="p">,</span>
-        <span class="s2">&quot;controller&quot;</span><span class="p">:</span> <span class="n">controller</span><span class="p">,</span>
+        <span class="s2">"training_modules"</span><span class="p">:</span> <span class="n">training_modules</span><span class="p">,</span>
+        <span class="s2">"controller"</span><span class="p">:</span> <span class="n">controller</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">Restartable</span><span class="p">):</span>
-        <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;database&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">restarter</span>
+        <span class="n">structure</span><span class="p">[</span><span class="s2">"database"</span><span class="p">]</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">restarter</span>
 
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
         <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">pfile</span><span class="p">)</span></div>
 
 
@@ -188,7 +188,7 @@
 <div class="viewcode-block" id="restore_checkpoint">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.serialization.html#hippynn.restore_checkpoint">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">restore_checkpoint</span><span class="p">(</span><span class="n">structure</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">restart_db</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 
 <span class="sd">    This function loads the parameters from the state dictionary into the modules,</span>
 <span class="sd">    optionally tries to restart the database, and sets the RNG state.</span>
@@ -198,15 +198,15 @@
 <span class="sd">    :param restart_db: Attempt to restore database (true/false)</span>
 
 <span class="sd">    :return: experiment structure</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;training_modules&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">])</span>
-    <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;controller&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;controller&quot;</span><span class="p">])</span>
+<span class="sd">    """</span>
+    <span class="n">structure</span><span class="p">[</span><span class="s2">"training_modules"</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">"model"</span><span class="p">])</span>
+    <span class="n">structure</span><span class="p">[</span><span class="s2">"controller"</span><span class="p">]</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">"controller"</span><span class="p">])</span>
 
-    <span class="k">if</span> <span class="s2">&quot;database&quot;</span> <span class="ow">in</span> <span class="n">structure</span> <span class="ow">and</span> <span class="n">restart_db</span><span class="p">:</span>
-        <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;database&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;database&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attempt_restart</span><span class="p">()</span>
+    <span class="k">if</span> <span class="s2">"database"</span> <span class="ow">in</span> <span class="n">structure</span> <span class="ow">and</span> <span class="n">restart_db</span><span class="p">:</span>
+        <span class="n">structure</span><span class="p">[</span><span class="s2">"database"</span><span class="p">]</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">"database"</span><span class="p">]</span><span class="o">.</span><span class="n">attempt_restart</span><span class="p">()</span>
 
-    <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;metric_tracker&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;metric_tracker&quot;</span><span class="p">]</span>
-    <span class="n">torch</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">set_rng_state</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;torch_rng_state&quot;</span><span class="p">])</span>
+    <span class="n">structure</span><span class="p">[</span><span class="s2">"metric_tracker"</span><span class="p">]</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">"metric_tracker"</span><span class="p">]</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">set_rng_state</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">"torch_rng_state"</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">structure</span></div>
 
@@ -215,22 +215,22 @@
 <div class="viewcode-block" id="check_mapping_devices">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.serialization.html#hippynn.check_mapping_devices">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">check_mapping_devices</span><span class="p">(</span><span class="n">map_location</span><span class="p">,</span> <span class="n">model_device</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Check options for restarting across devices.</span>
 
 <span class="sd">    :param map_location: device mapping argument for torch.load.</span>
 <span class="sd">    :param model_device: automatically handle device mapping.</span>
 <span class="sd">    :raises TypeError: if both map_location and model_device are specified</span>
 <span class="sd">    :return: processed map_location and model_device</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># if both are none, no transfer across device happens, directly pass map_location (which is None) to torch.load</span>
     <span class="k">if</span> <span class="n">model_device</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># if both map_location and model_device are given</span>
         <span class="k">if</span> <span class="n">map_location</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Passing map_location explicitly and the model device are incompatible&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">model_device</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"Passing map_location explicitly and the model device are incompatible"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">model_device</span> <span class="o">==</span> <span class="s2">"auto"</span><span class="p">:</span>
             <span class="n">model_device</span> <span class="o">=</span> <span class="n">device_fallback</span><span class="p">()</span>
-        <span class="n">map_location</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span>
+        <span class="n">map_location</span> <span class="o">=</span> <span class="s2">"cpu"</span>
     <span class="k">return</span> <span class="n">map_location</span><span class="p">,</span> <span class="n">model_device</span></div>
 
 
@@ -239,7 +239,7 @@
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.serialization.html#hippynn.load_saved_tensors">[docs]</a>
 <span class="nd">@bundles_deprecated_warnings</span><span class="p">(</span><span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_saved_tensors</span><span class="p">(</span><span class="n">structure_fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">state_fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">weights_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Load torch tensors from file.</span>
 
 <span class="sd">    .. Warning::</span>
@@ -252,12 +252,12 @@
 <span class="sd">    :param state_fname: name of the state file</span>
 <span class="sd">    :param weights_only: passed to ``torch.load``</span>
 <span class="sd">    :return: loaded dictionaries of checkpoint and model parameters</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">structure_fname</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">structure_fname</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
         <span class="n">structure</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">pfile</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="n">weights_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">state_fname</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">state_fname</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span>
         <span class="n">state</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">pfile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">structure</span><span class="p">,</span> <span class="n">state</span></div>
 
@@ -268,7 +268,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">load_checkpoint</span><span class="p">(</span>
     <span class="n">structure_fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">state_fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">restart_db</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Load checkpoint file from given filename.</span>
 
 <span class="sd">    For details more information on to use this function, see :doc:`/examples/restarting`.</span>
@@ -286,24 +286,24 @@
 <span class="sd">    :param model_device: automatically handle device mapping. Defaults to None, defaults to None</span>
 <span class="sd">    :param weights_only: passed to ``torch.load``, defaults to False</span>
 <span class="sd">    :return: experiment structure</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># we need keep the original map_location value for the if</span>
     <span class="n">mapped</span><span class="p">,</span> <span class="n">model_device</span> <span class="o">=</span> <span class="n">check_mapping_devices</span><span class="p">(</span><span class="n">map_location</span><span class="p">,</span> <span class="n">model_device</span><span class="p">)</span>
-    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;map_location&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">"map_location"</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped</span>
     <span class="n">structure</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">load_saved_tensors</span><span class="p">(</span><span class="n">structure_fname</span><span class="p">,</span> <span class="n">state_fname</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="n">weights_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="c1"># transfer stuff back to model_device</span>
     <span class="n">structure</span> <span class="o">=</span> <span class="n">restore_checkpoint</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">restart_db</span><span class="o">=</span><span class="n">restart_db</span><span class="p">)</span>
     <span class="c1"># no transfer happens in either case, as the tensors are on the target devices already</span>
-    <span class="k">if</span> <span class="n">model_device</span> <span class="o">==</span> <span class="s2">&quot;cpu&quot;</span> <span class="ow">or</span> <span class="n">map_location</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">evaluator</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;training_modules&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">evaluator</span>
+    <span class="k">if</span> <span class="n">model_device</span> <span class="o">==</span> <span class="s2">"cpu"</span> <span class="ow">or</span> <span class="n">map_location</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">evaluator</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">"training_modules"</span><span class="p">]</span><span class="o">.</span><span class="n">evaluator</span>
         <span class="c1"># model_device can be None, so we have to determine the device for a tensor</span>
         <span class="n">evaluator</span><span class="o">.</span><span class="n">model_device</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span><span class="o">.</span><span class="n">device</span>
     <span class="c1"># if map_location is not set and model_device is set</span>
     <span class="k">elif</span> <span class="n">model_device</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">training_modules</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;training_modules&quot;</span><span class="p">]</span>
-        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;controller&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">optimizer</span>
+        <span class="n">training_modules</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">"training_modules"</span><span class="p">]</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">"controller"</span><span class="p">]</span><span class="o">.</span><span class="n">optimizer</span>
         <span class="n">model</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">evaluator</span> <span class="o">=</span> <span class="n">training_modules</span>
         <span class="n">model</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">,</span> <span class="n">optimizer</span> <span class="o">=</span> <span class="n">set_devices</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">evaluator</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">model_device</span><span class="p">)</span>
     <span class="c1"># if neither map_location nor model_device is set, directly return</span>
@@ -314,7 +314,7 @@
 <div class="viewcode-block" id="load_checkpoint_from_cwd">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.serialization.html#hippynn.load_checkpoint_from_cwd">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_checkpoint_from_cwd</span><span class="p">(</span><span class="n">map_location</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Same as ``load_checkpoint``, but using default filenames.</span>
 
 <span class="sd">    .. Warning::</span>
@@ -331,9 +331,9 @@
 <span class="sd">    :type weights_only: bool, optional</span>
 <span class="sd">    :return: experiment structure</span>
 <span class="sd">    :rtype: dict</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">load_checkpoint</span><span class="p">(</span>
-        <span class="n">DEFAULT_STRUCTURE_FNAME</span><span class="p">,</span> <span class="s2">&quot;best_checkpoint.pt&quot;</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">map_location</span><span class="p">,</span> <span class="n">model_device</span><span class="o">=</span><span class="n">model_device</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="n">weights_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="n">DEFAULT_STRUCTURE_FNAME</span><span class="p">,</span> <span class="s2">"best_checkpoint.pt"</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">map_location</span><span class="p">,</span> <span class="n">model_device</span><span class="o">=</span><span class="n">model_device</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="n">weights_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span></div>
 
 
@@ -341,7 +341,7 @@
 <div class="viewcode-block" id="load_model_from_cwd">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.experiment.serialization.html#hippynn.load_model_from_cwd">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_model_from_cwd</span><span class="p">(</span><span class="n">map_location</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphModule</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Only load model from current working directory.</span>
 
 <span class="sd">    .. Warning::</span>
@@ -357,14 +357,14 @@
 <span class="sd">    :param weights_only: passed to ``torch.load``, defaults to False</span>
 <span class="sd">    :type weights_only: bool, optional</span>
 <span class="sd">    :return: model with reloaded parameters</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">mapped</span><span class="p">,</span> <span class="n">model_device</span> <span class="o">=</span> <span class="n">check_mapping_devices</span><span class="p">(</span><span class="n">map_location</span><span class="p">,</span> <span class="n">model_device</span><span class="p">)</span>
-    <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;map_location&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped</span>
-    <span class="n">structure</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">load_saved_tensors</span><span class="p">(</span><span class="s2">&quot;experiment_structure.pt&quot;</span><span class="p">,</span> <span class="s2">&quot;best_model.pt&quot;</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="n">weights_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">"map_location"</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped</span>
+    <span class="n">structure</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">load_saved_tensors</span><span class="p">(</span><span class="s2">"experiment_structure.pt"</span><span class="p">,</span> <span class="s2">"best_model.pt"</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="n">weights_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="n">model</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">&quot;training_modules&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">model</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">structure</span><span class="p">[</span><span class="s2">"training_modules"</span><span class="p">]</span><span class="o">.</span><span class="n">model</span>
     <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">map_location</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">model_device</span> <span class="o">!=</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">model_device</span> <span class="o">!=</span> <span class="s2">&quot;cpu&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">map_location</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">model_device</span> <span class="o">!=</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">model_device</span> <span class="o">!=</span> <span class="s2">"cpu"</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">model_device</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">model</span></div>

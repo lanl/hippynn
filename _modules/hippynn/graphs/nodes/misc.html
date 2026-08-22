@@ -108,9 +108,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.graphs.nodes.misc</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Nodes not otherwise categorized.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdxType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">ExpandParents</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">algebra</span> <span class="k">as</span> <span class="n">algebra_modules</span>
@@ -119,11 +119,11 @@
 <div class="viewcode-block" id="ListNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.misc.html#hippynn.graphs.nodes.misc.ListNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ListNode</span><span class="p">(</span><span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;features&quot;</span>
-    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;wrapped_features&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"features"</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"wrapped_features"</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">algebra_modules</span><span class="o">.</span><span class="n">ListMod</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">)</span></div>
 
 
@@ -133,12 +133,12 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">EnsembleTarget</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">algebra_modules</span><span class="o">.</span><span class="n">EnsembleTarget</span>
     <span class="n">input_names</span> <span class="o">=</span> <span class="bp">NotImplemented</span>  <span class="c1"># NotImplemented tells __init_subclass__ that we will fill this in later.</span>
-    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"mean"</span><span class="p">,</span> <span class="s2">"std"</span><span class="p">,</span> <span class="s2">"all"</span>
 
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">require_compatible_idx_states</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">):</span>
 
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
 
@@ -146,26 +146,26 @@
         <span class="n">db_name</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">db_name</span>  <span class="c1"># assumes that all are the same!</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">output_index_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">index_state</span><span class="p">,)</span><span class="o">*</span><span class="mi">3</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">input_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;input_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parents</span><span class="p">))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"input_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parents</span><span class="p">))]</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">out_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_names</span><span class="p">):</span>
-            <span class="n">c</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">db_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">out_name</span><span class="si">}</span><span class="s1">&#39;</span></div>
+            <span class="n">c</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">db_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">out_name</span><span class="si">}</span><span class="s1">'</span></div>
 
 
 
 <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Module-level getattr for finding of old functions.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;StrainInducer&quot;</span><span class="p">:</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">"StrainInducer"</span><span class="p">:</span>
         <span class="c1"># Backwards compatibility for unpickling prior models</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">physics</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">..._deprecations</span><span class="w"> </span><span class="kn">import</span> <span class="n">warn_name_change</span>
         <span class="n">warn_name_change</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">old_module</span><span class="o">=</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">new_module</span><span class="o">=</span><span class="n">physics</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">physics</span><span class="o">.</span><span class="n">StrainInducer</span>
     
-    <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;module </span><span class="si">{</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s2"> has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"module </span><span class="si">{</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s2"> has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 
            </div>

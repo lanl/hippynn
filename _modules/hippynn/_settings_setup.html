@@ -108,9 +108,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn._settings_setup</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Settings to use in the rest of the library.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="c1"># Setup defaults.</span>
 <span class="c1"># Note for developers: Settings should not affect</span>
@@ -126,9 +126,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
 
 <span class="c1"># Significant strings</span>
-<span class="n">SECTION_NAME</span> <span class="o">=</span> <span class="s2">&quot;GLOBALS&quot;</span>
-<span class="n">SETTING_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;HIPPYNN_&quot;</span>
-<span class="n">LOCAL_RC_FILE_KEY</span> <span class="o">=</span> <span class="s2">&quot;LOCAL_RC_FILE&quot;</span>
+<span class="n">SECTION_NAME</span> <span class="o">=</span> <span class="s2">"GLOBALS"</span>
+<span class="n">SETTING_PREFIX</span> <span class="o">=</span> <span class="s2">"HIPPYNN_"</span>
+<span class="n">LOCAL_RC_FILE_KEY</span> <span class="o">=</span> <span class="s2">"LOCAL_RC_FILE"</span>
 
 <span class="c1"># Globals</span>
 <span class="n">DEFAULT_PROGRESS</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># this gets set to a tqdm object if possible</span>
@@ -157,27 +157,27 @@
 <span class="c1"># Setting handlers: Take an input str or other value and return the appropriate value.</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">progress_handler</span><span class="p">(</span><span class="n">prog_setting</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Function for handling the progress bar settings.</span>
 
 <span class="sd">    :param prog_setting:</span>
 <span class="sd">    :return:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TQDM_PROGRESS</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">setup_tqdm</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">prog_setting</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">prog_setting</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="kc">True</span><span class="p">:</span> <span class="s2">&quot;tqdm&quot;</span><span class="p">,</span>
-            <span class="kc">False</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
-            <span class="kc">None</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+            <span class="kc">True</span><span class="p">:</span> <span class="s2">"tqdm"</span><span class="p">,</span>
+            <span class="kc">False</span><span class="p">:</span> <span class="s2">"none"</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">:</span> <span class="s2">"none"</span><span class="p">,</span>
         <span class="p">}[</span><span class="n">prog_setting</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prog_setting</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">prog_setting</span> <span class="o">=</span> <span class="n">prog_setting</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">prog_setting</span> <span class="o">==</span> <span class="s2">&quot;tqdm&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">prog_setting</span> <span class="o">==</span> <span class="s2">"tqdm"</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">DEFAULT_PROGRESS</span>
-        <span class="k">elif</span> <span class="n">prog_setting</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">prog_setting</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"none"</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
     <span class="n">prog_setting</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">prog_setting</span><span class="p">)</span>  <span class="c1"># Trigger error if not floatable.</span>
@@ -187,18 +187,18 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">kernel_handler</span><span class="p">(</span><span class="n">kernel_string</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 
 <span class="sd">    :param kernel_string:</span>
 <span class="sd">    :return:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">kernel_string</span> <span class="o">=</span> <span class="n">kernel_string</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
     <span class="n">kernel</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;0&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="s2">&quot;false&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s2">&quot;true&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"0"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"false"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">"1"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"true"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kernel_string</span><span class="p">,</span> <span class="n">kernel_string</span><span class="p">)</span>
 
     <span class="c1"># This function used to warn about unexpected kernel settings.</span>
@@ -213,25 +213,25 @@
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
         <span class="c1"># Boolean states </span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s1">&#39;1&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>    
-            <span class="s1">&#39;yes&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s1">&#39;true&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s1">&#39;on&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s1">&#39;0&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s1">&#39;no&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s1">&#39;false&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="s1">&#39;off&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">'1'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>    
+            <span class="s1">'yes'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">'true'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">'on'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">'0'</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">'no'</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">'false'</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">'off'</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="p">}[</span><span class="n">key</span><span class="o">.</span><span class="n">casefold</span><span class="p">()]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid value </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2">. Truth-ish string or boolean is required.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid value </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2">. Truth-ish string or boolean is required."</span><span class="p">)</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">deprecation_handler</span><span class="p">(</span><span class="n">deprecation_string</span><span class="p">):</span>
     <span class="n">deprecation_string</span> <span class="o">=</span> <span class="n">deprecation_string</span><span class="o">.</span><span class="n">casefold</span><span class="p">()</span>
-    <span class="n">deprecation_vals</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span> <span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">]</span>
+    <span class="n">deprecation_vals</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"simple"</span><span class="p">,</span> <span class="s2">"ignore"</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">]</span>
     
     <span class="k">if</span> <span class="n">deprecation_string</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">deprecation_vals</span><span class="p">:</span>
-        <span class="n">default</span> <span class="o">=</span> <span class="n">DEFAULT_SETTINGS</span><span class="p">[</span><span class="s1">&#39;DEPRECATION_WARNINGS&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid DEPRECATION_WARNINGS setting: </span><span class="si">{</span><span class="n">deprecation_string</span><span class="si">}</span><span class="s2">. Using default: </span><span class="si">{</span><span class="n">default</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">default</span> <span class="o">=</span> <span class="n">DEFAULT_SETTINGS</span><span class="p">[</span><span class="s1">'DEPRECATION_WARNINGS'</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid DEPRECATION_WARNINGS setting: </span><span class="si">{</span><span class="n">deprecation_string</span><span class="si">}</span><span class="s2">. Using default: </span><span class="si">{</span><span class="n">default</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">deprecation_string</span> <span class="o">=</span> <span class="n">default</span>
 
     <span class="k">return</span> <span class="n">deprecation_string</span>
@@ -240,34 +240,34 @@
 
 <span class="c1"># keys: defaults, types, and handlers.</span>
 <span class="n">DEFAULT_SETTINGS</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;PROGRESS&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;tqdm&#39;</span><span class="p">,</span> <span class="n">progress_handler</span><span class="p">),</span>
-    <span class="s2">&quot;DEFAULT_PLOT_FILETYPE&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;.pdf&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
-    <span class="s2">&quot;TRANSPARENT_PLOT&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">bool_or_strtobool</span><span class="p">),</span>
-    <span class="s2">&quot;DEBUG_LOSS_BROADCAST&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">bool_or_strtobool</span><span class="p">),</span>
-    <span class="s2">&quot;DEBUG_GRAPH_EXECUTION&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">bool_or_strtobool</span><span class="p">),</span>
-    <span class="s2">&quot;DEBUG_NODE_CREATION&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">bool_or_strtobool</span><span class="p">),</span>
-    <span class="s2">&quot;DEBUG_AUTOINDEXING&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">bool_or_strtobool</span><span class="p">),</span>
-    <span class="s2">&quot;USE_CUSTOM_KERNELS&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">kernel_handler</span><span class="p">),</span>
-    <span class="s2">&quot;WARN_LOW_DISTANCES&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">bool_or_strtobool</span><span class="p">),</span>
-    <span class="s2">&quot;TIMEPLOT_AUTOSCALING&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">bool_or_strtobool</span><span class="p">),</span>
-    <span class="s2">&quot;PYTORCH_GPU_MEM_FRAC&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span>
-    <span class="s2">&quot;COMM_FEATURES_LAMMPS&quot;</span><span class="p">:</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">bool_or_strtobool</span><span class="p">),</span>
-    <span class="s2">&quot;DEPRECATION_WARNINGS&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;simple&quot;</span><span class="p">,</span> <span class="n">deprecation_handler</span><span class="p">)</span>
+    <span class="s2">"PROGRESS"</span><span class="p">:</span> <span class="p">(</span><span class="s1">'tqdm'</span><span class="p">,</span> <span class="n">progress_handler</span><span class="p">),</span>
+    <span class="s2">"DEFAULT_PLOT_FILETYPE"</span><span class="p">:</span> <span class="p">(</span><span class="s2">".pdf"</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+    <span class="s2">"TRANSPARENT_PLOT"</span><span class="p">:</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">bool_or_strtobool</span><span class="p">),</span>
+    <span class="s2">"DEBUG_LOSS_BROADCAST"</span><span class="p">:</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">bool_or_strtobool</span><span class="p">),</span>
+    <span class="s2">"DEBUG_GRAPH_EXECUTION"</span><span class="p">:</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">bool_or_strtobool</span><span class="p">),</span>
+    <span class="s2">"DEBUG_NODE_CREATION"</span><span class="p">:</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">bool_or_strtobool</span><span class="p">),</span>
+    <span class="s2">"DEBUG_AUTOINDEXING"</span><span class="p">:</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">bool_or_strtobool</span><span class="p">),</span>
+    <span class="s2">"USE_CUSTOM_KERNELS"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"auto"</span><span class="p">,</span> <span class="n">kernel_handler</span><span class="p">),</span>
+    <span class="s2">"WARN_LOW_DISTANCES"</span><span class="p">:</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">bool_or_strtobool</span><span class="p">),</span>
+    <span class="s2">"TIMEPLOT_AUTOSCALING"</span><span class="p">:</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">bool_or_strtobool</span><span class="p">),</span>
+    <span class="s2">"PYTORCH_GPU_MEM_FRAC"</span><span class="p">:</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span>
+    <span class="s2">"COMM_FEATURES_LAMMPS"</span><span class="p">:</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">bool_or_strtobool</span><span class="p">),</span>
+    <span class="s2">"DEPRECATION_WARNINGS"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"simple"</span><span class="p">,</span> <span class="n">deprecation_handler</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="n">INITIAL_SETTINGS</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">handler</span><span class="p">(</span><span class="n">default</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">handler</span><span class="p">)</span> <span class="ow">in</span> <span class="n">DEFAULT_SETTINGS</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
 <span class="n">settings</span> <span class="o">=</span> <span class="n">SimpleNamespace</span><span class="p">(</span><span class="o">**</span><span class="n">INITIAL_SETTINGS</span><span class="p">)</span>
-<span class="n">settings</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="n">settings</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="s2">"""</span>
 <span class="s2">Values for the current hippynn settings.</span>
 <span class="s2">See :doc:`/user_guide/settings` for a description.</span>
-<span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">"""</span>
 
 
 <div class="viewcode-block" id="reload_settings">
 <a class="viewcode-back" href="../../api_documentation/hippynn.html#hippynn.reload_settings">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">reload_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Attempt to reload the hippynn library settings.</span>
 
 <span class="sd">    Settings sources are, in order from least to greatest priority:</span>
@@ -283,23 +283,23 @@
 <span class="sd">    :param kwargs: explicit settings to change.</span>
 
 <span class="sd">    :return:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Developer note: this function modifies the module-scope `settings` directly.</span>
 
     <span class="n">config_sources</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Dictionary of configuration variable sources mapping to dictionary of configuration.</span>
     <span class="c1"># We add to this dictionary in order of application</span>
 
-    <span class="n">rc_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~/.hippynnrc&quot;</span><span class="p">)</span>
+    <span class="n">rc_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">"~/.hippynnrc"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">rc_name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">rc_name</span><span class="p">):</span>
-        <span class="n">config</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">(</span><span class="n">inline_comment_prefixes</span><span class="o">=</span><span class="s2">&quot;#&quot;</span><span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">(</span><span class="n">inline_comment_prefixes</span><span class="o">=</span><span class="s2">"#"</span><span class="p">)</span>
         <span class="n">config</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">rc_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">SECTION_NAME</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Config file </span><span class="si">{</span><span class="n">rc_name</span><span class="si">}</span><span class="s2"> does not contain a </span><span class="si">{</span><span class="n">SECTION_NAME</span><span class="si">}</span><span class="s2"> section and will be ignored!&quot;</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Config file </span><span class="si">{</span><span class="n">rc_name</span><span class="si">}</span><span class="s2"> does not contain a </span><span class="si">{</span><span class="n">SECTION_NAME</span><span class="si">}</span><span class="s2"> section and will be ignored!"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">config_sources</span><span class="p">[</span><span class="s2">&quot;~/.hippynnrc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">SECTION_NAME</span><span class="p">]</span>
+            <span class="n">config_sources</span><span class="p">[</span><span class="s2">"~/.hippynnrc"</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">SECTION_NAME</span><span class="p">]</span>
 
     <span class="n">hippynn_environment_variables</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">SETTING_PREFIX</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">SETTING_PREFIX</span><span class="p">)</span>
+        <span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">SETTING_PREFIX</span><span class="p">,</span> <span class="s2">""</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">SETTING_PREFIX</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="n">LOCAL_RC_FILE_KEY</span> <span class="ow">in</span> <span class="n">hippynn_environment_variables</span><span class="p">:</span>
@@ -308,14 +308,14 @@
             <span class="n">local_config</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
             <span class="n">local_config</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">local_rc_fname</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">SECTION_NAME</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">local_config</span><span class="p">:</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Config file </span><span class="si">{</span><span class="n">local_rc_fname</span><span class="si">}</span><span class="s2"> does not contain a </span><span class="si">{</span><span class="n">SECTION_NAME</span><span class="si">}</span><span class="s2"> section and will be ignored!&quot;</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Config file </span><span class="si">{</span><span class="n">local_rc_fname</span><span class="si">}</span><span class="s2"> does not contain a </span><span class="si">{</span><span class="n">SECTION_NAME</span><span class="si">}</span><span class="s2"> section and will be ignored!"</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">config_sources</span><span class="p">[</span><span class="n">LOCAL_RC_FILE_KEY</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_config</span><span class="p">[</span><span class="n">SECTION_NAME</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Local configuration file </span><span class="si">{</span><span class="n">local_rc_fname</span><span class="si">}</span><span class="s2"> not found.&quot;</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Local configuration file </span><span class="si">{</span><span class="n">local_rc_fname</span><span class="si">}</span><span class="s2"> not found."</span><span class="p">)</span>
 
-    <span class="n">config_sources</span><span class="p">[</span><span class="s2">&quot;environment variables&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hippynn_environment_variables</span>
-    <span class="n">config_sources</span><span class="p">[</span><span class="s2">&quot;kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">config_sources</span><span class="p">[</span><span class="s2">"environment variables"</span><span class="p">]</span> <span class="o">=</span> <span class="n">hippynn_environment_variables</span>
+    <span class="n">config_sources</span><span class="p">[</span><span class="s2">"kwargs"</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">sname</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">config_sources</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">source</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -325,9 +325,9 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">handler</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Value </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> for setting </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> is invalid&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ee</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Value </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> for setting </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> is invalid"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ee</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration source </span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2"> contains invalid variables (</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">). These will be ignored.&quot;</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Configuration source </span><span class="si">{</span><span class="n">sname</span><span class="si">}</span><span class="s2"> contains invalid variables (</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">). These will be ignored."</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">settings</span></div>
 

@@ -108,16 +108,16 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.interfaces.schnetpack_interface</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Interface to use schnetpack networks with hippynn.</span>
 
 <span class="sd">Note: Only open boundary conditions are supported for now.</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">schnetpack</span>
 <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">ie</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Schnetpack installation is required to use the schnetpack interface.&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ie</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">"Schnetpack installation is required to use the schnetpack interface."</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ie</span>
 
 <span class="kn">import</span> <span class="n">torch</span>
 
@@ -142,21 +142,21 @@
 <div class="viewcode-block" id="SchNetWrapper.forward">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.interfaces.schnetpack_interface.html#hippynn.interfaces.schnetpack_interface.SchNetWrapper.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z_arr</span><span class="p">,</span> <span class="n">r_arr</span><span class="p">,</span> <span class="n">nonblank</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Wrap a call into the underlying schnet, which uses</span>
 <span class="sd">        dictionaries.</span>
 <span class="sd">        :param z_arr:</span>
 <span class="sd">        :param r_arr:</span>
 <span class="sd">        :param nonblank:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">packed</span> <span class="o">=</span> <span class="n">create_schnetpack_inputs</span><span class="p">(</span><span class="n">z_arr</span><span class="p">,</span> <span class="n">r_arr</span><span class="p">,</span> <span class="n">nonblank</span><span class="p">)</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schnet</span><span class="p">(</span><span class="n">packed</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">schnet</span><span class="o">.</span><span class="n">return_intermediate</span><span class="p">:</span>
             <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">outputs</span><span class="p">]</span>
-        <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">packed</span><span class="p">[</span><span class="s2">&quot;nonblank&quot;</span><span class="p">]]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">packed</span><span class="p">[</span><span class="s2">"nonblank"</span><span class="p">]]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">outputs</span></div>
 </div>
 
@@ -165,11 +165,11 @@
 <div class="viewcode-block" id="SchNetNode">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.interfaces.schnetpack_interface.html#hippynn.interfaces.schnetpack_interface.SchNetNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SchNetNode</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">Network</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;species&quot;</span><span class="p">,</span> <span class="s2">&quot;positions&quot;</span><span class="p">,</span> <span class="s2">&quot;nonblank&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"species"</span><span class="p">,</span> <span class="s2">"positions"</span><span class="p">,</span> <span class="s2">"nonblank"</span>
     <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">SchNetWrapper</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="n">module_kwargs</span><span class="p">)</span></div>
 
 
@@ -210,7 +210,7 @@
         <span class="n">Properties</span><span class="o">.</span><span class="n">R</span><span class="p">:</span> <span class="n">r_arr</span><span class="p">,</span>
         <span class="n">Properties</span><span class="o">.</span><span class="n">cell</span><span class="p">:</span> <span class="n">cell</span><span class="p">,</span>
         <span class="n">Properties</span><span class="o">.</span><span class="n">cell_offset</span><span class="p">:</span> <span class="n">cell_offset</span><span class="p">,</span>
-        <span class="s2">&quot;nonblank&quot;</span><span class="p">:</span> <span class="n">nonblank</span><span class="p">,</span>
+        <span class="s2">"nonblank"</span><span class="p">:</span> <span class="n">nonblank</span><span class="p">,</span>
     <span class="p">}</span></div>
 
 </pre></div>

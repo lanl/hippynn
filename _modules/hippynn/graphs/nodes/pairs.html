@@ -108,9 +108,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.graphs.nodes.pairs</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Nodes for finding and manipulating pairs and distances.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base.node_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NodeNotFound</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">Node</span>
@@ -124,10 +124,10 @@
 <div class="viewcode-block" id="OpenPairIndexer">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.OpenPairIndexer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OpenPairIndexer</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;nonblank&quot;</span><span class="p">,</span> <span class="s2">&quot;real_atoms&quot;</span><span class="p">,</span> <span class="s2">&quot;inv_real_atoms&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"coordinates"</span><span class="p">,</span> <span class="s2">"nonblank"</span><span class="p">,</span> <span class="s2">"real_atoms"</span><span class="p">,</span> <span class="s2">"inv_real_atoms"</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">OpenPairIndexer</span>
     <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;hard_dist_cutoff&quot;</span><span class="p">:</span> <span class="s2">&quot;dist_hard_max&quot;</span><span class="p">,</span>
+        <span class="s2">"hard_dist_cutoff"</span><span class="p">:</span> <span class="s2">"dist_hard_max"</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">PositionsNode</span><span class="p">,</span> <span class="n">SpeciesNode</span><span class="p">)</span>
@@ -157,7 +157,7 @@
 <div class="viewcode-block" id="PeriodicPairOutputs">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.PeriodicPairOutputs">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PeriodicPairOutputs</span><span class="p">:</span>
-    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;pair_dist&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_coord&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_offsets&quot;</span><span class="p">,</span> <span class="s2">&quot;offset_index&quot;</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"pair_dist"</span><span class="p">,</span> <span class="s2">"pair_first"</span><span class="p">,</span> <span class="s2">"pair_second"</span><span class="p">,</span> <span class="s2">"pair_coord"</span><span class="p">,</span> <span class="s2">"cell_offsets"</span><span class="p">,</span> <span class="s2">"offset_index"</span>
     <span class="n">output_index_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pairs</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_names</span><span class="p">)</span></div>
 
 
@@ -165,10 +165,10 @@
 <div class="viewcode-block" id="PeriodicPairIndexer">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.PeriodicPairIndexer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PeriodicPairIndexer</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span>  <span class="n">PeriodicPairOutputs</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;nonblank&quot;</span><span class="p">,</span> <span class="s2">&quot;real_atoms&quot;</span><span class="p">,</span> <span class="s2">&quot;inv_real_atoms&quot;</span><span class="p">,</span> <span class="s2">&quot;cell&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"coordinates"</span><span class="p">,</span> <span class="s2">"nonblank"</span><span class="p">,</span> <span class="s2">"real_atoms"</span><span class="p">,</span> <span class="s2">"inv_real_atoms"</span><span class="p">,</span> <span class="s2">"cell"</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">PeriodicPairIndexer</span>
     <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;hard_dist_cutoff&quot;</span><span class="p">:</span> <span class="s2">&quot;dist_hard_max&quot;</span><span class="p">,</span>
+        <span class="s2">"hard_dist_cutoff"</span><span class="p">:</span> <span class="s2">"dist_hard_max"</span><span class="p">,</span>
     <span class="p">}</span>
 
 <div class="viewcode-block" id="PeriodicPairIndexer.expand0">
@@ -224,24 +224,24 @@
 <div class="viewcode-block" id="PeriodicPairIndexerMemory">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.PeriodicPairIndexerMemory">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PeriodicPairIndexerMemory</span><span class="p">(</span><span class="n">PeriodicPairIndexer</span><span class="p">,</span> <span class="n">Memory</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    Implementation of PeriodicPairIndexer with additional memory component.</span>
 
 <span class="sd">    Stores current pair indices in memory and reuses them to compute the pair distances if no </span>
 <span class="sd">    particle has moved more than skin/2 since last pair calculation. Otherwise uses the</span>
 <span class="sd">    _pair_indexer_class to recompute the pairs.</span>
 
-<span class="sd">    Increasing the value of &#39;skin&#39; will increase the number of pair distances computed at</span>
+<span class="sd">    Increasing the value of 'skin' will increase the number of pair distances computed at</span>
 <span class="sd">    each step, but decrease the number of times new pairs must be computed. Skin should be </span>
 <span class="sd">    set to zero while training for fastest results.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    '''</span>
     
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">periodic</span><span class="o">.</span><span class="n">PeriodicPairIndexerMemory</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">skin</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">skin</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">module_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;skin&quot;</span><span class="p">:</span> <span class="n">skin</span><span class="p">,</span> <span class="o">**</span><span class="n">module_kwargs</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"skin"</span><span class="p">:</span> <span class="n">skin</span><span class="p">,</span> <span class="o">**</span><span class="n">module_kwargs</span><span class="p">}</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
@@ -250,9 +250,9 @@
 <div class="viewcode-block" id="ExternalNeighborIndexer">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.ExternalNeighborIndexer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExternalNeighborIndexer</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span>  <span class="n">MultiNode</span><span class="p">):</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;real_atoms&quot;</span><span class="p">,</span> <span class="s2">&quot;shifts&quot;</span><span class="p">,</span> <span class="s2">&quot;cell&quot;</span><span class="p">,</span> <span class="s2">&quot;ext_pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;ext_pair_second&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"coordinates"</span><span class="p">,</span> <span class="s2">"real_atoms"</span><span class="p">,</span> <span class="s2">"shifts"</span><span class="p">,</span> <span class="s2">"cell"</span><span class="p">,</span> <span class="s2">"ext_pair_first"</span><span class="p">,</span> <span class="s2">"ext_pair_second"</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">ExternalNeighbors</span>
-    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">&quot;hard_dist_cutoff&quot;</span><span class="p">,</span>
+    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">"hard_dist_cutoff"</span><span class="p">,</span>
 
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_names</span><span class="p">))</span>
@@ -264,12 +264,12 @@
 <div class="viewcode-block" id="PairReIndexer">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.PairReIndexer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PairReIndexer</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    For re-using index information to convert</span>
 <span class="sd">    from IdxType.SysAtomAtom -&gt; IdxType.Pairs</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;pair_features&quot;</span><span class="p">,</span> <span class="s2">&quot;system_index&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_index&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"pair_features"</span><span class="p">,</span> <span class="s2">"system_index"</span><span class="p">,</span> <span class="s2">"atom_index"</span><span class="p">,</span> <span class="s2">"pair_first"</span><span class="p">,</span> <span class="s2">"pair_second"</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">PairReIndexer</span>
     <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pairs</span>
 
@@ -298,7 +298,7 @@
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">assertlen</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
@@ -309,18 +309,18 @@
 <div class="viewcode-block" id="PairDeIndexer">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.PairDeIndexer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PairDeIndexer</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    For converting from IdxType.Pairs to IdxType.SysAtomAtom</span>
 <span class="sd">    (Padded form)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">input_names</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="s2">&quot;pair_features&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;system_index&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;atom_index&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;n_systems&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;n_atoms_max&quot;</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span>
+        <span class="s2">"pair_features"</span><span class="p">,</span>
+        <span class="s2">"system_index"</span><span class="p">,</span>
+        <span class="s2">"atom_index"</span><span class="p">,</span>
+        <span class="s2">"n_systems"</span><span class="p">,</span>
+        <span class="s2">"n_atoms_max"</span> <span class="s2">"pair_first"</span><span class="p">,</span>
+        <span class="s2">"pair_second"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">PairDeIndexer</span>
     <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">SysAtomAtom</span>
@@ -349,7 +349,7 @@
         <span class="p">)</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
@@ -358,14 +358,14 @@
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.PairCacher">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PairCacher</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">PairCache</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
     <span class="n">input_names</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;cell_offsets&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;offset_index&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;real_atoms&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;system_index&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;n_atoms_max&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;n_systems&quot;</span><span class="p">,</span>
+        <span class="s2">"pair_first"</span><span class="p">,</span>
+        <span class="s2">"pair_second"</span><span class="p">,</span>
+        <span class="s2">"cell_offsets"</span><span class="p">,</span>
+        <span class="s2">"offset_index"</span><span class="p">,</span>
+        <span class="s2">"real_atoms"</span><span class="p">,</span>
+        <span class="s2">"system_index"</span><span class="p">,</span>
+        <span class="s2">"n_atoms_max"</span><span class="p">,</span>
+        <span class="s2">"n_systems"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">PairCacher</span>
     <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Unlabeled</span>
@@ -375,8 +375,8 @@
     <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">PairIndexer</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expand0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair_indexer</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">atomidx</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">pair_indexer</span><span class="p">,</span> <span class="n">AtomIndexer</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s2">&quot;n_images&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">[</span><span class="s2">&quot;n_images&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pair_indexer</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">n_images</span>
+        <span class="k">if</span> <span class="s2">"n_images"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">[</span><span class="s2">"n_images"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pair_indexer</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">n_images</span>
         <span class="k">return</span> <span class="n">pair_indexer</span><span class="p">,</span> <span class="n">atomidx</span></div>
 
 
@@ -403,11 +403,11 @@
 <div class="viewcode-block" id="PairUncacher">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.PairUncacher">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PairUncacher</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;sparsepairs&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span> <span class="s2">&quot;cells&quot;</span><span class="p">,</span> <span class="s2">&quot;real_atoms&quot;</span><span class="p">,</span> <span class="s2">&quot;inv_real_atoms&quot;</span><span class="p">,</span> <span class="s2">&quot;n_atoms_max&quot;</span><span class="p">,</span> <span class="s2">&quot;n_systems&quot;</span>
-    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;pair_dist&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_coord&quot;</span><span class="p">,</span> <span class="s2">&quot;cell_offsets&quot;</span><span class="p">,</span> <span class="s2">&quot;offset_index&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"sparsepairs"</span><span class="p">,</span> <span class="s2">"coordinates"</span><span class="p">,</span> <span class="s2">"cells"</span><span class="p">,</span> <span class="s2">"real_atoms"</span><span class="p">,</span> <span class="s2">"inv_real_atoms"</span><span class="p">,</span> <span class="s2">"n_atoms_max"</span><span class="p">,</span> <span class="s2">"n_systems"</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"pair_dist"</span><span class="p">,</span> <span class="s2">"pair_first"</span><span class="p">,</span> <span class="s2">"pair_second"</span><span class="p">,</span> <span class="s2">"pair_coord"</span><span class="p">,</span> <span class="s2">"cell_offsets"</span><span class="p">,</span> <span class="s2">"offset_index"</span>
     <span class="n">output_index_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pairs</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_names</span><span class="p">)</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">PairUncacher</span>
-    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">&quot;dist_hard_max&quot;</span><span class="p">,</span>
+    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">"dist_hard_max"</span><span class="p">,</span>
     <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Unlabeled</span>
 
 <div class="viewcode-block" id="PairUncacher.expand0">
@@ -443,20 +443,20 @@
 <div class="viewcode-block" id="RDFBins">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.RDFBins">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RDFBins</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;pair_dists&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="s2">&quot;one_hot&quot;</span><span class="p">,</span> <span class="s2">&quot;n_systems&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"pair_dists"</span><span class="p">,</span> <span class="s2">"pair_first"</span><span class="p">,</span> <span class="s2">"pair_second"</span><span class="p">,</span> <span class="s2">"one_hot"</span><span class="p">,</span> <span class="s2">"n_systems"</span>
     <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span> <span class="c1"># Computes over whole batch.</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">RDFBins</span>
-    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">&quot;bins&quot;</span><span class="p">,</span>
-    <span class="n">parent_expansion_kwargs</span> <span class="o">=</span> <span class="s2">&quot;dist_hard_max&quot;</span><span class="p">,</span>
+    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">"bins"</span><span class="p">,</span>
+    <span class="n">parent_expansion_kwargs</span> <span class="o">=</span> <span class="s2">"dist_hard_max"</span><span class="p">,</span>
 
 <div class="viewcode-block" id="RDFBins.expand0">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.RDFBins.expand0">[docs]</a>
     <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">PositionsNode</span><span class="p">,</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">CellNode</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expand0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Build a default Periodic Pair indexer.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">pairs</span> <span class="o">=</span> <span class="n">PeriodicPairIndexer</span><span class="p">(</span><span class="s2">&quot;Period Pairs&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">cell</span><span class="p">),</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">dist_hard_max</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="n">pairs</span> <span class="o">=</span> <span class="n">PeriodicPairIndexer</span><span class="p">(</span><span class="s2">"Period Pairs"</span><span class="p">,</span> <span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">cell</span><span class="p">),</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">dist_hard_max</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pairs</span><span class="p">,</span></div>
 
 
@@ -464,10 +464,10 @@
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.RDFBins.expand1">[docs]</a>
     <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">PositionsNode</span><span class="p">,</span> <span class="n">SpeciesNode</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expand1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Builds an open pair indexer.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">pairs</span> <span class="o">=</span> <span class="n">OpenPairIndexer</span><span class="p">(</span><span class="s2">&quot;Period Pairs&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">spec</span><span class="p">),</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">dist_hard_max</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="n">pairs</span> <span class="o">=</span> <span class="n">OpenPairIndexer</span><span class="p">(</span><span class="s2">"Period Pairs"</span><span class="p">,</span> <span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">spec</span><span class="p">),</span> <span class="n">dist_hard_max</span><span class="o">=</span><span class="n">dist_hard_max</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pairs</span><span class="p">,</span></div>
 
 
@@ -475,9 +475,9 @@
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.RDFBins.expand2">[docs]</a>
     <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">PairIndexer</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expand2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pairs</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Get the encoding and padding associated with a pair indexer.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">enc</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">pairs</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">)</span>
         <span class="n">pad</span> <span class="o">=</span> <span class="n">find_unique_relative</span><span class="p">(</span><span class="n">pairs</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">enc</span><span class="p">,</span> <span class="n">pad</span></div>
@@ -487,10 +487,10 @@
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.RDFBins.expand3">[docs]</a>
     <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">PairIndexer</span><span class="p">,</span> <span class="n">OneHotEncoder</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expand3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">one_hot</span><span class="p">,</span> <span class="n">pad</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">purpose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Expanded the needed children of pairs, encoder, and padding indexer.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">[</span><span class="s2">&quot;species_set&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">one_hot</span><span class="o">.</span><span class="n">species_set</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span><span class="p">[</span><span class="s2">"species_set"</span><span class="p">]</span> <span class="o">=</span> <span class="n">one_hot</span><span class="o">.</span><span class="n">species_set</span>
         <span class="k">return</span> <span class="n">pairs</span><span class="o">.</span><span class="n">pair_dist</span><span class="p">,</span> <span class="n">pairs</span><span class="o">.</span><span class="n">pair_first</span><span class="p">,</span> <span class="n">pairs</span><span class="o">.</span><span class="n">pair_second</span><span class="p">,</span> <span class="n">one_hot</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="n">pad</span><span class="o">.</span><span class="n">n_systems</span></div>
 
 
@@ -504,37 +504,37 @@
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">_DispatchNeighbors</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">PeriodicPairOutputs</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Superclass for nodes that compute neighbors for systems one at a time.</span>
 <span class="sd">    These should be capable of searching all feasible neighbors (no limit on number of images)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">input_names</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="s2">&quot;coordinates&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;nonblank&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;real_atoms&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;inv_real_atoms&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;cell&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;system_index&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;n_systems&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;n_atoms_max&quot;</span><span class="p">,</span>
+        <span class="s2">"coordinates"</span><span class="p">,</span>
+        <span class="s2">"nonblank"</span><span class="p">,</span>
+        <span class="s2">"real_atoms"</span><span class="p">,</span>
+        <span class="s2">"inv_real_atoms"</span><span class="p">,</span>
+        <span class="s2">"cell"</span><span class="p">,</span>
+        <span class="s2">"system_index"</span><span class="p">,</span>
+        <span class="s2">"n_systems"</span><span class="p">,</span>
+        <span class="s2">"n_atoms_max"</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">&quot;dist_hard_max&quot;</span><span class="p">,</span>
+    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">"dist_hard_max"</span><span class="p">,</span>
     
 
     <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">PositionsNode</span><span class="p">,</span> <span class="n">SpeciesNode</span><span class="p">,</span> <span class="n">CellNode</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expand0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Acquire padding and encoding.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">enc</span><span class="p">,</span> <span class="n">padidx</span> <span class="o">=</span> <span class="n">acquire_encoding_padding</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">species_set</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pos</span><span class="p">,</span> <span class="n">enc</span><span class="p">,</span> <span class="n">padidx</span><span class="p">,</span> <span class="n">cell</span>
 
     <span class="nd">@parent_expander</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">PositionsNode</span><span class="p">,</span> <span class="n">Encoder</span><span class="p">,</span> <span class="n">PaddingIndexer</span><span class="p">,</span> <span class="n">CellNode</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">expand1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">encode</span><span class="p">,</span> <span class="n">indexer</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Expand needed child nodes of encoder and padding indexer.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">pos</span><span class="p">,</span>
@@ -566,11 +566,11 @@
 <div class="viewcode-block" id="DynamicPeriodicPairs">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.DynamicPeriodicPairs">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DynamicPeriodicPairs</span><span class="p">(</span><span class="n">_DispatchNeighbors</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Node for finding pairs in arbitrary periodic boundary conditions.</span>
 <span class="sd">    Note: This will often be slower than PeriodicPairIndexer, but more general.</span>
 <span class="sd">    If the speed is a concern, consider precomputing pairs with experiment.assembly.precompute_pairs</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">TorchNeighbors</span></div>
 
@@ -578,34 +578,34 @@
 <div class="viewcode-block" id="KDTreePairs">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.KDTreePairs">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">KDTreePairs</span><span class="p">(</span><span class="n">_DispatchNeighbors</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Node for finding pairs under periodic boundary conditions using Scipy&#39;s KD Tree algorithm. </span>
+<span class="w">    </span><span class="sd">'''</span>
+<span class="sd">    Node for finding pairs under periodic boundary conditions using Scipy's KD Tree algorithm. </span>
 <span class="sd">    Cell must be orthorhombic.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    '''</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">dispatch</span><span class="o">.</span><span class="n">KDTreeNeighbors</span></div>
 
 
 <div class="viewcode-block" id="KDTreePairsMemory">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.KDTreePairsMemory">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">KDTreePairsMemory</span><span class="p">(</span><span class="n">_DispatchNeighbors</span><span class="p">,</span> <span class="n">Memory</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">'''</span>
 <span class="sd">    Implementation of KDTreePairs with an added memory component.</span>
 
 <span class="sd">    Stores current pair indices in memory and reuses them to compute the pair distances if no </span>
 <span class="sd">    particle has moved more than skin/2 since last pair calculation. Otherwise uses the</span>
 <span class="sd">    _pair_indexer_class to recompute the pairs.</span>
 
-<span class="sd">    Increasing the value of &#39;skin&#39; will increase the number of pair distances computed at</span>
+<span class="sd">    Increasing the value of 'skin' will increase the number of pair distances computed at</span>
 <span class="sd">    each step, but decrease the number of times new pairs must be computed. Skin should be </span>
 <span class="sd">    set to zero while training for fastest results.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    '''</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">dispatch</span><span class="o">.</span><span class="n">KDTreePairsMemory</span>
-    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">&quot;dist_hard_max&quot;</span><span class="p">,</span>
+    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="s2">"dist_hard_max"</span><span class="p">,</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">skin</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">skin</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">module_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;skin&quot;</span><span class="p">:</span> <span class="n">skin</span><span class="p">,</span> <span class="o">**</span><span class="n">module_kwargs</span><span class="p">}</span>
+        <span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"skin"</span><span class="p">:</span> <span class="n">skin</span><span class="p">,</span> <span class="o">**</span><span class="n">module_kwargs</span><span class="p">}</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="n">module_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
@@ -613,10 +613,10 @@
 <div class="viewcode-block" id="PaddedNeighborNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.PaddedNeighborNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PaddedNeighborNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;pair_first&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_second&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_coord&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"pair_first"</span><span class="p">,</span> <span class="s2">"pair_second"</span><span class="p">,</span> <span class="s2">"pair_coord"</span>
     <span class="n">output_names</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="s2">&quot;j_list&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;rij_list&quot;</span><span class="p">,</span>
+        <span class="s2">"j_list"</span><span class="p">,</span>
+        <span class="s2">"rij_list"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">PaddedNeighModule</span>
@@ -633,7 +633,7 @@
         <span class="k">except</span> <span class="n">NodeNotFound</span><span class="p">:</span>
             <span class="c1"># Fall back to finding -any- atom-indexed tensor.</span>
             <span class="n">atom_arrays</span> <span class="o">=</span> <span class="n">pair_finder</span><span class="o">.</span><span class="n">find_relatives</span><span class="p">(</span>
-                <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s2">&quot;index_state&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">index_state</span> <span class="o">==</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
+                <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s2">"index_state"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">index_state</span> <span class="o">==</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
             <span class="p">)</span>
             <span class="n">atom_array</span> <span class="o">=</span> <span class="n">atom_arrays</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
 
@@ -644,7 +644,7 @@
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pairs</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pairs</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pairs</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
@@ -653,8 +653,8 @@
 <div class="viewcode-block" id="MinDistNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.pairs.html#hippynn.graphs.nodes.pairs.MinDistNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MinDistNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">&quot;rij_list&quot;</span><span class="p">,</span> <span class="s2">&quot;j_list&quot;</span><span class="p">,</span> <span class="s2">&quot;system_index&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_index&quot;</span><span class="p">,</span> <span class="s2">&quot;inv_real_atoms&quot;</span><span class="p">,</span> <span class="s2">&quot;n_atoms_max&quot;</span><span class="p">,</span> <span class="s2">&quot;n_systems&quot;</span>
-    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">&quot;min_dist_mol&quot;</span><span class="p">,</span> <span class="s2">&quot;mol_locs&quot;</span><span class="p">,</span> <span class="s2">&quot;min_dist_atom&quot;</span><span class="p">,</span> <span class="s2">&quot;atom_pairlocs&quot;</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"rij_list"</span><span class="p">,</span> <span class="s2">"j_list"</span><span class="p">,</span> <span class="s2">"system_index"</span><span class="p">,</span> <span class="s2">"atom_index"</span><span class="p">,</span> <span class="s2">"inv_real_atoms"</span><span class="p">,</span> <span class="s2">"n_atoms_max"</span><span class="p">,</span> <span class="s2">"n_systems"</span>
+    <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"min_dist_mol"</span><span class="p">,</span> <span class="s2">"mol_locs"</span><span class="p">,</span> <span class="s2">"min_dist_atom"</span><span class="p">,</span> <span class="s2">"atom_pairlocs"</span>
     <span class="n">output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">pairs_modules</span><span class="o">.</span><span class="n">MinDistModule</span>
 
@@ -666,7 +666,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">neigh_list</span> <span class="o">=</span> <span class="n">pair_finder</span><span class="o">.</span><span class="n">find_unique_relative</span><span class="p">(</span><span class="n">PaddedNeighborNode</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">NodeNotFound</span><span class="p">:</span>
-            <span class="n">neigh_list</span> <span class="o">=</span> <span class="n">PaddedNeighborNode</span><span class="p">(</span><span class="s2">&quot;NeighList&quot;</span><span class="p">,</span> <span class="n">pair_finder</span><span class="p">)</span>
+            <span class="n">neigh_list</span> <span class="o">=</span> <span class="n">PaddedNeighborNode</span><span class="p">(</span><span class="s2">"NeighList"</span><span class="p">,</span> <span class="n">pair_finder</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="n">neigh_list</span><span class="p">,)</span></div>
 
@@ -698,7 +698,7 @@
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">get_main_outputs</span><span class="p">()</span>
     <span class="n">parent_expander</span><span class="o">.</span><span class="n">require_idx_states</span><span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Atoms</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
@@ -718,28 +718,28 @@
         <span class="c1"># During graph construction, every node is connected to its current set of parents. </span>
         <span class="c1"># It is possible that pair_indexer.children can contain itself; an un-initialized PairFilter. </span>
         <span class="c1"># Only initialized PairIndexers are extracted here. </span>
-        <span class="n">parents</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pair_indexer</span><span class="o">.</span><span class="n">children</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s2">&quot;index_state&quot;</span><span class="p">)]</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">pair_indexer</span><span class="o">.</span><span class="n">children</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s2">"index_state"</span><span class="p">)]</span>
 
         <span class="c1"># Validate that nothing unexpected has happened.</span>
-        <span class="c1"># Hopefully this can&#39;t fail, but if we update the pair API or someone customizes this aspect of the</span>
+        <span class="c1"># Hopefully this can't fail, but if we update the pair API or someone customizes this aspect of the</span>
         <span class="c1"># library, this should catch any problems.</span>
         <span class="n">idx_states</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">index_state</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">parents</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx_states</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Input contains mixed index states: </span><span class="si">{</span><span class="n">idx_states</span><span class="si">}</span><span class="s2">. Input states should only consist of index type pair.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Input contains mixed index states: </span><span class="si">{</span><span class="n">idx_states</span><span class="si">}</span><span class="s2">. Input states should only consist of index type pair."</span><span class="p">)</span>
         <span class="n">idx_state</span> <span class="o">=</span> <span class="n">idx_states</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">idx_state</span> <span class="o">!=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Pairs</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Index state for inputs was </span><span class="si">{</span><span class="n">idx_state</span><span class="si">}</span><span class="s2">, needs to be index type pair.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Index state for inputs was </span><span class="si">{</span><span class="n">idx_state</span><span class="si">}</span><span class="s2">, needs to be index type pair."</span><span class="p">)</span>
         <span class="c1"># Validation complete.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;out_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">pair_indexer</span><span class="o">.</span><span class="n">output_names</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">input_names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;in_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">pair_indexer</span><span class="o">.</span><span class="n">output_names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="sa">f</span><span class="s2">"out_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">pair_indexer</span><span class="o">.</span><span class="n">output_names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="sa">f</span><span class="s2">"in_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">pair_indexer</span><span class="o">.</span><span class="n">output_names</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_index_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pairs</span><span class="p">,)</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">parents</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;hard_dist_cutoff&quot;</span><span class="p">:</span> <span class="n">dist_hard_max</span><span class="p">}</span>  <span class="c1"># passes to PairIndexer superclass</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"hard_dist_cutoff"</span><span class="p">:</span> <span class="n">dist_hard_max</span><span class="p">}</span>  <span class="c1"># passes to PairIndexer superclass</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dist_hard_max</span> <span class="o">=</span> <span class="n">dist_hard_max</span>
         <span class="n">parents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expand_parents</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>

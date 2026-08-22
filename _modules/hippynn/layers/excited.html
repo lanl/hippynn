@@ -116,9 +116,9 @@
 <div class="viewcode-block" id="NACR">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.excited.html#hippynn.layers.excited.NACR">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NACR</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute NAC vector * ΔE. Originally in hippynn.layers.physics.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -145,9 +145,9 @@
 <div class="viewcode-block" id="NACRMultiState">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.excited.html#hippynn.layers.excited.NACRMultiState">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NACRMultiState</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute NAC vector * ΔE for all paris of states. Originally in hippynn.layers.physics.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_target</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_target</span> <span class="o">=</span> <span class="n">n_target</span>
@@ -206,19 +206,19 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">bias</span><span class="p">)</span> <span class="k">for</span> <span class="n">nf</span><span class="p">,</span> <span class="n">bias</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">feature_sizes</span><span class="p">,</span> <span class="n">biases</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">players</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">nf</span> <span class="ow">in</span> <span class="n">feature_sizes</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ninf</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ninf</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"-inf"</span><span class="p">)</span>
 
 <div class="viewcode-block" id="LocalEnergy.forward">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.excited.html#hippynn.layers.excited.LocalEnergy.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_features</span><span class="p">,</span> <span class="n">system_index</span><span class="p">,</span> <span class="n">atom_index</span><span class="p">,</span> <span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        :param all_features: list of feature tensors</span>
 <span class="sd">        :param system_index: which molecule is the atom</span>
 <span class="sd">        :param atom_index: which atom in the molecule is that atom</span>
 <span class="sd">        :param n_molecules: total number of molecules in the batch</span>
 <span class="sd">        :param n_atoms_max: maximum number of atoms in the batch</span>
 <span class="sd">        :return: contributed_energy, atom_energy, atom_preenergy, prob, propensity</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_is_interacting</span><span class="p">:</span>
             <span class="n">all_features</span> <span class="o">=</span> <span class="n">all_features</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
@@ -231,7 +231,7 @@
         <span class="c1"># This segment does not need gradients, we are constructing the subtraction parameters for softmax</span>
         <span class="c1"># which results in a calculation that does not under or overflow; the result is most accurate this way</span>
         <span class="c1"># But actually invariant to the subtraction used, so it does not require a grad.</span>
-        <span class="c1"># It&#39;s a standard SoftMax technique, however, the implementation is not built into pytorch for</span>
+        <span class="c1"># It's a standard SoftMax technique, however, the implementation is not built into pytorch for</span>
         <span class="c1"># the molecule/atom framework.</span>
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
             <span class="n">propensity_sysatom</span> <span class="o">=</span> <span class="n">all_features</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">new_full</span><span class="p">((</span><span class="n">n_molecules</span><span class="p">,</span> <span class="n">n_atoms_max</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">ninf</span><span class="p">)</span>

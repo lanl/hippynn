@@ -108,9 +108,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.layers.targets</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Layers for target prediction such as Energy and Charge</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">indexers</span>
@@ -120,17 +120,17 @@
 <div class="viewcode-block" id="HEnergy">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.HEnergy">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HEnergy</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Predict a system-level scalar such as energy from a sum over local components.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_sizes</span><span class="p">,</span> <span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_target</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param feature_sizes: size of features at each level</span>
 <span class="sd">        :param first_is_interacting: whether to drop the first set of (non-interacting) features.</span>
 <span class="sd">        :param n_target: number of items to regress to.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">first_is_interacting</span> <span class="o">=</span> <span class="n">first_is_interacting</span>
@@ -150,14 +150,14 @@
 <div class="viewcode-block" id="HEnergy.forward">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.HEnergy.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_features</span><span class="p">,</span> <span class="n">system_index</span><span class="p">,</span> <span class="n">n_systems</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Pytorch Enforced Forward function</span>
 
 <span class="sd">        :param: all_features a list of feature tensors:</span>
 <span class="sd">        :param: system_index the molecular index for atoms in the batch</span>
 <span class="sd">        :param: total number of molecules in the batch</span>
 <span class="sd">        :return: Total Energy</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_is_interacting</span><span class="p">:</span>
             <span class="n">all_features</span> <span class="o">=</span> <span class="n">all_features</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
 
@@ -197,9 +197,9 @@
 <div class="viewcode-block" id="HCharge">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.HCharge">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">HCharge</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Predict an atom-level scalar such as charge from local features.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_sizes</span><span class="p">,</span> <span class="n">first_is_interacting</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_target</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -215,10 +215,10 @@
 <div class="viewcode-block" id="HCharge.forward">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.HCharge.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_features</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        :param all_features a list of feature tensors:</span>
 <span class="sd">        :return: charges, predicted charges summed at each layer, and charge hierarchcality</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">partial_charges</span> <span class="o">=</span> <span class="p">[</span><span class="n">lay</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">lay</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)]</span>
         <span class="n">partial_sums</span> <span class="o">=</span> <span class="p">[</span><span class="n">partial_charges</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
         <span class="n">z</span> <span class="o">=</span> <span class="n">partial_charges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -295,10 +295,10 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">symmetric</span> <span class="ow">and</span> <span class="n">antisymmetric</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Bond-like prediction cannot be both symmetric and antisymmetric!&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bond-like prediction cannot be both symmetric and antisymmetric!"</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">antisymmetric</span> <span class="ow">and</span> <span class="n">positive</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Bond-like prediction cannot be antisymmetric and positive!&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Bond-like prediction cannot be antisymmetric and positive!"</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">sensitivity</span> <span class="o">=</span> <span class="n">sensitivity_type</span><span class="p">(</span><span class="n">n_dist</span><span class="p">,</span> <span class="n">dist_soft_min</span><span class="p">,</span> <span class="n">dist_soft_max</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_sizes</span> <span class="o">=</span> <span class="n">feature_sizes</span>
@@ -354,7 +354,7 @@
         <span class="c1"># NOTE: This code is faster now that pytorch as opt_einsum features built in.</span>
         <span class="c1"># Einsum implementation of combined partial_bond_dists and partial_bond operations..</span>
         <span class="n">partial_bonds</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">torch</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;bf,bg,bs,stfg-&gt;bt&quot;</span><span class="p">,</span><span class="n">f</span><span class="p">[</span><span class="n">pair_first</span><span class="p">],</span><span class="n">f</span><span class="p">[</span><span class="n">pair_second</span><span class="p">],</span><span class="n">sense_vals</span><span class="p">,</span><span class="n">w</span><span class="p">)</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"bf,bg,bs,stfg-&gt;bt"</span><span class="p">,</span><span class="n">f</span><span class="p">[</span><span class="n">pair_first</span><span class="p">],</span><span class="n">f</span><span class="p">[</span><span class="n">pair_second</span><span class="p">],</span><span class="n">sense_vals</span><span class="p">,</span><span class="n">w</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">f</span><span class="p">,</span><span class="n">w</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_features</span><span class="p">,</span><span class="n">weights</span><span class="p">)</span>
         <span class="p">]</span>
         
@@ -407,7 +407,7 @@
 <a class="viewcode-back" href="../../../api_documentation/hippynn.layers.targets.html#hippynn.layers.targets.AtomizationEnergy.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_features</span><span class="p">,</span> <span class="n">vacuum_features</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="n">system_index</span><span class="p">,</span> <span class="n">n_systems</span><span class="p">):</span>
 
-        <span class="c1"># Don&#39;t need the non-interacting features,</span>
+        <span class="c1"># Don't need the non-interacting features,</span>
         <span class="c1"># they contribute zero total for this layer, by definition the any component would cancel.</span>
         <span class="c1"># this is why we hardcode first_is_interacting in the `__init__` method.</span>
         <span class="n">vacuum_features</span> <span class="o">=</span> <span class="n">vacuum_features</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>

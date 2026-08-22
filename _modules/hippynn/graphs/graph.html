@@ -108,9 +108,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for hippynn.graphs.graph</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""</span>
 <span class="sd">Core GraphModule that implements node computations</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedDict</span>
 
@@ -123,7 +123,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
 
 
-<span class="c1"># possible TODO: Enable &quot;virtual input nodes&quot; where we accept the value for any given node</span>
+<span class="c1"># possible TODO: Enable "virtual input nodes" where we accept the value for any given node</span>
 <span class="c1"># Requires copying subgraph, eliminating the parents which belong only to the</span>
 <span class="c1"># Virtual input nodes, and then creating an input node for each virtual input node</span>
 <span class="c1"># Idea: allow someone to evaluate parts of the graph when other parts are known</span>
@@ -135,20 +135,20 @@
 <a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.GraphModule">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GraphModule</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">required_inputs</span><span class="p">,</span> <span class="n">nodes_to_compute</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        takes a graph, makes a pytorch neural network</span>
 
 <span class="sd">        :param required_inputs: inputs</span>
 <span class="sd">        :param nodes_to_compute: outouts</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="n">nodes_to_compute</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nodes_to_compute</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes_to_compute</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Length of `nodes_to_compute` was zero. A graph module &quot;</span>
-                             <span class="s2">&quot;must receive a list of outputs with length greater than zero.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Length of `nodes_to_compute` was zero. A graph module "</span>
+                             <span class="s2">"must receive a list of outputs with length greater than zero."</span><span class="p">)</span>
 
         <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">InputNode</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">required_inputs</span><span class="p">)</span>
 
@@ -160,14 +160,14 @@
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">all_node_list</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">InputNode</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Nodes to compute requires an unspecified input:&quot;</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Nodes to compute requires an unspecified input:"</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_node_list</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Node</span><span class="p">):</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Computational objects must be callable.&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Computational objects must be callable."</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Warning: object not base node:&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">"Warning: object not base node:"</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 
         <span class="k">del</span> <span class="n">x</span>
 
@@ -179,7 +179,7 @@
         <span class="c1"># self.node_mod_map does this as a regular python dictionary,</span>
         <span class="c1"># while registration with pytorch is given by numbering.</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">names_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="s2">&quot;node&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward_output_list</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">names_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="s2">"node"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward_output_list</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">moddict</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleDict</span><span class="p">(</span>
             <span class="n">OrderedDict</span><span class="p">(</span>
                 <span class="p">(</span>
@@ -199,28 +199,28 @@
 <div class="viewcode-block" id="GraphModule.print_structure">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.GraphModule.print_structure">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">print_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">suppress</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pretty-print the structure of the nodes and links comprising this graph.&quot;&quot;&quot;</span>
-        <span class="n">in_nodes</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="s2">&quot;I</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">)}</span>
-        <span class="n">out_nodes</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="s2">&quot;O</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">)}</span>
-        <span class="n">middle_nodes</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="s2">&quot;H</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward_output_list</span><span class="p">)}</span>
+<span class="w">        </span><span class="sd">"""Pretty-print the structure of the nodes and links comprising this graph."""</span>
+        <span class="n">in_nodes</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="s2">"I</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">)}</span>
+        <span class="n">out_nodes</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="s2">"O</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">)}</span>
+        <span class="n">middle_nodes</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="s2">"H</span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward_output_list</span><span class="p">)}</span>
         <span class="n">middle_nodes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">out_nodes</span><span class="p">)</span>
         <span class="n">node_map</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">in_nodes</span><span class="p">,</span> <span class="o">**</span><span class="n">middle_nodes</span><span class="p">}</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Inputs:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Inputs:"</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">in_nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Outputs:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="s2">":"</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Outputs:"</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">out_nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Order:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="s2">":"</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Order:"</span><span class="p">)</span>
         <span class="n">all_inputs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">n</span> <span class="k">for</span> <span class="n">this_list</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_inputs_list</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">this_list</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">computed</span><span class="p">,</span> <span class="n">inputs_for_computed</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward_output_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_inputs_list</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">computed</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_inputs</span> <span class="ow">and</span> <span class="n">computed</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">:</span>
                 <span class="c1"># most likely this is just the child of MultiNode which is still unpacked.</span>
                 <span class="k">continue</span>
 
-            <span class="n">pre</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">({</span><span class="n">node_map</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">inputs_for_computed</span><span class="p">})</span>
-            <span class="n">mid</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:3}</span><span class="s2"> : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node_map</span><span class="p">[</span><span class="n">computed</span><span class="p">],</span> <span class="n">computed</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:-&lt;20}</span><span class="s2">-&gt; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">mid</span><span class="p">))</span></div>
+            <span class="n">pre</span> <span class="o">=</span> <span class="s2">","</span><span class="o">.</span><span class="n">join</span><span class="p">({</span><span class="n">node_map</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">inputs_for_computed</span><span class="p">})</span>
+            <span class="n">mid</span> <span class="o">=</span> <span class="s2">"</span><span class="si">{:3}</span><span class="s2"> : </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node_map</span><span class="p">[</span><span class="n">computed</span><span class="p">],</span> <span class="n">computed</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="si">{:-&lt;20}</span><span class="s2">-&gt; </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">mid</span><span class="p">))</span></div>
 
 
         
@@ -229,9 +229,9 @@
 <div class="viewcode-block" id="GraphModule.nodes_from_name">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.GraphModule.nodes_from_name">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">nodes_from_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        returns list of all matching nodes</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward_output_list</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">db_name</span> <span class="o">==</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
@@ -244,16 +244,16 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">unique_node_from_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="n">matches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes_from_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">NodeNotFound</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in graph.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">NodeNotFound</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Name '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' not found in graph."</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">NodeAmbiguityError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Multiple nodes found with name or db_name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">NodeAmbiguityError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Multiple nodes found with name or db_name '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">'."</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="GraphModule.extra_repr">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.graph.html#hippynn.GraphModule.extra_repr">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">extra_repr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;Inputs: </span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2"> Outputs: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="k">return</span> <span class="s2">"Inputs: </span><span class="si">{}</span><span class="s2"> </span><span class="se">\n</span><span class="s2"> Outputs: </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">)</span>
         <span class="p">)</span></div>
 
@@ -274,9 +274,9 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="s2">&quot;node_from_name&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="s2">"node_from_name"</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">.._deprecations</span><span class="w"> </span><span class="kn">import</span> <span class="n">warn_name_change</span>
-            <span class="n">warn_name_change</span><span class="p">(</span><span class="s2">&quot;node_from_name&quot;</span><span class="p">,</span> <span class="s2">&quot;unique_node_from_name&quot;</span><span class="p">)</span>
+            <span class="n">warn_name_change</span><span class="p">(</span><span class="s2">"node_from_name"</span><span class="p">,</span> <span class="s2">"unique_node_from_name"</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_node_from_name</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
@@ -293,51 +293,51 @@
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ee</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">,</span> <span class="n">input_values</span><span class="p">):</span>
                 <span class="nb">print</span><span class="p">(</span>
-                    <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Node:&quot;</span><span class="p">,</span>
+                    <span class="s2">"</span><span class="se">\t</span><span class="s2">Node:"</span><span class="p">,</span>
                     <span class="n">n</span><span class="p">,</span>
                 <span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">Value:&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Something broke loading the values.&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ee</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\t\t</span><span class="s2">Value:"</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">"Something broke loading the values."</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ee</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;INPUTTED:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"INPUTTED:"</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">computed</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">k</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Should be inputted:&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">,</span> <span class="n">k</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"Should be inputted:"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_nodes</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">"</span><span class="se">\n\t</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">this_node</span><span class="p">,</span> <span class="n">inputs_for_this_node</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward_output_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward_inputs_list</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computing:&quot;</span><span class="p">,</span> <span class="n">this_node</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"Computing:"</span><span class="p">,</span> <span class="n">this_node</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">inputs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">computed</span><span class="p">[</span><span class="n">inkey</span><span class="p">]</span> <span class="k">for</span> <span class="n">inkey</span> <span class="ow">in</span> <span class="n">inputs_for_this_node</span><span class="p">)</span>
                 <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_module</span><span class="p">(</span><span class="n">this_node</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;module:&quot;</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Inputs for this node:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">inputs_for_this_node</span><span class="p">])</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;input devices:&quot;</span><span class="p">,</span> <span class="p">[(</span><span class="n">x</span><span class="o">.</span><span class="n">device</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">])</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">"module:"</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">"Inputs for this node:"</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">inputs_for_this_node</span><span class="p">])</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">"input devices:"</span><span class="p">,</span> <span class="p">[(</span><span class="n">x</span><span class="o">.</span><span class="n">device</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="k">else</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">])</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">module</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">)</span>
-                <span class="c1"># print(&quot;inputs:&quot;,inputs)</span>
-                <span class="c1"># print(&quot;Value:&quot;,value)</span>
+                <span class="c1"># print("inputs:",inputs)</span>
+                <span class="c1"># print("Value:",value)</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Output shape:&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">"Output shape:"</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Nan detected! </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Nan detected! </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Output non-tensor.&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">"Output non-tensor."</span><span class="p">)</span>
                 <span class="n">computed</span><span class="p">[</span><span class="n">this_node</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem!&quot;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Inputs for this node:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">inputs_for_this_node</span><span class="p">])</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">"Problem!"</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">"Inputs for this node:"</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">inputs_for_this_node</span><span class="p">])</span>
                 <span class="k">for</span> <span class="n">in_node</span> <span class="ow">in</span> <span class="n">inputs_for_this_node</span><span class="p">:</span>
                     <span class="n">in_comp</span> <span class="o">=</span> <span class="n">computed</span><span class="p">[</span><span class="n">in_node</span><span class="p">]</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">in_comp</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">in_node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">in_comp</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">in_comp</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">,</span> <span class="n">in_node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">in_comp</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">in_comp</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> non-tensor:&quot;</span><span class="p">,</span> <span class="n">in_comp</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2"> non-tensor:"</span><span class="p">,</span> <span class="n">in_comp</span><span class="p">)</span>
 
                 <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computing state:&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">"Computing state:"</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">({</span><span class="n">k</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">computed</span><span class="o">.</span><span class="n">keys</span><span class="p">()})</span>
                 <span class="c1"># for k,v in computed.items():</span>
-                <span class="c1">#    print(&quot;Name: {} Value: {}&quot;.format(k.name,v))</span>
+                <span class="c1">#    print("Name: {} Value: {}".format(k.name,v))</span>
                 <span class="k">raise</span> <span class="n">e</span>
 
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">computed</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes_to_compute</span><span class="p">)</span>
