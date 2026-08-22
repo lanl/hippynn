@@ -25,19 +25,19 @@ def test_serialize_autonode_graph(energy_graph):
     
 
 def test_serialize_simple_nodes():
-    from hippynn.experiment.serialization.node_serializer import serialize_nodes
+    from hippynn.experiment.serialization.node_serializer import serialize_node_list
     from hippynn.graphs.nodes.base import ValueNode
 
     value = ValueNode(1.0)
 
-    serial_data, tensor_data, identifier_map = serialize_nodes([value])
+    serial_data, tensor_data, identifier_map = serialize_node_list([value])
     assert len(serial_data.node_list) == 1
 
     left = ValueNode(1.0)
     right = ValueNode(2.0)
     combined = left + right
 
-    serial_data, tensor_data, identifier_map = serialize_nodes([left, right, combined])
+    serial_data, tensor_data, identifier_map = serialize_node_list([left, right, combined])
     assert len(serial_data.node_list) == 3
 
 
@@ -51,9 +51,9 @@ def written_energy_graph(energy_graph):
 def test_serialize_roundtrip(written_energy_graph, energy_graph, example_box):
     record, tensor_data = written_energy_graph
 
-    from hippynn.experiment.serialization.node_serializer import deserialize_nodes
+    from hippynn.experiment.serialization.node_serializer import deserialize
 
-    rebuilt_graph = deserialize_nodes(record, tensor_data)
+    rebuilt_graph = deserialize(record, tensor_data)
 
     args = (example_box["species"], example_box["coordinates"], example_box["cell"])
 

@@ -3,6 +3,21 @@
 Functions for training.
 
 """
+import warnings
+
+from .. import settings
+
+if settings.DEBUG_EXPERIMENT:
+    warnings.warn("Printing debug info for experiment subpackage! Output will be verbose.")
+
+
+def _debprint(*args, **kwargs):
+    if settings.DEBUG_EXPERIMENT:
+        print("Experiment:", *args, **kwargs)
+    else:
+        pass
+
+
 from . import controllers
 from . import evaluator
 from . import metric_tracker

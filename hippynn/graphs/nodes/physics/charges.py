@@ -16,7 +16,7 @@ from ..inputs import PositionsNode
 from ..tags import Charges
 
 
-class ChargeMomentNode(ExpandParents, AutoModule, SingleNode):
+class ChargeMomentNode(ExpandParents, SingleNode):
     input_names = "charges", "positions", "system_index", "n_systems"
 
     @parent_expander.matchlen(1)
@@ -41,7 +41,7 @@ class ChargeMomentNode(ExpandParents, AutoModule, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class DipoleNode(ChargeMomentNode):
+class DipoleNode(AutoModule, ChargeMomentNode):
     """
     Compute the dipole of point charges.
     """
@@ -50,7 +50,7 @@ class DipoleNode(ChargeMomentNode):
     index_state = IdxType.Systems
 
 
-class QuadrupoleNode(ChargeMomentNode):
+class QuadrupoleNode(AutoModule, ChargeMomentNode):
     """
     Compute the traceless quadrupole of point charges.
     """
