@@ -24,11 +24,7 @@ def test_serialize_autonode_graph(energy_graph):
     assert isinstance(tensor_data, dict)
     
 
-@pytest.mark.xfail(raises=KeyError, reason="ValueNode is not yet registered for serialization.")
 def test_serialize_simple_nodes():
-    """
-    ValueNode should be serializable once it is converted onto AutoModule.
-    """
     from hippynn.experiment.serialization.node_serializer import serialize_nodes
     from hippynn.graphs.nodes.base import ValueNode
 
@@ -52,7 +48,6 @@ def written_energy_graph(energy_graph):
     return serialize(energy_graph)
 
 
-@pytest.mark.xfail(raises=ImportError, reason="deserialize_nodes is not implemented yet; see route-to-completion plan.")
 def test_serialize_roundtrip(written_energy_graph, energy_graph, example_box):
     record, tensor_data = written_energy_graph
 

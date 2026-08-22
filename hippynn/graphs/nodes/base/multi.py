@@ -20,12 +20,9 @@ class IndexNode(AutoModule, SingleNode):
         par = parents[0]
         iname = par.output_names[index] if hasattr(par, "output_names") else "<{index}>".format(index=index)
         repr_info = {"parent_name": par.name, "index": iname}
-        #module = Idx(index, repr_info=repr_info)
-        #self.index = index
         self.index_state = IdxType.Unlabeled if index_state is None else index_state
         super().__init__(name, parents, repr_info=repr_info, index=index,  module="auto")
-        #super().__init__(name, parents, module=module)
-            
+
 
 class MultiNode(Node,_DeprecatedNamesMixin):  # Multinode
     output_names = NotImplemented

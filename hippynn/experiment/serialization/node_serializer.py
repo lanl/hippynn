@@ -40,17 +40,14 @@ def get_nodetype(node_cls):
     if qualname[:3] == "hippynn.graphs.nodes".split('.'):
         namespace = qualname[3]
         package = ".".join(qualname[:3])
-        name = qualname[-1]
     elif qualname[:2] == "hippynn.interfaces".split('.'):
         namespace = qualname[2]
         package = ".".join(qualname[:2])
-        name = qualname[-1]
     else:
         package = qualname[0]
         namespace = ".".join(qualname[1:-1])
-        name = qualname[-1]
 
-    namespace = tuple(namespace)
+    name = node_cls.__qualname__
 
     return NodeTypeIdentifier(name=name, namespace=namespace, package=package)
 
@@ -81,10 +78,11 @@ class TensorReference(NamedTuple):
     key: int
     kind: Literal["tensor_ref"] = "tensor_ref"
 
-class TaggedSet(Generic[T]):
-    kind: Literal["set"] = "set"
+class TaggedSet(NamedTuple, Generic[T]):
     values: list[T]
-    
+    kind: Literal["set"] = "set"
+
+
 type ScalarPrimitive = None | bool | int | float | str
 type Scalar = ScalarPrimitive | TensorReference
 type ContainerPrimitive[T] = list[T] | tuple[T, ...] | dict[str, T] | TaggedSet[T]
@@ -140,10 +138,9 @@ def deserialize_record(
         pass
     
     if record.state_dict:
-    
-    pass
+        pass
 
-    
+
 
 from typing import Iterable
 
