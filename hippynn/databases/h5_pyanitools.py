@@ -28,11 +28,12 @@ class PyAniMethods:
     _IGNORE_KEYS = ("path", "Jnames")
 
     # Note: assumes that all data files have 'coordinates'.
-    def extract_full_file(self, file, species_key="species", permit_only=None):
+    def extract_full_file(self, file, species_key=None, permit_only=None):
         """
-        
+
         :param file: filename to open
-        :param species_key: name for species variable (needs special treatment)
+        :param species_key: name for species variable (needs special treatment). If None, auto-detected
+            from the keys of the first data group via :func:`~hippynn.databases.utils.auto_detect_key`.
         :param permit_only: if truthy, give a list of valid keys; skip others.
         :return: batches, n_atoms_max, sys_count
         :rtype: tuple[list, int, int]
@@ -45,6 +46,12 @@ class PyAniMethods:
 
         for c in progress_bar(x, desc="Data Groups", unit="group", total=x.group_size()):
             batch_dict = {}
+            if species_key is None:
+                from .utils import auto_detect_key  # local import: utils.py imports this module at top level
+
+                candidate_keys = [k for k in c.keys() if k not in self._IGNORE_KEYS]
+                species_key = auto_detect_key(candidate_keys, 'species', required=True)
+                self.species_key = species_key
             if species_key not in c:
                 raise ValueError(f"Species key '{species_key}' not found' in file {file}!\n" f"\tFound keys: {set(c.keys())}")
             for k, v in c.items():
@@ -193,7 +200,7 @@ class PyAniMethods:
 
 
 class PyAniFileDB(Database, PyAniMethods, Restartable):
-    def __init__(self, file, inputs, targets, *args, allow_unfound=False, species_key="species", quiet=False, driver="core", **kwargs):
+    def __init__(self, file, inputs, targets, *args, allow_unfound=False, species_key=None, quiet=False, driver="core", **kwargs):
         """
 
         :param file:
@@ -201,7 +208,7 @@ class PyAniFileDB(Database, PyAniMethods, Restartable):
         :param targets:
         :param args:
         :param allow_unfound:
-        :param species_key:
+        :param species_key: name for species variable. If None, auto-detected from the keys present in the file.
         :param quiet:
         :param driver: h5 file driver.
         :param kwargs:
@@ -225,7 +232,7 @@ class PyAniFileDB(Database, PyAniMethods, Restartable):
             driver=driver,
             quiet=quiet,
             allow_unfound=allow_unfound,
-            species_key=species_key,
+            species_key=self.species_key,
         )
 
     def load_arrays(self, allow_unfound=False, quiet=False):
@@ -251,7 +258,7 @@ class PyAniDirectoryDB(Database, PyAniMethods, Restartable):
         *args,
         files=None,
         allow_unfound=False,
-        species_key="species",
+        species_key=None,
         quiet=False,
         driver="core",
         **kwargs,
@@ -267,7 +274,9 @@ class PyAniDirectoryDB(Database, PyAniMethods, Restartable):
         arr_dict = self.load_arrays(allow_unfound=allow_unfound, quiet=quiet)
 
         super().__init__(arr_dict, inputs, targets, *args, **kwargs, quiet=quiet, allow_unfound=allow_unfound)
-        self.restarter = self.make_restarter(directory, inputs, targets, *args, files=files, quiet=quiet, species_key=species_key, **kwargs)
+        self.restarter = self.make_restarter(
+            directory, inputs, targets, *args, files=files, quiet=quiet, species_key=self.species_key, **kwargs
+        )
 
     def load_arrays(self, allow_unfound=False, quiet=False):
 

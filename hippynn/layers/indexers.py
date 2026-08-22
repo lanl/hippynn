@@ -24,7 +24,7 @@ class OneHotSpecies(torch.nn.Module):
 
         max_z = torch.max(self.species_set)
         zmap = torch.zeros((max_z + 1,), dtype=torch.long)
-        zmap[self.species_set] = torch.arange(0, self.n_species, dtype=torch.long)
+        zmap[self.species_set.long()] = torch.arange(0, self.n_species, dtype=torch.long)
 
         self.species_map = torch.nn.Parameter(torch.as_tensor(zmap, dtype=torch.long), requires_grad=False)
 

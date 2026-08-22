@@ -4,7 +4,7 @@ from .hipnn import Hipnn
 from ..layers.hiplayers import HOPInteractionLayer, TensorExtractor
 
 
-class HipHopNNModule(Hipnn):
+class HipHopnnModule(Hipnn):
     _interaction_class = HOPInteractionLayer
     _interaction_kwargs = ("l_max", "n_max", "group_norm", "group_norm_eps")
 
@@ -49,3 +49,15 @@ class HipHopNNModule(Hipnn):
             output_features.append(features)
 
         return output_features
+
+def __getattr__(name: str):
+    import warnings
+    if name == "HipHopNNModule":
+        # Backwards compatibility for unpickling prior models
+        warnings.warn(
+            "'HipHopNNModule' is a deprecated class name, please use 'HipHopnnModule'.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return HipHopnnModule
+    raise AttributeError(f"module {__name__!r} has no attribute {name}")

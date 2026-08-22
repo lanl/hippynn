@@ -5,7 +5,7 @@ from hippynn.graphs import networks, targets, physics
 
 
 @pytest.mark.parametrize(
-    "net_class,",
+    "net_class",
     [
         networks.Hipnn,
         networks.HipnnVec,
@@ -39,7 +39,6 @@ def test_build_atom_target(target_cls, neural_network_node):
 
 
 def test_build_bonds(neural_network_node, bond_parameters):
-
     bonds = targets.HBondNode("bonds", neural_network_node, module_kwargs=bond_parameters)
     return
 

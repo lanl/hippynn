@@ -3,6 +3,8 @@ Things to do before training, i.e. initialization of network and diagnostics.
 """
 
 import warnings
+from typing import Optional, Union
+
 import numpy as np
 import torch
 
@@ -124,10 +126,10 @@ def _setup_min_dist_graph(
 
 def calculate_min_dists(
     array_dict: dict,
-    species_name: str,
-    positions_name: str,
     dist_hard_max: float,
-    cell_name: str = None,
+    species_name: Optional[str] = None,
+    positions_name: Optional[str] = None,
+    cell_name: Optional[Union[bool, str]] = None,
     device: torch.device = None,
     pair_finder_class: Node = "auto",
     batch_size: int = 50,
@@ -138,17 +140,17 @@ def calculate_min_dists(
     Example usage for unsplit data::
 
     >>> db = Database(...)
-    >>> min_dists = calculate_min_dists(db.arr_dict,"Z","R",5.0)
+    >>> min_dists = calculate_min_dists(db.arr_dict, 5.0, species_name="Z", positions_name="R")
 
     If the database has been split::
 
-    >>> min_dists_train = calculate_min_dists(db.splits['train'],"Z","R",5.0)
+    >>> min_dists_train = calculate_min_dists(db.splits['train'], 5.0, species_name="Z", positions_name="R")
 
     Example usage to prune out low-distance data::
 
     >>> db = Database(...)
     >>> dist_threshold = ...
-    >>> min_dist = calculate_min_dists(db.arr_dict,"Z","R",5.0)
+    >>> min_dist = calculate_min_dists(db.arr_dict, 5.0, species_name="Z", positions_name="R")
     >>> low_distance_system = min_dist < dist_threshold
     >>> db.arr_dict = {k:v[~low_distance_system] for k,v in db.arr_dict.items()}
 
@@ -159,16 +161,26 @@ def calculate_min_dists(
        If an entire system has no neighbors, the minimum distance will be set to zero.
 
     :param array_dict: dictionary mapping strings to tensors/numpy arrays
-    :param species_name: dictionary key for species
-    :param positions_name: dictionary key for positions
     :param dist_hard_max: maximum distance to search
-    :param cell_name: dictionary key for cell (periodic boundary conditions.
-     if the cell is not specified, open boundaries are used.
+    :param species_name: dictionary key for species. If None, auto-detected from ``array_dict``.
+    :param positions_name: dictionary key for positions. If None, auto-detected from ``array_dict``.
+    :param cell_name: dictionary key for cell (periodic boundary conditions), or a boolean controlling
+     auto-detection. A string is used directly as the key. ``True`` requires a cell key to be
+     auto-detected from ``array_dict``. ``False`` skips cell matching entirely with open boundaries.
+     ``None`` (default) also uses open boundaries, but warns if a candidate cell key is found
+     in ``array_dict`` anyway, since this may indicate a missed argument.
     :param pair_finder_class: if 'auto', choose automatically. elsewise build this kind of pair finder.
     :param device: Where to perform the computation.
     :param batch_size: batch size to perform evaluation over.
     :return:
     """
+    from .databases.utils import auto_detect_key
+
+    if species_name is None:
+        species_name = auto_detect_key(array_dict.keys(), 'species', required=True)
+    if positions_name is None:
+        positions_name = auto_detect_key(array_dict.keys(), 'coordinates', required=True)
+
     # Check for required info before proceeding to more expensive stuff.
     if species_name not in array_dict:
         raise KeyError(f"Species key {species_name} not in dictionary.")
@@ -176,14 +188,27 @@ def calculate_min_dists(
     if positions_name not in array_dict:
         raise KeyError(f"Positions key {positions_name} not in dictionary.")
 
-    if cell_name is not None:
+    if isinstance(cell_name, str):
         if cell_name not in array_dict:
             raise KeyError(f"Cell key {cell_name} not in dictionary.")
+    elif cell_name:
+        cell_name = auto_detect_key(array_dict.keys(), 'cell', required=True)
+    elif cell_name is None:
+        detected_cell = auto_detect_key(array_dict.keys(), 'cell', required=False)
+        if detected_cell is not None:
+            warnings.warn(
+                f"cell_name was not specified, but a candidate cell key {detected_cell!r} was found in "
+                f"array_dict. Open boundaries will be used. Pass cell_name={detected_cell!r} explicitly "
+                f"if periodic boundary conditions were intended.",
+                stacklevel=2,
+            )
+    else:
+        cell_name = None
 
     species_set = list(np.unique(array_dict[species_name]))
 
     if 0 not in species_set:
-        species_set = np.concatenate([[0], species_set], axis=0)
+        species_set = [0] + species_set
 
     if not len(species_set) or set(species_set) == {0}:
         raise ValueError("Species set empty!")
@@ -271,7 +296,7 @@ def calculate_max_system_force(
 
     species_set = list(np.unique(array_dict[species_name]))
     if 0 not in species_set:
-        species_set = np.concatenate([[0], species_set], axis=0)
+        species_set = [0] + species_set
 
     if not len(species_set) or set(species_set) == {0}:
         raise ValueError("Species set empty!")
