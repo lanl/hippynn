@@ -1,3 +1,5 @@
+import dataclasses
+
 import pytest
 
 import hippynn
@@ -7,12 +9,111 @@ from conftest import ignore_cusp_warning, ignore_relocation, ignore_weights_only
 import torch
 
 
+@pytest.fixture
+def processor_pair():
+    """A fresh writer/reader Processor pair, mirroring separate serialize/deserialize sessions."""
+    from hippynn.experiment.serialization.node_serializer.processor import Processor
+
+    return Processor(), Processor()
+
+
+def test_processor_plain_data_roundtrip(processor_pair):
+    writer, reader = processor_pair
+
+    data = {"a": 1, "b": [1, 2.5, "three", None, (4, 5)], "c": {"nested": True}}
+
+    structure, tensor_blob = writer.unstructure(data)
+    assert tensor_blob == {}
+
+    restored = reader.structure(structure, object, tensor_blob=tensor_blob)
+    assert restored == data
+
+
+def test_processor_single_tensor_roundtrip(processor_pair):
+    writer, reader = processor_pair
+
+    data = {"weight": torch.arange(6).reshape(2, 3)}
+
+    structure, tensor_blob = writer.unstructure(data)
+    assert len(tensor_blob) == 1
+
+    restored = reader.structure(structure, object, tensor_blob=tensor_blob)
+    assert torch.equal(restored["weight"], data["weight"])
+
+
+def test_processor_shared_tensor_identity_roundtrip(processor_pair):
+    writer, reader = processor_pair
+
+    shared = torch.ones(3)
+    data = {"a": shared, "b": shared}
+
+    structure, tensor_blob = writer.unstructure(data)
+    assert len(tensor_blob) == 1, "the same tensor object referenced twice must be stored once"
+
+    restored = reader.structure(structure, object, tensor_blob=tensor_blob)
+    assert restored["a"] is restored["b"], "shared tensor identity must survive the round-trip"
+
+
+def test_processor_set_roundtrip(processor_pair):
+    writer, reader = processor_pair
+
+    data = {"values": {1, 2, 3}}
+
+    structure, tensor_blob = writer.unstructure(data)
+    restored = reader.structure(structure, object, tensor_blob=tensor_blob)
+
+    assert restored["values"] == data["values"]
+
+
+def test_processor_embedded_object_reference_roundtrip(processor_pair):
+
+    from hippynn.experiment.serialization.node_serializer.processor import Processor
+
+    writer, reader = processor_pair
+
+    @dataclasses.dataclass
+    class Leaf:
+        payload: str
+
+    @dataclasses.dataclass
+    class Root:
+        leaves: list
+
+    @Processor.register_unstructure(Leaf)
+    def _unstructure_leaf(obj, *, ctx):
+        blob = getattr(ctx, "_leaf_blob", None)
+        if blob is None:
+            blob, ids = {}, {}
+            ctx._leaf_blob, ctx._leaf_ids = blob, ids
+        key = ctx._leaf_ids.get(id(obj))
+        if key is None:
+            key = len(blob)
+            ctx._leaf_ids[id(obj)] = key
+            blob[key] = obj.payload
+        return {"kind": "leaf_ref", "key": key}
+
+    @Processor.register_structure(Leaf)
+    def _structure_leaf(data, typ, *, ctx):
+        cache = getattr(ctx, "_leaf_objects", None)
+        if cache is None:
+            cache = {}
+            ctx._leaf_objects = cache
+        key = data["key"]
+        if key not in cache:
+            cache[key] = typ(ctx._leaf_blob[key])
+        return cache[key]
+
+    shared_leaf = Leaf(payload="shared")
+    root = Root(leaves=[shared_leaf, shared_leaf])
+
+    structure, tensor_blob = writer.unstructure(root)
+    restored = reader.structure(structure, Root, tensor_blob=tensor_blob)
+
+    assert restored.leaves[0] is restored.leaves[1], "repeated references to one Leaf must resolve to one object"
+    assert restored.leaves[0].payload == "shared"
+
 
 def test_serialize_autonode_graph(energy_graph):
-    """
-    Serializing a graph built entirely from AutoModule-based nodes (and InputNodes)
-    already works today; this pins down the expected shape of the returned record.
-    """
     from hippynn.experiment.serialization.node_serializer import serialize, NodeInfo, SerializedGraphModule
 
     record, tensor_data = serialize(energy_graph)
@@ -39,6 +140,50 @@ def test_serialize_simple_nodes():
 
     serial_data, tensor_data, identifier_map = serialize_node_list([left, right, combined])
     assert len(serial_data.node_list) == 3
+
+
+def test_serialize_atleast2d_and_arithmetic_leaf_coverage():
+    from hippynn.experiment.serialization.node_serializer import serialize_node_list
+    from hippynn.graphs.nodes.base import ValueNode
+    from hippynn.graphs.nodes.base.base import AtLeast2D
+
+    left = ValueNode(1.0)
+    right = ValueNode(2.0)
+    combined = left + right
+    wrapped = AtLeast2D((combined,))
+
+    serial_data, tensor_data, identifier_map = serialize_node_list([left, right, combined, wrapped])
+    assert len(serial_data.node_list) == 4
+
+
+def test_serialize_shared_tensor_across_nodes_dedup():
+    from hippynn.experiment.serialization.node_serializer import serialize_node_list
+    from hippynn.graphs.nodes.base import ValueNode
+
+    shared = torch.ones(3)
+    left = ValueNode(shared)
+    right = ValueNode(shared)
+
+    serial_data, tensor_data, identifier_map = serialize_node_list([left, right])
+
+    assert len(tensor_data) == 1, "the same tensor object referenced by two nodes must be stored once"
+
+
+def test_serialize_origin_node_roundtrip(energy_node, energy_graph, example_box):
+    from hippynn.graphs.nodes.loss import MAELoss
+    from hippynn.experiment.serialization.node_serializer import serialize, deserialize
+    from hippynn.graphs.nodes.base import get_connected_nodes, LossPredNode, LossTrueNode
+
+    loss_node = MAELoss.of_node(energy_node)
+
+    record, tensor_data = serialize(loss_node)
+    rebuilt_loss = deserialize(record, tensor_data)
+
+    rebuilt_nodes = get_connected_nodes([rebuilt_loss], descendants=False, ancestors=True)
+    rebuilt_pred = next(n for n in rebuilt_nodes if isinstance(n, LossPredNode))
+    rebuilt_true = next(n for n in rebuilt_nodes if isinstance(n, LossTrueNode))
+
+    assert rebuilt_pred.origin_node is rebuilt_true.origin_node
 
 
 @pytest.fixture
