@@ -21,14 +21,16 @@ from .node_functions import get_connected_nodes, get_ancestors, get_descendants,
 from .node_functions import NodeAmbiguityError, NodeOperationError, NodeNotFound
 
 # Basic node classes
-from .base import Node, SingleNode, InputNode, LossInputNode, LossPredNode, LossTrueNode, ValueNode
+from .base import Node, SingleNode, InputNode, LossInputNode, LossPredNode, LossTrueNode
+from .automodule import AutoModule 
 
+from .value import ValueNode
 
 # Node that provides multiple outputs
 from .multi import MultiNode, IndexNode
 
 # Optional mixins for simplifying the process of defining BaseNode subclasses
-from .definition_helpers import AutoModule, ExpandParents
+from .parent_expander import ExpandParents
 
 def __getattr__(name: str):
     import warnings

@@ -206,7 +206,7 @@ def setup_training(
         )
 
     optimizer = controller.optimizer
-    model, evaluator, optimizer = serialization.set_devices(
+    model, evaluator, optimizer = set_devices(
         model, loss, evaluator, optimizer, setup_params.device or tools.device_fallback()
     )
 

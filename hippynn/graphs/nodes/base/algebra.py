@@ -12,7 +12,7 @@ from ...indextypes import elementwise_compare_reduce
 
 
 def wrap_as_node(obj):
-    from .base import ValueNode, Node
+    from . import Node, ValueNode
     return obj.main_output if isinstance(obj, Node) else ValueNode(obj)
 
 
@@ -97,8 +97,12 @@ def __getattr__(name: str):
     """
     if name.endswith("Node") or name == "AtLeast2D":
         # Backwards compatibility for unpickling prior models
-        from . import base
-        answer = getattr(base, name) # error if not found.
+        from . import base 
+        answer = getattr(base, name, None)
+        if answer is None:
+            from ..import base # Note, this is the higher-level base; not the one parallel to this file.
+            answer = getattr(base, name) # error if not found.
+            
         # Warn if found.
         from ...._deprecations import warn_name_change
         warn_name_change(name,answer, old_module=__name__, stacklevel=2)

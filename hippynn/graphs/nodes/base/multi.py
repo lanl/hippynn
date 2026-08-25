@@ -3,7 +3,7 @@ A base node that provides several output tensors.
 """
 from ....layers.algebra import Idx
 from .base import SingleNode, Node
-from .definition_helpers import AutoModule
+from . import AutoModule
 from .. import _debprint
 from ...indextypes import IdxType
 from ...._deprecations import _DeprecatedNamesMixin
@@ -12,16 +12,18 @@ from ...._deprecations import _DeprecatedNamesMixin
 class IndexNode(AutoModule, SingleNode):
     input_names = ("parent",)
     auto_module_class = Idx
-    auto_module_kwargs = ("repr_info", "index")
+    # _repr_info required so this node can be serailized cleanly;
+    # auto-modules must allow the keywords to be passed at the node level.
+    auto_module_kwargs = {"repr_info": "_repr_info", "index": "index"}
 
-    def __init__(self, name, parents, index, index_state=None):
+    def __init__(self, name, parents, index, index_state=None, _repr_info=None, module_kwargs=None):
         if len(parents) != 1:
             raise TypeError("Index node takes exactly one parent.")
         par = parents[0]
         iname = par.output_names[index] if hasattr(par, "output_names") else "<{index}>".format(index=index)
         repr_info = {"parent_name": par.name, "index": iname}
         self.index_state = IdxType.Unlabeled if index_state is None else index_state
-        super().__init__(name, parents, repr_info=repr_info, index=index,  module="auto")
+        super().__init__(name, parents, _repr_info=repr_info, index=index, module="auto")
 
 
 class MultiNode(Node,_DeprecatedNamesMixin):  # Multinode

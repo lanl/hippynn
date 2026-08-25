@@ -38,8 +38,7 @@ def test_create_simple_henergy_class(neural_network_node):
     import hippynn.layers.targets as target_modules
 
     from hippynn.graphs import IdxType
-    from hippynn.graphs.nodes.base import MultiNode
-    from hippynn.graphs.nodes.base.definition_helpers import AutoModule
+    from hippynn.graphs.nodes.base import MultiNode, AutoModule
 
     class SimpleHEnergyNode(AutoModule, MultiNode):
         input_names = "input_features", "system_index", "n_systems"

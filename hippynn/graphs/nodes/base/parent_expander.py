@@ -14,67 +14,9 @@ import functools
 import contextlib
 from .. import _debprint
 
-from . import Node
 from ...indextypes import index_type_coercion, get_reduced_index_state
-from .base import _SerializableNodeMixin
+from . import Node
 from typing import Dict, Union, Tuple, Optional
-
-
-class AutoModule(_SerializableNodeMixin):
-    """
-    Helper mixin class for piping keyword arguments into an nn.module class.
-
-    Using AutoModule is required for text-based graph serialization.
-
-    Keyword Argument sources (lower precedence first):
-
-        - module_kwargs argument to init.
-        - kwarg-source pairs from self.auto_module_kwargs,
-          where the value for the source is popped from the kwargs to the node.
-        - self.module_kwargs.
-
-    Note: If self.auto_module_kwargs is not a dict, it will then be interpreted
-      as a list of keys for a dictionary with the identity for key-value mapping.
-
-    After constructing the kwargs, they are saved as self.module_kwargs.
-
-    """
-    # developer note: dictionary form is a bit sensitive for node serialization, handle with care.
-    auto_module_kwargs: Optional[Union[Tuple[str], Dict[str, str]]] = None
-
-    def __init__(self, *args, module="auto", module_kwargs=None, **kwargs):
-
-        # if none supplied, start with empty
-        if module_kwargs is None:
-            module_kwargs = {}
-
-        auto_module_kwargs = self.auto_module_kwargs
-
-        # if automatic keyword translation is enabled,
-        # set that up
-        if auto_module_kwargs is None:
-            auto_module_kwargs = {}
-        elif not isinstance(auto_module_kwargs, dict):
-            # Assume list of keys-values which are identical.
-            auto_module_kwargs = dict(zip(auto_module_kwargs, auto_module_kwargs))
-
-        # Pipe auto-forward keywords from node kwargs
-        # into module creation kwargs
-        for k, v in auto_module_kwargs.items():
-            if v in kwargs:
-                module_kwargs[k] = kwargs.pop(v)
-
-        # Add any that have been saved via self.module_kwargs
-        module_kwargs |= getattr(self, "module_kwargs", {})
-
-        if module == "auto":
-            self.module_kwargs = module_kwargs
-            module = self.auto_module_class(**module_kwargs)
-            self._auto_module_captured = True
-        else:
-            self._auto_module_captured = False
-
-        super().__init__(*args, module=module, **kwargs)
 
 
 @contextlib.contextmanager

@@ -7,8 +7,8 @@ import torch
 from .. import _debprint
 from ...graphs import GraphModule, compute_evaluation_order
 from ...graphs.indextypes import IdxType
-from ...graphs.nodes.base import Node, InputNode
-from ...graphs.nodes.base.base import _SerializableNodeMixin
+from ...graphs.nodes.base import Node, InputNode, AutoModule
+from ...graphs.nodes.base.base import _SerializableNode
 from ...graphs.nodes.base import get_connected_nodes, find_relatives
 
 
@@ -17,9 +17,9 @@ _ID_REGISTRY = {}
 
 
 def _populate_registry():
-    for cls in _SerializableNodeMixin._unregistered_classes.copy():
+    for cls in _SerializableNode._unregistered_classes.copy():
         register_node_cls(cls)
-        _SerializableNodeMixin._unregistered_classes.remove(cls)
+        _SerializableNode._unregistered_classes.remove(cls)
     pass
 
 
@@ -246,9 +246,9 @@ def serialize_node_list(node_list):
 
         cls = _NODE_REGISTRY[type(node)]
 
-        db_name = node.db_name if hasattr(node, "db_name") else None
-        index_state = node.index_state if hasattr(node, "index_state") else None
-        requires_grad = node.requires_grad if hasattr(node, "requires_grad") else None
+        db_name = getattr(node, "db_name", None)
+        index_state = getattr(node, "index_state", None)
+        requires_grad = getattr(node, "requires_grad", None)
 
         if isinstance(node, InputNode):
             node_info = NodeInfo(
@@ -264,11 +264,8 @@ def serialize_node_list(node_list):
             raise ValueError(f"Invalid toposort for serializing nodes.") from ee
 
 
-        node_kwargs = node.module_kwargs
-        # If name translation was applied, translate back here so the node reconstructs from the kwargs.
-        if (auto_module_kwargs := getattr(node, "auto_module_kwargs", None)) and isinstance(auto_module_kwargs, dict):
-            node_kwargs = {auto_module_kwargs.get(k, k): v for k, v in node_kwargs.items()}
-
+        serialize_kwargs = getattr(node, "_serialize_kwargs", None)
+        node_kwargs = serialize_kwargs() if serialize_kwargs is not None else node.module_kwargs
         module_kwargs, tensor_data = lower_serializable(node_kwargs, tensor_data=tensor_data, counter=tensor_counter)
 
         node_info = NodeInfo(
@@ -290,6 +287,53 @@ def serialize_node_list(node_list):
         n_tensor_arguments=n_tensors,
     )
     return serial_data, tensor_data, node_identity_map
+
+
+def _reconstruct_node(cls, name, parents, kwargs):
+    """
+    Build a node instance from (name, parents, kwargs) without relying on any
+    per-class ``_deserialize`` method. ``AutoModule`` subclasses are handled by
+    splitting kwargs on ``auto_module_kwargs`` membership; other classes may
+    declare ``_deserialize_spec``, a tuple of tokens ("name", "parents",
+    "parents*", "kwargs") describing how to call their constructor; anything
+    else falls back to ``cls(name, parents, **kwargs)``.
+    """
+    if issubclass(cls, AutoModule):
+        auto_module_kwargs = cls.auto_module_kwargs
+        if not auto_module_kwargs:
+            mapping = {}
+        elif isinstance(auto_module_kwargs, dict):
+            mapping = auto_module_kwargs
+        else:
+            mapping = dict(zip(auto_module_kwargs, auto_module_kwargs))
+
+        node_kwargs = {}
+        leftover_module_kwargs = {}
+        for k, v in kwargs.items():
+            if k in mapping:
+                node_kwargs[mapping[k]] = v
+            else:
+                leftover_module_kwargs[k] = v
+        return cls(name, parents, module_kwargs=leftover_module_kwargs, **node_kwargs)
+
+    spec = getattr(cls, "_deserialize_spec", None)
+    if spec is not None:
+        args = []
+        call_kwargs = {}
+        for token in spec:
+            if token == "name":
+                args.append(name)
+            elif token == "parents":
+                args.append(parents)
+            elif token == "parents*":
+                args.extend(parents)
+            elif token == "kwargs":
+                call_kwargs = kwargs
+            else:
+                raise ValueError(f"Unknown _deserialize_spec token {token!r} on {cls!r}")
+        return cls(*args, **call_kwargs)
+
+    return cls(name, parents, **kwargs)
 
 
 def deserialize_node_list(node_list: list[NodeInfo], tensor_data: Optional[dict[int, torch.Tensor]] = None):
@@ -321,7 +365,7 @@ def deserialize_node_list(node_list: list[NodeInfo], tensor_data: Optional[dict[
 
         module_kwargs = raise_serializable(node_info.module_kwargs, tensor_data=tensor_data)
 
-        node = cls(name, parents, **module_kwargs)
+        node = _reconstruct_node(cls, name, parents, module_kwargs)
 
         if node_info.db_name is not None:
             node.db_name = node_info.db_name
@@ -376,7 +420,6 @@ def lower_serializable(obj: object, tensor_data: dict[int, torch.Tensor] = None,
     raise ValueError(f"Unrecognized type for serializing! {type(obj)=} {obj=}")
 
 
-
 def raise_serializable(obj: Serializable, tensor_data: dict[int, torch.Tensor]) -> object:
     if (obj is None) or isinstance(obj, (bool, str, int, float)):
         return obj
@@ -397,6 +440,7 @@ def raise_serializable(obj: Serializable, tensor_data: dict[int, torch.Tensor]) 
         return {k: raise_serializable(v, tensor_data) for k, v in obj.items()}
 
     raise ValueError(f"Unrecognized type for deserializing! {type(obj)=} {obj=}")
+
 
 
 ensure_registry_namespaces(raise_=False)

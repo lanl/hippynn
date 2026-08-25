@@ -338,6 +338,10 @@ def is_in_loss_graph(node_or_nodes, why_desc=DEFAULT_WHY_DESC):
     
 
 
+class _SerializableNode():
+    _unregistered_classes: list = []
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        _SerializableNode._unregistered_classes.append(cls)
 
-
-
+        

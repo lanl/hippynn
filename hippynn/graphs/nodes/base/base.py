@@ -5,7 +5,7 @@ from ... import indextypes
 from ...indextypes import IdxType
 from .algebra import _NodeAlgebra
 
-from .node_functions import _NodeFunctions
+from .node_functions import _NodeFunctions, _SerializableNode
 from .algebra import UnaryNode, BinNode, _AlgebraicOperation
 from ....layers import algebra as algebra_mods
 from ...._deprecations import _DeprecatedNamesMixin
@@ -15,7 +15,6 @@ from typing import Optional
 
 class Node(_NodeFunctions, _NodeAlgebra):
     pass
-
 
 
 class SingleNode(Node, _DeprecatedNamesMixin):
@@ -59,17 +58,6 @@ class SingleNode(Node, _DeprecatedNamesMixin):
         return self
     
 
-
-class ValueNode(SingleNode):
-    index_state = IdxType.Scalar  # By definition abstract values do not have a batch axis.
-    def __init__(self, value, convert=True):
-        name = "Value({})".format(str(value))
-        self.value = value
-        self._converted = convert
-        module = algebra_mods.ValueMod(self.value, convert=self._converted)
-        super().__init__(name, parents=(), module=module)
-
-
 class InvNode(UnaryNode, SingleNode, _AlgebraicOperation, operation="invert"):
     pass
 
@@ -112,14 +100,7 @@ class AtLeast2D(SingleNode):
         self.origin_node = p.origin_node
 
 
-class _SerializableNodeMixin():
-    _unregistered_classes: list = []
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        _SerializableNodeMixin._unregistered_classes.append(cls)
-
-
-class InputNode(SingleNode, _SerializableNodeMixin):
+class InputNode(SingleNode, _SerializableNode):
     input_names = ()
     """Node for getting information for the database."""
     requires_grad = False

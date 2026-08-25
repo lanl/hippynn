@@ -98,6 +98,10 @@ class PeriodicPairIndexerMemory(PeriodicPairIndexer, Memory):
     '''
     
     auto_module_class = pairs_modules.periodic.PeriodicPairIndexerMemory
+    auto_module_kwargs = {
+        "hard_dist_cutoff": "dist_hard_max",
+        "skin": "skin",
+    }
 
     def __init__(self, name, parents, dist_hard_max, skin, module="auto", module_kwargs=None, **kwargs):
         if module_kwargs is None:
@@ -395,7 +399,7 @@ class KDTreePairsMemory(_DispatchNeighbors, Memory):
     set to zero while training for fastest results.
     '''
     auto_module_class = pairs_modules.dispatch.KDTreePairsMemory
-    auto_module_kwargs = "dist_hard_max",
+    auto_module_kwargs = "dist_hard_max", "skin"
 
     def __init__(self, name, parents, dist_hard_max, skin, module="auto", module_kwargs=None, **kwargs):
         if module_kwargs is None:
@@ -483,6 +487,7 @@ class MinDistNode(ExpandParents, AutoModule, MultiNode):
 # Graph Nodes for Filter Pair Indexer. Works with PeriodicPairs, OpenPairs, External Neighbors.
 class PairFilter(AutoModule, PairIndexer, ExpandParents, MultiNode):
     auto_module_class = pairs_modules.FilterDistance
+    auto_module_kwargs = {"hard_dist_cutoff": "dist_hard_max"}
 
     @parent_expander.match(PairIndexer)
     def expand0(self, pair_indexer, purpose):
@@ -510,7 +515,6 @@ class PairFilter(AutoModule, PairIndexer, ExpandParents, MultiNode):
         return parents
 
     def __init__(self, name, parents, dist_hard_max, module="auto", **kwargs):
-        self.module_kwargs = {"hard_dist_cutoff": dist_hard_max}  # passes to PairIndexer superclass
         self.dist_hard_max = dist_hard_max
         parents = self.expand_parents(parents)
-        super().__init__(name, parents, module=module, **kwargs)
+        super().__init__(name, parents, dist_hard_max=dist_hard_max, module=module, **kwargs)
