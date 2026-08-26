@@ -8,15 +8,15 @@ from typing import Tuple, Union
 
 import torch
 
-from ...databases import Database
-from ...databases.restarter import Restartable
-from ...graphs import GraphModule
-from ...tools import device_fallback
-from ..._deprecations import bundles_deprecated_warnings
-from ..assembly import TrainingModules
-from ..controllers import Controller
-from ..device import set_devices
-from ..metric_tracker import MetricTracker
+from ..databases import Database
+from ..databases.restarter import Restartable
+from ..graphs import GraphModule
+from ..tools import device_fallback
+from .._deprecations import bundles_deprecated_warnings
+from .assembly import TrainingModules
+from .controllers import Controller
+from .device import set_devices
+from .metric_tracker import MetricTracker
 
 DEFAULT_STRUCTURE_FNAME = "experiment_structure.pt"
 

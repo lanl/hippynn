@@ -5,7 +5,7 @@ Plain-data type definitions for graph serialization: node/tensor references and 
 import dataclasses
 from typing import Literal
 
-from ....graphs.indextypes import IdxType
+from ..graphs.indextypes import IdxType
 
 
 @dataclasses.dataclass(frozen=True)

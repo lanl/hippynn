@@ -59,28 +59,3 @@ class AutoModule(_SerializableNode):
             self._auto_module_captured = False
 
         super().__init__(*args, module=module, **kwargs)
-
-    @classmethod
-    def _deserialize(cls, name, parents, kwargs):
-        """
-        Reverses the translation performed by ``__init__``: keys named in
-        ``auto_module_kwargs`` are passed through as node-level keywords (translated to
-        their node-level name), and everything else is bundled into ``module_kwargs``.
-        """
-        auto_module_kwargs = cls.auto_module_kwargs
-        if not auto_module_kwargs:
-            mapping = {}
-        elif isinstance(auto_module_kwargs, dict):
-            mapping = auto_module_kwargs
-        else:
-            mapping = dict(zip(auto_module_kwargs, auto_module_kwargs))
-
-        node_kwargs = {}
-        leftover_module_kwargs = {}
-        for k, v in kwargs.items():
-            if k in mapping:
-                node_kwargs[mapping[k]] = v
-            else:
-                leftover_module_kwargs[k] = v
-
-        return cls(name, parents, module_kwargs=leftover_module_kwargs, **node_kwargs)

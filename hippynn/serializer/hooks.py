@@ -6,9 +6,9 @@ and the generic container-walk hook used on the structure (read) side.
 import torch
 
 from .processor import ContextConverter
-from .registry import _ID_REGISTRY, _NODE_REGISTRY, _RECONSTRUCTORS, node_reference_attrs
+from .registry import _ID_REGISTRY, _NODE_REGISTRY, _automodule_kwarg_mapping, node_reference_attrs
 from .types import NodeIdentifier, NodeInfo, NodeReference, Serializable
-from ...graphs.nodes.base import InputNode, Node
+from ..graphs.nodes.base import AutoModule, InputNode, Node
 
 
 # ----------------------------------------------------------------------
@@ -103,7 +103,7 @@ def _resolve_node(key, ctx):
         parents = tuple(_resolve_node(p["key"], ctx) for p in record.parents)
         kwargs = _resolve_serializable(record.module_kwargs, ctx) if record.module_kwargs is not None else {}
 
-        node = _RECONSTRUCTORS[cls](name, parents, kwargs, record)
+        node = ctx.converter.structure((name, parents, kwargs, record), cls)
 
         # Mirrors the two branches of the pre-Processor `deserialize_node_list`: input nodes
         # already receive db_name/index_state at construction time, and re-applying db_name
@@ -129,6 +129,37 @@ def _resolve_node(key, ctx):
 @ContextConverter.register_structure(NodeReference)
 def _structure_node_reference(data, typ, *, ctx):
     return _resolve_node(data["key"], ctx)
+
+
+# ----------------------------------------------------------------------
+# Per-class node reconstruction (structure/read side), keyed on the concrete Node subclass
+# rather than the wire-tagged NodeReference above: `_resolve_node` calls
+# `ctx.converter.structure((name, parents, kwargs, record), cls)`, and cattrs dispatches to
+# whichever family hook's predicate matches `cls`. Only the InputNode and AutoModule families
+# are implemented here; LossInputNode (which also derives from InputNode, so must not be
+# matched by the generic InputNode hook - not yet resolved) and the `_deserialize_spec`/plain-
+# call branches are left unimplemented for now.
+# ----------------------------------------------------------------------
+
+
+@ContextConverter.register_structure_family(lambda t: isinstance(t, type) and issubclass(t, InputNode))
+def _structure_input_node(data, typ, *, ctx):
+    name, parents, kwargs, record = data
+    return typ(name=name, db_name=record.db_name, index_state=record.index_state)
+
+
+@ContextConverter.register_structure_family(lambda t: isinstance(t, type) and issubclass(t, AutoModule))
+def _structure_automodule_node(data, typ, *, ctx):
+    name, parents, kwargs, record = data
+    mapping = _automodule_kwarg_mapping(typ)
+    node_kwargs = {}
+    leftover_module_kwargs = {}
+    for k, v in kwargs.items():
+        if k in mapping:
+            node_kwargs[mapping[k]] = v
+        else:
+            leftover_module_kwargs[k] = v
+    return typ(name, parents, module_kwargs=leftover_module_kwargs, **node_kwargs)
 
 
 # ----------------------------------------------------------------------
@@ -161,10 +192,14 @@ def _unstructure_set(obj, *, ctx):
 
 
 # ----------------------------------------------------------------------
-# Generic container walk (structure/read side only). structure() needs a concrete target
-# type up front, so unlike the write side above (dispatched by cattrs on runtime type),
-# this is a hand-written recursive walk over the untagged-except-for-three-cases shape
-# that `module_kwargs` (and similar Serializable-typed blobs) actually have.
+# Serializable union discrimination (structure/read side only). structure() needs a concrete
+# target type up front, so unlike the write side above (dispatched by cattrs on runtime
+# type), this decides which member of the `Serializable` union a piece of wire data
+# represents by its shape, then delegates to cattrs with a concrete type - `dict[str,
+# Serializable]`, `list[Serializable]`, `tuple[Serializable, ...]`, or the already-registered
+# `TensorReference`/`NodeReference` hooks - so cattrs performs the actual recursion rather
+# than this module walking containers by hand. `set` is the one case with no JSON-native
+# container to delegate to, since it's the only member that genuinely needs tagging.
 # ----------------------------------------------------------------------
 
 
@@ -176,14 +211,14 @@ def _resolve_serializable(data, ctx):
         if kind == "tensor_ref":
             return ctx.converter.structure(data, torch.Tensor)
         if kind == "node_ref":
-            return _resolve_node(data["key"], ctx)
+            return ctx.converter.structure(data, NodeReference)
         if kind == "set":
-            return {_resolve_serializable(v, ctx) for v in data["values"]}
-        return {k: _resolve_serializable(v, ctx) for k, v in data.items()}
+            return set(ctx.converter.structure(data["values"], list[Serializable]))
+        return ctx.converter.structure(data, dict[str, Serializable])
     if isinstance(data, list):
-        return [_resolve_serializable(v, ctx) for v in data]
+        return ctx.converter.structure(data, list[Serializable])
     if isinstance(data, tuple):
-        return tuple(_resolve_serializable(v, ctx) for v in data)
+        return ctx.converter.structure(data, tuple[Serializable, ...])
     raise TypeError(f"Cannot deserialize value of type {type(data)!r}: {data!r}")
 
 
@@ -192,4 +227,8 @@ def _structure_serializable(data, typ, *, ctx):
     # NOTE: matching against the PEP-695 `Serializable` type-alias object itself (rather than
     # something it resolves/unwraps to, e.g. via `.__value__`) is not yet verified against the
     # pinned cattrs version - flagged in the plan's "verify against actual cattrs version" step.
+    # `_resolve_serializable` also relies on this same identity-match for the generic
+    # collection types it delegates to below (`dict[str, Serializable]`, `list[Serializable]`,
+    # `tuple[Serializable, ...]`), since cattrs re-enters this hook per element when recursing
+    # into those.
     return _resolve_serializable(data, ctx)

@@ -10,9 +10,9 @@ and provides the `serialize`/`deserialize` entry points, thin wrappers around
 
 from typing import Iterable
 
-from .. import _debprint
-from ...graphs import GraphModule
-from ...graphs.nodes.base import Node, get_connected_nodes
+from ..experiment import _debprint
+from ..graphs import GraphModule
+from ..graphs.nodes.base import Node, get_connected_nodes
 from .hooks import _resolve_node
 from .processor import ContextConverter
 from .registry import ensure_registry_namespaces, register_node_cls

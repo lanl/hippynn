@@ -99,9 +99,6 @@ class ContextConverter:
         for predicate, func in self._unstructure_families:
             self.converter.register_unstructure_hook_func(predicate, partial(func, ctx=self))
 
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
 
     def unstructure(self, obj):
         """

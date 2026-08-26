@@ -1,6 +1,6 @@
 import torch
 from hippynn.graphs import loss
-from hippynn.experiment.serialization import load_checkpoint
+from hippynn.experiment.checkpoints import load_checkpoint
 from hippynn.experiment.assembly import assemble_for_training
 from hippynn.graphs.nodes.inputs import PositionsNode, SpeciesNode
 from .seqm_modules import pack_par

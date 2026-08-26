@@ -12,7 +12,7 @@ import torch
 @pytest.fixture
 def processor_pair():
     """A fresh writer/reader Processor pair, mirroring separate serialize/deserialize sessions."""
-    from hippynn.experiment.serialization.node_serializer.processor import ContextConverter
+    from hippynn.serializer.processor import ContextConverter
 
     return ContextConverter(), ContextConverter()
 
@@ -67,7 +67,7 @@ def test_processor_set_roundtrip(processor_pair):
 
 def test_processor_embedded_object_reference_roundtrip(processor_pair):
 
-    from hippynn.experiment.serialization.node_serializer.processor import ContextConverter
+    from hippynn.serializer.processor import ContextConverter
 
     writer, reader = processor_pair
 
@@ -114,7 +114,7 @@ def test_processor_embedded_object_reference_roundtrip(processor_pair):
 
 
 def test_serialize_autonode_graph(energy_graph):
-    from hippynn.experiment.serialization.node_serializer import serialize, NodeInfo, SerializedGraphModule
+    from hippynn.serializer import serialize, NodeInfo, SerializedGraphModule
 
     record, tensor_data = serialize(energy_graph)
 
@@ -126,7 +126,7 @@ def test_serialize_autonode_graph(energy_graph):
     
 
 def test_serialize_simple_nodes():
-    from hippynn.experiment.serialization.node_serializer import serialize_node_list
+    from hippynn.serializer import serialize_node_list
     from hippynn.graphs.nodes.base import ValueNode
 
     value = ValueNode(1.0)
@@ -143,7 +143,7 @@ def test_serialize_simple_nodes():
 
 
 def test_serialize_atleast2d_and_arithmetic_leaf_coverage():
-    from hippynn.experiment.serialization.node_serializer import serialize_node_list
+    from hippynn.serializer import serialize_node_list
     from hippynn.graphs.nodes.base import ValueNode
     from hippynn.graphs.nodes.base.base import AtLeast2D
 
@@ -157,7 +157,7 @@ def test_serialize_atleast2d_and_arithmetic_leaf_coverage():
 
 
 def test_serialize_shared_tensor_across_nodes_dedup():
-    from hippynn.experiment.serialization.node_serializer import serialize_node_list
+    from hippynn.serializer import serialize_node_list
     from hippynn.graphs.nodes.base import ValueNode
 
     shared = torch.ones(3)
@@ -171,7 +171,7 @@ def test_serialize_shared_tensor_across_nodes_dedup():
 
 def test_serialize_origin_node_roundtrip(energy_node, energy_graph, example_box):
     from hippynn.graphs.nodes.loss import MAELoss
-    from hippynn.experiment.serialization.node_serializer import serialize, deserialize
+    from hippynn.serializer import serialize, deserialize
     from hippynn.graphs.nodes.base import get_connected_nodes, LossPredNode, LossTrueNode
 
     loss_node = MAELoss.of_node(energy_node)
@@ -188,7 +188,7 @@ def test_serialize_origin_node_roundtrip(energy_node, energy_graph, example_box)
 
 @pytest.fixture
 def written_energy_graph(energy_graph):
-    from hippynn.experiment.serialization.node_serializer import serialize
+    from hippynn.serializer import serialize
 
     return serialize(energy_graph)
 
@@ -196,7 +196,7 @@ def written_energy_graph(energy_graph):
 def test_serialize_roundtrip(written_energy_graph, energy_graph, example_box):
     record, tensor_data = written_energy_graph
 
-    from hippynn.experiment.serialization.node_serializer import deserialize
+    from hippynn.serializer import deserialize
 
     rebuilt_graph = deserialize(record, tensor_data)
 
