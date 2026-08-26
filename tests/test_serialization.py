@@ -107,6 +107,7 @@ def test_processor_embedded_object_reference_roundtrip(processor_pair):
     root = Root(leaves=[shared_leaf, shared_leaf])
 
     structure, tensor_blob = writer.unstructure(root)
+    reader._leaf_blob = writer._leaf_blob  # out-of-band leaf payloads, mirroring tensor_blob's write->read hand-off
     restored = reader.structure(structure, Root, tensor_blob=tensor_blob)
 
     assert restored.leaves[0] is restored.leaves[1], "repeated references to one Leaf must resolve to one object"

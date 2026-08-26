@@ -87,18 +87,33 @@ class ContextConverter:
         self.node_objects: dict[int, Any] = {}  # key -> reconstructed node, structure-side cache
         self._node_resolving: set[int] = set()  # loop guard for the recursive resolver
 
-        for typ, func in self._structure_hooks:
+        self._synced_structure = 0
+        self._synced_unstructure = 0
+        self._synced_structure_families = 0
+        self._synced_unstructure_families = 0
+        self._sync_hooks()
+
+    def _sync_hooks(self):
+        """
+        Register onto `self.converter` any class-level hooks added since this instance last
+        synced, so hooks registered after construction (e.g. by a caller that registers a
+        type's hooks just before using it) still take effect.
+        """
+        for typ, func in self._structure_hooks[self._synced_structure :]:
             self.converter.register_structure_hook(typ, partial(func, ctx=self))
+        self._synced_structure = len(self._structure_hooks)
 
-        for typ, func in self._unstructure_hooks:
+        for typ, func in self._unstructure_hooks[self._synced_unstructure :]:
             self.converter.register_unstructure_hook(typ, partial(func, ctx=self))
+        self._synced_unstructure = len(self._unstructure_hooks)
 
-        for predicate, func in self._structure_families:
+        for predicate, func in self._structure_families[self._synced_structure_families :]:
             self.converter.register_structure_hook_func(predicate, partial(func, ctx=self))
+        self._synced_structure_families = len(self._structure_families)
 
-        for predicate, func in self._unstructure_families:
+        for predicate, func in self._unstructure_families[self._synced_unstructure_families :]:
             self.converter.register_unstructure_hook_func(predicate, partial(func, ctx=self))
-
+        self._synced_unstructure_families = len(self._unstructure_families)
 
     def unstructure(self, obj):
         """
@@ -106,10 +121,12 @@ class ContextConverter:
         suitable for JSON/YAML encoding; `tensor_blob` holds tensor payloads out-of-band, to be
         saved separately.
         """
+        self._sync_hooks()
         structure = self.converter.unstructure(obj)
         return structure, self.tensor_blob
 
     def structure(self, structure, typ, *, tensor_blob):
         """Reconstruct an object from `structure` plus the separately-loaded `tensor_blob`."""
+        self._sync_hooks()
         self.tensor_blob = tensor_blob
         return self.converter.structure(structure, typ)

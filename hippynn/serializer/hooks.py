@@ -9,6 +9,7 @@ from .processor import ContextConverter
 from .registry import _ID_REGISTRY, _NODE_REGISTRY, node_reference_attrs
 from .types import NodeIdentifier, NodeInfo, NodeReference, Serializable
 from ..graphs.nodes.base import AutoModule, InputNode, Node
+from ..graphs.nodes.base.algebra import BinNode, UnaryNode
 
 
 # ----------------------------------------------------------------------
@@ -74,13 +75,16 @@ def unstructure_node(obj, *, ctx):
 
 InputNode.unstructure = unstructure_node
 AutoModule.unstructure = unstructure_node
+UnaryNode.unstructure = unstructure_node
+BinNode.unstructure = unstructure_node
 
 
 @ContextConverter.register_unstructure_family(lambda t: isinstance(t, type) and issubclass(t, Node))
 def _unstructure_node(obj, *, ctx):
     """
     Node <-> NodeReference cattrs hook: memoized by identity in `ctx.node_ids`/`ctx.node_blob`,
-    delegating the actual `NodeInfo` construction to `obj.unstructure`.
+    delegating the actual `NodeInfo` construction to `obj.unstructure` where present, falling
+    back to the generic `unstructure_node` for `Node` subclasses that aren't `_SerializableNode`s.
     """
     key = ctx.node_ids.get(id(obj))
     if key is not None:
@@ -90,7 +94,8 @@ def _unstructure_node(obj, *, ctx):
     ctx.node_ids[id(obj)] = key
     ctx.node_objects[key] = obj  # write-side: lets callers map discovered nodes back to their key/reference
 
-    ctx.node_blob[key] = obj.unstructure(ctx=ctx)
+    unstructure = getattr(obj, "unstructure", None)
+    ctx.node_blob[key] = unstructure(ctx=ctx) if unstructure is not None else unstructure_node(obj, ctx=ctx)
     return {"key": key, "kind": "node_ref"}
 
 

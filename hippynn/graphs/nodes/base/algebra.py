@@ -9,6 +9,7 @@ from ....layers import algebra as algebra_mods
 
 
 from ...indextypes import elementwise_compare_reduce
+from .node_functions import _SerializableNode
 
 
 def wrap_as_node(obj):
@@ -76,20 +77,32 @@ class _AlgebraicOperation():
         return 
 
 
-class UnaryNode():
+class UnaryNode(_SerializableNode):
     def __init__(self, in_node):
         #name = "{}({})".format(self._classname, in_node)
         super().__init__(self._classname, (in_node,), module=None)
         self.index_state = in_node.index_state
 
+    @staticmethod
+    def structure(data, typ, *, ctx):
+        """cattrs structure hook: rebuilds the node from its single parent."""
+        name, parents, kwargs, record = data
+        return typ(parents[0])
 
-class BinNode():
+
+class BinNode(_SerializableNode):
     def __init__(self, left, right):
         left, right = left.main_output, right.main_output
         left, right = elementwise_compare_reduce(left, right)
         #name = "{}({}, {})".format(self._classname, left.name, right.name)
         super().__init__(self._classname, (left, right), module=None)
         self.index_state = left.index_state
+
+    @staticmethod
+    def structure(data, typ, *, ctx):
+        """cattrs structure hook: rebuilds the node from its two parents."""
+        name, parents, kwargs, record = data
+        return typ(*parents)
 
 def __getattr__(name: str):
     """
