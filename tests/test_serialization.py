@@ -12,9 +12,9 @@ import torch
 @pytest.fixture
 def processor_pair():
     """A fresh writer/reader Processor pair, mirroring separate serialize/deserialize sessions."""
-    from hippynn.experiment.serialization.node_serializer.processor import Processor
+    from hippynn.experiment.serialization.node_serializer.processor import ContextConverter
 
-    return Processor(), Processor()
+    return ContextConverter(), ContextConverter()
 
 
 def test_processor_plain_data_roundtrip(processor_pair):
@@ -67,7 +67,7 @@ def test_processor_set_roundtrip(processor_pair):
 
 def test_processor_embedded_object_reference_roundtrip(processor_pair):
 
-    from hippynn.experiment.serialization.node_serializer.processor import Processor
+    from hippynn.experiment.serialization.node_serializer.processor import ContextConverter
 
     writer, reader = processor_pair
 
@@ -77,9 +77,9 @@ def test_processor_embedded_object_reference_roundtrip(processor_pair):
 
     @dataclasses.dataclass
     class Root:
-        leaves: list
+        leaves: list[Leaf]
 
-    @Processor.register_unstructure(Leaf)
+    @ContextConverter.register_unstructure(Leaf)
     def _unstructure_leaf(obj, *, ctx):
         blob = getattr(ctx, "_leaf_blob", None)
         if blob is None:
@@ -92,7 +92,7 @@ def test_processor_embedded_object_reference_roundtrip(processor_pair):
             blob[key] = obj.payload
         return {"kind": "leaf_ref", "key": key}
 
-    @Processor.register_structure(Leaf)
+    @ContextConverter.register_structure(Leaf)
     def _structure_leaf(data, typ, *, ctx):
         cache = getattr(ctx, "_leaf_objects", None)
         if cache is None:
