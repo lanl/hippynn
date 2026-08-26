@@ -1,8 +1,6 @@
 """
 Nodes for constructing loss functions.
 """
-import functools
-
 import torch
 import torch.nn.functional
 
@@ -140,24 +138,21 @@ class WeightedMAELoss(_WeightedCompareLoss):
     _classname = "WeightedMAE"
     torch_module = algebra_modules.WeightedMAELoss()
 
-class WeightedHuberLoss(_WeightedCompareLoss):
+class WeightedHuberLoss(AutoKw, SingleNode):
     _classname = "WeightedHuber"
-    torch_module = algebra_modules.WeightedHuberLoss()
+    index_state = IdxType.Scalar
+    auto_module_class = algebra_modules.WeightedHuberLoss
+    auto_module_kwargs = "delta",
 
-    def __init__(self, predicted, true, weight, delta=None):
-        if delta is None:
-            super().__init__(predicted, true, weight)
-            return
-        # A per-instance delta needs its own layer module; the class-level one is shared.
-        name = "{}(delta={},{},{},{})".format(self._classname, delta, predicted.name, true.name, weight.name)
+    def __init__(self, predicted, true, weight, delta=1.0, module="auto"):
+        name = "{}({},{},{})".format(self._classname, predicted.name, true.name, weight.name)
         predicted, true, weight = elementwise_compare_reduce(predicted, true, weight)
-        module = algebra_modules.WeightedHuberLoss(delta=delta)
-        SingleNode.__init__(self, name, (predicted, true, weight), module=module)
+        super().__init__(name, (predicted, true, weight), module=module, delta=delta)
 
     @classmethod
-    def of_node(cls, node, weight, delta=None):
+    def of_node(cls, node, weight, delta=1.0):
         """
-        Same as _WeightedCompareLoss.of_node, plus an optional huber delta.
+        Same as _WeightedCompareLoss.of_node, plus the huber delta.
         """
         node = node.main_output
 
@@ -191,23 +186,21 @@ class MAELoss(_BaseCompareLoss, op=torch.nn.functional.l1_loss):
     pass
 
 
-class HuberLoss(_BaseCompareLoss, op=torch.nn.functional.huber_loss):
-    def __init__(self, predicted, true, delta=None):
-        if delta is None:
-            super().__init__(predicted, true)
-            return
-        # The class-level module is baked with torch's default delta of 1.0;
-        # any other delta needs its own module instance.
+class HuberLoss(AutoKw, SingleNode):
+    _classname = "huber_loss"
+    index_state = IdxType.Scalar
+    auto_module_class = torch.nn.HuberLoss
+    auto_module_kwargs = "delta",
+
+    def __init__(self, predicted, true, delta=1.0, module="auto"):
         predicted = predicted.main_output
         true = true.main_output
-        name = "{}(delta={},{},{})".format(self._classname, delta, predicted.name, true.name)
+        name = "{}({},{})".format(self._classname, predicted.name, true.name)
         predicted, true = elementwise_compare_reduce(predicted, true)
-        op = functools.partial(torch.nn.functional.huber_loss, delta=float(delta))
-        op.__name__ = "huber_loss"
-        SingleNode.__init__(self, name, (predicted, true), module=algebra_modules.LambdaModule(op))
+        super().__init__(name, (predicted, true), module=module, delta=delta)
 
     @classmethod
-    def of_node(cls, node, delta=None):
+    def of_node(cls, node, delta=1.0):
         node = node.main_output
         return cls(node.pred, node.true, delta=delta)
 
