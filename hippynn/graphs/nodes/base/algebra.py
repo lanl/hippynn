@@ -83,8 +83,10 @@ class UnaryNode(_SerializableNode):
         super().__init__(self._classname, (in_node,), module=None)
         self.index_state = in_node.index_state
 
+    # `to_record` is attached generically in hippynn/serializer/hooks.py.
+
     @staticmethod
-    def structure(data, typ, *, ctx):
+    def from_record(data, typ, *, ctx):
         """cattrs structure hook: rebuilds the node from its single parent."""
         name, parents, kwargs, record = data
         return typ(parents[0])
@@ -98,8 +100,10 @@ class BinNode(_SerializableNode):
         super().__init__(self._classname, (left, right), module=None)
         self.index_state = left.index_state
 
+    # `to_record` is attached generically in hippynn/serializer/hooks.py.
+
     @staticmethod
-    def structure(data, typ, *, ctx):
+    def from_record(data, typ, *, ctx):
         """cattrs structure hook: rebuilds the node from its two parents."""
         name, parents, kwargs, record = data
         return typ(*parents)

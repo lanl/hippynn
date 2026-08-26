@@ -60,10 +60,10 @@ class AutoModule(_SerializableNode):
 
         super().__init__(*args, module=module, **kwargs)
 
-    # `unstructure` is attached generically in hippynn/serializer/hooks.py.
+    # `to_record` is attached generically in hippynn/serializer/hooks.py.
 
     @staticmethod
-    def structure(data, typ, *, ctx):
+    def from_record(data, typ, *, ctx):
         """
         cattrs structure hook: reverses the translation performed by ``__init__``. Keys named
         in ``auto_module_kwargs`` are passed through as node-level keywords (translated to

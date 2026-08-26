@@ -191,7 +191,7 @@ class HVPNode(ExpandParents, AutoModule, MultiNode):
     @parent_expander.match(Node, PositionsNode, Node)
     def expansion3(self, force, positions, vector, *, purpose, **kwargs):
 
-        if not isinstance(force, GradientNode) and not any(isinstance(f, GradientNode) for f in force.get_all_parents()):
+        if not isinstance(force, GradientNode) and not any(isinstance(f, GradientNode) for f in force.get_ancestors()):
             warnings.warn(f"Input to HVP node doesn't appear to be a force or child of a force! Got node: {force}")
 
         encoder, _ = acquire_encoding_padding((force, positions), species_set=None, purpose=purpose)

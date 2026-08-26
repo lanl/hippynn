@@ -73,18 +73,19 @@ def unstructure_node(obj, *, ctx):
         requires_grad=getattr(obj, "requires_grad", None),
     )
 
-InputNode.unstructure = unstructure_node
-AutoModule.unstructure = unstructure_node
-UnaryNode.unstructure = unstructure_node
-BinNode.unstructure = unstructure_node
+InputNode.to_record = unstructure_node
+AutoModule.to_record = unstructure_node
+UnaryNode.to_record = unstructure_node
+BinNode.to_record = unstructure_node
 
 
 @ContextConverter.register_unstructure_family(lambda t: isinstance(t, type) and issubclass(t, Node))
 def _unstructure_node(obj, *, ctx):
     """
     Node <-> NodeReference cattrs hook: memoized by identity in `ctx.node_ids`/`ctx.node_blob`,
-    delegating the actual `NodeInfo` construction to `obj.unstructure` where present, falling
-    back to the generic `unstructure_node` for `Node` subclasses that aren't `_SerializableNode`s.
+    delegating the actual `NodeInfo` construction to `obj.to_record` where present, falling back
+    to the generic `unstructure_node` for `Node` subclasses that aren't `_SerializableNode`s (and
+    so don't have `to_record` attached).
     """
     key = ctx.node_ids.get(id(obj))
     if key is not None:
@@ -94,8 +95,8 @@ def _unstructure_node(obj, *, ctx):
     ctx.node_ids[id(obj)] = key
     ctx.node_objects[key] = obj  # write-side: lets callers map discovered nodes back to their key/reference
 
-    unstructure = getattr(obj, "unstructure", None)
-    ctx.node_blob[key] = unstructure(ctx=ctx) if unstructure is not None else unstructure_node(obj, ctx=ctx)
+    to_record = getattr(obj, "to_record", None)
+    ctx.node_blob[key] = to_record(ctx=ctx) if to_record is not None else unstructure_node(obj, ctx=ctx)
     return {"key": key, "kind": "node_ref"}
 
 
@@ -145,8 +146,8 @@ def _structure_node_reference(data, typ, *, ctx):
 # ----------------------------------------------------------------------
 # Per-class node reconstruction (structure/read side) is registered generically by
 # `registry.register_structure_hooks`, which finds each direct `_SerializableNode` subclass's
-# own `structure` staticmethod (e.g. `InputNode.structure`, `AutoModule.structure`) and
-# registers it as a `ContextConverter.register_structure_family` hook keyed on that class.
+# own `from_record` staticmethod (e.g. `AutoModule.from_record`) and registers it as a
+# `ContextConverter.register_structure_family` hook keyed on that class.
 # LossInputNode (which also derives from InputNode, so must not be matched by the generic
 # InputNode hook - not yet resolved) is left unimplemented for now.
 # ----------------------------------------------------------------------

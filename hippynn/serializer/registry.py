@@ -1,8 +1,8 @@
 """
 Node class registry and validation. Per-class reconstruction dispatch on the structure (read)
-side lives as a `structure` staticmethod on each direct `_SerializableNode` subclass (e.g.
-`InputNode.structure`, `AutoModule.structure`); `register_structure_hooks` below finds and
-registers them as `ContextConverter.register_structure_family` hooks.
+side lives as a `from_record` staticmethod on each direct `_SerializableNode` subclass (e.g.
+`AutoModule.from_record`); `register_structure_hooks` below finds and registers them as
+`ContextConverter.register_structure_family` hooks.
 """
 
 import importlib
@@ -105,12 +105,12 @@ def ensure_registry_namespaces(raise_=False):
 
 def register_structure_hooks():
     """
-    Find each direct `_SerializableNode` subclass's own `structure` staticmethod and register
+    Find each direct `_SerializableNode` subclass's own `from_record` staticmethod and register
     it as a `ContextConverter.register_structure_family` hook keyed on that class.
     """
     for cls in _SerializableNode.__subclasses__():
-        if "structure" not in cls.__dict__:
-            raise TypeError(f"{cls!r} is a direct subclass of _SerializableNode but does not define its own `structure`.")
-        ContextConverter.register_structure_family(lambda t, cls=cls: isinstance(t, type) and issubclass(t, cls))(cls.structure)
+        if "from_record" not in cls.__dict__:
+            raise TypeError(f"{cls!r} is a direct subclass of _SerializableNode but does not define its own `from_record`.")
+        ContextConverter.register_structure_family(lambda t, cls=cls: isinstance(t, type) and issubclass(t, cls))(cls.from_record)
 
 

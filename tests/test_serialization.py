@@ -143,6 +143,25 @@ def test_serialize_simple_nodes():
     assert len(serial_data.node_list) == 3
 
 
+def test_serialize_automodule_kwargs_roundtrip(processor_pair):
+    """AutoModule.from_record's tuple-form auto_module_kwargs translation, exercised directly."""
+    from hippynn.graphs.nodes.base import ValueNode
+    from hippynn.graphs.nodes.indexers import FuzzyHistogrammer
+
+    writer, reader = processor_pair
+
+    values = ValueNode(torch.linspace(0, 1, 10))
+    node = FuzzyHistogrammer("hist", (values,), length=5, vmin=0.0, vmax=1.0)
+
+    structure, tensor_blob = writer.unstructure([values, node])
+    reader.node_blob = writer.node_blob  # out-of-band node records, mirroring tensor_blob's write->read hand-off
+    restored_values, restored_node = reader.structure(structure, object, tensor_blob=tensor_blob)
+
+    assert isinstance(restored_node, FuzzyHistogrammer)
+    assert restored_node.parents[0] is restored_values
+    assert restored_node.module_kwargs == {"length": 5, "vmin": 0.0, "vmax": 1.0}
+
+
 def test_serialize_atleast2d_and_arithmetic_leaf_coverage():
     from hippynn.serializer import serialize_node_list
     from hippynn.graphs.nodes.base import ValueNode
