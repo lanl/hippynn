@@ -1,6 +1,8 @@
 """
 Nodes for constructing loss functions.
 """
+import functools
+
 import torch
 import torch.nn.functional
 
@@ -138,6 +140,39 @@ class WeightedMAELoss(_WeightedCompareLoss):
     _classname = "WeightedMAE"
     torch_module = algebra_modules.WeightedMAELoss()
 
+class WeightedHuberLoss(_WeightedCompareLoss):
+    _classname = "WeightedHuber"
+    torch_module = algebra_modules.WeightedHuberLoss()
+
+    def __init__(self, predicted, true, weight, delta=None):
+        if delta is None:
+            super().__init__(predicted, true, weight)
+            return
+        # A per-instance delta needs its own layer module; the class-level one is shared.
+        name = "{}(delta={},{},{},{})".format(self._classname, delta, predicted.name, true.name, weight.name)
+        predicted, true, weight = elementwise_compare_reduce(predicted, true, weight)
+        module = algebra_modules.WeightedHuberLoss(delta=delta)
+        SingleNode.__init__(self, name, (predicted, true, weight), module=module)
+
+    @classmethod
+    def of_node(cls, node, weight, delta=None):
+        """
+        Same as _WeightedCompareLoss.of_node, plus an optional huber delta.
+        """
+        node = node.main_output
+
+        if isinstance(weight, str):
+            index_state = db_state_of(node.index_state)
+            weight = InputNode(db_name=weight, index_state=index_state)
+
+        if not weight.is_in_loss_graph():
+            if isinstance(weight, InputNode):
+                weight = weight.true
+            else:
+                weight = weight.pred
+
+        return cls(node.pred, node.true, weight, delta=delta)
+
 class RsqMod(torch.nn.Module):
     def forward(self, predicted, true):
         return 1 - (torch.mean(torch.pow(predicted - true, 2)) / true.var())
@@ -157,7 +192,24 @@ class MAELoss(_BaseCompareLoss, op=torch.nn.functional.l1_loss):
 
 
 class HuberLoss(_BaseCompareLoss, op=torch.nn.functional.huber_loss):
-    pass
+    def __init__(self, predicted, true, delta=None):
+        if delta is None:
+            super().__init__(predicted, true)
+            return
+        # The class-level module is baked with torch's default delta of 1.0;
+        # any other delta needs its own module instance.
+        predicted = predicted.main_output
+        true = true.main_output
+        name = "{}(delta={},{},{})".format(self._classname, delta, predicted.name, true.name)
+        predicted, true = elementwise_compare_reduce(predicted, true)
+        op = functools.partial(torch.nn.functional.huber_loss, delta=float(delta))
+        op.__name__ = "huber_loss"
+        SingleNode.__init__(self, name, (predicted, true), module=algebra_modules.LambdaModule(op))
+
+    @classmethod
+    def of_node(cls, node, delta=None):
+        node = node.main_output
+        return cls(node.pred, node.true, delta=delta)
 
 
 class _LPReg(AutoKw, SingleNode):
