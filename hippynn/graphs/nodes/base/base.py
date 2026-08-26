@@ -123,6 +123,13 @@ class InputNode(SingleNode, _SerializableNode):
             name = self.input_type_str + "(db_name='{}')".format(db_name)
         super().__init__(name=name, parents=(), db_name=db_name, module=None)
 
+    # `unstructure` is attached generically in hippynn/serializer/hooks.py.
+
+    @staticmethod
+    def structure(data, typ, *, ctx):
+        """cattrs structure hook: rebuilds the node from its name, db_name, and index_state."""
+        name, parents, kwargs, record = data
+        return typ(name=name, db_name=record.db_name, index_state=record.index_state)
 
 
 class LossInputNode(InputNode):

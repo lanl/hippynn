@@ -6,7 +6,7 @@ and the generic container-walk hook used on the structure (read) side.
 import torch
 
 from .processor import ContextConverter
-from .registry import _ID_REGISTRY, _NODE_REGISTRY, _automodule_kwarg_mapping, node_reference_attrs
+from .registry import _ID_REGISTRY, _NODE_REGISTRY, node_reference_attrs
 from .types import NodeIdentifier, NodeInfo, NodeReference, Serializable
 from ..graphs.nodes.base import AutoModule, InputNode, Node
 
@@ -41,35 +41,27 @@ def _structure_tensor(data, typ, *, ctx):
 # ----------------------------------------------------------------------
 
 
-def _node_reference_dict(obj, ctx):
+def unstructure_node(obj, *, ctx):
     """
-    Ensure `obj` is present in `ctx.node_blob` (recursing into its parents and any
-    NODE_REFERENCE_ATTRS-named attributes), returning a `{"kind": "node_ref", ...}` dict
-    that stands in for `obj` wherever it is referenced in the unstructured tree.
+    Generic `unstructure` implementation shared by every direct `_SerializableNode` subclass
+    that doesn't need its own (attached onto `InputNode`/`AutoModule` below rather than defined
+    on those classes directly, since building a `NodeInfo` needs types from this package, which
+    `graphs.nodes.base` cannot import without a circular import). Builds the full `NodeInfo` for
+    `obj`, recursing into `.parents` and any NODE_REFERENCE_ATTRS-named attributes.
     """
-    key = ctx.node_ids.get(id(obj))
-    if key is not None:
-        return {"key": key, "kind": "node_ref"}
-
-    key = len(ctx.node_blob)
-    ctx.node_ids[id(obj)] = key
-    ctx.node_objects[key] = obj  # write-side: lets callers map discovered nodes back to their key/reference
-
     cls = type(obj)
-    parents = tuple(_node_reference_dict(p, ctx) for p in obj.parents)
+    key = ctx.node_ids[id(obj)]
+    parents = tuple(ctx.converter.unstructure(p) for p in obj.parents)
 
-    if isinstance(obj, InputNode):
-        node_kwargs = {}
-    else:
-        serialize_kwargs = getattr(obj, "_serialize_kwargs", None)
-        node_kwargs = dict(serialize_kwargs()) if serialize_kwargs is not None else dict(obj.module_kwargs)
+    serialize_kwargs = getattr(obj, "_serialize_kwargs", None)
+    node_kwargs = dict(serialize_kwargs()) if serialize_kwargs is not None else dict(getattr(obj, "module_kwargs", None) or {})
 
     for attr_name in node_reference_attrs(cls):
         node_kwargs[attr_name] = getattr(obj, attr_name)
 
     module_kwargs = ctx.converter.unstructure(node_kwargs) if node_kwargs else None
 
-    node_info = NodeInfo(
+    return NodeInfo(
         identifier=NodeIdentifier(id=key, name=obj.name or None),
         cls=_NODE_REGISTRY[cls],
         input_=isinstance(obj, InputNode),
@@ -79,13 +71,27 @@ def _node_reference_dict(obj, ctx):
         db_name=getattr(obj, "db_name", None),
         requires_grad=getattr(obj, "requires_grad", None),
     )
-    ctx.node_blob[key] = node_info
-    return {"key": key, "kind": "node_ref"}
+
+InputNode.unstructure = unstructure_node
+AutoModule.unstructure = unstructure_node
 
 
 @ContextConverter.register_unstructure_family(lambda t: isinstance(t, type) and issubclass(t, Node))
 def _unstructure_node(obj, *, ctx):
-    return _node_reference_dict(obj, ctx)
+    """
+    Node <-> NodeReference cattrs hook: memoized by identity in `ctx.node_ids`/`ctx.node_blob`,
+    delegating the actual `NodeInfo` construction to `obj.unstructure`.
+    """
+    key = ctx.node_ids.get(id(obj))
+    if key is not None:
+        return {"key": key, "kind": "node_ref"}
+
+    key = len(ctx.node_blob)
+    ctx.node_ids[id(obj)] = key
+    ctx.node_objects[key] = obj  # write-side: lets callers map discovered nodes back to their key/reference
+
+    ctx.node_blob[key] = obj.unstructure(ctx=ctx)
+    return {"key": key, "kind": "node_ref"}
 
 
 def _resolve_node(key, ctx):
@@ -132,34 +138,13 @@ def _structure_node_reference(data, typ, *, ctx):
 
 
 # ----------------------------------------------------------------------
-# Per-class node reconstruction (structure/read side), keyed on the concrete Node subclass
-# rather than the wire-tagged NodeReference above: `_resolve_node` calls
-# `ctx.converter.structure((name, parents, kwargs, record), cls)`, and cattrs dispatches to
-# whichever family hook's predicate matches `cls`. Only the InputNode and AutoModule families
-# are implemented here; LossInputNode (which also derives from InputNode, so must not be
-# matched by the generic InputNode hook - not yet resolved) and the `_deserialize_spec`/plain-
-# call branches are left unimplemented for now.
+# Per-class node reconstruction (structure/read side) is registered generically by
+# `registry.register_structure_hooks`, which finds each direct `_SerializableNode` subclass's
+# own `structure` staticmethod (e.g. `InputNode.structure`, `AutoModule.structure`) and
+# registers it as a `ContextConverter.register_structure_family` hook keyed on that class.
+# LossInputNode (which also derives from InputNode, so must not be matched by the generic
+# InputNode hook - not yet resolved) is left unimplemented for now.
 # ----------------------------------------------------------------------
-
-
-@ContextConverter.register_structure_family(lambda t: isinstance(t, type) and issubclass(t, InputNode))
-def _structure_input_node(data, typ, *, ctx):
-    name, parents, kwargs, record = data
-    return typ(name=name, db_name=record.db_name, index_state=record.index_state)
-
-
-@ContextConverter.register_structure_family(lambda t: isinstance(t, type) and issubclass(t, AutoModule))
-def _structure_automodule_node(data, typ, *, ctx):
-    name, parents, kwargs, record = data
-    mapping = _automodule_kwarg_mapping(typ)
-    node_kwargs = {}
-    leftover_module_kwargs = {}
-    for k, v in kwargs.items():
-        if k in mapping:
-            node_kwargs[mapping[k]] = v
-        else:
-            leftover_module_kwargs[k] = v
-    return typ(name, parents, module_kwargs=leftover_module_kwargs, **node_kwargs)
 
 
 # ----------------------------------------------------------------------
