@@ -8,6 +8,7 @@ and provides the `serialize`/`deserialize` entry points, thin wrappers around
 `Processor.unstructure`/`structure`.
 """
 
+import warnings
 from typing import Iterable
 
 from ..experiment import _debprint
@@ -34,20 +35,24 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, descendants=T
     """
     module = original_roots = None
     if isinstance(nodes_or_graph, GraphModule):
-        nodes = nodes_or_graph.nodes_to_compute
         module = nodes_or_graph
-    elif isinstance(nodes_or_graph, Node):
-        original_roots = [nodes_or_graph]
-        nodes = original_roots
+        # A GraphModule already computed its own exhaustive set of referenced nodes - inputs
+        # plus everything its forward pass touches, including MultiNode children pulled in by
+        # get_subgraph (see hippynn/graphs/gops.py). Reuse that directly instead of re-deriving
+        # an approximation via ancestor/descendant traversal, so this always matches whatever
+        # criteria GraphModule itself uses to decide which nodes it needs.
+        expanded = list(module.input_nodes) + list(module.forward_output_list)
     else:
-        original_roots = list(nodes_or_graph)
-        nodes = original_roots
+        if isinstance(nodes_or_graph, Node):
+            original_roots = [nodes_or_graph]
+        else:
+            original_roots = list(nodes_or_graph)
 
-    # Ancestors no longer need to be gathered here - the Node <-> NodeReference hook pair
-    # (hooks.py) discovers them by recursing into `.parents` while unstructuring. Descendants
-    # are not reachable that way (there is no parent->child edge to recurse through), so they
-    # still need to be gathered explicitly when requested.
-    expanded = get_connected_nodes(nodes, descendants=descendants, ancestors=False)
+        # Ancestors no longer need to be gathered here - the Node <-> NodeReference hook pair
+        # (hooks.py) discovers them by recursing into `.parents` while unstructuring. Descendants
+        # are not reachable that way (there is no parent->child edge to recurse through), so they
+        # still need to be gathered explicitly when requested.
+        expanded = get_connected_nodes(original_roots, descendants=descendants, ancestors=False)
 
     serial_data, tensor_data, identifier_map = serialize_node_list(expanded)
 
@@ -104,6 +109,15 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
     output_nodes = map_tuple(record.module.output_nodes)
 
     module = GraphModule(input_nodes, output_nodes)
+
+    if len(module.forward_output_list) != len(record.module.forward_output_list):
+        warnings.warn(
+            f"Deserialized GraphModule has {len(module.forward_output_list)} forward_output_list "
+            f"nodes, but the record was serialized with {len(record.module.forward_output_list)} - "
+            "the reconstructed graph structure does not match the original, and loading its "
+            "state_dict is likely to fail.",
+            stacklevel=2,
+        )
 
     if state_dict is None:
         state_dict = record.state_dict

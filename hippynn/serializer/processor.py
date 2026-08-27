@@ -2,6 +2,7 @@
 The ContextConverter class: a per-session cattrs Converter plus tensor/node identity caches.
 """
 
+import itertools
 from functools import partial
 from typing import Any, ClassVar
 
@@ -79,6 +80,7 @@ class ContextConverter:
         self.tensor_blob: dict[int, Any] = {}
         self.tensor_ids: dict[int, int] = {}  # id(tensor) -> key, unstructure-side dedup
         self.tensor_objects: dict[int, Any] = {}  # key -> tensor, structure-side cache
+        self._tensor_counter = itertools.count()  # dedicated key source, independent of len(tensor_blob)
 
         # Node <-> NodeReference: this blob *is* SerializedGraph.node_list, assembled directly
         # from discovery order by the top-level serialize()/deserialize() wrappers.
@@ -86,6 +88,10 @@ class ContextConverter:
         self.node_ids: dict[int, int] = {}  # id(node) -> key, unstructure-side dedup
         self.node_objects: dict[int, Any] = {}  # key -> reconstructed node, structure-side cache
         self._node_resolving: set[int] = set()  # loop guard for the recursive resolver
+        self._node_counter = itertools.count()  # dedicated key source, independent of len(node_blob) -
+        # unstructuring a node recurses into its parents before its own blob slot is written, so
+        # len(node_blob) is not yet incremented while nested keys are assigned - a plain counter
+        # guarantees each call gets a distinct key regardless of that reentrancy.
 
         self._synced_structure = 0
         self._synced_unstructure = 0

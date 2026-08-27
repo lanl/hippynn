@@ -100,4 +100,4 @@ class MLSEQM_Node(AutoModule, MultiNode):
     def __init__(self, name, parents, seqm_parameters, module="auto", **kwargs):
         self.module_kwargs = dict(seqm_parameters=seqm_parameters)
         super().__init__(name, parents, module=module, **kwargs)
-rgs)
+

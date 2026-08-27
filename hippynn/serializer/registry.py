@@ -103,14 +103,22 @@ def ensure_registry_namespaces(raise_=False):
     return problems
 
 
+def _dispatch_from_record(data, typ, *, ctx):
+    """Resolves `from_record` on the actual runtime type, so a stricter subclass (e.g. IndexNode
+    under AutoModule) can override the class its family hook was registered against."""
+    return typ.from_record(data, typ, ctx=ctx)
+
+
 def register_structure_hooks():
     """
     Find each direct `_SerializableNode` subclass's own `from_record` staticmethod and register
-    it as a `ContextConverter.register_structure_family` hook keyed on that class.
+    a `ContextConverter.register_structure_family` hook keyed on that class, dispatching to
+    `typ.from_record` at structure time rather than the registering class's, so subclasses further
+    down the MRO may override it.
     """
     for cls in _SerializableNode.__subclasses__():
         if "from_record" not in cls.__dict__:
             raise TypeError(f"{cls!r} is a direct subclass of _SerializableNode but does not define its own `from_record`.")
-        ContextConverter.register_structure_family(lambda t, cls=cls: isinstance(t, type) and issubclass(t, cls))(cls.from_record)
+        ContextConverter.register_structure_family(lambda t, cls=cls: isinstance(t, type) and issubclass(t, cls))(_dispatch_from_record)
 
 

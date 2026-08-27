@@ -170,7 +170,7 @@ def test_serialize_atleast2d_and_arithmetic_leaf_coverage():
     left = ValueNode(1.0)
     right = ValueNode(2.0)
     combined = left + right
-    wrapped = AtLeast2D((combined,))
+    wrapped = AtLeast2D(combined)
 
     serial_data, tensor_data, identifier_map = serialize_node_list([left, right, combined, wrapped])
     assert len(serial_data.node_list) == 4
@@ -189,17 +189,20 @@ def test_serialize_shared_tensor_across_nodes_dedup():
     assert len(tensor_data) == 1, "the same tensor object referenced by two nodes must be stored once"
 
 
-def test_serialize_origin_node_roundtrip(energy_node, energy_graph, example_box):
-    from hippynn.graphs.nodes.loss import MAELoss
-    from hippynn.serializer import serialize, deserialize
-    from hippynn.graphs.nodes.base import get_connected_nodes, LossPredNode, LossTrueNode
+def test_serialize_origin_node_roundtrip():
+    from hippynn.graphs.nodes.base import InputNode, LossPredNode, LossTrueNode
+    from hippynn.serializer import serialize_node_list, deserialize_node_list
 
-    loss_node = MAELoss.of_node(energy_node)
+    # node.true's _main_output is wrapped in an AtLeast2D (base.py's LossTrueNode.__init__), which
+    # registers as a *child* of node.true - only relevant here because get_connected_nodes'
+    # descendant search follows .children. serialize_node_list only recurses via .parents, so it
+    # never touches that unrelated AtLeast2D wrapper; this test is only about origin_node identity.
+    node = InputNode(db_name="X")
+    pred_node, true_node = node.pred, node.true
 
-    record, tensor_data = serialize(loss_node)
-    rebuilt_loss = deserialize(record, tensor_data)
+    serial_data, tensor_data, identifier_map = serialize_node_list([pred_node, true_node])
+    rebuilt_nodes, rebuilt_identifier_map = deserialize_node_list(serial_data.node_list, tensor_data=tensor_data)
 
-    rebuilt_nodes = get_connected_nodes([rebuilt_loss], descendants=False, ancestors=True)
     rebuilt_pred = next(n for n in rebuilt_nodes if isinstance(n, LossPredNode))
     rebuilt_true = next(n for n in rebuilt_nodes if isinstance(n, LossTrueNode))
 
@@ -213,6 +216,14 @@ def written_energy_graph(energy_graph):
     return serialize(energy_graph)
 
 
+def _flatten_tensors(seq):
+    for item in seq:
+        if isinstance(item, (tuple, list)):
+            yield from _flatten_tensors(item)
+        else:
+            yield item
+
+
 def test_serialize_roundtrip(written_energy_graph, energy_graph, example_box):
     record, tensor_data = written_energy_graph
 
@@ -222,9 +233,12 @@ def test_serialize_roundtrip(written_energy_graph, energy_graph, example_box):
 
     args = (example_box["species"], example_box["coordinates"], example_box["cell"])
 
-    original_outputs = energy_graph(*args)
-    rebuilt_outputs = rebuilt_graph(*args)
+    # energy_node is a bare MultiNode, so each entry of these outputs may itself be a
+    # tuple of tensors (one per output_names) rather than a single tensor - flatten before comparing.
+    original_outputs = list(_flatten_tensors(energy_graph(*args)))
+    rebuilt_outputs = list(_flatten_tensors(rebuilt_graph(*args)))
 
+    assert len(original_outputs) == len(rebuilt_outputs)
     for orig, new in zip(original_outputs, rebuilt_outputs):
         assert torch.allclose(orig, new)
 

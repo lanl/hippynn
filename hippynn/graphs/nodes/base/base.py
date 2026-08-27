@@ -87,17 +87,13 @@ class PowNode(BinNode, SingleNode , _AlgebraicOperation, operation="pow"):
 # have at least two dimensions.
 # See nodes/loss.py and turn on `debug_loss_broadcast` if you have concerns about
 # broadcasting behavior.
-class AtLeast2D(SingleNode):
+class AtLeast2D(UnaryNode, SingleNode):
     torch_module = algebra_mods.AtLeast2D()
-    index_state = IdxType.Unlabeled
+    _classname = "Atleast2D"
 
-    def __init__(self, parents, *args, **kwargs):
-        if len(parents) != 1:
-            raise ValueError("AtLeast2D can only have 1 parent, got {}".format(len(parents)))
-        p = parents[0]
-        self.index_state = p.index_state
-        super().__init__("Atleast2D({})".format(p), parents, *args, module=None, **kwargs)
-        self.origin_node = p.origin_node
+    def __init__(self, in_node):
+        super().__init__(in_node)
+        self.origin_node = in_node.origin_node
 
 
 class InputNode(SingleNode, _SerializableNode):
@@ -139,6 +135,18 @@ class LossInputNode(InputNode):
         super().__init__(name, db_name)
         self.origin_node = origin_node
 
+    @staticmethod
+    def from_record(data, typ, *, ctx):
+        """
+        cattrs structure hook: overrides InputNode.from_record, whose (name, db_name, index_state)
+        signature doesn't match LossPredNode/LossTrueNode's (name, origin_node, db_name) constructor.
+        origin_node is already a resolved live Node by this point (NODE_REFERENCE_ATTRS resolves it
+        as part of module_kwargs); index_state is left to the constructor, which always derives it
+        from origin_node rather than accepting it as an argument.
+        """
+        name, parents, kwargs, record = data
+        return typ(name=name, origin_node=kwargs["origin_node"], db_name=record.db_name)
+
 
 class LossPredNode(LossInputNode):
     def __init__(self, name, origin_node, db_name):
@@ -150,7 +158,7 @@ class LossTrueNode(LossInputNode):
     def __init__(self, name, origin_node, db_name):
         super().__init__(name, origin_node, db_name)
         self.index_state = indextypes.reduce_funcs.db_state_of(origin_node.index_state)
-        self._main_output = AtLeast2D((self,))
+        self._main_output = AtLeast2D(self)
 
     @property
     def main_output(self):

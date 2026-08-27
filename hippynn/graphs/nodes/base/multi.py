@@ -25,6 +25,21 @@ class IndexNode(AutoModule, SingleNode):
         self.index_state = IdxType.Unlabeled if index_state is None else index_state
         super().__init__(name, parents, _repr_info=repr_info, index=index, module="auto")
 
+    # `to_record` is attached generically in hippynn/serializer/hooks.py.
+
+    @staticmethod
+    def from_record(data, typ, *, ctx):
+        """
+        cattrs structure hook: an IndexNode only ever exists as a MultiNode's child, already
+        created as a side effect of reconstructing that parent (see MultiNode.__init__) - reuse
+        it instead of constructing an independent duplicate.
+        """
+        name, parents, kwargs, record = data
+        (parent,) = parents
+        child = parent.children[kwargs["index"]]
+        child.name = name
+        return child
+
 
 class MultiNode(Node,_DeprecatedNamesMixin):  # Multinode
     output_names = NotImplemented

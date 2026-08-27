@@ -22,7 +22,7 @@ from ..graphs.nodes.base.algebra import BinNode, UnaryNode
 def _unstructure_tensor(obj: torch.Tensor, *, ctx):
     key = ctx.tensor_ids.get(id(obj))
     if key is None:
-        key = len(ctx.tensor_blob)
+        key = next(ctx._tensor_counter)
         ctx.tensor_ids[id(obj)] = key
         ctx.tensor_blob[key] = obj
     return {"key": key, "kind": "tensor_ref"}
@@ -91,7 +91,7 @@ def _unstructure_node(obj, *, ctx):
     if key is not None:
         return {"key": key, "kind": "node_ref"}
 
-    key = len(ctx.node_blob)
+    key = next(ctx._node_counter)
     ctx.node_ids[id(obj)] = key
     ctx.node_objects[key] = obj  # write-side: lets callers map discovered nodes back to their key/reference
 
