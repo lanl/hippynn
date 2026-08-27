@@ -40,11 +40,9 @@ def _populate_registry():
 
 
 def register_node_cls(cls):
-    _debprint(f"Registering {cls=}")
     nodetype = get_nodetype(cls)
-    _debprint(f"{type(nodetype)=}, {nodetype=}")
-    if nodetype in _ID_REGISTRY:
-        raise ValueError(f"Registry of duplicate {nodetype=}")
+    _debprint(f"Registering {cls=}, {type(nodetype)=}, {nodetype=}")
+
     _NODE_REGISTRY[cls] = nodetype
     _ID_REGISTRY[nodetype] = cls
 
@@ -71,12 +69,10 @@ def get_nodetype(node_cls):
     return NodeTypeIdentifier(name=name, namespace=namespace, package=package)
 
 
-def ensure_registry_namespaces(raise_=False):
+def ensure_registry_consistency(raise_=False):
     """
     Verify that `_NODE_REGISTRY` (class -> identifier) and `_ID_REGISTRY` (identifier -> class)
-    are inverses of one another: every registered class round-trips back to itself through its
-    own identifier, and every registered identifier round-trips back to itself through its own
-    class.
+    are inverses of one another.
     """
     _populate_registry()
 
@@ -94,7 +90,7 @@ def ensure_registry_namespaces(raise_=False):
     if problems:
         message = "Registry round-trip mismatch(es):\n" + "\n".join(problems)
         if raise_:
-            raise LookupError(message)
+            raise ValueError(message)
         else:
             warnings.warn(message, stacklevel=2)
 

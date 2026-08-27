@@ -16,7 +16,7 @@ from ..graphs import GraphModule
 from ..graphs.nodes.base import Node, get_connected_nodes
 from .hooks import _resolve_node
 from .processor import ContextConverter
-from .registry import ensure_registry_namespaces, register_node_cls, register_structure_hooks
+from .registry import ensure_registry_consistency, register_node_cls, register_structure_hooks
 from .types import (
     NodeIdentifier,
     NodeInfo,
@@ -157,6 +157,6 @@ def deserialize_node_list(node_list: list[NodeInfo], tensor_data: dict[int, obje
     return list(identifier_map.values()), identifier_map
 
 
-ensure_registry_namespaces(raise_=False)
+ensure_registry_consistency(raise_=False)
 register_structure_hooks()
 

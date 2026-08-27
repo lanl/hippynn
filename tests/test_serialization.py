@@ -180,10 +180,10 @@ def test_serialize_graph(energy_graph):
 
 
 def test_serialization_registry():
-    from hippynn.serializer import ensure_registry_namespaces
+    from hippynn.serializer import ensure_registry_consistency
 
     # Test no problems
-    ensure_registry_namespaces(raise_=True)
+    ensure_registry_consistency(raise_=True)
 
     # Test problems when duplicate definitions clash
     from hippynn.graphs.nodes.base import InputNode
@@ -192,7 +192,7 @@ def test_serialization_registry():
     class Foo(InputNode):
         pass
     with pytest.raises(ValueError):
-        ensure_registry_namespaces(raise_=True)
+        ensure_registry_consistency(raise_=True)
 
 
 
