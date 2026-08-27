@@ -52,13 +52,19 @@ class WeightedHuberLoss(_WeightedLoss):
 
     def __init__(self, delta=1.0):
         super().__init__()
-        self.delta = float(delta)
+        self.huber = torch.nn.HuberLoss(reduction="none", delta=delta)
 
-    def loss_func(self, pred, true, reduction):
-        return torch.nn.functional.huber_loss(pred, true, reduction=reduction, delta=self.delta)
+    def forward(self, pred, true, weights):
+        unweighted_loss = self.huber(pred, true)
+        assert weights.shape == unweighted_loss.shape, (
+            f"Shape mismatch: weights {weights.shape}, loss {unweighted_loss.shape}"
+        )
 
-    def extra_repr(self):
-        return f"delta={self.delta}"
+        weights = weights.to(dtype=unweighted_loss.dtype)
+
+        normalized_weights = weights/torch.mean(weights)
+        weighted_loss = (normalized_weights*unweighted_loss).mean()
+        return weighted_loss
 
 
 class AtLeast2D(torch.nn.Module):
