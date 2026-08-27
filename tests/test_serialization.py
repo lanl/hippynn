@@ -114,16 +114,6 @@ def test_processor_embedded_object_reference_roundtrip(processor_pair):
     assert restored.leaves[0].payload == "shared"
 
 
-def test_serialize_autonode_graph(energy_graph):
-    from hippynn.serializer import serialize, NodeInfo, SerializedGraphModule
-
-    record, tensor_data = serialize(energy_graph)
-
-    assert isinstance(record.graph.node_list, list)
-    assert len(record.graph.node_list) > 0
-    assert all(isinstance(info, NodeInfo) for info in record.graph.node_list)
-    assert isinstance(record.module, SerializedGraphModule)
-    assert isinstance(tensor_data, dict)
     
 
 def test_serialize_simple_nodes():
@@ -143,8 +133,7 @@ def test_serialize_simple_nodes():
     assert len(serial_data.node_list) == 3
 
 
-def test_serialize_automodule_kwargs_roundtrip(processor_pair):
-    """AutoModule.from_record's tuple-form auto_module_kwargs translation, exercised directly."""
+def test_serialize_automodule(processor_pair):
     from hippynn.graphs.nodes.base import ValueNode
     from hippynn.graphs.nodes.indexers import FuzzyHistogrammer
 
@@ -162,6 +151,7 @@ def test_serialize_automodule_kwargs_roundtrip(processor_pair):
     assert restored_node.module_kwargs == {"length": 5, "vmin": 0.0, "vmax": 1.0}
 
 
+
 def test_serialize_atleast2d_and_arithmetic_leaf_coverage():
     from hippynn.serializer import serialize_node_list
     from hippynn.graphs.nodes.base import ValueNode
@@ -176,7 +166,37 @@ def test_serialize_atleast2d_and_arithmetic_leaf_coverage():
     assert len(serial_data.node_list) == 4
 
 
-def test_serialize_shared_tensor_across_nodes_dedup():
+def test_serialize_graph(energy_graph):
+    from hippynn.serializer import serialize, NodeInfo, SerializedGraphModule
+
+    record, tensor_data = serialize(energy_graph)
+
+    assert isinstance(record.graph.node_list, list)
+    assert len(record.graph.node_list) > 0
+    assert all(isinstance(info, NodeInfo) for info in record.graph.node_list)
+    assert isinstance(record.module, SerializedGraphModule)
+    assert isinstance(tensor_data, dict)
+
+
+
+def test_serialization_registry():
+    from hippynn.serializer import ensure_registry_namespaces
+
+    # Test no problems
+    ensure_registry_namespaces(raise_=True)
+
+    # Test problems when duplicate definitions clash
+    from hippynn.graphs.nodes.base import InputNode
+    class Foo(InputNode):
+        pass
+    class Foo(InputNode):
+        pass
+    with pytest.raises(ValueError):
+        ensure_registry_namespaces(raise_=True)
+
+
+
+def test_same_tensor_shared():
     from hippynn.serializer import serialize_node_list
     from hippynn.graphs.nodes.base import ValueNode
 
@@ -189,7 +209,8 @@ def test_serialize_shared_tensor_across_nodes_dedup():
     assert len(tensor_data) == 1, "the same tensor object referenced by two nodes must be stored once"
 
 
-def test_serialize_origin_node_roundtrip():
+
+def test_origin_node_link():
     from hippynn.graphs.nodes.base import InputNode, LossPredNode, LossTrueNode
     from hippynn.serializer import serialize_node_list, deserialize_node_list
 

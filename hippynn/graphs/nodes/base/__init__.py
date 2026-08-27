@@ -22,7 +22,7 @@ from .node_functions import NodeAmbiguityError, NodeOperationError, NodeNotFound
 
 # Basic node classes
 from .base import Node, SingleNode, InputNode, LossInputNode, LossPredNode, LossTrueNode
-from .automodule import AutoModule 
+from .automodule import AutoModule
 
 from .value import ValueNode
 

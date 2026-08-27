@@ -5,7 +5,6 @@ side lives as a `from_record` staticmethod on each direct `_SerializableNode` su
 `ContextConverter.register_structure_family` hooks.
 """
 
-import importlib
 import warnings
 
 from ..experiment import _debprint
@@ -74,27 +73,26 @@ def get_nodetype(node_cls):
 
 def ensure_registry_namespaces(raise_=False):
     """
-    Verify that every registered node class is actually reachable via
-    ``getattr(importlib.import_module(f"{package}.{namespace}"), name)``, and that
-    the object found there is the same class that was registered.
+    Verify that `_NODE_REGISTRY` (class -> identifier) and `_ID_REGISTRY` (identifier -> class)
+    are inverses of one another: every registered class round-trips back to itself through its
+    own identifier, and every registered identifier round-trips back to itself through its own
+    class.
     """
     _populate_registry()
 
     problems = []
     for cls, nodetype in _NODE_REGISTRY.items():
-        module_path = f"{nodetype.package}.{nodetype.namespace}"
-        try:
-            module = importlib.import_module(module_path)
-        except ImportError as ee:
-            problems.append(f"{nodetype}: could not import {module_path!r}: {ee}")
-            continue
-
-        found = getattr(module, nodetype.name, None)
+        found = _ID_REGISTRY.get(nodetype)
         if found is not cls:
-            problems.append(f"{nodetype}: {module_path}.{nodetype.name} resolves to {found!r}, expected {cls!r}")
+            problems.append(f"{nodetype}: registered for {cls!r}, but _ID_REGISTRY resolves it to {found!r}")
+
+    for nodetype, cls in _ID_REGISTRY.items():
+        found = _NODE_REGISTRY.get(cls)
+        if found != nodetype:
+            problems.append(f"{cls!r}: registered as {nodetype}, but _NODE_REGISTRY resolves it to {found!r}")
 
     if problems:
-        message = "Registry namespace mismatch(es):\n" + "\n".join(problems)
+        message = "Registry round-trip mismatch(es):\n" + "\n".join(problems)
         if raise_:
             raise LookupError(message)
         else:
