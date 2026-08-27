@@ -117,20 +117,25 @@ def test_processor_embedded_object_reference_roundtrip(processor_pair):
     
 
 def test_serialize_simple_nodes():
-    from hippynn.serializer import serialize_node_list
+    from hippynn.serializer import serialize
     from hippynn.graphs.nodes.base import ValueNode
-
-    value = ValueNode(1.0)
-
-    serial_data, tensor_data, identifier_map = serialize_node_list([value])
-    assert len(serial_data.node_list) == 1
+    from hippynn.graphs.nodes.base.base import AtLeast2D
 
     left = ValueNode(1.0)
+    record, tensor_data = serialize(left)
+    assert len(record.graph.node_list) == 1
+
     right = ValueNode(2.0)
     combined = left + right
 
-    serial_data, tensor_data, identifier_map = serialize_node_list([left, right, combined])
-    assert len(serial_data.node_list) == 3
+    record, tensor_data = serialize([left, right, combined])
+    assert len(record.graph.node_list) == 3
+
+    wrapped = AtLeast2D(combined)
+    record, tensor_data = serialize([left, right, combined, wrapped])
+    assert len(record.graph.node_list) == 4
+
+    
 
 
 def test_serialize_automodule(processor_pair):
@@ -151,19 +156,6 @@ def test_serialize_automodule(processor_pair):
     assert restored_node.module_kwargs == {"length": 5, "vmin": 0.0, "vmax": 1.0}
 
 
-
-def test_serialize_atleast2d_and_arithmetic_leaf_coverage():
-    from hippynn.serializer import serialize_node_list
-    from hippynn.graphs.nodes.base import ValueNode
-    from hippynn.graphs.nodes.base.base import AtLeast2D
-
-    left = ValueNode(1.0)
-    right = ValueNode(2.0)
-    combined = left + right
-    wrapped = AtLeast2D(combined)
-
-    serial_data, tensor_data, identifier_map = serialize_node_list([left, right, combined, wrapped])
-    assert len(serial_data.node_list) == 4
 
 
 def test_serialize_graph(energy_graph):
@@ -197,14 +189,14 @@ def test_serialization_registry():
 
 
 def test_same_tensor_shared():
-    from hippynn.serializer import serialize_node_list
+    from hippynn.serializer import serialize
     from hippynn.graphs.nodes.base import ValueNode
 
     shared = torch.ones(3)
     left = ValueNode(shared)
     right = ValueNode(shared)
 
-    serial_data, tensor_data, identifier_map = serialize_node_list([left, right])
+    record, tensor_data = serialize([left, right])
 
     assert len(tensor_data) == 1, "the same tensor object referenced by two nodes must be stored once"
 
@@ -212,17 +204,13 @@ def test_same_tensor_shared():
 
 def test_origin_node_link():
     from hippynn.graphs.nodes.base import InputNode, LossPredNode, LossTrueNode
-    from hippynn.serializer import serialize_node_list, deserialize_node_list
+    from hippynn.serializer import serialize, deserialize
 
-    # node.true's _main_output is wrapped in an AtLeast2D (base.py's LossTrueNode.__init__), which
-    # registers as a *child* of node.true - only relevant here because get_connected_nodes'
-    # descendant search follows .children. serialize_node_list only recurses via .parents, so it
-    # never touches that unrelated AtLeast2D wrapper; this test is only about origin_node identity.
     node = InputNode(db_name="X")
     pred_node, true_node = node.pred, node.true
 
-    serial_data, tensor_data, identifier_map = serialize_node_list([pred_node, true_node])
-    rebuilt_nodes, rebuilt_identifier_map = deserialize_node_list(serial_data.node_list, tensor_data=tensor_data)
+    record, tensor_data = serialize([pred_node, true_node], descendants=False)
+    rebuilt_nodes = deserialize(record, tensor_data)
 
     rebuilt_pred = next(n for n in rebuilt_nodes if isinstance(n, LossPredNode))
     rebuilt_true = next(n for n in rebuilt_nodes if isinstance(n, LossTrueNode))
