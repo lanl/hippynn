@@ -7,7 +7,7 @@ import torch
 
 from .processor import ContextConverter
 from .registry import _ID_REGISTRY, _NODE_REGISTRY, node_reference_attrs
-from .types import NodeIdentifier, NodeInfo, NodeReference, Serializable
+from .types import NodeIdentifier, NodeInfo, NodeReference, Serializable, TaggedSet, TensorReference
 from ..graphs.nodes.base import AutoModule, InputNode, Node
 from ..graphs.nodes.base.algebra import BinNode, UnaryNode
 
@@ -25,12 +25,12 @@ def _unstructure_tensor(obj: torch.Tensor, *, ctx):
         key = next(ctx._tensor_counter)
         ctx.tensor_ids[id(obj)] = key
         ctx.tensor_blob[key] = obj
-    return {"key": key, "kind": "tensor_ref"}
+    return TensorReference(key=key)
 
 
 @ContextConverter.register_structure(torch.Tensor)
-def _structure_tensor(data, typ, *, ctx):
-    key = data["key"]
+def _structure_tensor(data: TensorReference, typ, *, ctx):
+    key = data.key
     if key not in ctx.tensor_objects:
         ctx.tensor_objects[key] = ctx.tensor_blob[key]
     return ctx.tensor_objects[key]
@@ -89,7 +89,7 @@ def _unstructure_node(obj, *, ctx):
     """
     key = ctx.node_ids.get(id(obj))
     if key is not None:
-        return {"key": key, "kind": "node_ref"}
+        return NodeReference(key=key)
 
     key = next(ctx._node_counter)
     ctx.node_ids[id(obj)] = key
@@ -97,7 +97,7 @@ def _unstructure_node(obj, *, ctx):
 
     to_record = getattr(obj, "to_record", None)
     ctx.node_blob[key] = to_record(ctx=ctx) if to_record is not None else unstructure_node(obj, ctx=ctx)
-    return {"key": key, "kind": "node_ref"}
+    return NodeReference(key=key)
 
 
 def _resolve_node(key, ctx):
@@ -112,7 +112,7 @@ def _resolve_node(key, ctx):
         record = ctx.node_blob[key]
         cls = _ID_REGISTRY[record.cls]
         name = record.identifier.name
-        parents = tuple(_resolve_node(p["key"], ctx) for p in record.parents)
+        parents = tuple(_resolve_node(p.key, ctx) for p in record.parents)
         kwargs = _resolve_serializable(record.module_kwargs, ctx) if record.module_kwargs is not None else {}
 
         node = ctx.converter.structure((name, parents, kwargs, record), cls)
@@ -139,17 +139,17 @@ def _resolve_node(key, ctx):
 
 
 @ContextConverter.register_structure(NodeReference)
-def _structure_node_reference(data, typ, *, ctx):
-    return _resolve_node(data["key"], ctx)
+def _structure_node_reference(data: NodeReference, typ, *, ctx):
+    return _resolve_node(data.key, ctx)
 
 
 # ----------------------------------------------------------------------
 # Per-class node reconstruction (structure/read side) is registered generically by
 # `registry.register_structure_hooks`, which finds each direct `_SerializableNode` subclass's
 # own `from_record` staticmethod (e.g. `AutoModule.from_record`) and registers it as a
-# `ContextConverter.register_structure_family` hook keyed on that class.
-# LossInputNode (which also derives from InputNode, so must not be matched by the generic
-# InputNode hook - not yet resolved) is left unimplemented for now.
+# `ContextConverter.register_structure_family` hook keyed on that class. `LossInputNode`'s own
+# `from_record` (base.py) overrides the generic `InputNode.from_record` for its subclasses
+# (`LossPredNode`/`LossTrueNode`), since dispatch resolves against the runtime type.
 # ----------------------------------------------------------------------
 
 
@@ -179,7 +179,7 @@ def _unstructure_dict(obj, *, ctx):
 
 @ContextConverter.register_unstructure(set)
 def _unstructure_set(obj, *, ctx):
-    return {"kind": "set", "values": [ctx.converter.unstructure(v) for v in obj]}
+    return TaggedSet(values=[ctx.converter.unstructure(v) for v in obj])
 
 
 # ----------------------------------------------------------------------
@@ -197,14 +197,13 @@ def _unstructure_set(obj, *, ctx):
 def _resolve_serializable(data, ctx):
     if data is None or isinstance(data, (bool, int, float, str)):
         return data
+    if isinstance(data, TensorReference):
+        return ctx.converter.structure(data, torch.Tensor)
+    if isinstance(data, NodeReference):
+        return ctx.converter.structure(data, NodeReference)
+    if isinstance(data, TaggedSet):
+        return set(ctx.converter.structure(data.values, list[Serializable]))
     if isinstance(data, dict):
-        kind = data.get("kind")
-        if kind == "tensor_ref":
-            return ctx.converter.structure(data, torch.Tensor)
-        if kind == "node_ref":
-            return ctx.converter.structure(data, NodeReference)
-        if kind == "set":
-            return set(ctx.converter.structure(data["values"], list[Serializable]))
         return ctx.converter.structure(data, dict[str, Serializable])
     if isinstance(data, list):
         return ctx.converter.structure(data, list[Serializable])

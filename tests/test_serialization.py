@@ -245,6 +245,7 @@ def _flatten_tensors(seq):
             yield item
 
 
+@ignore_sensitivity_warning
 def test_serialize_roundtrip(written_energy_graph, energy_graph, example_box):
     record, tensor_data = written_energy_graph
 
