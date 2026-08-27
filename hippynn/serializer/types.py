@@ -22,15 +22,15 @@ class NodeIdentifier:
 
 
 @dataclasses.dataclass(frozen=True)
-class TensorReference:
-    key: int
-    kind: Literal["tensor_ref"] = "tensor_ref"
+class NodeReference:
+    identifier: NodeIdentifier
+    kind: Literal["node_ref"] = "node_ref"
 
 
 @dataclasses.dataclass(frozen=True)
-class NodeReference:
+class TensorReference:
     key: int
-    kind: Literal["node_ref"] = "node_ref"
+    kind: Literal["tensor_ref"] = "tensor_ref"
 
 
 @dataclasses.dataclass(frozen=True)

@@ -87,9 +87,10 @@ def _unstructure_node(obj, *, ctx):
     to the generic `unstructure_node` for `Node` subclasses that aren't `_SerializableNode`s (and
     so don't have `to_record` attached).
     """
+    name = obj.name or None
     key = ctx.node_ids.get(id(obj))
     if key is not None:
-        return NodeReference(key=key)
+        return NodeReference(identifier=NodeIdentifier(id=key, name=name))
 
     key = next(ctx._node_counter)
     ctx.node_ids[id(obj)] = key
@@ -97,7 +98,7 @@ def _unstructure_node(obj, *, ctx):
 
     to_record = getattr(obj, "to_record", None)
     ctx.node_blob[key] = to_record(ctx=ctx) if to_record is not None else unstructure_node(obj, ctx=ctx)
-    return NodeReference(key=key)
+    return NodeReference(identifier=NodeIdentifier(id=key, name=name))
 
 
 def _resolve_node(key, ctx):
@@ -105,14 +106,14 @@ def _resolve_node(key, ctx):
     if key in ctx.node_objects:
         return ctx.node_objects[key]
     if key in ctx._node_resolving:
-        raise ValueError(f"Cycle detected while resolving node reference {key} - node graphs must be acyclic.")
+        raise ValueError(f"Cycle detected while resolving node reference {key} - graphs must be acyclic.")
 
     ctx._node_resolving.add(key)
     try:
         record = ctx.node_blob[key]
         cls = _ID_REGISTRY[record.cls]
         name = record.identifier.name
-        parents = tuple(_resolve_node(p.key, ctx) for p in record.parents)
+        parents = tuple(_resolve_node(p.identifier.id, ctx) for p in record.parents)
         kwargs = _resolve_serializable(record.module_kwargs, ctx) if record.module_kwargs is not None else {}
 
         node = ctx.converter.structure((name, parents, kwargs, record), cls)
@@ -140,7 +141,7 @@ def _resolve_node(key, ctx):
 
 @ContextConverter.register_structure(NodeReference)
 def _structure_node_reference(data: NodeReference, typ, *, ctx):
-    return _resolve_node(data.key, ctx)
+    return _resolve_node(data.identifier.id, ctx)
 
 
 # ----------------------------------------------------------------------
@@ -161,9 +162,10 @@ def _structure_node_reference(data: NodeReference, typ, *, ctx):
 # ----------------------------------------------------------------------
 
 
-@ContextConverter.register_unstructure(list)
-def _unstructure_list(obj, *, ctx):
-    return [ctx.converter.unstructure(v) for v in obj]
+#todo: remove me if built-in to cattrs (does unstructure_plain_data test this)
+# @ContextConverter.register_unstructure(list)
+# def _unstructure_list(obj, *, ctx):
+#     return [ctx.converter.unstructure(v) for v in obj]
 
 
 @ContextConverter.register_unstructure(tuple)
@@ -171,10 +173,11 @@ def _unstructure_tuple(obj, *, ctx):
     return tuple(ctx.converter.unstructure(v) for v in obj)
 
 
-@ContextConverter.register_unstructure(dict)
-def _unstructure_dict(obj, *, ctx):
-    assert all(isinstance(k, str) for k in obj), "All dictionary keys must be strings!"
-    return {k: ctx.converter.unstructure(v) for k, v in obj.items()}
+#todo: remove me if built-in to cattrs (does unstructure_plain_data test this)
+# @ContextConverter.register_unstructure(dict)
+# def _unstructure_dict(obj, *, ctx):
+#     assert all(isinstance(k, str) for k in obj), "All dictionary keys must be strings!"
+#     return {k: ctx.converter.unstructure(v) for k, v in obj.items()}
 
 
 @ContextConverter.register_unstructure(set)

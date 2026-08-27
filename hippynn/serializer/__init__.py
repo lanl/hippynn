@@ -63,7 +63,7 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, descendants=T
         )
         state_dict = module.state_dict()
     else:
-        ids = [identifier_map[n].key for n in original_roots]
+        ids = [identifier_map[n].identifier.id for n in original_roots]
         root_ids = ids[0] if isinstance(nodes_or_graph, Node) else ids
 
     record = SerializationRecord(graph=serial_data, module=graph_module_record, state_dict=state_dict, root_ids=root_ids)
@@ -91,7 +91,7 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
         return by_id[record.root_ids]
 
     def map_tuple(attr):
-        return tuple(by_id[ref.key] for ref in attr)
+        return tuple(by_id[ref.identifier.id] for ref in attr)
 
     input_nodes = map_tuple(record.module.input_nodes)
     output_nodes = map_tuple(record.module.output_nodes)
@@ -126,7 +126,9 @@ def serialize_node_list(node_list: Iterable[Node]):
     processor = ContextConverter()
     processor.unstructure(list(node_list))
 
-    identifier_map = {processor.node_objects[key]: NodeReference(key=key) for key in processor.node_blob}
+    identifier_map = {
+        processor.node_objects[key]: NodeReference(identifier=info.identifier) for key, info in processor.node_blob.items()
+    }
     serial_data = SerializedGraph(node_list=list(processor.node_blob.values()), n_tensor_arguments=len(processor.tensor_blob))
     return serial_data, processor.tensor_blob, identifier_map
 
