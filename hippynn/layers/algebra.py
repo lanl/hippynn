@@ -47,6 +47,26 @@ class WeightedMAELoss(_WeightedLoss):
     loss_func = staticmethod(torch.nn.functional.l1_loss)
 
 
+class WeightedHuberLoss(_WeightedLoss):
+    """Weighted Huber loss. ``delta`` sets the quadratic-to-linear transition point."""
+
+    def __init__(self, delta=1.0):
+        super().__init__()
+        self.huber = torch.nn.HuberLoss(reduction="none", delta=delta)
+
+    def forward(self, pred, true, weights):
+        unweighted_loss = self.huber(pred, true)
+        assert weights.shape == unweighted_loss.shape, (
+            f"Shape mismatch: weights {weights.shape}, loss {unweighted_loss.shape}"
+        )
+
+        weights = weights.to(dtype=unweighted_loss.dtype)
+
+        normalized_weights = weights/torch.mean(weights)
+        weighted_loss = (normalized_weights*unweighted_loss).mean()
+        return weighted_loss
+
+
 class AtLeast2D(torch.nn.Module):
     def forward(self, item):
         if item.ndimension() == 1:

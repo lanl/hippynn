@@ -84,3 +84,25 @@ def test_weighted_loss_string(energy_force_nodes):
     henergy, forces = energy_force_nodes
     mse_energy_weighted2 = loss.WeightedMSELoss.of_node(henergy, "en_mask")
     mse_force_weighted2 = loss.WeightedMSELoss.of_node(forces, "f_mask")
+
+
+def test_huber_losses():
+    import torch
+    from hippynn.graphs import GraphModule
+    from hippynn.graphs.nodes import inputs, loss
+
+    a = inputs.InputNode(db_name="a")
+    w = inputs.InputNode(db_name="w")
+    plain = loss.HuberLoss.of_node(a)
+    wide = loss.WeightedHuberLoss.of_node(a, w, delta=5.0)
+    g = GraphModule([a.pred, a.true, w.true], [plain, wide])
+
+    # A residual of 2 lands in the linear regime for delta=1 (2 - 0.5 = 1.5)
+    # but the quadratic regime for delta=5 (2**2 / 2 = 2.0).
+    predicted = torch.full((4, 1), 2.0)
+    true = torch.zeros(4, 1)
+    weights = torch.tensor([[1.0], [3.0], [0.5], [2.0]])
+
+    out_plain, out_wide = g(predicted, true, weights)
+    assert out_plain.item() == pytest.approx(1.5)
+    assert out_wide.item() == pytest.approx(2.0)  # uniform residuals: weights normalize away
