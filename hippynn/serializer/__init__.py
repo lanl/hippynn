@@ -28,7 +28,7 @@ from .types import (
     TensorReference,
 )
 
-
+#todo if possible: rewrite to simply handle all of these cases using cattrs?
 def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, descendants=True):
     """
     Interface wrapper taking node(s) or a graph and serializing them to a `SerializationRecord`.
@@ -36,27 +36,21 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, descendants=T
     module = original_roots = None
     if isinstance(nodes_or_graph, GraphModule):
         module = nodes_or_graph
-        # A GraphModule already computed its own exhaustive set of referenced nodes - inputs
-        # plus everything its forward pass touches, including MultiNode children pulled in by
-        # get_subgraph (see hippynn/graphs/gops.py). Reuse that directly instead of re-deriving
-        # an approximation via ancestor/descendant traversal, so this always matches whatever
-        # criteria GraphModule itself uses to decide which nodes it needs.
+        # Set of nodes for serializing in a graph
         expanded = list(module.input_nodes) + list(module.forward_output_list)
     else:
+        
         if isinstance(nodes_or_graph, Node):
             original_roots = [nodes_or_graph]
         else:
             original_roots = list(nodes_or_graph)
 
-        # Ancestors no longer need to be gathered here - the Node <-> NodeReference hook pair
-        # (hooks.py) discovers them by recursing into `.parents` while unstructuring. Descendants
-        # are not reachable that way (there is no parent->child edge to recurse through), so they
-        # still need to be gathered explicitly when requested.
+        # Parents will be found recursively as dependencies.
         expanded = get_connected_nodes(original_roots, descendants=descendants, ancestors=False)
 
     serial_data, tensor_data, identifier_map = serialize_node_list(expanded)
 
-    graph_module_record = state_dict = None
+    graph_module_record = state_dict = root_ids = None
     if module is not None:
 
         def map_tuple(attr):
@@ -69,16 +63,10 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, descendants=T
         )
         state_dict = module.state_dict()
     else:
-        # No GraphModule to carry input/output identifiers, so stash which of the discovered
-        # nodes were actually requested (as opposed to ancestors pulled in incidentally) plus
-        # whether a bare `Node` (rather than an iterable of them) was requested, so `deserialize`
-        # can hand back a matching shape instead of every node reachable from the roots.
-        serial_data.metadata = {
-            "root_ids": [identifier_map[n].key for n in original_roots],
-            "single_root": isinstance(nodes_or_graph, Node),
-        }
+        ids = [identifier_map[n].key for n in original_roots]
+        root_ids = ids[0] if isinstance(nodes_or_graph, Node) else ids
 
-    record = SerializationRecord(graph=serial_data, module=graph_module_record, state_dict=state_dict)
+    record = SerializationRecord(graph=serial_data, module=graph_module_record, state_dict=state_dict, root_ids=root_ids)
 
     return record, tensor_data
 
@@ -88,6 +76,7 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
     Interface wrapper taking a `SerializationRecord` (and its associated tensor data) and
     reconstructing either a bare list of nodes or a `GraphModule`, mirroring `serialize`.
     """
+    ### see comments in serialize about how to change this
     if tensor_data is None:
         tensor_data = record.tensor_data or {}
 
@@ -95,12 +84,11 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
     by_id = {ident.id: node for ident, node in identifier_map.items()}
 
     if record.module is None:
-        metadata = record.graph.metadata or {}
-        root_ids = metadata.get("root_ids")
-        if root_ids is None:
+        if record.root_ids is None:
             return nodes
-        roots = [by_id[key] for key in root_ids]
-        return roots[0] if metadata.get("single_root") else roots
+        if isinstance(record.root_ids, list):
+            return [by_id[key] for key in record.root_ids]
+        return by_id[record.root_ids]
 
     def map_tuple(attr):
         return tuple(by_id[ref.key] for ref in attr)
@@ -127,6 +115,7 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
     return module
 
 
+#todo: likely can remove the need for this function
 def serialize_node_list(node_list: Iterable[Node]):
     """
     Serialize `node_list` - plus everything reachable from it via `.parents` - into a
@@ -141,7 +130,7 @@ def serialize_node_list(node_list: Iterable[Node]):
     serial_data = SerializedGraph(node_list=list(processor.node_blob.values()), n_tensor_arguments=len(processor.tensor_blob))
     return serial_data, processor.tensor_blob, identifier_map
 
-
+#todo: likely can remove the need for this function
 def deserialize_node_list(node_list: list[NodeInfo], tensor_data: dict[int, object] | None = None):
     """
     Reconstruct every node in `node_list`, returning `(nodes, {NodeIdentifier: Node})`.

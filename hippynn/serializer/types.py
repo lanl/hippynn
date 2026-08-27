@@ -17,7 +17,7 @@ class NodeTypeIdentifier:
 
 @dataclasses.dataclass(frozen=True)
 class NodeIdentifier:
-    id: int  # assigned in discovery order; not necessarily a toposort position, not persistent
+    id: int  # assigned in discovery order; not persistent
     name: str | None
 
 
@@ -63,7 +63,6 @@ class NodeInfo:
 class SerializedGraph:
     node_list: list[NodeInfo]
     n_tensor_arguments: int
-    metadata: dict[str, Serializable] | None = None
 
 
 @dataclasses.dataclass
@@ -79,3 +78,4 @@ class SerializationRecord:
     module: SerializedGraphModule | None = None
     tensor_data: dict[int, object] | None = None
     state_dict: dict[str, object] | None = None
+    root_ids: int | list[int] | None = None 
