@@ -171,6 +171,19 @@ def test_serialize_graph(energy_graph):
 
 
 
+def test_deserialize_protocol_version_mismatch_warns():
+    from hippynn.serializer import serialize, deserialize
+    from hippynn.graphs.nodes.base import ValueNode
+
+    node = ValueNode(1.0)
+    record, tensor_data = serialize(node)
+
+    stale_record = dataclasses.replace(record, protocol_version=record.protocol_version - 1)
+
+    with pytest.warns(UserWarning, match="protocol_version"):
+        deserialize(stale_record, tensor_data)
+
+
 def test_serialize_valuenode_graph_module():
     from hippynn.serializer import serialize, deserialize
     from hippynn.graphs.nodes.base import ValueNode

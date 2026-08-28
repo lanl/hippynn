@@ -18,6 +18,7 @@ from .hooks import _resolve_node
 from .processor import ContextConverter
 from .registry import ensure_registry_consistency, register_node_cls, register_structure_hooks
 from .types import (
+    PROTOCOL_VERSION,
     NodeIdentifier,
     NodeInfo,
     NodeReference,
@@ -73,6 +74,14 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
     Interface wrapper taking a `SerializationRecord` (and its associated tensor data) and
     reconstructing either a bare list of nodes or a `GraphModule`, mirroring `serialize`.
     """
+    if record.protocol_version != PROTOCOL_VERSION:
+        warnings.warn(
+            f"Deserializing a SerializationRecord with protocol_version={record.protocol_version}, "
+            f"but the running codebase's protocol_version is {PROTOCOL_VERSION} - the record shapes "
+            "or their cattrs hooks may have changed incompatibly since this record was written.",
+            stacklevel=2,
+        )
+
     if tensor_data is None:
         tensor_data = record.tensor_data or {}
 

@@ -7,6 +7,10 @@ from typing import Literal
 
 from ..graphs.indextypes import IdxType
 
+# Bumped whenever a change to these record shapes (or their cattrs hooks) breaks
+# compatibility with previously-written `SerializationRecord`s.
+PROTOCOL_VERSION = 1
+
 
 @dataclasses.dataclass(frozen=True)
 class NodeTypeIdentifier:
@@ -75,6 +79,7 @@ class SerializedGraphModule:
 @dataclasses.dataclass
 class SerializationRecord:
     graph: SerializedGraph
+    protocol_version: int = PROTOCOL_VERSION
     module: SerializedGraphModule | None = None
     tensor_data: dict[int, object] | None = None
     state_dict: dict[str, object] | None = None
