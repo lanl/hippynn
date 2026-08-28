@@ -201,9 +201,9 @@ def _unstructure_set(obj, *, ctx):
 # `.values` field - then delegates to cattrs with a concrete type (`list[Serializable]` or
 # `dict[str, Serializable]`), or to the already-registered `TensorReference`/`NodeReference`
 # hooks, so cattrs performs the actual recursion rather than this module walking containers by
-# hand. The one remaining bare-`dict` case is `module_kwargs` itself, which is never wrapped in
-# the first place (see `unstructure_node`), since its own type is the concrete, unambiguous
-# `dict[str, Serializable]` rather than a member of the `Serializable` union.
+# hand. Every dict-shaped value - including `module_kwargs` (`ModuleKwargs = TaggedDict[Serializable]`)
+# - arrives pre-wrapped as a `TaggedDict`, since `_unstructure_dict` above tags any plain Python
+# `dict` on the write side regardless of its static type.
 # ----------------------------------------------------------------------
 
 
@@ -222,13 +222,9 @@ def _resolve_serializable(data, ctx):
         return tuple(ctx.converter.structure(data.values, list[Serializable]))
     if isinstance(data, TaggedDict):
         return dict(ctx.converter.structure(data.values, dict[str, Serializable]))
-    #todo, hope to get r
-    if isinstance(data, dict):
-        return ctx.converter.structure(data, dict[str, Serializable])
     raise TypeError(f"Cannot deserialize value of type {type(data)!r}: {data!r}")
 
-# todo:  not sure t is object is kosher here
-@ContextConverter.register_structure_family(lambda t: t is object or t is Serializable)
+@ContextConverter.register_structure_family(lambda t: t is Serializable)
 def _structure_serializable(data, typ, *, ctx):
     # NOTE: matching against the PEP-695 `Serializable` type-alias object itself (rather than
     # something it resolves/unwraps to, e.g. via `.__value__`) is not yet verified against the

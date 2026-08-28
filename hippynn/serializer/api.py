@@ -15,6 +15,7 @@ from cattrs import Converter
 from ..experiment import _debprint
 from ..graphs import GraphModule
 from ..graphs.nodes.base import Node, get_connected_nodes
+from ..tools import open_if_needed
 from .hooks import _resolve_node
 from .processor import ContextConverter
 from .types import (
@@ -177,24 +178,6 @@ def _infer_filetype(file, filetype):
             return suffix
     raise ValueError(f"Could not infer a filetype from {file!r}; pass `filetype` explicitly, one of {_FILETYPES}.")
 
-# todo: make context manager, place in hippynn/utils.py, and import here. func call goes inside context. change name
-def _open_and(file, mode, func):
-    """Call `func` on `file` as an open file object, opening it first if `file` is a filename."""
-    if isinstance(file, str):
-        with open(file, mode) as fh:
-            return func(fh)
-    return func(file)
-
-# sketch of new version
-def open_if_needed(filename_or_file, mode='r'):
-    # doc that mode will not be used if file is given
-    if isinstance(filename_or_file,str):
-        with open(filename_or_file,mode=mode) as file:
-            yield file
-    else:
-        yield filename_or_file
-
-
 def savegraph(
     nodes_or_graph: Node | Iterable[Node] | GraphModule,
     file,
@@ -227,11 +210,10 @@ def savegraph(
             if isinstance(target, str) and pathlib.Path(target).exists():
                 raise FileExistsError(f"{target!r} already exists and overwrite=False.")
 
-    # todo use file context manager for weights file as well.
-
     record, tensor_data = serialize(nodes_or_graph, include_descendants=include_descendants)
 
     if weights_file is not None:
+        # `torch.save` accepts a filename or an already-open file object directly.
         torch.save({"tensor_data": tensor_data, "state_dict": record.state_dict}, weights_file)
         record.state_dict = None
     elif filetype in ("json", "yml", "pkl") and (tensor_data or record.state_dict is not None):
@@ -242,19 +224,20 @@ def savegraph(
 
     _plain_converter = _make_plain_converter()
 
-    # todo replace with context manager calls described above
-    if filetype == "pkl":
-        _open_and(file, "wb", lambda fh: pickle.dump(record, fh))
-    elif filetype == "pt":
-        _open_and(file, "wb", lambda fh: torch.save(record, fh))
-    elif filetype == "json":
-        _open_and(file, "w", lambda fh: json.dump(_plain_converter.unstructure(record), fh))
-    elif filetype == "yml":
-        import yaml
+    write_mode = "wb" if filetype in ("pkl", "pt") else "w"
+    with open_if_needed(file, write_mode) as fh:
+        if filetype == "pkl":
+            pickle.dump(record, fh)
+        elif filetype == "pt":
+            torch.save(record, fh)
+        elif filetype == "json":
+            json.dump(_plain_converter.unstructure(record), fh)
+        elif filetype == "yml":
+            import yaml
 
-        _open_and(file, "w", lambda fh: yaml.safe_dump(_plain_converter.unstructure(record), fh))
-    else:
-        raise ValueError(f"Unknown filetype {filetype!r}; expected one of {_FILETYPES}.")
+            yaml.safe_dump(_plain_converter.unstructure(record), fh)
+        else:
+            raise ValueError(f"Unknown filetype {filetype!r}; expected one of {_FILETYPES}.")
 
 
 def loadgraph(file, weights_file=None, filetype: str | None = None, weights_only: bool = False):
@@ -273,19 +256,20 @@ def loadgraph(file, weights_file=None, filetype: str | None = None, weights_only
 
     _plain_converter = _make_plain_converter()
 
-    # todo see notes above on context management
-    if filetype == "pkl":
-        record = _open_and(file, "rb", pickle.load)
-    elif filetype == "pt":
-        record = _open_and(file, "rb", lambda fh: torch.load(fh, weights_only=weights_only))
-    elif filetype == "json":
-        record = _plain_converter.structure(_open_and(file, "r", json.load), SerializationRecord)
-    elif filetype == "yml":
-        import yaml
+    read_mode = "rb" if filetype in ("pkl", "pt") else "r"
+    with open_if_needed(file, read_mode) as fh:
+        if filetype == "pkl":
+            record = pickle.load(fh)
+        elif filetype == "pt":
+            record = torch.load(fh, weights_only=weights_only)
+        elif filetype == "json":
+            record = _plain_converter.structure(json.load(fh), SerializationRecord)
+        elif filetype == "yml":
+            import yaml
 
-        record = _plain_converter.structure(_open_and(file, "r", yaml.safe_load), SerializationRecord)
-    else:
-        raise ValueError(f"Unknown filetype {filetype!r}; expected one of {_FILETYPES}.")
+            record = _plain_converter.structure(yaml.safe_load(fh), SerializationRecord)
+        else:
+            raise ValueError(f"Unknown filetype {filetype!r}; expected one of {_FILETYPES}.")
 
     tensor_data = state_dict = None
     if weights_file is not None:

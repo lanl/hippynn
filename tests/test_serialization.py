@@ -3,6 +3,7 @@ import dataclasses
 import pytest
 
 import hippynn
+from hippynn.serializer.types import Serializable
 
 from conftest import skip_if_no_models, MODEL_DIR
 from conftest import ignore_cusp_warning, ignore_relocation, ignore_weights_only_warning, ignore_sensitivity_warning
@@ -25,7 +26,7 @@ def test_processor_plain_data_roundtrip(processor_pair):
     structure, tensor_blob = writer.unstructure(data)
     assert tensor_blob == {}
 
-    restored = reader.structure(structure, object, tensor_blob=tensor_blob)
+    restored = reader.structure(structure, Serializable, tensor_blob=tensor_blob)
     assert restored == data
 
 
@@ -37,7 +38,7 @@ def test_processor_single_tensor_roundtrip(processor_pair):
     structure, tensor_blob = writer.unstructure(data)
     assert len(tensor_blob) == 1
 
-    restored = reader.structure(structure, object, tensor_blob=tensor_blob)
+    restored = reader.structure(structure, Serializable, tensor_blob=tensor_blob)
     assert torch.equal(restored["weight"], data["weight"])
 
 
@@ -50,7 +51,7 @@ def test_processor_shared_tensor_identity_roundtrip(processor_pair):
     structure, tensor_blob = writer.unstructure(data)
     assert len(tensor_blob) == 1, "the same tensor object referenced twice must be stored once"
 
-    restored = reader.structure(structure, object, tensor_blob=tensor_blob)
+    restored = reader.structure(structure, Serializable, tensor_blob=tensor_blob)
     assert restored["a"] is restored["b"], "shared tensor identity must survive the round-trip"
 
 
@@ -60,7 +61,7 @@ def test_processor_set_roundtrip(processor_pair):
     data = {"values": {1, 2, 3}}
 
     structure, tensor_blob = writer.unstructure(data)
-    restored = reader.structure(structure, object, tensor_blob=tensor_blob)
+    restored = reader.structure(structure, Serializable, tensor_blob=tensor_blob)
 
     assert restored["values"] == data["values"]
 
@@ -149,7 +150,7 @@ def test_serialize_automodule(processor_pair):
 
     structure, tensor_blob = writer.unstructure([values, node])
     reader.node_blob = writer.node_blob  # out-of-band node records, mirroring tensor_blob's write->read hand-off
-    restored_values, restored_node = reader.structure(structure, object, tensor_blob=tensor_blob)
+    restored_values, restored_node = reader.structure(structure, Serializable, tensor_blob=tensor_blob)
 
     assert isinstance(restored_node, FuzzyHistogrammer)
     assert restored_node.parents[0] is restored_values

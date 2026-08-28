@@ -104,6 +104,25 @@ def active_directory(dirname, create=None):
         os.chdir(return_dir)
 
 
+@contextlib.contextmanager
+def open_if_needed(file, mode="r"):
+    """
+    Context manager yielding an open file object.
+
+    If `file` is already an open file object, it is yielded as-is (`mode` is ignored, and it is
+    not closed on exit); otherwise `file` is treated as a filename, opened with `mode`, and closed
+    on exit.
+
+    :param file: filename or an already-open file object
+    :param mode: passed to ``open()`` if `file` is a filename
+    """
+    if isinstance(file, str):
+        with open(file, mode) as fh:
+            yield fh
+    else:
+        yield file
+
+
 def progress_bar(iterable, *args, **kwargs):
     """
     Wrap an iterable in a progress bar according to hippynn's current progress bar settings.
