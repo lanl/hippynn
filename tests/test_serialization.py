@@ -171,6 +171,52 @@ def test_serialize_graph(energy_graph):
 
 
 
+def test_serialize_valuenode_graph_module():
+    from hippynn.serializer import serialize, deserialize
+    from hippynn.graphs.nodes.base import ValueNode
+    from hippynn.graphs import GraphModule
+    import operator
+
+    a_val = ValueNode(2)
+    b_val = ValueNode(3)
+    out_val = operator.add(a_val, b_val)
+
+    graph = GraphModule([], [out_val])
+
+    record, tensor_data = serialize(graph)
+    rebuilt = deserialize(record, tensor_data)
+
+    assert isinstance(rebuilt, GraphModule)
+    assert rebuilt()[0] == graph()[0]
+
+
+@ignore_sensitivity_warning
+def test_serialize_energy_graph_module(input_nodes, energy_node, example_box):
+    from hippynn.serializer import serialize, deserialize
+    from hippynn.graphs import GraphModule
+
+    # Use energy_node's own system_energy child, rather than the bare MultiNode, so
+    # forward() returns a flat tuple of tensors.
+    graph = GraphModule(input_nodes, [energy_node.system_energy])
+
+    record, tensor_data = serialize(graph)
+    rebuilt = deserialize(record, tensor_data)
+
+    assert isinstance(rebuilt, GraphModule)
+
+    original_state = graph.state_dict()
+    rebuilt_state = rebuilt.state_dict()
+    assert original_state.keys() == rebuilt_state.keys()
+    for key in original_state:
+        assert torch.equal(original_state[key], rebuilt_state[key])
+
+    args = (example_box["species"], example_box["coordinates"], example_box["cell"])
+    original_outputs = graph(*args)
+    rebuilt_outputs = rebuilt(*args)
+    for orig, new in zip(original_outputs, rebuilt_outputs):
+        assert torch.allclose(orig, new)
+
+
 def test_serialization_registry():
     from hippynn.serializer import ensure_registry_consistency
 

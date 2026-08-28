@@ -28,47 +28,44 @@ from .types import (
     TensorReference,
 )
 
-#todo if possible: rewrite to simply handle all of these cases using cattrs?
 def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, descendants=True):
     """
     Interface wrapper taking node(s) or a graph and serializing them to a `SerializationRecord`.
     """
-    module = original_roots = None
+    processor = ContextConverter()
+
+    graph_module_record = state_dict = root_ids = None
     if isinstance(nodes_or_graph, GraphModule):
         module = nodes_or_graph
-        # Set of nodes for serializing in a graph
-        expanded = list(module.input_nodes) + list(module.forward_output_list)
+        input_refs, _ = processor.unstructure(list(module.input_nodes))
+        output_refs, _ = processor.unstructure(list(module.nodes_to_compute))
+        forward_refs, _ = processor.unstructure(list(module.forward_output_list))
+        graph_module_record = SerializedGraphModule(
+            input_nodes=tuple(input_refs),
+            output_nodes=tuple(output_refs),
+            forward_output_list=tuple(forward_refs),
+        )
+        state_dict = module.state_dict()
     else:
-        
         if isinstance(nodes_or_graph, Node):
             original_roots = [nodes_or_graph]
         else:
             original_roots = list(nodes_or_graph)
 
-        # Parents will be found recursively as dependencies.
+        root_refs, _ = processor.unstructure(original_roots)
+
+        # Descendants aren't found by the Node parent recursion.
         expanded = get_connected_nodes(original_roots, descendants=descendants, ancestors=False)
+        _debprint(f"Serializing node list: {expanded=}")
+        processor.unstructure(expanded)
 
-    serial_data, tensor_data, identifier_map = serialize_node_list(expanded)
-
-    graph_module_record = state_dict = root_ids = None
-    if module is not None:
-
-        def map_tuple(attr):
-            return tuple(identifier_map[node] for node in attr)
-
-        graph_module_record = SerializedGraphModule(
-            input_nodes=map_tuple(module.input_nodes),
-            output_nodes=map_tuple(module.nodes_to_compute),
-            forward_output_list=map_tuple(module.forward_output_list),
-        )
-        state_dict = module.state_dict()
-    else:
-        ids = [identifier_map[n].identifier.id for n in original_roots]
+        ids = [ref.identifier.id for ref in root_refs]
         root_ids = ids[0] if isinstance(nodes_or_graph, Node) else ids
 
+    serial_data = SerializedGraph(node_list=list(processor.node_blob.values()), n_tensor_arguments=len(processor.tensor_blob))
     record = SerializationRecord(graph=serial_data, module=graph_module_record, state_dict=state_dict, root_ids=root_ids)
 
-    return record, tensor_data
+    return record, processor.tensor_blob
 
 
 def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | None = None, state_dict: dict[str, object] | None = None):
@@ -76,25 +73,27 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
     Interface wrapper taking a `SerializationRecord` (and its associated tensor data) and
     reconstructing either a bare list of nodes or a `GraphModule`, mirroring `serialize`.
     """
-    ### see comments in serialize about how to change this
     if tensor_data is None:
         tensor_data = record.tensor_data or {}
 
-    nodes, identifier_map = deserialize_node_list(record.graph.node_list, tensor_data=tensor_data)
-    by_id = {ident.id: node for ident, node in identifier_map.items()}
+    _debprint(f"Deserializing node list: {record.graph.node_list=}")
+    processor = ContextConverter()
+    processor.tensor_blob = tensor_data
+    for info in record.graph.node_list:
+        processor.node_blob[info.identifier.id] = info
 
     if record.module is None:
         if record.root_ids is None:
-            return nodes
+            return [_resolve_node(info.identifier.id, processor) for info in record.graph.node_list]
         if isinstance(record.root_ids, list):
-            return [by_id[key] for key in record.root_ids]
-        return by_id[record.root_ids]
+            return [_resolve_node(key, processor) for key in record.root_ids]
+        return _resolve_node(record.root_ids, processor)
 
-    def map_tuple(attr):
-        return tuple(by_id[ref.identifier.id] for ref in attr)
+    def resolve_tuple(attr):
+        return tuple(_resolve_node(ref.identifier.id, processor) for ref in attr)
 
-    input_nodes = map_tuple(record.module.input_nodes)
-    output_nodes = map_tuple(record.module.output_nodes)
+    input_nodes = resolve_tuple(record.module.input_nodes)
+    output_nodes = resolve_tuple(record.module.output_nodes)
 
     module = GraphModule(input_nodes, output_nodes)
 
@@ -113,39 +112,6 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
         module.load_state_dict(state_dict)
 
     return module
-
-
-#todo: likely can remove the need for this function
-def serialize_node_list(node_list: Iterable[Node]):
-    """
-    Serialize `node_list` - plus everything reachable from it via `.parents` - into a
-    `SerializedGraph`, a tensor blob, and a `{Node: NodeReference}` map covering every node
-    discovered, not only those originally passed in.
-    """
-    _debprint(f"Serializing node list: {node_list=}")
-    processor = ContextConverter()
-    processor.unstructure(list(node_list))
-
-    identifier_map = {
-        processor.node_objects[key]: NodeReference(identifier=info.identifier) for key, info in processor.node_blob.items()
-    }
-    serial_data = SerializedGraph(node_list=list(processor.node_blob.values()), n_tensor_arguments=len(processor.tensor_blob))
-    return serial_data, processor.tensor_blob, identifier_map
-
-#todo: likely can remove the need for this function
-def deserialize_node_list(node_list: list[NodeInfo], tensor_data: dict[int, object] | None = None):
-    """
-    Reconstruct every node in `node_list`, returning `(nodes, {NodeIdentifier: Node})`.
-    """
-    _debprint(f"Deserializing node list: {node_list=}")
-    processor = ContextConverter()
-    if tensor_data is not None:
-        processor.tensor_blob = tensor_data
-    for info in node_list:
-        processor.node_blob[info.identifier.id] = info
-
-    identifier_map = {info.identifier: _resolve_node(info.identifier.id, processor) for info in node_list}
-    return list(identifier_map.values()), identifier_map
 
 
 ensure_registry_consistency(raise_=False)
