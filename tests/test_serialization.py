@@ -159,7 +159,8 @@ def test_serialize_automodule(processor_pair):
 
 
 def test_serialize_graph(energy_graph):
-    from hippynn.serializer import serialize, NodeInfo, SerializedGraphModule
+    from hippynn.serializer import serialize
+    from hippynn.serializer.types import NodeInfo, SerializedGraphModule
 
     record, tensor_data = serialize(energy_graph)
 
