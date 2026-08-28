@@ -38,17 +38,35 @@ class TensorReference:
 
 
 @dataclasses.dataclass(frozen=True)
+class TaggedList[T]:
+    values: list[T]
+    kind: Literal["list"] = "list"
+
+
+@dataclasses.dataclass(frozen=True)
 class TaggedSet[T]:
     values: list[T]
     kind: Literal["set"] = "set"
 
 
+@dataclasses.dataclass(frozen=True)
+class TaggedTuple[T]:
+    values: tuple[T, ...]
+    kind: Literal["tuple"] = "tuple"
+
+
+@dataclasses.dataclass(frozen=True)
+class TaggedDict[T]:
+    values: dict[str, T]
+    kind: Literal["dict"] = "dict"
+
+
 type ScalarPrimitive = None | bool | int | float | str
 type Scalar = ScalarPrimitive | TensorReference | NodeReference
-type Container[T] = list[T] | tuple[T, ...] | dict[str, T] | TaggedSet[T]
+type Container[T] = TaggedList[T] | TaggedTuple[T] | TaggedDict[T] | TaggedSet[T]
 type ContainerPrimitive = Container[Serializable]
 type Serializable = Scalar | ContainerPrimitive
-type ModuleKwargs = dict[str, Serializable]
+type ModuleKwargs = TaggedDict[Serializable]
 
 
 @dataclasses.dataclass
@@ -83,4 +101,5 @@ class SerializationRecord:
     module: SerializedGraphModule | None = None
     tensor_data: dict[int, object] | None = None
     state_dict: dict[str, object] | None = None
-    root_ids: int | list[int] | None = None 
+    root_ids: list[int] | None = None
+    single_root: bool = False

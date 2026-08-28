@@ -7,7 +7,7 @@ import torch
 
 from .processor import ContextConverter
 from .registry import _ID_REGISTRY, _NODE_REGISTRY, node_reference_attrs
-from .types import NodeIdentifier, NodeInfo, NodeReference, Serializable, TaggedSet, TensorReference
+from .types import NodeIdentifier, NodeInfo, NodeReference, Serializable, TaggedDict, TaggedList, TaggedSet, TaggedTuple, TensorReference
 from ..graphs.nodes.base import AutoModule, InputNode, Node
 from ..graphs.nodes.base.algebra import BinNode, UnaryNode
 
@@ -60,6 +60,8 @@ def unstructure_node(obj, *, ctx):
     for attr_name in node_reference_attrs(cls):
         node_kwargs[attr_name] = getattr(obj, attr_name)
 
+    # `ModuleKwargs = TaggedDict[Serializable]`, so `node_kwargs` goes through the same generic
+    # `dict` hook as any other plain dict nested inside a `Serializable` value.
     module_kwargs = ctx.converter.unstructure(node_kwargs) if node_kwargs else None
 
     return NodeInfo(
@@ -156,28 +158,34 @@ def _structure_node_reference(data: NodeReference, typ, *, ctx):
 
 # ----------------------------------------------------------------------
 # Plain container unstructuring (write side): explicit, rather than relying on whatever
-# cattrs' own defaults happen to do for these builtin types, since `set`/`tuple` need to
-# round-trip through the read-side walk below without losing their identity as a Python
-# type distinct from `list`.
+# cattrs' own defaults happen to do for these builtin types. Every one of `list`/`set`/`tuple`/
+# `dict` is tagged with a `kind` discriminator uniformly, so the read-side walk below dispatches
+# on a single `kind` field rather than on shape - `list`/`tuple` would otherwise collapse to the
+# same JSON array shape, and an untagged `dict` could collide with the `kind`-discriminator
+# scheme used for `NodeReference`/`TensorReference`/etc.
+#
+# This hook fires on *any* Python `list`/`dict` passed through `ctx.converter.unstructure()`, not
+# just ones nested inside `Serializable`-typed values - callers that unstructure a plain
+# list/dict of something else (e.g. a list of `Node`s) must avoid passing the container itself
+# through `unstructure()` (see `unstructure_node`'s `module_kwargs` handling above, and
+# `serialize()`'s node-reference list-building in `api.py`).
 # ----------------------------------------------------------------------
 
 
-#todo: remove me if built-in to cattrs (does unstructure_plain_data test this)
-# @ContextConverter.register_unstructure(list)
-# def _unstructure_list(obj, *, ctx):
-#     return [ctx.converter.unstructure(v) for v in obj]
+@ContextConverter.register_unstructure(list)
+def _unstructure_list(obj, *, ctx):
+    return TaggedList(values=[ctx.converter.unstructure(v) for v in obj])
 
 
 @ContextConverter.register_unstructure(tuple)
 def _unstructure_tuple(obj, *, ctx):
-    return tuple(ctx.converter.unstructure(v) for v in obj)
+    return TaggedTuple(values=tuple(ctx.converter.unstructure(v) for v in obj))
 
 
-#todo: remove me if built-in to cattrs (does unstructure_plain_data test this)
-# @ContextConverter.register_unstructure(dict)
-# def _unstructure_dict(obj, *, ctx):
-#     assert all(isinstance(k, str) for k in obj), "All dictionary keys must be strings!"
-#     return {k: ctx.converter.unstructure(v) for k, v in obj.items()}
+@ContextConverter.register_unstructure(dict)
+def _unstructure_dict(obj, *, ctx):
+    assert all(isinstance(k, str) for k in obj), "All dictionary keys must be strings!"
+    return TaggedDict(values={k: ctx.converter.unstructure(v) for k, v in obj.items()})
 
 
 @ContextConverter.register_unstructure(set)
@@ -188,12 +196,14 @@ def _unstructure_set(obj, *, ctx):
 # ----------------------------------------------------------------------
 # Serializable union discrimination (structure/read side only). structure() needs a concrete
 # target type up front, so unlike the write side above (dispatched by cattrs on runtime
-# type), this decides which member of the `Serializable` union a piece of wire data
-# represents by its shape, then delegates to cattrs with a concrete type - `dict[str,
-# Serializable]`, `list[Serializable]`, `tuple[Serializable, ...]`, or the already-registered
-# `TensorReference`/`NodeReference` hooks - so cattrs performs the actual recursion rather
-# than this module walking containers by hand. `set` is the one case with no JSON-native
-# container to delegate to, since it's the only member that genuinely needs tagging.
+# type), this decides which member of the `Serializable` union a piece of wire data represents
+# by its shape - each of `TaggedList`/`TaggedSet`/`TaggedTuple`/`TaggedDict` is unwrapped via its
+# `.values` field - then delegates to cattrs with a concrete type (`list[Serializable]` or
+# `dict[str, Serializable]`), or to the already-registered `TensorReference`/`NodeReference`
+# hooks, so cattrs performs the actual recursion rather than this module walking containers by
+# hand. The one remaining bare-`dict` case is `module_kwargs` itself, which is never wrapped in
+# the first place (see `unstructure_node`), since its own type is the concrete, unambiguous
+# `dict[str, Serializable]` rather than a member of the `Serializable` union.
 # ----------------------------------------------------------------------
 
 
@@ -204,24 +214,25 @@ def _resolve_serializable(data, ctx):
         return ctx.converter.structure(data, torch.Tensor)
     if isinstance(data, NodeReference):
         return ctx.converter.structure(data, NodeReference)
+    if isinstance(data, TaggedList):
+        return list(ctx.converter.structure(data.values, list[Serializable]))
     if isinstance(data, TaggedSet):
         return set(ctx.converter.structure(data.values, list[Serializable]))
+    if isinstance(data, TaggedTuple):
+        return tuple(ctx.converter.structure(data.values, list[Serializable]))
+    if isinstance(data, TaggedDict):
+        return dict(ctx.converter.structure(data.values, dict[str, Serializable]))
+    #todo, hope to get r
     if isinstance(data, dict):
         return ctx.converter.structure(data, dict[str, Serializable])
-    if isinstance(data, list):
-        return ctx.converter.structure(data, list[Serializable])
-    if isinstance(data, tuple):
-        return ctx.converter.structure(data, tuple[Serializable, ...])
     raise TypeError(f"Cannot deserialize value of type {type(data)!r}: {data!r}")
 
-
+# todo:  not sure t is object is kosher here
 @ContextConverter.register_structure_family(lambda t: t is object or t is Serializable)
 def _structure_serializable(data, typ, *, ctx):
     # NOTE: matching against the PEP-695 `Serializable` type-alias object itself (rather than
     # something it resolves/unwraps to, e.g. via `.__value__`) is not yet verified against the
     # pinned cattrs version - flagged in the plan's "verify against actual cattrs version" step.
-    # `_resolve_serializable` also relies on this same identity-match for the generic
-    # collection types it delegates to below (`dict[str, Serializable]`, `list[Serializable]`,
-    # `tuple[Serializable, ...]`), since cattrs re-enters this hook per element when recursing
-    # into those.
+    # `_resolve_serializable` also relies on this same identity-match for `list[Serializable]`,
+    # since cattrs re-enters this hook per element when recursing into it.
     return _resolve_serializable(data, ctx)

@@ -231,6 +231,36 @@ def test_serialize_energy_graph_module(input_nodes, energy_node, example_box):
         assert torch.allclose(orig, new)
 
 
+@ignore_sensitivity_warning
+@pytest.mark.parametrize("filetype", ["pkl", "pt", "json", "yaml"])
+def test_savegraph_loadgraph_roundtrip(input_nodes, energy_node, example_box, tmp_path, filetype):
+    from hippynn.graphs import GraphModule
+
+    # Use energy_node's own system_energy child, rather than the bare MultiNode, so
+    # forward() returns a flat tuple of tensors.
+    graph = GraphModule(input_nodes, [energy_node.system_energy])
+
+    main_file = tmp_path / f"graph.{filetype}"
+    weights_file = tmp_path / "graph_weights.pt"
+
+    hippynn.savegraph(graph, str(main_file), weights_file=str(weights_file))
+    rebuilt = hippynn.loadgraph(str(main_file), weights_file=str(weights_file))
+
+    assert isinstance(rebuilt, GraphModule)
+
+    original_state = graph.state_dict()
+    rebuilt_state = rebuilt.state_dict()
+    assert original_state.keys() == rebuilt_state.keys()
+    for key in original_state:
+        assert torch.equal(original_state[key], rebuilt_state[key])
+
+    args = (example_box["species"], example_box["coordinates"], example_box["cell"])
+    original_outputs = graph(*args)
+    rebuilt_outputs = rebuilt(*args)
+    for orig, new in zip(original_outputs, rebuilt_outputs):
+        assert torch.allclose(orig, new)
+
+
 def test_serialization_registry():
     from hippynn.serializer import ensure_registry_consistency
 
@@ -269,7 +299,7 @@ def test_origin_node_link():
     node = InputNode(db_name="X")
     pred_node, true_node = node.pred, node.true
 
-    record, tensor_data = serialize([pred_node, true_node], descendants=False)
+    record, tensor_data = serialize([pred_node, true_node], include_descendants=False)
     rebuilt_nodes = deserialize(record, tensor_data)
 
     rebuilt_pred = next(n for n in rebuilt_nodes if isinstance(n, LossPredNode))
