@@ -6,9 +6,10 @@ side lives as a `from_record` staticmethod on each direct `_SerializableNode` su
 """
 
 import warnings
+from functools import partial
 
 from ..experiment import _debprint
-from .processor import ContextConverter
+from .processor import context_converter
 from .types import NodeTypeIdentifier
 from ..graphs.nodes.base import LossInputNode
 from ..graphs.nodes.base.base import _SerializableNode
@@ -122,6 +123,8 @@ def register_structure_hooks():
     for cls in _SerializableNode.__subclasses__():
         if "from_record" not in cls.__dict__:
             raise TypeError(f"{cls!r} is a direct subclass of _SerializableNode but does not define its own `from_record`.")
-        ContextConverter.register_structure_family(lambda t, cls=cls: isinstance(t, type) and issubclass(t, cls))(_dispatch_from_record)
+        context_converter.converter.register_structure_hook_func(
+            lambda t, cls=cls: isinstance(t, type) and issubclass(t, cls), partial(_dispatch_from_record, ctx=context_converter)
+        )
 
 

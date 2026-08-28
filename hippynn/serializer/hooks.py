@@ -3,9 +3,11 @@ Auxiliary structure/unstructure hooks: tensor <-> TensorReference, Node <-> Node
 and the generic container-walk hook used on the structure (read) side.
 """
 
+from functools import partial
+
 import torch
 
-from .processor import ContextConverter
+from .processor import context_converter
 from .registry import _ID_REGISTRY, _NODE_REGISTRY, node_reference_attrs
 from .types import NodeIdentifier, NodeInfo, NodeReference, Serializable, TaggedDict, TaggedList, TaggedSet, TaggedTuple, TensorReference
 from ..graphs.nodes.base import AutoModule, InputNode, Node
@@ -18,7 +20,6 @@ from ..graphs.nodes.base.algebra import BinNode, UnaryNode
 # ----------------------------------------------------------------------
 
 
-@ContextConverter.register_unstructure(torch.Tensor)
 def _unstructure_tensor(obj: torch.Tensor, *, ctx):
     key = ctx.tensor_ids.get(id(obj))
     if key is None:
@@ -28,12 +29,17 @@ def _unstructure_tensor(obj: torch.Tensor, *, ctx):
     return TensorReference(key=key)
 
 
-@ContextConverter.register_structure(torch.Tensor)
+context_converter.converter.register_unstructure_hook(torch.Tensor, partial(_unstructure_tensor, ctx=context_converter))
+
+
 def _structure_tensor(data: TensorReference, typ, *, ctx):
     key = data.key
     if key not in ctx.tensor_objects:
         ctx.tensor_objects[key] = ctx.tensor_blob[key]
     return ctx.tensor_objects[key]
+
+
+context_converter.converter.register_structure_hook(torch.Tensor, partial(_structure_tensor, ctx=context_converter))
 
 
 # ----------------------------------------------------------------------
@@ -81,7 +87,6 @@ UnaryNode.to_record = unstructure_node
 BinNode.to_record = unstructure_node
 
 
-@ContextConverter.register_unstructure_family(lambda t: isinstance(t, type) and issubclass(t, Node))
 def _unstructure_node(obj, *, ctx):
     """
     Node <-> NodeReference cattrs hook: memoized by identity in `ctx.node_ids`/`ctx.node_blob`,
@@ -101,6 +106,11 @@ def _unstructure_node(obj, *, ctx):
     to_record = getattr(obj, "to_record", None)
     ctx.node_blob[key] = to_record(ctx=ctx) if to_record is not None else unstructure_node(obj, ctx=ctx)
     return NodeReference(identifier=NodeIdentifier(id=key, name=name))
+
+
+context_converter.converter.register_unstructure_hook_func(
+    lambda t: isinstance(t, type) and issubclass(t, Node), partial(_unstructure_node, ctx=context_converter)
+)
 
 
 def _resolve_node(key, ctx):
@@ -141,9 +151,11 @@ def _resolve_node(key, ctx):
         ctx._node_resolving.discard(key)
 
 
-@ContextConverter.register_structure(NodeReference)
 def _structure_node_reference(data: NodeReference, typ, *, ctx):
     return _resolve_node(data.identifier.id, ctx)
+
+
+context_converter.converter.register_structure_hook(NodeReference, partial(_structure_node_reference, ctx=context_converter))
 
 
 # ----------------------------------------------------------------------
@@ -172,25 +184,33 @@ def _structure_node_reference(data: NodeReference, typ, *, ctx):
 # ----------------------------------------------------------------------
 
 
-@ContextConverter.register_unstructure(list)
 def _unstructure_list(obj, *, ctx):
     return TaggedList(values=[ctx.converter.unstructure(v) for v in obj])
 
 
-@ContextConverter.register_unstructure(tuple)
+context_converter.converter.register_unstructure_hook(list, partial(_unstructure_list, ctx=context_converter))
+
+
 def _unstructure_tuple(obj, *, ctx):
     return TaggedTuple(values=tuple(ctx.converter.unstructure(v) for v in obj))
 
 
-@ContextConverter.register_unstructure(dict)
+context_converter.converter.register_unstructure_hook(tuple, partial(_unstructure_tuple, ctx=context_converter))
+
+
 def _unstructure_dict(obj, *, ctx):
     assert all(isinstance(k, str) for k in obj), "All dictionary keys must be strings!"
     return TaggedDict(values={k: ctx.converter.unstructure(v) for k, v in obj.items()})
 
 
-@ContextConverter.register_unstructure(set)
+context_converter.converter.register_unstructure_hook(dict, partial(_unstructure_dict, ctx=context_converter))
+
+
 def _unstructure_set(obj, *, ctx):
     return TaggedSet(values=[ctx.converter.unstructure(v) for v in obj])
+
+
+context_converter.converter.register_unstructure_hook(set, partial(_unstructure_set, ctx=context_converter))
 
 
 # ----------------------------------------------------------------------
@@ -225,7 +245,6 @@ def _resolve_serializable(data, ctx):
         return dict(ctx.converter.structure(data.values, dict[str, Serializable]))
     raise TypeError(f"Cannot deserialize value of type {type(data)!r}: {data!r}")
 
-@ContextConverter.register_structure_family(lambda t: t is Serializable)
 def _structure_serializable(data, typ, *, ctx):
     # NOTE: matching against the PEP-695 `Serializable` type-alias object itself (rather than
     # something it resolves/unwraps to, e.g. via `.__value__`) is not yet verified against the
@@ -233,3 +252,6 @@ def _structure_serializable(data, typ, *, ctx):
     # `_resolve_serializable` also relies on this same identity-match for `list[Serializable]`,
     # since cattrs re-enters this hook per element when recursing into it.
     return _resolve_serializable(data, ctx)
+
+
+context_converter.converter.register_structure_hook_func(lambda t: t is Serializable, partial(_structure_serializable, ctx=context_converter))

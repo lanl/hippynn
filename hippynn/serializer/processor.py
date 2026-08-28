@@ -1,80 +1,33 @@
 """
-The ContextConverter class: a per-session cattrs Converter plus tensor/node identity caches.
+The ContextConverter class: a global cattrs Converter plus tensor/node identity caches.
 """
 
 import itertools
-from functools import partial
-from typing import Any, ClassVar
+from typing import Any
 
 from cattrs import Converter
 
 
 class ContextConverter:
     """
-    One ContextConverter instance == one serialization/deserialization context.
-
-    Hook registration is class-level (shared across all instances); the cattrs Converter and
-    all blob/identity-cache state are instance-level, created fresh in `__init__`. A Processor
-    instance is single-session, single-threaded, and non-reentrant: `structure()` mutates
-    `self.tensor_blob` as a side effect before delegating to the converter.
+    Holds one cattrs `Converter` plus the tensor/node identity caches used by its hooks (see
+    `hooks.py`/`registry.py`). `context_converter` below is the single instance used for the
+    whole process - a Converter's dispatch machinery caches resolved hooks per type, so reusing
+    one is the intended usage, and every hook is bound to `ctx=context_converter` directly, at
+    registration time, since there is only ever this one instance to resolve. `reset()` clears the
+    per-session state back to empty; it must be called at the start of each independent
+    serialize()/deserialize() session (see `api.py`), since state is not cleared automatically - a
+    session like `serialize()` makes several `unstructure()` calls that must accumulate into the
+    same blobs. A session is single-threaded and non-reentrant - two independent sessions cannot
+    be interleaved.
     """
-
-    _structure_hooks: ClassVar[list[tuple[type, Any]]] = []
-    _unstructure_hooks: ClassVar[list[tuple[type, Any]]] = []
-    _structure_families: ClassVar[list[tuple[Any, Any]]] = []
-    _unstructure_families: ClassVar[list[tuple[Any, Any]]] = []
-
-    # ------------------------------------------------------------------
-    # Class-level registration decorators
-    # ------------------------------------------------------------------
-
-    @classmethod
-    def register_structure(cls, typ):
-        """Register a context-aware cattrs structure hook for one type: `func(data, typ, *, ctx)`."""
-
-        def decorator(func):
-            cls._structure_hooks.append((typ, func))
-            return func
-
-        return decorator
-
-    @classmethod
-    def register_unstructure(cls, typ):
-        """Register a context-aware cattrs unstructure hook for one type: `func(obj, *, ctx)`."""
-
-        def decorator(func):
-            cls._unstructure_hooks.append((typ, func))
-            return func
-
-        return decorator
-
-    @classmethod
-    def register_structure_family(cls, predicate):
-        """Register a context-aware structure hook for a family of types matched by `predicate(typ)`."""
-
-        def decorator(func):
-            cls._structure_families.append((predicate, func))
-            return func
-
-        return decorator
-
-    @classmethod
-    def register_unstructure_family(cls, predicate):
-        """Register a context-aware unstructure hook for a family of types matched by `predicate(typ)`."""
-
-        def decorator(func):
-            cls._unstructure_families.append((predicate, func))
-            return func
-
-        return decorator
-
-    # ------------------------------------------------------------------
-    # Per-session context
-    # ------------------------------------------------------------------
 
     def __init__(self):
         self.converter = Converter()
+        self.reset()
 
+    def reset(self):
+        """Clear all per-session state, ready for a fresh serialize()/deserialize() call."""
         # torch.Tensor <-> TensorReference: a side-channel blob, never part of the plaintext
         # structure itself.
         self.tensor_blob: dict[int, Any] = {}
@@ -93,50 +46,35 @@ class ContextConverter:
         # len(node_blob) is not yet incremented while nested keys are assigned - a plain counter
         # guarantees each call gets a distinct key regardless of that reentrancy.
 
-        self._synced_structure = 0
-        self._synced_unstructure = 0
-        self._synced_structure_families = 0
-        self._synced_unstructure_families = 0
-        self._sync_hooks()
-
-    def _sync_hooks(self):
-        """
-        Register onto `self.converter` any class-level hooks added since this instance last
-        synced, so hooks registered after construction (e.g. by a caller that registers a
-        type's hooks just before using it) still take effect.
-        """
-        for typ, func in self._structure_hooks[self._synced_structure :]:
-            self.converter.register_structure_hook(typ, partial(func, ctx=self))
-        self._synced_structure = len(self._structure_hooks)
-
-        for typ, func in self._unstructure_hooks[self._synced_unstructure :]:
-            self.converter.register_unstructure_hook(typ, partial(func, ctx=self))
-        self._synced_unstructure = len(self._unstructure_hooks)
-
-        for predicate, func in self._structure_families[self._synced_structure_families :]:
-            self.converter.register_structure_hook_func(predicate, partial(func, ctx=self))
-        self._synced_structure_families = len(self._structure_families)
-
-        for predicate, func in self._unstructure_families[self._synced_unstructure_families :]:
-            self.converter.register_unstructure_hook_func(predicate, partial(func, ctx=self))
-        self._synced_unstructure_families = len(self._unstructure_families)
-
     def get_node_id(self, obj):
         """Return the discovery-order id already assigned to `obj` by a prior `unstructure()` call, or None."""
         return self.node_ids.get(id(obj))
 
+    # todo plain unstructure should not return a tensor_blob and should be used in the recursion.
+    # add new method for unstructuring WITH blob. and make sure regular unstructure is only called from
+    # within a ccall to that method (therefore gauranteeing that the blob gets returned somewhere at a higher level)
     def unstructure(self, obj):
         """
         Return `(structure, tensor_blob)`: `structure` is ordinary cattrs-produced plain data,
         suitable for JSON/YAML encoding; `tensor_blob` holds tensor payloads out-of-band, to be
         saved separately.
         """
-        self._sync_hooks()
         structure = self.converter.unstructure(obj)
         return structure, self.tensor_blob
 
-    def structure(self, structure, typ, *, tensor_blob):
-        """Reconstruct an object from `structure` plus the separately-loaded `tensor_blob`."""
-        self._sync_hooks()
+    def structure(self, structure, typ, *, tensor_blob, node_blob=None):
+        """
+        Reconstruct an object from `structure` plus the separately-loaded `tensor_blob` (and, for
+        a node-graph `structure`, its `node_blob`). Always starts by calling `reset()`, so a read
+        session never resolves out of a previous write's identity caches - callers only need to
+        hand over the blob(s), not manage reset timing themselves.
+        """
+        self.reset()
         self.tensor_blob = tensor_blob
+        if node_blob is not None:
+            self.node_blob = node_blob
         return self.converter.structure(structure, typ)
+
+
+# The single ContextConverter used for the whole process - see the class docstring.
+context_converter = ContextConverter()

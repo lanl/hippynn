@@ -17,7 +17,7 @@ from ..graphs import GraphModule
 from ..graphs.nodes.base import Node, get_connected_nodes
 from ..tools import open_if_needed
 from .hooks import _resolve_node
-from .processor import ContextConverter
+from .processor import ContextConverter, context_converter
 from .types import (
     PROTOCOL_VERSION,
     NodeReference,
@@ -75,7 +75,8 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, include_desce
     """
     Interface wrapper taking node(s) or a graph and serializing them to a `SerializationRecord`.
     """
-    processor = ContextConverter()
+    context_converter.reset()
+    processor = context_converter
 
     graph_module_record = state_dict = root_ids = None
     single_root = False
@@ -172,7 +173,8 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
         )
 
     _debprint(f"Deserializing node list: {record.graph.node_list=}")
-    processor = ContextConverter()
+    context_converter.reset()
+    processor = context_converter
     processor.tensor_blob = tensor_data
     for info in record.graph.node_list:
         processor.node_blob[info.identifier.id] = info

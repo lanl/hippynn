@@ -12,10 +12,15 @@ import torch
 
 @pytest.fixture
 def processor_pair():
-    """A fresh writer/reader Processor pair, mirroring separate serialize/deserialize sessions."""
-    from hippynn.serializer.processor import ContextConverter
+    """
+    The (single, process-wide) writer/reader Processor, reset to a clean state. `writer`/`reader`
+    are the same object - there is only one `context_converter` - but `.structure()` always
+    resets internally before reading (see its docstring), so write and read remain independent.
+    """
+    from hippynn.serializer.processor import context_converter
 
-    return ContextConverter(), ContextConverter()
+    context_converter.reset()
+    return context_converter, context_converter
 
 
 def test_processor_plain_data_roundtrip(processor_pair):
@@ -66,11 +71,11 @@ def test_processor_set_roundtrip(processor_pair):
     assert restored["values"] == data["values"]
 
 
-def test_processor_embedded_object_reference_roundtrip(processor_pair):
+def test_processor_embedded_object_reference_roundtrip():
 
-    from hippynn.serializer.processor import ContextConverter
+    from functools import partial
 
-    writer, reader = processor_pair
+    from hippynn.serializer.processor import context_converter
 
     @dataclasses.dataclass
     class Leaf:
@@ -80,7 +85,6 @@ def test_processor_embedded_object_reference_roundtrip(processor_pair):
     class Root:
         leaves: list[Leaf]
 
-    @ContextConverter.register_unstructure(Leaf)
     def _unstructure_leaf(obj, *, ctx):
         blob = getattr(ctx, "_leaf_blob", None)
         if blob is None:
@@ -93,7 +97,6 @@ def test_processor_embedded_object_reference_roundtrip(processor_pair):
             blob[key] = obj.payload
         return {"kind": "leaf_ref", "key": key}
 
-    @ContextConverter.register_structure(Leaf)
     def _structure_leaf(data, typ, *, ctx):
         cache = getattr(ctx, "_leaf_objects", None)
         if cache is None:
@@ -104,12 +107,19 @@ def test_processor_embedded_object_reference_roundtrip(processor_pair):
             cache[key] = typ(ctx._leaf_blob[key])
         return cache[key]
 
+    context_converter.reset()
+    context_converter.converter.register_unstructure_hook(Leaf, partial(_unstructure_leaf, ctx=context_converter))
+    context_converter.converter.register_structure_hook(Leaf, partial(_structure_leaf, ctx=context_converter))
+
+    writer, reader = context_converter, context_converter
+
     shared_leaf = Leaf(payload="shared")
     root = Root(leaves=[shared_leaf, shared_leaf])
 
     structure, tensor_blob = writer.unstructure(root)
-    reader._leaf_blob = writer._leaf_blob  # out-of-band leaf payloads, mirroring tensor_blob's write->read hand-off
+    leaf_blob = writer._leaf_blob  # out-of-band leaf payload, captured before .structure()'s internal reset()
     restored = reader.structure(structure, Root, tensor_blob=tensor_blob)
+    reader._leaf_blob = leaf_blob
 
     assert restored.leaves[0] is restored.leaves[1], "repeated references to one Leaf must resolve to one object"
     assert restored.leaves[0].payload == "shared"
@@ -149,8 +159,8 @@ def test_serialize_automodule(processor_pair):
     node = FuzzyHistogrammer("hist", (values,), length=5, vmin=0.0, vmax=1.0)
 
     structure, tensor_blob = writer.unstructure([values, node])
-    reader.node_blob = writer.node_blob  # out-of-band node records, mirroring tensor_blob's write->read hand-off
-    restored_values, restored_node = reader.structure(structure, Serializable, tensor_blob=tensor_blob)
+    node_blob = writer.node_blob  # out-of-band node records, captured before .structure()'s internal reset()
+    restored_values, restored_node = reader.structure(structure, Serializable, tensor_blob=tensor_blob, node_blob=node_blob)
 
     assert isinstance(restored_node, FuzzyHistogrammer)
     assert restored_node.parents[0] is restored_values
