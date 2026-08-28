@@ -89,10 +89,18 @@ else:
         warnings.warn(f"Lammps interface was not importable due to exception: :{eee}")
         del eee, warnings
 
-# Graph (de)serialization - imported last so that Node subclasses defined by any of the optional
-# interfaces above are already registered before the serializer's registry validation runs.
-from . import serializer
-from .serializer import savegraph, loadgraph
+# Submodules that require cattrs
+try:
+    import cattrs
+except ImportError:
+    pass
+else:
+    del cattrs
+    # Graph (de)serialization - imported last so that Node subclasses defined by any of the
+    # optional interfaces above are already registered before the serializer's registry
+    # validation runs.
+    from . import serializer
+    from .serializer import savegraph, loadgraph
 
 # The order is adjusted to put functions after objects in the documentation.
 _dir = dir()
