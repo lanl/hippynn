@@ -121,6 +121,10 @@ class ContextConverter:
             self.converter.register_unstructure_hook_func(predicate, partial(func, ctx=self))
         self._synced_unstructure_families = len(self._unstructure_families)
 
+    def get_node_id(self, obj):
+        """Return the discovery-order id already assigned to `obj` by a prior `unstructure()` call, or None."""
+        return self.node_ids.get(id(obj))
+
     def unstructure(self, obj):
         """
         Return `(structure, tensor_blob)`: `structure` is ordinary cattrs-produced plain data,

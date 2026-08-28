@@ -62,6 +62,7 @@ def _structure_serializable(data, _typ, *, converter):
 
 
 def _make_plain_converter() -> Converter:
+    # todo: remove the need for this, borrow a context converter's internal converter?
     """A fresh `cattrs.Converter` with the `Serializable`-boundary structure hook registered."""
     converter = Converter()
     converter.register_structure_hook_func(lambda t: t is Serializable, partial(_structure_serializable, converter=converter))
@@ -80,12 +81,9 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, include_desce
     single_root = False
     if isinstance(nodes_or_graph, GraphModule):
         module = nodes_or_graph
-        # Unstructured per-element (rather than `processor.unstructure(list(...))`) since these
-        # are plain lists of `Node`s, not `Serializable`-typed data - passing the list itself
-        # through `unstructure()` would wrap it as a `TaggedList` via the generic `list` hook.
-        input_refs = [processor.unstructure(n)[0] for n in module.input_nodes]
-        output_refs = [processor.unstructure(n)[0] for n in module.nodes_to_compute]
-        forward_refs = [processor.unstructure(n)[0] for n in module.forward_output_list]
+        input_refs = processor.unstructure(list(module.input_nodes))[0].values
+        output_refs = processor.unstructure(list(module.nodes_to_compute))[0].values
+        forward_refs = processor.unstructure(list(module.forward_output_list))[0].values
         graph_module_record = SerializedGraphModule(
             input_nodes=tuple(input_refs),
             output_nodes=tuple(output_refs),
@@ -96,16 +94,16 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, include_desce
         single_root = isinstance(nodes_or_graph, Node)
         original_roots = [nodes_or_graph] if single_root else list(nodes_or_graph)
 
-        root_refs = [processor.unstructure(n)[0] for n in original_roots]
+        processor.unstructure(original_roots)
 
         # Descendants aren't found by the Node parent recursion.
         expanded = get_connected_nodes(original_roots, descendants=include_descendants, ancestors=False)
         _debprint(f"Serializing node list: {expanded=}")
         processor.unstructure(expanded)
 
-        root_ids = [ref.identifier.id for ref in root_refs]
+        root_ids = [processor.get_node_id(n) for n in original_roots]
 
-    serial_data = SerializedGraph(node_list=list(processor.node_blob.values()), n_tensor_arguments=len(processor.tensor_blob))
+    serial_data = SerializedGraph(node_list=list(processor.node_blob.values()), n_tensor_values=len(processor.tensor_blob))
     record = SerializationRecord(
         graph=serial_data, module=graph_module_record, state_dict=state_dict, root_ids=root_ids, single_root=single_root
     )
@@ -113,33 +111,16 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, include_desce
     return record, processor.tensor_blob
 
 
-def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | None = None, state_dict: dict[str, object] | None = None):
-    """
-    Interface wrapper taking a `SerializationRecord` (and its associated tensor data) and
-    reconstructing either a bare list of nodes or a `GraphModule`, mirroring `serialize`.
-    """
-    if record.protocol_version != PROTOCOL_VERSION:
-        warnings.warn(
-            f"Deserializing a SerializationRecord with protocol_version={record.protocol_version}, "
-            f"but the running codebase's protocol_version is {PROTOCOL_VERSION} - the record shapes "
-            "or their cattrs hooks may have changed incompatibly since this record was written.",
-            stacklevel=2,
-        )
+def _resolve_bare_nodes(record: SerializationRecord, processor: ContextConverter):
+    """Reconstruct `deserialize`'s bare-node-list case (`record.module is None`)."""
+    if record.root_ids is None:
+        return [_resolve_node(info.identifier.id, processor) for info in record.graph.node_list]
+    resolved = [_resolve_node(key, processor) for key in record.root_ids]
+    return resolved[0] if record.single_root else resolved
 
-    if tensor_data is None:
-        tensor_data = record.tensor_data or {}
 
-    _debprint(f"Deserializing node list: {record.graph.node_list=}")
-    processor = ContextConverter()
-    processor.tensor_blob = tensor_data
-    for info in record.graph.node_list:
-        processor.node_blob[info.identifier.id] = info
-
-    if record.module is None:
-        if record.root_ids is None:
-            return [_resolve_node(info.identifier.id, processor) for info in record.graph.node_list]
-        resolved = [_resolve_node(key, processor) for key in record.root_ids]
-        return resolved[0] if record.single_root else resolved
+def _resolve_graph_module(record: SerializationRecord, processor: ContextConverter, state_dict: dict[str, object] | None):
+    """Reconstruct `deserialize`'s `GraphModule` case (`record.module is not None`)."""
 
     def resolve_tuple(attr):
         return tuple(_resolve_node(ref.identifier.id, processor) for ref in attr)
@@ -164,6 +145,41 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
         module.load_state_dict(state_dict)
 
     return module
+
+
+def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | None = None, state_dict: dict[str, object] | None = None):
+    """
+    Interface wrapper taking a `SerializationRecord` (and its associated tensor data) and
+    reconstructing either a bare list of nodes or a `GraphModule`, mirroring `serialize`.
+    """
+    if record.protocol_version != PROTOCOL_VERSION:
+        warnings.warn(
+            f"Deserializing a SerializationRecord with protocol_version={record.protocol_version}, "
+            f"but the running codebase's protocol_version is {PROTOCOL_VERSION} - the record shapes "
+            "or their cattrs hooks may have changed incompatibly since this record was written.",
+            stacklevel=2,
+        )
+
+    if tensor_data is None:
+        tensor_data = record.tensor_data or {}
+
+    if len(tensor_data) != record.graph.n_tensor_values:
+        warnings.warn(
+            f"SerializationRecord expects {record.graph.n_tensor_values} tensor value(s), but "
+            f"tensor_data has {len(tensor_data)} - the tensor payload may be incomplete or come "
+            "from a different record.",
+            stacklevel=2,
+        )
+
+    _debprint(f"Deserializing node list: {record.graph.node_list=}")
+    processor = ContextConverter()
+    processor.tensor_blob = tensor_data
+    for info in record.graph.node_list:
+        processor.node_blob[info.identifier.id] = info
+
+    if record.module is None:
+        return _resolve_bare_nodes(record, processor)
+    return _resolve_graph_module(record, processor, state_dict)
 
 
 

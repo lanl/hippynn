@@ -186,6 +186,39 @@ def test_deserialize_protocol_version_mismatch_warns():
         deserialize(stale_record, tensor_data)
 
 
+def test_deserialize_tensor_count_mismatch_warns():
+    from hippynn.serializer import serialize, deserialize
+    from hippynn.graphs.nodes.base import ValueNode
+
+    node = ValueNode(torch.ones(3))
+    record, tensor_data = serialize(node)
+    assert record.graph.n_tensor_values == len(tensor_data)
+
+    padded_tensor_data = dict(tensor_data)
+    padded_tensor_data[max(tensor_data) + 1] = torch.zeros(1)
+
+    with pytest.warns(UserWarning, match="tensor"):
+        deserialize(record, padded_tensor_data)
+
+
+def test_get_nodetype_rejects_module_directly_in_namespace_root():
+    from hippynn.serializer.registry import get_nodetype
+
+    class FakeGraphNode:
+        pass
+
+    FakeGraphNode.__module__ = "hippynn.graphs.nodes"
+    with pytest.raises(ValueError, match="hippynn.graphs.nodes"):
+        get_nodetype(FakeGraphNode)
+
+    class FakeInterfaceNode:
+        pass
+
+    FakeInterfaceNode.__module__ = "hippynn.interfaces"
+    with pytest.raises(ValueError, match="hippynn.interfaces"):
+        get_nodetype(FakeInterfaceNode)
+
+
 def test_serialize_valuenode_graph_module():
     from hippynn.serializer import serialize, deserialize
     from hippynn.graphs.nodes.base import ValueNode

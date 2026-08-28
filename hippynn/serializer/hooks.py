@@ -51,7 +51,7 @@ def unstructure_node(obj, *, ctx):
     `obj`, recursing into `.parents` and any NODE_REFERENCE_ATTRS-named attributes.
     """
     cls = type(obj)
-    key = ctx.node_ids[id(obj)]
+    key = ctx.get_node_id(obj)
     parents = tuple(ctx.converter.unstructure(p) for p in obj.parents)
 
     serialize_kwargs = getattr(obj, "_serialize_kwargs", None)
@@ -90,7 +90,7 @@ def _unstructure_node(obj, *, ctx):
     so don't have `to_record` attached).
     """
     name = obj.name or None
-    key = ctx.node_ids.get(id(obj))
+    key = ctx.get_node_id(obj)
     if key is not None:
         return NodeReference(identifier=NodeIdentifier(id=key, name=name))
 
@@ -210,6 +210,7 @@ def _unstructure_set(obj, *, ctx):
 def _resolve_serializable(data, ctx):
     if data is None or isinstance(data, (bool, int, float, str)):
         return data
+    
     if isinstance(data, TensorReference):
         return ctx.converter.structure(data, torch.Tensor)
     if isinstance(data, NodeReference):

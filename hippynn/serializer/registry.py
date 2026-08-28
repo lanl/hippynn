@@ -53,11 +53,20 @@ def get_nodetype(node_cls):
     # first two locations are common locations for hippynn nodes
     # they are treated separately as packages. Nodes defined within these subpcakges
     # must have references in the corresponding namespace.
-    # todo: add validation to this.
     if qualname[:3] == "hippynn.graphs.nodes".split("."):
+        if len(qualname) < 4:
+            raise ValueError(
+                f"{node_cls!r} is defined directly in 'hippynn.graphs.nodes' ({node_cls.__module__!r}); "
+                "node classes must live in a namespaced subpackage, e.g. 'hippynn.graphs.nodes.base'."
+            )
         namespace = qualname[3]
         package = ".".join(qualname[:3])
     elif qualname[:2] == "hippynn.interfaces".split("."):
+        if len(qualname) < 3:
+            raise ValueError(
+                f"{node_cls!r} is defined directly in 'hippynn.interfaces' ({node_cls.__module__!r}); "
+                "node classes must live in a namespaced subpackage, e.g. 'hippynn.interfaces.ase_interface'."
+            )
         namespace = qualname[2]
         package = ".".join(qualname[:2])
     else:

@@ -84,7 +84,7 @@ class NodeInfo:
 @dataclasses.dataclass
 class SerializedGraph:
     node_list: list[NodeInfo]
-    n_tensor_arguments: int
+    n_tensor_values: int
 
 
 @dataclasses.dataclass
