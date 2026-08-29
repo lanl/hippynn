@@ -9,7 +9,7 @@ import warnings
 from functools import partial
 
 from ..experiment import _debprint
-from .processor import context_converter
+from .processor import CONTEXT_CONVERTER
 from .types import NodeTypeIdentifier
 from ..graphs.nodes.base.base import _SerializableNode
 
@@ -107,8 +107,8 @@ def register_structure_hooks():
     for cls in _SerializableNode.__subclasses__():
         if "from_record" not in cls.__dict__:
             raise TypeError(f"{cls!r} is a direct subclass of _SerializableNode but does not define its own `from_record`.")
-        context_converter.converter.register_structure_hook_func(
-            lambda t, cls=cls: isinstance(t, type) and issubclass(t, cls), partial(_dispatch_from_record, ctx=context_converter)
+        CONTEXT_CONVERTER.converter.register_structure_hook_func(
+            lambda t, cls=cls: isinstance(t, type) and issubclass(t, cls), partial(_dispatch_from_record, ctx=CONTEXT_CONVERTER)
         )
 
 

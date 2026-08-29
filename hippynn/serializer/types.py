@@ -100,5 +100,5 @@ class SerializationRecord:
     module: SerializedGraphModule | None = None
     tensor_data: dict[int, object] | None = None
     state_dict: dict[str, object] | None = None
-    root_ids: list[int] | None = None
+    root_ids: list[NodeReference] | None = None
     single_root: bool = False

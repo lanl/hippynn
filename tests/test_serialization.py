@@ -17,10 +17,10 @@ def processor_pair():
     are the same object - there is only one `context_converter` - but `.structure()` always
     resets internally before reading (see its docstring), so write and read remain independent.
     """
-    from hippynn.serializer.processor import context_converter
+    from hippynn.serializer.processor import CONTEXT_CONVERTER
 
-    context_converter.reset()
-    return context_converter, context_converter
+    CONTEXT_CONVERTER.reset()
+    return CONTEXT_CONVERTER, CONTEXT_CONVERTER
 
 
 def test_processor_plain_data_roundtrip(processor_pair):
@@ -75,7 +75,7 @@ def test_processor_embedded_object_reference_roundtrip():
 
     from functools import partial
 
-    from hippynn.serializer.processor import context_converter
+    from hippynn.serializer.processor import CONTEXT_CONVERTER
 
     @dataclasses.dataclass
     class Leaf:
@@ -107,11 +107,11 @@ def test_processor_embedded_object_reference_roundtrip():
             cache[key] = typ(ctx._leaf_blob[key])
         return cache[key]
 
-    context_converter.reset()
-    context_converter.converter.register_unstructure_hook(Leaf, partial(_unstructure_leaf, ctx=context_converter))
-    context_converter.converter.register_structure_hook(Leaf, partial(_structure_leaf, ctx=context_converter))
+    CONTEXT_CONVERTER.reset()
+    CONTEXT_CONVERTER.converter.register_unstructure_hook(Leaf, partial(_unstructure_leaf, ctx=CONTEXT_CONVERTER))
+    CONTEXT_CONVERTER.converter.register_structure_hook(Leaf, partial(_structure_leaf, ctx=CONTEXT_CONVERTER))
 
-    writer, reader = context_converter, context_converter
+    writer, reader = CONTEXT_CONVERTER, CONTEXT_CONVERTER
 
     shared_leaf = Leaf(payload="shared")
     root = Root(leaves=[shared_leaf, shared_leaf])

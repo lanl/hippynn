@@ -59,7 +59,7 @@ class GraphModule(torch.nn.Module):
 
         del x
 
-        self.forward_output_list, self.forward_inputs_list = compute_evaluation_order(all_node_list)
+        self.forward_output_list = compute_evaluation_order(all_node_list)
 
         # Here we have to do a small dance to allow us to create a dictionary of nodes to modules.
         # Pytorch requires ModuleDicts to have keys that are strings.
@@ -95,13 +95,13 @@ class GraphModule(torch.nn.Module):
         for k, v in out_nodes.items():
             print("\t", v, ":", k)
         print("Order:")
-        all_inputs = set(n for this_list in self.forward_inputs_list for n in this_list)
-        for computed, inputs_for_computed in zip(self.forward_output_list, self.forward_inputs_list):
+        all_inputs = set(n for node in self.forward_output_list for n in node.parents)
+        for computed in self.forward_output_list:
             if computed not in all_inputs and computed not in self.nodes_to_compute:
                 # most likely this is just the child of MultiNode which is still unpacked.
                 continue
 
-            pre = ",".join({node_map[n] for n in inputs_for_computed})
+            pre = ",".join({node_map[n] for n in computed.parents})
             mid = "{:3} : {}".format(node_map[computed], computed.name)
             print("{:-<20}-> {}".format(pre, mid))
 
@@ -138,8 +138,8 @@ class GraphModule(torch.nn.Module):
             for node, value in zip(self.input_nodes, input_values)
         }
 
-        for this_node, inputs_for_this_node in zip(self.forward_output_list, self.forward_inputs_list):
-            computed[this_node] = self.get_module(this_node)(*(computed[inkey] for inkey in inputs_for_this_node))
+        for this_node in self.forward_output_list:
+            computed[this_node] = self.get_module(this_node)(*(computed[inkey] for inkey in this_node.parents))
 
         return tuple(computed[x] for x in self.nodes_to_compute)
 
@@ -174,7 +174,8 @@ class _DebugGraphModule(GraphModule):
         print("Should be inputted:")
         print(*(i.name for i in self.input_nodes), sep="\n\t")
 
-        for this_node, inputs_for_this_node in zip(self.forward_output_list, self.forward_inputs_list):
+        for this_node in self.forward_output_list:
+            inputs_for_this_node = this_node.parents
             print("Computing:", this_node.name)
             try:
                 inputs = tuple(computed[inkey] for inkey in inputs_for_this_node)

@@ -1,5 +1,6 @@
 """
 The ContextConverter class: a global cattrs Converter plus tensor/node identity caches.
+
 """
 
 import itertools
@@ -105,4 +106,4 @@ class ContextConverter:
 
 
 # The single ContextConverter used for the whole process - see the class docstring.
-context_converter = ContextConverter()
+CONTEXT_CONVERTER = ContextConverter()

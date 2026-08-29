@@ -7,7 +7,7 @@ from functools import partial
 
 import torch
 
-from .processor import context_converter
+from .processor import CONTEXT_CONVERTER
 from .registry import _ID_REGISTRY, _NODE_REGISTRY
 from .types import NodeIdentifier, NodeInfo, NodeReference, Serializable, TaggedDict, TaggedList, TaggedSet, TaggedTuple, TensorReference
 from ..graphs.nodes.base import AutoModule, InputNode, Node
@@ -29,7 +29,7 @@ def _unstructure_tensor(obj: torch.Tensor, *, ctx):
     return TensorReference(key=key)
 
 
-context_converter.converter.register_unstructure_hook(torch.Tensor, partial(_unstructure_tensor, ctx=context_converter))
+CONTEXT_CONVERTER.converter.register_unstructure_hook(torch.Tensor, partial(_unstructure_tensor, ctx=CONTEXT_CONVERTER))
 
 
 def _structure_tensor(data: TensorReference, typ, *, ctx):
@@ -39,7 +39,7 @@ def _structure_tensor(data: TensorReference, typ, *, ctx):
     return ctx.tensor_objects[key]
 
 
-context_converter.converter.register_structure_hook(torch.Tensor, partial(_structure_tensor, ctx=context_converter))
+CONTEXT_CONVERTER.converter.register_structure_hook(torch.Tensor, partial(_structure_tensor, ctx=CONTEXT_CONVERTER))
 
 
 # ----------------------------------------------------------------------
@@ -106,8 +106,8 @@ def _unstructure_node(obj, *, ctx):
     return NodeReference(identifier=NodeIdentifier(id=key, name=name))
 
 
-context_converter.converter.register_unstructure_hook_func(
-    lambda t: isinstance(t, type) and issubclass(t, Node), partial(_unstructure_node, ctx=context_converter)
+CONTEXT_CONVERTER.converter.register_unstructure_hook_func(
+    lambda t: isinstance(t, type) and issubclass(t, Node), partial(_unstructure_node, ctx=CONTEXT_CONVERTER)
 )
 
 
@@ -145,26 +145,11 @@ def _resolve_node(key, ctx):
         ctx._node_resolving.discard(key)
 
 
-def _resolve_ids(nested, ctx):
-    """
-    Recursively resolve a (possibly nested) list/tuple of ids, `NodeReference`s, or `NodeInfo`s
-    into the nodes they refer to, preserving the input's list/tuple shape - lets a caller batch
-    several groups of ids into one combined structure and resolve them all in a single call,
-    mirroring how `serialize()` batches groups into one `unstructure_with_context()` call on the
-    write side.
-    """
-    if isinstance(nested, (list, tuple)):
-        resolved = [_resolve_ids(item, ctx) for item in nested]
-        return tuple(resolved) if isinstance(nested, tuple) else resolved
-    key = nested if isinstance(nested, int) else nested.identifier.id
-    return _resolve_node(key, ctx)
-
-
 def _structure_node_reference(data: NodeReference, typ, *, ctx):
     return _resolve_node(data.identifier.id, ctx)
 
 
-context_converter.converter.register_structure_hook(NodeReference, partial(_structure_node_reference, ctx=context_converter))
+CONTEXT_CONVERTER.converter.register_structure_hook(NodeReference, partial(_structure_node_reference, ctx=CONTEXT_CONVERTER))
 
 
 # ----------------------------------------------------------------------
@@ -197,14 +182,14 @@ def _unstructure_list(obj, *, ctx):
     return TaggedList(values=[ctx.converter.unstructure(v) for v in obj])
 
 
-context_converter.converter.register_unstructure_hook(list, partial(_unstructure_list, ctx=context_converter))
+CONTEXT_CONVERTER.converter.register_unstructure_hook(list, partial(_unstructure_list, ctx=CONTEXT_CONVERTER))
 
 
 def _unstructure_tuple(obj, *, ctx):
     return TaggedTuple(values=tuple(ctx.converter.unstructure(v) for v in obj))
 
 
-context_converter.converter.register_unstructure_hook(tuple, partial(_unstructure_tuple, ctx=context_converter))
+CONTEXT_CONVERTER.converter.register_unstructure_hook(tuple, partial(_unstructure_tuple, ctx=CONTEXT_CONVERTER))
 
 
 def _unstructure_dict(obj, *, ctx):
@@ -212,14 +197,14 @@ def _unstructure_dict(obj, *, ctx):
     return TaggedDict(values={k: ctx.converter.unstructure(v) for k, v in obj.items()})
 
 
-context_converter.converter.register_unstructure_hook(dict, partial(_unstructure_dict, ctx=context_converter))
+CONTEXT_CONVERTER.converter.register_unstructure_hook(dict, partial(_unstructure_dict, ctx=CONTEXT_CONVERTER))
 
 
 def _unstructure_set(obj, *, ctx):
     return TaggedSet(values=[ctx.converter.unstructure(v) for v in obj])
 
 
-context_converter.converter.register_unstructure_hook(set, partial(_unstructure_set, ctx=context_converter))
+CONTEXT_CONVERTER.converter.register_unstructure_hook(set, partial(_unstructure_set, ctx=CONTEXT_CONVERTER))
 
 
 # ----------------------------------------------------------------------
@@ -263,4 +248,4 @@ def _structure_serializable(data, typ, *, ctx):
     return _resolve_serializable(data, ctx)
 
 
-context_converter.converter.register_structure_hook_func(lambda t: t is Serializable, partial(_structure_serializable, ctx=context_converter))
+CONTEXT_CONVERTER.converter.register_structure_hook_func(lambda t: t is Serializable, partial(_structure_serializable, ctx=CONTEXT_CONVERTER))

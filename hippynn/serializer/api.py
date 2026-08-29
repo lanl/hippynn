@@ -19,10 +19,10 @@ from ..experiment import _debprint
 from ..graphs import GraphModule
 from ..graphs.nodes.base import Node, get_connected_nodes
 from ..tools import open_if_needed
-from .hooks import _resolve_ids
-from .processor import context_converter
+from .processor import CONTEXT_CONVERTER
 from .types import (
     PROTOCOL_VERSION,
+    NodeReference,
     SerializationRecord,
     Serializable,
     SerializedGraph,
@@ -64,7 +64,7 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, include_desce
     """
     Interface wrapper taking node(s) or a graph and serializing them to a `SerializationRecord`.
     """
-    processor = context_converter
+    processor = CONTEXT_CONVERTER
     processor.reset()
 
     graph_module_record = state_dict = root_ids = None
@@ -91,7 +91,7 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, include_desce
 
         structure, tensor_blob, node_blob = processor.unstructure_with_context([original_roots, expanded])
         roots_structure, extended_structure = structure.values
-        root_ids = [ref.identifier.id for ref in roots_structure.values]
+        root_ids = roots_structure.values
 
     serial_data = SerializedGraph(node_list=list(node_blob.values()), n_tensor_values=len(tensor_blob))
     record = SerializationRecord(
@@ -127,25 +127,29 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
 
     _debprint(f"Deserializing node list: {record.graph.node_list=}")
 
-    context_converter.structure_with_context(tensor_data, record.graph.node_list)
+    CONTEXT_CONVERTER.structure_with_context(tensor_data, record.graph.node_list)
 
     # Bare node list, early return
     if record.module is None:
-        ids = record.root_ids if record.root_ids is not None else record.graph.node_list
-        resolved = _resolve_ids(ids, context_converter)
+        refs = record.root_ids
+        if refs is None:
+            refs = [NodeReference(identifier=info.identifier) for info in record.graph.node_list]
+        resolved = CONTEXT_CONVERTER.converter.structure(refs, list[NodeReference])
         return resolved[0] if record.single_root else resolved
 
     # GraphModule, restructure it
-    input_nodes, output_nodes = _resolve_ids([record.module.input_nodes, record.module.output_nodes], context_converter)
+    input_nodes, output_nodes, forward_output_list = CONTEXT_CONVERTER.converter.structure(
+        [record.module.input_nodes, record.module.output_nodes, record.module.forward_output_list],
+        list[tuple[NodeReference, ...]],
+    )
 
     module = GraphModule(input_nodes, output_nodes)
 
-    if len(module.forward_output_list) != len(record.module.forward_output_list):
+    if tuple(module.forward_output_list) != forward_output_list:
         warnings.warn(
-            f"Deserialized GraphModule has {len(module.forward_output_list)} forward_output_list "
-            f"nodes, but the record was serialized with {len(record.module.forward_output_list)} - "
-            "the reconstructed graph structure does not match the original, and loading its "
-            "state_dict is likely to fail.",
+            "Deserialized GraphModule's forward_output_list does not match the recorded one - "
+            "the reconstructed graph structure differs from the original, and its state_dict "
+            "keys (assigned by forward_output_list position) are likely to map onto the wrong nodes.",
             stacklevel=2,
         )
 
