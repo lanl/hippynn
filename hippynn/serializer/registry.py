@@ -11,27 +11,11 @@ from functools import partial
 from ..experiment import _debprint
 from .processor import context_converter
 from .types import NodeTypeIdentifier
-from ..graphs.nodes.base import LossInputNode
 from ..graphs.nodes.base.base import _SerializableNode
 
 
 _NODE_REGISTRY: dict[type, NodeTypeIdentifier] = {}
 _ID_REGISTRY: dict[NodeTypeIdentifier, type] = {}
-
-# Attribute names on a Node subclass that hold embedded live-Node values outside `.parents`,
-# consumed by the Node <-> NodeReference hook pair in hooks.py.
-NODE_REFERENCE_ATTRS: dict[type, tuple[str, ...]] = {
-    LossInputNode: ("origin_node",),
-}
-
-
-def node_reference_attrs(cls: type) -> tuple[str, ...]:
-    """Return the reference-attribute names for `cls`, walking its MRO."""
-    for klass in cls.__mro__:
-        attrs = NODE_REFERENCE_ATTRS.get(klass)
-        if attrs is not None:
-            return attrs
-    return ()
 
 
 def _populate_registry():

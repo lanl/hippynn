@@ -9,7 +9,7 @@ entry points (thin wrappers around `Processor.unstructure`/`structure`) plus the
 """
 
 from .api import serialize, deserialize, savegraph, loadgraph
-from .registry import ensure_registry_consistency, register_node_cls, register_structure_hooks
+from .registry import ensure_registry_consistency, register_structure_hooks
 from .types import PROTOCOL_VERSION
 
 

@@ -55,13 +55,8 @@ class _NodeFunctions(_DeprecatedNamesMixin):
 
         self._pred: Optional[Node] = None
         self._true: Optional[Node] = None
-        
-        # The db_name must be set after parents, _pred, and _true,
-        # because assigning a db_name will assign to the true and pred versions of a node, as well;
-        # this in turn requires having these things as well as the parents to define if they exist or not.
-        self.db_name: Optional[str] = db_name 
 
-        
+        self.db_name: Optional[str] = db_name
             
         # Otherwise, glue the module on
         if module is not None:
@@ -143,10 +138,17 @@ class _NodeFunctions(_DeprecatedNamesMixin):
     
     def main_output(self):
         return NotImplemented    
-    
-    def db_name(self):
-        return NotImplemented
 
+    @property
+    def db_name(self):
+        return self._db_name
+
+    @db_name.setter
+    def db_name(self, value):
+        if value is not None and self.is_in_loss_graph():
+            raise ValueError("Nodes in loss graph cannot be assigned a db_name") 
+        self._db_name = value
+    
     def __dir__(self):
         dir_ = super().__dir__()
         # need to protect against a case where input names are not specified.

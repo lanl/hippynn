@@ -31,7 +31,7 @@ class SingleNode(Node, _DeprecatedNamesMixin):
         if self._pred is None:
             if self.is_in_loss_graph():
                 raise TypeError("Node {} of type {} already in loss graph".format(self, type(self)))
-            self._pred = LossPredNode(self.name + "-pred", origin_node=self, db_name=self.db_name)
+            return LossPredNode(self.name + "-pred", origin_node=self) # sets backlink when created
         return self._pred
 
     @property
@@ -39,19 +39,8 @@ class SingleNode(Node, _DeprecatedNamesMixin):
         if self._true is None:
             if self.is_in_loss_graph():
                 raise TypeError("Node {} of type {} already in loss graph".format(self, type(self)))
-            self._true = LossTrueNode(self.name + "-true", origin_node=self, db_name=self.db_name)
+            return LossTrueNode(self.name + "-true", origin_node=self) # sets backlink when created
         return self._true
-    
-    @property
-    def db_name(self):
-        return self._db_name
-
-    @db_name.setter
-    def db_name(self, value):
-        self._db_name = value
-        if not self.is_in_loss_graph():
-            self.true.db_name = value
-            self.pred.db_name = value
     
     @property
     def main_output(self):
@@ -116,7 +105,7 @@ class InputNode(SingleNode, _SerializableNode):
         if db_name is None and name is None:
             raise TypeError("Input node requires name or db_name arguments.")
         if name is None and db_name is not None:
-            name = self.input_type_str + "(db_name='{}')".format(db_name)
+            name = db_name
         super().__init__(name=name, parents=(), db_name=db_name, module=None)
 
     # `to_record` is attached generically in hippynn/serializer/hooks.py.
@@ -131,34 +120,30 @@ class InputNode(SingleNode, _SerializableNode):
 class LossInputNode(InputNode):
     """Node for getting information from the model (predicted) or database (true) into the loss."""
 
-    def __init__(self, name, origin_node, db_name):
-        super().__init__(name, db_name)
+    def __init__(self, name, origin_node):
+        super().__init__(name, db_name=None)
         self.origin_node = origin_node
+   
 
     @staticmethod
     def from_record(data, typ, *, ctx):
-        """
-        cattrs structure hook: overrides InputNode.from_record, whose (name, db_name, index_state)
-        signature doesn't match LossPredNode/LossTrueNode's (name, origin_node, db_name) constructor.
-        origin_node is already a resolved live Node by this point (NODE_REFERENCE_ATTRS resolves it
-        as part of module_kwargs); index_state is left to the constructor, which always derives it
-        from origin_node rather than accepting it as an argument.
-        """
         name, parents, kwargs, record = data
-        return typ(name=name, origin_node=kwargs["origin_node"], db_name=record.db_name)
+        return typ(name=name, origin_node=kwargs["origin_node"])
 
 
 class LossPredNode(LossInputNode):
-    def __init__(self, name, origin_node, db_name):
-        super().__init__(name, origin_node, db_name)
+    def __init__(self, name, origin_node):
+        super().__init__(name, origin_node)
         self.index_state = getattr(origin_node, "index_state", IdxType.Unlabeled)
+        self.origin_node._pred = self
 
 
 class LossTrueNode(LossInputNode):
-    def __init__(self, name, origin_node, db_name):
-        super().__init__(name, origin_node, db_name)
+    def __init__(self, name, origin_node):
+        super().__init__(name, origin_node)
         self.index_state = indextypes.reduce_funcs.db_state_of(origin_node.index_state)
         self._main_output = AtLeast2D(self)
+        self.origin_node._true = self
 
     @property
     def main_output(self):

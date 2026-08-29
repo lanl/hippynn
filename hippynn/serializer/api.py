@@ -2,34 +2,32 @@
 Public serialize/deserialize entry points, plus text-based codec interfaces.
 """
 
+import dataclasses
 import json
 import pathlib
 import pickle
+import typing
 import warnings
 from functools import partial
 from typing import Iterable
 
 import torch
 from cattrs import Converter
+from cattrs.strategies import configure_tagged_union
 
 from ..experiment import _debprint
 from ..graphs import GraphModule
 from ..graphs.nodes.base import Node, get_connected_nodes
 from ..tools import open_if_needed
-from .hooks import _resolve_node
-from .processor import ContextConverter, context_converter
+from .hooks import _resolve_ids
+from .processor import context_converter
 from .types import (
     PROTOCOL_VERSION,
-    NodeReference,
     SerializationRecord,
     Serializable,
     SerializedGraph,
     SerializedGraphModule,
-    TaggedDict,
-    TaggedList,
-    TaggedSet,
-    TaggedTuple,
-    TensorReference,
+    Tagged,
 )
 
 # Filetypes supported by `savegraph`/`loadgraph`, plus common extension spellings that map onto
@@ -37,37 +35,28 @@ from .types import (
 _FILETYPES = ("pkl", "pt", "json", "yml")
 _FILETYPE_ALIASES = {"pickle": "pkl", "pth": "pt", "yaml": "yml"}
 
-# todo: instead of registering some new hooks and making a new type of plain converter,
-# borrow the already-dressed converter of a ContextConverter type?
+
 def _structure_serializable(data, _typ, *, converter):
     """
     `Serializable`-boundary structure hook for the plain (JSON/YAML) converter: `Serializable`
-    is a recursive, open union with no attrs-class discriminator cattrs can auto-disambiguate,
-    so this only selects a concrete target type from the wire value's shape, then delegates the
-    actual recursive structuring back to `converter`.
+    is a recursive, open union that also contains bare scalars, so this only rules those out,
+    then delegates dict-shaped data to the `Tagged` sub-union, which `configure_tagged_union`
+    below dispatches on its `_type` field.
     """
     if isinstance(data, dict):
-        target = {
-            "list": TaggedList[Serializable],
-            "node_ref": NodeReference,
-            "tensor_ref": TensorReference,
-            "set": TaggedSet[Serializable],
-            "tuple": TaggedTuple[Serializable],
-            "dict": TaggedDict[Serializable],
-        }.get(data.get("kind"))
-        if target is None:
-            raise ValueError(f"Cannot structure a Serializable dict without a recognized 'kind': {data!r}")
-        return converter.structure(data, target)
+        return converter.structure(data, Tagged)
     return data
 
 
-def _make_plain_converter() -> Converter:
-    # todo: remove the need for this, borrow a context converter's internal converter?
-    """A fresh `cattrs.Converter` with the `Serializable`-boundary structure hook registered."""
-    converter = Converter()
-    converter.register_structure_hook_func(lambda t: t is Serializable, partial(_structure_serializable, converter=converter))
-    return converter
+def _tagged_type(cls: type) -> str:
+    """The `_type` field's default on `cls` - the same discriminator string it writes into its own unstructured payload."""
+    cls = typing.get_origin(cls) or cls
+    return next(f.default for f in dataclasses.fields(cls) if f.name == "_type")
 
+
+plain_converter = Converter()
+plain_converter.register_structure_hook_func(lambda t: t is Serializable, partial(_structure_serializable, converter=plain_converter))
+configure_tagged_union(Tagged, plain_converter, tag_generator=_tagged_type, tag_name="_type")
 
 
 
@@ -75,77 +64,41 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, include_desce
     """
     Interface wrapper taking node(s) or a graph and serializing them to a `SerializationRecord`.
     """
-    context_converter.reset()
     processor = context_converter
+    processor.reset()
 
     graph_module_record = state_dict = root_ids = None
     single_root = False
     if isinstance(nodes_or_graph, GraphModule):
         module = nodes_or_graph
-        input_refs = processor.unstructure(list(module.input_nodes))[0].values
-        output_refs = processor.unstructure(list(module.nodes_to_compute))[0].values
-        forward_refs = processor.unstructure(list(module.forward_output_list))[0].values
+        structure, tensor_blob, node_blob = processor.unstructure_with_context(
+            [module.input_nodes, module.nodes_to_compute, module.forward_output_list]
+        )
+        input_structure, output_structure, forward_structure = structure.values
         graph_module_record = SerializedGraphModule(
-            input_nodes=tuple(input_refs),
-            output_nodes=tuple(output_refs),
-            forward_output_list=tuple(forward_refs),
+            input_nodes=input_structure.values,
+            output_nodes=output_structure.values,
+            forward_output_list=forward_structure.values,
         )
         state_dict = module.state_dict()
     else:
         single_root = isinstance(nodes_or_graph, Node)
         original_roots = [nodes_or_graph] if single_root else list(nodes_or_graph)
 
-        processor.unstructure(original_roots)
-
         # Descendants aren't found by the Node parent recursion.
         expanded = get_connected_nodes(original_roots, descendants=include_descendants, ancestors=False)
         _debprint(f"Serializing node list: {expanded=}")
-        processor.unstructure(expanded)
 
-        root_ids = [processor.get_node_id(n) for n in original_roots]
+        structure, tensor_blob, node_blob = processor.unstructure_with_context([original_roots, expanded])
+        roots_structure, extended_structure = structure.values
+        root_ids = [ref.identifier.id for ref in roots_structure.values]
 
-    serial_data = SerializedGraph(node_list=list(processor.node_blob.values()), n_tensor_values=len(processor.tensor_blob))
+    serial_data = SerializedGraph(node_list=list(node_blob.values()), n_tensor_values=len(tensor_blob))
     record = SerializationRecord(
         graph=serial_data, module=graph_module_record, state_dict=state_dict, root_ids=root_ids, single_root=single_root
     )
 
-    return record, processor.tensor_blob
-
-
-def _resolve_bare_nodes(record: SerializationRecord, processor: ContextConverter):
-    """Reconstruct `deserialize`'s bare-node-list case (`record.module is None`)."""
-    if record.root_ids is None:
-        return [_resolve_node(info.identifier.id, processor) for info in record.graph.node_list]
-    resolved = [_resolve_node(key, processor) for key in record.root_ids]
-    return resolved[0] if record.single_root else resolved
-
-
-def _resolve_graph_module(record: SerializationRecord, processor: ContextConverter, state_dict: dict[str, object] | None):
-    """Reconstruct `deserialize`'s `GraphModule` case (`record.module is not None`)."""
-
-    def resolve_tuple(attr):
-        return tuple(_resolve_node(ref.identifier.id, processor) for ref in attr)
-
-    input_nodes = resolve_tuple(record.module.input_nodes)
-    output_nodes = resolve_tuple(record.module.output_nodes)
-
-    module = GraphModule(input_nodes, output_nodes)
-
-    if len(module.forward_output_list) != len(record.module.forward_output_list):
-        warnings.warn(
-            f"Deserialized GraphModule has {len(module.forward_output_list)} forward_output_list "
-            f"nodes, but the record was serialized with {len(record.module.forward_output_list)} - "
-            "the reconstructed graph structure does not match the original, and loading its "
-            "state_dict is likely to fail.",
-            stacklevel=2,
-        )
-
-    if state_dict is None:
-        state_dict = record.state_dict
-    if state_dict is not None:
-        module.load_state_dict(state_dict)
-
-    return module
+    return record, tensor_blob
 
 
 def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | None = None, state_dict: dict[str, object] | None = None):
@@ -173,15 +126,35 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
         )
 
     _debprint(f"Deserializing node list: {record.graph.node_list=}")
-    context_converter.reset()
-    processor = context_converter
-    processor.tensor_blob = tensor_data
-    for info in record.graph.node_list:
-        processor.node_blob[info.identifier.id] = info
 
+    context_converter.structure_with_context(tensor_data, record.graph.node_list)
+
+    # Bare node list, early return
     if record.module is None:
-        return _resolve_bare_nodes(record, processor)
-    return _resolve_graph_module(record, processor, state_dict)
+        ids = record.root_ids if record.root_ids is not None else record.graph.node_list
+        resolved = _resolve_ids(ids, context_converter)
+        return resolved[0] if record.single_root else resolved
+
+    # GraphModule, restructure it
+    input_nodes, output_nodes = _resolve_ids([record.module.input_nodes, record.module.output_nodes], context_converter)
+
+    module = GraphModule(input_nodes, output_nodes)
+
+    if len(module.forward_output_list) != len(record.module.forward_output_list):
+        warnings.warn(
+            f"Deserialized GraphModule has {len(module.forward_output_list)} forward_output_list "
+            f"nodes, but the record was serialized with {len(record.module.forward_output_list)} - "
+            "the reconstructed graph structure does not match the original, and loading its "
+            "state_dict is likely to fail.",
+            stacklevel=2,
+        )
+
+    if state_dict is None:
+        state_dict = record.state_dict
+    if state_dict is not None:
+        module.load_state_dict(state_dict)
+
+    return module
 
 
 
@@ -231,7 +204,6 @@ def savegraph(
     record, tensor_data = serialize(nodes_or_graph, include_descendants=include_descendants)
 
     if weights_file is not None:
-        # `torch.save` accepts a filename or an already-open file object directly.
         torch.save({"tensor_data": tensor_data, "state_dict": record.state_dict}, weights_file)
         record.state_dict = None
     elif filetype in ("json", "yml", "pkl") and (tensor_data or record.state_dict is not None):
@@ -240,8 +212,6 @@ def savegraph(
         record.tensor_data = tensor_data
 
 
-    _plain_converter = _make_plain_converter()
-
     write_mode = "wb" if filetype in ("pkl", "pt") else "w"
     with open_if_needed(file, write_mode) as fh:
         if filetype == "pkl":
@@ -249,11 +219,11 @@ def savegraph(
         elif filetype == "pt":
             torch.save(record, fh)
         elif filetype == "json":
-            json.dump(_plain_converter.unstructure(record), fh)
+            json.dump(plain_converter.unstructure(record), fh)
         elif filetype == "yml":
             import yaml
 
-            yaml.safe_dump(_plain_converter.unstructure(record), fh)
+            yaml.safe_dump(plain_converter.unstructure(record), fh)
         else:
             raise ValueError(f"Unknown filetype {filetype!r}; expected one of {_FILETYPES}.")
 
@@ -272,8 +242,6 @@ def loadgraph(file, weights_file=None, filetype: str | None = None, weights_only
     """
     filetype = _infer_filetype(file, filetype)
 
-    _plain_converter = _make_plain_converter()
-
     read_mode = "rb" if filetype in ("pkl", "pt") else "r"
     with open_if_needed(file, read_mode) as fh:
         if filetype == "pkl":
@@ -281,11 +249,10 @@ def loadgraph(file, weights_file=None, filetype: str | None = None, weights_only
         elif filetype == "pt":
             record = torch.load(fh, weights_only=weights_only)
         elif filetype == "json":
-            record = _plain_converter.structure(json.load(fh), SerializationRecord)
+            record = plain_converter.structure(json.load(fh), SerializationRecord)
         elif filetype == "yml":
             import yaml
-
-            record = _plain_converter.structure(yaml.safe_load(fh), SerializationRecord)
+            record = plain_converter.structure(yaml.safe_load(fh), SerializationRecord)
         else:
             raise ValueError(f"Unknown filetype {filetype!r}; expected one of {_FILETYPES}.")
 

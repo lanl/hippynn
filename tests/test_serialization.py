@@ -28,7 +28,7 @@ def test_processor_plain_data_roundtrip(processor_pair):
 
     data = {"a": 1, "b": [1, 2.5, "three", None, (4, 5)], "c": {"nested": True}}
 
-    structure, tensor_blob = writer.unstructure(data)
+    structure, tensor_blob, _node_blob = writer.unstructure_with_context(data)
     assert tensor_blob == {}
 
     restored = reader.structure(structure, Serializable, tensor_blob=tensor_blob)
@@ -40,7 +40,7 @@ def test_processor_single_tensor_roundtrip(processor_pair):
 
     data = {"weight": torch.arange(6).reshape(2, 3)}
 
-    structure, tensor_blob = writer.unstructure(data)
+    structure, tensor_blob, _node_blob = writer.unstructure_with_context(data)
     assert len(tensor_blob) == 1
 
     restored = reader.structure(structure, Serializable, tensor_blob=tensor_blob)
@@ -53,7 +53,7 @@ def test_processor_shared_tensor_identity_roundtrip(processor_pair):
     shared = torch.ones(3)
     data = {"a": shared, "b": shared}
 
-    structure, tensor_blob = writer.unstructure(data)
+    structure, tensor_blob, _node_blob = writer.unstructure_with_context(data)
     assert len(tensor_blob) == 1, "the same tensor object referenced twice must be stored once"
 
     restored = reader.structure(structure, Serializable, tensor_blob=tensor_blob)
@@ -65,7 +65,7 @@ def test_processor_set_roundtrip(processor_pair):
 
     data = {"values": {1, 2, 3}}
 
-    structure, tensor_blob = writer.unstructure(data)
+    structure, tensor_blob, _node_blob = writer.unstructure_with_context(data)
     restored = reader.structure(structure, Serializable, tensor_blob=tensor_blob)
 
     assert restored["values"] == data["values"]
@@ -116,8 +116,8 @@ def test_processor_embedded_object_reference_roundtrip():
     shared_leaf = Leaf(payload="shared")
     root = Root(leaves=[shared_leaf, shared_leaf])
 
-    structure, tensor_blob = writer.unstructure(root)
-    leaf_blob = writer._leaf_blob  # out-of-band leaf payload, captured before .structure()'s internal reset()
+    structure, tensor_blob, _node_blob = writer.unstructure_with_context(root)
+    leaf_blob = writer._leaf_blob  # out-of-band leaf payload, untouched by reset() (not a built-in attribute)
     restored = reader.structure(structure, Root, tensor_blob=tensor_blob)
     reader._leaf_blob = leaf_blob
 
@@ -158,8 +158,7 @@ def test_serialize_automodule(processor_pair):
     values = ValueNode(torch.linspace(0, 1, 10))
     node = FuzzyHistogrammer("hist", (values,), length=5, vmin=0.0, vmax=1.0)
 
-    structure, tensor_blob = writer.unstructure([values, node])
-    node_blob = writer.node_blob  # out-of-band node records, captured before .structure()'s internal reset()
+    structure, tensor_blob, node_blob = writer.unstructure_with_context([values, node])
     restored_values, restored_node = reader.structure(structure, Serializable, tensor_blob=tensor_blob, node_blob=node_blob)
 
     assert isinstance(restored_node, FuzzyHistogrammer)

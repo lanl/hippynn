@@ -8,7 +8,7 @@ from functools import partial
 import torch
 
 from .processor import context_converter
-from .registry import _ID_REGISTRY, _NODE_REGISTRY, node_reference_attrs
+from .registry import _ID_REGISTRY, _NODE_REGISTRY
 from .types import NodeIdentifier, NodeInfo, NodeReference, Serializable, TaggedDict, TaggedList, TaggedSet, TaggedTuple, TensorReference
 from ..graphs.nodes.base import AutoModule, InputNode, Node
 from ..graphs.nodes.base.algebra import BinNode, UnaryNode
@@ -54,17 +54,16 @@ def unstructure_node(obj, *, ctx):
     that doesn't need its own (attached onto `InputNode`/`AutoModule` below rather than defined
     on those classes directly, since building a `NodeInfo` needs types from this package, which
     `graphs.nodes.base` cannot import without a circular import). Builds the full `NodeInfo` for
-    `obj`, recursing into `.parents` and any NODE_REFERENCE_ATTRS-named attributes.
+    `obj`, recursing into `.parents` and `.origin_node` (set on `LossInputNode` instances; `None`
+    on every other node).
     """
     cls = type(obj)
     key = ctx.get_node_id(obj)
     parents = tuple(ctx.converter.unstructure(p) for p in obj.parents)
 
-    serialize_kwargs = getattr(obj, "_serialize_kwargs", None)
-    node_kwargs = dict(serialize_kwargs()) if serialize_kwargs is not None else dict(getattr(obj, "module_kwargs", None) or {})
-
-    for attr_name in node_reference_attrs(cls):
-        node_kwargs[attr_name] = getattr(obj, attr_name)
+    node_kwargs = dict(getattr(obj, "module_kwargs", None) or {})
+    if getattr(obj, "origin_node", None) is not None:
+        node_kwargs["origin_node"] = obj.origin_node
 
     # `ModuleKwargs = TaggedDict[Serializable]`, so `node_kwargs` goes through the same generic
     # `dict` hook as any other plain dict nested inside a `Serializable` value.
@@ -73,7 +72,6 @@ def unstructure_node(obj, *, ctx):
     return NodeInfo(
         identifier=NodeIdentifier(id=key, name=obj.name or None),
         cls=_NODE_REGISTRY[cls],
-        input_=isinstance(obj, InputNode),
         parents=parents,
         module_kwargs=module_kwargs,
         index_state=getattr(obj, "index_state", None),
@@ -130,11 +128,7 @@ def _resolve_node(key, ctx):
 
         node = ctx.converter.structure((name, parents, kwargs, record), cls)
 
-        # Mirrors the two branches of the pre-Processor `deserialize_node_list`: input nodes
-        # already receive db_name/index_state at construction time, and re-applying db_name
-        # post-construction would trigger SingleNode.db_name's setter side effect of lazily
-        # creating `.pred`/`.true` (LossPredNode/LossTrueNode).
-        if record.input_:
+        if isinstance(node, InputNode):
             if record.requires_grad is not None:
                 node.requires_grad = record.requires_grad
         else:
@@ -149,6 +143,21 @@ def _resolve_node(key, ctx):
         return node
     finally:
         ctx._node_resolving.discard(key)
+
+
+def _resolve_ids(nested, ctx):
+    """
+    Recursively resolve a (possibly nested) list/tuple of ids, `NodeReference`s, or `NodeInfo`s
+    into the nodes they refer to, preserving the input's list/tuple shape - lets a caller batch
+    several groups of ids into one combined structure and resolve them all in a single call,
+    mirroring how `serialize()` batches groups into one `unstructure_with_context()` call on the
+    write side.
+    """
+    if isinstance(nested, (list, tuple)):
+        resolved = [_resolve_ids(item, ctx) for item in nested]
+        return tuple(resolved) if isinstance(nested, tuple) else resolved
+    key = nested if isinstance(nested, int) else nested.identifier.id
+    return _resolve_node(key, ctx)
 
 
 def _structure_node_reference(data: NodeReference, typ, *, ctx):
@@ -171,9 +180,9 @@ context_converter.converter.register_structure_hook(NodeReference, partial(_stru
 # ----------------------------------------------------------------------
 # Plain container unstructuring (write side): explicit, rather than relying on whatever
 # cattrs' own defaults happen to do for these builtin types. Every one of `list`/`set`/`tuple`/
-# `dict` is tagged with a `kind` discriminator uniformly, so the read-side walk below dispatches
-# on a single `kind` field rather than on shape - `list`/`tuple` would otherwise collapse to the
-# same JSON array shape, and an untagged `dict` could collide with the `kind`-discriminator
+# `dict` is tagged with a `_type` discriminator uniformly, so the read-side walk below dispatches
+# on a single `_type` field rather than on shape - `list`/`tuple` would otherwise collapse to the
+# same JSON array shape, and an untagged `dict` could collide with the `_type`-discriminator
 # scheme used for `NodeReference`/`TensorReference`/etc.
 #
 # This hook fires on *any* Python `list`/`dict` passed through `ctx.converter.unstructure()`, not

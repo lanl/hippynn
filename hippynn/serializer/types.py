@@ -7,10 +7,7 @@ from typing import Literal
 
 from ..graphs.indextypes import IdxType
 
-# Bumped whenever a change to these record shapes (or their cattrs hooks) breaks
-# compatibility with previously-written `SerializationRecord`s.
-PROTOCOL_VERSION = 1
-
+PROTOCOL_VERSION = 0
 
 @dataclasses.dataclass(frozen=True)
 class NodeTypeIdentifier:
@@ -28,37 +25,37 @@ class NodeIdentifier:
 @dataclasses.dataclass(frozen=True)
 class NodeReference:
     identifier: NodeIdentifier
-    kind: Literal["node_ref"] = "node_ref"
+    _type: Literal["node_ref"] = "node_ref"
 
 
 @dataclasses.dataclass(frozen=True)
 class TensorReference:
     key: int
-    kind: Literal["tensor_ref"] = "tensor_ref"
+    _type: Literal["tensor_ref"] = "tensor_ref"
 
 
 @dataclasses.dataclass(frozen=True)
 class TaggedList[T]:
     values: list[T]
-    kind: Literal["list"] = "list"
+    _type: Literal["list"] = "list"
 
 
 @dataclasses.dataclass(frozen=True)
 class TaggedSet[T]:
     values: list[T]
-    kind: Literal["set"] = "set"
+    _type: Literal["set"] = "set"
 
 
 @dataclasses.dataclass(frozen=True)
 class TaggedTuple[T]:
     values: tuple[T, ...]
-    kind: Literal["tuple"] = "tuple"
+    _type: Literal["tuple"] = "tuple"
 
 
 @dataclasses.dataclass(frozen=True)
 class TaggedDict[T]:
     values: dict[str, T]
-    kind: Literal["dict"] = "dict"
+    _type: Literal["dict"] = "dict"
 
 
 type ScalarPrimitive = None | bool | int | float | str
@@ -68,12 +65,14 @@ type ContainerPrimitive = Container[Serializable]
 type Serializable = Scalar | ContainerPrimitive
 type ModuleKwargs = TaggedDict[Serializable]
 
+# all tagged types for seralization
+type Tagged = NodeReference | TensorReference | TaggedList[Serializable] | TaggedSet[Serializable] | TaggedTuple[Serializable] | TaggedDict[Serializable]
+
 
 @dataclasses.dataclass
 class NodeInfo:
     identifier: NodeIdentifier
     cls: NodeTypeIdentifier
-    input_: bool
     parents: tuple[NodeReference, ...] = ()
     module_kwargs: ModuleKwargs | None = None
     index_state: IdxType | None = None

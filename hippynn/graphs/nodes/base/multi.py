@@ -25,7 +25,6 @@ class IndexNode(AutoModule, SingleNode):
         self.index_state = IdxType.Unlabeled if index_state is None else index_state
         super().__init__(name, parents, _repr_info=repr_info, index=index, module="auto")
 
-    # `to_record` is attached generically in hippynn/serializer/hooks.py.
 
     @staticmethod
     def from_record(data, typ, *, ctx):
