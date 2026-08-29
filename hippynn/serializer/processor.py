@@ -67,7 +67,7 @@ class ContextConverter:
         finally:
             self.reset()
         return structure, return_tensors, return_nodes
-    
+
     def unstructure(self, obj):
         """
         Return `(structure, tensor_blob)`: `structure` is ordinary cattrs-produced plain data,

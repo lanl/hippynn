@@ -11,8 +11,7 @@ entry points (thin wrappers around `Processor.unstructure`/`structure`) plus the
 from .types import PROTOCOL_VERSION
 from .registry import ensure_registry_consistency, register_structure_hooks
 from .api import serialize, deserialize, savegraph, loadgraph
-from . import hooks # Trigger hook installation -- needed!
+from . import hooks  # Trigger hook installation -- needed!
 
 ensure_registry_consistency(raise_=False)
 register_structure_hooks()
-

@@ -79,6 +79,7 @@ def unstructure_node(obj, *, ctx):
         requires_grad=getattr(obj, "requires_grad", None),
     )
 
+
 InputNode.to_record = unstructure_node
 AutoModule.to_record = unstructure_node
 UnaryNode.to_record = unstructure_node
@@ -224,7 +225,7 @@ CONTEXT_CONVERTER.converter.register_unstructure_hook(set, partial(_unstructure_
 def _resolve_serializable(data, ctx):
     if data is None or isinstance(data, (bool, int, float, str)):
         return data
-    
+
     if isinstance(data, TensorReference):
         return ctx.converter.structure(data, torch.Tensor)
     if isinstance(data, NodeReference):
@@ -239,6 +240,7 @@ def _resolve_serializable(data, ctx):
         return dict(ctx.converter.structure(data.values, dict[str, Serializable]))
     raise TypeError(f"Cannot deserialize value of type {type(data)!r}: {data!r}")
 
+
 def _structure_serializable(data, typ, *, ctx):
     # NOTE: matching against the PEP-695 `Serializable` type-alias object itself (rather than
     # something it resolves/unwraps to, e.g. via `.__value__`) is not yet verified against the
@@ -248,4 +250,6 @@ def _structure_serializable(data, typ, *, ctx):
     return _resolve_serializable(data, ctx)
 
 
-CONTEXT_CONVERTER.converter.register_structure_hook_func(lambda t: t is Serializable, partial(_structure_serializable, ctx=CONTEXT_CONVERTER))
+CONTEXT_CONVERTER.converter.register_structure_hook_func(
+    lambda t: t is Serializable, partial(_structure_serializable, ctx=CONTEXT_CONVERTER)
+)

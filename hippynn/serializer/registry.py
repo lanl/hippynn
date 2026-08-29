@@ -110,5 +110,3 @@ def register_structure_hooks():
         CONTEXT_CONVERTER.converter.register_structure_hook_func(
             lambda t, cls=cls: isinstance(t, type) and issubclass(t, cls), partial(_dispatch_from_record, ctx=CONTEXT_CONVERTER)
         )
-
-

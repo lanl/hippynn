@@ -59,7 +59,6 @@ plain_converter.register_structure_hook_func(lambda t: t is Serializable, partia
 configure_tagged_union(Tagged, plain_converter, tag_generator=_tagged_type, tag_name="_type")
 
 
-
 def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, include_descendants=True):
     """
     Interface wrapper taking node(s) or a graph and serializing them to a `SerializationRecord`.
@@ -135,7 +134,10 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
         if refs is None:
             refs = [NodeReference(identifier=info.identifier) for info in record.graph.node_list]
         resolved = CONTEXT_CONVERTER.converter.structure(refs, list[NodeReference])
-        return resolved[0] if record.single_root else resolved
+        if record.single_root:
+            return resolved[0]
+        else:
+            return resolved
 
     # GraphModule, restructure it
     input_nodes, output_nodes, forward_output_list = CONTEXT_CONVERTER.converter.structure(
@@ -147,11 +149,10 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
 
     if tuple(module.forward_output_list) != forward_output_list:
         warnings.warn(
-            "Deserialized GraphModule's forward_output_list does not match the recorded one - "
-            "the reconstructed graph structure differs from the original, and its state_dict "
-            "keys (assigned by forward_output_list position) are likely to map onto the wrong nodes.",
+            "Deserialized GraphModule's forward_output_list does not match the recorded one. " "State dict may be invalid.",
             stacklevel=2,
         )
+    module.forward_output_list = forward_output_list
 
     if state_dict is None:
         state_dict = record.state_dict
@@ -159,7 +160,6 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
         module.load_state_dict(state_dict)
 
     return module
-
 
 
 def _infer_filetype(file, filetype):
@@ -172,6 +172,7 @@ def _infer_filetype(file, filetype):
         if suffix in _FILETYPES:
             return suffix
     raise ValueError(f"Could not infer a filetype from {file!r}; pass `filetype` explicitly, one of {_FILETYPES}.")
+
 
 def savegraph(
     nodes_or_graph: Node | Iterable[Node] | GraphModule,
@@ -215,7 +216,6 @@ def savegraph(
     else:
         record.tensor_data = tensor_data
 
-
     write_mode = "wb" if filetype in ("pkl", "pt") else "w"
     with open_if_needed(file, write_mode) as fh:
         if filetype == "pkl":
@@ -256,6 +256,7 @@ def loadgraph(file, weights_file=None, filetype: str | None = None, weights_only
             record = plain_converter.structure(json.load(fh), SerializationRecord)
         elif filetype == "yml":
             import yaml
+
             record = plain_converter.structure(yaml.safe_load(fh), SerializationRecord)
         else:
             raise ValueError(f"Unknown filetype {filetype!r}; expected one of {_FILETYPES}.")

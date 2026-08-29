@@ -9,6 +9,7 @@ from ..graphs.indextypes import IdxType
 
 PROTOCOL_VERSION = 0
 
+
 @dataclasses.dataclass(frozen=True)
 class NodeTypeIdentifier:
     name: str
@@ -66,7 +67,9 @@ type Serializable = Scalar | ContainerPrimitive
 type ModuleKwargs = TaggedDict[Serializable]
 
 # all tagged types for seralization
-type Tagged = NodeReference | TensorReference | TaggedList[Serializable] | TaggedSet[Serializable] | TaggedTuple[Serializable] | TaggedDict[Serializable]
+type Tagged = NodeReference | TensorReference | TaggedList[Serializable] | TaggedSet[Serializable] | TaggedTuple[Serializable] | TaggedDict[
+    Serializable
+]
 
 
 @dataclasses.dataclass
