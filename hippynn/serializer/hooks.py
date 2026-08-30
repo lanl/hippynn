@@ -9,9 +9,8 @@ import torch
 
 from .processor import CONTEXT_CONVERTER
 from .registry import _ID_REGISTRY, _NODE_REGISTRY
-from .types import NodeIdentifier, NodeInfo, NodeReference, Serializable, TaggedDict, TaggedList, TaggedSet, TaggedTuple, TensorReference
-from ..graphs.nodes.base import AutoModule, InputNode, Node
-from ..graphs.nodes.base.algebra import BinNode, UnaryNode
+from .types import NodeIdentifier, NodeInfo, NodeRecord, NodeReference, Serializable, TaggedDict, TaggedList, TaggedSet, TaggedTuple, TensorReference
+from ..graphs.nodes.base import InputNode, Node
 
 
 # ----------------------------------------------------------------------
@@ -48,50 +47,15 @@ CONTEXT_CONVERTER.converter.register_structure_hook(torch.Tensor, partial(_struc
 # ----------------------------------------------------------------------
 
 
-def unstructure_node(obj, *, ctx):
-    """
-    Generic `unstructure` implementation shared by every direct `_SerializableNode` subclass
-    that doesn't need its own (attached onto `InputNode`/`AutoModule` below rather than defined
-    on those classes directly, since building a `NodeInfo` needs types from this package, which
-    `graphs.nodes.base` cannot import without a circular import). Builds the full `NodeInfo` for
-    `obj`, recursing into `.parents` and `.origin_node` (set on `LossInputNode` instances; `None`
-    on every other node).
-    """
-    cls = type(obj)
-    key = ctx.get_node_id(obj)
-    parents = tuple(ctx.converter.unstructure(p) for p in obj.parents)
-
-    node_kwargs = dict(getattr(obj, "module_kwargs", None) or {})
-    if getattr(obj, "origin_node", None) is not None:
-        node_kwargs["origin_node"] = obj.origin_node
-
-    # `ModuleKwargs = TaggedDict[Serializable]`, so `node_kwargs` goes through the same generic
-    # `dict` hook as any other plain dict nested inside a `Serializable` value.
-    module_kwargs = ctx.converter.unstructure(node_kwargs) if node_kwargs else None
-
-    return NodeInfo(
-        identifier=NodeIdentifier(id=key, name=obj.name or None),
-        cls=_NODE_REGISTRY[cls],
-        parents=parents,
-        module_kwargs=module_kwargs,
-        index_state=getattr(obj, "index_state", None),
-        db_name=getattr(obj, "db_name", None),
-        requires_grad=getattr(obj, "requires_grad", None),
-    )
-
-
-InputNode.to_record = unstructure_node
-AutoModule.to_record = unstructure_node
-UnaryNode.to_record = unstructure_node
-BinNode.to_record = unstructure_node
-
-
 def _unstructure_node(obj, *, ctx):
     """
-    Node <-> NodeReference cattrs hook: memoized by identity in `ctx.node_ids`/`ctx.node_blob`,
-    delegating the actual `NodeInfo` construction to `obj.to_record` where present, falling back
-    to the generic `unstructure_node` for `Node` subclasses that aren't `_SerializableNode`s (and
-    so don't have `to_record` attached).
+    Node <-> NodeReference cattrs hook: memoized by identity in `ctx.node_ids`/`ctx.node_blob`.
+
+    `obj.to_record()` is a plain, `ctx`-free instance method (defined on `_SerializableNode` and
+    overridden/chained via `super()` by subclasses) that builds a domain-level `NodeInfo`: live
+    parent `Node`s, and any extra per-class data nested under a named key in `extra_state`. This
+    hook's only job is to resolve that domain-level `NodeInfo` into the wire-level `NodeRecord`,
+    recursing into parents/state_dict/extra_state via `ctx.unstructure`.
     """
     name = obj.name or None
     key = ctx.get_node_id(obj)
@@ -102,8 +66,20 @@ def _unstructure_node(obj, *, ctx):
     ctx.node_ids[id(obj)] = key
     ctx.node_objects[key] = obj  # write-side: lets callers map discovered nodes back to their key/reference
 
-    to_record = getattr(obj, "to_record", None)
-    ctx.node_blob[key] = to_record(ctx=ctx) if to_record is not None else unstructure_node(obj, ctx=ctx)
+    info = obj.to_record()
+
+    ctx.node_blob[key] = NodeRecord(
+        identifier=NodeIdentifier(id=key, name=name),
+        cls=_NODE_REGISTRY[type(obj)],
+        info=NodeInfo(
+            parents=tuple(ctx.unstructure(p) for p in info.parents),
+            index_state=info.index_state,
+            db_name=info.db_name,
+            requires_grad=info.requires_grad,
+            state_dict=ctx.unstructure(info.state_dict) if info.state_dict else None,
+            extra_state={k: ctx.unstructure(v) for k, v in info.extra_state.items()} if info.extra_state else None,
+        ),
+    )
     return NodeReference(identifier=NodeIdentifier(id=key, name=name))
 
 
@@ -111,9 +87,16 @@ CONTEXT_CONVERTER.converter.register_unstructure_hook_func(
     lambda t: isinstance(t, type) and issubclass(t, Node), partial(_unstructure_node, ctx=CONTEXT_CONVERTER)
 )
 
-
+# todo: rename to _structure_node to match _unstructure_node and nomeclature of cattrs?
 def _resolve_node(key, ctx):
-    """Recursive, memoized reconstruction of the node recorded at `ctx.node_blob[key]`."""
+    """
+    Recursive, memoized reconstruction of the node recorded at `ctx.node_blob[key]`.
+
+    Resolves the stored wire-level `NodeRecord.info` into a domain-level `NodeInfo` (parents
+    resolved to live `Node`s, `state_dict`/`extra_state` resolved to live values), then calls
+    `cls.from_record(name, info, cls, ctx=ctx)` directly - a plain staticmethod lookup that
+    follows `cls`'s own MRO, rather than cattrs' `ctx.structure(...)` dispatch.
+    """
     if key in ctx.node_objects:
         return ctx.node_objects[key]
     if key in ctx._node_resolving:
@@ -124,21 +107,32 @@ def _resolve_node(key, ctx):
         record = ctx.node_blob[key]
         cls = _ID_REGISTRY[record.cls]
         name = record.identifier.name
-        parents = tuple(_resolve_node(p.identifier.id, ctx) for p in record.parents)
-        kwargs = _resolve_serializable(record.module_kwargs, ctx) if record.module_kwargs is not None else {}
+        info = record.info
 
-        node = ctx.converter.structure((name, parents, kwargs, record), cls)
+        resolved_info = NodeInfo(
+            parents=tuple(ctx.structure(p, Serializable) for p in info.parents),
+            index_state=info.index_state,
+            db_name=info.db_name,
+            requires_grad=info.requires_grad,
+            state_dict=ctx.structure(info.state_dict, Serializable) if info.state_dict is not None else None,
+            extra_state={k: ctx.structure(v, Serializable) for k, v in info.extra_state.items()} if info.extra_state is not None else None,
+        )
+
+        node = cls.from_record(name, resolved_info, cls, ctx=ctx)
 
         if isinstance(node, InputNode):
-            if record.requires_grad is not None:
-                node.requires_grad = record.requires_grad
+            if resolved_info.requires_grad is not None:
+                node.requires_grad = resolved_info.requires_grad
         else:
-            if record.db_name is not None:
-                node.db_name = record.db_name
-            if record.index_state is not None:
-                node.index_state = record.index_state
-            if record.requires_grad is not None:
-                node.requires_grad = record.requires_grad
+            if resolved_info.db_name is not None:
+                node.db_name = resolved_info.db_name
+            if resolved_info.index_state is not None:
+                node.index_state = resolved_info.index_state
+            if resolved_info.requires_grad is not None:
+                node.requires_grad = resolved_info.requires_grad
+
+        if resolved_info.state_dict is not None:
+            node.torch_module.load_state_dict(resolved_info.state_dict)
 
         ctx.node_objects[key] = node
         return node
@@ -153,41 +147,17 @@ def _structure_node_reference(data: NodeReference, typ, *, ctx):
 CONTEXT_CONVERTER.converter.register_structure_hook(NodeReference, partial(_structure_node_reference, ctx=CONTEXT_CONVERTER))
 
 
-# ----------------------------------------------------------------------
-# Per-class node reconstruction (structure/read side) is registered generically by
-# `registry.register_structure_hooks`, which finds each direct `_SerializableNode` subclass's
-# own `from_record` staticmethod (e.g. `AutoModule.from_record`) and registers it as a
-# `ContextConverter.register_structure_family` hook keyed on that class. `LossInputNode`'s own
-# `from_record` (base.py) overrides the generic `InputNode.from_record` for its subclasses
-# (`LossPredNode`/`LossTrueNode`), since dispatch resolves against the runtime type.
-# ----------------------------------------------------------------------
-
-
-# ----------------------------------------------------------------------
-# Plain container unstructuring (write side): explicit, rather than relying on whatever
-# cattrs' own defaults happen to do for these builtin types. Every one of `list`/`set`/`tuple`/
-# `dict` is tagged with a `_type` discriminator uniformly, so the read-side walk below dispatches
-# on a single `_type` field rather than on shape - `list`/`tuple` would otherwise collapse to the
-# same JSON array shape, and an untagged `dict` could collide with the `_type`-discriminator
-# scheme used for `NodeReference`/`TensorReference`/etc.
-#
-# This hook fires on *any* Python `list`/`dict` passed through `ctx.converter.unstructure()`, not
-# just ones nested inside `Serializable`-typed values - callers that unstructure a plain
-# list/dict of something else (e.g. a list of `Node`s) must avoid passing the container itself
-# through `unstructure()` (see `unstructure_node`'s `module_kwargs` handling above, and
-# `serialize()`'s node-reference list-building in `api.py`).
-# ----------------------------------------------------------------------
-
+# Plain wrapper types
 
 def _unstructure_list(obj, *, ctx):
-    return TaggedList(values=[ctx.converter.unstructure(v) for v in obj])
+    return TaggedList(values=[ctx.unstructure(v) for v in obj])
 
 
 CONTEXT_CONVERTER.converter.register_unstructure_hook(list, partial(_unstructure_list, ctx=CONTEXT_CONVERTER))
 
 
 def _unstructure_tuple(obj, *, ctx):
-    return TaggedTuple(values=tuple(ctx.converter.unstructure(v) for v in obj))
+    return TaggedTuple(values=tuple(ctx.unstructure(v) for v in obj))
 
 
 CONTEXT_CONVERTER.converter.register_unstructure_hook(tuple, partial(_unstructure_tuple, ctx=CONTEXT_CONVERTER))
@@ -195,53 +165,41 @@ CONTEXT_CONVERTER.converter.register_unstructure_hook(tuple, partial(_unstructur
 
 def _unstructure_dict(obj, *, ctx):
     assert all(isinstance(k, str) for k in obj), "All dictionary keys must be strings!"
-    return TaggedDict(values={k: ctx.converter.unstructure(v) for k, v in obj.items()})
+    return TaggedDict(values={k: ctx.unstructure(v) for k, v in obj.items()})
 
 
 CONTEXT_CONVERTER.converter.register_unstructure_hook(dict, partial(_unstructure_dict, ctx=CONTEXT_CONVERTER))
 
 
 def _unstructure_set(obj, *, ctx):
-    return TaggedSet(values=[ctx.converter.unstructure(v) for v in obj])
+    return TaggedSet(values=[ctx.unstructure(v) for v in obj])
 
 
 CONTEXT_CONVERTER.converter.register_unstructure_hook(set, partial(_unstructure_set, ctx=CONTEXT_CONVERTER))
 
 
-# ----------------------------------------------------------------------
-# Serializable union discrimination (structure/read side only). structure() needs a concrete
-# target type up front, so unlike the write side above (dispatched by cattrs on runtime
-# type), this decides which member of the `Serializable` union a piece of wire data represents
-# by its shape - each of `TaggedList`/`TaggedSet`/`TaggedTuple`/`TaggedDict` is unwrapped via its
-# `.values` field - then delegates to cattrs with a concrete type (`list[Serializable]` or
-# `dict[str, Serializable]`), or to the already-registered `TensorReference`/`NodeReference`
-# hooks, so cattrs performs the actual recursion rather than this module walking containers by
-# hand. Every dict-shaped value - including `module_kwargs` (`ModuleKwargs = TaggedDict[Serializable]`)
-# - arrives pre-wrapped as a `TaggedDict`, since `_unstructure_dict` above tags any plain Python
-# `dict` on the write side regardless of its static type.
-# ----------------------------------------------------------------------
-
 
 def _resolve_serializable(data, ctx):
     if data is None or isinstance(data, (bool, int, float, str)):
         return data
-
+    
     if isinstance(data, TensorReference):
-        return ctx.converter.structure(data, torch.Tensor)
+        return ctx.structure(data, torch.Tensor)
     if isinstance(data, NodeReference):
-        return ctx.converter.structure(data, NodeReference)
+        return ctx.structure(data, NodeReference)
     if isinstance(data, TaggedList):
-        return list(ctx.converter.structure(data.values, list[Serializable]))
+        return list(ctx.structure(data.values, list[Serializable]))
     if isinstance(data, TaggedSet):
-        return set(ctx.converter.structure(data.values, list[Serializable]))
+        return set(ctx.structure(data.values, list[Serializable]))
     if isinstance(data, TaggedTuple):
-        return tuple(ctx.converter.structure(data.values, list[Serializable]))
+        return tuple(ctx.structure(data.values, list[Serializable]))
     if isinstance(data, TaggedDict):
-        return dict(ctx.converter.structure(data.values, dict[str, Serializable]))
+        return dict(ctx.structure(data.values, dict[str, Serializable]))
     raise TypeError(f"Cannot deserialize value of type {type(data)!r}: {data!r}")
 
-
+# todo merge with above function, don't seem to have need for two functions??
 def _structure_serializable(data, typ, *, ctx):
+    # todo address note... what does this even mean
     # NOTE: matching against the PEP-695 `Serializable` type-alias object itself (rather than
     # something it resolves/unwraps to, e.g. via `.__value__`) is not yet verified against the
     # pinned cattrs version - flagged in the plan's "verify against actual cattrs version" step.

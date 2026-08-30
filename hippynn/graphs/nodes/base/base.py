@@ -5,7 +5,8 @@ from ... import indextypes
 from ...indextypes import IdxType
 from .algebra import _NodeAlgebra
 
-from .node_functions import _NodeFunctions, _SerializableNode
+from .node_functions import _NodeFunctions
+from .serializable import _SerializableNode
 from .algebra import UnaryNode, BinNode, _AlgebraicOperation
 from ....layers import algebra as algebra_mods
 from ...._deprecations import _DeprecatedNamesMixin
@@ -45,7 +46,14 @@ class SingleNode(Node, _DeprecatedNamesMixin):
     @property
     def main_output(self):
         return self
-    
+
+    def to_record(self):
+        record = super().to_record()
+        record.index_state = self.index_state
+        if self.torch_module is not None:
+            record.state_dict = self.torch_module.state_dict()
+        return record
+
 
 class InvNode(UnaryNode, SingleNode, _AlgebraicOperation, operation="invert"):
     pass
@@ -86,13 +94,16 @@ class AtLeast2D(UnaryNode, SingleNode):
 
 
 class InputNode(SingleNode, _SerializableNode):
-    input_names = ()
     """Node for getting information for the database."""
-    requires_grad = False
+    input_names = ()
     input_type_str = "Input"
+    requires_grad: bool = False
 
     def __init__(self, name=None, db_name=None, index_state=None):
 
+        self.requires_grad = False
+
+        # todo: just reduce signature on subclasses?
         if hasattr(self, "index_state") and self.index_state is not IdxType.Unlabeled:
             if index_state is not None:
                 if index_state != self.index_state:
@@ -108,27 +119,29 @@ class InputNode(SingleNode, _SerializableNode):
             name = db_name
         super().__init__(name=name, parents=(), db_name=db_name, module=None)
 
-    # `to_record` is attached generically in hippynn/serializer/hooks.py.
+    def to_record(self):
+        record = super().to_record()
+        record.requires_grad = self.requires_grad
+        return record
+
 
     @staticmethod
-    def from_record(data, typ, *, ctx):
+    def from_record(name, info, typ, *, ctx):
         """cattrs structure hook: rebuilds the node from its name, db_name, and index_state."""
-        name, parents, kwargs, record = data
-        return typ(name=name, db_name=record.db_name, index_state=record.index_state)
+        return typ(name=name, db_name=info.db_name, index_state=info.index_state)
 
 
 class LossInputNode(InputNode):
     """Node for getting information from the model (predicted) or database (true) into the loss."""
+    serialization_attributes = ("origin_node",)
 
     def __init__(self, name, origin_node):
         super().__init__(name, db_name=None)
         self.origin_node = origin_node
-   
 
     @staticmethod
-    def from_record(data, typ, *, ctx):
-        name, parents, kwargs, record = data
-        return typ(name=name, origin_node=kwargs["origin_node"])
+    def from_record(name, info, typ, *, ctx):
+        return typ(name=name, origin_node=info.extra_state["origin_node"])
 
 
 class LossPredNode(LossInputNode):

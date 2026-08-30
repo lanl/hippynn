@@ -14,8 +14,9 @@ import torch
 def processor_pair():
     """
     The (single, process-wide) writer/reader Processor, reset to a clean state. `writer`/`reader`
-    are the same object - there is only one `context_converter` - but `.structure()` always
-    resets internally before reading (see its docstring), so write and read remain independent.
+    are the same object - there is only one `context_converter` - but `.structure_with_context()`
+    always resets internally before reading (see its docstring), so write and read remain
+    independent.
     """
     from hippynn.serializer.processor import CONTEXT_CONVERTER
 
@@ -31,7 +32,7 @@ def test_processor_plain_data_roundtrip(processor_pair):
     structure, tensor_blob, _node_blob = writer.unstructure_with_context(data)
     assert tensor_blob == {}
 
-    restored = reader.structure(structure, Serializable, tensor_blob=tensor_blob)
+    restored = reader.structure_with_context(structure, Serializable, tensor_blob=tensor_blob)
     assert restored == data
 
 
@@ -43,7 +44,7 @@ def test_processor_single_tensor_roundtrip(processor_pair):
     structure, tensor_blob, _node_blob = writer.unstructure_with_context(data)
     assert len(tensor_blob) == 1
 
-    restored = reader.structure(structure, Serializable, tensor_blob=tensor_blob)
+    restored = reader.structure_with_context(structure, Serializable, tensor_blob=tensor_blob)
     assert torch.equal(restored["weight"], data["weight"])
 
 
@@ -56,7 +57,7 @@ def test_processor_shared_tensor_identity_roundtrip(processor_pair):
     structure, tensor_blob, _node_blob = writer.unstructure_with_context(data)
     assert len(tensor_blob) == 1, "the same tensor object referenced twice must be stored once"
 
-    restored = reader.structure(structure, Serializable, tensor_blob=tensor_blob)
+    restored = reader.structure_with_context(structure, Serializable, tensor_blob=tensor_blob)
     assert restored["a"] is restored["b"], "shared tensor identity must survive the round-trip"
 
 
@@ -66,7 +67,7 @@ def test_processor_set_roundtrip(processor_pair):
     data = {"values": {1, 2, 3}}
 
     structure, tensor_blob, _node_blob = writer.unstructure_with_context(data)
-    restored = reader.structure(structure, Serializable, tensor_blob=tensor_blob)
+    restored = reader.structure_with_context(structure, Serializable, tensor_blob=tensor_blob)
 
     assert restored["values"] == data["values"]
 
@@ -118,7 +119,7 @@ def test_processor_embedded_object_reference_roundtrip():
 
     structure, tensor_blob, _node_blob = writer.unstructure_with_context(root)
     leaf_blob = writer._leaf_blob  # out-of-band leaf payload, untouched by reset() (not a built-in attribute)
-    restored = reader.structure(structure, Root, tensor_blob=tensor_blob)
+    restored = reader.structure_with_context(structure, Root, tensor_blob=tensor_blob)
     reader._leaf_blob = leaf_blob
 
     assert restored.leaves[0] is restored.leaves[1], "repeated references to one Leaf must resolve to one object"
@@ -159,7 +160,7 @@ def test_serialize_automodule(processor_pair):
     node = FuzzyHistogrammer("hist", (values,), length=5, vmin=0.0, vmax=1.0)
 
     structure, tensor_blob, node_blob = writer.unstructure_with_context([values, node])
-    restored_values, restored_node = reader.structure(structure, Serializable, tensor_blob=tensor_blob, node_blob=node_blob)
+    restored_values, restored_node = reader.structure_with_context(structure, Serializable, tensor_blob=tensor_blob, node_blob=node_blob)
 
     assert isinstance(restored_node, FuzzyHistogrammer)
     assert restored_node.parents[0] is restored_values

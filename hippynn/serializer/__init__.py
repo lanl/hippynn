@@ -8,7 +8,7 @@ entry points (thin wrappers around `Processor.unstructure`/`structure`) plus the
 `savegraph`/`loadgraph`. This module re-exports the public surface.
 """
 
-from .types import PROTOCOL_VERSION
+from .types import PROTOCOL_VERSION, NodeInfo
 from .registry import ensure_registry_consistency, register_structure_hooks
 from .api import serialize, deserialize, savegraph, loadgraph
 from . import hooks  # Trigger hook installation -- needed!

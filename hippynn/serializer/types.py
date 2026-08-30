@@ -71,21 +71,29 @@ type Tagged = NodeReference | TensorReference | TaggedList[Serializable] | Tagge
     Serializable
 ]
 
+    
 
 @dataclasses.dataclass
 class NodeInfo:
-    identifier: NodeIdentifier
-    cls: NodeTypeIdentifier
     parents: tuple[NodeReference, ...] = ()
-    module_kwargs: ModuleKwargs | None = None
     index_state: IdxType | None = None
     db_name: str | None = None
-    requires_grad: bool | None = None  # for input nodes
+    requires_grad: bool | None = None
+    state_dict: ModuleKwargs | None = None
+    extra_state: dict[str, Serializable] | None = None  # Arbitrary other node data, keyed by piece name, for specific classes.
+
+
+@dataclasses.dataclass
+class NodeRecord:
+    identifier: NodeIdentifier
+    cls: NodeTypeIdentifier
+    info: NodeInfo
+
 
 
 @dataclasses.dataclass
 class SerializedGraph:
-    node_list: list[NodeInfo]
+    node_list: list[NodeRecord]
     n_tensor_values: int
 
 
@@ -102,6 +110,5 @@ class SerializationRecord:
     protocol_version: int = PROTOCOL_VERSION
     module: SerializedGraphModule | None = None
     tensor_data: dict[int, object] | None = None
-    state_dict: dict[str, object] | None = None
     root_ids: list[NodeReference] | None = None
     single_root: bool = False

@@ -22,7 +22,8 @@ class _NodeFunctions(_DeprecatedNamesMixin):
     Base Node methods without dynamic algebra behavior.
     """
     input_names = NotImplemented
-    
+    torch_module: Optional[torch.nn.Module] = None
+
     _DEPRECATED_NAMES = {
         "_input_names" : "input_names",
     }
@@ -339,11 +340,3 @@ def is_in_loss_graph(node_or_nodes, why_desc=DEFAULT_WHY_DESC):
         return False
     
 
-
-class _SerializableNode():
-    _unregistered_classes: list = []
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        _SerializableNode._unregistered_classes.append(cls)
-
-        

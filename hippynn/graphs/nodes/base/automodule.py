@@ -1,6 +1,6 @@
 from typing import Optional, Union, Tuple, Dict
 
-from .node_functions import _SerializableNode
+from .serializable import _SerializableNode
 
 class AutoModule(_SerializableNode):
     """
@@ -25,6 +25,7 @@ class AutoModule(_SerializableNode):
     # For this reason, an AutoModule node MUST allow passing of all auto_module_kwargs
     # in at the node level
     auto_module_kwargs: Optional[Union[Tuple[str], Dict[str, str]]] = None
+    serialization_attributes = ("module_kwargs",)
 
     def __init__(self, *args, module="auto", module_kwargs=None, **kwargs):
 
@@ -60,16 +61,14 @@ class AutoModule(_SerializableNode):
 
         super().__init__(*args, module=module, **kwargs)
 
-    # `to_record` is attached generically in hippynn/serializer/hooks.py.
-
     @staticmethod
-    def from_record(data, typ, *, ctx):
+    def from_record(name, info, typ, *, ctx):
         """
         cattrs structure hook: reverses the translation performed by ``__init__``. Keys named
         in ``auto_module_kwargs`` are passed through as node-level keywords (translated to
         their node-level name), and everything else is bundled into ``module_kwargs``.
         """
-        name, parents, kwargs, record = data
+        module_kwargs = info.extra_state["module_kwargs"]
         auto_module_kwargs = typ.auto_module_kwargs
         if not auto_module_kwargs:
             mapping = {}
@@ -80,10 +79,10 @@ class AutoModule(_SerializableNode):
 
         node_kwargs = {}
         leftover_module_kwargs = {}
-        for k, v in kwargs.items():
+        for k, v in module_kwargs.items():
             if k in mapping:
                 node_kwargs[mapping[k]] = v
             else:
                 leftover_module_kwargs[k] = v
 
-        return typ(name, parents, module_kwargs=leftover_module_kwargs, **node_kwargs)
+        return typ(name, info.parents, module_kwargs=leftover_module_kwargs, **node_kwargs)

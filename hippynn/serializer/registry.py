@@ -1,8 +1,8 @@
 """
 Node class registry and validation. Per-class reconstruction dispatch on the structure (read)
 side lives as a `from_record` staticmethod on each direct `_SerializableNode` subclass (e.g.
-`AutoModule.from_record`); `register_structure_hooks` below finds and registers them as
-`ContextConverter.register_structure_family` hooks.
+`AutoModule.from_record`); `register_structure_hooks` below finds and registers them via
+`CONTEXT_CONVERTER.converter.register_structure_hook_func`.
 """
 
 import warnings
@@ -100,7 +100,7 @@ def _dispatch_from_record(data, typ, *, ctx):
 def register_structure_hooks():
     """
     Find each direct `_SerializableNode` subclass's own `from_record` staticmethod and register
-    a `ContextConverter.register_structure_family` hook keyed on that class, dispatching to
+    a `converter.register_structure_hook_func` hook keyed on that class, dispatching to
     `typ.from_record` at structure time rather than the registering class's, so subclasses further
     down the MRO may override it.
     """

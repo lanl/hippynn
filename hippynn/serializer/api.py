@@ -66,7 +66,7 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, include_desce
     processor = CONTEXT_CONVERTER
     processor.reset()
 
-    graph_module_record = state_dict = root_ids = None
+    graph_module_record = root_ids = None
     single_root = False
     if isinstance(nodes_or_graph, GraphModule):
         module = nodes_or_graph
@@ -79,7 +79,6 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, include_desce
             output_nodes=output_structure.values,
             forward_output_list=forward_structure.values,
         )
-        state_dict = module.state_dict()
     else:
         single_root = isinstance(nodes_or_graph, Node)
         original_roots = [nodes_or_graph] if single_root else list(nodes_or_graph)
@@ -93,14 +92,12 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, include_desce
         root_ids = roots_structure.values
 
     serial_data = SerializedGraph(node_list=list(node_blob.values()), n_tensor_values=len(tensor_blob))
-    record = SerializationRecord(
-        graph=serial_data, module=graph_module_record, state_dict=state_dict, root_ids=root_ids, single_root=single_root
-    )
+    record = SerializationRecord(graph=serial_data, module=graph_module_record, root_ids=root_ids, single_root=single_root)
 
     return record, tensor_blob
 
 
-def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | None = None, state_dict: dict[str, object] | None = None):
+def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | None = None):
     """
     Interface wrapper taking a `SerializationRecord` (and its associated tensor data) and
     reconstructing either a bare list of nodes or a `GraphModule`, mirroring `serialize`.
@@ -126,23 +123,25 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
 
     _debprint(f"Deserializing node list: {record.graph.node_list=}")
 
-    CONTEXT_CONVERTER.structure_with_context(tensor_data, record.graph.node_list)
+    node_blob = {info.identifier.id: info for info in record.graph.node_list}
 
     # Bare node list, early return
     if record.module is None:
         refs = record.root_ids
         if refs is None:
             refs = [NodeReference(identifier=info.identifier) for info in record.graph.node_list]
-        resolved = CONTEXT_CONVERTER.converter.structure(refs, list[NodeReference])
+        resolved = CONTEXT_CONVERTER.structure_with_context(refs, list[NodeReference], tensor_blob=tensor_data, node_blob=node_blob)
         if record.single_root:
             return resolved[0]
         else:
             return resolved
 
     # GraphModule, restructure it
-    input_nodes, output_nodes, forward_output_list = CONTEXT_CONVERTER.converter.structure(
+    input_nodes, output_nodes, forward_output_list = CONTEXT_CONVERTER.structure_with_context(
         [record.module.input_nodes, record.module.output_nodes, record.module.forward_output_list],
         list[tuple[NodeReference, ...]],
+        tensor_blob=tensor_data,
+        node_blob=node_blob,
     )
 
     module = GraphModule(input_nodes, output_nodes)
@@ -153,11 +152,6 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
             stacklevel=2,
         )
     module.forward_output_list = forward_output_list
-
-    if state_dict is None:
-        state_dict = record.state_dict
-    if state_dict is not None:
-        module.load_state_dict(state_dict)
 
     return module
 
@@ -190,8 +184,8 @@ def savegraph(
         object. Format is inferred from `file`'s extension when it is a string, one of `pkl`
         (`pickle`), `pt` (`torch.save`), `json`, or `yml`; otherwise `filetype` is required.
     :param weights_file: optional secondary `.pt` file to hold the tensor payload
-        (`tensor_data`/`state_dict`) separately from the main record via `torch.save`, e.g. to
-        keep a `json`/`yml` record plaintext-only.
+        (`tensor_data`, which includes every node's own weights) separately from the main record
+        via `torch.save`, e.g. to keep a `json`/`yml` record plaintext-only.
     :param filetype: explicit format, used when it cannot be inferred from `file`.
     :param include_descendants: forwarded to `serialize`.
     :param overwrite: if False, raise `FileExistsError` if `file` or `weights_file` already
@@ -209,9 +203,8 @@ def savegraph(
     record, tensor_data = serialize(nodes_or_graph, include_descendants=include_descendants)
 
     if weights_file is not None:
-        torch.save({"tensor_data": tensor_data, "state_dict": record.state_dict}, weights_file)
-        record.state_dict = None
-    elif filetype in ("json", "yml", "pkl") and (tensor_data or record.state_dict is not None):
+        torch.save({"tensor_data": tensor_data}, weights_file)
+    elif filetype in ("json", "yml", "pkl") and tensor_data:
         raise ValueError(f"filetype={filetype!r} cannot hold tensor data inline - pass `weights_file` to store it separately.")
     else:
         record.tensor_data = tensor_data
@@ -238,8 +231,8 @@ def loadgraph(file, weights_file=None, filetype: str | None = None, weights_only
 
     :param file: source for the main record - a filename (`str`) or an already-open file object,
         in the same formats accepted by `savegraph`.
-    :param weights_file: optional secondary `.pt` file holding `tensor_data`/`state_dict`, loaded
-        via `torch.load(..., weights_only=True)`.
+    :param weights_file: optional secondary `.pt` file holding `tensor_data`, loaded via
+        `torch.load(..., weights_only=True)`.
     :param filetype: explicit format, used when it cannot be inferred from `file`.
     :param weights_only: forwarded to `torch.load` when `filetype` is `pt`; does not affect
         `weights_file`, which is always loaded with `weights_only=True`.
@@ -261,10 +254,9 @@ def loadgraph(file, weights_file=None, filetype: str | None = None, weights_only
         else:
             raise ValueError(f"Unknown filetype {filetype!r}; expected one of {_FILETYPES}.")
 
-    tensor_data = state_dict = None
+    tensor_data = None
     if weights_file is not None:
         weights = torch.load(weights_file, weights_only=True)
         tensor_data = weights["tensor_data"]
-        state_dict = weights["state_dict"]
 
-    return deserialize(record, tensor_data=tensor_data, state_dict=state_dict)
+    return deserialize(record, tensor_data=tensor_data)

@@ -537,7 +537,8 @@ def __getattr__(name: str):
     """
     if name in ("AutoKw", "AutoNoKw"):
         from ...._deprecations import warn_name_change
-
-        warn_name_change(name, AutoModule, old_module=__name__, stacklevel=2)
-        return AutoModule
+        from . import automodule
+        # todo make sure this warns that automodule is in a different class now!
+        warn_name_change(name, automodule.AutoModule, old_module=__name__, stacklevel=2, new_module=automodule)
+        return automodule.AutoModule
     raise AttributeError(f"module {__name__!r} has no attribute {name}")

@@ -27,15 +27,15 @@ class IndexNode(AutoModule, SingleNode):
 
 
     @staticmethod
-    def from_record(data, typ, *, ctx):
+    def from_record(name, info, typ, *, ctx):
         """
         cattrs structure hook: an IndexNode only ever exists as a MultiNode's child, already
         created as a side effect of reconstructing that parent (see MultiNode.__init__) - reuse
         it instead of constructing an independent duplicate.
         """
-        name, parents, kwargs, record = data
-        (parent,) = parents
-        child = parent.children[kwargs["index"]]
+        (parent,) = info.parents
+        module_kwargs = info.extra_state["module_kwargs"]
+        child = parent.children[module_kwargs["index"]]
         child.name = name
         return child
 
@@ -125,7 +125,12 @@ class MultiNode(Node,_DeprecatedNamesMixin):  # Multinode
             pass
 
         return super().__getattr__(item)
-            
+
+    def to_record(self):
+            record = super().to_record()
+            if self.torch_module is not None:
+                record.state_dict = self.torch_module.state_dict()
+            return record
 
     @property
     def main_output(self):

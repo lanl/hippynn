@@ -16,11 +16,14 @@ class ContextConverter:
     whole process - a Converter's dispatch machinery caches resolved hooks per type, so reusing
     one is the intended usage, and every hook is bound to `ctx=context_converter` directly, at
     registration time, since there is only ever this one instance to resolve. `reset()` clears the
-    per-session state back to empty; `unstructure_with_context()`/`structure()`/
-    `structure_with_context()` each call it themselves (before reading for `structure()`/
-    `structure_with_context()`, after collecting the blobs for `unstructure_with_context()`), so
-    callers never need to manage reset timing directly. A session is single-threaded and
-    non-reentrant - two independent sessions cannot be interleaved.
+    per-session state back to empty; `unstructure_with_context()`/`structure_with_context()` each
+    call it themselves (before installing blobs), and again after resolving, so callers never need
+    to manage reset timing directly. A session is single-threaded and non-reentrant - two
+    independent sessions cannot be interleaved.
+
+    `unstructure`/`structure` are the recursive, in-session calls used by hooks (`hooks.py`) while
+    a session is active; `unstructure_with_context`/`structure_with_context` are the one-shot,
+    self-contained sessions built on top of them.
     """
 
     def __init__(self):
@@ -31,6 +34,7 @@ class ContextConverter:
         """Clear all per-session state, ready for a fresh serialize()/deserialize() call."""
 
         self._unstructuring = False
+        self._structuring = False
 
         # For holding tensors that come as a side-payload
         self.tensor_blob: dict[int, Any] = {}
@@ -46,22 +50,19 @@ class ContextConverter:
         self._node_counter = itertools.count()  # dedicated key source, independent of len(node_blob) -
 
     def get_node_id(self, obj):
-        """Return the discovery-order id already assigned to `obj` by a prior `unstructure()` call, or None."""
+        """Return the discovery-order id already assigned to `obj` by a prior `unstructure_with_context()` call, or None."""
         return self.node_ids.get(id(obj))
 
-    # todo plain unstructure should not return a tensor_blob and should be used in the recursion.
-    # add new method for unstructuring WITH blob. and make sure regular unstructure is only called from
-    # within a ccall to that method (therefore gauranteeing that the blob gets returned somewhere at a higher level)
     def unstructure_with_context(self, obj):
         """
-        Self-contained unstructure session: `obj` may recurse through several nested
-        `unstructure()` calls (see the guard below) that all accumulate into the same
-        `tensor_blob`/`node_blob`; this method returns those blobs directly and resets
-        afterward, so callers never read `self.tensor_blob`/`self.node_blob` themselves.
+        Self-contained unstructure session: `obj` may recurse through several nested `unstructure()`
+        calls (see the guard below) that all accumulate into the same `tensor_blob`/`node_blob`;
+        this method returns those blobs directly and resets afterward, so callers never read
+        `self.tensor_blob`/`self.node_blob` themselves.
         """
         self._unstructuring = True
         try:
-            structure = self.converter.unstructure(obj)
+            structure = self.unstructure(obj)
             return_tensors = self.tensor_blob
             return_nodes = self.node_blob
         finally:
@@ -70,39 +71,41 @@ class ContextConverter:
 
     def unstructure(self, obj):
         """
-        Return `(structure, tensor_blob)`: `structure` is ordinary cattrs-produced plain data,
-        suitable for JSON/YAML encoding; `tensor_blob` holds tensor payloads out-of-band, to be
-        saved separately.
+        Recursive-call entry point used by hooks (`hooks.py`) while a session is active: returns
+        just the unstructured `structure` for `obj` - `tensor_blob`/`node_blob` accumulate as
+        side effects on `self` rather than being returned per call, and are collected once by
+        `unstructure_with_context` at the end of the whole session.
         """
         if not self._unstructuring:
-            raise ValueError("ContextConverter root calls require being in")
-        structure = self.converter.unstructure(obj)
-        return structure, self.tensor_blob
+            raise ValueError("ContextConverter.unstructure() may only be called during an active unstructure_with_context() session.")
+        return self.converter.unstructure(obj)
 
-    def structure_with_context(self, tensor_data, node_list):
+    def structure_with_context(self, data, typ, *, tensor_blob, node_blob=None):
         """
-        Read-side session setup: resets state, then installs `tensor_data`/`node_list` as
-        `self.tensor_blob`/`self.node_blob` so recursive resolution helpers (e.g.
-        `hooks._resolve_node`) can find them there - mirrors `unstructure_with_context`'s session
-        handling for the write side. Does not perform resolution itself, since that logic lives in
-        `hooks.py` to avoid a circular import back into this module.
-        """
-        self.reset()
-        self.tensor_blob = tensor_data
-        self.node_blob = {info.identifier.id: info for info in node_list}
-
-    def structure(self, structure, typ, *, tensor_blob, node_blob=None):
-        """
-        Reconstruct an object from `structure` plus the separately-loaded `tensor_blob` (and, for
-        a node-graph `structure`, its `node_blob`). Always starts by calling `reset()`, so a read
-        session never resolves out of a previous write's identity caches - callers only need to
-        hand over the blob(s), not manage reset timing themselves.
+        Self-contained structure session: mirrors `unstructure_with_context` for the read side.
+        Resets state, installs `tensor_blob`/`node_blob` so recursive resolution helpers (e.g.
+        `hooks._resolve_node`) can find them, resolves `data` against `typ` via `structure()`,
+        then resets again - callers only need to hand over the blob(s), not manage session state
+        themselves.
         """
         self.reset()
         self.tensor_blob = tensor_blob
         if node_blob is not None:
             self.node_blob = node_blob
-        return self.converter.structure(structure, typ)
+        self._structuring = True
+        try:
+            return self.structure(data, typ)
+        finally:
+            self.reset()
+
+    def structure(self, data, typ):
+        """
+        Recursive-call entry point used by hooks (`hooks.py`) while a session is active: mirrors
+        `unstructure()` for the read side.
+        """
+        if not self._structuring:
+            raise ValueError("ContextConverter.structure() may only be called during an active structure_with_context() session.")
+        return self.converter.structure(data, typ)
 
 
 # The single ContextConverter used for the whole process - see the class docstring.
