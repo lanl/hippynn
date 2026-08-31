@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HIPPYNN Molecular Energy Prediction - Computation Flow</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #434343 0%, #000000 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .controls button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .controls button.active {
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .controls input[type="text"] {
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-left: auto;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        #visualization {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        .detail-panel {
+            position: fixed;
+            right: -400px;
+            top: 0;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.3);
+            transition: right 0.3s;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .detail-panel.show {
+            right: 0;
+        }
+
+        .detail-panel .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .detail-content {
+            padding: 50px 20px 20px 20px;
+        }
+
+        .detail-content h3 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+        }
+
+        .detail-section h4 {
+            color: #555;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .detail-section p, .detail-section pre {
+            color: #666;
+            line-height: 1.6;
+            font-size: 13px;
+        }
+
+        .detail-section pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 3px solid #667eea;
+        }
+
+        .node {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .node:hover {
+            filter: brightness(1.1);
+        }
+
+        .node-rect {
+            stroke: #fff;
+            stroke-width: 2;
+        }
+
+        .node-text {
+            fill: white;
+            font-size: 12px;
+            font-weight: 600;
+            pointer-events: none;
+            text-anchor: middle;
+        }
+
+        .node-subtext {
+            fill: rgba(255,255,255,0.8);
+            font-size: 10px;
+            pointer-events: none;
+            text-anchor: middle;
+        }
+
+        .link {
+            fill: none;
+            stroke: #999;
+            stroke-width: 2;
+            opacity: 0.6;
+        }
+
+        .link.highlighted {
+            stroke: #667eea;
+            stroke-width: 3;
+            opacity: 1;
+        }
+
+        .node.highlighted .node-rect {
+            stroke: #667eea;
+            stroke-width: 4;
+            filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.8));
+        }
+
+        .layer-label {
+            font-size: 16px;
+            font-weight: bold;
+            fill: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 HIPPYNN Molecular Energy Prediction</h1>
+            <p>Interactive Computation Flow Visualization</p>
+        </div>
+
+        <div class="controls">
+            <button id="layer1-btn" class="active" style="background: #4a90e2; color: white;">Layer 1: Data</button>
+            <button id="layer2-btn" class="active" style="background: #7cb342; color: white;">Layer 2: Inputs</button>
+            <button id="layer3-btn" class="active" style="background: #ffa726; color: white;">Layer 3: Network</button>
+            <button id="layer4-btn" class="active" style="background: #ef5350; color: white;">Layer 4: Energy Heads</button>
+            <button id="layer5-btn" class="active" style="background: #ab47bc; color: white;">Layer 5: Loss</button>
+            <button id="layer6-btn" class="active" style="background: #26a69a; color: white;">Layer 6: Training</button>
+            <input type="text" id="search-box" placeholder="🔍 Search nodes...">
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4a90e2;"></div>
+                    <span>Data</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #7cb342;"></div>
+                    <span>Input Nodes</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffa726;"></div>
+                    <span>Network</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ef5350;"></div>
+                    <span>Predictions</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ab47bc;"></div>
+                    <span>Loss</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #26a69a;"></div>
+                    <span>Training</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="visualization"></div>
+    </div>
+
+    <div class="detail-panel" id="detail-panel">
+        <button class="close-btn" onclick="closeDetailPanel()">×</button>
+        <div class="detail-content" id="detail-content"></div>
+    </div>
+
+    <script>
+        // Node data structure
+        const nodes = [
+            // Layer 1: Data Inputs
+            {
+                id: 'data_Z',
+                layer: 1,
+                name: 'acn_Z.npy',
+                subtext: '(25000, 15)',
+                color: '#4a90e2',
+                source: 'Data file',
+                operations: 'Load atomic numbers for 15 atoms per molecule',
+                shapes: 'Input: None → Output: (25000, 15)',
+                code: 'Z = np.load("acn_Z.npy")\n# Shape: (n_molecules, n_atoms)',
+                description: 'Atomic numbers (Z) for each atom in each molecule. Values are 1 (H), 6 (C), or 8 (O). Used as categorical input to embed atoms into feature space.'
+            },
+            {
+                id: 'data_R',
+                layer: 1,
+                name: 'acn_R.npy',
+                subtext: '(25000, 15, 3)',
+                color: '#4a90e2',
+                source: 'Data file',
+                operations: 'Load 3D Cartesian coordinates',
+                shapes: 'Input: None → Output: (25000, 15, 3)',
+                code: 'R = np.load("acn_R.npy")\n# Shape: (n_molecules, n_atoms, 3)',
+                description: 'Atomic positions in Angstroms. These are the x, y, z coordinates for each atom. Gradients flow through these during force computation.'
+            },
+            {
+                id: 'data_targets',
+                layer: 1,
+                name: 'Energy Labels',
+                subtext: 'sE0..sE3 (4 states)',
+                color: '#4a90e2',
+                source: 'Data files (acn_sE*.npy)',
+                operations: 'Load ground and excited state energies',
+                shapes: 'Each: (25000,) in eV',
+                code: 'sE0 = np.load("acn_sE0.npy")  # Ground state\nsE1 = np.load("acn_sE1.npy")  # 1st excited\n# ... up to sE3',
+                description: 'Target energies for training. S0 is ground state, S1-S3 are excited electronic states. These are the values the network learns to predict.'
+            },
+
+            // Layer 2: HIPPYNN Input Nodes
+            {
+                id: 'species_node',
+                layer: 2,
+                name: 'SpeciesNode',
+                subtext: 'db_name="Z"',
+                color: '#7cb342',
+                source: 'hippynn/graphs/nodes/inputs.py:10',
+                operations: 'InputNode for atomic species, index_state=IdxType.SysAtom',
+                shapes: 'Output: (batch, n_atoms) integer tensor',
+                code: 'species = inputs.SpeciesNode(db_name="Z")\n# Creates InputNode that loads Z from database',
+                description: 'HIPPYNN input node that connects to the database Z array. Maintains graph structure and feeds atomic numbers to the network.'
+            },
+            {
+                id: 'positions_node',
+                layer: 2,
+                name: 'PositionsNode',
+                subtext: 'db_name="R", requires_grad=True',
+                color: '#7cb342',
+                source: 'hippynn/graphs/nodes/inputs.py:15',
+                operations: 'InputNode for atomic positions with gradient tracking',
+                shapes: 'Output: (batch, n_atoms, 3) float tensor',
+                code: 'positions = inputs.PositionsNode(db_name="R")\npositions.requires_grad = True\n# Enables force computation via autograd',
+                description: 'HIPPYNN input node for atomic coordinates. requires_grad=True enables automatic force computation as negative energy gradients.'
+            },
+
+            // Layer 3: Neural Network
+            {
+                id: 'network',
+                layer: 3,
+                name: 'HipHopnn Network',
+                subtext: 'n_features=75, n_interact=2',
+                color: '#ffa726',
+                source: 'hippynn/networks/hiphop.py:7',
+                operations: 'Message-passing neural network with tensor interactions',
+                shapes: 'Input: features(batch,atoms,75) → Output: list of feature tensors',
+                code: 'network = networks.HipHopnn(\n    "hiphopnn_model",\n    (species, positions),\n    module_kwargs=NETWORK_PARAMS\n)',
+                description: 'Main neural network implementing HIP-HOP-NN architecture. Performs message passing between atoms using spherical tensor decomposition (l_max=3, n_max=4).'
+            },
+            {
+                id: 'embedding',
+                layer: 3,
+                name: 'Species Embedding',
+                subtext: 'One-hot → Features',
+                color: '#ffa726',
+                source: 'hippynn/layers/indexers.py',
+                operations: 'OneHotEncoder: species → one-hot → float features',
+                shapes: 'Input: (batch,atoms) int → Output: (batch,atoms,n_species-1) float',
+                code: '# Implicit in network construction\nencoder = OneHotEncoder(species, species_set)\n# Maps Z ∈ {0,1,6,8} to one-hot vectors',
+                description: 'Converts atomic numbers to one-hot vectors then to floating point. For [H,C,O], creates 3D feature vectors.'
+            },
+            {
+                id: 'sensitivity',
+                layer: 3,
+                name: 'Sensitivity Layers',
+                subtext: 'n_sensitivities=63',
+                color: '#ffa726',
+                source: 'hippynn/layers/hiplayers/sensitivity.py',
+                operations: 'Radial basis functions: r → sensitivity_values',
+                shapes: 'Input: (n_pairs,) distances → Output: (n_pairs, 63)',
+                code: 'sensitivity = InverseSensitivityModule(\n    n_sensitivities=63,\n    dist_soft_min=0.7,\n    dist_soft_max=5.67,\n    dist_hard_max=11.83\n)',
+                description: 'Transforms pairwise distances into radial basis functions. Each pair gets 63 sensitivity values encoding distance information smoothly from 0.7Å to 11.8Å.'
+            },
+            {
+                id: 'interaction',
+                layer: 3,
+                name: 'Interaction Layers',
+                subtext: '2 layers, l_max=3',
+                color: '#ffa726',
+                source: 'hippynn/layers/hiplayers/interactions.py:7',
+                operations: 'Message passing: features, pairs → updated features',
+                shapes: 'Each layer: (atoms,75) → (atoms,75) via pair aggregation',
+                code: '# For each interaction block:\nfeatures = interaction_layer(\n    features, pair_first, pair_second,\n    pair_dist, tensor_rhats\n)\n# Message passing equation',
+                description: 'Core message-passing layers. Each atom aggregates information from neighbors using: Z\'_i = Σ_j W(r_ij, Y_lm) * Z_j + self_interaction(Z_i)'
+            },
+            {
+                id: 'atom_layers',
+                layer: 3,
+                name: 'Atom Layers',
+                subtext: '3 layers per block',
+                color: '#ffa726',
+                source: 'hippynn/networks/hipnn.py:200',
+                operations: 'Local transformation: Linear(features) → activation',
+                shapes: 'Each: (atoms,75) → (atoms,75)',
+                code: 'for j in range(n_atom_layers):\n    layer = torch.nn.Linear(out_size, middle_size)\n    features = ResNetWrapper(layer)(features)\n    features = activation(features)',
+                description: 'Local single-atom transformations applied after each interaction. These are standard feed-forward layers with ResNet connections that refine atomic features.'
+            },
+
+            // Layer 4: Energy Prediction Heads
+            {
+                id: 'henergy_sE0',
+                layer: 4,
+                name: 'HEnergyNode (sE0)',
+                subtext: 'Ground State',
+                color: '#ef5350',
+                source: 'hippynn/graphs/nodes/targets.py:15',
+                operations: 'Hierarchical energy: Σ_layers Linear(features_i) → mol_energy',
+                shapes: 'Input: feature_list → Output: (batch,) energies',
+                code: 'energy_sE0 = targets.HEnergyNode(\n    "sE0", network,\n    module_kwargs=None\n)\nmol_energy_sE0 = energy_sE0.mol_energy',
+                description: 'Energy prediction head for ground state (S0). Applies linear layers to each feature block and sums over atoms to get molecular energy.'
+            },
+            {
+                id: 'henergy_sE1',
+                layer: 4,
+                name: 'HEnergyNode (sE1)',
+                subtext: '1st Excited State',
+                color: '#ef5350',
+                source: 'hippynn/graphs/nodes/targets.py:15',
+                operations: 'Same architecture as sE0, separate parameters',
+                shapes: 'Input: feature_list → Output: (batch,) energies',
+                code: 'energy_sE1 = targets.HEnergyNode(\n    "sE1", network,\n    module_kwargs=None\n)',
+                description: 'Energy prediction head for 1st excited state. Shares network backbone with other states but has independent prediction parameters.'
+            },
+            {
+                id: 'henergy_sE2',
+                layer: 4,
+                name: 'HEnergyNode (sE2)',
+                subtext: '2nd Excited State',
+                color: '#ef5350',
+                source: 'hippynn/graphs/nodes/targets.py:15',
+                operations: 'Same architecture as sE0, separate parameters',
+                shapes: 'Input: feature_list → Output: (batch,) energies',
+                code: 'energy_sE2 = targets.HEnergyNode(\n    "sE2", network,\n    module_kwargs=None\n)',
+                description: 'Energy prediction head for 2nd excited state.'
+            },
+            {
+                id: 'henergy_sE3',
+                layer: 4,
+                name: 'HEnergyNode (sE3)',
+                subtext: '3rd Excited State',
+                color: '#ef5350',
+                source: 'hippynn/graphs/nodes/targets.py:15',
+                operations: 'Same architecture as sE0, separate parameters',
+                shapes: 'Input: feature_list → Output: (batch,) energies',
+                code: 'energy_sE3 = targets.HEnergyNode(\n    "sE3", network,\n    module_kwargs=None\n)',
+                description: 'Energy prediction head for 3rd excited state.'
+            },
+            {
+                id: 'mol_summer',
+                layer: 4,
+                name: 'MolSummer',
+                subtext: 'Atom → Molecule',
+                color: '#ef5350',
+                source: 'hippynn/layers/indexers.py',
+                operations: 'Scatter-add aggregation: atom_energies → mol_energies',
+                shapes: 'Input: (n_atoms,1) → Output: (n_molecules,1)',
+                code: '# Inside HEnergy.forward():\nself.summer = indexers.MolSummer()\ntotal_energies = self.summer(\n    total_atomen, system_index, n_systems\n)',
+                description: 'Aggregates per-atom energy contributions to molecular total energy. Uses torch.scatter_add indexed by system_index to sum atoms belonging to same molecule.'
+            },
+
+            // Layer 5: Loss Computation
+            {
+                id: 'loss_computation',
+                layer: 5,
+                name: 'Per-State Losses',
+                subtext: '√MSE + MAE',
+                color: '#ab47bc',
+                source: 'hippynn/graphs/nodes/loss.py:151',
+                operations: 'For each state: RMSE + MAE',
+                shapes: 'Input: pred(batch,), true(batch,) → Output: scalar',
+                code: 'for energy_output in energy_outputs:\n    state_rmse = loss.MSELoss.of_node(energy_output) ** 0.5\n    state_mae = loss.MAELoss.of_node(energy_output)\n    state_loss = state_rmse + state_mae',
+                description: 'Computes loss for each electronic state. Uses RMSE (for outlier sensitivity) + MAE (for robustness) combination. MSELoss.of_node() automatically finds .pred and .true nodes.'
+            },
+            {
+                id: 'l2_reg',
+                layer: 5,
+                name: 'L2 Regularization',
+                subtext: 'weight=2e-5',
+                color: '#ab47bc',
+                source: 'hippynn/graphs/nodes/loss.py:175',
+                operations: 'L2 penalty: Σ_params ||θ||²',
+                shapes: 'Output: scalar penalty',
+                code: 'l2_reg = loss.l2reg(network)\nloss_regularization = L2_WEIGHT * l2_reg\n# L2_WEIGHT = 2e-5',
+                description: 'L2 regularization prevents overfitting by penalizing large weights. Uses l2reg() which finds all trainable parameters in the network via regularization_params() method.'
+            },
+            {
+                id: 'total_loss',
+                layer: 5,
+                name: 'Total Loss',
+                subtext: 'Σ weighted losses',
+                color: '#ab47bc',
+                source: 'Training script',
+                operations: 'Sum all state losses and regularization',
+                shapes: 'Output: single scalar for backprop',
+                code: 'total_loss = sum([\n    ENERGY_WEIGHT * state_loss\n    for state_loss in state_losses\n]) + L2_WEIGHT * l2_reg',
+                description: 'Final training objective. Aggregates all per-state losses (weighted by ENERGY_WEIGHT=1.0) plus regularization. This scalar is what backpropagation differentiates.'
+            },
+
+            // Layer 6: Training Loop
+            {
+                id: 'assemble',
+                layer: 6,
+                name: 'assemble_for_training',
+                subtext: 'Graph → Modules',
+                color: '#26a69a',
+                source: 'hippynn/experiment/assembly.py:98',
+                operations: 'Convert node graph to PyTorch modules',
+                shapes: 'Returns: TrainingModules(model, loss, evaluator)',
+                code: 'training_modules, db_info = hippynn.experiment.assemble_for_training(\n    validation_losses["Loss"],\n    validation_losses,\n    plot_maker=plotter\n)',
+                description: 'Traverses the loss graph to find all required nodes. Creates GraphModule for model (inputs→outputs) and loss (predictions+targets→loss). Returns TrainingModules namedtuple.'
+            },
+            {
+                id: 'setup_training',
+                layer: 6,
+                name: 'setup_training',
+                subtext: 'Initialize optimizer',
+                color: '#26a69a',
+                source: 'hippynn/experiment/routines.py:152',
+                operations: 'Create optimizer, scheduler, controller',
+                shapes: 'Links optimizer to model.parameters()',
+                code: 'training_modules, controller, metric_tracker = setup_training(\n    training_modules=training_modules,\n    setup_params=experiment_params\n)',
+                description: 'Sets up training infrastructure: instantiates AdamW optimizer linked to model parameters, creates PatienceController for early stopping, initializes MetricTracker for logging.'
+            },
+            {
+                id: 'train_model',
+                layer: 6,
+                name: 'train_model',
+                subtext: 'Epoch loop',
+                color: '#26a69a',
+                source: 'hippynn/experiment/routines.py:218',
+                operations: 'Training loop: forward → loss → backward → step',
+                shapes: 'Runs for max_epochs or early stopping',
+                code: 'metric_tracker = train_model(\n    training_modules, database,\n    controller, metric_tracker,\n    callbacks=None\n)',
+                description: 'Main training loop. For each epoch: (1) iterate batches, (2) forward pass through model+loss, (3) backward pass, (4) optimizer step, (5) validation, (6) check stopping criteria.'
+            },
+            {
+                id: 'controller',
+                layer: 6,
+                name: 'PatienceController',
+                subtext: 'Early stopping',
+                color: '#26a69a',
+                source: 'hippynn/experiment/controllers.py',
+                operations: 'Monitors validation loss, stops if no improvement',
+                shapes: 'Tracks best model, adjusts learning rate',
+                code: 'controller = PatienceController(\n    optimizer=optimizer,\n    scheduler=scheduler,\n    batch_size=BATCH_SIZE,\n    stopping_key="Loss",\n    termination_patience=TERMINATION_PATIENCE\n)',
+                description: 'Controls training flow. Tracks validation metrics, implements early stopping after termination_patience epochs without improvement. Also handles dynamic batch size increases via RaiseBatchSizeOnPlateau.'
+            }
+        ];
+
+        // Define connections between nodes
+        const links = [
+            // Data → Input Nodes
+            { source: 'data_Z', target: 'species_node' },
+            { source: 'data_R', target: 'positions_node' },
+
+            // Input Nodes → Network
+            { source: 'species_node', target: 'embedding' },
+            { source: 'positions_node', target: 'network' },
+            { source: 'embedding', target: 'network' },
+
+            // Network internal flow
+            { source: 'network', target: 'sensitivity' },
+            { source: 'network', target: 'interaction' },
+            { source: 'sensitivity', target: 'interaction' },
+            { source: 'interaction', target: 'atom_layers' },
+
+            // Network → Energy Heads
+            { source: 'atom_layers', target: 'henergy_sE0' },
+            { source: 'atom_layers', target: 'henergy_sE1' },
+            { source: 'atom_layers', target: 'henergy_sE2' },
+            { source: 'atom_layers', target: 'henergy_sE3' },
+
+            // Energy aggregation
+            { source: 'henergy_sE0', target: 'mol_summer' },
+            { source: 'henergy_sE1', target: 'mol_summer' },
+            { source: 'henergy_sE2', target: 'mol_summer' },
+            { source: 'henergy_sE3', target: 'mol_summer' },
+
+            // Targets → Loss
+            { source: 'data_targets', target: 'loss_computation' },
+            { source: 'mol_summer', target: 'loss_computation' },
+
+            // Loss aggregation
+            { source: 'loss_computation', target: 'total_loss' },
+            { source: 'l2_reg', target: 'total_loss' },
+            { source: 'network', target: 'l2_reg' },
+
+            // Training flow
+            { source: 'total_loss', target: 'assemble' },
+            { source: 'assemble', target: 'setup_training' },
+            { source: 'setup_training', target: 'train_model' },
+            { source: 'train_model', target: 'controller' }
+        ];
+
+        // Layout configuration
+        const layerSpacing = 250;
+        const nodeSpacing = 120;
+        const nodeWidth = 180;
+        const nodeHeight = 60;
+        const margin = { top: 50, right: 50, bottom: 50, left: 50 };
+
+        // Calculate node positions
+        const nodesByLayer = d3.group(nodes, d => d.layer);
+        const positions = new Map();
+
+        nodesByLayer.forEach((layerNodes, layer) => {
+            const layerHeight = layerNodes.length * nodeSpacing;
+            layerNodes.forEach((node, index) => {
+                positions.set(node.id, {
+                    x: margin.left + (layer - 1) * layerSpacing,
+                    y: margin.top + index * nodeSpacing
+                });
+            });
+        });
+
+        // Create SVG
+        const width = 6 * layerSpacing + margin.left + margin.right;
+        const height = Math.max(...Array.from(nodesByLayer.values()).map(layer => layer.length)) * nodeSpacing + margin.top + margin.bottom;
+
+        const svg = d3.select('#visualization')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height);
+
+        // Add layer labels
+        const layerLabels = [
+            { layer: 1, label: 'LAYER 1: DATA INPUTS' },
+            { layer: 2, label: 'LAYER 2: HIPPYNN INPUT NODES' },
+            { layer: 3, label: 'LAYER 3: NEURAL NETWORK' },
+            { layer: 4, label: 'LAYER 4: ENERGY PREDICTION HEADS' },
+            { layer: 5, label: 'LAYER 5: LOSS COMPUTATION' },
+            { layer: 6, label: 'LAYER 6: TRAINING LOOP' }
+        ];
+
+        svg.selectAll('.layer-label')
+            .data(layerLabels)
+            .enter()
+            .append('text')
+            .attr('class', 'layer-label')
+            .attr('x', d => margin.left + (d.layer - 1) * layerSpacing)
+            .attr('y', 20)
+            .text(d => d.label);
+
+        // Draw links
+        const linkSelection = svg.selectAll('.link')
+            .data(links)
+            .enter()
+            .append('path')
+            .attr('class', 'link')
+            .attr('d', d => {
+                const source = positions.get(d.source);
+                const target = positions.get(d.target);
+                return `M ${source.x + nodeWidth} ${source.y + nodeHeight/2}
+                        L ${target.x} ${target.y + nodeHeight/2}`;
+            });
+
+        // Draw nodes
+        const nodeSelection = svg.selectAll('.node')
+            .data(nodes)
+            .enter()
+            .append('g')
+            .attr('class', 'node')
+            .attr('transform', d => {
+                const pos = positions.get(d.id);
+                return `translate(${pos.x}, ${pos.y})`;
+            })
+            .on('click', (event, d) => showDetail(d))
+            .on('mouseenter', (event, d) => highlightConnections(d))
+            .on('mouseleave', clearHighlight);
+
+        nodeSelection.append('rect')
+            .attr('class', 'node-rect')
+            .attr('width', nodeWidth)
+            .attr('height', nodeHeight)
+            .attr('rx', 5)
+            .attr('fill', d => d.color);
+
+        nodeSelection.append('text')
+            .attr('class', 'node-text')
+            .attr('x', nodeWidth / 2)
+            .attr('y', nodeHeight / 2 - 5)
+            .text(d => d.name);
+
+        nodeSelection.append('text')
+            .attr('class', 'node-subtext')
+            .attr('x', nodeWidth / 2)
+            .attr('y', nodeHeight / 2 + 12)
+            .text(d => d.subtext);
+
+        // Layer toggle functionality
+        const layerButtons = {
+            1: d3.select('#layer1-btn'),
+            2: d3.select('#layer2-btn'),
+            3: d3.select('#layer3-btn'),
+            4: d3.select('#layer4-btn'),
+            5: d3.select('#layer5-btn'),
+            6: d3.select('#layer6-btn')
+        };
+
+        const visibleLayers = new Set([1, 2, 3, 4, 5, 6]);
+
+        Object.entries(layerButtons).forEach(([layer, button]) => {
+            button.on('click', () => {
+                if (visibleLayers.has(parseInt(layer))) {
+                    visibleLayers.delete(parseInt(layer));
+                    button.classed('active', false);
+                    button.style('opacity', '0.5');
+                } else {
+                    visibleLayers.add(parseInt(layer));
+                    button.classed('active', true);
+                    button.style('opacity', '1');
+                }
+                updateVisibility();
+            });
+        });
+
+        function updateVisibility() {
+            nodeSelection.style('display', d => visibleLayers.has(d.layer) ? 'block' : 'none');
+            linkSelection.style('display', d => {
+                const sourceNode = nodes.find(n => n.id === d.source);
+                const targetNode = nodes.find(n => n.id === d.target);
+                return visibleLayers.has(sourceNode.layer) && visibleLayers.has(targetNode.layer) ? 'block' : 'none';
+            });
+        }
+
+        // Search functionality
+        d3.select('#search-box').on('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            nodeSelection.style('opacity', d => {
+                if (searchTerm === '') return 1;
+                return d.name.toLowerCase().includes(searchTerm) ||
+                       d.subtext.toLowerCase().includes(searchTerm) ||
+                       d.description.toLowerCase().includes(searchTerm) ? 1 : 0.2;
+            });
+        });
+
+        // Highlight connections
+        function highlightConnections(node) {
+            const connectedNodes = new Set([node.id]);
+
+            // Find upstream nodes
+            function findUpstream(nodeId) {
+                links.filter(l => l.target === nodeId).forEach(link => {
+                    connectedNodes.add(link.source);
+                    findUpstream(link.source);
+                });
+            }
+
+            // Find downstream nodes
+            function findDownstream(nodeId) {
+                links.filter(l => l.source === nodeId).forEach(link => {
+                    connectedNodes.add(link.target);
+                    findDownstream(link.target);
+                });
+            }
+
+            findUpstream(node.id);
+            findDownstream(node.id);
+
+            nodeSelection.classed('highlighted', d => connectedNodes.has(d.id));
+            linkSelection.classed('highlighted', d =>
+                connectedNodes.has(d.source) && connectedNodes.has(d.target)
+            );
+        }
+
+        function clearHighlight() {
+            nodeSelection.classed('highlighted', false);
+            linkSelection.classed('highlighted', false);
+        }
+
+        // Detail panel
+        function showDetail(node) {
+            const panel = document.getElementById('detail-panel');
+            const content = document.getElementById('detail-content');
+
+            content.innerHTML = `
+                <h3>${node.name}</h3>
+                <div class="detail-section">
+                    <h4>Source Location</h4>
+                    <p>${node.source}</p>
+                </div>
+                <div class="detail-section">
+                    <h4>Description</h4>
+                    <p>${node.description}</p>
+                </div>
+                <div class="detail-section">
+                    <h4>Key Operations</h4>
+                    <p>${node.operations}</p>
+                </div>
+                <div class="detail-section">
+                    <h4>Tensor Shapes</h4>
+                    <p>${node.shapes}</p>
+                </div>
+                <div class="detail-section">
+                    <h4>Code Example</h4>
+                    <pre>${node.code}</pre>
+                </div>
+            `;
+
+            panel.classList.add('show');
+        }
+
+        function closeDetailPanel() {
+            document.getElementById('detail-panel').classList.remove('show');
+        }
+    </script>
+</body>
+</html>
