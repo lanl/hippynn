@@ -66,6 +66,7 @@ train_energies = false
 train_forces = false
 train_tdipoles = false
 train_scaled_nacrs = true
+n_states = 3                              # three excited states (S1,S2,S3); coupling pairs 12/13/23
 targeted_scaled_nacr_pairs = 12 13 23
 scaled_nacr_head = direct_vector_v3
 direct_nacr_v2_mode = gdv_pair_mixing_residual

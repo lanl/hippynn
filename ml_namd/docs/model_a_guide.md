@@ -68,8 +68,8 @@ train_forces = true
 train_tdipoles = false
 train_scaled_nacrs = false
 
-# --- state selection: S0..S5 ---
-n_states = 6
+# --- state selection: S0-S5 ---
+n_states = 5                # n_states = number of EXCITED states (S1..S5); with the ground state => S0-S5
 include_ground_state = true
 
 # --- training ---
