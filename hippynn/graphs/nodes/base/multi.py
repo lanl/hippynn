@@ -25,19 +25,18 @@ class IndexNode(AutoModule, SingleNode):
         self.index_state = IdxType.Unlabeled if index_state is None else index_state
         super().__init__(name, parents, _repr_info=repr_info, index=index, module="auto")
 
-
-    @staticmethod
-    def from_record(name, info, typ, *, ctx):
-        """
-        cattrs structure hook: an IndexNode only ever exists as a MultiNode's child, already
-        created as a side effect of reconstructing that parent (see MultiNode.__init__) - reuse
-        it instead of constructing an independent duplicate.
-        """
-        (parent,) = info.parents
-        module_kwargs = info.extra_state["module_kwargs"]
-        child = parent.children[module_kwargs["index"]]
-        child.name = name
-        return child
+    # try to make work from inheritance
+    # @classmethod
+    # def from_record(cls, parents, module_kwargs, **kwargs):
+    #     """
+    #     cattrs structure hook: an IndexNode only ever exists as a MultiNode's child, already
+    #     created as a side effect of reconstructing that parent (see MultiNode.__init__) - reuse
+    #     it instead of constructing an independent duplicate.
+    #     """
+    #     (parent,) = parents
+    #     child = parent.children[module_kwargs["index"]]
+    #     child.name = name
+    #     return child
 
 
 class MultiNode(Node,_DeprecatedNamesMixin):  # Multinode

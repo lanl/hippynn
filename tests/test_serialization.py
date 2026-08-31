@@ -32,7 +32,7 @@ def test_processor_plain_data_roundtrip(processor_pair):
     structure, tensor_blob, _node_blob = writer.unstructure_with_context(data)
     assert tensor_blob == {}
 
-    restored = reader.structure_with_context(structure, Serializable, tensor_blob=tensor_blob)
+    restored = reader.structure_with_context(structure, Serializable, tensor_blob=tensor_blob, node_blob=_node_blob)
     assert restored == data
 
 
@@ -44,7 +44,7 @@ def test_processor_single_tensor_roundtrip(processor_pair):
     structure, tensor_blob, _node_blob = writer.unstructure_with_context(data)
     assert len(tensor_blob) == 1
 
-    restored = reader.structure_with_context(structure, Serializable, tensor_blob=tensor_blob)
+    restored = reader.structure_with_context(structure, Serializable, tensor_blob=tensor_blob, node_blob=_node_blob)
     assert torch.equal(restored["weight"], data["weight"])
 
 
@@ -57,7 +57,7 @@ def test_processor_shared_tensor_identity_roundtrip(processor_pair):
     structure, tensor_blob, _node_blob = writer.unstructure_with_context(data)
     assert len(tensor_blob) == 1, "the same tensor object referenced twice must be stored once"
 
-    restored = reader.structure_with_context(structure, Serializable, tensor_blob=tensor_blob)
+    restored = reader.structure_with_context(structure, Serializable, tensor_blob=tensor_blob, node_blob=_node_blob)
     assert restored["a"] is restored["b"], "shared tensor identity must survive the round-trip"
 
 
@@ -67,7 +67,7 @@ def test_processor_set_roundtrip(processor_pair):
     data = {"values": {1, 2, 3}}
 
     structure, tensor_blob, _node_blob = writer.unstructure_with_context(data)
-    restored = reader.structure_with_context(structure, Serializable, tensor_blob=tensor_blob)
+    restored = reader.structure_with_context(structure, Serializable, tensor_blob=tensor_blob, node_blob=_node_blob)
 
     assert restored["values"] == data["values"]
 
@@ -119,7 +119,7 @@ def test_processor_embedded_object_reference_roundtrip():
 
     structure, tensor_blob, _node_blob = writer.unstructure_with_context(root)
     leaf_blob = writer._leaf_blob  # out-of-band leaf payload, untouched by reset() (not a built-in attribute)
-    restored = reader.structure_with_context(structure, Root, tensor_blob=tensor_blob)
+    restored = reader.structure_with_context(structure, Root, tensor_blob=tensor_blob, node_blob=_node_blob)
     reader._leaf_blob = leaf_blob
 
     assert restored.leaves[0] is restored.leaves[1], "repeated references to one Leaf must resolve to one object"
@@ -129,23 +129,36 @@ def test_processor_embedded_object_reference_roundtrip():
     
 
 def test_serialize_simple_nodes():
-    from hippynn.serializer import serialize
+    from hippynn.serializer import serialize, deserialize
     from hippynn.graphs.nodes.base import ValueNode
     from hippynn.graphs.nodes.base.base import AtLeast2D
 
     left = ValueNode(1.0)
     record, tensor_data = serialize(left)
     assert len(record.graph.node_list) == 1
+    deserialize(record)
+    print("1 worked")
 
     right = ValueNode(2.0)
     combined = left + right
 
-    record, tensor_data = serialize([left, right, combined])
+    left = ValueNode(torch.ones(3))
+    record, tensor_data = serialize(left)
+    assert len(record.graph.node_list) == 1
+    deserialize(record)
+    print("1 tensor worked")
+
+    record, tensor_data = serialize([combined, left, right])
     assert len(record.graph.node_list) == 3
+    deserialize(record)
+    print("1+1=2 worked")
 
     wrapped = AtLeast2D(combined)
     record, tensor_data = serialize([left, right, combined, wrapped])
     assert len(record.graph.node_list) == 4
+    deserialize(record)
+
+
 
     
 

@@ -164,6 +164,7 @@ class _DeprecatedNamesMixin(SetStateMixin, GetAttrMixin):
         _DEPRECATED_NAMES = {}
         _DEPRECATED_STATE = {}
 
+        # Probably ends up overwriting multiple times, but very simple.
         for base_cls in reversed(cls.__mro__):
             if issubclass(base_cls, _DeprecatedNamesMixin):
                 _DEPRECATED_NAMES.update(base_cls._DEPRECATED_NAMES)

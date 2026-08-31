@@ -1,28 +1,28 @@
+from typing import Optional
+
 
 # Todo rename to SerializableNode; it is not going to be hidden.
 class _SerializableNode():
     _unregistered_classes: list = [] # class-level registry
-    serialization_attributes: tuple[str, ...] = () # for child classes to override
+    serialization_attributes: Optional[tuple[str, ...]] = None # for child classes to override
 
-
-    
     def to_record(self):
-        from ....serializer import NodeInfo
-        record = NodeInfo(parents=self.parents,
-                        db_name=self.db_name)
         if self.serialization_attributes:
-            record.extra_state = {name: getattr(self, name) for name in self.serialization_attributes}
-        return record
-
+            return {name: getattr(self, name) for name in self.serialization_attributes}
+        else:
+            return None
+    
     def __init_subclass__(cls, **kwargs):
             super().__init_subclass__(**kwargs)
             # Merge each ancestor's own declared serialization_attributes (in MRO order, base-first)
-            # into cls's own attribute, mirroring _DeprecatedNamesMixin.__init_subclass__.
-            merged = []
+            serialization_attributes = []
             for base_cls in reversed(cls.__mro__):
-                for name in base_cls.__dict__.get("serialization_attributes", ()):
-                    if name not in merged:
-                        merged.append(name)
-            cls.serialization_attributes = tuple(merged)
+                if hasattr(base_cls, "serialization_attributes"):
+                    # Note! Nodes which are not serializable can still declare these attributes!
+                    # That's why we check the Node class.
+                    if base_cls.serialization_attributes:
+                        serialization_attributes.extend(base_cls.serialization_attributes)
+            # todo: avoid explicit duplications?
+            cls.serialization_attributes = tuple(set(serialization_attributes))
             _SerializableNode._unregistered_classes.append(cls)
 

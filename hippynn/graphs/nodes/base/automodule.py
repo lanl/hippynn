@@ -61,28 +61,28 @@ class AutoModule(_SerializableNode):
 
         super().__init__(*args, module=module, **kwargs)
 
-    @staticmethod
-    def from_record(name, info, typ, *, ctx):
-        """
-        cattrs structure hook: reverses the translation performed by ``__init__``. Keys named
-        in ``auto_module_kwargs`` are passed through as node-level keywords (translated to
-        their node-level name), and everything else is bundled into ``module_kwargs``.
-        """
-        module_kwargs = info.extra_state["module_kwargs"]
-        auto_module_kwargs = typ.auto_module_kwargs
+    # @classmethod
+    # def translation_map(cls):
+
+
+    @classmethod
+    def from_record(cls, name, parents, module_kwargs, **kwargs):
+        
+        # auto module kwargs k: module name: v: node name
+        auto_module_kwargs = cls.auto_module_kwargs
         if not auto_module_kwargs:
-            mapping = {}
+            auto_module_kwargs = {}
         elif isinstance(auto_module_kwargs, dict):
-            mapping = auto_module_kwargs
+            pass
         else:
-            mapping = dict(zip(auto_module_kwargs, auto_module_kwargs))
+            auto_module_kwargs = dict(zip(auto_module_kwargs, auto_module_kwargs))
 
         node_kwargs = {}
         leftover_module_kwargs = {}
         for k, v in module_kwargs.items():
-            if k in mapping:
-                node_kwargs[mapping[k]] = v
+            if k in auto_module_kwargs:
+                node_kwargs[auto_module_kwargs[k]] = v
             else:
                 leftover_module_kwargs[k] = v
 
-        return typ(name, info.parents, module_kwargs=leftover_module_kwargs, **node_kwargs)
+        return cls(name, parents, module_kwargs=leftover_module_kwargs, **node_kwargs)

@@ -15,11 +15,13 @@ from typing import Optional
 
 
 class Node(_NodeFunctions, _NodeAlgebra):
+    serialization_attributes = ("db_name",) # hack
     pass
 
 
 class SingleNode(Node, _DeprecatedNamesMixin):
     index_state: Optional[IdxType] = IdxType.Unlabeled
+    serialization_attributes = ("index_state",)
     _DEPRECATED_NAMES = {
         "_index_state" : "index_state",
         }
@@ -46,13 +48,6 @@ class SingleNode(Node, _DeprecatedNamesMixin):
     @property
     def main_output(self):
         return self
-
-    def to_record(self):
-        record = super().to_record()
-        record.index_state = self.index_state
-        if self.torch_module is not None:
-            record.state_dict = self.torch_module.state_dict()
-        return record
 
 
 class InvNode(UnaryNode, SingleNode, _AlgebraicOperation, operation="invert"):
@@ -98,6 +93,7 @@ class InputNode(SingleNode, _SerializableNode):
     input_names = ()
     input_type_str = "Input"
     requires_grad: bool = False
+    serialization_attributes = ("requires_grad",)
 
     def __init__(self, name=None, db_name=None, index_state=None):
 
@@ -119,16 +115,13 @@ class InputNode(SingleNode, _SerializableNode):
             name = db_name
         super().__init__(name=name, parents=(), db_name=db_name, module=None)
 
-    def to_record(self):
-        record = super().to_record()
-        record.requires_grad = self.requires_grad
-        return record
 
-
-    @staticmethod
-    def from_record(name, info, typ, *, ctx):
-        """cattrs structure hook: rebuilds the node from its name, db_name, and index_state."""
-        return typ(name=name, db_name=info.db_name, index_state=info.index_state)
+    @classmethod
+    def from_record(cls, name, db_name, index_state, requires_grad, **kwargs):
+        node = cls(name=name, db_name=db_name, index_state=index_state)
+        if requires_grad:
+            node.requires_grad = requires_grad
+        return 
 
 
 class LossInputNode(InputNode):
@@ -139,9 +132,9 @@ class LossInputNode(InputNode):
         super().__init__(name, db_name=None)
         self.origin_node = origin_node
 
-    @staticmethod
-    def from_record(name, info, typ, *, ctx):
-        return typ(name=name, origin_node=info.extra_state["origin_node"])
+    @classmethod
+    def from_record(cls, name, origin_node, **kwargs):
+        return cls(name=name, origin_node=origin_node)
 
 
 class LossPredNode(LossInputNode):

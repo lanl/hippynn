@@ -9,7 +9,6 @@ import warnings
 from functools import partial
 
 from ..experiment import _debprint
-from .processor import CONTEXT_CONVERTER
 from .types import NodeTypeIdentifier
 from ..graphs.nodes.base.base import _SerializableNode
 
@@ -91,22 +90,24 @@ def ensure_registry_consistency(raise_=False):
     return problems
 
 
-def _dispatch_from_record(data, typ, *, ctx):
-    """Resolves `from_record` on the actual runtime type, so a stricter subclass (e.g. IndexNode
-    under AutoModule) can override the class its family hook was registered against."""
-    return typ.from_record(data, typ, ctx=ctx)
+# def _dispatch_from_record(data, typ, *, ctx):
+#     """Resolves `from_record` on the actual runtime type, so a stricter subclass (e.g. IndexNode
+#     under AutoModule) can override the class its family hook was registered against."""
+#     return typ.from_record(data, typ, ctx=ctx)
 
 
-def register_structure_hooks():
-    """
-    Find each direct `_SerializableNode` subclass's own `from_record` staticmethod and register
-    a `converter.register_structure_hook_func` hook keyed on that class, dispatching to
-    `typ.from_record` at structure time rather than the registering class's, so subclasses further
-    down the MRO may override it.
-    """
-    for cls in _SerializableNode.__subclasses__():
-        if "from_record" not in cls.__dict__:
-            raise TypeError(f"{cls!r} is a direct subclass of _SerializableNode but does not define its own `from_record`.")
-        CONTEXT_CONVERTER.converter.register_structure_hook_func(
-            lambda t, cls=cls: isinstance(t, type) and issubclass(t, cls), partial(_dispatch_from_record, ctx=CONTEXT_CONVERTER)
-        )
+# def register_structure_hooks():
+#     """
+#     Find each direct `_SerializableNode` subclass's own `from_record` staticmethod and register
+#     a `converter.register_structure_hook_func` hook keyed on that class, dispatching to
+#     `typ.from_record` at structure time rather than the registering class's, so subclasses further
+#     down the MRO may override it.
+#     """
+#     from .processor import CONTEXT_CONVERTER, CONVERT
+
+#     for cls in _SerializableNode.__subclasses__():
+#         if "from_record" not in cls.__dict__:
+#             raise TypeError(f"{cls!r} is a direct subclass of _SerializableNode but does not define its own `from_record`.")
+#         CONTEXT_CONVERTER.converter.register_structure_hook_func(
+#             lambda t, cls=cls: isinstance(t, type) and issubclass(t, cls), partial(_dispatch_from_record, ctx=CONTEXT_CONVERTER)
+#         )

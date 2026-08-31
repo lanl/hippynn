@@ -15,6 +15,7 @@ import torch
 from cattrs import Converter
 from cattrs.strategies import configure_tagged_union
 
+
 from ..experiment import _debprint
 from ..graphs import GraphModule
 from ..graphs.nodes.base import Node, get_connected_nodes
@@ -48,6 +49,7 @@ def _structure_serializable(data, _typ, *, converter):
     return data
 
 
+from .processor import install_union_alias_unwrapping
 def _tagged_type(cls: type) -> str:
     """The `_type` field's default on `cls` - the same discriminator string it writes into its own unstructured payload."""
     cls = typing.get_origin(cls) or cls
@@ -55,8 +57,9 @@ def _tagged_type(cls: type) -> str:
 
 
 plain_converter = Converter()
+install_union_alias_unwrapping(plain_converter)
 plain_converter.register_structure_hook_func(lambda t: t is Serializable, partial(_structure_serializable, converter=plain_converter))
-configure_tagged_union(Tagged, plain_converter, tag_generator=_tagged_type, tag_name="_type")
+#configure_tagged_union(Tagged, plain_converter, tag_generator=_tagged_type, tag_name="_type")
 
 
 def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, include_descendants=True):

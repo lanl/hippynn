@@ -83,10 +83,10 @@ class UnaryNode(_SerializableNode):
         super().__init__(self._classname, (in_node,), module=None)
         self.index_state = in_node.index_state
 
-    @staticmethod
-    def from_record(name, info, typ, *, ctx):
+    @classmethod
+    def from_record(cls, name, parents, **kwargs):
         """cattrs structure hook: rebuilds the node from its single parent."""
-        return typ(info.parents[0])
+        return cls(parents[0])
 
 
 class BinNode(_SerializableNode):
@@ -97,10 +97,10 @@ class BinNode(_SerializableNode):
         super().__init__(self._classname, (left, right), module=None)
         self.index_state = left.index_state
 
-    @staticmethod
-    def from_record(name, info, typ, *, ctx):
+    @classmethod
+    def from_record(cls, name, parents, **kwargs):
         """cattrs structure hook: rebuilds the node from its two parents."""
-        return typ(*info.parents)
+        return cls(parents)
 
 def __getattr__(name: str):
     """
