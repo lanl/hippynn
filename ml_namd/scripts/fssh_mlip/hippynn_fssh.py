@@ -1,4 +1,41 @@
-"""Small HiphopNN electronic-structure adapter for PySEQM FSSH."""
+"""FSSH@MLIP engine: a HIPPYNN-driven electronic-structure adapter for PySEQM surface hopping.
+
+Scientific purpose
+------------------
+Run fewest-switches surface hopping (FSSH) where the electronic-structure payload (per-state
+energies, forces, and nonadiabatic coupling vectors) comes from a trained HIPPYNN MLIP instead of
+a semiempirical CIS calculation. :class:`HiphopSurfaceHopping` subclasses PySEQM's
+``SurfaceHoppingDynamics`` and overrides the electronic-structure hooks to query a HiphopNN
+predictor each step, so the classical propagation, hopping, and decoherence machinery of PySEQM is
+reused unchanged.
+
+Key physics conventions (do not change; they are load-bearing and were hard-won):
+- NAC vectors are ``nac_ij = dENACR_ij / (E_j - E_i)`` using the RAW gap, with NO floor and NO clamp
+  (PySEQM ``seqm_functions/nac.py``). Flooring the gap (the old ``max(gap, 1e-8)``) inverted small/
+  negative MLIP gaps, exploded the coupling, and froze hopping via amplitude NaNs.
+- Time-derivative coupling uses ``tdc_method = "nac_dot_v"`` with ``decohere_on_hop = True`` (the
+  MLIP has no CIS amplitudes, so ``hamiltonian_fd`` is infeasible for the MLIP path).
+- ``_phase_match`` fixes the arbitrary per-state sign of the coupling vectors against the previous
+  step, GPU-vectorized and unit-verified bit-identical to the former per-molecule loop (n=3,4,5).
+
+Dependencies and layout assumptions (IMPORTANT)
+-----------------------------------------------
+This module is meant to run from the FSSH driver directory on the cluster, which must also contain:
+- ``enol_ef_nacr_developer_handoff/src/`` with ``hiphop_predictor_v3.py`` (the predictor) and the
+  training modules (``unified_training``, ``direct_nacr_head_v3``, ``direct_nacr_head_v2``);
+- a repository ROOT two levels up (``parents[2]``) that is added to ``sys.path``.
+Both are prepended to ``sys.path`` at import time (see below). The joint/pooled model pickle
+references training symbols (e.g. ``DataDumper``) via ``__main__``, so ``unified_training``'s public
+names are copied into ``__main__`` BEFORE any model is unpickled. When relocating this file, keep
+that directory next to it (or edit the two path assumptions here and document the change).
+"""
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
 
 import itertools
 import sys
@@ -7,6 +44,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
+# Path assumptions (documented above): repo ROOT two levels up, and the developer-handoff src dir.
 ROOT = Path(__file__).resolve().parents[2]
 HANDOFF = Path(__file__).resolve().parent / "enol_ef_nacr_developer_handoff"
 sys.path[:0] = [str(ROOT), str(HANDOFF / "src")]
@@ -25,6 +63,11 @@ from seqm.api import Constants, Molecule, SurfaceHoppingDynamics, read_xyz
 
 
 def states(spec):
+    """Parse a ``--states`` spec (e.g. ``"0,1,2,3"``) into a sorted tuple of state labels.
+
+    Requires at least two EXCITED labels drawn from 1..5 (S0 may be included). Raises
+    ``ValueError`` otherwise.
+    """
     out = tuple(sorted({int(x) for x in str(spec).replace(" ", "").split(",") if x}))
     if any(x < 0 or x > 5 for x in out) or len([x for x in out if x]) < 2:
         raise ValueError("--states must contain at least two excited labels from 1..5 (optionally S0).")
@@ -32,10 +75,12 @@ def states(spec):
 
 
 def pairs(labels):
+    """Return the ordered two-digit pair keys (e.g. ``"12"``) for every excited-state combination."""
     return tuple(f"{i}{j}" for i, j in itertools.combinations([x for x in labels if x], 2))
 
 
 def molecule(xyz, ntraj, device):
+    """Build a PySEQM ``Molecule`` replicated ``ntraj`` times from an .xyz file (AM1 constants)."""
     Z, R = read_xyz([str(Path(xyz).expanduser())], sort=False)
     Z = torch.as_tensor(Z, dtype=torch.long, device=device).repeat(ntraj, 1)
     R = torch.as_tensor(R, dtype=torch.float64, device=device).repeat(ntraj, 1, 1)
@@ -45,7 +90,13 @@ def molecule(xyz, ntraj, device):
 
 
 class HiphopSurfaceHopping(SurfaceHoppingDynamics):
-    """FSSH that obtains E, F, and NAC vectors from ``HiphopPredictor``."""
+    """FSSH that obtains E, F, and NAC vectors from a ``HiphopPredictor`` (single-model path).
+
+    ``labels`` is the tuple of state labels handled by the model (e.g. ``(0, 1, 2, 3)``);
+    ``self.labels`` drops S0 to give the excited states, while ``self.model_states`` keeps all
+    labels and ``self.model_pairs`` are the two-digit pair keys. The class name and the overridden
+    PySEQM hook signatures are load-bearing.
+    """
 
     def __init__(
         self,
@@ -59,6 +110,11 @@ class HiphopSurfaceHopping(SurfaceHoppingDynamics):
         friction=None,
         nac_gap_floor=1e-8,
     ):
+        """Configure the PySEQM CIS/nonadiabatic parameters and attach the HiphopNN predictor.
+
+        ``nac_gap_floor`` is retained for API compatibility but the coupling uses the RAW gap
+        (see module docstring); ``friction`` (if given) selects Langevin damping ``1/friction``.
+        """
         self.labels = tuple(x for x in labels if x)
         self.model_states, self.model_pairs = tuple(labels), pairs(labels)
         if initial_state not in self.labels:
@@ -91,6 +147,7 @@ class HiphopSurfaceHopping(SurfaceHoppingDynamics):
         )  # gap_source defaults to "self" (joint self-supplies gaps at inference)
 
     def _setup_states(self, mol):
+        """Cache the state/pair bookkeeping (counts, 0-based and 1-based pair keys) for ``mol``."""
         self._nstates = len(self.labels)
         self._full_nac_pair_keys = list(itertools.combinations(range(self._nstates), 2))
         self._full_nac_pairs_1based = [(i + 1, j + 1) for i, j in self._full_nac_pair_keys]
@@ -98,6 +155,7 @@ class HiphopSurfaceHopping(SurfaceHoppingDynamics):
         self._ensure_active_states(mol.species.shape[0], mol.coordinates.device)
 
     def initialize(self, mol, remove_com=None, learned_parameters=None, *args, **kwargs):
+        """PySEQM hook: set up states/coeffs/DOF, seed velocities (nac_dot_v needs v at t=0), then defer."""
         self._setup_states(mol)
         self._init_coeffs(mol)
         self.set_dof(mol)
@@ -108,23 +166,31 @@ class HiphopSurfaceHopping(SurfaceHoppingDynamics):
         )
 
     def initialize_velocity(self, mol, vel_com=True):
+        """Keep pre-supplied velocities if present; otherwise draw them via the base class."""
         if torch.is_tensor(mol.velocities):
             return mol.velocities
         return super().initialize_velocity(mol, vel_com=vel_com)
 
     def _phase_match(self, nac):
-        # GPU-VECTORIZED (bit-identical to the former per-molecule Python argmax loop; unit-verified
-        # n=3,4,5, 2026-08-29). Per state s a sign q_s in {+/-1} (q_0 fixed +1); per molecule pick the
-        # sign set maximizing sum_{i<j} q_i q_j <nac_ij(t), nac_ij(t-1)>; apply q_i q_j to each pair.
+        """Fix the arbitrary per-state sign of the coupling vectors against the previous step.
+
+        GPU-VECTORIZED (bit-identical to the former per-molecule Python argmax loop; unit-verified
+        n=3,4,5, 2026-08-29). Per state ``s`` a sign ``q_s in {+/-1}`` (``q_0`` fixed +1); per molecule
+        pick the sign set maximizing ``sum_{i<j} q_i q_j <nac_ij(t), nac_ij(t-1)>`` and apply
+        ``q_i q_j`` to each pair. ``nac`` maps 0-based pair keys to (M, n_atoms, 3) tensors; on the
+        first call the current couplings are cached and returned unchanged.
+        """
         if self.previous_nac is None:
             self.previous_nac = {k: v.detach().clone() for k, v in nac.items()}
             return nac
         pk = self._full_nac_pair_keys
         ref = nac[pk[0]]
-        dev, dtype, M = ref.device, ref.dtype, ref.shape[0]
+        dev, dtype, M = ref.device, ref.dtype, ref.shape[0]  # M = number of molecules (trajectories)
+        # O[m, p] = <nac_p(t), nac_p(t-1)> per molecule m and pair p (flatten atom*3, sum).
         O = torch.stack(
             [(nac[i, j] * self.previous_nac[i, j]).reshape(M, -1).sum(1) for (i, j) in pk], dim=1
         )  # (M, P) per-pair overlaps <nac(t), nac(t-1)>
+        # S[g, p] = q_i q_j for candidate gauge g (2^{nstates-1} gauges, q_0 fixed +1); cached per nstates.
         if getattr(self, "_phase_S", None) is None or self._phase_S_n != self._nstates:
             cand = [(1,) + x for x in itertools.product((-1, 1), repeat=self._nstates - 1)]
             q = torch.tensor(cand, dtype=dtype, device=dev)  # (G, nstates)
@@ -140,6 +206,13 @@ class HiphopSurfaceHopping(SurfaceHoppingDynamics):
         return nac
 
     def _compute_electronic_structure(self, mol, learned_parameters, **kwargs):
+        """Query the MLIP for E/F/dENACR, populate ``mol``, and return the CIS (gap-to-S0) energies.
+
+        Shapes: ``n`` molecules, ``a`` atoms. Fills per-state energies/forces, the active-state force,
+        total energies, and the phase-matched NAC vectors + their time-derivative coupling
+        (``mol.nac_dot``). SCF/CIS convergence flags are forced all-converged because the MLIP never
+        runs SCF/CIS (so the master's gap_stop still fires on the S0-S1 gap).
+        """
         del learned_parameters, kwargs
         self._setup_states(mol)
         pred = self.predictor.predict(
@@ -151,8 +224,8 @@ class HiphopSurfaceHopping(SurfaceHoppingDynamics):
         mol.cis_converged = torch.ones(n, dtype=torch.bool, device=dev)
         self.esdriver.notconverged = torch.zeros(n, dtype=torch.bool, device=dev)
         E = {s: torch.as_tensor(pred["E_abs"][s], dtype=dtype, device=dev) for s in self.model_states}
-        e0 = E.get(0, E[self.labels[0]])
-        cis = torch.stack([E[s] - e0 for s in self.labels], 1)
+        e0 = E.get(0, E[self.labels[0]])  # ground-state energy (S0 if present, else the lowest label)
+        cis = torch.stack([E[s] - e0 for s in self.labels], 1)  # excitation energies (n, n_excited)
         mol.cis_energies = cis
         mol.all_forces = torch.zeros((n, self._nstates + 1, a, 3), dtype=dtype, device=dev)
         for i, s in enumerate(self.labels):
@@ -185,12 +258,14 @@ class HiphopSurfaceHopping(SurfaceHoppingDynamics):
         return cis
 
     def _compute_NACR_for_hop(self, mol, nac_pairs):
+        """Return the ML NAC vectors for the requested hop pairs (raises if any are missing)."""
         out = self._select_nac_pairs(mol.nac, nac_pairs)
         if out is None:
             raise RuntimeError("missing ML NAC vector required for hop rescaling")
         return out
 
     def _recompute_active_force(self, mol):
+        """Refresh ``mol.active_state`` and ``mol.force`` from the cached per-state forces."""
         active, idx = (
             self._active_states,
             self._get_arange(len(self._active_states), device=mol.coordinates.device),

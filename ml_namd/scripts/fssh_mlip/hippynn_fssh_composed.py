@@ -1,22 +1,32 @@
 """Composed A+B (frozen E+F Model A + decoupled NACR Model B) adapter for PySEQM FSSH.
 
-Drives FSSH with the DECOUPLED DeNAC stack instead of the joint model:
-  Stage A (frozen Model A): Z,R -> sE, F        (energies + forces for propagation)
-  Stage B (Model B, v3):    Z,R,GDV(=Fi-Fj),GAP(=sEj-sEi) -> dENACR   (coupling)
-  NAC vector d_ij = dENACR_ij / GAP_ij  (A's gap), then NACT = d.v  (hop driver)
+Scientific purpose
+------------------
+Drive FSSH with the DECOUPLED "DeNAC" stack instead of a single joint model:
+  Stage A (frozen Model A): ``Z, R -> sE, F``        (energies + forces for propagation)
+  Stage B (Model B, v3):    ``Z, R, GDV(=Fi-Fj), GAP(=sEj-sEi) -> dENACR``   (coupling)
+  NAC vector ``d_ij = dENACR_ij / GAP_ij`` (A's gap), then ``NACT = d . v`` (the hop driver).
 
-`ModelBComposedPredictor.predict()` returns the SAME dict keys the joint predictor
-does (sE, E_abs, F, dENACR), so `HiphopSurfaceHopping._compute_electronic_structure`
-is inherited UNCHANGED -- we only swap which predictor object it calls.
+``ModelBComposedPredictor.predict()`` returns the SAME dict keys the joint predictor does
+(``sE``, ``E_abs``, ``F``, ``dENACR``), so :meth:`HiphopSurfaceHopping._compute_electronic_structure`
+is inherited UNCHANGED; only the predictor object is swapped. Because Model B is NACR-only (no E/F
+heads), the parent must NOT build a ``HiphopPredictorV3`` on it, so :class:`ComposedSurfaceHopping`
+replicates the parent ``__init__`` verbatim except for the final predictor line.
 
-Model B is NACR-only (no E/F heads), so we must NOT let the parent build a
-HiphopPredictorV3 on it. This subclass replicates the parent __init__ verbatim
-except the final predictor line.
-
-Developer: Ajay Khanna <akhanna2@ucmerced.edu>
-LANL / Triad National Security, LLC.
+Dependencies
+------------
+Requires ``modelb_composed_predictor.ModelBComposedPredictor`` on ``sys.path`` (the path setup and
+the ``HANDOFF`` src directory are inherited from :mod:`hippynn_fssh`, imported here).
 """
+
 from __future__ import annotations
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
 
 from hippynn_fssh import HiphopSurfaceHopping, HANDOFF, pairs
 from seqm.api import SurfaceHoppingDynamics
@@ -24,10 +34,12 @@ from modelb_composed_predictor import ModelBComposedPredictor
 
 
 class _ComposedAdapter:
-    """Wrap ModelBComposedPredictor to the HiphopPredictorV3.predict signature used
-    in _compute_electronic_structure (it passes gdv_source='forces'). Model A
-    self-builds GDV from its own forces internally, so gdv_source/gap_source are
-    irrelevant here and are accepted-and-ignored."""
+    """Adapt ``ModelBComposedPredictor`` to the ``HiphopPredictorV3.predict`` signature.
+
+    :meth:`HiphopSurfaceHopping._compute_electronic_structure` calls ``predict(..., gdv_source='forces')``.
+    Model A self-builds the GDV from its own forces internally, so ``gdv_source``/``gap_source`` are
+    irrelevant here and are accepted-and-ignored.
+    """
 
     def __init__(self, modelA_dir, modelB_dir, head_dir, *, pairs, device, dtype="float64"):
         self._cp = ModelBComposedPredictor(
@@ -35,12 +47,17 @@ class _ComposedAdapter:
         )
 
     def predict(self, Z, R, gdv_source=None, gap_source=None, check_species=True, **_kw):
+        """Return the composed A+B electronic-structure dict (``gdv_source``/``gap_source`` ignored)."""
         return self._cp.predict(Z, R, check_species=check_species)
 
 
 class ComposedSurfaceHopping(HiphopSurfaceHopping):
-    """FSSH driven by composed A->B. Same electronic-structure / hop machinery as
-    HiphopSurfaceHopping; only the predictor differs."""
+    """FSSH driven by the composed A->B stack.
+
+    Identical electronic-structure / hop machinery to :class:`HiphopSurfaceHopping`; only the
+    predictor differs. The ``__init__`` intentionally mirrors the parent's body (so the PySEQM
+    CIS/nonadiabatic parameters stay in lockstep) except for the final predictor assignment.
+    """
 
     def __init__(
         self,
@@ -55,6 +72,7 @@ class ComposedSurfaceHopping(HiphopSurfaceHopping):
         friction=None,
         nac_gap_floor=1e-8,
     ):
+        """Configure PySEQM exactly as the parent, then attach the composed A->B predictor."""
         # --- replicate HiphopSurfaceHopping.__init__ EXCEPT the predictor line ---
         self.labels = tuple(x for x in labels if x)
         self.model_states, self.model_pairs = tuple(labels), pairs(labels)
