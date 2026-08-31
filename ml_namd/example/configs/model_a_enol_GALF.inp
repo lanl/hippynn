@@ -1,0 +1,53 @@
+# =============================================================================
+# Model A (E + F, S0-S5) training config -- ENOL, GALF pool. EXAMPLE bundle.
+# Self-contained per-run config for unified_training.py (no CLI overrides).
+#   n_states = 5 -> five EXCITED states (S1..S5); with include_ground_state=true this is S0-S5.
+# NOTE: the SHIPPED decoupled Model A checkpoint (models/modelA_enol_nf145/GALF) used the S0-S3
+#       manifold that the enol FSSH needs (pairs 12/13/23). This config trains the more general
+#       S0-S5 Model A on the same GALF geometries; it is FSSH-compatible (FSSH uses S0-S3).
+#       To reproduce the shipped checkpoint exactly, set n_states = 3.
+# Developer: Ajay Khanna | LANL/Sergei Lab | Sep-01-2026 | ml_namd
+# =============================================================================
+train_energies       = true
+train_forces         = true
+train_tdipoles       = false
+train_scaled_nacrs   = false
+n_states             = 5
+include_ground_state = true
+
+network_type         = hiphopnn
+possible_species     = 0 1 6 8
+n_features           = 145
+n_sensitivities      = 20
+dist_soft_min        = 0.7
+dist_soft_max        = 5.67638290906325
+dist_hard_max        = 11.833504244685173
+n_interaction_layers = 2
+n_atom_layers        = 3
+l_max                = 3
+n_max                = 4
+
+batch_size           = 64
+eval_batch_size      = 256
+max_batch_size       = 64
+max_epochs           = 300
+learning_rate        = 3.15e-4
+l2_weight            = 6.97e-6
+termination_patience = 50
+scheduler_patience   = 16
+scheduler_factor     = 0.2
+stopping_key         = Loss
+fraction_train_eval  = 0.1
+plot_frequency       = 50
+
+energy_weight        = 1.0
+force_weight         = 1.0
+force_sign           = -1
+
+dataset_prefix       = acn_
+n_atoms              = 15
+seed                 = 114514
+test_size            = 0.1
+valid_size           = 0.1
+data_dir             = /usr/projects/ml4chem/akhanna2/softwares/hippynn_NAMD/ml_namd/example/data/GALF
+output_dir           = /usr/projects/ml4chem/akhanna2/softwares/hippynn_NAMD/ml_namd/example/runs/model_a_GALF/model
