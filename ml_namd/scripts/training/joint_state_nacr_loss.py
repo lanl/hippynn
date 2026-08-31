@@ -1,130 +1,294 @@
-"""Tier-1 sign-inconsistency fix: JOINT PER-STATE phase loss for scaled NACR (dENACR).
+"""Joint per-state phase loss for scaled nonadiabatic coupling vectors (dENACR).
 
-Replaces the per-pair phaseless min (which grants each pair an INDEPENDENT sign -> the
-pair-scramble gauge, r_ij != r_i r_j) with a JOINT minimization over per-STATE signs:
+Scientific purpose
+------------------
+A Model-B network predicts, for each ordered excited-state pair ``(i, j)``, the scaled
+nonadiabatic coupling vector ``dENACR_ij`` (the derivative coupling multiplied by the
+state-pair energy gap, flattened over atoms). The electronic wavefunction phase is
+arbitrary at every geometry, so each coupling carries an unobservable overall sign. The
+older training loss resolved that sign PER PAIR and INDEPENDENTLY, which lets the network
+settle into a "pair-scramble" gauge where the per-pair signs ``r_ij`` do not factor through
+a single set of per-state signs (``r_ij != s_i s_j``). The trajectory-surface-hopping driver
+can only re-align a CONSISTENT per-state gauge, so a pair-scramble survives into the dynamics
+and drives spurious relaxation (documented for keto acetylacetone).
 
-    L = mean_samples  min_{s_i=+-1}  sum_{i<j} || d_ij^ML - s_i s_j d_ij^QC ||^2 / n_pairs
+This module supplies the fix at TRAINING time: a loss that is minimized over a single,
+globally consistent set of per-state signs shared by every pair,
 
-The bilinear s_i s_j ties all pairs to a single consistent state gauge (2^{n-1} choices,
-s_1 fixed +1), re-imposing the n(n-1)/2 - (n-1) cocycle constraints the per-pair loss drops.
-Same math as the FSSH driver's `_phase_match`, applied at TRAINING against the QC label.
+    L  =  mean_frames  min_{s_i in {+1,-1}}  ( 1 / n_pairs )  sum_{i<j} || dENACR_ij^ML  -  s_i s_j  dENACR_ij^QC ||^2 ,
 
-Standalone module + hippynn Loss node.  Run this file directly for the unit test.
+with the first state's sign fixed to ``+1`` (leaving ``2^{n_states-1}`` candidate gauges).
+The bilinear factor ``s_i s_j`` re-imposes the cocycle constraints that the per-pair loss
+drops. This is the same construction the FSSH driver applies at inference (``_phase_match``),
+here applied against the quantum-chemistry (QC) label during training.
+
+Contents
+--------
+- :func:`build_sign_matrix`      enumerate the candidate per-state gauges as pair-sign rows.
+- :class:`JointStatePhaseModule` the pure-torch loss (no hippynn dependency).
+- :class:`JointStatePhaseLoss`   a hippynn scalar Loss node wrapping the module.
+- :func:`make_joint_loss_node`   factory for the node from per-pair dENACR nodes.
+
+Run this file directly (``python joint_state_nacr_loss.py``) to execute the unit test.
+
+Behavior stability note
+-----------------------
+The public names in this module (module filename, ``JointStatePhaseModule``,
+``JointStatePhaseLoss``, ``make_joint_loss_node``, and the default node name
+``"JointStatePhaseNACR"``) are serialized into ``experiment_structure.pt`` when a model is
+trained with this loss, and must resolve at load time. Do NOT rename them, and keep both the
+module and the node class at MODULE scope (a function-local class breaks hippynn's graph
+pickling with "Can't get local object ..."). The numerical reduction in
+:meth:`JointStatePhaseModule.forward` is likewise load-bearing and must not change.
 """
+
+from __future__ import annotations
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import itertools
+from typing import Dict, List, Optional, Tuple
+
 import torch
 
+# A "gauge" is one assignment of a +/-1 sign to every excited state, with the first state
+# pinned to +1. Represented as {state_index: sign}. The 1-based state indices match the
+# excited-state labels used throughout the pipeline (S1, S2, ...).
+Gauge = Dict[int, int]
+Pair = Tuple[int, int]
 
-def build_sign_matrix(pairs):
-    """pairs: list of (i,j) 1-based excited-state index tuples, e.g. [(1,2),(1,3),(2,3)].
-    Returns (signmat (G,n_pairs) float, states, gauges) with the first state fixed to +1."""
-    states = sorted({s for p in pairs for s in p})
-    free = states[1:]                                   # first state's sign fixed to +1
-    gauges = []
-    rows = []
-    for bits in itertools.product((1, -1), repeat=len(free)):
-        smap = {states[0]: 1}
-        smap.update(dict(zip(free, bits)))
-        rows.append([smap[i] * smap[j] for (i, j) in pairs])
-        gauges.append(smap)
-    return torch.tensor(rows, dtype=torch.float64), states, gauges
+
+def build_sign_matrix(pairs: List[Pair]) -> Tuple[torch.Tensor, List[int], List[Gauge]]:
+    """Enumerate every candidate per-state gauge and its induced per-pair signs.
+
+    Parameters
+    ----------
+    pairs
+        Ordered 1-based excited-state index pairs, e.g. ``[(1, 2), (1, 3), (2, 3)]`` for the
+        S1-S2 / S1-S3 / S2-S3 couplings.
+
+    Returns
+    -------
+    sign_matrix
+        Float64 tensor of shape ``(n_gauges, n_pairs)``. Row ``g`` holds the per-pair sign
+        ``s_i * s_j`` induced by gauge ``g``. ``n_gauges = 2 ** (n_states - 1)`` because the
+        first state's sign is fixed to ``+1``.
+    states
+        Sorted list of the distinct 1-based state indices appearing in ``pairs``.
+    gauges
+        The list of gauges (one ``{state: sign}`` dict per row of ``sign_matrix``).
+
+    Notes
+    -----
+    Units/shapes: dimensionless signs; no physical units. The matrix is later cast to the
+    prediction dtype inside the module.
+    """
+    states = sorted({state for pair in pairs for state in pair})
+    free_states = states[1:]  # first state's sign is fixed to +1; the rest are free
+
+    gauges: List[Gauge] = []
+    pair_sign_rows: List[List[int]] = []
+    for sign_bits in itertools.product((1, -1), repeat=len(free_states)):
+        gauge: Gauge = {states[0]: 1}
+        gauge.update(dict(zip(free_states, sign_bits)))
+        pair_sign_rows.append([gauge[i] * gauge[j] for (i, j) in pairs])
+        gauges.append(gauge)
+
+    sign_matrix = torch.tensor(pair_sign_rows, dtype=torch.float64)
+    return sign_matrix, states, gauges
 
 
 class JointStatePhaseModule(torch.nn.Module):
-    """forward(*tensors) with tensors = interleaved (pred_0, true_0, pred_1, true_1, ...).
-    Each pred/true is (B, D) or (B, 1, D) etc.; flattened to (B, D)."""
-    def __init__(self, pairs):
+    """Scalar joint per-state phase loss over a fixed set of state pairs.
+
+    The module holds no learnable parameters; it only stores the candidate-gauge sign table
+    as a buffer. ``forward`` receives the per-pair predicted and reference coupling tensors
+    interleaved and returns the scalar loss ``L`` defined in the module docstring.
+    """
+
+    def __init__(self, pairs: List[Pair]) -> None:
         super().__init__()
-        self.pairs = list(pairs)
-        self.n_pairs = len(pairs)
-        signmat, self.states, self.gauges = build_sign_matrix(pairs)
-        self.register_buffer("signmat", signmat)        # (G, n_pairs)
+        self.pairs: List[Pair] = list(pairs)
+        self.n_pairs: int = len(pairs)
+        sign_matrix, self.states, self.gauges = build_sign_matrix(self.pairs)
+        # (n_gauges, n_pairs); registered so it moves with .to(device)/.cuda().
+        self.register_buffer("signmat", sign_matrix)
 
-    def forward(self, *tensors):
+    def forward(self, *tensors: torch.Tensor) -> torch.Tensor:
+        """Compute the joint per-state phase loss.
+
+        Parameters
+        ----------
+        *tensors
+            ``2 * n_pairs`` tensors, interleaved as
+            ``(pred_0, true_0, pred_1, true_1, ...)``. Each entry has leading batch
+            dimension ``n_frames`` and is flattened over the remaining axes to the coupling
+            dimension ``D`` (``= 3 * n_atoms``); shapes ``(n_frames, D)`` or
+            ``(n_frames, 1, D)`` are both accepted.
+
+        Returns
+        -------
+        torch.Tensor
+            Zero-dimensional loss tensor (differentiable), the batch mean of the best-gauge
+            squared residual, divided by ``n_pairs``.
+
+        Raises
+        ------
+        AssertionError
+            If the number of tensors is not exactly ``2 * n_pairs``.
+        """
         assert len(tensors) == 2 * self.n_pairs, (len(tensors), self.n_pairs)
-        preds = tensors[0::2]; trues = tensors[1::2]
-        B = preds[0].shape[0]
-        P = torch.stack([p.reshape(B, -1) for p in preds], dim=1)   # (B, np, D)
-        T = torch.stack([t.reshape(B, -1) for t in trues], dim=1)   # (B, np, D)
-        S = self.signmat.to(P.dtype)                                # (G, np)
-        # diff[b,g,p,:] = P[b,p,:] - S[g,p]*T[b,p,:]
-        diff = P.unsqueeze(1) - S[None, :, :, None] * T.unsqueeze(1)  # (B, G, np, D)
-        per_gauge = (diff ** 2).sum(dim=(2, 3))                       # (B, G)
-        best = per_gauge.min(dim=1).values                           # (B,)
-        return best.mean() / self.n_pairs
+        predicted_per_pair = tensors[0::2]
+        reference_per_pair = tensors[1::2]
+
+        n_frames = predicted_per_pair[0].shape[0]
+        # Stack pairs into (n_frames, n_pairs, D); flatten trailing axes to the coupling dim D.
+        predicted = torch.stack([p.reshape(n_frames, -1) for p in predicted_per_pair], dim=1)
+        reference = torch.stack([t.reshape(n_frames, -1) for t in reference_per_pair], dim=1)
+
+        sign_table = self.signmat.to(predicted.dtype)  # (n_gauges, n_pairs)
+
+        # residual[frame, gauge, pair, :] = predicted[frame, pair, :]
+        #                                   - sign_table[gauge, pair] * reference[frame, pair, :]
+        residual = predicted.unsqueeze(1) - sign_table[None, :, :, None] * reference.unsqueeze(1)
+        squared_residual_per_gauge = (residual ** 2).sum(dim=(2, 3))       # (n_frames, n_gauges)
+        best_gauge_residual = squared_residual_per_gauge.min(dim=1).values  # (n_frames,)
+        return best_gauge_residual.mean() / self.n_pairs
 
 
-# ------------------- hippynn Loss node (MODULE-LEVEL so it is picklable) -------------------
-# NOTE: the node class MUST be defined at module scope (not inside a function) or hippynn's
-# graph serialization fails with "Can't get local object ...". Imports guarded so the pure-torch
-# unit test still runs where hippynn is absent.
+# ------------------------------------------------------------------------------------------
+# hippynn Loss node. Defined at MODULE scope (a function-local class breaks graph pickling).
+# The hippynn imports are guarded so the pure-torch unit test still runs where hippynn is
+# absent; in that case the node symbol is set to None and the factory raises a clear error.
+# ------------------------------------------------------------------------------------------
 try:
     from hippynn.graphs.nodes.base import SingleNode as _SingleNode
     from hippynn.graphs import IdxType as _IdxType
-    from hippynn.graphs.indextypes import elementwise_compare_reduce as _ecr
+    from hippynn.graphs.indextypes import elementwise_compare_reduce as _elementwise_compare_reduce
 
     class JointStatePhaseLoss(_SingleNode):
-        """Scalar hippynn loss node = JointStatePhaseModule over per-pair dENACR nodes.
-        Mirrors `_BaseCompareLoss.of_node` (uses node.pred / node.true)."""
+        """hippynn scalar Loss node wrapping :class:`JointStatePhaseModule`.
+
+        Mirrors ``_BaseCompareLoss.of_node``: for each per-pair dENACR node it pulls the
+        matched ``(pred, true)`` reduced tensors and feeds them, interleaved, to the module.
+        """
+
         index_state = _IdxType.Scalar
 
-        def __init__(self, nacr_nodes, pairs, name="JointStatePhaseNACR"):
+        def __init__(self, nacr_nodes, pairs: List[Pair], name: str = "JointStatePhaseNACR") -> None:
             parents = []
-            for nnode in nacr_nodes:
-                n = nnode.main_output
-                p, t = _ecr(n.pred, n.true)
-                parents += [p, t]
+            for nacr_node in nacr_nodes:
+                output_node = nacr_node.main_output
+                predicted_node, reference_node = _elementwise_compare_reduce(
+                    output_node.pred, output_node.true
+                )
+                parents += [predicted_node, reference_node]
             super().__init__(name, tuple(parents), module=JointStatePhaseModule(pairs))
+
 except Exception:  # hippynn not importable (e.g. the standalone unit test) -> node unavailable
-    JointStatePhaseLoss = None
+    JointStatePhaseLoss = None  # type: ignore[assignment,misc]
 
 
-def make_joint_loss_node(nacr_nodes, pairs, name="JointStatePhaseNACR"):
-    """Build the joint per-state phase loss node over the given per-pair dENACR prediction nodes."""
+def make_joint_loss_node(nacr_nodes, pairs: List[Pair], name: str = "JointStatePhaseNACR"):
+    """Build the joint per-state phase loss node over the given per-pair dENACR nodes.
+
+    Parameters
+    ----------
+    nacr_nodes
+        The per-pair dENACR prediction nodes, in the same order as ``pairs``.
+    pairs
+        The 1-based state-index pairs (see :func:`build_sign_matrix`).
+    name
+        Node name (kept stable because it is serialized into the trained graph).
+
+    Returns
+    -------
+    JointStatePhaseLoss
+        The scalar loss node ready to be accumulated into the training loss.
+
+    Raises
+    ------
+    RuntimeError
+        If hippynn is not importable in this environment.
+    """
     if JointStatePhaseLoss is None:
         raise RuntimeError("hippynn not available; cannot build JointStatePhaseLoss node")
     return JointStatePhaseLoss(nacr_nodes, pairs, name)
 
 
-# ------------------- unit test -------------------
-if __name__ == "__main__":
+def _run_unit_test() -> bool:
+    """Self-test the loss on planted gauges; returns True on PASS.
+
+    Checks the three defining behaviors:
+    (1) a globally consistent per-state gauge -> loss ~ 0 (the min finds the right signs);
+    (2) an independent per-pair sign scramble -> joint loss LARGE (no single gauge fixes it);
+    (3) the same scramble under the OLD per-pair phaseless loss -> ~ 0 (illustrating the bug
+        the joint loss is designed to remove).
+    """
     torch.set_default_dtype(torch.float64)
     torch.manual_seed(0)
-    pairs = [(1, 2), (1, 3), (2, 3)]                     # S0-S3: 3 pairs, states {1,2,3}
-    mod = JointStatePhaseModule(pairs)
-    print("states:", mod.states, "| n_gauges:", len(mod.gauges), "| signmat:\n", mod.signmat.int().tolist())
-    B, D = 200, 45
 
-    # planted CONSISTENT state gauge: per-sample per-state signs s_i; base vectors b_ij
-    s = torch.sign(torch.randn(B, 4)); s[:, 1] = 1.0     # s[:,k]=sign of state k (k=1..3 used); state1 fixed +1
-    base = {p: torch.randn(B, D) for p in pairs}
-    def dvec(sign_of):  # sign_of: (B, n_states+1) with sign per state
-        return {p: sign_of[:, p[0]].unsqueeze(1) * sign_of[:, p[1]].unsqueeze(1) * base[p] for p in pairs}
-    QC = dvec(s)                                          # QC in a consistent (scrambled-per-state) gauge
-    ML = {p: base[p].clone() for p in pairs}             # ML predicts the canonical (+) gauge
+    pairs: List[Pair] = [(1, 2), (1, 3), (2, 3)]  # S1-S2 / S1-S3 / S2-S3
+    module = JointStatePhaseModule(pairs)
+    print("states:", module.states, "| n_gauges:", len(module.gauges),
+          "| signmat:\n", module.signmat.int().tolist())
 
-    def loss_of(MLd, QCd):
-        t = []
-        for p in pairs: t += [MLd[p], QCd[p]]
-        return mod(*t).item()
+    n_frames, coupling_dim = 200, 45  # coupling_dim = 3 * n_atoms for a 15-atom system
+    per_state_sign = torch.sign(torch.randn(n_frames, 4))
+    per_state_sign[:, 1] = 1.0  # fix state 1's sign to +1 (matches the gauge convention)
+    base_vectors = {pair: torch.randn(n_frames, coupling_dim) for pair in pairs}
 
-    # (1) consistent state gauge -> joint loss should be ~0 (min finds the right per-state signs)
-    l_consistent = loss_of(ML, QC)
-    # (2) PAIR-scramble: flip each pair's QC sign INDEPENDENTLY (not a state gauge) -> joint loss HIGH
-    rpair = {p: torch.sign(torch.randn(B, 1)) for p in pairs}
-    QC_pair = {p: rpair[p] * QC[p] for p in pairs}
-    l_pairscramble = loss_of(ML, QC_pair)
-    # per-pair phaseless loss (the OLD loss) on the pair-scramble -> should be ~0 (each pair fixes itself)
-    def phaseless_perpair(MLd, QCd):
-        tot = 0.0
-        for p in pairs:
-            a = ((MLd[p]-QCd[p])**2).sum(1); b = ((MLd[p]+QCd[p])**2).sum(1)
-            tot += torch.minimum(a, b).mean()
-        return (tot/len(pairs)).item()
-    l_old_pairscramble = phaseless_perpair(ML, QC_pair)
+    def apply_state_gauge(sign_per_state: torch.Tensor) -> Dict[Pair, torch.Tensor]:
+        return {
+            pair: sign_per_state[:, pair[0]].unsqueeze(1)
+            * sign_per_state[:, pair[1]].unsqueeze(1)
+            * base_vectors[pair]
+            for pair in pairs
+        }
 
-    print(f"(1) consistent state gauge  : JOINT loss = {l_consistent:.3e}   (expect ~0)")
-    print(f"(2) PAIR-scramble QC        : JOINT loss = {l_pairscramble:.3e}   (expect LARGE)")
-    print(f"    same, OLD per-pair loss : phaseless  = {l_old_pairscramble:.3e}   (expect ~0 -> the bug)")
-    ok = (l_consistent < 1e-9) and (l_pairscramble > 1.0) and (l_old_pairscramble < 1e-9)
-    print("UNIT TEST", "PASS" if ok else "FAIL")
+    reference = apply_state_gauge(per_state_sign)          # QC in a consistent per-state gauge
+    predicted = {pair: base_vectors[pair].clone() for pair in pairs}  # ML in the canonical (+) gauge
+
+    def joint_loss(pred: Dict[Pair, torch.Tensor], ref: Dict[Pair, torch.Tensor]) -> float:
+        interleaved: List[torch.Tensor] = []
+        for pair in pairs:
+            interleaved += [pred[pair], ref[pair]]
+        return module(*interleaved).item()
+
+    loss_consistent = joint_loss(predicted, reference)
+
+    pair_flip = {pair: torch.sign(torch.randn(n_frames, 1)) for pair in pairs}
+    reference_pair_scrambled = {pair: pair_flip[pair] * reference[pair] for pair in pairs}
+    loss_pair_scramble = joint_loss(predicted, reference_pair_scrambled)
+
+    def phaseless_per_pair(pred: Dict[Pair, torch.Tensor], ref: Dict[Pair, torch.Tensor]) -> float:
+        total = 0.0
+        for pair in pairs:
+            plus = ((pred[pair] - ref[pair]) ** 2).sum(1)
+            minus = ((pred[pair] + ref[pair]) ** 2).sum(1)
+            total += torch.minimum(plus, minus).mean()
+        return (total / len(pairs)).item()
+
+    loss_old_pair_scramble = phaseless_per_pair(predicted, reference_pair_scrambled)
+
+    print(f"(1) consistent state gauge  : JOINT loss = {loss_consistent:.3e}   (expect ~0)")
+    print(f"(2) PAIR-scramble QC        : JOINT loss = {loss_pair_scramble:.3e}   (expect LARGE)")
+    print(f"    same, OLD per-pair loss : phaseless  = {loss_old_pair_scramble:.3e}   (expect ~0 -> the bug)")
+
+    passed = (loss_consistent < 1e-9) and (loss_pair_scramble > 1.0) and (loss_old_pair_scramble < 1e-9)
+    print("UNIT TEST", "PASS" if passed else "FAIL")
+    return passed
+
+
+def main() -> int:
+    """Entry point for the standalone unit test. Returns a process exit code."""
+    return 0 if _run_unit_test() else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
