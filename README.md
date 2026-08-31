@@ -89,7 +89,7 @@ Machine-specific paths in example commands are the confirmed cluster locations; 
 | `ml_namd/env/README.md` | ✅ | Environment reproducibility records + recreate/verify |
 | `ml_namd/data_manifests/DATA_MANIFEST.md` | ✅ | Dataset schema + provenance |
 | `ml_namd/scripts/*/README.md`, `_SOURCE_PROVENANCE.md` | ✅ (partial) | Per-group provenance + vendored-dependency notes |
-| Model A guide | planned | E+F multistate model training + inference |
+| `ml_namd/docs/model_a_guide.md` | ✅ | E+F multistate model training + inference |
 | NVE@MLIP guide | planned | energy-conserving MD workflow |
 | FSSH@MLIP guide | planned | the composed A→B surface-hopping driver |
 | FSSH@PYSEQM guide | planned | the reference driver + apple-to-apple harvest |
