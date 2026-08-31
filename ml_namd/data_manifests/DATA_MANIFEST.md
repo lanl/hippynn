@@ -73,7 +73,34 @@ Per-trajectory h5 schema (501 frames = 1 ps, 4 states S0–S3):
 
 ---
 
+## 4. Raw launch initial conditions — matched 1000-IC enol (R0 / V0 / Z)
+- **Purpose:** the raw per-IC arrays that launch *both* FSSH streams so the two share identical starting points. The MLIP driver (`namd_composed_batch.py`) reads them directly as `--coords-npy R0 --vel-npy V0 --z-npy Z`; the FSSH@PYSEQM reference consumes the same ICs in `coords.xyz` + NEXMD `velocity.out` form (`run_fssh_ref.py`), with the raw `velocity.out` divided by 1000 (`VEL_DIV`, see `fssh_pyseqm_guide.md`).
+- **Expected location (laptop, canonical):** `D:/ml_namd_project/fssh_ref/enol_init3_hfd_1ps_darwin/ics_matched/enol1ps_{R0,V0,Z}.npy`.
+- **Cluster origin:** Darwin `/vast/home/akhanna2/data/ml_project/ml_namd_project/fssh_ref_updated/ics/sampled_enol/` (xyz/velocity form for the reference) and the matched `ics_matched/` npy form.
+- **Expected shapes/dtypes** (per the 15-atom AcAc convention; 1000 ICs): `R0` (1000, 15, 3) f64 [Å], `V0` (1000, 15, 3) f64, `Z` (15,) or (1000, 15) int, species order `[8,8,6,6,6,6,6,1×8]`. Seed per index = `422 + idx` (shared by both FSSH streams).
+
+| Array | Expected shape | Dtype | md5 |
+|---|---|---|---|
+| `enol1ps_R0.npy` | (1000, 15, 3) | float64 | PENDING (drive absent) |
+| `enol1ps_V0.npy` | (1000, 15, 3) | float64 | PENDING (drive absent) |
+| `enol1ps_Z.npy` | (15,) / (1000, 15) | int | PENDING (drive absent) |
+
+**md5 status:** `[UNVERIFIED — external drive D: not mounted at 2026-08-31 profiling]`. The canonical
+copies live only on D: (absent) and the clusters; no copy exists on C:. When D: is mounted, pin the
+three md5s (PowerShell):
+
+```powershell
+Get-FileHash -Algorithm MD5 D:\ml_namd_project\fssh_ref\enol_init3_hfd_1ps_darwin\ics_matched\enol1ps_R0.npy,`
+  D:\ml_namd_project\fssh_ref\enol_init3_hfd_1ps_darwin\ics_matched\enol1ps_V0.npy,`
+  D:\ml_namd_project\fssh_ref\enol_init3_hfd_1ps_darwin\ics_matched\enol1ps_Z.npy | Format-Table Hash,Path
+```
+
+Confirm the path (the `ics_matched/` subdir is the expected mirror of the cluster `ics/` set; verify it
+exists on the mounted drive) and the shapes above before recording, then replace each `PENDING` cell.
+
+---
+
 ## Notes and open items
 - The reference h5 store transition dipoles / oscillator strengths are **not** saved (only `ground_dipole`); recover via single-point CIS on saved geometries if needed.
-- The raw input initial conditions (R0, V0, Z for all 1000 enol ICs) used to launch both the reference and the MLIP FSSH are on the clusters (`ics_matched/enol1ps_{R0,V0,Z}.npy` per the updated generation plan); add exact laptop paths + md5 here once mirrored.
-- md5 checksums are intentionally omitted for the multi-GB arrays; add per-file md5 for the small IC files when they are pinned.
+- md5 checksums are intentionally omitted for the multi-GB training arrays (Sections 1–2); the small IC files (Section 4) carry md5 once D: is mounted and the arrays are pinned.
+- Survivor-extraction arrays for the reference (Section 3) are the 777-of-1000 subset; the raw launch ICs (Section 4) are the full 1000 before any survival filtering.

@@ -35,29 +35,38 @@ is discussed. This is a living list; resolved items should be moved to the chang
 
 ## Reproducibility / packaging
 
-7. **Vendored dependencies are not refactored.** The FSSH@MLIP predictor bundle
-   (`scripts/fssh_mlip/enol_ef_nacr_developer_handoff/src/`, 13 modules) and the FSSH@PYSEQM worker `.sh`
-   scripts are staged verbatim; they have not had the additive-documentation pass the owned scripts got.
+7. **Vendored predictor bundle is not refactored.** The FSSH@MLIP predictor bundle
+   (`scripts/fssh_mlip/enol_ef_nacr_developer_handoff/src/`, 13 modules) is staged verbatim; it has not
+   had the additive-documentation pass the owned scripts got. (The FSSH@PYSEQM worker `.sh` scripts
+   **have** now had that pass — additive header/comments only, executable lines byte-identical — so they
+   are no longer verbatim; see the changelog.)
 
 8. **The PySEQM-ml_namd data-generation fork is not vendored.** It is a full PySEQM fork, referenced on
    `PYTHONPATH` by the data-gen slurms and documented, but not included in this repo (too large).
 
-9. **Darwin PySEQM commit is unpinned.** The Darwin `venv_master` `master_src` checkout had no `.git`, so
-   its exact commit is unverified (project memory records `107f5b0`); the Chicoma master is pinned
-   (`e273f6d`). Pin the Darwin commit before relying on the reference build.
+9. **Darwin PySEQM commit is unpinned** (cluster-only close-out staged). The Darwin `venv_master`
+   `master_src` checkout had no `.git`, so its exact commit is unverified (project memory records
+   `107f5b0`); the Chicoma master is pinned (`e273f6d`). A runnable content-match recipe (clone master,
+   `diff -rq` the tree against `master_src` at each candidate commit) is staged in `../env/README.md`
+   under "Pending capture"; run it on Darwin to resolve the pin. The reference method
+   (`hamiltonian_fd` + `decohere_on_hop=True`) is fixed regardless, so this blocks exact pinning only.
 
-10. **GPU driver version is not captured.** The environment records were taken on login nodes without a
-    GPU, so the driver version is absent; capture it on a compute node
-    (`nvidia-smi --query-gpu=name,driver_version --format=csv`).
+10. **GPU driver version is not captured** (cluster-only close-out staged). The environment records were
+    taken on login nodes without a GPU, so the driver version is absent. The exact one-shot command
+    (`nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader`, run inside a GPU
+    job on each cluster) is staged in `../env/README.md` under "Pending capture".
 
 11. **Duplicated harvesters — RESOLVED.** The byte-identical `harvest_fssh_full.py` / `harvest_clean.py`
     copies were de-duplicated: the canonical shared versions now live in `scripts/analysis/` (with a
     README) and the `scripts/fssh_pyseqm/` duplicates were removed; both drivers reference the analysis
     copies. See the changelog.
 
-12. **Raw initial conditions not pinned in the data manifest.** The 1000-IC enol `R0/V0/Z` files that seed
-    both the reference and the MLIP FSSH runs live on the clusters; their exact laptop paths and md5 sums
-    are not yet recorded in `data_manifests/DATA_MANIFEST.md`.
+12. **Raw initial-condition md5s not pinned** (drive-absent close-out staged). The 1000-IC enol `R0/V0/Z`
+    files that seed both FSSH streams now have a dedicated Section 4 in `data_manifests/DATA_MANIFEST.md`
+    with the exact expected laptop path, shapes/dtypes, the shared `422 + idx` seed, and the literal
+    `Get-FileHash` command. The md5 cells read `PENDING (drive absent)`: the canonical copies live only
+    on the external `D:` drive (not mounted at 2026-08-31) and the clusters, with no copy on `C:`. Mount
+    `D:` and run the staged command to replace the three PENDING cells.
 
 ## Engineering / environment
 

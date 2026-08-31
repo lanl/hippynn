@@ -35,6 +35,37 @@ Notes:
 - Both HIPPYNN installs are editable (`pip install -e`) from a local source tree; the git commit above is
   the reproducible pin, not the PyPI version string.
 
+## Pending capture (cluster-only, run on a compute node)
+Two fields could not be captured from the login nodes where these records were taken. Both are one-shot
+commands; run them on the relevant cluster and paste the result into the record + the table above.
+
+1. **GPU model + driver version.** `nvidia-smi` is absent on login nodes. Inside a GPU job (Chicoma A100
+   40/80 GB, and Darwin), run:
+   ```bash
+   nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader
+   ```
+   Paste under the `GPU / DRIVER` section of the matching `records/*.txt` (currently the placeholder
+   "NVIDIA-SMI has failed …" line), and note the model/driver in the glance table.
+
+2. **Darwin PYSEQM commit.** The Darwin `master_src` checkout has no `.git`, so `git rev-parse` cannot
+   pin it; project memory records `107f5b0` while the Chicoma master is `e273f6d` — resolve which the
+   Darwin reference actually runs by content-matching against a fresh clone:
+   ```bash
+   git clone <pyseqm_remote> /tmp/pyseqm_pin && cd /tmp/pyseqm_pin
+   for c in e273f6d 107f5b0; do
+     git checkout -q "$c"
+     echo -n "$c: "; diff -rq --exclude=.git . \
+       /vast/home/akhanna2/data/ml_project/ml_namd_project/fssh_ref_updated/master_src >/dev/null \
+       && echo "MATCH (Darwin master_src == $c)" || echo "differs"
+   done
+   ```
+   The commit that reports `MATCH` is the pin; record it in the glance table (replacing the
+   "no `.git`; verify before relying" note) and in `records/darwin_venv_master.txt`.
+
+Until both are recorded, treat the driver version as unknown and the Darwin PYSEQM commit as
+`107f5b0` (unverified) — the reference method (`hamiltonian_fd` + `decohere_on_hop=True`) is fixed
+regardless, so this does not block reproduction, only exact pinning.
+
 ## Files
 - `records/chicoma_venv_master.txt`, `records/darwin_venv_master.txt`, `records/darwin_hiphopnn_env.txt`
   — complete captured records (source of truth for every field).

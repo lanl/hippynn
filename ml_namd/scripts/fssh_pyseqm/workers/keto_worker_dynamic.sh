@@ -10,6 +10,21 @@
 # Resume-safe: the SLURM script wipes $CLAIMDIR before srun, so on a restart every trajectory
 # whose log lacks REF_DONE is re-claimed and re-run (there is no intra-trajectory checkpoint);
 # trajectories already marked REF_DONE are skipped by the grep before any claim.
+# =============================================================================
+# PURPOSE : Dynamic cross-node work-queue worker for the keto 10 ps FSSH@PYSEQM reference. Every
+#           core scans idx START..NIC-1 and atomically claims each unfinished index via
+#           `mkdir $CLAIM/<idx>`; the owner runs one FSSH trajectory (run_fssh_ref.py). Fast cores
+#           keep scanning and absorb the tail so no core is stranded near the walltime.
+# INPUTS  : environment exported by the SLURM launcher (keto_ns3_10ps.slurm) -- $B (Darwin root),
+#           FORM, INIT, NSTATES, NIC, START, NSTEPS, OUTDIR, PREFIX_BASE, CLAIMDIR, and optional
+#           TDC (default hamiltonian_fd) / LOGDIR (default $B/logs).
+# OUTPUTS : per-trajectory h5 under $OUT; per-IC .log under $LOGS/${pfx}.log; claim dirs under $CLAIM.
+# CONFIG  : OUT=$OUTDIR; PB=$PREFIX_BASE; TDC=${TDC:-hamiltonian_fd}; LOGS=${LOGDIR:-$B/logs}.
+# DEPENDS : $B/run_fssh_ref.py; coords/velocity at $B/ics/sampled_${FORM}/{coords.xyz,velocity.out};
+#           $B/venv_master interpreter. Claim via mkdir is atomic on the shared filesystem (unlike flock).
+# NOTE    : behavior-preserving refactor -- header/comments only; no executable line changed.
+# Developer: Ajay Khanna | LANL/Sergei Lab | Sep-01-2026 | ml_namd
+# =============================================================================
 PY=$B/venv_master/bin/python
 OUT=${OUTDIR}; PB=${PREFIX_BASE}; TDC=${TDC:-hamiltonian_fd}; LOGS=${LOGDIR:-$B/logs}; CLAIM=${CLAIMDIR}
 mkdir -p "$OUT" "$LOGS" "$CLAIM"

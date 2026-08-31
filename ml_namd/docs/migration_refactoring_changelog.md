@@ -112,10 +112,22 @@ FSSH@PYSEQM guides; installation/environment guide; SLURM job guide; this change
 - **Harvester de-duplication.** `harvest_fssh_full.py` / `harvest_clean.py` were consolidated under
   `scripts/analysis/` (canonical, with a README); the `scripts/fssh_pyseqm/` duplicates were removed and
   both drivers now reference the analysis copies.
+- **FSSH@PYSEQM worker `.sh` refactor.** The three per-core workers
+  (`scripts/fssh_pyseqm/workers/{ref_worker_tdc,ns3_worker,keto_worker_dynamic}.sh`) received the project
+  `PURPOSE/INPUTS/OUTPUTS/CONFIG/DEPENDS` header block plus the dev-header line. The pass is additive
+  (header and comments only); every executable line is byte-identical to the vendored original, verified
+  by diffing the non-comment/non-blank lines against `HEAD` (all three reported IDENTICAL). The workers'
+  README was updated to drop the "candidate follow-up" note.
 
 ## Deferred cleanups (candidate follow-ups)
 
-- Additively refactor the FSSH@PYSEQM worker `.sh` scripts (currently verbatim).
-- Pin the Darwin PySEQM `master_src` commit (its checkout had no `.git`).
-- Capture the GPU driver version on a compute node (the env records were taken on login nodes).
-- Record the raw 1000-IC `R0/V0/Z` laptop paths + md5 in the data manifest.
+Each now has a runnable close-out staged in the repo; all three are gated on cluster or external-drive
+access, not on further authoring.
+
+- Pin the Darwin PySEQM `master_src` commit (its checkout had no `.git`) — content-match recipe staged in
+  `../env/README.md` under "Pending capture".
+- Capture the GPU driver version on a compute node (env records were login-node only) — one-shot
+  `nvidia-smi` command staged in `../env/README.md` under "Pending capture".
+- Record the raw 1000-IC `R0/V0/Z` md5s — Section 4 of `data_manifests/DATA_MANIFEST.md` now holds the
+  expected path, shapes, and the literal `Get-FileHash` command; cells read `PENDING (drive absent)`
+  until `D:` is mounted.

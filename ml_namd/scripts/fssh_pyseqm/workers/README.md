@@ -26,5 +26,7 @@ for reference/reproducibility; at runtime the workers, `run_fssh_ref.py`, the `v
 and the `ics/sampled_<form>/` inputs are all expected under `$B`. To run from a different root, set `$B`
 and place the worker + `run_fssh_ref.py` (see `../run_fssh_ref.py`) + ICs there.
 
-Provenance: pulled 2026-08-30 from `$B/` (4 files). The shell workers are kept verbatim (already
-well-commented); refactoring them additively is a candidate follow-up.
+Provenance: pulled 2026-08-30 from `$B/` (4 files). The three shell workers carry the project
+`PURPOSE/INPUTS/OUTPUTS/CONFIG/DEPENDS` header block plus the dev-header line; the refactor is
+additive (header and comments only) and behavior-preserving — every executable line is byte-identical
+to the vendored original.
