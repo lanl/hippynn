@@ -93,10 +93,11 @@ Machine-specific paths in example commands are the confirmed cluster locations; 
 | `ml_namd/docs/nve_at_mlip_guide.md` | ✅ | energy-conserving MD workflow + 4-check validation |
 | `ml_namd/docs/fssh_mlip_guide.md` | ✅ | the composed A→B surface-hopping driver |
 | `ml_namd/docs/fssh_pyseqm_guide.md` | ✅ | the reference driver + apple-to-apple harvest |
-| SLURM job guide | planned | submitting + monitoring the cluster jobs |
+| `ml_namd/docs/slurm_job_guide.md` | ✅ | submitting + monitoring every stage |
 | `ml_namd/docs/installation_and_environment.md` | ✅ | end-to-end environment setup (step-by-step recreate + verify + troubleshooting) |
 | Validation report, inference benchmark report | planned | accuracy + throughput evidence |
-| Migration / refactoring changelog, known limitations | planned | what changed, what is unresolved |
+| `ml_namd/docs/migration_refactoring_changelog.md` | ✅ | what changed during packaging + refactor |
+| Known limitations | planned | open issues + unresolved questions |
 
 ## Reproducibility and provenance notes
 
