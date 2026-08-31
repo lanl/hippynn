@@ -91,7 +91,7 @@ Machine-specific paths in example commands are the confirmed cluster locations; 
 | `ml_namd/scripts/*/README.md`, `_SOURCE_PROVENANCE.md` | ✅ (partial) | Per-group provenance + vendored-dependency notes |
 | `ml_namd/docs/model_a_guide.md` | ✅ | E+F multistate model training + inference |
 | `ml_namd/docs/nve_at_mlip_guide.md` | ✅ | energy-conserving MD workflow + 4-check validation |
-| FSSH@MLIP guide | planned | the composed A→B surface-hopping driver |
+| `ml_namd/docs/fssh_mlip_guide.md` | ✅ | the composed A→B surface-hopping driver |
 | FSSH@PYSEQM guide | planned | the reference driver + apple-to-apple harvest |
 | SLURM job guide | planned | submitting + monitoring the cluster jobs |
 | `ml_namd/docs/installation_and_environment.md` | ✅ | end-to-end environment setup (step-by-step recreate + verify + troubleshooting) |
