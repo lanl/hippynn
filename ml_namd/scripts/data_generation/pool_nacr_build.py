@@ -1,6 +1,18 @@
 #!/usr/bin/env python3
 """Build the NACR-inclusive pooled S0-S3 dataset (200K per tautomer): E+F + dENACR{12,13,23}
-targets + GDV{12,13,23} inputs. Same source order/slicing as pool_s0s3.py so frames align."""
+targets + GDV{12,13,23} inputs. Same source order/slicing as pool_s0s3.py so frames align.
+
+Pools the GS (S0) + S1/S2/S3-dynamics extracted sources per tautomer, writes a source_surface provenance
+array, and derives GDV{ij} = F_i - F_j (float32, (N,45)). Top-level script; paths are the Chicoma locations.
+"""
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import numpy as np, os
 GS = "/users/akhanna2/data/ml_namd_project/data/{t}/50K"
 EX = "/lustre/scratch5/akhanna2/ml_namd_project/data_gen/prod/{t}_s{s}/extracted/50K"

@@ -58,6 +58,13 @@ Date: November 2025
 
 from __future__ import annotations
 
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import argparse
 import sys
 import time

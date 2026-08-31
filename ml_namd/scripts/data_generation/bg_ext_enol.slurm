@@ -11,6 +11,16 @@
 #SBATCH -o /lustre/scratch5/akhanna2/ml_namd_project/data_gen/enol_balf_galf/bgext_%j.out
 #SBATCH -e /lustre/scratch5/akhanna2/ml_namd_project/data_gen/enol_balf_galf/bgext_%j.err
 # Extract BALF + GALF re-labeled gen -> acn_ splits (sE0-10, F, 45 dENACR pairs incl 12/13/23), enol E0.
+# =============================================================================
+# PURPOSE : extract the generated enol BALF + GALF *_all_states.npy into acn_ per-state/per-pair
+#           splits (sE0-10, F, 45 dENACR pairs incl 12/13/23), shifting energies by the enol E0_opt.
+# INPUTS  : $L/{BALF,GALF} generator outputs + acn_R/acn_Z; CPU-parallel (32 workers), no GPU.
+# OUTPUTS : $L/<set>/extracted/ acn_ arrays; logs in the #SBATCH -o/-e paths.
+# CONFIG  : #SBATCH block above (Chicoma gpu_debug reservation, 64 cpus, 96GB); env activated below.
+#           E0=-1391.422970121047 is the enol ground-state optimized energy (do not reuse for keto).
+# DEPENDS : process_acn_data_parallel_REPURPOSED.py (this dir).
+# Developer: Ajay Khanna | LANL/Sergei Lab | Sep-01-2026 | ml_namd
+# =============================================================================
 set -o pipefail
 CONDA_SH=/usr/projects/hpcsoft/common/x86_64/anaconda/2023.03-python-3.10/etc/profile.d/conda.sh
 source "$CONDA_SH"; conda activate /usr/projects/ml4chem/akhanna2/conda_envs/mlip_md_dyn

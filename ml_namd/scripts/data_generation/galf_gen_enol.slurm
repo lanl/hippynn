@@ -13,6 +13,15 @@
 #SBATCH -e /lustre/scratch5/akhanna2/ml_namd_project/data_gen/enol_balf_galf/galfgen_%j.err
 # GALF-ONLY re-gen (enol), longer 4h wall (BALF already done rc=0, do NOT re-run BALF).
 # AM1/CIS n_states=11, batch 5000, PYSEQM-ml_namd fork with cg_solver max_iter=400.
+# =============================================================================
+# PURPOSE : GALF-ONLY PySEQM AM1/CIS property generation (enol), longer 4h wall. Same generator as
+#           bg_gen_enol.slurm but restricted to the GALF set (BALF already done -> do NOT re-run BALF).
+# INPUTS  : acn_R.npy / acn_Z.npy under $L/GALF (Chicoma data_gen). 4 GPUs.
+# OUTPUTS : nacrs/energies/forces_all_states.npy under $L/GALF; logs in the #SBATCH -o/-e paths.
+# CONFIG  : #SBATCH block above (Chicoma gpu/gpu:4, qos=long, 96GB); env activated below.
+# DEPENDS : run_pyseqm_electronic_properties_calcs.py (this dir) + the PYSEQM-ml_namd fork on PYTHONPATH.
+# Developer: Ajay Khanna | LANL/Sergei Lab | Sep-01-2026 | ml_namd
+# =============================================================================
 set -o pipefail
 CONDA_SH=/usr/projects/hpcsoft/common/x86_64/anaconda/2023.03-python-3.10/etc/profile.d/conda.sh
 source "$CONDA_SH"; conda activate /usr/projects/ml4chem/akhanna2/conda_envs/mlip_md_dyn

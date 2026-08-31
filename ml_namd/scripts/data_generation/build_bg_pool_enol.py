@@ -1,3 +1,19 @@
+#!/usr/bin/env python3
+"""Build the enol S0-S3 Model-B training pool (pool_s0s3) for the BALF and GALF sets.
+
+Copies the S0-S3 energies/forces + dENACR{12,13,23} targets from each set's ``extracted/50K`` into a
+``pool_s0s3`` dir, then derives the Model-B inputs: GDV{ij} = F_i - F_j (excited-force difference,
+flattened to (N,45) float32) and GAP{ij} = sE_j - sE_i (float64). Prints a GAP12 near-CI summary.
+Top-level script (no main()); paths are the confirmed Chicoma data_gen locations.
+"""
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import numpy as np, os, shutil
 L="/lustre/scratch5/akhanna2/ml_namd_project/data_gen/enol_balf_galf"
 PAIRS={"12":(1,2),"13":(1,3),"23":(2,3)}

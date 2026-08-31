@@ -12,6 +12,16 @@
 #SBATCH -o /lustre/scratch5/akhanna2/ml_namd_project/data_gen/enol_balf_galf/bggen_%j.out
 #SBATCH -e /lustre/scratch5/akhanna2/ml_namd_project/data_gen/enol_balf_galf/bggen_%j.err
 # Full BALF + GALF re-labeling gen (keto): AM1/CIS n_states=11, batch 5000, CG max_iter=400. Outputs -> /lustre.
+# =============================================================================
+# PURPOSE : PySEQM AM1/CIS property generation (energies/forces/NACRs) for the enol BALF + GALF
+#           active-learning geometry sets (n_states=11, batch 5000). Produces *_all_states.npy per set.
+# INPUTS  : acn_R.npy / acn_Z.npy under $L/{BALF,GALF} (Chicoma data_gen). Runs the generator on 4 GPUs.
+# OUTPUTS : nacrs/energies/forces_all_states.npy in each $L/<set> dir; logs in the #SBATCH -o/-e paths.
+# CONFIG  : #SBATCH block above (Chicoma gpu_debug reservation, 4 GPUs, 96GB); env activated below.
+# DEPENDS : run_pyseqm_electronic_properties_calcs.py (this dir) + the PYSEQM-ml_namd fork on PYTHONPATH.
+# NOTE    : the legacy comment says "(keto)"; this job operates on the ENOL sets ($L = enol_balf_galf).
+# Developer: Ajay Khanna | LANL/Sergei Lab | Sep-01-2026 | ml_namd
+# =============================================================================
 set -o pipefail
 CONDA_SH=/usr/projects/hpcsoft/common/x86_64/anaconda/2023.03-python-3.10/etc/profile.d/conda.sh
 source "$CONDA_SH"; conda activate /usr/projects/ml4chem/akhanna2/conda_envs/mlip_md_dyn
