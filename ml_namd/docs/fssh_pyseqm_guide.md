@@ -99,13 +99,17 @@ an ill-conditioned seam, not a code bug — they are excluded from survivor-cond
 ## 6. Outputs and harvest
 
 Each trajectory writes a PySEQM h5 with `data/nonadiabatic/{active_surface, NACT, electronic_amplitudes}`
-and `data/excitation/state_energies`. Harvest utilities (`../scripts/fssh_pyseqm/`):
+and `data/excitation/state_energies`. Harvest utilities:
 
+Shared (canonical, in `../scripts/analysis/` — used by both the reference and the MLIP):
 - `harvest_fssh_full.py` — the canonical 6-panel apple-to-apple harvest (survivor-conditional live
   ensemble; classical = active-surface fraction, quantum = excited $|c|^2$).
+- `harvest_clean.py` — strict clean survivors (excludes any NaN-amplitude trajectory).
+
+Reference-specific (in `../scripts/fssh_pyseqm/`):
 - `survivors_ensemble.py` — survivors-only with a common fixed N.
 - `fixedN_harvest.py` — fixed-N (total conserved, ground-state recovery visible).
-- `harvest_clean.py` — strict clean survivors (excludes any NaN-amplitude trajectory).
+- `harvest_enol_ref.py` — enol reference-pilot population harvest.
 
 Use the **same harvester and conventions** for the reference and the MLIP so the two `.npz` files are
 directly comparable.

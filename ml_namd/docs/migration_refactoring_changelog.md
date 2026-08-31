@@ -104,9 +104,18 @@ FSSH@PYSEQM guides; installation/environment guide; SLURM job guide; this change
 - The `print()`-based training progress output was kept (intentional user-facing output; converting
   ~2800 lines to logging would be risk for no benefit).
 
+## Cleanups completed
+
+- **Predictor-bundle refactor.** The 9 predictor-specific modules in the vendored bundle received the
+  developer header (AST-verified behavior-preserving); the 4 training-module copies were left verbatim on
+  purpose (older functional versions the runtime pickle needs).
+- **Harvester de-duplication.** `harvest_fssh_full.py` / `harvest_clean.py` were consolidated under
+  `scripts/analysis/` (canonical, with a README); the `scripts/fssh_pyseqm/` duplicates were removed and
+  both drivers now reference the analysis copies.
+
 ## Deferred cleanups (candidate follow-ups)
 
-- Additively refactor the vendored predictor bundle and worker `.sh` scripts (currently verbatim).
-- De-duplicate the `analysis/` and `fssh_pyseqm/` harvesters (byte-identical originals).
+- Additively refactor the FSSH@PYSEQM worker `.sh` scripts (currently verbatim).
 - Pin the Darwin PySEQM `master_src` commit (its checkout had no `.git`).
 - Capture the GPU driver version on a compute node (the env records were taken on login nodes).
+- Record the raw 1000-IC `R0/V0/Z` laptop paths + md5 in the data manifest.

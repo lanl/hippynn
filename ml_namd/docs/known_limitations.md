@@ -50,8 +50,10 @@ is discussed. This is a living list; resolved items should be moved to the chang
     GPU, so the driver version is absent; capture it on a compute node
     (`nvidia-smi --query-gpu=name,driver_version --format=csv`).
 
-11. **Duplicated harvesters.** `scripts/analysis/` and `scripts/fssh_pyseqm/` carry byte-identical copies
-    of `harvest_fssh_full.py` / `harvest_clean.py`; de-duplication is deferred.
+11. **Duplicated harvesters — RESOLVED.** The byte-identical `harvest_fssh_full.py` / `harvest_clean.py`
+    copies were de-duplicated: the canonical shared versions now live in `scripts/analysis/` (with a
+    README) and the `scripts/fssh_pyseqm/` duplicates were removed; both drivers reference the analysis
+    copies. See the changelog.
 
 12. **Raw initial conditions not pinned in the data manifest.** The 1000-IC enol `R0/V0/Z` files that seed
     both the reference and the MLIP FSSH runs live on the clusters; their exact laptop paths and md5 sums
