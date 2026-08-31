@@ -94,7 +94,7 @@ Machine-specific paths in example commands are the confirmed cluster locations; 
 | FSSH@MLIP guide | planned | the composed A→B surface-hopping driver |
 | FSSH@PYSEQM guide | planned | the reference driver + apple-to-apple harvest |
 | SLURM job guide | planned | submitting + monitoring the cluster jobs |
-| Installation / environment guide | planned | end-to-end setup |
+| `ml_namd/docs/installation_and_environment.md` | ✅ | end-to-end environment setup (step-by-step recreate + verify + troubleshooting) |
 | Validation report, inference benchmark report | planned | accuracy + throughput evidence |
 | Migration / refactoring changelog, known limitations | planned | what changed, what is unresolved |
 
