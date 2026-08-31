@@ -70,8 +70,10 @@ ml_namd/                        all project-owned code + documentation
 2. **Data.** Datasets stay on the ground-zero drive / clusters; see `ml_namd/data_manifests/DATA_MANIFEST.md`
    for locations, array names, shapes, and provenance. Generate/extract with `ml_namd/scripts/data_generation/`.
 
-3. **Train Model A** (E + F, S0–S5) then **Model B** (dENACR) with `ml_namd/scripts/training/unified_training.py`
-   (config-file driven; see `model_b_usage_guide.md` for a complete `.inp`).
+3. **Train Model A** (E + F, S0–S5) then **Model B** (dENACR) — submit the ready-made enol launchers
+   `ml_namd/scripts/training/train_model_a_enol.slurm` and `train_model_b_enol.slurm` (self-contained
+   configs in `training/configs/`; `SMOKE=1 sbatch …` for a 2-epoch check). See `model_a_guide.md` /
+   `model_b_usage_guide.md` for the config details and `slurm_job_guide.md` for submission.
 
 4. **Run dynamics.** NVE@MLIP via `ml_namd/scripts/nve_mlip/pyseqm_hippynn_md.py`; FSSH@MLIP via
    `ml_namd/scripts/fssh_mlip/namd_composed_batch.py`; the FSSH@PYSEQM reference via
