@@ -12,6 +12,15 @@
 #SBATCH -e /vast/home/akhanna2/data/ml_project/ml_namd_project/fssh_ref_updated/logs/ns3ref/ns3ref_%j.out
 # n_states=3 (S0-S3, init S3) reference matched to the S0-S3 MLIP: hamiltonian_fd + decohere, 100 matched Vishikh IC.
 # Apples-to-apple partner for the S0-S3 MLIP (joint GALF 17187396, idx 0-99). Same ICs, seeds (422+idx).
+# =============================================================================
+# PURPOSE : n_states=3 (S0-S3, init S3) FSSH@PYSEQM reference matched to the S0-S3 MLIP.
+#           hamiltonian_fd + decohere, 100 matched Vishikh ICs (same ICs + seeds 422+idx). 1 node, debug qos.
+# INPUTS  : none (FORM/TDC/INIT/... are hard-set below for this fixed apple-to-apple partner run).
+# OUTPUTS : per-trajectory h5 under $OUTDIR; per-IC .log under $B/logs/ns3ref; NS3REF_DONE tally.
+# CONFIG  : user-tunable = the #SBATCH block above + the fixed vars below. $B is the confirmed Darwin root.
+# DEPENDS : $B/ns3_worker.sh + run_fssh_ref.py (worker NOT vendored here; lives in the cluster $B).
+# Developer: Ajay Khanna | LANL/Sergei Lab | Sep-01-2026 | ml_namd
+# =============================================================================
 set -o pipefail
 FORM=enol; TDC=hamiltonian_fd; INIT=3; NSTATES=3; NIC=100; START=0; NSTEPS=20000
 export B=/vast/home/akhanna2/data/ml_project/ml_namd_project/fssh_ref_updated

@@ -6,7 +6,19 @@ Uses the FIRST N trajectories. Each trajectory contributes at EVERY frame:
   - after it terminates (reaches the S1-S0 funnel): counted as S0 (recovered)
 Denominator is FIXED at N, so populations sum to 1 at every frame and S0 rises as trajectories recover.
 Usage: python fixedN_harvest.py <h5_glob> <out_npz> <N> <ps_per_frame>
+
+Inputs (positional argv): h5 glob, output .npz, N (fixed denominator), picoseconds-per-frame.
+Output: .npz with fixed-N (total-conserving) classical/quantum populations + fraction-alive.
+Kept as a top-level script (no main()) for md5 stability; this pass is documentation only.
 """
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import sys, glob, numpy as np, h5py
 GLOB, OUT, NFIX, PSPF = sys.argv[1], sys.argv[2], int(sys.argv[3]), float(sys.argv[4])
 QTOL = 0.1

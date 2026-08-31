@@ -1,15 +1,28 @@
 #!/usr/bin/env python3
-"""FSSH@PySEQM reference trajectory from a developer IC (coords.xyz frame + velocity.out frame).
+"""FSSH@PYSEQM reference trajectory with a detect-crossings A/B knob (variant of run_fssh_ref.py).
 
-Matches the developer setup: AM1/CIS, tdc=hamiltonian_fd, decoherence ON (project rule L-081), microcanonical,
-injected GS-sampled velocities (Vishikh convention: raw velocity.out / 1000). One h5 per
-trajectory (active_surface, NACT, electronic_amplitudes = classical + quantum populations).
-Works for keto and enol (same atom set). Runs on CPU (LAPACK eigh; avoids the batched-GPU
-cuSOLVER fault). Skip-not-raise.
+Scientific purpose
+------------------
+Same as :mod:`run_fssh_ref` (AM1/CIS, ``tdc_method = hamiltonian_fd``, decoherence ON, microcanonical,
+Vishikh velocities, one h5 per trajectory, CPU one-thread-per-traj, skip-not-raise) but adds a
+``--detect-crossings`` switch to A/B-test PySEQM's trivial-crossing detector. ``None`` (the default)
+leaves the PySEQM default (True); ``true``/``false`` force it.
 
-Usage: python run_fssh_ref.py --coords coords.xyz --velocities velocity.out --idx 0 \
-    --n-states 4 --initial-state 3 --nsteps 200000 --timestep 0.05 --out-dir out --prefix keto_s3_i0
+Inputs / outputs
+----------------
+Identical to :mod:`run_fssh_ref` plus ``--detect-crossings {true,false}``. Output: ``<out-dir>/<prefix>*.h5``
++ ``<prefix>.summary.json``; exit 0 on success, 1 on failure.
+
+Usage: python run_fssh_ref_dc.py --coords coords.xyz --velocities velocity.out --idx 0 \
+    --n-states 4 --initial-state 3 --nsteps 200000 --timestep 0.05 --detect-crossings false \
+    --out-dir out --prefix keto_s3_i0
 """
+
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import argparse, json, sys, traceback
 from pathlib import Path
 import numpy as np
@@ -19,10 +32,11 @@ torch.set_default_dtype(torch.float64)
 torch.set_num_threads(1); torch.set_num_interop_threads(1)  # 1 thread/traj -> true one-per-core (avoid oversubscription)
 
 VEL_DIV = 1000.0  # Vishikh velocity.out -> PySEQM velocity units
-SYM2Z = {"H": 1, "C": 6, "O": 8, "N": 7}
+SYM2Z = {"H": 1, "C": 6, "O": 8, "N": 7}  # element symbol -> atomic number
+
 
 def read_xyz_frame(path, idx):
-    """Parse the idx-th frame of a multi-frame .xyz -> (Z (natoms,), R (natoms,3))."""
+    """Parse the idx-th frame of a multi-frame .xyz -> (Z (natoms,), R (natoms,3)); raises IndexError if absent."""
     lines = open(path).read().splitlines()
     natoms = int(lines[0].split()[0])
     per = natoms + 2
@@ -35,7 +49,12 @@ def read_xyz_frame(path, idx):
         Z.append(SYM2Z[tok[0]]); R.append(list(map(float, tok[1:4])))
     return np.asarray(Z, dtype=np.int64), np.asarray(R, dtype=np.float64)
 
+
 def build_params(n_states, tdc, detect_crossings=None):
+    """PySEQM parameter dict (AM1/CIS + TDC + decoherence); optionally set the trivial-crossing detector.
+
+    ``detect_crossings`` None -> leave the PySEQM default (True); otherwise force the given bool.
+    """
     nad = {"tdc_method": tdc, "decohere_on_hop": True}
     if detect_crossings is not None:
         nad["detect_crossings"] = detect_crossings   # A/B test knob; default None -> PySEQM default (True)
@@ -43,10 +62,13 @@ def build_params(n_states, tdc, detect_crossings=None):
             "excited_states": {"n_states": n_states, "method": "cis", "tolerance": 1e-6},
             "analytical_gradient": [True], "nonadiabatic": nad}
 
+
 def read_velocity_frame(path, idx, natoms):
-    """Parse a NEXMD-style velocity.out; return the idx-th frame's (natoms,3) velocities."""
+    """Parse a NEXMD-style velocity.out; return the idx-th frame's (natoms,3) velocities (raises IndexError if absent).
+
+    Frames are delimited by a ``$VELOC`` marker; the ``natoms`` lines after it are the velocities.
+    """
     lines = open(path).read().splitlines()
-    # frames delimited by a '$VELOC' marker; the natoms lines after it are the velocities
     starts = [i for i, l in enumerate(lines) if "$VELOC" in l]
     if idx >= len(starts):
         raise IndexError(f"velocity frame {idx} not found ({len(starts)} frames)")
@@ -54,7 +76,9 @@ def read_velocity_frame(path, idx, natoms):
     vel = [list(map(float, lines[s + k].split()[:3])) for k in range(natoms)]
     return np.asarray(vel, dtype=np.float64)
 
+
 def main():
+    """Read the IC frame, build the PySEQM molecule + dynamics (with the detect-crossings knob), run, and record."""
     ap = argparse.ArgumentParser()
     ap.add_argument("--coords", required=True); ap.add_argument("--velocities", required=True)
     ap.add_argument("--idx", type=int, required=True)
@@ -103,6 +127,7 @@ def main():
     Path(a.out_dir).mkdir(parents=True, exist_ok=True)
     (Path(a.out_dir) / f"{a.prefix}.summary.json").write_text(json.dumps(rec, indent=1))
     sys.exit(0 if rec["status"] == "ok" else 1)
+
 
 if __name__ == "__main__":
     main()

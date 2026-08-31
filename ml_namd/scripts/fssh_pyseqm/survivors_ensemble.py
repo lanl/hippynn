@@ -5,13 +5,26 @@ Survivor = alive at the final frame (never terminated). No half-survived traject
 Pass 1: count survivors per source. N = min. Pass 2: use the FIRST N survivors of each; denominator = N (constant,
 all frames alive). Classical = active-surface fraction; quantum = mean excited |c|^2. S0 column kept but not used in plots.
 Usage: python survivors_ensemble.py <pspf> <glob1> <out1> <glob2> <out2> ...
+
+Inputs (positional argv): picoseconds-per-frame, then (glob, out.npz) pairs, one per source.
+Output: one survivors-only ensemble .npz per source (classical/quantum populations, N used).
+Kept as a top-level script (no main()) for md5 stability; this pass is documentation only.
 """
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import sys, glob, numpy as np, h5py
 PSPF = float(sys.argv[1]); rest = sys.argv[2:]
 pairs = [(rest[i], rest[i + 1]) for i in range(0, len(rest), 2)]
 QTOL = 0.1
 
 def survivor_files(globpat):
+    """Return the h5 files under ``globpat`` whose final frame is still alive (survivors)."""
     fs = sorted(f for f in glob.glob(globpat) if f.endswith(".h5"))
     surv = []
     for f in fs:

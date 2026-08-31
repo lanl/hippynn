@@ -6,12 +6,29 @@ CONVENTIONS (verified against init state, memory fssh-pyseqm-no-decoherence-over
   * active_surface is S0-indexed (0=S0). CLASSICAL pop = fraction of traj on each surface.
   * electronic_amplitudes has width W = n_excited; column j maps to EXCITED state S(j+1).
     No S0 amplitude is stored, so quantum S0 pop = 1 - sum_j |c_j|^2 (over-coherence deficit).
-Writes a compact npz + prints a sanity summary. Data stays on Darwin."""
+Writes a compact npz + prints a sanity summary. Data stays on Darwin.
+
+Inputs (positional argv): the base dir holding ``enol_init3/`` and ``enol_init5/`` h5 subdirs.
+Output: ``<base>/enol_ref_pops.npz`` (per-init time axis + classical/quantum populations).
+"""
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import sys, glob, os
 import numpy as np
 import h5py
 
 def harvest(d, init):
+    """Harvest classical + quantum populations from the enol reference h5 in dir ``d``.
+
+    ``init`` is the initial surface label (3 or 5), used only for reporting. Returns a dict with
+    the time axis ``t`` [fs] and ``(T, n_states)`` classical/quantum population arrays.
+    """
     files = sorted(glob.glob(os.path.join(d, "*.h5")))
     assert files, f"no h5 in {d}"
     t = None; clas = []; qexc = []; bad = 0

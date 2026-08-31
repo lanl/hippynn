@@ -1,15 +1,33 @@
 #!/usr/bin/env python3
-"""FSSH@PySEQM reference trajectory from a developer IC (coords.xyz frame + velocity.out frame).
+"""FSSH@PYSEQM reference trajectory from a developer initial condition (one .xyz + one velocity frame).
 
-Matches the developer setup: AM1/CIS, tdc=hamiltonian_fd, decoherence ON (project rule L-081), microcanonical,
-injected GS-sampled velocities (Vishikh convention: raw velocity.out / 1000). One h5 per
-trajectory (active_surface, NACT, electronic_amplitudes = classical + quantum populations).
-Works for keto and enol (same atom set). Runs on CPU (LAPACK eigh; avoids the batched-GPU
-cuSOLVER fault). Skip-not-raise.
+Scientific purpose
+------------------
+Produce a single fewest-switches surface hopping (FSSH) reference trajectory with PySEQM's native
+AM1/CIS electronic structure, to benchmark FSSH@MLIP against. Matches the developer reference setup:
+AM1/CIS, ``tdc_method = hamiltonian_fd``, decoherence ON (project rule L-081), microcanonical
+propagation, and GS-sampled velocities injected in the Vishikh convention (raw ``velocity.out`` / 1000).
+Writes one h5 per trajectory (active_surface, NACT, electronic_amplitudes = classical + quantum
+populations). Works for keto and enol (same atom set). Runs on CPU (LAPACK eigh, avoiding the
+batched-GPU cuSOLVER fault) with one thread per trajectory. Failures are recorded, not raised
+(skip-not-raise), so a large IC sweep does not abort on a single bad IC.
+
+Inputs / outputs
+----------------
+Inputs (CLI): ``--coords`` multi-frame .xyz, ``--velocities`` NEXMD velocity.out, ``--idx`` frame index,
+plus state/dynamics knobs (``--n-states``, ``--initial-state``, ``--nsteps``, ``--timestep`` [fs],
+``--tdc``, ``--temperature``). Output: ``<out-dir>/<prefix>*.h5`` trajectory + ``<prefix>.summary.json``
+(status/hops record). Exit code 0 on success, 1 on failure.
 
 Usage: python run_fssh_ref.py --coords coords.xyz --velocities velocity.out --idx 0 \
     --n-states 4 --initial-state 3 --nsteps 200000 --timestep 0.05 --out-dir out --prefix keto_s3_i0
 """
+
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import argparse, json, sys, traceback
 from pathlib import Path
 import numpy as np
@@ -19,10 +37,14 @@ torch.set_default_dtype(torch.float64)
 torch.set_num_threads(1); torch.set_num_interop_threads(1)  # 1 thread/traj -> true one-per-core (avoid oversubscription)
 
 VEL_DIV = 1000.0  # Vishikh velocity.out -> PySEQM velocity units
-SYM2Z = {"H": 1, "C": 6, "O": 8, "N": 7}
+SYM2Z = {"H": 1, "C": 6, "O": 8, "N": 7}  # element symbol -> atomic number
+
 
 def read_xyz_frame(path, idx):
-    """Parse the idx-th frame of a multi-frame .xyz -> (Z (natoms,), R (natoms,3))."""
+    """Parse the idx-th frame of a multi-frame .xyz -> (Z (natoms,), R (natoms,3)).
+
+    Raises ``IndexError`` if the requested frame is beyond the file.
+    """
     lines = open(path).read().splitlines()
     natoms = int(lines[0].split()[0])
     per = natoms + 2
@@ -35,15 +57,21 @@ def read_xyz_frame(path, idx):
         Z.append(SYM2Z[tok[0]]); R.append(list(map(float, tok[1:4])))
     return np.asarray(Z, dtype=np.int64), np.asarray(R, dtype=np.float64)
 
+
 def build_params(n_states, tdc):
+    """Return the PySEQM parameter dict: AM1/CIS with ``n_states`` and the given TDC method + decoherence."""
     return {"method": "AM1", "elements": [1, 6, 8], "scf_eps": 1e-8, "scf_converger": [1],
             "excited_states": {"n_states": n_states, "method": "cis", "tolerance": 1e-6},
             "analytical_gradient": [True], "nonadiabatic": {"tdc_method": tdc, "decohere_on_hop": True}}
 
+
 def read_velocity_frame(path, idx, natoms):
-    """Parse a NEXMD-style velocity.out; return the idx-th frame's (natoms,3) velocities."""
+    """Parse a NEXMD-style velocity.out; return the idx-th frame's (natoms,3) velocities.
+
+    Frames are delimited by a ``$VELOC`` marker; the ``natoms`` lines after it are the velocities.
+    Raises ``IndexError`` if the requested frame is missing.
+    """
     lines = open(path).read().splitlines()
-    # frames delimited by a '$VELOC' marker; the natoms lines after it are the velocities
     starts = [i for i, l in enumerate(lines) if "$VELOC" in l]
     if idx >= len(starts):
         raise IndexError(f"velocity frame {idx} not found ({len(starts)} frames)")
@@ -51,7 +79,9 @@ def read_velocity_frame(path, idx, natoms):
     vel = [list(map(float, lines[s + k].split()[:3])) for k in range(natoms)]
     return np.asarray(vel, dtype=np.float64)
 
+
 def main():
+    """Read the IC frame, build the PySEQM molecule + dynamics, run FSSH, and write the summary record."""
     ap = argparse.ArgumentParser()
     ap.add_argument("--coords", required=True); ap.add_argument("--velocities", required=True)
     ap.add_argument("--idx", type=int, required=True)
@@ -98,6 +128,7 @@ def main():
     Path(a.out_dir).mkdir(parents=True, exist_ok=True)
     (Path(a.out_dir) / f"{a.prefix}.summary.json").write_text(json.dumps(rec, indent=1))
     sys.exit(0 if rec["status"] == "ok" else 1)
+
 
 if __name__ == "__main__":
     main()

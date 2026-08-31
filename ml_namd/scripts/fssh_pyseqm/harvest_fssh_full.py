@@ -14,7 +14,20 @@ Conventions (from plot_enol1ps.py / L-045 / L-047):
   * transition E_j - E_0 (eV), mean over alive
   * adjacent gaps E_{i+1}-E_i (eV): median + IQR over alive
   * aCC = per-frame MAX over backbone C-C bonds (2,3),(2,4),(3,5),(4,6) [0-based]; median over survivors
+
+Inputs (positional argv): h5 glob, output .npz path, picoseconds-per-frame (e.g. 0.002).
+Output: a compact .npz with ensemble arrays (clas, quant, transE, gaps, aCC, frac_alive, death, ...).
+This is the CANONICAL apple-to-apple harvester; kept as a top-level script (no main()) so its md5
+stays stable across the codebase. Behavior is unchanged by this documentation pass.
 """
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import sys, glob, os
 import numpy as np, h5py
 

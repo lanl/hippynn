@@ -16,6 +16,17 @@
 # 8 nodes x 112 = 896 one-FSSH-per-physical-core tasks, ONE job (sidesteps QOSMaxJobsPerUser), qos=long.
 # Resume-safe at trajectory granularity: ns3_1000_worker.sh skips any idx whose log already has REF_DONE
 # (NO intra-trajectory checkpoint — a timed-out job resumes only whole, not-yet-finished trajectories).
+# =============================================================================
+# PURPOSE : KETO 10 ps FSSH@PYSEQM reference (200000 steps @ 0.05 fs). init3, n_states=3,
+#           hamiltonian_fd + decohere, 1000 Vishikh ICs, 8 nodes x 112 = 896 one-FSSH-per-core, ONE job.
+# INPUTS  : none (all vars hard-set below); identical METHOD to the enol ns3-1000 reference, keto coords.
+# OUTPUTS : per-trajectory h5 under $OUTDIR; per-IC .log under $LOGDIR; claim files under $CLAIMDIR;
+#           KETO_NS3_10PS_DONE tally. Resume-safe at trajectory granularity (REF_DONE trajs skipped).
+# CONFIG  : user-tunable = the #SBATCH block above + the fixed vars below. $B = confirmed Darwin root.
+# DEPENDS : $B/keto_worker_dynamic.sh + run_fssh_ref.py (worker NOT vendored here; on the cluster $B).
+#           Progress monitor: $B/venv_master/bin/python $B/ref_progress.py (printed at runtime).
+# Developer: Ajay Khanna | LANL/Sergei Lab | Sep-01-2026 | ml_namd
+# =============================================================================
 set -o pipefail
 FORM=keto; TDC=hamiltonian_fd; INIT=3; NSTATES=3; NIC=1000; START=0; NSTEPS=200000
 export B=/vast/home/akhanna2/data/ml_project/ml_namd_project/fssh_ref_updated
