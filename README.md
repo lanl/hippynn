@@ -97,7 +97,8 @@ Machine-specific paths in example commands are the confirmed cluster locations; 
 | `ml_namd/docs/fssh_pyseqm_guide.md` | ✅ | the reference driver + apple-to-apple harvest |
 | `ml_namd/docs/slurm_job_guide.md` | ✅ | submitting + monitoring every stage |
 | `ml_namd/docs/installation_and_environment.md` | ✅ | end-to-end environment setup (step-by-step recreate + verify + troubleshooting) |
-| Validation report, inference benchmark report | planned | accuracy + throughput evidence |
+| `ml_namd/docs/validation_report.md` | ✅ | accuracy: Model A parity, NVE conservation, FSSH@MLIP vs reference (enol validated, keto open) |
+| Inference benchmark report | planned | throughput evidence |
 | `ml_namd/docs/migration_refactoring_changelog.md` | ✅ | what changed during packaging + refactor |
 | Known limitations | planned | open issues + unresolved questions |
 
