@@ -4,7 +4,19 @@ length (state_energies != 0 at final frame) AND (b) contain NO NaN in the electr
 amplitude norm at any alive frame. Reports per-source counts + every excluded NaN traj.
 Classical = active-surface fraction; quantum = mean excited |c|^2 (renormalised).
 Usage: harvest_clean.py <pspf> <label> <glob> <out.npz>
+
+Inputs (positional argv): picoseconds-per-frame, a label, the h5 glob, the output .npz path.
+Output: .npz with constant-N clean-survivor classical/quantum populations + exclusion counts.
+Kept as a top-level script (no main()) for md5 stability; this pass is documentation only.
 """
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import sys, glob, numpy as np, h5py
 PSPF = float(sys.argv[1]); LABEL = sys.argv[2]; GLOB = sys.argv[3]; OUT = sys.argv[4]
 fs = sorted(f for f in glob.glob(GLOB) if f.endswith(".h5"))

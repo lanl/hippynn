@@ -12,6 +12,15 @@
 # SMOKE: keto FSSH@MLIP on Chicoma venv_master (e273f6d GPU). Validate BOTH driver paths
 # (joint + composed) load the keto BALF models under the FIXED driver, propagate, write h5,
 # fire hops, and produce NO amplitude NaN. COUNT=5 IC, 500 steps each. init3, S0-S3, dt=0.05.
+# =============================================================================
+# PURPOSE : SMOKE for keto FSSH@MLIP. Validate BOTH driver paths (joint + composed) load the keto BALF
+#           models under the fixed driver, propagate, write h5, fire hops, and produce NO amplitude NaN.
+# INPUTS  : keto BALF models under bg_ladder_keto/nf145; ICs under ics/. COUNT=5, 500 steps, init3, S0-S3.
+# OUTPUTS : a few h5 under a smoke dir; PASS = rc0 + h5 written + NaN=0; logs in the #SBATCH paths.
+# CONFIG  : #SBATCH block above (Chicoma gpu_debug, 1 GPU, 20 min); venv_master activated in the body.
+# DEPENDS : ../fssh_mlip/ driver (namd_batch.py + namd_composed_batch.py) + venv_master.
+# Developer: Ajay Khanna | LANL/Sergei Lab | Sep-01-2026 | ml_namd
+# =============================================================================
 set -o pipefail
 RUN=/lustre/scratch5/akhanna2/keto_mlip_10ps
 DRV=$RUN/driver; PY=/usr/projects/ml4chem/akhanna2/venv_master/bin/python

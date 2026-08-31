@@ -12,6 +12,16 @@
 # SMOKE: S0-S3 3-pair composed FSSH, TIER-1 JOINT Model B (joint per-state phase loss).
 # Verify the joint Model B loads clean (experiment_structure.pt references joint loss node ->
 # must NOT break inference load), no KeyError/NaN, hops fire. COUNT=5, 500 steps, init3.
+# =============================================================================
+# PURPOSE : SMOKE for the TIER-1 joint Model B. Verify the joint-loss Model B loads clean
+#           (experiment_structure.pt references the joint loss node -> must NOT break inference load),
+#           no KeyError/NaN, hops fire, in the S0-S3 3-pair composed driver.
+# INPUTS  : the keto_s0s5A_3pairB_joint Model B + S0-S5 Model A; COUNT=5, 500 steps, init3.
+# OUTPUTS : a few h5; PASS = clean load + rc0 + NaN=0; logs in the #SBATCH paths.
+# CONFIG  : #SBATCH block above (Chicoma gpu_debug, 1 GPU, 20 min); venv_master activated in the body.
+# DEPENDS : ../fssh_mlip/ driver + the joint loss node module (joint_state_nacr_loss.py must be importable).
+# Developer: Ajay Khanna | LANL/Sergei Lab | Sep-01-2026 | ml_namd
+# =============================================================================
 set -o pipefail
 RUN=/lustre/scratch5/akhanna2/keto_mlip_10ps
 DRV=$RUN/driver; IC=$RUN/ics; PY=/usr/projects/ml4chem/akhanna2/venv_master/bin/python

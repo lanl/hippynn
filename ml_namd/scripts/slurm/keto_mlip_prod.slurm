@@ -15,6 +15,16 @@
 # Params via --export: MODE={joint|comp}, CELL={BALF|GALF}, COUNT (default 125 = OOM-safe max on 40GB),
 #   NIC_TOTAL (default 1000), STARTS (optional colon-list; auto from COUNT/NIC_TOTAL).
 # GPU dispatch: DYNAMIC FIFO work-queue over the node's GPUs (uuid-addressed), self-balancing.
+# =============================================================================
+# PURPOSE : keto FSSH@MLIP production, 10 ps (200000 steps), init3, S0-S3, dt=0.05, on Chicoma (4 GPUs).
+# INPUTS  : --export MODE={joint|comp}, CELL={BALF|GALF}, COUNT (default 125 = OOM-safe max on 40GB),
+#           NIC_TOTAL (default 1000), STARTS (optional). Models under bg_ladder_keto/nf145; ICs under ics/.
+# OUTPUTS : per-trajectory h5 under the run's prod dir; logs in the #SBATCH -o/-e paths.
+# CONFIG  : #SBATCH block above (Chicoma gpu, 4x A100-40GB, exclusive); venv_master activated in the body.
+# DEPENDS : the FSSH@MLIP driver (../fssh_mlip/: namd_batch.py / namd_composed_batch.py + hippynn_fssh*)
+#           and venv_master (master PySEQM e273f6d + torch cu118 + hippynn). FIXED driver: RAW-gap NAC.
+# Developer: Ajay Khanna | LANL/Sergei Lab | Sep-01-2026 | ml_namd
+# =============================================================================
 set -o pipefail
 : ${MODE:?}; : ${CELL:?}
 COUNT=${COUNT:-125}; NIC_TOTAL=${NIC_TOTAL:-1000}   # 125 = OOM-safe max (joint OOMs at 250 on 40GB)

@@ -15,6 +15,15 @@
 # venv_master = master PySEQM e273f6d. FIXED driver: nac = dENACR/(E_j-E_i) RAW gap NO floor;
 # tdc_method=nac_dot_v; decohere_on_hop=True (SAME as the previous keto FSSH@MLIP run).
 # Params via --export: MODE={joint|comp}, CELL={BALF|GALF}, COUNT (default 125), NIC_TOTAL (default 1000).
+# =============================================================================
+# PURPOSE : keto FSSH@MLIP production with the S0-S5 models: Model A = S0-S5 (bg10p), Model B = 3-pair
+#           (keto_s0s5A_3pairB). S0-S3, init3, dt=0.05, 10 ps (200000 steps), Chicoma (4 GPUs).
+# INPUTS  : --export MODE={joint|comp}, CELL={BALF|GALF}, COUNT (default 125), NIC_TOTAL (default 1000).
+# OUTPUTS : per-trajectory h5 under the run's prod_s0s5A dir; logs in the #SBATCH -o/-e paths.
+# CONFIG  : #SBATCH block above (Chicoma gpu/gpu40, 4 GPUs, exclusive); venv_master activated in the body.
+# DEPENDS : ../fssh_mlip/ driver + venv_master (master PySEQM e273f6d). FIXED driver (RAW-gap NAC, nac_dot_v).
+# Developer: Ajay Khanna | LANL/Sergei Lab | Sep-01-2026 | ml_namd
+# =============================================================================
 set -o pipefail
 : ${MODE:?}; : ${CELL:?}
 COUNT=${COUNT:-125}; NIC_TOTAL=${NIC_TOTAL:-1000}

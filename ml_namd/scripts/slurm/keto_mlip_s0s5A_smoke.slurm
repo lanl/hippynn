@@ -13,6 +13,15 @@
 #   composed: S0-S5 Model A (bg10p) + 3-pair Model B (keto_s0s5A_3pairB) -> does predictor select S0-S3?
 #   joint:    S0-S5 E/F + 3-pair NACR joint -> same selection check.
 # COUNT=5 IC, 500 steps, init3, states 0,1,2,3, pairs 12,13,23. Pass = rc0 + h5 + NaN=0.
+# =============================================================================
+# PURPOSE : SMOKE for the S0-S5-model FSSH wiring BEFORE the big run. Checks the composed (S0-S5 Model A
+#           + 3-pair Model B) and joint paths correctly select S0-S3 in the driver.
+# INPUTS  : the keto_s0s5A models; COUNT=5, 500 steps, init3, states 0,1,2,3, pairs 12,13,23.
+# OUTPUTS : a few h5; PASS = rc0 + h5 written + NaN=0; logs in the #SBATCH paths.
+# CONFIG  : #SBATCH block above (Chicoma gpu_debug, 1 GPU, 20 min); venv_master activated in the body.
+# DEPENDS : ../fssh_mlip/ driver + venv_master.
+# Developer: Ajay Khanna | LANL/Sergei Lab | Sep-01-2026 | ml_namd
+# =============================================================================
 set -o pipefail
 RUN=/lustre/scratch5/akhanna2/keto_mlip_10ps
 DRV=$RUN/driver; IC=$RUN/ics; PY=/usr/projects/ml4chem/akhanna2/venv_master/bin/python

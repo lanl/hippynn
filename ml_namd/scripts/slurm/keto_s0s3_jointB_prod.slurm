@@ -15,6 +15,16 @@
 # (keto_s0s5A_3pairB_joint). Decisive test: does training-time sign-consistency close
 # keto over-relaxation (S1 0.70 -> toward ref 0.52)? Baseline = phaseless Model B.
 # venv_master e273f6d; nac_dot_v + decohere; original 3-pair `driver`.
+# =============================================================================
+# PURPOSE : TIER-1 decisive keto FSSH@MLIP, S0-S3, init3, 10 ps. COMPOSED Model A (S0-S5 bg10p) +
+#           3-pair JOINT-loss Model B (keto_s0s5A_3pairB_joint). Tests whether training-time
+#           sign-consistency closes keto over-relaxation (S1 ~0.70 -> toward ref 0.52); baseline = phaseless B.
+# INPUTS  : --export MODE/CELL/COUNT/NIC_TOTAL (as the other keto FSSH@MLIP prod slurms).
+# OUTPUTS : per-trajectory h5 under prod_s0s3_jointB; logs in the #SBATCH -o/-e paths.
+# CONFIG  : #SBATCH block above (Chicoma gpu/gpu40, 4 GPUs, exclusive); venv_master activated in the body.
+# DEPENDS : ../fssh_mlip/ driver (3-pair `driver`, composed A+B) + venv_master (e273f6d).
+# Developer: Ajay Khanna | LANL/Sergei Lab | Sep-01-2026 | ml_namd
+# =============================================================================
 set -o pipefail
 : ${CELL:?}
 COUNT=${COUNT:-125}; NIC_TOTAL=${NIC_TOTAL:-1000}
