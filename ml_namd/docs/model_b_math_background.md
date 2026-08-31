@@ -150,7 +150,7 @@ better of the two signs:
 ```math
 \ell^{\text{phaseless}}_{ij}  =  \frac{\mathrm{RMSE}_{ij}}{\sqrt{3 n_\text{at}}} + \mathrm{MAE}_{ij},
 \qquad
-\mathrm{err}_{ij}  =  \min_{\sigma \in \{+1,-1\}} \big\lVert  \mathbf{D}^{\text{ML}}_{ij} - \sigma  \mathbf{D}^{\text{QC}}_{ij}  \big\rVert,
+\mathrm{err}_{ij}  =  \min_{\sigma \in \{+1,-1\}} \lVert  \mathbf{D}^{\text{ML}}_{ij} - \sigma  \mathbf{D}^{\text{QC}}_{ij}  \rVert,
 ```
 
 with the per-sample sign chosen from the 45-vector norm (hippynn `MSEPhaseLoss` / `MAEPhaseLoss`).
@@ -163,7 +163,7 @@ pair-scramble survives into the dynamics.
 **Joint per-state phase loss (sign-consistent).** Enforce a single global gauge shared by all pairs:
 
 ```math
-\mathcal{L}^{\text{joint}}  =  \frac{1}{n_\text{pairs}}  \mathbb{E}_\text{batch}[  \min_{\{ s_k \in \{\pm 1\},\ s_1 = +1 \}} \sum_{i < j} \big\lVert  \mathbf{D}^{\text{ML}}_{ij} - s_i s_j  \mathbf{D}^{\text{QC}}_{ij}  \big\rVert^2  ].
+\mathcal{L}^{\text{joint}}  =  \frac{1}{n_\text{pairs}}  \mathbb{E}_\text{batch}[  \min_{\{ s_k \in \{\pm 1\},\ s_1 = +1 \}} \sum_{i < j} \lVert  \mathbf{D}^{\text{ML}}_{ij} - s_i s_j  \mathbf{D}^{\text{QC}}_{ij}  \rVert^2  ].
 ```
 
 The bilinear factor $s_i s_j$ ties every pair to one of $2^{ n_\text{exc}-1}$ candidate per-state
