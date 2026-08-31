@@ -26,6 +26,13 @@ LANL / Triad National Security, LLC.
 """
 from __future__ import annotations
 
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import numpy as np
 
 from hiphop_predictor_v3 import HiphopPredictorV3, build_gdv_from_forces, N_ATOMS

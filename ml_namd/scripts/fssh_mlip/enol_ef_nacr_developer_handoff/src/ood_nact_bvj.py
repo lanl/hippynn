@@ -6,6 +6,13 @@ Recipe: dENACR -> d_ij = dENACR_ij/gap_ij -> nact = (d.V); |r| = corr(|nact_mlip
 JOINT (v3) supplies its own gap (gap_source='self'); Model B rides frozen A's gap (composed A->B).
 CHUNKED predict (forces build a create_graph autodiff graph -> OOM if all geoms at once).
 """
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
 import os, sys, glob, argparse
 os.environ["HIPPYNN_USE_CUSTOM_KERNELS"] = "False"
 import numpy as np, torch, h5py

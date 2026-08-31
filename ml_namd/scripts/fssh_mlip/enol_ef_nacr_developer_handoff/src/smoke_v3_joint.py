@@ -9,6 +9,13 @@ result -- the JOINT OOD path.
 
 Run on Chicoma (CPU login node OK; small subset). NOT a paper result.
 """
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
 import os, sys, argparse
 os.environ["HIPPYNN_USE_CUSTOM_KERNELS"] = "False"
 os.environ.setdefault("OMP_NUM_THREADS", "4")

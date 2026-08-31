@@ -75,6 +75,13 @@ Developer: Ajay Khanna <akhanna2@ucmerced.edu>
 LANL / Triad National Security, LLC.  LA-UR-XX-XXXXX
 """
 
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import argparse
 import json
 import os

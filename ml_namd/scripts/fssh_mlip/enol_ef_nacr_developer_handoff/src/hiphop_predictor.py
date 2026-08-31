@@ -53,6 +53,13 @@ LANL / Triad National Security, LLC.  LA-UR-XX-XXXXX
 
 from __future__ import annotations
 
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import os
 from pathlib import Path
 

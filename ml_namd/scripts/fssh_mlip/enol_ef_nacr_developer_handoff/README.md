@@ -26,5 +26,15 @@ instead of vendoring copies here, then remove the duplicated training modules fr
 then, treat `../../training/` as canonical and this bundle as a runtime vendoring.
 
 Provenance: `/lustre/scratch5/akhanna2/keto_mlip_10ps/driver/enol_ef_nacr_developer_handoff/src/`,
-pulled 2026-08-30 (13 .py files). These predictor modules are NOT yet refactored (Phase 2 covered the
-driver scripts in `../`); refactoring them additively is a candidate next step.
+pulled 2026-08-30 (13 .py files).
+
+Refactor status: the 9 predictor-specific modules (`hiphop_predictor`, `hiphop_predictor_v3`,
+`modelb_composed_predictor`, `multistate_ef_inference_hiphop`, `multistate_ef_nacr_inference_hiphop`,
+`generate_gdv_data`, `iid_nact_rval`, `ood_nact_bvj`, `smoke_v3_joint`) were given the standard
+developer-header dunder block, verified AST-EQUIVALENT to their originals (logic unchanged). The four
+training-module copies here (`unified_training.py`, `direct_nacr_head.py`, `_v2.py`, `_v3.py`) are
+**left verbatim on purpose**: they are the older functional versions the runtime pickle was built
+against (e.g. this `unified_training.py` is 2702 lines vs the refactored 2861-line canonical in
+`../../training/`), so they must not be altered. Use `../../training/` as the canonical, refactored
+source; these copies exist only so the FSSH runtime resolves its pickled references exactly as on the
+cluster.

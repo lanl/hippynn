@@ -10,6 +10,13 @@ velocity for S1-S3 test rows comes from nact_work/acn_V_{t}_s{k}.npy[row - k*100
 run_nact_all-validated). true NACT = (dENACR_oracle/GAP_oracle . V); pred NACT = (dENACR_pred/gap_pred . V).
 The C=2.41888425e-5 scale cancels in the correlation, so it is omitted.
 """
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
 import os, sys, argparse
 os.environ["HIPPYNN_USE_CUSTOM_KERNELS"] = "False"
 import numpy as np, torch
