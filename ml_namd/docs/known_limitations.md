@@ -61,12 +61,13 @@ is discussed. This is a living list; resolved items should be moved to the chang
     README) and the `scripts/fssh_pyseqm/` duplicates were removed; both drivers reference the analysis
     copies. See the changelog.
 
-12. **Raw initial-condition md5s not pinned** (drive-absent close-out staged). The 1000-IC enol `R0/V0/Z`
-    files that seed both FSSH streams now have a dedicated Section 4 in `data_manifests/DATA_MANIFEST.md`
-    with the exact expected laptop path, shapes/dtypes, the shared `422 + idx` seed, and the literal
-    `Get-FileHash` command. The md5 cells read `PENDING (drive absent)`: the canonical copies live only
-    on the external `D:` drive (not mounted at 2026-08-31) and the clusters, with no copy on `C:`. Mount
-    `D:` and run the staged command to replace the three PENDING cells.
+12. **Raw launch ICs are cluster-only; reference survivor arrays md5-pinned** (resolved 2026-08-31 with
+    `D:` mounted). A full-drive search confirmed the 1000-IC enol `R0/V0/Z` launch arrays are **not**
+    mirrored to the laptop (no `R0.npy`/`V0.npy`/`enol1ps_*`, no `ics_matched/` dir on `D:`, none on
+    `C:`); they live only on the clusters, so `data_manifests/DATA_MANIFEST.md` §4 now records that plus
+    the cluster-side `md5sum` command. What **is** on `D:` — the reference survivor arrays (§3) — was
+    md5-pinned (Python `hashlib.md5`; the laptop's FIPS policy blocks .NET MD5). Only the cluster-side
+    launch-IC md5s remain, and they must be taken on the cluster, not the laptop.
 
 ## Engineering / environment
 

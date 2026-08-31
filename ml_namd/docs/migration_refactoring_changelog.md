@@ -128,6 +128,8 @@ access, not on further authoring.
   `../env/README.md` under "Pending capture".
 - Capture the GPU driver version on a compute node (env records were login-node only) — one-shot
   `nvidia-smi` command staged in `../env/README.md` under "Pending capture".
-- Record the raw 1000-IC `R0/V0/Z` md5s — Section 4 of `data_manifests/DATA_MANIFEST.md` now holds the
-  expected path, shapes, and the literal `Get-FileHash` command; cells read `PENDING (drive absent)`
-  until `D:` is mounted.
+- Record the raw 1000-IC `R0/V0/Z` md5s — **resolved 2026-08-31 (`D:` mounted).** A full-drive search
+  found the launch ICs are cluster-only (not on `D:` or `C:`); `data_manifests/DATA_MANIFEST.md` §4 now
+  records that with the cluster-side `md5sum` command, and §3 md5-pins the reference survivor arrays that
+  do live on `D:` (Python `hashlib.md5`; the laptop's FIPS policy blocks .NET MD5). Only the cluster-side
+  launch-IC hashes remain, to be taken on the cluster.

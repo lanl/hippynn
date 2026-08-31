@@ -57,6 +57,22 @@ Model-B pool (`BALF/pool_s0s3/`) key arrays:
   - `enol_init3_hfd_decohere/` — **1000** per-trajectory h5 files `enol_s3hfd_i{0000..0999}.0.h5`.
   - survivor extraction (`*_survivors_*.npy`): `R` (777, 501, 15, 3) f32, `Z` (15,) i16, `ic_index` (777,) i32, `has_nan` (777,) bool, `n_surv`/`NF`/`meta` scalars → **777 of 1000 ICs survive 1 ps**.
 - **Origin:** Darwin `/vast/home/akhanna2/data/ml_project/ml_namd_project/fssh_ref_updated/` (venv_master, PySEQM master). Compared as a strict n3 view (N = 775) against keto in the apple-to-apple analysis.
+- **Embedded provenance (`meta`):** `enol_n4_hfd_init3_dt0.05_1ps | FSSH@PySEQM reference | survivors-only (alive at final frame) | R=coords(Angstrom) full trajectory | Z=atomic numbers | NF=501 natoms=15 | float32`.
+
+Survivor-array md5 `[verified: python hashlib.md5 @ 2026-08-31, D: mounted]` (species order `[8,8,6,6,6,6,6,1×8]`):
+
+| File | Bytes | Shape / dtype | md5 |
+|---|---|---|---|
+| `enol_init3hfd_survivors_R.npy` | 70069988 | (777, 501, 15, 3) float32 | `e78c8e318cca477ab8883bbfcb6c1e5d` |
+| `enol_init3hfd_survivors_RZ.npz` | 65075254 | R (777,501,15,3) f32; Z (15,) i16; ic_index (777,) i32; has_nan (777,) bool; NF/n_surv i32; meta \<U177 | `b2945fce3396f8bcbab51046df9e9986` |
+| `enol_init3hfd_survivors_Z.npy` | 158 | (15,) int16 | `6b33e3442479abb0e8c6a65104975611` |
+| `enol_init3hfd_survivors_ic_index.npy` | 3236 | (777,) int32 | `e373849a7c767907a63e927918f9e412` |
+| `enol_init3hfd_survivors_has_nan.npy` | 905 | (777,) bool | `fa7e6b38154cff896df60ec551e2b0cc` |
+| `enol_init3hfd_survivors_n_surv.npy` | 132 | () int32 | `c7ea3c10f1785e42b6d3f0e678cff586` |
+| `enol_init3hfd_survivors_NF.npy` | 132 | () int32 | `8a372e837a26b46c26554e4f4a62d673` |
+| `enol_init3hfd_survivors_meta.npy` | 836 | () \<U177 | `60f4ff3655eb9a4acac00b1f4457d8f3` |
+
+(This laptop enforces FIPS, so `Get-FileHash -Algorithm MD5` is blocked in .NET; these were computed with Python `hashlib.md5`. Use `Get-FileHash -Algorithm SHA256` or `python -c "import hashlib,sys;print(hashlib.md5(open(sys.argv[1],'rb').read()).hexdigest())"` on this host.)
 
 Per-trajectory h5 schema (501 frames = 1 ps, 4 states S0–S3):
 
@@ -75,32 +91,22 @@ Per-trajectory h5 schema (501 frames = 1 ps, 4 states S0–S3):
 
 ## 4. Raw launch initial conditions — matched 1000-IC enol (R0 / V0 / Z)
 - **Purpose:** the raw per-IC arrays that launch *both* FSSH streams so the two share identical starting points. The MLIP driver (`namd_composed_batch.py`) reads them directly as `--coords-npy R0 --vel-npy V0 --z-npy Z`; the FSSH@PYSEQM reference consumes the same ICs in `coords.xyz` + NEXMD `velocity.out` form (`run_fssh_ref.py`), with the raw `velocity.out` divided by 1000 (`VEL_DIV`, see `fssh_pyseqm_guide.md`).
-- **Expected location (laptop, canonical):** `D:/ml_namd_project/fssh_ref/enol_init3_hfd_1ps_darwin/ics_matched/enol1ps_{R0,V0,Z}.npy`.
-- **Cluster origin:** Darwin `/vast/home/akhanna2/data/ml_project/ml_namd_project/fssh_ref_updated/ics/sampled_enol/` (xyz/velocity form for the reference) and the matched `ics_matched/` npy form.
-- **Expected shapes/dtypes** (per the 15-atom AcAc convention; 1000 ICs): `R0` (1000, 15, 3) f64 [Å], `V0` (1000, 15, 3) f64, `Z` (15,) or (1000, 15) int, species order `[8,8,6,6,6,6,6,1×8]`. Seed per index = `422 + idx` (shared by both FSSH streams).
+- **Location — cluster-only.** `[verified: full-drive search @ 2026-08-31, D: mounted]` The raw launch ICs are **not mirrored to the laptop**. A recursive search of `D:/ml_namd_project` for `R0.npy`, `V0.npy`, and `enol1ps_{R0,V0,Z}.npy` returned nothing, and there is no `ics_matched/` directory; D: holds only the reference **outputs** (per-trajectory h5 + `.xyz`) and the survivor arrays of Section 3. No copy on C: either. The launch ICs live on the clusters: Darwin `/vast/home/akhanna2/data/ml_project/ml_namd_project/fssh_ref_updated/ics/sampled_enol/{coords.xyz,velocity.out}` (xyz/velocity form for the reference); the matched R0/V0/Z npy form is on the run cluster next to the MLIP FSSH job.
+- **Convention:** species order `[8,8,6,6,6,6,6,1×8]` (confirmed from the survivor `Z`); per-index seed `422 + idx`, shared by both FSSH streams. The survivor `R[:, 0]` (Section 3) is the launch geometry for the 777 survivors, but the full 1000-IC launch set (all ICs, plus velocities) exists only on the clusters.
+- **md5 status:** `[cluster-only — not resolvable from the laptop]`. Pin the three md5s on the cluster that holds the matched npy (Linux):
 
-| Array | Expected shape | Dtype | md5 |
-|---|---|---|---|
-| `enol1ps_R0.npy` | (1000, 15, 3) | float64 | PENDING (drive absent) |
-| `enol1ps_V0.npy` | (1000, 15, 3) | float64 | PENDING (drive absent) |
-| `enol1ps_Z.npy` | (15,) / (1000, 15) | int | PENDING (drive absent) |
-
-**md5 status:** `[UNVERIFIED — external drive D: not mounted at 2026-08-31 profiling]`. The canonical
-copies live only on D: (absent) and the clusters; no copy exists on C:. When D: is mounted, pin the
-three md5s (PowerShell):
-
-```powershell
-Get-FileHash -Algorithm MD5 D:\ml_namd_project\fssh_ref\enol_init3_hfd_1ps_darwin\ics_matched\enol1ps_R0.npy,`
-  D:\ml_namd_project\fssh_ref\enol_init3_hfd_1ps_darwin\ics_matched\enol1ps_V0.npy,`
-  D:\ml_namd_project\fssh_ref\enol_init3_hfd_1ps_darwin\ics_matched\enol1ps_Z.npy | Format-Table Hash,Path
+```bash
+md5sum <run_root>/enol1ps_R0.npy <run_root>/enol1ps_V0.npy <run_root>/enol1ps_Z.npy
+# reference xyz/velocity form (Darwin $B/ics/sampled_enol/):
+md5sum $B/ics/sampled_enol/coords.xyz $B/ics/sampled_enol/velocity.out
 ```
 
-Confirm the path (the `ics_matched/` subdir is the expected mirror of the cluster `ics/` set; verify it
-exists on the mounted drive) and the shapes above before recording, then replace each `PENDING` cell.
+Record the resulting hashes here once run; there is nothing further to capture from D:.
 
 ---
 
 ## Notes and open items
 - The reference h5 store transition dipoles / oscillator strengths are **not** saved (only `ground_dipole`); recover via single-point CIS on saved geometries if needed.
-- md5 checksums are intentionally omitted for the multi-GB training arrays (Sections 1–2); the small IC files (Section 4) carry md5 once D: is mounted and the arrays are pinned.
+- md5 checksums are intentionally omitted for the multi-GB training arrays (Sections 1–2); the reference **survivor** arrays (Section 3) are md5-pinned (verified 2026-08-31). The raw **launch** ICs (Section 4) are cluster-only, so their md5s are pinned on the cluster, not the laptop.
 - Survivor-extraction arrays for the reference (Section 3) are the 777-of-1000 subset; the raw launch ICs (Section 4) are the full 1000 before any survival filtering.
+- FIPS note: this laptop blocks .NET MD5 (`Get-FileHash -Algorithm MD5` errors); use `Get-FileHash -Algorithm SHA256` or Python `hashlib.md5` locally.
