@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
-"""Generate NVE start geometries (enol/keto) from GS S0 acn_R frame, in acn_Z order."""
+"""Generate NVE start geometries (enol/keto) from the GS S0 acn_R frame, in acn_Z order.
+
+Reads frame ``FRAME`` of each tautomer's S0 ``acn_R``/``acn_Z`` and writes ``geom/<t>_s0_start.xyz``.
+Paths are the confirmed Chicoma locations. Top-level script (no main()); documentation-only refactor.
+"""
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import numpy as np, os
 SYM = {1: "H", 6: "C", 8: "O"}
 GEOM = "/lustre/scratch5/akhanna2/ml_namd_project/experiments/nve_md/geom"

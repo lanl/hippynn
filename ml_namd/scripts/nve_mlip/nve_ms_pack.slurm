@@ -15,6 +15,16 @@
 #   Phase 1: geomeTRIC-optimize S1/S2/S3 onto their PES (6 quick jobs) -> geom/{t}_s{k}_opt.xyz
 #   Phase 2: NVE 100 ps for S0-S3 x {enol,keto} (8 jobs), 4 GPUs, 4-at-a-time.
 # PREREQ: geomeTRIC installed in mlip_md_dyn (pip install geometric).
+# =============================================================================
+# PURPOSE : per-dynamics MULTISTATE S0-S3 NVE 100 ps, both tautomers, on Chicoma (4 GPUs).
+#           Phase 1: geomeTRIC-optimize S1/S2/S3 onto their PES (6 jobs). Phase 2: NVE 100 ps for
+#           S0-S3 x {enol,keto} (8 jobs), 4-at-a-time.
+# INPUTS  : the inputs_ms/ .input files (from make_nve_inputs.py) + start geometries + models under $ND.
+# OUTPUTS : per-cell h5/xyz + optimized geoms; logs in the #SBATCH output/error paths.
+# CONFIG  : #SBATCH block above (Chicoma gpu/gpu40, 4 GPUs); conda env mlip_md_dyn activated below.
+# DEPENDS : pyseqm_hippynn_md.py + pyseqm_hippynn_optimize.py (this dir); geomeTRIC in mlip_md_dyn.
+# Developer: Ajay Khanna | LANL/Sergei Lab | Sep-01-2026 | ml_namd
+# =============================================================================
 set -o pipefail
 CONDA_SH=/usr/projects/hpcsoft/common/x86_64/anaconda/2023.03-python-3.10/etc/profile.d/conda.sh
 source "$CONDA_SH"; conda activate /usr/projects/ml4chem/akhanna2/conda_envs/mlip_md_dyn

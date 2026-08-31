@@ -20,6 +20,14 @@ microcanonical, traj every 200 steps, log every 100, seed 42.
 Writes into  <nve_md>/inputs_ms/  (non-destructive; leaves the old single_state
 *_nve.input files untouched).
 """
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import os
 
 EXP = "/lustre/scratch5/akhanna2/ml_namd_project/experiments"

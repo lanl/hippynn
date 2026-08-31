@@ -14,6 +14,15 @@
 # INPUT-FILE DRIVEN (per-run-inp-config-policy): every step is `-i <file>` with NO CLI overrides,
 # for exact reproducibility. Per cell: [optimize (excited)] -> NVE 100 ps -> drift + integrity.
 # 4 GPUs, 4 cells at a time. Submit twice (TAUT=enol, keto). Inputs from make_prod_inputs.py.
+# =============================================================================
+# PURPOSE : 100 ps PRODUCTION NVE grid for one tautomer (TAUT env), S0-S3 x {multi, single}.
+#           Fully input-file driven (per-run .inp policy, no CLI overrides) for exact reproducibility.
+# INPUTS  : env TAUT=enol|keto; the inputs_prod/ .input files from make_prod_inputs.py; models under $NDW.
+# OUTPUTS : per-cell NVE h5/xyz + drift + integrity reports under prod/; logs in #SBATCH output/error.
+# CONFIG  : #SBATCH block above (Chicoma gpu/gpu40, 4 GPUs); conda env mlip_md_dyn activated below.
+# DEPENDS : pyseqm_hippynn_md.py + pyseqm_hippynn_optimize.py + check_nve_drift.py + analyze_geom_integrity.py.
+# Developer: Ajay Khanna | LANL/Sergei Lab | Sep-01-2026 | ml_namd
+# =============================================================================
 set -o pipefail
 CONDA_SH=/usr/projects/hpcsoft/common/x86_64/anaconda/2023.03-python-3.10/etc/profile.d/conda.sh
 source "$CONDA_SH"; conda activate /usr/projects/ml4chem/akhanna2/conda_envs/mlip_md_dyn

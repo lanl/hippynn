@@ -14,6 +14,15 @@
 # dt-TEST: does timestep 0.1 fs (vs 0.5) remove the multistate energy leak? NVE 10 ps from the
 # SAME S3-optimized minima (reused), both models. If multistate drift -> ~0 it was integrator
 # error; if it stays, it is genuine PES roughness.
+# =============================================================================
+# PURPOSE : dt convergence smoke for NVE@MLIP. 10 ps NVE at dt=0.1 fs from the SAME S3-optimized
+#           minima, both models, to decide whether the multistate energy leak is integrator error.
+# INPUTS  : the S3-optimized start .xyz + trained models under $ND (Chicoma nve_md dir).
+# OUTPUTS : per-run h5/xyz + drift check under the smoke dir; logs in the #SBATCH output/error paths.
+# CONFIG  : #SBATCH block above (Chicoma gpu/gpu40, 1 GPU); conda env mlip_md_dyn activated below.
+# DEPENDS : pyseqm_hippynn_md.py + check_nve_drift.py (this dir); paths are the confirmed Chicoma env.
+# Developer: Ajay Khanna | LANL/Sergei Lab | Sep-01-2026 | ml_namd
+# =============================================================================
 set -o pipefail
 CONDA_SH=/usr/projects/hpcsoft/common/x86_64/anaconda/2023.03-python-3.10/etc/profile.d/conda.sh
 source "$CONDA_SH"; conda activate /usr/projects/ml4chem/akhanna2/conda_envs/mlip_md_dyn

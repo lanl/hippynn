@@ -43,9 +43,20 @@ OTHER DEPARTURES FROM THE STOCK SCRIPT
    GradientNode; evaluating under `torch.no_grad()` silently yields zeros.
 7. Custom kernels are disabled (see below) because the graph is cast to float64.
 
-Developer: Ajay Khanna <akhanna2@ucmerced.edu>
-LANL / Triad National Security, LLC.  LA-UR-XX-XXXXX
+Developer Information
+---------------------
+  __developer__: "Ajay Khanna"
+  __place__: "LANL/Sergei Lab"
+  __date__: "Sep-01-2026"
+  __project__: "ml_namd"
 """
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
 
 import argparse
 import os

@@ -23,6 +23,14 @@ Usage:
   python reference_qm_check.py --model-dir <...> --state-index 3 \
      --energy-offset -1391.422970121047 --traj <run>.0.xyz --n-frames 30 [--n-states-cis 10]
 """
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import argparse
 import os
 from pathlib import Path

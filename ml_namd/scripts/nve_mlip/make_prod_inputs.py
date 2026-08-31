@@ -10,6 +10,14 @@ seed 42. S0 -> NVE from the frame-25000 start (no opt); S1-S3 -> optimize onto S
 
 Writes into  <nve_md>/inputs_prod/  :  {t}_s{k}_{m}_opt.input (excited) + {t}_s{k}_{m}_nve.input.
 """
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import os
 
 EXP = "/lustre/scratch5/akhanna2/ml_namd_project/experiments"

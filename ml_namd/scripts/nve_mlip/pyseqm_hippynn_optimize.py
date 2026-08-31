@@ -32,8 +32,21 @@ PREREQ: geomeTRIC must be importable in the run env (mlip_md_dyn):
 INPUT: same .input files as the MD runner (reads `active_state` or `state_index`),
 plus optional --opt-maxsteps. Writes {output_dir}/{output_prefix}_opt.xyz.
 
-Developer: staged for review (do not run yet).
+Developer Information
+---------------------
+  __developer__: "Ajay Khanna"
+  __place__: "LANL/Sergei Lab"
+  __date__: "Sep-01-2026"
+  __project__: "ml_namd"
 """
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import argparse
 import os
 from pathlib import Path

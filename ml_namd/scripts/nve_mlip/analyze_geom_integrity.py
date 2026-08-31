@@ -6,6 +6,14 @@ nearest-neighbor distance (an atom detaching = fragmentation), and the molecular
 extent. Also tracks per-frame nearest-neighbor bond stats vs frame 0 so rearrangement
 (a bond that stretches far or a new close contact) shows up. numpy only.
 """
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
+
 import sys
 import numpy as np
 

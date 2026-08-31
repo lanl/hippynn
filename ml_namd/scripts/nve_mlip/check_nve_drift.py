@@ -12,9 +12,20 @@ The HDF5 stores `data/thermo/{Ep,Ek,T}` as float64.
 PASS (Phase 4): max |Etot(t) - Etot(0)| < 1 meV/atom (= 15 meV for this molecule),
 with no monotonic trend. Drift rate also reported in meV/ps.
 
-Developer: Ajay Khanna <akhanna2@ucmerced.edu>
-LANL / Triad National Security, LLC.  LA-UR-XX-XXXXX
+Developer Information
+---------------------
+  __developer__: "Ajay Khanna"
+  __place__: "LANL/Sergei Lab"
+  __date__: "Sep-01-2026"
+  __project__: "ml_namd"
 """
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
 
 import argparse
 import sys
