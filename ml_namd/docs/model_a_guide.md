@@ -20,13 +20,13 @@ output model directory, `$PY` = the project Python (`../env/README.md`).
 
 For each frame it emits, per state $k\in\{0,\dots,5\}$:
 
-- $E_k$ — the adiabatic state energy. Trained on the **shifted** energy $sE_k = E_k^\text{raw} - E_0^\text{opt}$,
+- `E_k` — the adiabatic state energy. Trained on the **shifted** energy $sE_k = E_k^\text{raw} - E_0^\text{opt}$,
   with $E_0^\text{opt}(\text{enol}) = -1391.422970121047$ and $E_0^\text{opt}(\text{keto}) = -1391.451136550848$ eV.
-- $\mathbf{F}_k = -\nabla_{\mathbf{R}} E_k$ — the state force, obtained by autodifferentiation of $E_k$
+- $\mathbf{F}_k = -\nabla_{\mathbf{R}} E_k$ — the state force, obtained by autodifferentiation of `E_k`
   (a HIPPYNN `GradientNode`, sign $-1$).
 
-Derived at inference without extra network cost: gaps $E_j-E_i$ (subtractions) and gradient-difference
-vectors $\mathbf{F}_i-\mathbf{F}_j$ (subtractions) — the inputs Model B needs.
+Derived at inference without extra network cost: gaps `E_j − E_i` (subtractions) and gradient-difference
+vectors `F_i − F_j` (subtractions) — the inputs Model B needs.
 
 ## 2. Data contract
 
@@ -34,10 +34,10 @@ Per-frame `acn_` arrays in `data_dir`:
 
 | Array | Role | Shape | Dtype |
 |---|---|---|---|
-| `acn_R` | positions [Å] | $(N, n_\text{at}, 3)$ | float64 |
-| `acn_Z` | species | $(N, n_\text{at})$ | int64 |
-| `acn_sE0 … acn_sE5` | **target** state energies (shifted) [eV] | $(N,)$ | float64 |
-| `acn_F0 … acn_F5` | **target** state forces [eV/Å] | $(N, n_\text{at}, 3)$ | float64 |
+| `acn_R` | positions [Å] | `(N, n_at, 3)` | float64 |
+| `acn_Z` | species | `(N, n_at)` | int64 |
+| `acn_sE0 … acn_sE5` | **target** state energies (shifted) [eV] | `(N,)` | float64 |
+| `acn_F0 … acn_F5` | **target** state forces [eV/Å] | `(N, n_at, 3)` | float64 |
 
 Atom order in `acn_Z` is fixed: `[8, 8, 6, 6, 6, 6, 6, 1×8]` (2 O, 5 C, 8 H). The S0-dynamics dataset
 carries the full S0–S10 payload; Model A uses the S0–S5 subset. Dataset locations and provenance are in

@@ -30,11 +30,11 @@ model (pairs `12, 13, 23`) the required arrays are:
 
 | Array | Role | Shape | Dtype |
 |---|---|---|---|
-| `acn_R` | positions [Å] | $(N, n_\text{at}, 3)$ | float64 |
-| `acn_Z` | species | $(N, n_\text{at})$ | int64 |
-| `acn_dENACR12`, `acn_dENACR13`, `acn_dENACR23` | **targets** (scaled coupling, flattened) | $(N, 45)$ | float64 |
-| `acn_GDV12`, `acn_GDV13`, `acn_GDV23` | **inputs** ($\mathbf{F}_i-\mathbf{F}_j$, flattened) | $(N, 45)$ | float32 |
-| `acn_GAP12`, `acn_GAP13`, `acn_GAP23` | **inputs** ($E_j-E_i$) [eV] | $(N,)$ | float64 |
+| `acn_R` | positions [Å] | `(N, n_at, 3)` | float64 |
+| `acn_Z` | species | `(N, n_at)` | int64 |
+| `acn_dENACR12`, `acn_dENACR13`, `acn_dENACR23` | **targets** (scaled coupling, flattened) | `(N, 45)` | float64 |
+| `acn_GDV12`, `acn_GDV13`, `acn_GDV23` | **inputs** (`F_i − F_j`, flattened) | `(N, 45)` | float32 |
+| `acn_GAP12`, `acn_GAP13`, `acn_GAP23` | **inputs** (`E_j − E_i`) [eV] | `(N,)` | float64 |
 
 Building the pool from extracted E/F/dENACR is done by `../scripts/data_generation/build_bg_pool_enol.py`
 (enol) — it copies R/Z/sE/F/dENACR into a `pool_s0s3/` dir and derives `GDV{ij}=F_i-F_j` and

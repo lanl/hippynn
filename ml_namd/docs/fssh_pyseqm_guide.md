@@ -103,7 +103,7 @@ and `data/excitation/state_energies`. Harvest utilities:
 
 Shared (canonical, in `../scripts/analysis/` — used by both the reference and the MLIP):
 - `harvest_fssh_full.py` — the canonical 6-panel apple-to-apple harvest (survivor-conditional live
-  ensemble; classical = active-surface fraction, quantum = excited $|c|^2$).
+  ensemble; classical = active-surface fraction, quantum = excited $\lvert c\rvert^2$).
 - `harvest_clean.py` — strict clean survivors (excludes any NaN-amplitude trajectory).
 
 Reference-specific (in `../scripts/fssh_pyseqm/`):

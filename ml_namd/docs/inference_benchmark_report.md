@@ -10,9 +10,9 @@ A100 measurements from the campaign; re-measure on your hardware before quoting.
 
 | Quantity | Rate | Per geometry | Notes |
 |---|---|---|---|
-| Energies only ($E_k$) | ~3.3–3.6k geom/s | ~0.28 ms | forward pass only |
-| Energies + forces ($E_k, \mathbf{F}_k$) | ~405 geom/s | ~2.46 ms | forces add an autograd pass, ~9× the energy cost |
-| Gaps $E_j-E_i$, GDV $\mathbf{F}_i-\mathbf{F}_j$ | free | — | subtractions of already-computed quantities |
+| Energies only (`E_k`) | ~3.3–3.6k geom/s | ~0.28 ms | forward pass only |
+| Energies + forces (`E_k, F_k`) | ~405 geom/s | ~2.46 ms | forces add an autograd pass, ~9× the energy cost |
+| Gaps `E_j − E_i`, GDV `F_i − F_j` | free | — | subtractions of already-computed quantities |
 
 Model A carries ~2.6M parameters. The dominant inference cost when forces are required (FSSH and NVE
 both need them) is the force autodifferentiation — roughly 9× the energy-only forward. Because the gaps

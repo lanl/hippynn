@@ -47,7 +47,7 @@ make_start_xyz.py        pull a start geometry (S0 frame, well-sampled)
 - **Start geometry.** `make_start_xyz.py` writes `geom/{t}_s0_start.xyz` from a well-sampled S0-MD frame
   (frame 25000). S0 runs NVE directly from that frame.
 - **Excited-state start (S1–S3).** Starting an excited run from the S0-region frame is wrong; first
-  relax onto the S$_k$ minimum with `pyseqm_hippynn_optimize.py` (geomeTRIC, using the *same*
+  relax onto the $S_k$ minimum with `pyseqm_hippynn_optimize.py` (geomeTRIC, using the *same*
   `HIPPYNN_ESDriver` as the runner so the PES is identical), then run NVE on that surface.
 - **Inputs.** `make_nve_inputs.py` / `make_prod_inputs.py` generate self-contained `.input` files (one
   per cell), so a production step is `-i <file>` with no CLI overrides (reproducibility).
@@ -125,7 +125,7 @@ and a single-timestep "pass" can hide roughness. Always confirm the trend with a
 
 1. Environment: `python ../env/verify_env.py`.
 2. `nve_smoke_dt01.slurm` → the drift check reports ≈ 0 meV/ps at dt = 0.1 fs and no fragmentation.
-3. For an excited state, confirm the optimizer produced a sensible S$_k$ minimum before the NVE.
+3. For an excited state, confirm the optimizer produced a sensible $S_k$ minimum before the NVE.
 
 See also: `model_a_guide.md` (the E+F model), `fssh_mlip_guide.md` (the multistate successor), and the
 best-practices framework the four checks come from.

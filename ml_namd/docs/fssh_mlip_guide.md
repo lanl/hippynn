@@ -22,7 +22,7 @@ Recap (full derivation in the math doc). At each geometry the engine needs, per 
 2. the **scaled coupling** $\mathbf{D}_{ij}$ (dENACR) — from Model B;
 3. the **derivative coupling** $\mathbf{d}_{ij} = \mathbf{D}_{ij}/(E_j-E_i)$, using the **raw** gap;
 4. the **time-derivative coupling** $\sigma_{ij} = \mathbf{d}_{ij}\cdot\mathbf{v}$, which drives the hop
-   probability $g_{a\to b} = \max\!\big(0,\, -2\,\mathrm{Re}(\rho_{ab}\sigma_{ba})\,\Delta t / \rho_{aa}\big)$.
+   probability $g_{a \to b} = \max(0,\ -2\ \mathrm{Re}(\rho_{ab} \sigma_{ba})\ \Delta t / \rho_{aa})$.
 
 Signs are made temporally consistent by a per-state phase match against the previous step before the
 coherences are propagated.
@@ -115,7 +115,7 @@ compact `.npz`, then compare against the FSSH@PYSEQM reference harvested the sam
 timestep, and the survivor conditioning; the reference TDC (`hamiltonian_fd`) differs from the MLIP's
 (`nac_dot_v`) by construction and is validated harmless at the ensemble level.
 
-Classical populations come from `active_surface`; quantum $|c|^2$ from `electronic_amplitudes`
+Classical populations come from `active_surface`; quantum $\lvert c\rvert^2$ from `electronic_amplitudes`
 (excited-only, renormalized, S0 as the norm deficit). See the harvester header for the exact
 conventions.
 
