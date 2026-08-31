@@ -27,15 +27,45 @@ Usage examples:
 
 For more information on HIPPYNN, see:
   - HIPPYNN Documentation: https://hippynn.readthedocs.io/
-  
- Developer Information
----------------
+
+Roles of this script:
+  One config-driven script trains BOTH project models. With ``--train_energies --train_forces``
+  (NACR off) it produces Model A (per-state energies + forces, S0-S5). With
+  ``--train_scaled_nacrs`` it produces Model B (scaled NACR / dENACR for the requested state
+  pairs), whose v3 head consumes Model A's predicted gaps + gradient-difference vectors at inference.
+
+Units and shapes (leading axis = frame index N):
+  positions R [Angstrom] (N, n_atoms, 3); energies sE = E_raw - E0_opt [eV] (N,) per state;
+  forces F [eV/Angstrom] (N, n_atoms, 3) per state; scaled NACR dENACR [flattened] (N, 3*n_atoms)
+  per pair; energy gaps GAP [eV] (N,) per pair; GDV [eV/Angstrom] (N, 3*n_atoms) per pair.
+
+Section map:
+  * Configuration   -- TrainingConfig (dataclass), parse_config_file, parse_state_weights_*,
+                       parse_cli_args, _coerce_config_value, merge_and_resolve, validate_config
+  * State selection -- determine_states
+  * Dataset checks  -- validate_nacr_shapes / gdv_* / gap_* helpers
+  * Graph assembly  -- build_network, build_graph_nodes
+  * Loss assembly   -- build_loss (energy / force / dipole / NACR / L2 blocks)
+  * Plotting        -- DataDumper, build_plotters
+  * Reporting       -- print_pretraining_summary, save_training_summary, print_restart_summary
+  * Orchestration   -- main (parse -> validate -> determine states -> build -> train -> save)
+
+Developer Information
+---------------------
   __developer__: "Ajay Khanna"
-  __place__: "LANL"
-  __date__: "May-01-2026"
+  __place__: "LANL/Sergei Lab"
+  __date__: "Sep-01-2026"
+  __project__: "ml_namd"
 """
 
 from __future__ import annotations
+
+# Developer Information
+# ---------------------
+__developer__ = "Ajay Khanna"
+__place__ = "LANL/Sergei Lab"
+__date__ = "Sep-01-2026"
+__project__ = "ml_namd"
 
 import argparse
 import copy
