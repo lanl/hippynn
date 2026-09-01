@@ -101,6 +101,7 @@ Machine-specific paths in example commands are the confirmed cluster locations; 
 | `ml_namd/docs/inference_benchmark_report.md` | ✅ | throughput + batching/OOM + multi-GPU evidence |
 | `ml_namd/docs/migration_refactoring_changelog.md` | ✅ | what changed during packaging + refactor |
 | `ml_namd/docs/known_limitations.md` | ✅ | open issues + unresolved questions |
+| `ml_namd/example/README.md` | ✅ | runnable enol working example (decoupled A+B): datasets, shipped nf145 models, 100-IC subset, train/FSSH slurms + a no-SLURM local runner |
 
 ## Reproducibility and provenance notes
 

@@ -151,6 +151,42 @@ Darwin path, not committed to git. To rebuild them on a fresh checkout:
   `fssh_pyseqm/` sliced from `.../fssh_ref_updated/ics/sampled_enol/{coords.xyz,velocity.out}`;
   `fssh_mlip/` sliced from `.../fssh_ref_updated/ics_matched/enol1ps_{R0,V0,Z}.npy`.
 
+## Run FSSH@MLIP on your own workstation (no SLURM)
+
+The SLURM scripts above are for the cluster. To run the composed FSSH@MLIP driver directly on a
+workstation or interactive GPU node:
+
+```bash
+PY=/path/to/python ./run_fssh_mlip_local.sh                       # small smoke: 2 ICs, 500 steps
+DATASET=GALF COUNT=100 NSTEPS=20000 PY=/path/to/python ./run_fssh_mlip_local.sh   # full 1 ps, 100 ICs
+```
+
+`run_fssh_mlip_local.sh` calls `scripts/fssh_mlip/namd_composed_batch.py` with no SLURM; it uses the GPU
+if torch sees one and otherwise falls back to CPU (CPU is fine for the 2-IC smoke, slow for the full
+run). `PY` must point to an interpreter with the project stack (hippynn at the pinned commit + master
+PySEQM + torch; see `../env/`).
+
+**To carry FSSH@MLIP to a machine that is not this repo checkout**, build a portable bundle first --
+this dereferences the `scripts/` symlink and packs the driver + predictor bundle + the chosen cell's
+Model A and Model B + the 100 ICs + the local runner into one tarball:
+
+```bash
+DATASET=BALF ./pack_fssh_mlip_example.sh     # -> fssh_mlip_example_BALF.tar.gz (~120 MB)
+```
+
+Copy that tarball to the workstation, `tar xzf` it, build the env, and run `./run_fssh_mlip_local.sh`
+inside the unpacked dir. A plain `git clone` alone is not enough: `models/`, `ics/`, and the `scripts/`
+symlinks are git-ignored and live on the Darwin path, so use the tarball (or `rsync -L` the example dir).
+
+## Access (who can read this path)
+
+The bundle lives under `/usr/projects/ml4chem/akhanna2/...`, readable **only by members of the
+`ml4chem` unix group**: the top-level `/usr/projects/ml4chem` grants no world access, and the model
+checkpoints are group-only (`-rwxrwx---`). Datasets, ICs, scripts, configs, and SLURM files are
+group-readable too, so **an `ml4chem` member has everything needed** (ics, models, scripts, slurm). A
+non-member cannot reach the path at all (group membership is set by the allocation admin, not here) --
+in that case hand them the `pack_fssh_mlip_example.sh` tarball.
+
 ## Notes
 
 - **Decoupled A + B** is the deployed composition: Model A gives E, F, gaps, and gradient-difference
