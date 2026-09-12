@@ -5,8 +5,6 @@ Plain-data type definitions for graph serialization: node/tensor references and 
 from dataclasses import dataclass
 from typing import Literal
 
-from ..graphs.indextypes import IdxType
-
 PROTOCOL_VERSION = 0
 
 
@@ -59,13 +57,13 @@ class TaggedDict[T]:
     _type: Literal["dict"] = "dict"
 
 @dataclass(frozen=True)
-class TaggedIdxType[T]:
+class TaggedIdxType:
     values: str
     _type: Literal["IdxType"] = "IdxType"
 
 
-type ScalarPrimitive = None | bool | int | float | str | IdxType
-type Scalar = ScalarPrimitive | TensorReference | NodeReference
+type ScalarPrimitive = None | bool | int | float | str
+type Scalar = ScalarPrimitive | TensorReference | NodeReference | TaggedIdxType
 #type Container[T] = TaggedList[T] | TaggedTuple[T] | TaggedDict[T] | TaggedSet[T]
 type Container[T] = list[T] | TaggedTuple[T] | dict[str,T] | TaggedSet[T]
 type ContainerPrimitive = Container[Serializable]
@@ -76,7 +74,7 @@ type ModuleKwargs = TaggedDict[Serializable]
 # type Tagged = NodeReference | TensorReference | TaggedList[Serializable] | TaggedSet[Serializable] | TaggedTuple[Serializable] | TaggedDict[
 #     Serializable]
 
-type Tagged = NodeReference | TensorReference  | TaggedSet[Serializable] | TaggedTuple[Serializable] 
+type Tagged = NodeReference | TensorReference | TaggedSet[Serializable] | TaggedTuple[Serializable] | TaggedIdxType
 # @dataclass
 # class NodeInfo:
 #     pass

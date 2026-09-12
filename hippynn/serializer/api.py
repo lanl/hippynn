@@ -37,6 +37,7 @@ _FILETYPES = ("pkl", "pt", "json", "yml")
 _FILETYPE_ALIASES = {"pickle": "pkl", "pth": "pt", "yaml": "yml"}
 
 
+
 def _structure_serializable(data, _typ, *, converter):
     """
     `Serializable`-boundary structure hook for the plain (JSON/YAML) converter: `Serializable`
@@ -62,6 +63,15 @@ plain_converter.register_structure_hook_func(lambda t: t is Serializable, partia
 #configure_tagged_union(Tagged, plain_converter, tag_generator=_tagged_type, tag_name="_type")
 
 
+def _unwrap_values(structure):
+    """
+    Undo `list`/tuple pass-through ambiguity: a tagged tuple unstructures to
+    `{"values": [...], "_type": "tuple"}`, while a plain list passes through untagged - normalize
+    both to the bare list of (unstructured) references.
+    """
+    return structure["values"] if isinstance(structure, dict) else structure
+
+
 def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, include_descendants=True):
     """
     Interface wrapper taking node(s) or a graph and serializing them to a `SerializationRecord`.
@@ -78,9 +88,9 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, include_desce
         )
         input_structure, output_structure, forward_structure = structure
         graph_module_record = SerializedGraphModule(
-            input_nodes=input_structure["values"],
-            output_nodes=output_structure["values"],
-            forward_output_list=forward_structure["values"],
+            input_nodes=_unwrap_values(input_structure),
+            output_nodes=_unwrap_values(output_structure),
+            forward_output_list=_unwrap_values(forward_structure),
         )
     else:
         single_root = isinstance(nodes_or_graph, Node)
@@ -126,13 +136,15 @@ def deserialize(record: SerializationRecord, tensor_data: dict[int, object] | No
 
     _debprint(f"Deserializing node list: {record.graph.node_list=}")
 
-    node_blob = {info.identifier.id: info for info in record.graph.node_list}
+    node_blob = {info["identifier"]["id"]: info for info in record.graph.node_list}
 
     # Bare node list, early return
     if record.module is None:
         refs = record.root_ids
         if refs is None:
-            refs = [NodeReference(identifier=info.identifier) for info in record.graph.node_list]
+            # Todo this is weird as heck, we just constructed a structured thing directly
+            # using dict, very bad way to do things
+            refs = [{"identifier": info["identifier"], "_type": "node_ref"} for info in record.graph.node_list]
         resolved = CONTEXT_CONVERTER.structure_with_context(refs, list[NodeReference], tensor_blob=tensor_data, node_blob=node_blob)
         if record.single_root:
             return resolved[0]

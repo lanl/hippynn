@@ -222,27 +222,27 @@ def test_serialize_simple_nodes():
     left = ValueNode(1.0)
     record, tensor_data = serialize(left)
     assert len(record.graph.node_list) == 1
-    deserialize(record)
+    deserialize(record, tensor_data)
     print("1 worked")
 
     right = ValueNode(2.0)
     combined = left + right
 
-    left = ValueNode(torch.ones(3))
-    record, tensor_data = serialize(left)
+    tensor_node = ValueNode(torch.ones(3))
+    record, tensor_data = serialize(tensor_node)
     assert len(record.graph.node_list) == 1
-    deserialize(record)
+    deserialize(record, tensor_data)
     print("1 tensor worked")
 
     record, tensor_data = serialize([combined, left, right])
     assert len(record.graph.node_list) == 3
-    deserialize(record)
+    deserialize(record, tensor_data)
     print("1+1=2 worked")
 
     wrapped = AtLeast2D(combined)
     record, tensor_data = serialize([left, right, combined, wrapped])
     assert len(record.graph.node_list) == 4
-    deserialize(record)
+    deserialize(record, tensor_data)
 
 
 
