@@ -3,6 +3,7 @@ import dataclasses
 import pytest
 
 import hippynn
+from hippynn.graphs.indextypes import IdxType
 from hippynn.serializer.types import Serializable
 
 from conftest import skip_if_no_models, MODEL_DIR
@@ -24,10 +25,18 @@ def processor_pair():
     return CONTEXT_CONVERTER, CONTEXT_CONVERTER
 
 
-def test_processor_plain_data_roundtrip(processor_pair):
+PLAIN_DATA_CASES = [
+    pytest.param(1, id="int"),
+    pytest.param(2., id="float"),
+    pytest.param("hello world", id="str"),
+    pytest.param({"a": 1}, id="dict"),
+    pytest.param([1, 2.5, "three", None, (4, 5)], id="list"),
+    pytest.param({"a": [{'thing':(27,None)}], "b": {"nested": True}}, id="nested"),
+    pytest.param({"idx": IdxType.Scalar}, id="indextype"),
+]
+@pytest.mark.parametrize("data", PLAIN_DATA_CASES)
+def test_processor_plain_data_roundtrip(processor_pair, data):
     writer, reader = processor_pair
-
-    data = {"a": 1, "b": [1, 2.5, "three", None, (4, 5)], "c": {"nested": True}}
 
     structure, tensor_blob, _node_blob = writer.unstructure_with_context(data)
     assert tensor_blob == {}
@@ -71,7 +80,7 @@ def test_processor_set_roundtrip(processor_pair):
 
     assert restored["values"] == data["values"]
 
-
+# TODO at test cleanup time: this test is highly overblown and must be simplified or removed 
 def test_processor_embedded_object_reference_roundtrip():
 
     from functools import partial
@@ -126,7 +135,84 @@ def test_processor_embedded_object_reference_roundtrip():
     assert restored.leaves[0].payload == "shared"
 
 
-    
+def _attr_equal(original, reconstructed):
+    if isinstance(original, torch.Tensor) or isinstance(reconstructed, torch.Tensor):
+        return torch.equal(original, reconstructed)
+    return original == reconstructed
+
+
+def _make_input_node():
+    from hippynn.graphs.nodes.base import InputNode
+
+    return InputNode(db_name="my_input")
+
+
+def _make_loss_input_node():
+    from hippynn.graphs.nodes.base import InputNode, LossInputNode
+
+    origin = InputNode(db_name="origin")
+    return LossInputNode("loss_in", origin_node=origin)
+
+
+def _make_unary_node():
+    from hippynn.graphs.nodes.base import ValueNode
+    from hippynn.graphs.nodes.base.base import NegNode
+
+    return NegNode(ValueNode(1.0))
+
+
+def _make_bin_node():
+    from hippynn.graphs.nodes.base import ValueNode
+    from hippynn.graphs.nodes.base.base import AddNode
+
+    return AddNode(ValueNode(1.0), ValueNode(2.0))
+
+
+def _make_automodule_node():
+    from hippynn.graphs.nodes.base import ValueNode
+    from hippynn.graphs.nodes.indexers import FuzzyHistogrammer
+
+    values = ValueNode(torch.linspace(0, 1, 10))
+    return FuzzyHistogrammer("hist", (values,), length=5, vmin=0.0, vmax=1.0)
+
+
+def _make_value_node():
+    from hippynn.graphs.nodes.base import ValueNode
+
+    return ValueNode(3.5)
+
+
+NODE_FACTORIES = [
+    pytest.param(_make_input_node, id="InputNode"),
+    pytest.param(_make_loss_input_node, id="LossInputNode"),
+    pytest.param(_make_unary_node, id="UnaryNode-NegNode"),
+    pytest.param(_make_bin_node, id="BinNode-AddNode"),
+    pytest.param(_make_automodule_node, id="AutoModule-FuzzyHistogrammer"),
+    pytest.param(_make_value_node, id="ValueNode"),
+]
+
+
+@pytest.mark.parametrize("make_node", NODE_FACTORIES)
+def test_node_to_record_from_record_roundtrip(make_node):
+    """
+    Round-trips a single node through `to_record()`/`from_record()` directly, bypassing the
+    serializer's reference/tensor-blob machinery entirely. Parents are the node's own live
+    parents, passed straight through - node/tensor identity resolution across a whole graph is
+    not exercised here (see the `test_processor_*` and `test_serialize_*` tests for that).
+    """
+    node = make_node()
+
+    record = node.to_record()
+    rebuilt = type(node).from_record(name=node.name, parents=node.parents, **(record or {}))
+
+    assert isinstance(rebuilt, type(node)), f"from_record returned {rebuilt!r} instead of a {type(node).__name__}"
+    assert rebuilt.name == node.name
+    assert rebuilt.parents == node.parents
+
+    for attr in node.serialization_attributes or ():
+        original, reconstructed = getattr(node, attr), getattr(rebuilt, attr)
+        assert _attr_equal(original, reconstructed), f"{attr!r} mismatch: {original!r} != {reconstructed!r}"
+
 
 def test_serialize_simple_nodes():
     from hippynn.serializer import serialize, deserialize

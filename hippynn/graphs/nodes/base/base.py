@@ -121,7 +121,7 @@ class InputNode(SingleNode, _SerializableNode):
         node = cls(name=name, db_name=db_name, index_state=index_state)
         if requires_grad:
             node.requires_grad = requires_grad
-        return 
+        return node
 
 
 class LossInputNode(InputNode):

@@ -4,7 +4,7 @@ The ContextConverter class: a global cattrs Converter plus tensor/node identity 
 """
 
 import itertools
-from typing import Any
+from typing import Any, get_origin
 from .types import NodeReference, NodeIdentifier, NodeRecord, Serializable, NodeBlob, ScalarPrimitive
 from .registry import _NODE_REGISTRY, _ID_REGISTRY
 from cattrs import Converter
@@ -18,6 +18,7 @@ from ..graphs.nodes.base import InputNode, Node
 
 
 CONVERTER = Converter()
+
 
 class ContextConverter:
     """
@@ -68,7 +69,7 @@ class ContextConverter:
             return self.unstructure(NodeReference(identifier=NodeIdentifier(id=key, name=node.name)))
 
         # Recurse parents first, so that when reconstructing we'll have topo order.
-        parent_references = self.unstructure(node.parents, unstructure_as=list[NodeReference])
+        parent_references = self.unstructure(node.parents)
 
         # new key
         key = self.node_ids[id(node)] = next(self._node_counter)
@@ -84,7 +85,6 @@ class ContextConverter:
             identifier=identifier,
             cls = _NODE_REGISTRY[type(node)],
             parents = node.parents,
-            index_state = getattr(node, "index_state", None),
             state = node.to_record(),
             state_dict = state_dict,
         )
@@ -93,7 +93,7 @@ class ContextConverter:
         return self.unstructure(reference)
 
     def emit_node(self, key):
-        
+
         if key in self.node_objects:
             return self.node_objects[key]
         
@@ -109,16 +109,14 @@ class ContextConverter:
             record = self.structure(record, NodeRecord) # records hold references!
             cls = _ID_REGISTRY[record.cls]
             parents = [self.emit_node(p) for p in record.parents]
-            node = cls.from_record(name=record.identifier.name, parents=parents, **record.state)
+            node = cls.from_record(name=record.identifier.name, parents=parents, **(record.state or {}))
             if record.state_dict:
-                node.torch_module.load_state_dict(record.state_dict) 
+                node.torch_module.load_state_dict(record.state_dict)
             self.node_objects[key] = node
             print("Deserializing YAY finished safely",key)
-            self._node_resolving.discard(key)
             return node
         finally:
            self._node_resolving.discard(key)
-           print("Deserializing finished poorly",key)
 
 
 
@@ -130,25 +128,26 @@ class ContextConverter:
             self.tensor_blob[key] = obj
         return self.unstructure(TensorReference(key=key))
 
-    def emit_tensor(self, data: TensorReference, typ):
+    def emit_tensor(self, data: TensorReference, typ) -> torch.Tensor:
         key = data.key
         if key not in self.tensor_objects:
             self.tensor_objects[key] = self.tensor_blob[key]
         return self.tensor_objects[key]
 
+    def unstructure_idxtype(self, obj):
+        return self.unstructure(TaggedTuple(values=list(obj)))
 
-    def unstructure_tuple(self, obj):
+    def unstructure_tuple(self, obj: tuple):
         return self.unstructure(TaggedTuple(values=list(obj)))
     
-    def unstructure_set(self, obj):
+    def unstructure_set(self, obj: set):
         return self.unstructure(TaggedSet(values=list(obj)))
 
     def structure_tuple(self, obj, type_):
-        return tuple(self.structure(v) for v in obj.values)
+        return tuple(self.structure(v, Serializable) for v in obj["values"])
 
     def structure_set(self, obj, type_):
-        return set(self.structure(v) for v in obj.values)
-
+        return set(self.structure(v, Serializable) for v in obj["values"])
 
 
     def structure_serializable(self, data, type_):
@@ -167,10 +166,13 @@ class ContextConverter:
         try:
             structure = self.unstructure(obj)
             return_tensors = self.tensor_blob
-            return_nodes = self.node_blob
-            print("WE SURVIVED THE FIRST UNSTRUCTURE")
-            self.unstructure(return_nodes, unstructure_as=NodeBlob) # wow!
-            print("WE SURVIVED THE SECOND UNSTRUCTURE")
+            # Worklist: unstructuring a record's `state` may call `consume_node` for a node not yet
+            # in `self.node_blob` (e.g. `LossInputNode.origin_node`), growing it mid-loop - so only
+            # ever unstructure the keys not yet handled, and repeat until no new ones appear.
+            return_nodes = {}
+            while len(return_nodes) < len(self.node_blob):
+                pending = {k: v for k, v in self.node_blob.items() if k not in return_nodes}
+                return_nodes.update(self.unstructure(pending, unstructure_as=NodeBlob))
         finally:
             self.reset()
         # todo validate number of constructed/reconstructed tensors/nodes matches!
@@ -205,33 +207,41 @@ CONTEXT_CONVERTER = ContextConverter()
 from cattrs.strategies import configure_union_passthrough
 configure_union_passthrough(ScalarPrimitive.__value__, CONVERTER)
 
-CONVERTER.register_unstructure_hook(torch.Tensor, CONTEXT_CONVERTER.consume_tensor)
-CONVERTER.register_structure_hook(torch.Tensor, CONTEXT_CONVERTER.emit_tensor)
+# Direct-type-key hooks: registered via cattrs' decorator-style dispatch (the key is inferred from
+# the bound method's annotations - see "Use as Decorators" in the cattrs docs). Called rather than
+# applied with literal `@` syntax, since these are shared-instance bound methods, not fresh defs.
+CONVERTER.register_unstructure_hook(CONTEXT_CONVERTER.consume_tensor)
+CONVERTER.register_structure_hook(CONTEXT_CONVERTER.emit_tensor)
+CONVERTER.register_unstructure_hook(CONTEXT_CONVERTER.unstructure_tuple)
+CONVERTER.register_unstructure_hook(CONTEXT_CONVERTER.unstructure_set)
 
+# `emit_node`: its return value is a live `Node`, not the `NodeReference` it's dispatched on, so
+# the decorator's return-type introspection doesn't apply - explicit key form.
+CONVERTER.register_structure_hook(NodeReference, CONTEXT_CONVERTER.emit_node)
+
+# Predicate-based hooks, plus `structure_tuple`/`structure_set` below via hook factories: `TaggedTuple[Serializable]`/
+# `TaggedSet[Serializable]` are parametrized generics, not valid `register_structure_hook` class keys, and their
+# hooks intentionally return a different runtime type (`tuple`/`set`) than the type they're dispatched on - a hook
+# *factory* (predicate -> hook, decorator-eligible) is the appropriate cattrs API for that, not a plain hook.
 CONVERTER.register_unstructure_hook_func(
     lambda t: isinstance(t, type) and issubclass(t, Node), CONTEXT_CONVERTER.consume_node
     )
 
-CONVERTER.register_structure_hook(NodeReference, CONTEXT_CONVERTER.emit_node)
-
-CONVERTER.register_unstructure_hook(tuple, CONTEXT_CONVERTER.unstructure_tuple)
-CONVERTER.register_unstructure_hook(set, CONTEXT_CONVERTER.unstructure_set)
-from typing import get_origin
 CONVERTER.register_structure_hook_func(
     lambda t: get_origin(t) is TaggedTuple,
     CONTEXT_CONVERTER.structure_tuple,
-    )
+)
+
 CONVERTER.register_structure_hook_func(
     lambda t: get_origin(t) is TaggedSet,
     CONTEXT_CONVERTER.structure_set,
-    )
-
-
+)
 CONVERTER.register_structure_hook_func(
     lambda t: t is Serializable,
-    CONTEXT_CONVERTER.structure_serializable),
+    CONTEXT_CONVERTER.structure_serializable,
+    )
 
-## experimental 
+## experimental
 from functools import reduce
 from operator import or_
 from typing import get_args

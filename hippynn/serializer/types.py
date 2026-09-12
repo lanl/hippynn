@@ -58,8 +58,13 @@ class TaggedDict[T]:
     values: dict[str, T]
     _type: Literal["dict"] = "dict"
 
+@dataclass(frozen=True)
+class TaggedIdxType[T]:
+    values: str
+    _type: Literal["IdxType"] = "IdxType"
 
-type ScalarPrimitive = None | bool | int | float | str
+
+type ScalarPrimitive = None | bool | int | float | str | IdxType
 type Scalar = ScalarPrimitive | TensorReference | NodeReference
 #type Container[T] = TaggedList[T] | TaggedTuple[T] | TaggedDict[T] | TaggedSet[T]
 type Container[T] = list[T] | TaggedTuple[T] | dict[str,T] | TaggedSet[T]

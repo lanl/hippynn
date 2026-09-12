@@ -125,12 +125,6 @@ class MultiNode(Node,_DeprecatedNamesMixin):  # Multinode
 
         return super().__getattr__(item)
 
-    def to_record(self):
-            record = super().to_record()
-            if self.torch_module is not None:
-                record.state_dict = self.torch_module.state_dict()
-            return record
-
     @property
     def main_output(self):
         if self.main_output_name is NotImplemented:

@@ -76,11 +76,11 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, include_desce
         structure, tensor_blob, node_blob = processor.unstructure_with_context(
             [module.input_nodes, module.nodes_to_compute, module.forward_output_list]
         )
-        input_structure, output_structure, forward_structure = structure.values
+        input_structure, output_structure, forward_structure = structure
         graph_module_record = SerializedGraphModule(
-            input_nodes=input_structure.values,
-            output_nodes=output_structure.values,
-            forward_output_list=forward_structure.values,
+            input_nodes=input_structure["values"],
+            output_nodes=output_structure["values"],
+            forward_output_list=forward_structure["values"],
         )
     else:
         single_root = isinstance(nodes_or_graph, Node)
@@ -91,8 +91,8 @@ def serialize(nodes_or_graph: Node | Iterable[Node] | GraphModule, include_desce
         _debprint(f"Serializing node list: {expanded=}")
 
         structure, tensor_blob, node_blob = processor.unstructure_with_context([original_roots, expanded])
-        roots_structure, extended_structure = structure.values
-        root_ids = roots_structure.values
+        roots_structure, extended_structure = structure
+        root_ids = roots_structure
 
     serial_data = SerializedGraph(node_list=list(node_blob.values()), n_tensor_values=len(tensor_blob))
     record = SerializationRecord(graph=serial_data, module=graph_module_record, root_ids=root_ids, single_root=single_root)

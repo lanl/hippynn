@@ -85,8 +85,8 @@ class UnaryNode(_SerializableNode):
 
     @classmethod
     def from_record(cls, name, parents, **kwargs):
-        """cattrs structure hook: rebuilds the node from its single parent."""
-        return cls(parents[0])
+        p, = parents
+        return cls(p)
 
 
 class BinNode(_SerializableNode):
@@ -99,8 +99,8 @@ class BinNode(_SerializableNode):
 
     @classmethod
     def from_record(cls, name, parents, **kwargs):
-        """cattrs structure hook: rebuilds the node from its two parents."""
-        return cls(parents)
+        left, right = parents
+        return cls(left, right)
 
 def __getattr__(name: str):
     """
