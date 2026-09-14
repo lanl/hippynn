@@ -6,14 +6,10 @@ import dataclasses
 import json
 import pathlib
 import pickle
-import typing
 import warnings
-from functools import partial
 from typing import Iterable
 
 import torch
-from cattrs import Converter
-from cattrs.strategies import configure_tagged_union
 
 
 from ..experiment import _debprint
@@ -25,10 +21,8 @@ from .types import (
     PROTOCOL_VERSION,
     NodeReference,
     SerializationRecord,
-    Serializable,
     SerializedGraph,
     SerializedGraphModule,
-    Tagged,
 )
 
 # Filetypes supported by `savegraph`/`loadgraph`, plus common extension spellings that map onto
@@ -37,30 +31,26 @@ _FILETYPES = ("pkl", "pt", "json", "yml")
 _FILETYPE_ALIASES = {"pickle": "pkl", "pth": "pt", "yaml": "yml"}
 
 
-
-def _structure_serializable(data, _typ, *, converter):
+def _record_from_plain_dict(data: dict) -> SerializationRecord:
     """
-    `Serializable`-boundary structure hook for the plain (JSON/YAML) converter: `Serializable`
-    is a recursive, open union that also contains bare scalars, so this only rules those out,
-    then delegates dict-shaped data to the `Tagged` sub-union, which `configure_tagged_union`
-    below dispatches on its `_type` field.
+    Rebuild a `SerializationRecord` from the plain dict produced by `dataclasses.asdict`
+    (round-tripped through JSON/YAML). The inner content (`node_list`, `root_ids`, module fields)
+    is already plain data by construction (see `serialize()`), so this only needs to restore the
+    wrapper dataclasses themselves - it must not re-interpret their content through cattrs, since
+    `deserialize()` expects that inner content to stay in its already-plain, dict-shaped form.
     """
-    if isinstance(data, dict):
-        return converter.structure(data, Tagged)
-    return data
-
-
-from .processor import install_union_alias_unwrapping
-def _tagged_type(cls: type) -> str:
-    """The `_type` field's default on `cls` - the same discriminator string it writes into its own unstructured payload."""
-    cls = typing.get_origin(cls) or cls
-    return next(f.default for f in dataclasses.fields(cls) if f.name == "_type")
-
-
-plain_converter = Converter()
-install_union_alias_unwrapping(plain_converter)
-plain_converter.register_structure_hook_func(lambda t: t is Serializable, partial(_structure_serializable, converter=plain_converter))
-#configure_tagged_union(Tagged, plain_converter, tag_generator=_tagged_type, tag_name="_type")
+    graph_data = data["graph"]
+    graph = SerializedGraph(node_list=graph_data["node_list"], n_tensor_values=graph_data["n_tensor_values"])
+    module_data = data["module"]
+    module = SerializedGraphModule(**module_data) if module_data is not None else None
+    return SerializationRecord(
+        graph=graph,
+        protocol_version=data["protocol_version"],
+        module=module,
+        tensor_data=data["tensor_data"],
+        root_ids=data["root_ids"],
+        single_root=data["single_root"],
+    )
 
 
 def _unwrap_values(structure):
@@ -231,11 +221,11 @@ def savegraph(
         elif filetype == "pt":
             torch.save(record, fh)
         elif filetype == "json":
-            json.dump(plain_converter.unstructure(record), fh)
+            json.dump(dataclasses.asdict(record), fh)
         elif filetype == "yml":
             import yaml
 
-            yaml.safe_dump(plain_converter.unstructure(record), fh)
+            yaml.safe_dump(dataclasses.asdict(record), fh)
         else:
             raise ValueError(f"Unknown filetype {filetype!r}; expected one of {_FILETYPES}.")
 
@@ -261,11 +251,11 @@ def loadgraph(file, weights_file=None, filetype: str | None = None, weights_only
         elif filetype == "pt":
             record = torch.load(fh, weights_only=weights_only)
         elif filetype == "json":
-            record = plain_converter.structure(json.load(fh), SerializationRecord)
+            record = _record_from_plain_dict(json.load(fh))
         elif filetype == "yml":
             import yaml
 
-            record = plain_converter.structure(yaml.safe_load(fh), SerializationRecord)
+            record = _record_from_plain_dict(yaml.safe_load(fh))
         else:
             raise ValueError(f"Unknown filetype {filetype!r}; expected one of {_FILETYPES}.")
 

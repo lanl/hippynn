@@ -78,7 +78,7 @@ class ContextConverter:
         self.node_objects[key] = node
 
         parents = tuple(self.ensure_node(p) for p in node.parents) 
-        state_dict = node.torch_module.state_dict() if getattr(node, "torch_module", None) else None
+        state_dict = node.torch_module.state_dict(keep_vars=True) if getattr(node, "torch_module", None) else None
         record = NodeRecord(
             identifier=identifier,
             cls=_NODE_REGISTRY[type(node)],

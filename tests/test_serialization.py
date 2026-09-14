@@ -80,60 +80,6 @@ def test_processor_set_roundtrip(processor_pair):
 
     assert restored["values"] == data["values"]
 
-# TODO at test cleanup time: this test is highly overblown and must be simplified or removed 
-def test_processor_embedded_object_reference_roundtrip():
-
-    from functools import partial
-
-    from hippynn.serializer.processor import CONTEXT_CONVERTER
-
-    @dataclasses.dataclass
-    class Leaf:
-        payload: str
-
-    @dataclasses.dataclass
-    class Root:
-        leaves: list[Leaf]
-
-    def _unstructure_leaf(obj, *, ctx):
-        blob = getattr(ctx, "_leaf_blob", None)
-        if blob is None:
-            blob, ids = {}, {}
-            ctx._leaf_blob, ctx._leaf_ids = blob, ids
-        key = ctx._leaf_ids.get(id(obj))
-        if key is None:
-            key = len(blob)
-            ctx._leaf_ids[id(obj)] = key
-            blob[key] = obj.payload
-        return {"kind": "leaf_ref", "key": key}
-
-    def _structure_leaf(data, typ, *, ctx):
-        cache = getattr(ctx, "_leaf_objects", None)
-        if cache is None:
-            cache = {}
-            ctx._leaf_objects = cache
-        key = data["key"]
-        if key not in cache:
-            cache[key] = typ(ctx._leaf_blob[key])
-        return cache[key]
-
-    CONTEXT_CONVERTER.reset()
-    CONTEXT_CONVERTER.converter.register_unstructure_hook(Leaf, partial(_unstructure_leaf, ctx=CONTEXT_CONVERTER))
-    CONTEXT_CONVERTER.converter.register_structure_hook(Leaf, partial(_structure_leaf, ctx=CONTEXT_CONVERTER))
-
-    writer, reader = CONTEXT_CONVERTER, CONTEXT_CONVERTER
-
-    shared_leaf = Leaf(payload="shared")
-    root = Root(leaves=[shared_leaf, shared_leaf])
-
-    structure, tensor_blob, _node_blob = writer.unstructure_with_context(root)
-    leaf_blob = writer._leaf_blob  # out-of-band leaf payload, untouched by reset() (not a built-in attribute)
-    restored = reader.structure_with_context(structure, Root, tensor_blob=tensor_blob, node_blob=_node_blob)
-    reader._leaf_blob = leaf_blob
-
-    assert restored.leaves[0] is restored.leaves[1], "repeated references to one Leaf must resolve to one object"
-    assert restored.leaves[0].payload == "shared"
-
 
 def _attr_equal(original, reconstructed):
     if isinstance(original, torch.Tensor) or isinstance(reconstructed, torch.Tensor):
@@ -270,13 +216,14 @@ def test_serialize_automodule(processor_pair):
 
 def test_serialize_graph(energy_graph):
     from hippynn.serializer import serialize
-    from hippynn.serializer.types import NodeInfo, SerializedGraphModule
+    from hippynn.serializer.types import SerializedGraphModule
 
     record, tensor_data = serialize(energy_graph)
 
     assert isinstance(record.graph.node_list, list)
     assert len(record.graph.node_list) > 0
-    assert all(isinstance(info, NodeInfo) for info in record.graph.node_list)
+    # `node_list` entries are already-unstructured plain dicts (see `ensure_node`), not live records.
+    assert all(isinstance(info, dict) and "identifier" in info for info in record.graph.node_list)
     assert isinstance(record.module, SerializedGraphModule)
     assert isinstance(tensor_data, dict)
 
