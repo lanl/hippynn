@@ -42,29 +42,20 @@ CONVERTER = Converter()
 _RECORD_TAGS = {cls._type for cls in (NodeRecord, NodeListRecord, GraphModuleRecord)}
 
 
+# Holds one cattrs `Converter` plus the tensor/node identity caches used by its hooks (defined as
+# methods below, registered onto `CONVERTER` at the bottom of this file). `CONTEXT_CONVERTER`
+# below is the single process-wide instance - hooks are bound to `self` at registration time, so
+# there's only ever one instance to resolve. A session is single-threaded and non-reentrant.
+#
+# `unstructure`/`structure` are the recursive, in-session calls used by hooks; `reset()` clears
+# per-session state, called automatically by `unstructure_with_context()`/`structure_with_context()`
+# (the one-shot, self-contained sessions built on top of the recursive calls) before and after use.
 class ContextConverter:
-    """
-    Holds one cattrs `Converter` plus the tensor/node identity caches used by its hooks (defined
-    as methods below and registered onto `CONVERTER` at the bottom of this file).
-    `context_converter` below is the single instance used for the whole process - a Converter's
-    dispatch machinery caches resolved hooks per type, so reusing one is the intended usage, and
-    every hook is bound to `self` directly, at registration time, since there is only ever this one
-    instance to resolve. `reset()` clears the per-session state back to empty;
-    `unstructure_with_context()`/`structure_with_context()` each call it themselves (before
-    installing blobs), and again after resolving, so callers never need to manage reset timing
-    directly. A session is single-threaded and non-reentrant - two independent sessions cannot be
-    interleaved.
-
-    `unstructure`/`structure` are the recursive, in-session calls used by hooks while a session is
-    active; `unstructure_with_context`/`structure_with_context` are the one-shot, self-contained
-    sessions built on top of them.
-    """
-
     def __init__(self):
         self.reset()
 
     def reset(self):
-        """Clear all per-session state, ready for a fresh serialize()/deserialize() call."""
+        """Clear all per-session state, ready for a fresh unstructure_with_context()/structure_with_context() call."""
 
         self._unstructuring = False
         self._structuring = False
@@ -83,9 +74,7 @@ class ContextConverter:
         self._node_counter = itertools.count()  # dedicated key source, independent of len(node_blob) -
 
     def ensure_node(self, node):
-        """
-        Recursively convert node/parents into NodeReferences for unstructuring.
-        """
+        """Recursively convert node/parents into NodeReferences for unstructuring."""
         key = self.node_ids.get(id(node))
         if key is not None:
             return NodeReference(identifier=NodeIdentifier(id=key, name=node.name))
@@ -99,7 +88,7 @@ class ContextConverter:
 
         self.node_objects[key] = node
 
-        parents = tuple(self.ensure_node(p) for p in node.parents) 
+        parents = tuple(self.ensure_node(p) for p in node.parents)
         state_dict = node.torch_module.state_dict(keep_vars=True) if getattr(node, "torch_module", None) else None
         record = NodeData(
             identifier=identifier,
@@ -163,7 +152,7 @@ class ContextConverter:
 
     def unstructure_tuple(self, obj: tuple):
         return self.unstructure(TaggedTuple(values=list(obj)))
-    
+
     def unstructure_set(self, obj: set):
         return self.unstructure(TaggedSet(values=list(obj)))
 
@@ -205,13 +194,11 @@ class ContextConverter:
         return module
 
 
+    # The single root entry point for unstructuring - never reached recursively (hooks recurse via
+    # `self.unstructure()` instead), so it's free to recognize `obj`'s top-level shape with plain
+    # `isinstance` checks, unlike a cattrs hook, which would fire identically on that same shape
+    # found nested anywhere else (e.g. a `Node` reference, or an unrelated plain list).
     def unstructure_with_context(self, obj):
-        """
-        The single root entry point for unstructuring - never reached recursively (hooks recurse
-        via `self.unstructure()` instead), so it's free to recognize `obj`'s top-level shape with
-        plain `isinstance` checks, unlike a cattrs hook (which would fire identically on the same
-        shape found nested anywhere else, e.g. a `Node` reference or an unrelated plain list).
-        """
         self.reset()
         self._unstructuring = True
         try:
@@ -248,17 +235,14 @@ class ContextConverter:
         # todo validate number of constructed/reconstructed tensors/nodes matches!
         return structure, return_tensors, return_nodes
 
-    def unstructure(self, obj, **kwargs):
+    def unstructure(self, obj):
         if not self._unstructuring:
             raise ValueError("ContextConverter.unstructure() may only be called during an active unstructure_with_context() session.")
-        return CONVERTER.unstructure(obj, **kwargs)
+        return CONVERTER.unstructure(obj)
 
+    # The single root entry point for structuring - mirrors `unstructure_with_context`'s root-only
+    # shape checks by recognizing `data`'s shape instead of requiring an explicit target type.
     def structure_with_context(self, data, *, tensor_blob, node_blob):
-        """
-        The single root entry point for structuring - mirrors `unstructure_with_context`'s own
-        root-only `isinstance` checks by recognizing `data`'s shape instead of requiring the
-        caller to pass a target type explicitly.
-        """
         self.reset()
         self.tensor_blob = tensor_blob
         self.node_blob = node_blob
@@ -277,12 +261,11 @@ class ContextConverter:
             typ = SerializationRecord
         else:
             typ = Serializable
+        # todo validate number of constructed/reconstructed tensors/nodes matches!
         try:
             return self.structure(data, typ)
         finally:
             self.reset()
-
-        # todo validate number of constructed/reconstructed tensors/nodes matches!
 
     def structure(self, data, typ):
         if not self._structuring:
