@@ -381,6 +381,30 @@ def test_same_tensor_shared():
     assert len(tensor_data) == 1, "the same tensor object referenced by two nodes must be stored once"
 
 
+def test_multinode_attributes(energy_node):
+    """
+    `IndexNode`s are normally built by their `MultiNode` parent with a fixed, class-declared
+    `index_state` and no `db_name` (see `MultiNode.__init__`), but real code (e.g.
+    `EnsembleTarget.__init__`) reassigns `index_state`/`db_name` on an already-built `IndexNode`
+    child directly, after construction. This checks that such a late rewiring survives a
+    serialize/deserialize round-trip, rather than reverting to the parent's original defaults.
+    """
+    from hippynn.graphs.indextypes import IdxType
+    from hippynn.serializer import serialize, deserialize
+
+    child = energy_node.mol_hier
+    assert child.index_state == IdxType.Systems, "sanity check: this is the class-declared default before rewiring"
+    assert child.db_name is None, "sanity check: no db_name is assigned by MultiNode.__init__"
+
+    child.index_state = IdxType.Atoms
+    child.db_name = "custom_mol_hier_name"
+
+    record, tensor_data = serialize(child)
+    rebuilt_child = deserialize(record, tensor_data)
+
+    assert rebuilt_child.index_state == IdxType.Atoms, "rewired index_state must survive the round-trip"
+    assert rebuilt_child.db_name == "custom_mol_hier_name", "rewired db_name must survive the round-trip"
+
 
 def test_origin_node_link():
     from hippynn.graphs.nodes.base import InputNode, LossPredNode, LossTrueNode
