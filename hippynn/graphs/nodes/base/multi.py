@@ -4,7 +4,6 @@ A base node that provides several output tensors.
 from ....layers.algebra import Idx
 from .base import SingleNode, Node
 from . import AutoModule
-from .. import _debprint
 from ...indextypes import IdxType
 from ...._deprecations import _DeprecatedNamesMixin
 
@@ -26,13 +25,13 @@ class IndexNode(AutoModule, SingleNode):
         super().__init__(name, parents, _repr_info=repr_info, index=index, module="auto")
 
     @classmethod
-    def from_record(cls, name, parents, module_kwargs, **kwargs):
-        #An `IndexNode` is by definition a `MultiNode`'s child
-        # reuse instead of constructing duplicate
-        # constructing an independent duplicate.
+    def from_record(cls, name, parents, module_kwargs, db_name, index_state):
         (parent,) = parents
-        child = parent.children[module_kwargs["index"]]
+        index = module_kwargs['index']
+        child = parent.children[index]
         child.name = name
+        child.db_name = db_name
+        child.index_state = index_state
         return child
 
 

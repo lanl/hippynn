@@ -22,7 +22,6 @@ class _SerializableNode():
                     # That's why we check the Node class.
                     if base_cls.serialization_attributes:
                         serialization_attributes.extend(base_cls.serialization_attributes)
-            # todo: avoid explicit duplications?
-            cls.serialization_attributes = tuple(set(serialization_attributes))
+            cls.serialization_attributes = tuple(dict.fromkeys(serialization_attributes))
             _SerializableNode._unregistered_classes.append(cls)
 

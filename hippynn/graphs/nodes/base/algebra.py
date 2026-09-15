@@ -41,7 +41,6 @@ class _NodeAlgebra():
         full_name = "__" + operation + "__"
         method = _make_node_method(operation, cls)
         setattr(_NodeAlgebra, full_name, method)
-        return
 
 def _make_node_method(operation, cls):
 
@@ -74,7 +73,6 @@ class _AlgebraicOperation():
 
         cls.torch_module = algebra_mods.LambdaModule(base_function)
         cls._classname = operation
-        return 
 
 
 class UnaryNode(_SerializableNode):

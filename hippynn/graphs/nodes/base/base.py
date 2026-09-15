@@ -15,8 +15,7 @@ from typing import Optional
 
 
 class Node(_NodeFunctions, _NodeAlgebra):
-    serialization_attributes = ("db_name",) # hack
-    pass
+    serialization_attributes = ("db_name",)  # hack
 
 
 class SingleNode(Node, _DeprecatedNamesMixin):
