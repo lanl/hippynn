@@ -61,7 +61,6 @@ type Serializable = Scalar | ContainerPrimitive
 type Tagged = NodeReference | TensorReference | TaggedSet[Serializable] | TaggedTuple[Serializable] | TaggedIdxType
 
 
-#TODO rename this as NodeData
 @dataclass
 class NodeData:
     identifier: NodeIdentifier  # holds name
@@ -70,12 +69,8 @@ class NodeData:
     state: dict[str, Serializable] | None = None  # class-specific
     state_dict: dict[str, Serializable] | None = None
 
-# Top-level record structures - the three shapes `savegraph()`/`loadgraph()` produce/consume,
-# dispatched by cattrs via each variant's `_type` tag (see `SerializationRecordVariant` below).
-# `protocol_version`/`tensor_data`/`n_tensor_values` are common to all three and live once on the
-# outer `SerializationBox` (below), shared by composition rather than redeclared on each variant.
+# Record classes--top-level serialization objects.
 
-# TODO when rename above is done, rename this to just NodeRecord
 @dataclass
 class NodeRecord:  # a single root `Node`, not wrapped in a list or a `GraphModule`
     graph: list[NodeData]
@@ -96,12 +91,11 @@ class GraphModuleRecord:  # a `GraphModule`
     forward_output_list: tuple[NodeReference, ...]
     _type: Literal["graph_module_record"] = "graph_module_record"
 
-# TODO rename SerializationRecord
-type SerializationRecordVariant = NodeRecord | NodeListRecord | GraphModuleRecord
+type SerializationRecord = NodeRecord | NodeListRecord | GraphModuleRecord
 
 @dataclass
 class SerializationBox:
-    record: SerializationRecordVariant
+    record: SerializationRecord
     n_tensor_values: int
     tensor_data: dict[int, object] | None = None
     protocol_version: int = PROTOCOL_VERSION

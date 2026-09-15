@@ -35,7 +35,7 @@ def savegraph(
     overwrite: bool = True,
 ):
     """
-    Serialize `nodes_or_graph` to a `SerializationBox` (wrapping a `SerializationRecordVariant` -
+    Serialize `nodes_or_graph` to a `SerializationBox` (wrapping a `SerializationRecord` -
     `NodeListRecord`/`GraphModuleRecord`, chosen by the shape of `nodes_or_graph`) and write it to
     `file`.
 
@@ -111,13 +111,18 @@ def loadgraph(file, weights_file=None, filetype: str | None = None, weights_only
             box = torch.load(fh, weights_only=weights_only)
         elif filetype == "json":
             box = json.load(fh)
-            box = SerializationBox(**box)
         elif filetype == "yml":
             import yaml
+
             box = yaml.safe_load(fh)
-            box = SerializationBox(**box)
         else:
             raise ValueError(f"Unknown filetype {filetype!r}; expected one of {_FILETYPES}.")
+
+    # `box` is a live SerializationBox for pkl/pt (pickle/torch preserve Python objects); for
+    # json/yml it comes back as a plain dict (no type info survives) - box-ify it here so the
+    # rest of this function can use uniform attribute access.
+    if isinstance(box, dict):
+        box = SerializationBox(**box)
 
     tensor_data = None
     if weights_file is not None:

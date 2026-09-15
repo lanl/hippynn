@@ -23,7 +23,7 @@ from .types import (
     ScalarPrimitive,
     Serializable,
     NodeRecord,
-    SerializationRecordVariant,
+    SerializationRecord,
     Tagged,
     TaggedIdxType,
     TaggedSet,
@@ -37,9 +37,9 @@ from ..graphs.nodes.base import Node
 
 CONVERTER = Converter()
 
-# `_type` tag values for the three `SerializationRecordVariant` members, used by
+# `_type` tag values for the three `SerializationRecord` members, used by
 # `structure_with_context` to recognize a record dict without needing its live Python type.
-_RECORD_TAGS = {cls.__dataclass_fields__["_type"].default for cls in (NodeRecord, NodeListRecord, GraphModuleRecord)}
+_RECORD_TAGS = {cls._type for cls in (NodeRecord, NodeListRecord, GraphModuleRecord)}
 
 
 class ContextConverter:
@@ -228,6 +228,9 @@ class ContextConverter:
             elif isinstance(obj, (list, tuple)) and all(isinstance(x, Node) for x in obj):
                 root_list = self.unstructure(list(obj))
                 structure = NodeListRecord(graph=list(self.node_blob.values()), root_list=root_list)
+            elif isinstance(obj, Node):
+                root = self.unstructure(obj)
+                structure = NodeRecord(graph=list(self.node_blob.values()), root=root)
             else:
                 structure = self.unstructure(obj)
 
@@ -271,7 +274,7 @@ class ContextConverter:
             # json/yml lose Python type info, but the `_type` tag still identifies which record
             # variant this is - cattrs disambiguates the union from it, same as any other tagged
             # union member.
-            typ = SerializationRecordVariant
+            typ = SerializationRecord
         else:
             typ = Serializable
         try:
