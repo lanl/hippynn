@@ -61,62 +61,47 @@ type Serializable = Scalar | ContainerPrimitive
 type Tagged = NodeReference | TensorReference | TaggedSet[Serializable] | TaggedTuple[Serializable] | TaggedIdxType
 
 
+#TODO rename this as NodeData
 @dataclass
-class NodeRecord:
+class NodeData:
     identifier: NodeIdentifier  # holds name
     cls: NodeTypeIdentifier
     parents: tuple[NodeReference, ...] = ()
     state: dict[str, Serializable] | None = None  # class-specific
     state_dict: dict[str, Serializable] | None = None
 
+# Top-level record structures - the three shapes `savegraph()`/`loadgraph()` produce/consume,
+# dispatched by cattrs via each variant's `_type` tag (see `SerializationRecordVariant` below).
+# `protocol_version`/`tensor_data`/`n_tensor_values` are common to all three and live once on the
+# outer `SerializationBox` (below), shared by composition rather than redeclared on each variant.
+
+# TODO when rename above is done, rename this to just NodeRecord
 @dataclass
-class SerializedGraph:
-    node_list: list[NodeRecord]
-    n_tensor_values: int
-    protocol_version: int = PROTOCOL_VERSION
-    tensor_data: dict[int, object] | None = None
-
-
-#TODO replace
-@dataclass
-class SerializedGraphModule:
-    input_nodes: tuple[NodeReference, ...]  # `required_inputs`
-    output_nodes: tuple[NodeReference, ...]  # `nodes_to_compute`
-    forward_output_list: tuple[NodeReference, ...]
-
-#TODO: replace
-@dataclass
-class SerializationRecord:
-    graph: SerializedGraph
-    protocol_version: int = PROTOCOL_VERSION
-    module: SerializedGraphModule | None = None
-    tensor_data: dict[int, object] | None = None
-    root_ids: list[NodeReference] | None = None
-    single_root: bool = False
-
-
-# Top-level record structures
-@dataclass
-class NodeRecord:  # bare list of `Node`s, not wrapped in a `GraphModule`
-    nodes: SerializedGraph
+class NodeRecord:  # a single root `Node`, not wrapped in a list or a `GraphModule`
+    graph: list[NodeData]
     root: NodeReference
-    _type: Literal["node_list_record"] = "node_record"
+    _type: Literal["node_record"] = "node_record"
 
 @dataclass
-class NodeListRecord:  # bare list of `Node`s, not wrapped in a `GraphModule`
-    graph: SerializedGraph
+class NodeListRecord:  # a list of root `Node`s, not wrapped in a `GraphModule`
+    graph: list[NodeData]
     root_list: list[NodeReference]
-    single_root: bool = False
     _type: Literal["node_list_record"] = "node_list_record"
-
 
 @dataclass
 class GraphModuleRecord:  # a `GraphModule`
-    graph: SerializedGraph
+    graph: list[NodeData]
     input_nodes: tuple[NodeReference, ...]  # `required_inputs`
     output_nodes: tuple[NodeReference, ...]  # `nodes_to_compute`
     forward_output_list: tuple[NodeReference, ...]
     _type: Literal["graph_module_record"] = "graph_module_record"
 
-
+# TODO rename SerializationRecord
 type SerializationRecordVariant = NodeRecord | NodeListRecord | GraphModuleRecord
+
+@dataclass
+class SerializationBox:
+    record: SerializationRecordVariant
+    n_tensor_values: int
+    tensor_data: dict[int, object] | None = None
+    protocol_version: int = PROTOCOL_VERSION

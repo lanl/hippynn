@@ -1,9 +1,13 @@
 """
 The ContextConverter class: a global cattrs Converter plus tensor/node identity caches.
 
+Implements structuring and unstructuring based on types.py
+
 """
 
+import dataclasses
 import itertools
+import warnings
 from typing import Any, get_origin
 
 import torch
@@ -11,22 +15,31 @@ from cattrs import Converter
 
 from .registry import _ID_REGISTRY, _NODE_REGISTRY
 from .types import (
+    GraphModuleRecord,
     NodeIdentifier,
-    NodeRecord,
+    NodeListRecord,
+    NodeData,
     NodeReference,
     ScalarPrimitive,
     Serializable,
+    NodeRecord,
+    SerializationRecordVariant,
     Tagged,
     TaggedIdxType,
     TaggedSet,
     TaggedTuple,
     TensorReference,
 )
+from ..graphs import GraphModule
 from ..graphs.indextypes import IdxType
 from ..graphs.nodes.base import Node
 
 
 CONVERTER = Converter()
+
+# `_type` tag values for the three `SerializationRecordVariant` members, used by
+# `structure_with_context` to recognize a record dict without needing its live Python type.
+_RECORD_TAGS = {cls.__dataclass_fields__["_type"].default for cls in (NodeRecord, NodeListRecord, GraphModuleRecord)}
 
 
 class ContextConverter:
@@ -88,7 +101,7 @@ class ContextConverter:
 
         parents = tuple(self.ensure_node(p) for p in node.parents) 
         state_dict = node.torch_module.state_dict(keep_vars=True) if getattr(node, "torch_module", None) else None
-        record = NodeRecord(
+        record = NodeData(
             identifier=identifier,
             cls=_NODE_REGISTRY[type(node)],
             parents=parents,
@@ -100,7 +113,7 @@ class ContextConverter:
         self.node_blob[identifier.id] = self.unstructure(record)
         return reference
 
-    def consume_node(self, node):
+    def unstructure_node(self, node):
         """cattrs unstructure hook for live `Node` instances anywhere in the structure being unstructured."""
         return self.unstructure(self.ensure_node(node))
 
@@ -118,7 +131,7 @@ class ContextConverter:
             record = self.node_blob[key]
             # Structuring `record.parents` (tuple[NodeReference, ...]) recurses into this same
             # hook for each parent, so `record.parents` already holds live Node objects here.
-            record = self.structure(record, NodeRecord)
+            record = self.structure(record, NodeData)
             cls = _ID_REGISTRY[record.cls]
             node = cls.from_record(name=record.identifier.name, parents=record.parents, **(record.state or {}))
             if record.state_dict:
@@ -170,11 +183,61 @@ class ContextConverter:
             return self.structure(data, dict[str, Serializable])
         return data
 
+    def structure_single_node_record(self, data, type_) -> Node:
+        (resolved,) = self.structure([data["root"]], list[NodeReference])
+        return resolved
+
+    def structure_node_list_record(self, data, type_) -> list:
+        return self.structure(data["root_list"], list[NodeReference])
+
+    def structure_graph_module_record(self, data, type_) -> GraphModule:
+        input_nodes, output_nodes, forward_output_list = self.structure(
+            [data["input_nodes"], data["output_nodes"], data["forward_output_list"]],
+            list[tuple[NodeReference, ...]],
+        )
+        module = GraphModule(input_nodes, output_nodes)
+        if tuple(module.forward_output_list) != forward_output_list:
+            warnings.warn(
+                "Deserialized GraphModule's forward_output_list does not match the recorded one. State dict may be invalid.",
+                stacklevel=2,
+            )
+        module.forward_output_list = forward_output_list
+        return module
+
 
     def unstructure_with_context(self, obj):
+        """
+        The single root entry point for unstructuring - never reached recursively (hooks recurse
+        via `self.unstructure()` instead), so it's free to recognize `obj`'s top-level shape with
+        plain `isinstance` checks, unlike a cattrs hook (which would fire identically on the same
+        shape found nested anywhere else, e.g. a `Node` reference or an unrelated plain list).
+        """
+        self.reset()
         self._unstructuring = True
         try:
-            structure = self.unstructure(obj)
+            if isinstance(obj, GraphModule):
+                input_structure, output_structure, forward_structure = self.unstructure(
+                    [list(obj.input_nodes), list(obj.nodes_to_compute), list(obj.forward_output_list)]
+                )
+                structure = GraphModuleRecord(
+                    graph=list(self.node_blob.values()),
+                    input_nodes=input_structure,
+                    output_nodes=output_structure,
+                    forward_output_list=forward_structure,
+                )
+            elif isinstance(obj, (list, tuple)) and all(isinstance(x, Node) for x in obj):
+                root_list = self.unstructure(list(obj))
+                structure = NodeListRecord(graph=list(self.node_blob.values()), root_list=root_list)
+            else:
+                structure = self.unstructure(obj)
+
+            if dataclasses.is_dataclass(structure) and not isinstance(structure, type):
+                # `structure` never embeds a live tensor - tensors are only ever referenced
+                # indirectly via `TensorReference.key`, resolved through `tensor_blob` below - so
+                # flattening it here is cheap and safe. From here on `unstructure_with_context`
+                # always returns plain data, uniformly, regardless of `obj`'s shape.
+                structure = dataclasses.asdict(structure)
+
             return_tensors = self.tensor_blob
             return_nodes = self.node_blob
         finally:
@@ -187,11 +250,30 @@ class ContextConverter:
             raise ValueError("ContextConverter.unstructure() may only be called during an active unstructure_with_context() session.")
         return CONVERTER.unstructure(obj, **kwargs)
 
-    def structure_with_context(self, data, typ, *, tensor_blob, node_blob):
+    def structure_with_context(self, data, *, tensor_blob, node_blob):
+        """
+        The single root entry point for structuring - mirrors `unstructure_with_context`'s own
+        root-only `isinstance` checks by recognizing `data`'s shape instead of requiring the
+        caller to pass a target type explicitly.
+        """
         self.reset()
         self.tensor_blob = tensor_blob
         self.node_blob = node_blob
         self._structuring = True
+        if dataclasses.is_dataclass(data) and not isinstance(data, type):
+            # `data` is a live NodeRecord/NodeListRecord/GraphModuleRecord - e.g. unpickled or
+            # torch.load()ed (both preserve Python objects); `unstructure_with_context` itself
+            # never returns one of these live (it flattens them), so this only happens when
+            # reading straight from a pkl/pt file.
+            typ = type(data)
+            data = dict(vars(data))
+        elif isinstance(data, dict) and data.get("_type") in _RECORD_TAGS:
+            # json/yml lose Python type info, but the `_type` tag still identifies which record
+            # variant this is - cattrs disambiguates the union from it, same as any other tagged
+            # union member.
+            typ = SerializationRecordVariant
+        else:
+            typ = Serializable
         try:
             return self.structure(data, typ)
         finally:
@@ -210,29 +292,23 @@ CONTEXT_CONVERTER = ContextConverter()
 from cattrs.strategies import configure_union_passthrough
 configure_union_passthrough(ScalarPrimitive.__value__, CONVERTER)
 
-# Direct-type-key hooks: registered via cattrs' decorator-style dispatch (the key is inferred from
-# the bound method's annotations - see "Use as Decorators" in the cattrs docs). Called rather than
-# applied with literal `@` syntax, since these are shared-instance bound methods, not fresh defs.
+# Register direct hooks (implicit type from return type)
 CONVERTER.register_unstructure_hook(CONTEXT_CONVERTER.consume_tensor)
 CONVERTER.register_unstructure_hook(CONTEXT_CONVERTER.unstructure_tuple)
 CONVERTER.register_unstructure_hook(CONTEXT_CONVERTER.unstructure_set)
 CONVERTER.register_unstructure_hook(CONTEXT_CONVERTER.unstructure_idxtype)
 
-# `emit_tensor`/`emit_node`/`emit_idxtype`: each one's return value is a live `torch.Tensor`/`Node`/
-# `IdxType`, not the `TensorReference`/`NodeReference`/`TaggedIdxType` it's dispatched on - the
-# decorator's return-type introspection would infer the wrong key, so all three use the explicit key
-# form. This is also what lets the `Tagged` union (`structure_serializable` below) resolve a
-# disambiguated member straight through to the live object, rather than cattrs' default structuring.
+# Register indirect hooks (which return different types than they take in)
 CONVERTER.register_structure_hook(TensorReference, CONTEXT_CONVERTER.emit_tensor)
 CONVERTER.register_structure_hook(NodeReference, CONTEXT_CONVERTER.emit_node)
 CONVERTER.register_structure_hook(TaggedIdxType, CONTEXT_CONVERTER.emit_idxtype)
+CONVERTER.register_structure_hook(NodeRecord, CONTEXT_CONVERTER.structure_single_node_record)
+CONVERTER.register_structure_hook(NodeListRecord, CONTEXT_CONVERTER.structure_node_list_record)
+CONVERTER.register_structure_hook(GraphModuleRecord, CONTEXT_CONVERTER.structure_graph_module_record)
 
-# Predicate-based hooks, plus `structure_tuple`/`structure_set` below via hook factories: `TaggedTuple[Serializable]`/
-# `TaggedSet[Serializable]` are parametrized generics, not valid `register_structure_hook` class keys, and their
-# hooks intentionally return a different runtime type (`tuple`/`set`) than the type they're dispatched on - a hook
-# *factory* (predicate -> hook, decorator-eligible) is the appropriate cattrs API for that, not a plain hook.
+# Register generic hooks (many classes)
 CONVERTER.register_unstructure_hook_func(
-    lambda t: isinstance(t, type) and issubclass(t, Node), CONTEXT_CONVERTER.consume_node
+    lambda t: isinstance(t, type) and issubclass(t, Node), CONTEXT_CONVERTER.unstructure_node
     )
 
 CONVERTER.register_structure_hook_func(
@@ -248,34 +324,3 @@ CONVERTER.register_structure_hook_func(
     lambda t: t is Serializable,
     CONTEXT_CONVERTER.structure_serializable,
     )
-
-## experimental
-from functools import reduce
-from operator import or_
-from typing import get_args
-
-from cattrs._compat import is_generic, is_union_type
-from cattrs._generics import deep_copy_with
-from cattrs.gen._generics import generate_mapping
-from cattrs.typealiases import get_type_alias_base, is_type_alias
-
-
-def install_union_alias_unwrapping(converter):
-    def unwrap(t):
-        base = get_type_alias_base(t)
-        return deep_copy_with(base, generate_mapping(t)) if is_generic(t) else base
-
-    def contains_alias(t):
-        return is_union_type(t) and any(is_type_alias(a) for a in get_args(t))
-
-    def factory(t, converter):
-        expanded = reduce(
-            or_,
-            (unwrap(a) if is_type_alias(a) else a for a in get_args(t)),
-        )
-        return converter.get_structure_hook(expanded)
-
-    converter.register_structure_hook_factory(contains_alias, factory)
-
-
-install_union_alias_unwrapping(CONVERTER)

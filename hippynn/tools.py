@@ -4,7 +4,7 @@ Misc. helpful functions which are not part of the library organization per se.
 """
 # Dev Note: functions placed here should not have any dependency on internal
 # hippynn packages. This is the place for misc. pytorch/numpy/pure-python code.
-import sys, os, traceback, warnings, functools
+import sys, os, pathlib, traceback, warnings, functools
 import collections
 import contextlib
 
@@ -121,6 +121,33 @@ def open_if_needed(file, mode="r"):
             yield fh
     else:
         yield file
+
+
+def infer_filetype(file, filetype, filetypes, aliases=None):
+    """
+    Resolve the file format to use: `filetype` if given, else inferred from `file`'s extension.
+
+    :param file: filename (`str`) or an already-open file object; the format is only inferred
+        when this is a string.
+    :param filetype: explicit format to use; returned as-is if not None.
+    :param filetypes: allowed format strings; the inferred (possibly alias-resolved) extension
+        must be one of these.
+    :param aliases: optional mapping from alternate extension spellings to a canonical entry in
+        `filetypes` (e.g. ``{"yaml": "yml"}``).
+    """
+    if filetype is not None:
+        return filetype
+    if isinstance(file, str):
+        suffix = pathlib.Path(file).suffix.lstrip(".").lower()
+        suffix = (aliases or {}).get(suffix, suffix)
+        if suffix in filetypes:
+            return suffix
+    raise ValueError(f"Could not infer a filetype from {file!r}; pass `filetype` explicitly, one of {filetypes}.")
+
+
+# TODO: several other places in the library infer a file format from a filename's extension
+# (e.g. checkpoint/database loading) - look for call sites that could be migrated to use this
+# helper instead of reimplementing the same pattern.
 
 
 def progress_bar(iterable, *args, **kwargs):
