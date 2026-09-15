@@ -73,13 +73,18 @@ class NodeRecord:
 class SerializedGraph:
     node_list: list[NodeRecord]
     n_tensor_values: int
+    protocol_version: int = PROTOCOL_VERSION
+    tensor_data: dict[int, object] | None = None
 
+
+#TODO replace
 @dataclass
 class SerializedGraphModule:
     input_nodes: tuple[NodeReference, ...]  # `required_inputs`
     output_nodes: tuple[NodeReference, ...]  # `nodes_to_compute`
     forward_output_list: tuple[NodeReference, ...]
 
+#TODO: replace
 @dataclass
 class SerializationRecord:
     graph: SerializedGraph
@@ -88,3 +93,30 @@ class SerializationRecord:
     tensor_data: dict[int, object] | None = None
     root_ids: list[NodeReference] | None = None
     single_root: bool = False
+
+
+# Top-level record structures
+@dataclass
+class NodeRecord:  # bare list of `Node`s, not wrapped in a `GraphModule`
+    nodes: SerializedGraph
+    root: NodeReference
+    _type: Literal["node_list_record"] = "node_record"
+
+@dataclass
+class NodeListRecord:  # bare list of `Node`s, not wrapped in a `GraphModule`
+    graph: SerializedGraph
+    root_list: list[NodeReference]
+    single_root: bool = False
+    _type: Literal["node_list_record"] = "node_list_record"
+
+
+@dataclass
+class GraphModuleRecord:  # a `GraphModule`
+    graph: SerializedGraph
+    input_nodes: tuple[NodeReference, ...]  # `required_inputs`
+    output_nodes: tuple[NodeReference, ...]  # `nodes_to_compute`
+    forward_output_list: tuple[NodeReference, ...]
+    _type: Literal["graph_module_record"] = "graph_module_record"
+
+
+type SerializationRecordVariant = NodeRecord | NodeListRecord | GraphModuleRecord
