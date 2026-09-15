@@ -5,17 +5,25 @@ The ContextConverter class: a global cattrs Converter plus tensor/node identity 
 
 import itertools
 from typing import Any, get_origin
-from .types import NodeReference, NodeIdentifier, NodeRecord, Serializable, ScalarPrimitive
-from .registry import _NODE_REGISTRY, _ID_REGISTRY
-from cattrs import Converter
-
 
 import torch
+from cattrs import Converter
 
 from .registry import _ID_REGISTRY, _NODE_REGISTRY
-from .types import NodeIdentifier, NodeRecord, NodeReference, Serializable, TaggedDict, TaggedIdxType, TaggedList, TaggedSet, TaggedTuple, TensorReference, Tagged
-from ..graphs.nodes.base import InputNode, Node
+from .types import (
+    NodeIdentifier,
+    NodeRecord,
+    NodeReference,
+    ScalarPrimitive,
+    Serializable,
+    Tagged,
+    TaggedIdxType,
+    TaggedSet,
+    TaggedTuple,
+    TensorReference,
+)
 from ..graphs.indextypes import IdxType
+from ..graphs.nodes.base import Node
 
 
 CONVERTER = Converter()
@@ -23,19 +31,20 @@ CONVERTER = Converter()
 
 class ContextConverter:
     """
-    Holds one cattrs `Converter` plus the tensor/node identity caches used by its hooks (see
-    `hooks.py`/`registry.py`). `context_converter` below is the single instance used for the
-    whole process - a Converter's dispatch machinery caches resolved hooks per type, so reusing
-    one is the intended usage, and every hook is bound to `ctx=context_converter` directly, at
-    registration time, since there is only ever this one instance to resolve. `reset()` clears the
-    per-session state back to empty; `unstructure_with_context()`/`structure_with_context()` each
-    call it themselves (before installing blobs), and again after resolving, so callers never need
-    to manage reset timing directly. A session is single-threaded and non-reentrant - two
-    independent sessions cannot be interleaved.
+    Holds one cattrs `Converter` plus the tensor/node identity caches used by its hooks (defined
+    as methods below and registered onto `CONVERTER` at the bottom of this file).
+    `context_converter` below is the single instance used for the whole process - a Converter's
+    dispatch machinery caches resolved hooks per type, so reusing one is the intended usage, and
+    every hook is bound to `self` directly, at registration time, since there is only ever this one
+    instance to resolve. `reset()` clears the per-session state back to empty;
+    `unstructure_with_context()`/`structure_with_context()` each call it themselves (before
+    installing blobs), and again after resolving, so callers never need to manage reset timing
+    directly. A session is single-threaded and non-reentrant - two independent sessions cannot be
+    interleaved.
 
-    `unstructure`/`structure` are the recursive, in-session calls used by hooks (`hooks.py`) while
-    a session is active; `unstructure_with_context`/`structure_with_context` are the one-shot,
-    self-contained sessions built on top of them.
+    `unstructure`/`structure` are the recursive, in-session calls used by hooks while a session is
+    active; `unstructure_with_context`/`structure_with_context` are the one-shot, self-contained
+    sessions built on top of them.
     """
 
     def __init__(self):
@@ -53,7 +62,7 @@ class ContextConverter:
         self.tensor_objects: dict[int, Any] = {}  # key -> tensor, structure-side cache
         self._tensor_counter = itertools.count()  # dedicated key source, independent of len(tensor_blob)
 
-        # For holding tensors that come as a side-payload
+        # For holding nodes that come as a side-payload
         self.node_blob: dict[int, Any] = {}
         self.node_ids: dict[int, int] = {}  # id(node) -> key, unstructure-side dedup
         self.node_objects: dict[int, Any] = {}  # key -> reconstructed node, structure-side cache
@@ -117,9 +126,7 @@ class ContextConverter:
             self.node_objects[key] = node
             return node
         finally:
-           self._node_resolving.discard(key)
-
-
+            self._node_resolving.discard(key)
 
     def consume_tensor(self, obj: torch.Tensor):
         key = self.tensor_ids.get(id(obj))
@@ -269,42 +276,6 @@ def install_union_alias_unwrapping(converter):
         return converter.get_structure_hook(expanded)
 
     converter.register_structure_hook_factory(contains_alias, factory)
+
+
 install_union_alias_unwrapping(CONVERTER)
-# def _resolve_serializable(data, ctx):
-#     if data is None or isinstance(data, (bool, int, float, str)):
-#         return data
-    
-#     if isinstance(data, TensorReference):
-#         return ctx.structure(data, torch.Tensor)
-#     if isinstance(data, NodeReference):
-#         return ctx.structure(data, NodeReference)
-#     if isinstance(data, TaggedList):
-#         return list(ctx.structure(data.values, list[Serializable]))
-#     if isinstance(data, TaggedSet):
-#         return set(ctx.structure(data.values, list[Serializable]))
-#     if isinstance(data, TaggedTuple):
-#         return tuple(ctx.structure(data.values, list[Serializable]))
-#     if isinstance(data, TaggedDict):
-#         return dict(ctx.structure(data.values, dict[str, Serializable]))
-
-#     # print("Weird type", data)
-#     # return data
-#     # # Todo maybe that was a horrible mistake?
-#     print("Something went wrong! Unexpected data type:",data)
-#     raise TypeError(f"Cannot deserialize value of type {type(data)!r}: {data!r}")
-
-# # todo merge with above function, don't seem to have need for two functions??
-# def _structure_serializable(data, typ, *, ctx):
-#     # todo address note... what does this even mean
-#     # NOTE: matching against the PEP-695 `Serializable` type-alias object itself (rather than
-#     # something it resolves/unwraps to, e.g. via `.__value__`) is not yet verified against the
-#     # pinned cattrs version - flagged in the plan's "verify against actual cattrs version" step.
-#     # `_resolve_serializable` also relies on this same identity-match for `list[Serializable]`,
-#     # since cattrs re-enters this hook per element when recursing into it.
-#     print("structuring call",data,typ)
-#     return _resolve_serializable(data, ctx)
-
-# from functools import partial
-# CONVERTER.register_structure_hook_func(
-#     lambda t: t is Serializable, partial(_structure_serializable, ctx=CONTEXT_CONVERTER)
-#)
