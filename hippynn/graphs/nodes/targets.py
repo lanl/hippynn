@@ -5,7 +5,16 @@ Nodes for prediction of variables from network features.
 import torch
 
 from .base import MultiNode, AutoKw, ExpandParents, find_unique_relative, Node
-from .tags import AtomIndexer, Network, PairIndexer, HAtomRegressor, Charges, Energies, Encoder
+from .tags import (
+    AtomIndexer,
+    Network,
+    EquivariantNetwork,
+    PairIndexer,
+    HAtomRegressor,
+    Charges,
+    Energies,
+    Encoder,
+)
 from .indexers import PaddingIndexer
 from ..indextypes import IdxType, index_type_coercion
 from ...layers import targets as target_modules
@@ -217,3 +226,44 @@ class AtomizationEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, Mul
         henergy_node = HEnergyNode(f"{self.name}[HEnergy]", new_parents, module=henergy_mod)
 
         return henergy_node
+
+class HVectorNode(HAtomRegressor, ExpandParents, AutoKw, MultiNode):
+    input_names = (
+        "scalar_features",
+        "vector_features",
+        "system_index",
+        "n_systems",
+    )
+
+    output_names = (
+        "system_vector",
+        "atom_vectors",
+        "vector_terms",
+    )
+
+    main_output_name = "system_vector"
+
+    output_index_states = (
+        IdxType.Systems,
+        IdxType.Atoms,
+        None,
+    )
+
+    auto_module_class = target_modules.HVector
+
+    @parent_expander.match(EquivariantNetwork)
+    def expansion0(self, network, *, purpose, **kwargs):
+        atom_indexer = find_unique_relative(
+            network,
+            AtomIndexer,
+            why_desc=purpose,
+        )
+
+        return (
+            network.scalar_features,
+            network.vector_features,
+            atom_indexer.system_index,
+            atom_indexer.n_systems,
+        )
+
+    parent_expander.assertlen(4)

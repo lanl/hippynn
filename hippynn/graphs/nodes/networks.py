@@ -2,11 +2,11 @@
 Nodes for networks.
 """
 from .tags import Encoder, PairIndexer, Network, AtomIndexer
-from .base import Node, AutoKw, ExpandParents, SingleNode
+from .base import Node, MultiNode, AutoKw, ExpandParents, SingleNode
 from .base.multi import IndexNode
 from .indexers import OneHotEncoder, PaddingIndexer, acquire_encoding_padding
 from .pairs import OpenPairIndexer, PeriodicPairIndexer, SparsePairIndexer
-from .tags import PairIndexer
+from .tags import PairIndexer, EquivariantNetwork
 from .inputs import SpeciesNode, PositionsNode, CellNode
 from ..indextypes import IdxType
 from ... import networks as network_modules
@@ -138,7 +138,6 @@ class HipnnVec(AutoKw, DefaultNetworkExpansion, Network, SingleNode, _FeatureNod
     def __init__(self, name, parents, periodic=False, **kwargs):
         super().__init__(name, parents, periodic=periodic, **kwargs)
 
-
 class HipnnQuad(HipnnVec):
     """
     Node for HIP-NN-TS neural network, l=2
@@ -150,3 +149,42 @@ class HipHopnn(HipnnVec):
     Node for HIP-HOP_NN neural network.
     """
     auto_module_class = network_modules.hiphop.HipHopnnModule
+
+class HipHopHoorayNN(AutoKw, DefaultNetworkExpansion, EquivariantNetwork, MultiNode):
+    input_names = (
+        "input_features",
+        "pair_first",
+        "pair_second",
+        "pair_dist",
+        "pair_coord",
+    )
+
+    output_names = (
+        "scalar_features",
+        "vector_features",
+    )
+
+    output_index_states = (
+        IdxType.Unlabeled,
+        IdxType.Unlabeled,
+    )
+
+    main_output_name = "scalar_features"
+    auto_module_class = network_modules.hiphophooray.HipHopHoorayNNModule
+
+    @parent_expander.match(Node, PairIndexer)
+    def expansion2(self, features, pairfinder, **kwargs):
+        return (
+            features,
+            pairfinder.pair_first,
+            pairfinder.pair_second,
+            pairfinder.pair_dist,
+            pairfinder.pair_coord,
+        )
+
+    parent_expander.assertlen(5)
+    parent_expander.get_main_outputs()
+    parent_expander.require_idx_states(IdxType.Atoms, None, None, None, None)
+
+    def __init__(self, name, parents, periodic=False, **kwargs):
+        super().__init__(name, parents, periodic=periodic, **kwargs)

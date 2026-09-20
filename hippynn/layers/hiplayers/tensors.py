@@ -184,7 +184,41 @@ class TensorExtractor(torch.nn.Module):
                 t = torch.einsum("ijkl,bi,bj,bk->bl", self.pmaps[3], rhats, rhats, rhats)
         return s, v, q, t
 
+class VectorTensorExtractor(torch.nn.Module):
+    """
+    Combine vectors with angular tensors through angular order 3.
 
+    Returns reducible tensors of total orders 1 through 4.
+    """
+
+    def forward(self, vectors, angular_tensors):
+        s, v, Q, T = angular_tensors
+        batch_size = vectors.shape[0]
+
+        assert vectors.shape == (batch_size, 3), (
+            f"Expected vectors shape {(batch_size, 3)}, "
+            f"got {vectors.shape}"
+        )
+        assert s.shape == (batch_size, 1), (
+            f"Expected s shape {(batch_size, 1)}, got {s.shape}"
+        )
+        assert v.shape == (batch_size, 3), (
+            f"Expected v shape {(batch_size, 3)}, got {v.shape}"
+        )
+        assert Q.shape == (batch_size, 5), (
+            f"Expected Q shape {(batch_size, 5)}, got {Q.shape}"
+        )
+        assert T.shape == (batch_size, 7), (
+            f"Expected T shape {(batch_size, 7)}, got {T.shape}"
+        )
+
+        F1 = vectors * s
+        F2 = torch.einsum("bi,bj->bij", vectors, v)
+        F3 = torch.einsum("bi,bk->bik", vectors, Q)
+        F4 = torch.einsum("bi,bl->bil", vectors, T)
+
+        return F1, F2, F3, F4
+    
 # Note:!! Jitting this function with torch.jit.script does something bad:
 # the training code slows down over time. (Some kind of leak)
 # even though it is about 20% faster at first, it is very bad overall.
@@ -308,6 +342,7 @@ class HopInvariantLayer(torch.nn.Module):
         super().__init__()
         self.l_max = l_max
         self.n_max = n_max
+        # Note: this is making copy in every layer? 
         self.cmaps = torch.nn.ParameterList(list(_cmaps.values()))
         for c in self.cmaps:
             c.requires_grad_(False)

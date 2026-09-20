@@ -46,3 +46,8 @@ class Species:
 
 class Energies:
     pass
+
+class EquivariantNetwork(Network):
+    """Network that exposes invariant and equivariant feature streams."""
+
+    pass

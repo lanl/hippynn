@@ -296,3 +296,19 @@ class AtomizationEnergy(torch.nn.Module):
             total_hier = torch.zeros_like(total_energies)
 
         return total_energies, en_terms, total_hier
+
+
+class HVector(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(
+        self,
+        scalar_features,
+        vector_features,
+        system_index,
+        n_systems,
+    ):
+        raise NotImplementedError(
+            "The equivariant vector readout has not been implemented yet."
+        )

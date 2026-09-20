@@ -349,10 +349,12 @@ class HOPInteractionLayer(InteractLayer):
         # shape n_atom, n_feat, n_tensor
         tensor_features = tensor_features.permute(0, 2, 1).reshape(n_atoms_real * self.nf_out, n_tensor_comp)
 
+        # TODO: Invariant calculation eq. 25 
         invariants = self.invars(tensor_features)
         invariants = invariants.reshape(n_atoms_real, self.nf_out, self.n_invariants)
 
         if self.group_norm:
+            # TODO: eq. 27
             # Group norm operates on n_batch, n_groups*n_features_per_group,
             # so the group index (invariant index) should come first.
             invariants = invariants.permute(0, 2, 1).reshape(n_atoms_real, self.n_invariants * self.nf_out)
@@ -366,8 +368,10 @@ class HOPInteractionLayer(InteractLayer):
         normalized_invariants = normalized_invariants.reshape(n_atoms_real, self.nf_out * self.n_invariants)
 
         # (n_a,n_f*n_i) @ (n_f*n_i,n_f) -> (n_a, n_f)
+        # TODO: eq. 28 
         mixing_features = normalized_invariants @ self.mixing_weights.reshape(-1, self.nf_out)
 
+        # TODO: eq. 19 
         total_out = mixing_features + features_out_selfpart
 
         return total_out
