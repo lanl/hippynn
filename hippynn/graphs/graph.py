@@ -9,6 +9,7 @@ import torch
 from .nodes.base import Node, InputNode, NodeNotFound, NodeAmbiguityError
 
 from . import get_subgraph, compute_evaluation_order
+from .gops import check_evaluation_order, GraphInconsistency
 
 from .. import settings
 
@@ -59,23 +60,44 @@ class GraphModule(torch.nn.Module):
 
         del x
 
-        self.forward_output_list = compute_evaluation_order(all_node_list)
+        self._set_evaluation_order(compute_evaluation_order(all_node_list))
 
-        # Here we have to do a small dance to allow us to create a dictionary of nodes to modules.
-        # Pytorch requires ModuleDicts to have keys that are strings.
-        # We want a ModuleDict with keys that are nodes.
-        # self.node_mod_map does this as a regular python dictionary,
-        # while registration with pytorch is given by numbering.
+    @classmethod
+    def from_evaluation_order(cls, required_inputs, nodes_to_compute, evaluation_order):
+        """
+        Construct a graph module with an explicit evaluation order, rather than one recomputed
+        from the nodes.
 
+        :param required_inputs: inputs
+        :param nodes_to_compute: outputs
+        :param evaluation_order: evaluation order to key the module dict with; must contain the
+            same set of nodes that `compute_evaluation_order` would produce for these inputs/outputs.
+        """
+        self = cls(required_inputs, nodes_to_compute)
+        self._set_evaluation_order(evaluation_order)
+        return self
+
+    def _set_evaluation_order(self, new_order):
+        """
+        Set (or reset) the evaluation order, rebuilding `names_dict`/`moddict` to match.
+
+        :param new_order: the new evaluation order for this graph.
+        :raises GraphInconsistency: if a previous evaluation order exists and `new_order` does
+            not contain the same set of nodes.
+        """
+        new_order = list(new_order)
+
+        previous = getattr(self, "forward_output_list", None)
+        if previous is not None and (len(new_order) != len(previous) or set(new_order) != set(previous)):
+            raise GraphInconsistency("New evaluation order does not contain the same nodes as the current one.")
+
+        check_evaluation_order(new_order)
+
+        self.forward_output_list = new_order
+        # Pytorch requires string keys; rebuilt from scratch (not patched) to keep names_dict/moddict in sync.
         self.names_dict = OrderedDict((n, "node" + str(i)) for i, n in enumerate(self.forward_output_list))
         self.moddict = torch.nn.ModuleDict(
-            OrderedDict(
-                (
-                    (node_name, node.torch_module)
-                    for node, node_name in self.names_dict.items()
-                    if not isinstance(node, InputNode)
-                )
-            )
+            OrderedDict((node_name, node.torch_module) for node, node_name in self.names_dict.items())
         )
 
     def get_module(self, node):

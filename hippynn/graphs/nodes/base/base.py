@@ -133,7 +133,12 @@ class LossInputNode(InputNode):
 
     @classmethod
     def from_record(cls, name, origin_node, **kwargs):
-        return cls(name=name, origin_node=origin_node)
+        node = cls(name=name, origin_node=origin_node)
+        # `LossPredNode`/`LossTrueNode` derive `index_state` from `origin_node` in their own
+        # `__init__`, but a bare `LossInputNode` does not - restore it if it was independently set.
+        if "index_state" in kwargs:
+            node.index_state = kwargs["index_state"]
+        return node
 
 
 class LossPredNode(LossInputNode):

@@ -97,5 +97,6 @@ type SerializationRecord = NodeRecord | NodeListRecord | GraphModuleRecord
 class SerializationBox:
     record: SerializationRecord
     n_tensor_values: int
-    tensor_data: dict[int, object] | None = None
+    n_node_values: int
+    tensor_data: list[object] | None = None
     protocol_version: int = PROTOCOL_VERSION

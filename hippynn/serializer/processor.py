@@ -6,7 +6,6 @@ Implements structuring and unstructuring based on types.py
 """
 
 import dataclasses
-import itertools
 import warnings
 from typing import Any, get_origin
 
@@ -42,14 +41,7 @@ CONVERTER = Converter()
 _RECORD_TAGS = {cls._type for cls in (NodeRecord, NodeListRecord, GraphModuleRecord)}
 
 
-# Holds one cattrs `Converter` plus the tensor/node identity caches used by its hooks (defined as
-# methods below, registered onto `CONVERTER` at the bottom of this file). `CONTEXT_CONVERTER`
-# below is the single process-wide instance - hooks are bound to `self` at registration time, so
-# there's only ever one instance to resolve. A session is single-threaded and non-reentrant.
-#
-# `unstructure`/`structure` are the recursive, in-session calls used by hooks; `reset()` clears
-# per-session state, called automatically by `unstructure_with_context()`/`structure_with_context()`
-# (the one-shot, self-contained sessions built on top of the recursive calls) before and after use.
+# For serializing objects while side-car-ing nodes (avoid recursion) and tensors (avoid large storage)
 class ContextConverter:
     def __init__(self):
         self.reset()
@@ -60,18 +52,16 @@ class ContextConverter:
         self._unstructuring = False
         self._structuring = False
 
-        # For holding tensors that come as a side-payload
-        self.tensor_blob: dict[int, Any] = {}
+        # For holding tensors that come as a side-payload; keys are indices into tensor_blob.
+        self.tensor_blob: list[Any] = []
         self.tensor_ids: dict[int, int] = {}  # id(tensor) -> key, unstructure-side dedup
         self.tensor_objects: dict[int, Any] = {}  # key -> tensor, structure-side cache
-        self._tensor_counter = itertools.count()  # dedicated key source, independent of len(tensor_blob)
 
-        # For holding nodes that come as a side-payload
-        self.node_blob: dict[int, Any] = {}
+        # For holding nodes that come as a side-payload; NodeIdentifier.id is an index into node_blob.
+        self.node_blob: list[Any] = []
         self.node_ids: dict[int, int] = {}  # id(node) -> key, unstructure-side dedup
         self.node_objects: dict[int, Any] = {}  # key -> reconstructed node, structure-side cache
         self._node_resolving: set[int] = set()  # loop guard for the recursive resolver
-        self._node_counter = itertools.count()  # dedicated key source, independent of len(node_blob) -
 
     def ensure_node(self, node):
         """Recursively convert node/parents into NodeReferences for unstructuring."""
@@ -79,10 +69,11 @@ class ContextConverter:
         if key is not None:
             return NodeReference(identifier=NodeIdentifier(id=key, name=node.name))
 
-        # Reserve the key before recursing, so a cycle back to this node returns a reference
-        # instead of rebuilding it; recurse parents first, so that when reconstructing we'll
-        # have topo order.
-        key = self.node_ids[id(node)] = next(self._node_counter)
+        # Reserve the key and its slot before recursing, so a cycle back to this node returns a
+        # reference instead of rebuilding it; recurse parents first, so that when reconstructing
+        # we'll have topo order.
+        key = self.node_ids[id(node)] = len(self.node_blob)
+        self.node_blob.append(None)
         identifier = NodeIdentifier(id=key, name=node.name)
         reference = NodeReference(identifier=identifier)
 
@@ -133,9 +124,8 @@ class ContextConverter:
     def consume_tensor(self, obj: torch.Tensor):
         key = self.tensor_ids.get(id(obj))
         if key is None:
-            key = next(self._tensor_counter)
-            self.tensor_ids[id(obj)] = key
-            self.tensor_blob[key] = obj
+            key = self.tensor_ids[id(obj)] = len(self.tensor_blob)
+            self.tensor_blob.append(obj)
         return self.unstructure(TensorReference(key=key))
 
     def emit_tensor(self, data: TensorReference, typ) -> torch.Tensor:
@@ -184,20 +174,10 @@ class ContextConverter:
             [data["input_nodes"], data["output_nodes"], data["forward_output_list"]],
             list[tuple[NodeReference, ...]],
         )
-        module = GraphModule(input_nodes, output_nodes)
-        if tuple(module.forward_output_list) != forward_output_list:
-            warnings.warn(
-                "Deserialized GraphModule's forward_output_list does not match the recorded one. State dict may be invalid.",
-                stacklevel=2,
-            )
-        module.forward_output_list = forward_output_list
-        return module
+        return GraphModule.from_evaluation_order(input_nodes, output_nodes, forward_output_list)
 
 
-    # The single root entry point for unstructuring - never reached recursively (hooks recurse via
-    # `self.unstructure()` instead), so it's free to recognize `obj`'s top-level shape with plain
-    # `isinstance` checks, unlike a cattrs hook, which would fire identically on that same shape
-    # found nested anywhere else (e.g. a `Node` reference, or an unrelated plain list).
+    # Root unstructure call
     def unstructure_with_context(self, obj):
         self.reset()
         self._unstructuring = True
@@ -206,27 +186,20 @@ class ContextConverter:
                 input_structure, output_structure, forward_structure = self.unstructure(
                     [list(obj.input_nodes), list(obj.nodes_to_compute), list(obj.forward_output_list)]
                 )
-                structure = GraphModuleRecord(
-                    graph=list(self.node_blob.values()),
+                structure = self.unstructure(GraphModuleRecord(
+                    graph=self.node_blob,
                     input_nodes=input_structure,
                     output_nodes=output_structure,
                     forward_output_list=forward_structure,
-                )
+                ))
             elif isinstance(obj, (list, tuple)) and all(isinstance(x, Node) for x in obj):
                 root_list = self.unstructure(list(obj))
-                structure = NodeListRecord(graph=list(self.node_blob.values()), root_list=root_list)
+                structure = self.unstructure(NodeListRecord(graph=self.node_blob, root_list=root_list))
             elif isinstance(obj, Node):
                 root = self.unstructure(obj)
-                structure = NodeRecord(graph=list(self.node_blob.values()), root=root)
+                structure = self.unstructure(NodeRecord(graph=self.node_blob, root=root))
             else:
                 structure = self.unstructure(obj)
-
-            if dataclasses.is_dataclass(structure) and not isinstance(structure, type):
-                # `structure` never embeds a live tensor - tensors are only ever referenced
-                # indirectly via `TensorReference.key`, resolved through `tensor_blob` below - so
-                # flattening it here is cheap and safe. From here on `unstructure_with_context`
-                # always returns plain data, uniformly, regardless of `obj`'s shape.
-                structure = dataclasses.asdict(structure)
 
             return_tensors = self.tensor_blob
             return_nodes = self.node_blob
@@ -261,9 +234,30 @@ class ContextConverter:
             typ = SerializationRecord
         else:
             typ = Serializable
-        # todo validate number of constructed/reconstructed tensors/nodes matches!
         try:
-            return self.structure(data, typ)
+            result = self.structure(data, typ)
+            # Resolution-completeness check: a matching blob size (verified separately by
+            # `loadgraph`) does not guarantee every entry was actually reachable from the
+            # structured root(s) - a broken/dangling reference could leave one entry untouched
+            # while another gets resolved twice as often, keeping the blob size unchanged.
+            # `tensor_objects`/`node_objects` already gain exactly one key per entry actually
+            # resolved (see `emit_tensor`/`emit_node`), so their size is the tally - no separate
+            # counter needed.
+            if len(self.tensor_objects) != len(self.tensor_blob):
+                warnings.warn(
+                    f"Structuring resolved {len(self.tensor_objects)} tensor reference(s), but "
+                    f"tensor_blob has {len(self.tensor_blob)} - some tensor(s) may be unreachable "
+                    "from the structured root(s).",
+                    stacklevel=2,
+                )
+            if len(self.node_objects) != len(self.node_blob):
+                warnings.warn(
+                    f"Structuring resolved {len(self.node_objects)} node reference(s), but "
+                    f"node_blob has {len(self.node_blob)} - some node(s) may be unreachable from "
+                    "the structured root(s).",
+                    stacklevel=2,
+                )
+            return result
         finally:
             self.reset()
 
@@ -283,6 +277,11 @@ CONVERTER.register_unstructure_hook(CONTEXT_CONVERTER.consume_tensor)
 CONVERTER.register_unstructure_hook(CONTEXT_CONVERTER.unstructure_tuple)
 CONVERTER.register_unstructure_hook(CONTEXT_CONVERTER.unstructure_set)
 CONVERTER.register_unstructure_hook(CONTEXT_CONVERTER.unstructure_idxtype)
+
+# The three `SerializationRecord` variants also need to get unpacked, themselves!
+# dataclasses.asdict does this in a non-recursive way (internals already processed by the time that hook fires)
+for _record_cls in (NodeRecord, NodeListRecord, GraphModuleRecord):
+    CONVERTER.register_unstructure_hook(_record_cls, dataclasses.asdict)
 
 # Register indirect hooks (which return different types than they take in)
 CONVERTER.register_structure_hook(TensorReference, CONTEXT_CONVERTER.emit_tensor)

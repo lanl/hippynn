@@ -66,8 +66,8 @@ class AutoModule(_SerializableNode):
 
 
     @classmethod
-    def from_record(cls, name, parents, module_kwargs, **kwargs):
-        
+    def from_record(cls, name, parents, module_kwargs, db_name, **kwargs):
+
         # auto module kwargs k: module name: v: node name
         auto_module_kwargs = cls.auto_module_kwargs
         if not auto_module_kwargs:
@@ -85,4 +85,11 @@ class AutoModule(_SerializableNode):
             else:
                 leftover_module_kwargs[k] = v
 
-        return cls(name, parents, module_kwargs=leftover_module_kwargs, **node_kwargs)
+        node = cls(name, parents, module_kwargs=leftover_module_kwargs, **node_kwargs)
+        node.db_name = db_name
+        # `index_state` is only merged into `serialization_attributes` for `SingleNode`-based
+        # `AutoModule` subclasses (e.g. `FuzzyHistogrammer`), not `MultiNode`-based ones - so it's
+        # not always present in `kwargs`.
+        if "index_state" in kwargs:
+            node.index_state = kwargs["index_state"]
+        return node

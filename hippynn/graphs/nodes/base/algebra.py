@@ -82,9 +82,11 @@ class UnaryNode(_SerializableNode):
         self.index_state = in_node.index_state
 
     @classmethod
-    def from_record(cls, name, parents, **kwargs):
+    def from_record(cls, name, parents, db_name, **kwargs):
         p, = parents
-        return cls(p)
+        node = cls(p)
+        node.db_name = db_name
+        return node
 
 
 class BinNode(_SerializableNode):
@@ -96,9 +98,11 @@ class BinNode(_SerializableNode):
         self.index_state = left.index_state
 
     @classmethod
-    def from_record(cls, name, parents, **kwargs):
+    def from_record(cls, name, parents, db_name, **kwargs):
         left, right = parents
-        return cls(left, right)
+        node = cls(left, right)
+        node.db_name = db_name
+        return node
 
 def __getattr__(name: str):
     """

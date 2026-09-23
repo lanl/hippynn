@@ -61,8 +61,9 @@ def savegraph(
 
     # convert tuples, etc to list if provided
     payload = nodes_or_graph if isinstance(nodes_or_graph, GraphModule) else list(nodes_or_graph)
-    record, tensor_data, _node_blob = CONTEXT_CONVERTER.unstructure_with_context(payload)
+    record, tensor_data, node_blob = CONTEXT_CONVERTER.unstructure_with_context(payload)
     n_tensor_values = len(tensor_data)
+    n_node_values = len(node_blob)
 
     if weights_file is not None:
         torch.save(tensor_data, weights_file)
@@ -70,7 +71,7 @@ def savegraph(
     elif filetype in ("json", "yml") and tensor_data:
         raise ValueError(f"filetype={filetype!r} cannot hold tensor data inline - pass `weights_file` to store it separately.")
 
-    box = SerializationBox(record=record, n_tensor_values=n_tensor_values, tensor_data=tensor_data)
+    box = SerializationBox(record=record, n_tensor_values=n_tensor_values, n_node_values=n_node_values, tensor_data=tensor_data)
 
     write_mode = "wb" if filetype in ("pkl", "pt") else "w"
     with open_if_needed(file, write_mode) as fh:
@@ -118,9 +119,7 @@ def loadgraph(file, weights_file=None, filetype: str | None = None, weights_only
         else:
             raise ValueError(f"Unknown filetype {filetype!r}; expected one of {_FILETYPES}.")
 
-    # `box` is a live SerializationBox for pkl/pt (pickle/torch preserve Python objects); for
-    # json/yml it comes back as a plain dict (no type info survives) - box-ify it here so the
-    # rest of this function can use uniform attribute access.
+    # pt/pkl store a Box, json/yaml store a dict representing a Box.
     if isinstance(box, dict):
         box = SerializationBox(**box)
 
@@ -138,7 +137,7 @@ def loadgraph(file, weights_file=None, filetype: str | None = None, weights_only
         )
 
     if tensor_data is None:
-        tensor_data = box.tensor_data or {}
+        tensor_data = box.tensor_data or []
 
     n_tensor_values = box.n_tensor_values
     if len(tensor_data) != n_tensor_values:
@@ -149,8 +148,15 @@ def loadgraph(file, weights_file=None, filetype: str | None = None, weights_only
         )
 
     record = box.record
-    node_list = record["graph"]
-    _debprint(f"Deserializing node list: {node_list=}")
-    node_blob = {info["identifier"]["id"]: info for info in node_list}
+    node_blob = record["graph"]
+    _debprint(f"Deserializing node list: {node_blob=}")
+
+    n_node_values = box.n_node_values
+    if len(node_blob) != n_node_values:
+        warnings.warn(
+            f"Record expects {n_node_values} node(s), but the loaded graph has {len(node_blob)} - "
+            "the record may be incomplete or come from a different file.",
+            stacklevel=2,
+        )
 
     return CONTEXT_CONVERTER.structure_with_context(record, tensor_blob=tensor_data, node_blob=node_blob)

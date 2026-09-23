@@ -18,6 +18,8 @@ class ValueNode(SingleNode, _SerializableNode):
         super().__init__(name, (), module=module)
 
     @classmethod
-    def from_record(cls, value, _converted, **kwargs):
-        
-        return cls(value=value, convert=_converted)
+    def from_record(cls, value, _converted, db_name, index_state, **kwargs):
+        node = cls(value=value, convert=_converted)
+        node.db_name = db_name
+        node.index_state = index_state
+        return node

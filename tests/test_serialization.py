@@ -39,13 +39,13 @@ def test_processor_plain_data_roundtrip(processor_pair, data):
     writer, reader = processor_pair
 
     structure, tensor_blob, _node_blob = writer.unstructure_with_context(data)
-    assert tensor_blob == {}
+    assert tensor_blob == []
 
     restored = reader.structure_with_context(structure, tensor_blob=tensor_blob, node_blob=_node_blob)
     assert restored == data
 
 
-def test_processor_single_tensor_roundtrip(processor_pair):
+def test_processor_tensor_roundtrip(processor_pair):
     writer, reader = processor_pair
 
     data = {"weight": torch.arange(6).reshape(2, 3)}
@@ -57,7 +57,7 @@ def test_processor_single_tensor_roundtrip(processor_pair):
     assert torch.equal(restored["weight"], data["weight"])
 
 
-def test_processor_shared_tensor_identity_roundtrip(processor_pair):
+def test_processor_shared_tensor_roundtrip(processor_pair):
     writer, reader = processor_pair
 
     shared = torch.ones(3)
@@ -81,41 +81,79 @@ def test_processor_set_roundtrip(processor_pair):
     assert restored["values"] == data["values"]
 
 
+def test_processor_warns_tensor_count(processor_pair):
+    writer, reader = processor_pair
+
+    data = {"weight": torch.ones(3)}
+    structure, tensor_blob, node_blob = writer.unstructure_with_context(data)
+
+    tensor_blob = list(tensor_blob) + [torch.zeros(1)]
+
+    with pytest.warns(UserWarning, match="tensor"):
+        reader.structure_with_context(structure, tensor_blob=tensor_blob, node_blob=node_blob)
+
+
+def test_processor_warns_node_count(processor_pair):
+    from hippynn.graphs.nodes.base import ValueNode
+
+    writer, reader = processor_pair
+
+    node = ValueNode(1.0)
+    structure, tensor_blob, node_blob = writer.unstructure_with_context(node)
+
+    node_blob = list(node_blob)
+    orphan_entry = dict(node_blob[0])
+    orphan_entry["identifier"] = {"id": len(node_blob), "name": None}
+    node_blob.append(orphan_entry)
+
+    with pytest.warns(UserWarning, match="node"):
+        reader.structure_with_context(structure, tensor_blob=tensor_blob, node_blob=node_blob)
+
+
 def _attr_equal(original, reconstructed):
     if isinstance(original, torch.Tensor) or isinstance(reconstructed, torch.Tensor):
         return torch.equal(original, reconstructed)
     return original == reconstructed
 
 
-
-
 @pytest.fixture
 def scalar_value_node():
     from hippynn.graphs.nodes.base import ValueNode
 
-    return ValueNode(0.5)
+    node = ValueNode(0.5)
+    node.db_name = "custom_value_db_name"
+    node.index_state = IdxType.Atoms
+    return node
 
 @pytest.fixture
 def input_node():
     from hippynn.graphs.nodes.base import InputNode
 
-    return InputNode(db_name="my_input")
+    node = InputNode(db_name="my_input")
+    node.index_state = IdxType.Atoms
+    return node
 
 @pytest.fixture
 def loss_input_node():
     from hippynn.graphs.nodes.base import InputNode, LossInputNode
 
     origin = InputNode(db_name="origin")
-    return LossInputNode("loss_in", origin_node=origin)
+    node = LossInputNode("loss_in", origin_node=origin)
+    node.index_state = IdxType.Atoms
+    return node
 
 @pytest.fixture
-def unary_node(scalar_value_node):    
+def unary_node(scalar_value_node):
     from hippynn.graphs.nodes.base.base import NegNode
-    return NegNode(scalar_value_node)
+    node = NegNode(scalar_value_node)
+    node.db_name = "custom_unary_db_name"
+    return node
 
 @pytest.fixture
 def bin_node(scalar_value_node):
-    return scalar_value_node + scalar_value_node
+    node = scalar_value_node + scalar_value_node
+    node.db_name = "custom_bin_db_name"
+    return node
 
 @pytest.fixture
 def automodule_node():
@@ -123,7 +161,10 @@ def automodule_node():
     from hippynn.graphs.nodes.indexers import FuzzyHistogrammer
 
     values = ValueNode(torch.linspace(0, 1, 10))
-    return FuzzyHistogrammer("hist", (values,), length=5, vmin=0.0, vmax=1.0)
+    node = FuzzyHistogrammer("hist", (values,), length=5, vmin=0.0, vmax=1.0)
+    node.db_name = "custom_automodule_db_name"
+    node.index_state = IdxType.Atoms
+    return node
 
 
 @pytest.fixture
@@ -159,12 +200,7 @@ def test_node_to_record_from_record_roundtrip(node):
 
 
 def _roundtrip(obj):
-    """
-    Round-trips bare nodes/plain data through `CONTEXT_CONVERTER` directly - the same pattern as
-    `test_serialize_automodule` below. No record wrapper (`SingleNodeRecord`/`NodeListRecord`) is
-    needed for an in-memory round-trip; that wrapping only exists for `savegraph`'s on-disk shape.
-    Returns `(rebuilt, tensor_blob, node_blob)`.
-    """
+    # Round-trips bare nodes/plain data through `CONTEXT_CONVERTER` directly.
     from hippynn.serializer.processor import CONTEXT_CONVERTER
 
     structure, tensor_blob, node_blob = CONTEXT_CONVERTER.unstructure_with_context(obj)
@@ -214,7 +250,8 @@ def test_serialize_automodule(processor_pair):
 
 
 
-def test_serialize_graph(energy_graph):
+def test_unstructure_record_shape(energy_graph):
+    # Checks `unstructure_with_context` produces a `GraphModuleRecord`-shaped dict; not a round trip.
     from hippynn.serializer.processor import CONTEXT_CONVERTER
 
     record, tensor_data, _node_blob = CONTEXT_CONVERTER.unstructure_with_context(energy_graph)
@@ -225,11 +262,11 @@ def test_serialize_graph(energy_graph):
     # `graph` entries are already-unstructured plain dicts (see `ensure_node`), not live records.
     assert all(isinstance(info, dict) and "identifier" in info for info in record["graph"])
     assert record["_type"] == "graph_module_record"
-    assert isinstance(tensor_data, dict)
+    assert isinstance(tensor_data, list)
 
 
 
-def test_deserialize_protocol_version_mismatch_warns(tmp_path):
+def test_protocol_mismatch_warns(tmp_path):
     from hippynn.graphs.nodes.base import ValueNode
 
     node = ValueNode(1.0)
@@ -244,7 +281,7 @@ def test_deserialize_protocol_version_mismatch_warns(tmp_path):
         hippynn.loadgraph(str(file))
 
 
-def test_deserialize_tensor_count_mismatch_warns(tmp_path):
+def test_tensor_count_mismatch_warns(tmp_path):
     from hippynn.graphs.nodes.base import ValueNode
 
     node = ValueNode(torch.ones(3))
@@ -253,15 +290,30 @@ def test_deserialize_tensor_count_mismatch_warns(tmp_path):
     hippynn.savegraph([node], str(file), weights_file=str(weights_file))
 
     tensor_data = torch.load(weights_file, weights_only=True)
-    padded_tensor_data = dict(tensor_data)
-    padded_tensor_data[max(tensor_data) + 1] = torch.zeros(1)
+    padded_tensor_data = list(tensor_data) + [torch.zeros(1)]
     torch.save(padded_tensor_data, weights_file)
 
     with pytest.warns(UserWarning, match="tensor"):
         hippynn.loadgraph(str(file), weights_file=str(weights_file))
 
 
-def test_get_nodetype_rejects_module_directly_in_namespace_root():
+def test_node_count_mismatch_warns(tmp_path):
+    from hippynn.graphs.nodes.base import ValueNode
+
+    node = ValueNode(1.0)
+    file = tmp_path / "node.pkl"
+    hippynn.savegraph([node], str(file))
+
+    box = pickle.loads(file.read_bytes())
+    stale_box = dataclasses.replace(box, n_node_values=box.n_node_values + 1)
+    file.write_bytes(pickle.dumps(stale_box))
+
+    with pytest.warns(UserWarning, match="node"):
+        hippynn.loadgraph(str(file))
+
+
+def test_get_nodetype_rejects_namespace_root():
+    # A node class's `__module__` must be a leaf module, not a namespace package root
     from hippynn.serializer.registry import get_nodetype
 
     class FakeGraphNode:
@@ -279,16 +331,6 @@ def test_get_nodetype_rejects_module_directly_in_namespace_root():
         get_nodetype(FakeInterfaceNode)
 
 
-def _roundtrip_graph_module(graph):
-    """Round-trips a `GraphModule` through `CONTEXT_CONVERTER` directly - `unstructure_with_context`
-    recognizes a `GraphModule` at the top level and returns the matching `GraphModuleRecord`
-    directly, so no manual record construction is needed."""
-    from hippynn.serializer.processor import CONTEXT_CONVERTER
-
-    record, tensor_data, node_blob = CONTEXT_CONVERTER.unstructure_with_context(graph)
-    return CONTEXT_CONVERTER.structure_with_context(record, tensor_blob=tensor_data, node_blob=node_blob)
-
-
 def test_serialize_valuenode_graph_module():
     from hippynn.graphs.nodes.base import ValueNode
     from hippynn.graphs import GraphModule
@@ -300,7 +342,7 @@ def test_serialize_valuenode_graph_module():
 
     graph = GraphModule([], [out_val])
 
-    rebuilt = _roundtrip_graph_module(graph)
+    rebuilt, _tensor_blob, _node_blob = _roundtrip(graph)
 
     assert isinstance(rebuilt, GraphModule)
     assert rebuilt()[0] == graph()[0]
@@ -314,7 +356,7 @@ def test_serialize_energy_graph_module(input_nodes, energy_node, example_box):
     # forward() returns a flat tuple of tensors.
     graph = GraphModule(input_nodes, [energy_node.system_energy])
 
-    rebuilt = _roundtrip_graph_module(graph)
+    rebuilt, _tensor_blob, _node_blob = _roundtrip(graph)
 
     assert isinstance(rebuilt, GraphModule)
 
@@ -361,6 +403,38 @@ def test_savegraph_loadgraph_roundtrip(input_nodes, energy_node, example_box, tm
         assert torch.allclose(orig, new)
 
 
+def test_savegraph_loadgraph_key_stability(tmp_path):
+    # state_dict() keys must survive a save/load round trip even when node names collide.
+    # Repeated 10x with fresh nodes since the name tie-break is hash-dependent (see _set_evaluation_order).
+    from hippynn.graphs import GraphModule
+    from hippynn.graphs.nodes.base import ValueNode
+    from hippynn.graphs.nodes.indexers import FuzzyHistogrammer
+
+    for attempt in range(10):
+        values_a = ValueNode(torch.linspace(0.0, 1.0, 10))
+        values_b = ValueNode(torch.linspace(0.0, 1.0, 10))
+
+        hist_a = FuzzyHistogrammer("hist", (values_a,), length=4, vmin=0.0, vmax=1.0)
+        hist_b = FuzzyHistogrammer("hist", (values_b,), length=4, vmin=5.0, vmax=10.0)
+
+        graph = GraphModule([], [hist_a, hist_b])
+
+        main_file = tmp_path / f"graph_{attempt}.pkl"
+        weights_file = tmp_path / f"graph_weights_{attempt}.pt"
+        hippynn.savegraph(graph, str(main_file), weights_file=str(weights_file))
+        rebuilt = hippynn.loadgraph(str(main_file), weights_file=str(weights_file))
+
+        original_state = graph.state_dict()
+        rebuilt_state = rebuilt.state_dict()
+
+        assert original_state.keys() == rebuilt_state.keys()
+        for key in original_state:
+            assert torch.equal(original_state[key], rebuilt_state[key]), (
+                f"attempt {attempt}: key {key!r} disagrees between original and reloaded graph - "
+                "moddict keys are assigned positionally, and the position is not stable when node names collide."
+            )
+
+
 def test_serialization_registry():
     from hippynn.serializer import ensure_registry_consistency
 
@@ -378,7 +452,8 @@ def test_serialization_registry():
 
 
 
-def test_same_tensor_shared():
+def test_shared_tensor_dedup():
+    # Two nodes referencing the same tensor object must serialize it once.
     from hippynn.graphs.nodes.base import ValueNode
 
     shared = torch.ones(3)
@@ -391,13 +466,7 @@ def test_same_tensor_shared():
 
 
 def test_multinode_attributes(energy_node):
-    """
-    `IndexNode`s are normally built by their `MultiNode` parent with a fixed, class-declared
-    `index_state` and no `db_name` (see `MultiNode.__init__`), but real code (e.g.
-    `EnsembleTarget.__init__`) reassigns `index_state`/`db_name` on an already-built `IndexNode`
-    child directly, after construction. This checks that such a late rewiring survives a
-    serialize/deserialize round-trip, rather than reverting to the parent's original defaults.
-    """
+    # check that child nodes of multinodes retain customized attributes
     from hippynn.graphs.indextypes import IdxType
 
     child = energy_node.mol_hier
@@ -413,7 +482,7 @@ def test_multinode_attributes(energy_node):
     assert rebuilt_child.db_name == "custom_mol_hier_name", "rewired db_name must survive the round-trip"
 
 
-def test_origin_node_link():
+def test_origin_node():
     from hippynn.graphs.nodes.base import InputNode, LossPredNode, LossTrueNode
 
     node = InputNode(db_name="X")
@@ -443,7 +512,8 @@ def _flatten_tensors(seq):
 
 
 @ignore_sensitivity_warning
-def test_serialize_roundtrip(written_energy_graph, energy_graph, example_box):
+def test_multioutput_roundtrip(written_energy_graph, energy_graph, example_box):
+    # Round-trips a MultiNode-output graph via a pre-unstructured fixture, checking flattened forward outputs.
     from hippynn.serializer.processor import CONTEXT_CONVERTER
 
     record, tensor_data, node_blob = written_energy_graph

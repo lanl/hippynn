@@ -92,7 +92,7 @@ def check_evaluation_order(evaluation_outputs_list):
         for in_node in out_node.parents:
             if in_node not in pseudo_evaluated:
                 if not isinstance(in_node, InputNode):
-                    raise AssertionError("Nodes are not ordered correctly.")
+                    raise GraphInconsistency("Nodes are not ordered correctly.")
                 else:
                     pseudo_evaluated.append(in_node)
         pseudo_evaluated.append(out_node)
