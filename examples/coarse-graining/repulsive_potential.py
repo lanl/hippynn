@@ -6,9 +6,8 @@ import numpy as np
 import torch
 
 from hippynn.graphs import IdxType
-from hippynn.graphs.nodes.base import ExpandParents, find_unique_relative
+from hippynn.graphs.nodes.base import ExpandParents, AutoModule, find_unique_relative
 from hippynn.graphs.nodes.base.multi import MultiNode
-from hippynn.graphs.nodes.base.definition_helpers import AutoModule
 from hippynn.graphs.nodes.inputs import SpeciesNode, PositionsNode
 from hippynn.graphs.nodes.tags import PairIndexer, AtomIndexer
 from hippynn.layers import pairs

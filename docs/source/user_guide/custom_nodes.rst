@@ -152,7 +152,7 @@ This is the base class for the Dipole and Quadrupole Nodes. It uses several pare
    :func:`~hippynn.graphs.indextypes.index_type_coercion`.
 
 A full list of available methods is  at the API documentation for the
-:func:`~hippynn.graphs.nodes.base.definition_helpers.ParentExpander`.
+:func:`~hippynn.graphs.nodes.base.parent_expander.ParentExpander`.
 These directives are executed when the node's ``expand_parents`` method is run, which
 should be performed *before* calling to the ``super().__init__()`` method.
 In combination, these directives allow for a powerful flexibility in building graphs
