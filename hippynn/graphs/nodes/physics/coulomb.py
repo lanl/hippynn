@@ -105,9 +105,9 @@ class CoulombEnergyNode(AutoModule, ChargePairSetup, Energies,  MultiNode, _Depr
                 "Coulomb energy module is not compatible with closed boundary conditions."
             )
 
-        if pairfinder.torch_module.hard_dist_cutoff is not None:
+        if pairfinder.torch_module.dist_hard_max is not None:
             raise ValueError(
-                "hard_dist_cutoff is set to a finite value,\n"
+                "dist_hard_max is set to a finite value,\n"
                 "coulomb energy requires summing over the entire set of pairs"
             )
 
@@ -131,7 +131,7 @@ class ScreenedCoulombEnergyNode(AutoModule, ChargePairSetup, Energies, MultiNode
 
     @staticmethod
     def _validate_pairfinder(pairfinder, cutoff_distance):
-        existing_cutoff = pairfinder.torch_module.hard_dist_cutoff
+        existing_cutoff = pairfinder.torch_module.dist_hard_max
         if existing_cutoff is not None and existing_cutoff < cutoff_distance:
             raise ValueError(
                 f"Distance cutoff ({existing_cutoff}) is set to less than\n"

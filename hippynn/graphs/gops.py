@@ -380,14 +380,12 @@ def merge_children(start_nodes):
 
         # Extra code to handle merging of pair indexers.
         # Even if we clean up the pair indexer with an extra state we would still need logic to merge them.
-        # TODO: Clean up hard_dist_cutoff vs dist_hard max and make it impossible for the node and
-        # TODO module to disagree.
         if isinstance(first, PairIndexer):
-            max_r = first.torch_module.hard_dist_cutoff
+            max_r = first.torch_module.dist_hard_max
             max_r_node = first
             swap_first_in = False
             for other_node in rest:
-                this_r = other_node.torch_module.hard_dist_cutoff
+                this_r = other_node.torch_module.dist_hard_max
                 if this_r > max_r:
                     max_r_node = other_node
                     max_r = this_r

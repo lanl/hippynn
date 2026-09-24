@@ -373,4 +373,4 @@ class KDTreePairsMemory(PairMemory):
             distflat = paircoord.norm(dim=1)
 
         # We filter the lists to only send forward relevant pairs (those with distance under cutoff), improving performance.   
-        return filter_pairs(self.hard_dist_cutoff, distflat, self.pair_first, self.pair_second, paircoord, self.offsets, self.offset_index)
+        return filter_pairs(self.dist_hard_max, distflat, self.pair_first, self.pair_second, paircoord, self.offsets, self.offset_index)

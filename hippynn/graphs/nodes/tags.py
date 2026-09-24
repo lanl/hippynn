@@ -23,6 +23,14 @@ class PairIndexer:
     output_names = "pair_dist", "pair_first", "pair_second", "pair_coord"
     output_index_states = (IdxType.Pairs,) * len(output_names)
 
+    @property
+    def dist_hard_max(self):
+        return self.torch_module.dist_hard_max
+
+    @dist_hard_max.setter
+    def dist_hard_max(self, value):
+        self.torch_module.dist_hard_max = value
+
 
 class PairCache:
     pass
