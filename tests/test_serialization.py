@@ -1,4 +1,3 @@
-import dataclasses
 import pickle
 
 import pytest
@@ -274,8 +273,8 @@ def test_protocol_mismatch_warns(tmp_path):
     hippynn.savegraph([node], str(file))
 
     box = pickle.loads(file.read_bytes())
-    stale_box = dataclasses.replace(box, protocol_version=box.protocol_version - 1)
-    file.write_bytes(pickle.dumps(stale_box))
+    box["protocol_version"] -= 1
+    file.write_bytes(pickle.dumps(box))
 
     with pytest.warns(UserWarning, match="protocol_version"):
         hippynn.loadgraph(str(file))
@@ -295,21 +294,6 @@ def test_tensor_count_mismatch_warns(tmp_path):
 
     with pytest.warns(UserWarning, match="tensor"):
         hippynn.loadgraph(str(file), weights_file=str(weights_file))
-
-
-def test_node_count_mismatch_warns(tmp_path):
-    from hippynn.graphs.nodes.base import ValueNode
-
-    node = ValueNode(1.0)
-    file = tmp_path / "node.pkl"
-    hippynn.savegraph([node], str(file))
-
-    box = pickle.loads(file.read_bytes())
-    stale_box = dataclasses.replace(box, n_node_values=box.n_node_values + 1)
-    file.write_bytes(pickle.dumps(stale_box))
-
-    with pytest.warns(UserWarning, match="node"):
-        hippynn.loadgraph(str(file))
 
 
 def test_get_nodetype_rejects_namespace_root():

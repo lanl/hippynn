@@ -15,9 +15,10 @@ class NodeTypeIdentifier:
     package: str | None
 
 
+# The node identifier is the common pointer between the node reference and the node data
 @dataclass(frozen=True)
 class NodeIdentifier:
-    id: int  # assigned in discovery order; not persistent
+    id: int  # assigned in traversal order
     name: str | None
 
 
@@ -97,6 +98,5 @@ type SerializationRecord = NodeRecord | NodeListRecord | GraphModuleRecord
 class SerializationBox:
     record: SerializationRecord
     n_tensor_values: int
-    n_node_values: int
     tensor_data: list[object] | None = None
     protocol_version: int = PROTOCOL_VERSION

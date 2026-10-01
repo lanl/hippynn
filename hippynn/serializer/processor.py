@@ -59,27 +59,26 @@ class ContextConverter:
 
         # For holding nodes that come as a side-payload; NodeIdentifier.id is an index into node_blob.
         self.node_blob: list[Any] = []
-        self.node_ids: dict[int, int] = {}  # id(node) -> key, unstructure-side dedup
+        self.node_references: dict[int, NodeReference] = {}  # id(node) -> reference, unstructure-side dedup
         self.node_objects: dict[int, Any] = {}  # key -> reconstructed node, structure-side cache
         self._node_resolving: set[int] = set()  # loop guard for the recursive resolver
 
     def ensure_node(self, node):
         """Recursively convert node/parents into NodeReferences for unstructuring."""
-        key = self.node_ids.get(id(node))
-        if key is not None:
-            return NodeReference(identifier=NodeIdentifier(id=key, name=node.name))
+        reference = self.node_references.get(id(node))
+        if reference is not None:
+            return reference
 
-        # Reserve the key and its slot before recursing, so a cycle back to this node returns a
-        # reference instead of rebuilding it; recurse parents first, so that when reconstructing
-        # we'll have topo order.
-        key = self.node_ids[id(node)] = len(self.node_blob)
+        # Reserve the key and its slot before recursing, so a cycle back to this node returns the
+        # cached reference instead of rebuilding it.
+        key = len(self.node_blob)
         self.node_blob.append(None)
         identifier = NodeIdentifier(id=key, name=node.name)
-        reference = NodeReference(identifier=identifier)
-
+        reference = self.node_references[id(node)] = NodeReference(identifier=identifier)
         self.node_objects[key] = node
 
         parents = tuple(self.ensure_node(p) for p in node.parents)
+        # TODO don't like having to getattr. Maybe `state`` should store state_dict and automodule should return state_dict as part of state?
         state_dict = node.torch_module.state_dict(keep_vars=True) if getattr(node, "torch_module", None) else None
         record = NodeData(
             identifier=identifier,
@@ -98,6 +97,7 @@ class ContextConverter:
         return self.unstructure(self.ensure_node(node))
 
     def emit_node(self, data, type_):
+        # TODO name also not the most comfortable.
         key = data["identifier"]["id"]
 
         if key in self.node_objects:
@@ -109,8 +109,7 @@ class ContextConverter:
         self._node_resolving.add(key)
         try:
             record = self.node_blob[key]
-            # Structuring `record.parents` (tuple[NodeReference, ...]) recurses into this same
-            # hook for each parent, so `record.parents` already holds live Node objects here.
+            # note, this call will trigger recursive structuring of parents!:
             record = self.structure(record, NodeData)
             cls = _ID_REGISTRY[record.cls]
             node = cls.from_record(name=record.identifier.name, parents=record.parents, **(record.state or {}))
@@ -203,9 +202,11 @@ class ContextConverter:
 
             return_tensors = self.tensor_blob
             return_nodes = self.node_blob
+            #TODO change to raise runtime error (or a more specific one if clearly better)
+            assert len(self.tensor_ids) == len(return_tensors), "tensor dedup cache and tensor_blob diverged"
+            assert len(self.node_references) == len(return_nodes), "node dedup cache and node_blob diverged"
         finally:
             self.reset()
-        # todo validate number of constructed/reconstructed tensors/nodes matches!
         return structure, return_tensors, return_nodes
 
     def unstructure(self, obj):
@@ -213,36 +214,23 @@ class ContextConverter:
             raise ValueError("ContextConverter.unstructure() may only be called during an active unstructure_with_context() session.")
         return CONVERTER.unstructure(obj)
 
-    # The single root entry point for structuring - mirrors `unstructure_with_context`'s root-only
-    # shape checks by recognizing `data`'s shape instead of requiring an explicit target type.
+    # The single root entry point for structuring.
     def structure_with_context(self, data, *, tensor_blob, node_blob):
         self.reset()
         self.tensor_blob = tensor_blob
         self.node_blob = node_blob
         self._structuring = True
-        if dataclasses.is_dataclass(data) and not isinstance(data, type):
-            # `data` is a live NodeRecord/NodeListRecord/GraphModuleRecord - e.g. unpickled or
-            # torch.load()ed (both preserve Python objects); `unstructure_with_context` itself
-            # never returns one of these live (it flattens them), so this only happens when
-            # reading straight from a pkl/pt file.
-            typ = type(data)
-            data = dict(vars(data))
-        elif isinstance(data, dict) and data.get("_type") in _RECORD_TAGS:
-            # json/yml lose Python type info, but the `_type` tag still identifies which record
-            # variant this is - cattrs disambiguates the union from it, same as any other tagged
-            # union member.
+        if isinstance(data, dict) and data.get("_type") in _RECORD_TAGS:
+            # `data` is always a plain dict (unstructure_with_context flattens records to plain
+            # data; savegraph/loadgraph round-trip everything through dataclasses.asdict); the
+            # `_type` tag identifies which record variant this is - cattrs disambiguates the
+            # union from it, same as any other tagged union member.
             typ = SerializationRecord
         else:
             typ = Serializable
         try:
             result = self.structure(data, typ)
-            # Resolution-completeness check: a matching blob size (verified separately by
-            # `loadgraph`) does not guarantee every entry was actually reachable from the
-            # structured root(s) - a broken/dangling reference could leave one entry untouched
-            # while another gets resolved twice as often, keeping the blob size unchanged.
-            # `tensor_objects`/`node_objects` already gain exactly one key per entry actually
-            # resolved (see `emit_tensor`/`emit_node`), so their size is the tally - no separate
-            # counter needed.
+            # Check # of injected objects (tensors & nodes) matches expected!
             if len(self.tensor_objects) != len(self.tensor_blob):
                 warnings.warn(
                     f"Structuring resolved {len(self.tensor_objects)} tensor reference(s), but "
