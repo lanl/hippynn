@@ -13,6 +13,9 @@ Breaking changes:
   Most old names are still available and backwards compatibility with loading
   previously trained models is still being maintained, although
   you will likely see warnings when loading said models.
+- ``calculate_rdf`` and ``calculate_adf`` in the ``molecular_dynamics`` subpackage
+  now require the ``cells`` argument, since periodic boundary conditions are
+  required. Passing ``cells=None`` raises a ``ValueError``.
 
 New Features:
 -------------
@@ -58,6 +61,14 @@ Bug Fixes:
   LangevinDynamics.
 - Fix issue with optional dependencies being required by molecular dynamics subpackage
 - Fix bug in Predictor.add_output
+- Fix ``calculate_rdf`` normalization. RDFs were normalized by the number of pairs
+  inside the cutoff sphere rather than by N_j N_k / V. Species-pair RDFs
+  between different species also double counted pairs.
+- Fix a single ``(3, 3)`` cell being tiled to the wrong shape in ``calculate_rdf``
+  and ``calculate_adf``.
+- Fix ``extract_trajectory_data`` modifying a shared default ``mda_universe_kwargs``
+  between calls, raising an error for files without velocities or forces, and
+  silently ignoring non-orthorhombic cell angles (now a ``ValueError``).
 
 
 0.1.0
