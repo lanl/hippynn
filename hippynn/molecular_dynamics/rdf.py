@@ -43,6 +43,8 @@ def ensure_positions_species_compatibility(positions, species):
 
 def check_KDTree_compatibility(cells, cutoff):
     """`cells` must be collapsed to (3,) cell representations"""
+    if cells is None:
+        raise ValueError("Periodic cells are required: `cells` must not be None.")
     if (cutoff >= cells/2).any():
         raise ValueError(f"Cutoff value ({cutoff}) must be less than half the shortest cell side length ({cells.min()}).")
 
@@ -63,15 +65,15 @@ def get_KDTree_tree(positions, cell):
 
     return KDTree(positions, boxsize=cell)
 
-def calculate_rdf(positions: np.ndarray, cutoff: float, cells: np.ndarray = None, species: np.ndarray = None, n_bins: int = 300, lower_cutoff: float = 0):
-    """Computes the RDF. If `species` is not provided, also computes species pair specific RDFS. 
+def calculate_rdf(positions: np.ndarray, cutoff: float, cells: np.ndarray, species: np.ndarray = None, n_bins: int = 300, lower_cutoff: float = 0):
+    """Computes the RDF. If `species` is provided, also computes species pair specific RDFS.
 
     :param positions: Shape (n_frames, n_particles, 3).
     :type positions: np.ndarray
     :param cutoff: Largest pair distance considered.
     :type cutoff: float
-    :param cells: Shape (n_frames, 3, 3) or None to if no PBC, defaults to None.
-    :type cells: np.ndarray or None, optional
+    :param cells: Shape (n_frames, 3, 3) or (3, 3). 
+    :type cells: np.ndarray
     :param species: Shape (n_frames, n_particles) or (n_particles,), defaults to None.
     :type species: np.ndarray or None, optional
     :param n_bins: Number of bins for RDF(s), defaults to 300.
@@ -96,16 +98,19 @@ def calculate_rdf(positions: np.ndarray, cutoff: float, cells: np.ndarray = None
     check_KDTree_compatibility(cells, cutoff=cutoff)
 
     bins = np.linspace(lower_cutoff, cutoff, n_bins + 1)
-    n_timesteps = len(positions)
     
     counts_running = np.zeros(n_bins)
+    norm_running = 0.0  # sum over frames of N^2 / V
 
     if species is not None:
         unique_species = np.unique(species)
-        counts_running_species = {f"rdf_values_{i}-{j}": np.zeros(n_bins) for i, j in combinations_with_replacement(unique_species, 2)}
+        species_pairs = list(combinations_with_replacement(unique_species, 2))
+        counts_running_species = {f"rdf_values_{j}-{k}": np.zeros(n_bins) for j, k in species_pairs}
+        norm_running_species = {f"rdf_values_{j}-{k}": 0.0 for j, k in species_pairs}
 
     for i in progress_bar(range(len(positions))):
-        cell = (cells[i] if cells is not None else None)
+        cell = cells[i]
+        volume = np.prod(cell)
 
         tree = get_KDTree_tree(positions[i], cell)
         tree_dict = tree.sparse_distance_matrix(tree, cutoff)
@@ -118,41 +123,25 @@ def calculate_rdf(positions: np.ndarray, cutoff: float, cells: np.ndarray = None
 
         counts, _ = np.histogram(dists, bins=bins)
         counts_running += counts
+        norm_running += len(positions[i]) ** 2 / volume
 
         if species is not None:
-            for j, k in combinations_with_replacement(unique_species, 2):
+            for j, k in species_pairs:
+                key = f"rdf_values_{j}-{k}"
                 dists_spec = dists[(species[i][pairs[:,0]] == j) & (species[i][pairs[:,1]] == k)]
                 counts, _ = np.histogram(dists_spec, bins=bins)
-                counts_running_species[f'rdf_values_{j}-{k}'] += counts
-                if j!=k:
-                    dists_spec = dists[(species[i][pairs[:,0]] == k) & (species[i][pairs[:,1]] == j)]
-                    counts, _ = np.histogram(dists_spec, bins=bins)
-                    counts_running_species[f'rdf_values_{j}-{k}'] += counts
+                counts_running_species[key] += counts
+                norm_running_species[key] += (species[i] == j).sum() * (species[i] == k).sum() / volume
 
-    # Overall values to normalize by
-    avg_n_pairs = counts_running.sum() / n_timesteps
-    sphere_vol = cutoff**3
-    avg_density = avg_n_pairs / sphere_vol
+    # Volume of each spherical shell
+    shell_vols = 4 / 3 * np.pi * (np.power(bins[1:], 3) - np.power(bins[:-1], 3))
 
-    # Specific values to each bin/shell
-    # Volume of shell with radii from 0 to cutoff and thickness cutoff/n_bins
-    shell_vols = np.power(bins[1:], 3) - np.power(bins[:-1], 3)
-    avg_counts = counts_running / n_timesteps
-    shell_densities = avg_counts / shell_vols
-
-    # RDF ratio
-    rdf = shell_densities / avg_density
+    rdf = counts_running / (norm_running * shell_vols)
 
     if species is not None:
-        species_rdfs = dict()
-        for j, k in combinations_with_replacement(unique_species, 2):
-            avg_n_pairs = counts_running_species[f'rdf_values_{j}-{k}'].sum() / n_timesteps
-            avg_density = avg_n_pairs / sphere_vol
-
-            avg_counts = counts_running_species[f'rdf_values_{j}-{k}'] / n_timesteps
-            shell_densities = avg_counts / shell_vols
-
-            species_rdfs[f'rdf_values_{j}-{k}'] = shell_densities / avg_density
+        species_rdfs = {
+            key: counts_running_species[key] / (norm_running_species[key] * shell_vols) for key in counts_running_species
+        }
 
     bin_centers = 0.5 * (bins[:-1] + bins[1:])
 
