@@ -25,7 +25,7 @@ def ensure_positions_cells_compatibility(positions, cells):
     if cells is None:
         raise ValueError("Periodic boundary conditions are required: `cells` must not be None.")
     if cells.shape == (3,) or cells.shape == (3,3):
-        cells = np.tile(cells, (n_frames, 1))
+        cells = np.tile(cells, (n_frames, 1, 1))
     elif len(cells) != len(positions):
         raise ValueError(f"Number of frames in `positions` and `cells` do not match. Provided: {len(positions)}, {len(cells)}.")
     return positions, cells
