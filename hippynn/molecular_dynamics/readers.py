@@ -121,9 +121,9 @@ def extract_trajectory_data(topology, trajectory, start=0, stop=None, stride=1, 
             raise ValueError(f"Only orthorhombic cells are supported, but frame {start + i * stride} has cell angles {ts.dimensions[3:]}.")
         cells[i] = ts.dimensions[:3] * np.eye(3)
 
-        if ts.velocities is not None:
+        if ts.has_velocities:
             velocities[i] = ts.velocities
-        if ts.forces is not None:
+        if ts.has_forces:
             forces[i] = ts.forces
 
     return {
