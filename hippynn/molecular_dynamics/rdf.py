@@ -22,11 +22,12 @@ except ImportError:
 
 def ensure_positions_cells_compatibility(positions, cells):
     n_frames, _, _ = positions.shape
-    if cells is not None:
-        if cells.shape == (3,) or cells.shape == (3,3):
-            cells = np.tile(cells, (n_frames, 1))
-        elif len(cells) != len(positions):
-            raise ValueError(f"Number of frames in `positions` and `cells` do not match. Provided: {len(positions)}, {len(cells)}.")
+    if cells is None:
+        raise ValueError("Periodic boundary conditions are required: `cells` must not be None.")
+    if cells.shape == (3,) or cells.shape == (3,3):
+        cells = np.tile(cells, (n_frames, 1))
+    elif len(cells) != len(positions):
+        raise ValueError(f"Number of frames in `positions` and `cells` do not match. Provided: {len(positions)}, {len(cells)}.")
     return positions, cells
 
 def ensure_positions_species_compatibility(positions, species):
@@ -43,8 +44,6 @@ def ensure_positions_species_compatibility(positions, species):
 
 def check_KDTree_compatibility(cells, cutoff):
     """`cells` must be collapsed to (3,) cell representations"""
-    if cells is None:
-        raise ValueError("Periodic cells are required: `cells` must not be None.")
     if (cutoff >= cells/2).any():
         raise ValueError(f"Cutoff value ({cutoff}) must be less than half the shortest cell side length ({cells.min()}).")
 
@@ -169,7 +168,7 @@ def find_triples(jlist_pad, rijlist_pad):
 
     return triples, triples_vec
 
-def calculate_adf(positions, cutoffs, cells=None, species=None):
+def calculate_adf(positions, cutoffs, cells, species=None):
     """
     Computes ADFs for given cutoffs. If `species` is not provided, also computes species triple specific ADFs. 
 
@@ -179,8 +178,8 @@ def calculate_adf(positions, cutoffs, cells=None, species=None):
     :type positions: np.ndarray
     :param cutoffs: Maximum arm lengths on angles to consider.
     :type cutoffs: list[float]
-    :param cells: Shape (n_frames, 3, 3) or (3, 3), no PBC if None, defaults to None.
-    :type cells: np.ndarray or None, optional
+    :param cells: Shape (n_frames, 3, 3) or (3, 3).
+    :type cells: np.ndarray
     :param species: Shape (n_frames, n_particles) or (n_particles,), defaults to None.
     :type species: np.ndarray or None, optional
 
@@ -195,8 +194,7 @@ def calculate_adf(positions, cutoffs, cells=None, species=None):
     positions, cells = ensure_positions_cells_compatibility(positions, cells)
     positions, species = ensure_positions_species_compatibility(positions, species)
 
-    if cells is not None: 
-        cells = extract_multicell_diagonal(cells)
+    cells = extract_multicell_diagonal(cells)
 
     try:
         iter(cutoffs)
@@ -218,7 +216,7 @@ def calculate_adf(positions, cutoffs, cells=None, species=None):
         
 
     for i in progress_bar(range(len(positions))):
-        cell = (cells[i] if cells is not None else None)
+        cell = cells[i]
 
         tree = get_KDTree_tree(positions[i], cell)
         pairs = tree.query_pairs(max(cutoffs), output_type='ndarray')
@@ -226,7 +224,7 @@ def calculate_adf(positions, cutoffs, cells=None, species=None):
         if len(pairs) == 0:
             continue
 
-        cell = (np.diag(cell) if cell is not None else None)
+        cell = np.diag(cell)
         vecs = find_mic(positions[i][pairs[:,0]] - positions[i][pairs[:,1]], cell=cell)
         vecs = np.array(vecs)
 
