@@ -30,7 +30,7 @@ def get_types(universe):
         print(f"Found atom types {np.unique(types)}, which were infered to be chemical symbols. If this is not correct, please rerun the function and pass a `type_correction_dict`. The keys should be of type {type(types[0])}.")
     return np.array(species_numbers), np.array(species_symbols)
 
-def extract_trajectory_data(topology, trajectory, start=0, stop=None, stride=1, type_correction_dict=None, guess_masses=True, mda_universe_kwargs={}):
+def extract_trajectory_data(topology, trajectory, start=0, stop=None, stride=1, type_correction_dict=None, guess_masses=True, mda_universe_kwargs=None):
     """
     Extracts trajectory data using MDAnalysis.
 
@@ -52,8 +52,8 @@ def extract_trajectory_data(topology, trajectory, start=0, stop=None, stride=1, 
     :type type_correction_dict: dict(str, int)
     :param guess_masses: If true, will try to infer masses based on types. Default is True.
     :type guess_masses: bool
-    :param mda_universe_kwargs: Keywords to feed to MDAnalysis.Universe. Default is {}. 
-    :type mda_universe_kwargs: dict
+    :param mda_universe_kwargs: Keywords to feed to MDAnalysis.Universe. Default is None (no extra keywords). 
+    :type mda_universe_kwargs: dict or None
     :returns: Dictionary with keys:
         - positions: ndarray (n_frames, n_atoms, 3)
         - velocities: ndarray or None (n_frames, n_atoms, 3)
@@ -64,6 +64,8 @@ def extract_trajectory_data(topology, trajectory, start=0, stop=None, stride=1, 
         - mol_ids: ndarray (n_atoms,)
     :rtype: dict
     """
+
+    mda_universe_kwargs = dict(mda_universe_kwargs or {})  # copy so the caller's dict is not modified
 
     # Give it help if trajectory file is a LAMMPS dump file
     _, extension = os.path.splitext(trajectory)
@@ -115,6 +117,8 @@ def extract_trajectory_data(topology, trajectory, start=0, stop=None, stride=1, 
     # Extract per-frame data
     for i, ts in enumerate(u.trajectory[start:stop:stride]):
         positions[i] = ts.positions
+        if not np.allclose(ts.dimensions[3:], 90):
+            raise ValueError(f"Only orthorhombic cells are supported, but frame {start + i * stride} has cell angles {ts.dimensions[3:]}.")
         cells[i] = ts.dimensions[:3] * np.eye(3)
 
         if ts.velocities is not None:
