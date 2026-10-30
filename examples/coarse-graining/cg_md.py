@@ -82,8 +82,8 @@ species_variable = Variable(
 with active_directory("model"):
     check = load_checkpoint_from_cwd(model_device=device, restart_db=False)
 
-repulse = check["training_modules"].model.node_from_name("repulse")
-energy = check["training_modules"].model.node_from_name("sys_energy")
+repulse = check["training_modules"].model.unique_node_from_name("repulse")
+energy = check["training_modules"].model.unique_node_from_name("sys_energy")
 
 model = Predictor.from_graph(
     check["training_modules"].model,
@@ -98,7 +98,7 @@ model = Predictor.from_graph(check["training_modules"].model)
 model.to(default_dtype)
 model.to(device)
 
-pairs = model.graph.node_from_name("pairs")
+pairs = model.graph.unique_node_from_name("pairs")
 pairs.skin = 3 # see hippynn.graphs.nodes.pairs.KDTreePairsMemory documentation
 
 # Run MD
