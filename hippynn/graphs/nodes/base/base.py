@@ -98,15 +98,13 @@ class InputNode(SingleNode, SerializableNode):
 
         self.requires_grad = False
 
-        # todo: just reduce signature on subclasses?
-        if hasattr(self, "index_state") and self.index_state is not IdxType.Unlabeled:
-            if index_state is not None:
-                if index_state != self.index_state:
-                    raise ValueError(f"Cannot override IdxType {self.index_state} of node type {self.__class__.__name__} "
-                                     f"with user-specified type {index_state}.")
-        else:
-            if index_state is not None:
-                self.index_state = index_state
+        # todo: just reduce signature on subclasses?        
+        if index_state is not None:
+            cls_index_state = getattr(self, "index_state", IdxType.Unlabeled)
+            if (index_state != cls_index_state) and (cls_index_state is not IdxType.Unlabeled):
+                raise ValueError(f"Cannot override IdxType {cls_index_state} of node type {self.__class__.__name__} "
+                                 f"with user-specified type {index_state}.")                            
+            self.index_state = index_state 
         
         if db_name is None and name is None:
             raise TypeError("Input node requires name or db_name arguments.")
@@ -132,12 +130,11 @@ class LossInputNode(InputNode):
         self.origin_node = origin_node
 
     @classmethod
-    def from_record(cls, name, origin_node, **kwargs):
+    def from_record(cls, name, origin_node, index_state=None, **kwargs):
         node = cls(name=name, origin_node=origin_node)
-        # `LossPredNode`/`LossTrueNode` derive `index_state` from `origin_node` in their own
-        # `__init__`, but a bare `LossInputNode` does not - restore it if it was independently set.
-        if "index_state" in kwargs:
-            node.index_state = kwargs["index_state"]
+        # **kwargs contains unneeded things for these classes, db_name, parents, etc
+        if index_state is not None:
+            node.index_state = index_state
         return node
 
 
