@@ -145,7 +145,7 @@
 
 <div class="viewcode-block" id="extract_trajectory_data">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.molecular_dynamics.readers.html#hippynn.molecular_dynamics.readers.extract_trajectory_data">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">extract_trajectory_data</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">type_correction_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">guess_masses</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mda_universe_kwargs</span><span class="o">=</span><span class="p">{}):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_trajectory_data</span><span class="p">(</span><span class="n">topology</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">type_correction_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">guess_masses</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mda_universe_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Extracts trajectory data using MDAnalysis.</span>
 
@@ -167,8 +167,8 @@
 <span class="sd">    :type type_correction_dict: dict(str, int)</span>
 <span class="sd">    :param guess_masses: If true, will try to infer masses based on types. Default is True.</span>
 <span class="sd">    :type guess_masses: bool</span>
-<span class="sd">    :param mda_universe_kwargs: Keywords to feed to MDAnalysis.Universe. Default is {}. </span>
-<span class="sd">    :type mda_universe_kwargs: dict</span>
+<span class="sd">    :param mda_universe_kwargs: Keywords to feed to MDAnalysis.Universe. Default is None (no extra keywords). </span>
+<span class="sd">    :type mda_universe_kwargs: dict or None</span>
 <span class="sd">    :returns: Dictionary with keys:</span>
 <span class="sd">        - positions: ndarray (n_frames, n_atoms, 3)</span>
 <span class="sd">        - velocities: ndarray or None (n_frames, n_atoms, 3)</span>
@@ -179,6 +179,8 @@
 <span class="sd">        - mol_ids: ndarray (n_atoms,)</span>
 <span class="sd">    :rtype: dict</span>
 <span class="sd">    """</span>
+
+    <span class="n">mda_universe_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">mda_universe_kwargs</span> <span class="ow">or</span> <span class="p">{})</span>  <span class="c1"># copy so the caller's dict is not modified</span>
 
     <span class="c1"># Give it help if trajectory file is a LAMMPS dump file</span>
     <span class="n">_</span><span class="p">,</span> <span class="n">extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">trajectory</span><span class="p">)</span>
@@ -230,11 +232,13 @@
     <span class="c1"># Extract per-frame data</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">trajectory</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">:</span><span class="n">stride</span><span class="p">]):</span>
         <span class="n">positions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">positions</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="mi">3</span><span class="p">:],</span> <span class="mi">90</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Only orthorhombic cells are supported, but frame </span><span class="si">{</span><span class="n">start</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">stride</span><span class="si">}</span><span class="s2"> has cell angles </span><span class="si">{</span><span class="n">ts</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
         <span class="n">cells</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">velocities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">has_velocities</span><span class="p">:</span>
             <span class="n">velocities</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">velocities</span>
-        <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">forces</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">has_forces</span><span class="p">:</span>
             <span class="n">forces</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">forces</span>
 
     <span class="k">return</span> <span class="p">{</span>
