@@ -1,11 +1,11 @@
 from . import SingleNode
-from .serializable import _SerializableNode
+from .serializable import SerializableNode
 
 from ...indextypes import IdxType
 from ....layers import algebra as algebra_mods
 
 
-class ValueNode(SingleNode, _SerializableNode):
+class ValueNode(SingleNode, SerializableNode):
     index_state = IdxType.Scalar  # By definition abstract values do not have a batch axis.
     serialization_attributes = ("value","_converted")
 

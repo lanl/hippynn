@@ -25,7 +25,8 @@ class IndexNode(AutoModule, SingleNode):
         super().__init__(name, parents, _repr_info=repr_info, index=index, module="auto")
 
     @classmethod
-    def from_record(cls, name, parents, module_kwargs, db_name, index_state):
+    def from_record(cls, name, parents, module_kwargs, db_name, index_state, state_dict):
+        # `state_dict` is dropped: `Idx` holds no weights, and the child already exists on the parent.
         (parent,) = parents
         index = module_kwargs['index']
         child = parent.children[index]

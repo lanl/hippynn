@@ -119,7 +119,6 @@ def loadgraph(file, weights_file=None, filetype: str | None = None, weights_only
         else:
             raise ValueError(f"Unknown filetype {filetype!r}; expected one of {_FILETYPES}.")
 
-    # All four filetypes store a plain dict representing a SerializationBox.
     box = SerializationBox(**box)
 
     tensor_data = None

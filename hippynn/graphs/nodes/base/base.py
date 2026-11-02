@@ -6,7 +6,7 @@ from ...indextypes import IdxType
 from .algebra import _NodeAlgebra
 
 from .node_functions import _NodeFunctions
-from .serializable import _SerializableNode
+from .serializable import SerializableNode
 from .algebra import UnaryNode, BinNode, _AlgebraicOperation
 from ....layers import algebra as algebra_mods
 from ...._deprecations import _DeprecatedNamesMixin
@@ -87,7 +87,7 @@ class AtLeast2D(UnaryNode, SingleNode):
         self.origin_node = in_node.origin_node
 
 
-class InputNode(SingleNode, _SerializableNode):
+class InputNode(SingleNode, SerializableNode):
     """Node for getting information for the database."""
     input_names = ()
     input_type_str = "Input"

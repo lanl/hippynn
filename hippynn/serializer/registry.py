@@ -1,7 +1,7 @@
 """
 Node class registry and validation. Per-class reconstruction dispatch on the structure (read)
-side lives as a `from_record` classmethod on each `_SerializableNode` subclass (e.g.
-`AutoModule.from_record`); `ContextConverter.emit_node` looks up the class via `_ID_REGISTRY` and
+side lives as a `from_record` classmethod on each `SerializableNode` subclass (e.g.
+`AutoModule.from_record`); `ContextConverter.structure_node` looks up the class via `_ID_REGISTRY` and
 calls `cls.from_record(...)` directly.
 """
 
@@ -9,7 +9,7 @@ import warnings
 
 from ..experiment import _debprint
 from .types import NodeTypeIdentifier
-from ..graphs.nodes.base.base import _SerializableNode
+from ..graphs.nodes.base.base import SerializableNode
 
 
 _NODE_REGISTRY: dict[type, NodeTypeIdentifier] = {}
@@ -17,9 +17,9 @@ _ID_REGISTRY: dict[NodeTypeIdentifier, type] = {}
 
 
 def _populate_registry():
-    for cls in _SerializableNode._unregistered_classes.copy():
+    for cls in SerializableNode._unregistered_classes.copy():
         register_node_cls(cls)
-        _SerializableNode._unregistered_classes.remove(cls)
+        SerializableNode._unregistered_classes.remove(cls)
 
 
 def register_node_cls(cls):

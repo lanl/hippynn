@@ -1,8 +1,7 @@
 from typing import Optional
 
 
-# Todo rename to SerializableNode; it is not going to be hidden.
-class _SerializableNode():
+class SerializableNode:
     _unregistered_classes: list = [] # class-level registry
     serialization_attributes: Optional[tuple[str, ...]] = None # for child classes to override
 
@@ -23,5 +22,5 @@ class _SerializableNode():
                     if base_cls.serialization_attributes:
                         serialization_attributes.extend(base_cls.serialization_attributes)
             cls.serialization_attributes = tuple(dict.fromkeys(serialization_attributes))
-            _SerializableNode._unregistered_classes.append(cls)
+            SerializableNode._unregistered_classes.append(cls)
 

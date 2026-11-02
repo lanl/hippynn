@@ -7,7 +7,10 @@ from hippynn.graphs.indextypes import IdxType
 
 from conftest import skip_if_no_models, MODEL_DIR
 from conftest import ignore_cusp_warning, ignore_relocation, ignore_weights_only_warning, ignore_sensitivity_warning
+from conftest import ignore_registry_mismatch_warning
 import torch
+
+pytestmark = ignore_registry_mismatch_warning
 
 
 @pytest.fixture
@@ -258,7 +261,7 @@ def test_unstructure_record_shape(energy_graph):
     # `unstructure_with_context` always flattens a record-shaped result to a plain dict.
     assert isinstance(record["graph"], list)
     assert len(record["graph"]) > 0
-    # `graph` entries are already-unstructured plain dicts (see `ensure_node`), not live records.
+    # `graph` entries are already-unstructured plain dicts (see `reference_node`), not live records.
     assert all(isinstance(info, dict) and "identifier" in info for info in record["graph"])
     assert record["_type"] == "graph_module_record"
     assert isinstance(tensor_data, list)
@@ -433,6 +436,27 @@ def test_serialization_registry():
         pass
     with pytest.raises(ValueError):
         ensure_registry_consistency(raise_=True)
+
+
+def test_late_registered_node_roundtrip(tmp_path):
+    # A node class defined after `import hippynn` must be registered when a save/load session starts.
+    from hippynn.graphs.nodes.base import ValueNode
+    from hippynn.graphs.nodes.indexers import FuzzyHistogrammer
+    from hippynn.serializer.registry import _NODE_REGISTRY
+
+    class LateHistogrammer(FuzzyHistogrammer):
+        pass
+
+    assert LateHistogrammer not in _NODE_REGISTRY
+
+    values = ValueNode(torch.linspace(0, 1, 10))
+    node = LateHistogrammer("late_hist", (values,), length=5, vmin=0.0, vmax=1.0)
+    file = tmp_path / "late.pkl"
+    hippynn.savegraph([values, node], str(file))
+    _restored_values, restored_node = hippynn.loadgraph(str(file))
+
+    assert type(restored_node) is LateHistogrammer
+    assert restored_node.module_kwargs == {"length": 5, "vmin": 0.0, "vmax": 1.0}
 
 
 

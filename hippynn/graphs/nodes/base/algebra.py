@@ -9,7 +9,7 @@ from ....layers import algebra as algebra_mods
 
 
 from ...indextypes import elementwise_compare_reduce
-from .serializable import _SerializableNode
+from .serializable import SerializableNode
 
 
 def wrap_as_node(obj):
@@ -75,7 +75,7 @@ class _AlgebraicOperation():
         cls._classname = operation
 
 
-class UnaryNode(_SerializableNode):
+class UnaryNode(SerializableNode):
     def __init__(self, in_node):
         #name = "{}({})".format(self._classname, in_node)
         super().__init__(self._classname, (in_node,), module=None)
@@ -89,7 +89,7 @@ class UnaryNode(_SerializableNode):
         return node
 
 
-class BinNode(_SerializableNode):
+class BinNode(SerializableNode):
     def __init__(self, left, right):
         left, right = left.main_output, right.main_output
         left, right = elementwise_compare_reduce(left, right)

@@ -68,24 +68,23 @@ class NodeData:
     cls: NodeTypeIdentifier
     parents: tuple[NodeReference, ...] = ()
     state: dict[str, Serializable] | None = None  # class-specific
-    state_dict: dict[str, Serializable] | None = None
 
 # Record classes--top-level serialization objects.
 
 @dataclass
-class NodeRecord:  # a single root `Node`, not wrapped in a list or a `GraphModule`
+class NodeRecord:
     graph: list[NodeData]
     root: NodeReference
     _type: Literal["node_record"] = "node_record"
 
 @dataclass
-class NodeListRecord:  # a list of root `Node`s, not wrapped in a `GraphModule`
+class NodeListRecord: 
     graph: list[NodeData]
     root_list: list[NodeReference]
     _type: Literal["node_list_record"] = "node_list_record"
 
 @dataclass
-class GraphModuleRecord:  # a `GraphModule`
+class GraphModuleRecord: 
     graph: list[NodeData]
     input_nodes: tuple[NodeReference, ...]  # `required_inputs`
     output_nodes: tuple[NodeReference, ...]  # `nodes_to_compute`

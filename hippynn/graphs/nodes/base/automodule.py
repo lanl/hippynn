@@ -1,8 +1,8 @@
 from typing import Optional, Union, Tuple, Dict
 
-from .serializable import _SerializableNode
+from .serializable import SerializableNode
 
-class AutoModule(_SerializableNode):
+class AutoModule(SerializableNode):
     """
     Helper mixin class for piping keyword arguments into an nn.module class.
 
@@ -65,8 +65,13 @@ class AutoModule(_SerializableNode):
     # def translation_map(cls):
 
 
+    def to_record(self):
+        record = super().to_record()
+        record["state_dict"] = self.torch_module.state_dict(keep_vars=True)
+        return record
+
     @classmethod
-    def from_record(cls, name, parents, module_kwargs, db_name, **kwargs):
+    def from_record(cls, name, parents, module_kwargs, db_name, state_dict, **kwargs):
 
         # auto module kwargs k: module name: v: node name
         auto_module_kwargs = cls.auto_module_kwargs
@@ -86,6 +91,7 @@ class AutoModule(_SerializableNode):
                 leftover_module_kwargs[k] = v
 
         node = cls(name, parents, module_kwargs=leftover_module_kwargs, **node_kwargs)
+        node.torch_module.load_state_dict(state_dict)
         node.db_name = db_name
         # `index_state` is only merged into `serialization_attributes` for `SingleNode`-based
         # `AutoModule` subclasses (e.g. `FuzzyHistogrammer`), not `MultiNode`-based ones - so it's

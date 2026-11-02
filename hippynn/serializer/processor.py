@@ -12,7 +12,7 @@ from typing import Any, get_origin
 import torch
 from cattrs import Converter
 
-from .registry import _ID_REGISTRY, _NODE_REGISTRY
+from .registry import _ID_REGISTRY, _NODE_REGISTRY, ensure_registry_consistency
 from .types import (
     GraphModuleRecord,
     NodeIdentifier,
@@ -61,9 +61,9 @@ class ContextConverter:
         self.node_blob: list[Any] = []
         self.node_references: dict[int, NodeReference] = {}  # id(node) -> reference, unstructure-side dedup
         self.node_objects: dict[int, Any] = {}  # key -> reconstructed node, structure-side cache
-        self._node_resolving: set[int] = set()  # loop guard for the recursive resolver
+        self._currently_resolving_nodes: set[int] = set()  # loop guard for the recursive resolver
 
-    def ensure_node(self, node):
+    def reference_node(self, node):
         """Recursively convert node/parents into NodeReferences for unstructuring."""
         reference = self.node_references.get(id(node))
         if reference is not None:
@@ -77,15 +77,12 @@ class ContextConverter:
         reference = self.node_references[id(node)] = NodeReference(identifier=identifier)
         self.node_objects[key] = node
 
-        parents = tuple(self.ensure_node(p) for p in node.parents)
-        # TODO don't like having to getattr. Maybe `state`` should store state_dict and automodule should return state_dict as part of state?
-        state_dict = node.torch_module.state_dict(keep_vars=True) if getattr(node, "torch_module", None) else None
+        parents = tuple(self.reference_node(p) for p in node.parents)
         record = NodeData(
             identifier=identifier,
             cls=_NODE_REGISTRY[type(node)],
             parents=parents,
             state=node.to_record(),
-            state_dict=state_dict,
         )
         # Unstructure the whole record now, so cattrs' normal recursive hooks discover anything
         # reachable from `state` (e.g. `LossInputNode.origin_node`) as a side effect.
@@ -94,40 +91,38 @@ class ContextConverter:
 
     def unstructure_node(self, node):
         """cattrs unstructure hook for live `Node` instances anywhere in the structure being unstructured."""
-        return self.unstructure(self.ensure_node(node))
+        return self.unstructure(self.reference_node(node))
 
-    def emit_node(self, data, type_):
-        # TODO name also not the most comfortable.
+    def structure_node(self, data, type_):
         key = data["identifier"]["id"]
 
         if key in self.node_objects:
             return self.node_objects[key]
 
-        if key in self._node_resolving:
+        if key in self._currently_resolving_nodes:
             raise ValueError(f"Cycle detected while resolving node reference {key} - graphs must be acyclic.")
 
-        self._node_resolving.add(key)
+        self._currently_resolving_nodes.add(key)
         try:
             record = self.node_blob[key]
             # note, this call will trigger recursive structuring of parents!:
             record = self.structure(record, NodeData)
             cls = _ID_REGISTRY[record.cls]
-            node = cls.from_record(name=record.identifier.name, parents=record.parents, **(record.state or {}))
-            if record.state_dict:
-                node.torch_module.load_state_dict(record.state_dict)
+            node_state = record.state or {} # other arguments needed to build the node
+            node = cls.from_record(name=record.identifier.name, parents=record.parents, **node_state)
             self.node_objects[key] = node
             return node
         finally:
-            self._node_resolving.discard(key)
+            self._currently_resolving_nodes.discard(key)
 
-    def consume_tensor(self, obj: torch.Tensor):
+    def unstructure_tensor(self, obj: torch.Tensor):
         key = self.tensor_ids.get(id(obj))
         if key is None:
             key = self.tensor_ids[id(obj)] = len(self.tensor_blob)
             self.tensor_blob.append(obj)
         return self.unstructure(TensorReference(key=key))
 
-    def emit_tensor(self, data: TensorReference, typ) -> torch.Tensor:
+    def structure_tensor(self, data: TensorReference, typ) -> torch.Tensor:
         key = data["key"]
         if key not in self.tensor_objects:
             self.tensor_objects[key] = self.tensor_blob[key]
@@ -136,7 +131,7 @@ class ContextConverter:
     def unstructure_idxtype(self, obj: IdxType):
         return self.unstructure(TaggedIdxType(values=obj.name))
 
-    def emit_idxtype(self, data, type_) -> IdxType:
+    def structure_idxtype(self, data, type_) -> IdxType:
         return IdxType[data["values"]]
 
     def unstructure_tuple(self, obj: tuple):
@@ -161,7 +156,7 @@ class ContextConverter:
             return self.structure(data, dict[str, Serializable])
         return data
 
-    def structure_single_node_record(self, data, type_) -> Node:
+    def structure_node_record(self, data, type_) -> Node:
         (resolved,) = self.structure([data["root"]], list[NodeReference])
         return resolved
 
@@ -178,6 +173,8 @@ class ContextConverter:
 
     # Root unstructure call
     def unstructure_with_context(self, obj):
+        # Register node classes defined since the last session (e.g. user classes defined after import).
+        ensure_registry_consistency()
         self.reset()
         self._unstructuring = True
         try:
@@ -202,9 +199,10 @@ class ContextConverter:
 
             return_tensors = self.tensor_blob
             return_nodes = self.node_blob
-            #TODO change to raise runtime error (or a more specific one if clearly better)
-            assert len(self.tensor_ids) == len(return_tensors), "tensor dedup cache and tensor_blob diverged"
-            assert len(self.node_references) == len(return_nodes), "node dedup cache and node_blob diverged"
+            if len(self.tensor_ids) != len(return_tensors):
+                raise RuntimeError("Tensor dedup cache and tensor_blob diverged during unstructuring.")
+            if len(self.node_references) != len(return_nodes):
+                raise RuntimeError("Node dedup cache and node_blob diverged during unstructuring.")
         finally:
             self.reset()
         return structure, return_tensors, return_nodes
@@ -216,6 +214,7 @@ class ContextConverter:
 
     # The single root entry point for structuring.
     def structure_with_context(self, data, *, tensor_blob, node_blob):
+        ensure_registry_consistency()
         self.reset()
         self.tensor_blob = tensor_blob
         self.node_blob = node_blob
@@ -261,7 +260,7 @@ from cattrs.strategies import configure_union_passthrough
 configure_union_passthrough(ScalarPrimitive.__value__, CONVERTER)
 
 # Register direct hooks (implicit type from return type)
-CONVERTER.register_unstructure_hook(CONTEXT_CONVERTER.consume_tensor)
+CONVERTER.register_unstructure_hook(CONTEXT_CONVERTER.unstructure_tensor)
 CONVERTER.register_unstructure_hook(CONTEXT_CONVERTER.unstructure_tuple)
 CONVERTER.register_unstructure_hook(CONTEXT_CONVERTER.unstructure_set)
 CONVERTER.register_unstructure_hook(CONTEXT_CONVERTER.unstructure_idxtype)
@@ -272,10 +271,10 @@ for _record_cls in (NodeRecord, NodeListRecord, GraphModuleRecord):
     CONVERTER.register_unstructure_hook(_record_cls, dataclasses.asdict)
 
 # Register indirect hooks (which return different types than they take in)
-CONVERTER.register_structure_hook(TensorReference, CONTEXT_CONVERTER.emit_tensor)
-CONVERTER.register_structure_hook(NodeReference, CONTEXT_CONVERTER.emit_node)
-CONVERTER.register_structure_hook(TaggedIdxType, CONTEXT_CONVERTER.emit_idxtype)
-CONVERTER.register_structure_hook(NodeRecord, CONTEXT_CONVERTER.structure_single_node_record)
+CONVERTER.register_structure_hook(TensorReference, CONTEXT_CONVERTER.structure_tensor)
+CONVERTER.register_structure_hook(NodeReference, CONTEXT_CONVERTER.structure_node)
+CONVERTER.register_structure_hook(TaggedIdxType, CONTEXT_CONVERTER.structure_idxtype)
+CONVERTER.register_structure_hook(NodeRecord, CONTEXT_CONVERTER.structure_node_record)
 CONVERTER.register_structure_hook(NodeListRecord, CONTEXT_CONVERTER.structure_node_list_record)
 CONVERTER.register_structure_hook(GraphModuleRecord, CONTEXT_CONVERTER.structure_graph_module_record)
 
