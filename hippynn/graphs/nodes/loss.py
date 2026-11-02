@@ -138,6 +138,36 @@ class WeightedMAELoss(_WeightedCompareLoss):
     _classname = "WeightedMAE"
     torch_module = algebra_modules.WeightedMAELoss()
 
+class WeightedHuberLoss(AutoKw, SingleNode):
+    _classname = "WeightedHuber"
+    index_state = IdxType.Scalar
+    auto_module_class = algebra_modules.WeightedHuberLoss
+    auto_module_kwargs = "delta",
+
+    def __init__(self, predicted, true, weight, delta=1.0, module="auto"):
+        name = "{}({},{},{})".format(self._classname, predicted.name, true.name, weight.name)
+        predicted, true, weight = elementwise_compare_reduce(predicted, true, weight)
+        super().__init__(name, (predicted, true, weight), module=module, delta=delta)
+
+    @classmethod
+    def of_node(cls, node, weight, delta=1.0):
+        """
+        Same as _WeightedCompareLoss.of_node, plus the huber delta.
+        """
+        node = node.main_output
+
+        if isinstance(weight, str):
+            index_state = db_state_of(node.index_state)
+            weight = InputNode(db_name=weight, index_state=index_state)
+
+        if not weight.is_in_loss_graph():
+            if isinstance(weight, InputNode):
+                weight = weight.true
+            else:
+                weight = weight.pred
+
+        return cls(node.pred, node.true, weight, delta=delta)
+
 class RsqMod(torch.nn.Module):
     def forward(self, predicted, true):
         return 1 - (torch.mean(torch.pow(predicted - true, 2)) / true.var())
@@ -156,8 +186,23 @@ class MAELoss(_BaseCompareLoss, op=torch.nn.functional.l1_loss):
     pass
 
 
-class HuberLoss(_BaseCompareLoss, op=torch.nn.functional.huber_loss):
-    pass
+class HuberLoss(AutoKw, SingleNode):
+    _classname = "huber_loss"
+    index_state = IdxType.Scalar
+    auto_module_class = torch.nn.HuberLoss
+    auto_module_kwargs = "delta",
+
+    def __init__(self, predicted, true, delta=1.0, module="auto"):
+        predicted = predicted.main_output
+        true = true.main_output
+        name = "{}({},{})".format(self._classname, predicted.name, true.name)
+        predicted, true = elementwise_compare_reduce(predicted, true)
+        super().__init__(name, (predicted, true), module=module, delta=delta)
+
+    @classmethod
+    def of_node(cls, node, delta=1.0):
+        node = node.main_output
+        return cls(node.pred, node.true, delta=delta)
 
 
 class _LPReg(AutoKw, SingleNode):
