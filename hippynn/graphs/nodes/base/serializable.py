@@ -10,6 +10,10 @@ class SerializableNode:
             return {name: getattr(self, name) for name in self.serialization_attributes}
         else:
             return None
+
+    def from_record(self):
+        # Interface contract, make sure you implement this if subclassing!
+        return NotImplemented
     
     def __init_subclass__(cls, **kwargs):
             super().__init_subclass__(**kwargs)

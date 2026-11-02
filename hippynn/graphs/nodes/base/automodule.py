@@ -71,7 +71,7 @@ class AutoModule(SerializableNode):
         return record
 
     @classmethod
-    def from_record(cls, name, parents, module_kwargs, db_name, state_dict, **kwargs):
+    def from_record(cls, name, parents, module_kwargs, db_name, state_dict, index_state=None):
 
         # auto module kwargs k: module name: v: node name
         auto_module_kwargs = cls.auto_module_kwargs
@@ -93,9 +93,7 @@ class AutoModule(SerializableNode):
         node = cls(name, parents, module_kwargs=leftover_module_kwargs, **node_kwargs)
         node.torch_module.load_state_dict(state_dict)
         node.db_name = db_name
-        # `index_state` is only merged into `serialization_attributes` for `SingleNode`-based
-        # `AutoModule` subclasses (e.g. `FuzzyHistogrammer`), not `MultiNode`-based ones - so it's
-        # not always present in `kwargs`.
-        if "index_state" in kwargs:
-            node.index_state = kwargs["index_state"]
+        # index_state only present in SingleNodes
+        if index_state is not None:
+            node.index_state = index_state
         return node

@@ -77,7 +77,6 @@ class _AlgebraicOperation():
 
 class UnaryNode(SerializableNode):
     def __init__(self, in_node):
-        #name = "{}({})".format(self._classname, in_node)
         super().__init__(self._classname, (in_node,), module=None)
         self.index_state = in_node.index_state
 
@@ -93,7 +92,6 @@ class BinNode(SerializableNode):
     def __init__(self, left, right):
         left, right = left.main_output, right.main_output
         left, right = elementwise_compare_reduce(left, right)
-        #name = "{}({}, {})".format(self._classname, left.name, right.name)
         super().__init__(self._classname, (left, right), module=None)
         self.index_state = left.index_state
 
