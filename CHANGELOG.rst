@@ -4,7 +4,8 @@ Breaking changes:
 - ``calculate_min_dists`` signature changed: ``dist_hard_max`` is now the second
   positional argument, and ``species_name``/``positions_name`` are now optional
   keyword arguments that are auto-detected if omitted. ``cell_name`` now also
-  accepts ``True``/``False`` to control auto-detection of periodic boundaries.
+  accepts ``True`` / ``False`` to control auto-detection of periodic boundaries, 
+  and uses ``device_fallback`` if no device is supplied.
 - Alterations to data after loading as a hippynn Database but prior to
   splitting the data (eg. as in the examples ani_aluminum_example\*.py, 
   ani1x_training.py, and \*SNAPExample.py) are be performed using 
@@ -20,6 +21,14 @@ Breaking changes:
 - ``calculate_rdf`` and ``calculate_adf`` in the ``molecular_dynamics`` subpackage
   now require the ``cells`` argument, since periodic boundary conditions are
   required. Passing ``cells=None`` raises a ``ValueError``.
+- ``AutoKw`` and ``AutoNoKw`` are merged into ``AutoModule``, and
+  ``definition_helpers`` is renamed to ``parent_expander``. The old names still
+  import from ``hippynn.graphs.nodes.base`` with a deprecation warning.
+- The ``hard_dist_cutoff`` argument of the open-boundary pair indexer is renamed
+  to ``dist_hard_max``, matching the graph nodes. The old keyword is still
+  accepted but does not emit a deprecation warning.
+- ``ValueNode`` moved from ``nodes/base/base.py`` to its own
+  ``nodes/base/value.py``. Import it from ``hippynn.graphs.nodes.base`` as before.
 
 New Features:
 -------------
@@ -53,6 +62,12 @@ New Features:
 - Additional example for multi-fidelity training
 - Additional example for knowledge distillation
 - Added classical charge equilibration methods and associated examples
+- Added graph serialization: ``savegraph`` and ``loadgraph`` save and restore a
+  full ``GraphModule`` in pkl, pt, json, or yml format, and warn when the saved
+  protocol version does not match the current one.
+- Added the ``SerializableNode`` mixin, which lets node classes declare the
+  attributes stored in their serialized records. ``InputNode`` and ``AutoModule``
+  use it.
 
 
 

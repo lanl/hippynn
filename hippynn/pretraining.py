@@ -16,6 +16,7 @@ from .graphs.nodes.pairs import OpenPairIndexer, DynamicPeriodicPairs, MinDistNo
 from .graphs.nodes.indexers import acquire_encoding_padding, SysMaxOfAtomsNode
 from .graphs.nodes.physics import VecMag
 from .networks.hipnn import compute_hipnn_e0
+from .tools import device_fallback
 
 
 def hierarchical_energy_initialization(
@@ -212,6 +213,9 @@ def calculate_min_dists(
 
     if not len(species_set) or set(species_set) == {0}:
         raise ValueError("Species set empty!")
+
+    if device is None:
+        device = device_fallback()
 
     pred, node_key = _setup_min_dist_graph(
         species_name=species_name,
