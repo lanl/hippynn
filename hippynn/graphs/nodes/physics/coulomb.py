@@ -149,7 +149,7 @@ class ScreenedCoulombEnergyNode(AutoModule, ChargePairSetup, Energies, MultiNode
         
         
         # Dev Note: the _pe_cutoff_distance argument duplicates the cutoff_distance argument
-        # because the AutoKw and ExpandParent mixins both consume their keywords.
+        # because the AutoModule and ExpandParent mixins both consume their keywords.
         # Since both of them require the cutoff, we have it supplied with two different names.
         # Would be nice if the workflow didn't require this, but the workaround is not costly,
         # just confusing to find.

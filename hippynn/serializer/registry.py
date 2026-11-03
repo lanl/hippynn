@@ -9,7 +9,7 @@ import warnings
 
 from ..experiment import _debprint
 from .types import NodeTypeIdentifier
-from ..graphs.nodes.base.base import SerializableNode
+from ..graphs.nodes.base import SerializableNode
 
 
 _NODE_REGISTRY: dict[type, NodeTypeIdentifier] = {}

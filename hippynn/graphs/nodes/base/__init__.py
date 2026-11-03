@@ -14,7 +14,7 @@ Combining these, base.py defines many of the core node classes.
 the multi.py module goes on to define a particular core class of import, the MultiNode, which itself represents
 a single pytorch computation which returns multiple tensors.
 
-Last but not least is definition_helpers, which contains optional features which help to simplify the creation
+Last but not least is parent_expander, which contains optional features which help to simplify the creation
 nodes using flexible parent types.
 """
 from .node_functions import get_connected_nodes, get_ancestors, get_descendants, get_connected_nodes, find_relatives, find_unique_relative, is_in_loss_graph
@@ -23,6 +23,7 @@ from .node_functions import NodeAmbiguityError, NodeOperationError, NodeNotFound
 # Basic node classes
 from .base import Node, SingleNode, InputNode, LossInputNode, LossPredNode, LossTrueNode
 from .automodule import AutoModule
+from .serializable import SerializableNode
 
 from .value import ValueNode
 
@@ -42,4 +43,10 @@ def __getattr__(name: str):
             stacklevel=2,
         )
         return Node
+    if name in ("AutoKw", "AutoNoKw"):
+        # AutoKw/AutoNoKw were merged into AutoModule
+        from ...._deprecations import warn_name_change
+        from . import automodule
+        warn_name_change(name, automodule.AutoModule, old_module=__name__, stacklevel=2, new_module=automodule)
+        return automodule.AutoModule
     raise AttributeError(f"module {__name__!r} has no attribute {name}")
