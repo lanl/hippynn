@@ -114,7 +114,7 @@
 <span class="sd">"""</span>
 <span class="c1"># Dev Note: functions placed here should not have any dependency on internal</span>
 <span class="c1"># hippynn packages. This is the place for misc. pytorch/numpy/pure-python code.</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">traceback</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span><span class="o">,</span><span class="w"> </span><span class="nn">functools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">pathlib</span><span class="o">,</span><span class="w"> </span><span class="nn">traceback</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span><span class="o">,</span><span class="w"> </span><span class="nn">functools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 
@@ -227,6 +227,58 @@
     <span class="k">finally</span><span class="p">:</span>
         <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">return_dir</span><span class="p">)</span></div>
 
+
+
+<div class="viewcode-block" id="open_if_needed">
+<a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.open_if_needed">[docs]</a>
+<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">open_if_needed</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"r"</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Context manager yielding an open file object.</span>
+
+<span class="sd">    If `file` is already an open file object, it is yielded as-is (`mode` is ignored, and it is</span>
+<span class="sd">    not closed on exit); otherwise `file` is treated as a filename, opened with `mode`, and closed</span>
+<span class="sd">    on exit.</span>
+
+<span class="sd">    :param file: filename or an already-open file object</span>
+<span class="sd">    :param mode: passed to ``open()`` if `file` is a filename</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">fh</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">file</span></div>
+
+
+
+<div class="viewcode-block" id="infer_filetype">
+<a class="viewcode-back" href="../../api_documentation/hippynn.tools.html#hippynn.infer_filetype">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">infer_filetype</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">filetype</span><span class="p">,</span> <span class="n">filetypes</span><span class="p">,</span> <span class="n">aliases</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Resolve the file format to use: `filetype` if given, else inferred from `file`'s extension.</span>
+
+<span class="sd">    :param file: filename (`str`) or an already-open file object; the format is only inferred</span>
+<span class="sd">        when this is a string.</span>
+<span class="sd">    :param filetype: explicit format to use; returned as-is if not None.</span>
+<span class="sd">    :param filetypes: allowed format strings; the inferred (possibly alias-resolved) extension</span>
+<span class="sd">        must be one of these.</span>
+<span class="sd">    :param aliases: optional mapping from alternate extension spellings to a canonical entry in</span>
+<span class="sd">        `filetypes` (e.g. ``{"yaml": "yml"}``).</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">filetype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">filetype</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="p">(</span><span class="n">aliases</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">suffix</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="n">filetypes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">suffix</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not infer a filetype from </span><span class="si">{</span><span class="n">file</span><span class="si">!r}</span><span class="s2">; pass `filetype` explicitly, one of </span><span class="si">{</span><span class="n">filetypes</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># TODO: several other places in the library infer a file format from a filename's extension</span>
+<span class="c1"># (e.g. checkpoint/database loading) - look for call sites that could be migrated to use this</span>
+<span class="c1"># helper instead of reimplementing the same pattern.</span>
 
 
 <div class="viewcode-block" id="progress_bar">

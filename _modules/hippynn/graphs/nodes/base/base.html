@@ -116,6 +116,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.algebra</span><span class="w"> </span><span class="kn">import</span> <span class="n">_NodeAlgebra</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.node_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">_NodeFunctions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.serializable</span><span class="w"> </span><span class="kn">import</span> <span class="n">SerializableNode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.algebra</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnaryNode</span><span class="p">,</span> <span class="n">BinNode</span><span class="p">,</span> <span class="n">_AlgebraicOperation</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">....layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">algebra</span> <span class="k">as</span> <span class="n">algebra_mods</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...._deprecations</span><span class="w"> </span><span class="kn">import</span> <span class="n">_DeprecatedNamesMixin</span>
@@ -126,8 +127,7 @@
 <div class="viewcode-block" id="Node">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.Node">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Node</span><span class="p">(</span><span class="n">_NodeFunctions</span><span class="p">,</span> <span class="n">_NodeAlgebra</span><span class="p">):</span>
-    <span class="k">pass</span></div>
-
+    <span class="n">serialization_attributes</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"db_name"</span><span class="p">,)</span>  <span class="c1"># hack</span></div>
 
 
 
@@ -135,6 +135,7 @@
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.SingleNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SingleNode</span><span class="p">(</span><span class="n">Node</span><span class="p">,</span> <span class="n">_DeprecatedNamesMixin</span><span class="p">):</span>
     <span class="n">index_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">IdxType</span><span class="p">]</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Unlabeled</span>
+    <span class="n">serialization_attributes</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"index_state"</span><span class="p">,)</span>
     <span class="n">_DEPRECATED_NAMES</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">"_index_state"</span> <span class="p">:</span> <span class="s2">"index_state"</span><span class="p">,</span>
         <span class="p">}</span>
@@ -147,7 +148,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pred</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_in_loss_graph</span><span class="p">():</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"Node </span><span class="si">{}</span><span class="s2"> of type </span><span class="si">{}</span><span class="s2"> already in loss graph"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pred</span> <span class="o">=</span> <span class="n">LossPredNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">"-pred"</span><span class="p">,</span> <span class="n">origin_node</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">LossPredNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">"-pred"</span><span class="p">,</span> <span class="n">origin_node</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span> <span class="c1"># sets backlink when created</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pred</span>
 
     <span class="nd">@property</span>
@@ -155,37 +156,12 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_true</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_in_loss_graph</span><span class="p">():</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"Node </span><span class="si">{}</span><span class="s2"> of type </span><span class="si">{}</span><span class="s2"> already in loss graph"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_true</span> <span class="o">=</span> <span class="n">LossTrueNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">"-true"</span><span class="p">,</span> <span class="n">origin_node</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">LossTrueNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">"-true"</span><span class="p">,</span> <span class="n">origin_node</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span> <span class="c1"># sets backlink when created</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_true</span>
-    
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">db_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_db_name</span>
-
-    <span class="nd">@db_name</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">db_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_db_name</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_in_loss_graph</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">true</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="n">value</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">pred</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="n">value</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">main_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span></div>
-
-    
-
-
-<div class="viewcode-block" id="ValueNode">
-<a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.ValueNode">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ValueNode</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">):</span>
-    <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Scalar</span>  <span class="c1"># By definition abstract values do not have a batch axis.</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="s2">"Value(</span><span class="si">{}</span><span class="s2">)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_converted</span> <span class="o">=</span> <span class="n">convert</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">algebra_mods</span><span class="o">.</span><span class="n">ValueMod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">convert</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_converted</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="p">(),</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">)</span></div>
 
 
 
@@ -241,45 +217,53 @@
 <span class="c1"># broadcasting behavior.</span>
 <div class="viewcode-block" id="AtLeast2D">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.AtLeast2D">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">AtLeast2D</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AtLeast2D</span><span class="p">(</span><span class="n">UnaryNode</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
     <span class="n">torch_module</span> <span class="o">=</span> <span class="n">algebra_mods</span><span class="o">.</span><span class="n">AtLeast2D</span><span class="p">()</span>
-    <span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Unlabeled</span>
+    <span class="n">_classname</span> <span class="o">=</span> <span class="s2">"Atleast2D"</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"AtLeast2D can only have 1 parent, got </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parents</span><span class="p">)))</span>
-        <span class="n">p</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">index_state</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">index_state</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">"Atleast2D(</span><span class="si">{}</span><span class="s2">)"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">parents</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">origin_node</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">origin_node</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_node</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">in_node</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">origin_node</span> <span class="o">=</span> <span class="n">in_node</span><span class="o">.</span><span class="n">origin_node</span></div>
 
 
 
 <div class="viewcode-block" id="InputNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.InputNode">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">InputNode</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">):</span>
-    <span class="n">input_names</span> <span class="o">=</span> <span class="p">()</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InputNode</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">,</span> <span class="n">SerializableNode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Node for getting information for the database."""</span>
-    <span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">input_names</span> <span class="o">=</span> <span class="p">()</span>
     <span class="n">input_type_str</span> <span class="o">=</span> <span class="s2">"Input"</span>
+    <span class="n">requires_grad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">serialization_attributes</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"requires_grad"</span><span class="p">,)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">index_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"index_state"</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Unlabeled</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">index_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">index_state</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_state</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Cannot override IdxType </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">index_state</span><span class="si">}</span><span class="s2"> of node type </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> "</span>
-                                     <span class="sa">f</span><span class="s2">"with user-specified type </span><span class="si">{</span><span class="n">index_state</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">index_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">index_state</span> <span class="o">=</span> <span class="n">index_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># todo: just reduce signature on subclasses?        </span>
+        <span class="k">if</span> <span class="n">index_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cls_index_state</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"index_state"</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Unlabeled</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">index_state</span> <span class="o">!=</span> <span class="n">cls_index_state</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">cls_index_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Unlabeled</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Cannot override IdxType </span><span class="si">{</span><span class="n">cls_index_state</span><span class="si">}</span><span class="s2"> of node type </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> "</span>
+                                 <span class="sa">f</span><span class="s2">"with user-specified type </span><span class="si">{</span><span class="n">index_state</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>                            
+            <span class="bp">self</span><span class="o">.</span><span class="n">index_state</span> <span class="o">=</span> <span class="n">index_state</span> 
         
         <span class="k">if</span> <span class="n">db_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"Input node requires name or db_name arguments."</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">db_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_type_str</span> <span class="o">+</span> <span class="s2">"(db_name='</span><span class="si">{}</span><span class="s2">')"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">db_name</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="p">(),</span> <span class="n">db_name</span><span class="o">=</span><span class="n">db_name</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></div>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">db_name</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="p">(),</span> <span class="n">db_name</span><span class="o">=</span><span class="n">db_name</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
+
+<div class="viewcode-block" id="InputNode.from_record">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.InputNode.from_record">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_record</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">db_name</span><span class="p">,</span> <span class="n">index_state</span><span class="p">,</span> <span class="n">requires_grad</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="n">db_name</span><span class="p">,</span> <span class="n">index_state</span><span class="o">=</span><span class="n">index_state</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">requires_grad</span><span class="p">:</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="n">requires_grad</span>
+        <span class="k">return</span> <span class="n">node</span></div>
+</div>
 
 
 
@@ -287,29 +271,43 @@
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.LossInputNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">LossInputNode</span><span class="p">(</span><span class="n">InputNode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Node for getting information from the model (predicted) or database (true) into the loss."""</span>
+    <span class="n">serialization_attributes</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"origin_node"</span><span class="p">,)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">origin_node</span><span class="p">,</span> <span class="n">db_name</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">db_name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">origin_node</span> <span class="o">=</span> <span class="n">origin_node</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">origin_node</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">db_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">origin_node</span> <span class="o">=</span> <span class="n">origin_node</span>
+
+<div class="viewcode-block" id="LossInputNode.from_record">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.LossInputNode.from_record">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_record</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">origin_node</span><span class="p">,</span> <span class="n">index_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">origin_node</span><span class="o">=</span><span class="n">origin_node</span><span class="p">)</span>
+        <span class="c1"># **kwargs contains unneeded things for these classes, db_name, parents, etc</span>
+        <span class="k">if</span> <span class="n">index_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">index_state</span> <span class="o">=</span> <span class="n">index_state</span>
+        <span class="k">return</span> <span class="n">node</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="LossPredNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.LossPredNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">LossPredNode</span><span class="p">(</span><span class="n">LossInputNode</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">origin_node</span><span class="p">,</span> <span class="n">db_name</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">origin_node</span><span class="p">,</span> <span class="n">db_name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">index_state</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin_node</span><span class="p">,</span> <span class="s2">"index_state"</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Unlabeled</span><span class="p">)</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">origin_node</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">origin_node</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_state</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin_node</span><span class="p">,</span> <span class="s2">"index_state"</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Unlabeled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">origin_node</span><span class="o">.</span><span class="n">_pred</span> <span class="o">=</span> <span class="bp">self</span></div>
 
 
 
 <div class="viewcode-block" id="LossTrueNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.LossTrueNode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">LossTrueNode</span><span class="p">(</span><span class="n">LossInputNode</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">origin_node</span><span class="p">,</span> <span class="n">db_name</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">origin_node</span><span class="p">,</span> <span class="n">db_name</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">origin_node</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">origin_node</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index_state</span> <span class="o">=</span> <span class="n">indextypes</span><span class="o">.</span><span class="n">reduce_funcs</span><span class="o">.</span><span class="n">db_state_of</span><span class="p">(</span><span class="n">origin_node</span><span class="o">.</span><span class="n">index_state</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_main_output</span> <span class="o">=</span> <span class="n">AtLeast2D</span><span class="p">((</span><span class="bp">self</span><span class="p">,))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_main_output</span> <span class="o">=</span> <span class="n">AtLeast2D</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">origin_node</span><span class="o">.</span><span class="n">_true</span> <span class="o">=</span> <span class="bp">self</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">main_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

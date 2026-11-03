@@ -113,28 +113,44 @@
 <span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">....layers.algebra</span><span class="w"> </span><span class="kn">import</span> <span class="n">Idx</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">Node</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_debprint</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoModule</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdxType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...._deprecations</span><span class="w"> </span><span class="kn">import</span> <span class="n">_DeprecatedNamesMixin</span>
 
 
 <div class="viewcode-block" id="IndexNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.multi.html#hippynn.graphs.nodes.base.multi.IndexNode">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">IndexNode</span><span class="p">(</span><span class="n">SingleNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IndexNode</span><span class="p">(</span><span class="n">AutoModule</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
     <span class="n">input_names</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"parent"</span><span class="p">,)</span>
+    <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">Idx</span>
+    <span class="c1"># _repr_info required so this node can be serailized cleanly;</span>
+    <span class="c1"># auto-modules must allow the keywords to be passed at the node level.</span>
+    <span class="n">auto_module_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"repr_info"</span><span class="p">:</span> <span class="s2">"_repr_info"</span><span class="p">,</span> <span class="s2">"index"</span><span class="p">:</span> <span class="s2">"index"</span><span class="p">}</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">index_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">index_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_repr_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"Index node takes exactly one parent."</span><span class="p">)</span>
         <span class="n">par</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">iname</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">output_names</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="s2">"output_names"</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"&lt;</span><span class="si">{index}</span><span class="s2">&gt;"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
         <span class="n">repr_info</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"parent_name"</span><span class="p">:</span> <span class="n">par</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">"index"</span><span class="p">:</span> <span class="n">iname</span><span class="p">}</span>
-        <span class="n">module</span> <span class="o">=</span> <span class="n">Idx</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">repr_info</span><span class="o">=</span><span class="n">repr_info</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index_state</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Unlabeled</span> <span class="k">if</span> <span class="n">index_state</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">index_state</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">_repr_info</span><span class="o">=</span><span class="n">repr_info</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">)</span>
 
-            
+<div class="viewcode-block" id="IndexNode.from_record">
+<a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.multi.html#hippynn.graphs.nodes.base.multi.IndexNode.from_record">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_record</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parents</span><span class="p">,</span> <span class="n">module_kwargs</span><span class="p">,</span> <span class="n">db_name</span><span class="p">,</span> <span class="n">index_state</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>
+        <span class="c1"># `state_dict` is dropped: `Idx` holds no weights, and the child already exists on the parent.</span>
+        <span class="p">(</span><span class="n">parent</span><span class="p">,)</span> <span class="o">=</span> <span class="n">parents</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">module_kwargs</span><span class="p">[</span><span class="s1">'index'</span><span class="p">]</span>
+        <span class="n">child</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">child</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">child</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="n">db_name</span>
+        <span class="n">child</span><span class="o">.</span><span class="n">index_state</span> <span class="o">=</span> <span class="n">index_state</span>
+        <span class="k">return</span> <span class="n">child</span></div>
+</div>
+
+
 
 <div class="viewcode-block" id="MultiNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.base.multi.html#hippynn.graphs.nodes.base.multi.MultiNode">[docs]</a>
@@ -223,7 +239,6 @@
             <span class="k">pass</span>
 
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-            
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">main_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

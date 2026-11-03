@@ -112,13 +112,13 @@
 <span class="sd">Nodes not otherwise categorized.</span>
 <span class="sd">"""</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdxType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">ExpandParents</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoModule</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">ExpandParents</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">algebra</span> <span class="k">as</span> <span class="n">algebra_modules</span>
 
 
 <div class="viewcode-block" id="ListNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.misc.html#hippynn.graphs.nodes.misc.ListNode">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ListNode</span><span class="p">(</span><span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ListNode</span><span class="p">(</span><span class="n">AutoModule</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
     <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"features"</span>
     <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"wrapped_features"</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">algebra_modules</span><span class="o">.</span><span class="n">ListMod</span>
@@ -130,7 +130,7 @@
 
 <div class="viewcode-block" id="EnsembleTarget">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.misc.html#hippynn.graphs.nodes.misc.EnsembleTarget">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">EnsembleTarget</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">EnsembleTarget</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoModule</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
     <span class="n">auto_module_class</span> <span class="o">=</span> <span class="n">algebra_modules</span><span class="o">.</span><span class="n">EnsembleTarget</span>
     <span class="n">input_names</span> <span class="o">=</span> <span class="bp">NotImplemented</span>  <span class="c1"># NotImplemented tells __init_subclass__ that we will fill this in later.</span>
     <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"mean"</span><span class="p">,</span> <span class="s2">"std"</span><span class="p">,</span> <span class="s2">"all"</span>

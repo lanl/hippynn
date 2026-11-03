@@ -126,6 +126,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.graphs.nodes.indexers</span><span class="w"> </span><span class="kn">import</span> <span class="n">acquire_encoding_padding</span><span class="p">,</span> <span class="n">SysMaxOfAtomsNode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.graphs.nodes.physics</span><span class="w"> </span><span class="kn">import</span> <span class="n">VecMag</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.networks.hipnn</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_hipnn_e0</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">device_fallback</span>
 
 
 <div class="viewcode-block" id="hierarchical_energy_initialization">
@@ -330,6 +331,9 @@
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">species_set</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">(</span><span class="n">species_set</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="mi">0</span><span class="p">}:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Species set empty!"</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">device</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="n">device_fallback</span><span class="p">()</span>
 
     <span class="n">pred</span><span class="p">,</span> <span class="n">node_key</span> <span class="o">=</span> <span class="n">_setup_min_dist_graph</span><span class="p">(</span>
         <span class="n">species_name</span><span class="o">=</span><span class="n">species_name</span><span class="p">,</span>

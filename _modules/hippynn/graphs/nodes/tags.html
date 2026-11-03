@@ -142,7 +142,15 @@
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.tags.html#hippynn.graphs.nodes.tags.PairIndexer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PairIndexer</span><span class="p">:</span>
     <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"pair_dist"</span><span class="p">,</span> <span class="s2">"pair_first"</span><span class="p">,</span> <span class="s2">"pair_second"</span><span class="p">,</span> <span class="s2">"pair_coord"</span>
-    <span class="n">output_index_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pairs</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_names</span><span class="p">)</span></div>
+    <span class="n">output_index_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">IdxType</span><span class="o">.</span><span class="n">Pairs</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_names</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dist_hard_max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">dist_hard_max</span>
+
+    <span class="nd">@dist_hard_max</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dist_hard_max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">dist_hard_max</span> <span class="o">=</span> <span class="n">value</span></div>
 
 
 

@@ -165,10 +165,9 @@ hierarchical energy regression target <a class="reference internal" href="../api
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">hippynn.layers.targets</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">target_modules</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdxType</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiNode</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.base.definition_helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoKw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">AutoModule</span>
 
-<span class="k">class</span><span class="w"> </span><span class="nc">SimpleHEnergyNode</span><span class="p">(</span><span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SimpleHEnergyNode</span><span class="p">(</span><span class="n">AutoModule</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
     <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"input_features"</span><span class="p">,</span> <span class="s2">"system_index"</span><span class="p">,</span> <span class="s2">"n_systems"</span>
     <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"system_energies"</span><span class="p">,</span> <span class="s2">"atom_energies"</span><span class="p">,</span> <span class="s2">"energy_terms"</span><span class="p">,</span> <span class="s2">"hierarchicality"</span>
     <span class="n">main_output_name</span> <span class="o">=</span> <span class="s2">"system_energies"</span>
@@ -184,7 +183,7 @@ hierarchical energy regression target <a class="reference internal" href="../api
 <p>Note that we have added the <code class="docutils literal notranslate"><span class="pre">input_names</span></code> tuple as well, this attribute can be set on
 both SingleNode and MultiNode classes.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">main_output_name</span></code> attribute specifies what tensor to use by default when sending information
-to a child node. This class also makes use of the <code class="docutils literal notranslate"><span class="pre">AutoKw</span></code> mix-in for defining a new module
+to a child node. This class also makes use of the <code class="docutils literal notranslate"><span class="pre">AutoModule</span></code> mix-in for defining a new module
 using keyword arguments. These arguments will be passed to a new instance of the attribute
 <code class="docutils literal notranslate"><span class="pre">auto_module_class</span></code>. To use this node, we now only need to supply the arguments for the pytorch module:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hippynn.graphs.nodes.indexers</span><span class="w"> </span><span class="kn">import</span> <span class="n">acquire_encoding_padding</span>
@@ -210,7 +209,7 @@ in a batch are processed by the padding indexer. We can thus use another feature
 the <code class="docutils literal notranslate"><span class="pre">ExpandParents</span></code> class, to simplify construction of the node by making this logic an
 optional step during the construction of the node.</p>
 <p>Let’s take a look  at the full definition of <a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HEnergyNode" title="hippynn.graphs.nodes.targets.HEnergyNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">HEnergyNode</span></code></a>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">HEnergyNode</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">_DeprecatedNamesMixin</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">HEnergyNode</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoModule</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">_DeprecatedNamesMixin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Predict a system-level scalar such as energy from a sum over local components.</span>
 <span class="sd">    """</span>
@@ -287,7 +286,7 @@ the needed index state, this conversion will automatically be applied using
 <a class="reference internal" href="../api_documentation/hippynn.graphs.indextypes.html#hippynn.graphs.indextypes.index_type_coercion" title="hippynn.graphs.indextypes.index_type_coercion"><code class="xref py py-func docutils literal notranslate"><span class="pre">index_type_coercion()</span></code></a>.</p></li>
 </ol>
 <p>A full list of available methods is  at the API documentation for the
-<a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.base.definition_helpers.html#hippynn.graphs.nodes.base.definition_helpers.ParentExpander" title="hippynn.graphs.nodes.base.definition_helpers.ParentExpander"><code class="xref py py-func docutils literal notranslate"><span class="pre">ParentExpander()</span></code></a>.
+<a class="reference internal" href="../api_documentation/hippynn.graphs.nodes.base.parent_expander.html#hippynn.graphs.nodes.base.parent_expander.ParentExpander" title="hippynn.graphs.nodes.base.parent_expander.ParentExpander"><code class="xref py py-func docutils literal notranslate"><span class="pre">ParentExpander()</span></code></a>.
 These directives are executed when the node’s <code class="docutils literal notranslate"><span class="pre">expand_parents</span></code> method is run, which
 should be performed <em>before</em> calling to the <code class="docutils literal notranslate"><span class="pre">super().__init__()</span></code> method.
 In combination, these directives allow for a powerful flexibility in building graphs

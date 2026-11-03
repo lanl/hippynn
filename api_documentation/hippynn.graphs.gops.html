@@ -151,6 +151,7 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.networks.html">networks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.optimizer.html">optimizer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.plotting.html">plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.serializer.html">serializer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.pretraining.html">pretraining module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.tools.html">tools module</a></li>
 </ul>
@@ -200,14 +201,11 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hippynn.graphs.gops.check_evaluation_order">
-<span class="sig-name descname"><span class="pre">check_evaluation_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evaluation_outputs_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_inputs_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/gops.html#check_evaluation_order"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.gops.check_evaluation_order" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_evaluation_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evaluation_outputs_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/gops.html#check_evaluation_order"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.gops.check_evaluation_order" title="Link to this definition"></a></dt>
 <dd><p>Validate an evaluation order.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>evaluation_outputs_list</strong></p></li>
-<li><p><strong>evaluation_inputs_list</strong></p></li>
-</ul>
+<dd class="field-odd"><p><strong>evaluation_outputs_list</strong></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p></p>
@@ -245,9 +243,9 @@ a corresponding link parent&lt;-child.</p>
 <dd class="field-odd"><p><strong>all_nodes</strong> – The nodes to compute</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>outputs_list, inputs_list
-Outputs list is the node to evaluate next, which is fed the inputs in the
-corresponding entry of inputs_list</p>
+<dd class="field-even"><p>outputs_list
+The nodes to evaluate, in an order where each node’s parents already precede it
+(an input to a node is either an <cite>InputNode</cite> or already earlier in the list).</p>
 </dd>
 </dl>
 </dd></dl>

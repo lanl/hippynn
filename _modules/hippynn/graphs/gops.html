@@ -154,9 +154,9 @@
 
 <span class="sd">    :param all_nodes: The nodes to compute</span>
 
-<span class="sd">    :return:  outputs_list, inputs_list</span>
-<span class="sd">        Outputs list is the node to evaluate next, which is fed the inputs in the</span>
-<span class="sd">        corresponding entry of inputs_list</span>
+<span class="sd">    :return: outputs_list</span>
+<span class="sd">        The nodes to evaluate, in an order where each node's parents already precede it</span>
+<span class="sd">        (an input to a node is either an `InputNode` or already earlier in the list).</span>
 
 <span class="sd">    """</span>
 
@@ -164,7 +164,6 @@
     <span class="c1"># It's computationally inefficient, but it's very easy to implement.</span>
     <span class="c1"># The strategy is greedy and brute-force --  it won't scale to large numbers of nodes."""</span>
 
-    <span class="n">evaluation_inputs_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">evaluation_outputs_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1"># need to sort to get stable results between runs/processes.</span>
     <span class="n">unsatisfied_nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">all_nodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
@@ -184,7 +183,6 @@
                 <span class="n">satisfied_nodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">considered_node</span><span class="p">)</span>
                 <span class="c1"># Input nodes need not be considered; their values are given to `forward()`</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">considered_node</span><span class="p">,</span> <span class="n">InputNode</span><span class="p">):</span>
-                    <span class="n">evaluation_inputs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>
                     <span class="n">evaluation_outputs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">considered_node</span><span class="p">)</span>
                 <span class="k">break</span>  <span class="c1"># This break is necessary to make the `else` clause work;</span>
                 <span class="c1"># if we find a node, we break and the `else` statement won't be hit.</span>
@@ -193,27 +191,26 @@
             <span class="c1"># If we made it through all the unsatisfied nodes, something must be wrong.</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Graph inputs do not seem to specify outputs! Iteration: </span><span class="si">{}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
 
-    <span class="n">check_evaluation_order</span><span class="p">(</span><span class="n">evaluation_outputs_list</span><span class="p">,</span> <span class="n">evaluation_inputs_list</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">evaluation_outputs_list</span><span class="p">,</span> <span class="n">evaluation_inputs_list</span></div>
+    <span class="n">check_evaluation_order</span><span class="p">(</span><span class="n">evaluation_outputs_list</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">evaluation_outputs_list</span></div>
 
 
 
 <div class="viewcode-block" id="check_evaluation_order">
 <a class="viewcode-back" href="../../../api_documentation/hippynn.graphs.gops.html#hippynn.graphs.check_evaluation_order">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">check_evaluation_order</span><span class="p">(</span><span class="n">evaluation_outputs_list</span><span class="p">,</span> <span class="n">evaluation_inputs_list</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_evaluation_order</span><span class="p">(</span><span class="n">evaluation_outputs_list</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Validate an evaluation order.</span>
 
 <span class="sd">    :param evaluation_outputs_list:</span>
-<span class="sd">    :param evaluation_inputs_list:</span>
 <span class="sd">    :return:</span>
 <span class="sd">    """</span>
     <span class="n">pseudo_evaluated</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">out_node</span><span class="p">,</span> <span class="n">inputs_for_node</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">evaluation_outputs_list</span><span class="p">,</span> <span class="n">evaluation_inputs_list</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">in_node</span> <span class="ow">in</span> <span class="n">inputs_for_node</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">out_node</span> <span class="ow">in</span> <span class="n">evaluation_outputs_list</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">in_node</span> <span class="ow">in</span> <span class="n">out_node</span><span class="o">.</span><span class="n">parents</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">in_node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pseudo_evaluated</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">in_node</span><span class="p">,</span> <span class="n">InputNode</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">"Nodes are not ordered correctly."</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">GraphInconsistency</span><span class="p">(</span><span class="s2">"Nodes are not ordered correctly."</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">pseudo_evaluated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">in_node</span><span class="p">)</span>
         <span class="n">pseudo_evaluated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out_node</span><span class="p">)</span></div>
@@ -525,14 +522,12 @@
 
         <span class="c1"># Extra code to handle merging of pair indexers.</span>
         <span class="c1"># Even if we clean up the pair indexer with an extra state we would still need logic to merge them.</span>
-        <span class="c1"># TODO: Clean up hard_dist_cutoff vs dist_hard max and make it impossible for the node and</span>
-        <span class="c1"># TODO module to disagree.</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">):</span>
-            <span class="n">max_r</span> <span class="o">=</span> <span class="n">first</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">hard_dist_cutoff</span>
+            <span class="n">max_r</span> <span class="o">=</span> <span class="n">first</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">dist_hard_max</span>
             <span class="n">max_r_node</span> <span class="o">=</span> <span class="n">first</span>
             <span class="n">swap_first_in</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">for</span> <span class="n">other_node</span> <span class="ow">in</span> <span class="n">rest</span><span class="p">:</span>
-                <span class="n">this_r</span> <span class="o">=</span> <span class="n">other_node</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">hard_dist_cutoff</span>
+                <span class="n">this_r</span> <span class="o">=</span> <span class="n">other_node</span><span class="o">.</span><span class="n">torch_module</span><span class="o">.</span><span class="n">dist_hard_max</span>
                 <span class="k">if</span> <span class="n">this_r</span> <span class="o">&gt;</span> <span class="n">max_r</span><span class="p">:</span>
                     <span class="n">max_r_node</span> <span class="o">=</span> <span class="n">other_node</span>
                     <span class="n">max_r</span> <span class="o">=</span> <span class="n">this_r</span>

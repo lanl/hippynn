@@ -114,7 +114,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">Node</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">AutoModule</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">find_unique_relative</span><span class="p">,</span> <span class="n">Node</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.tags</span><span class="w"> </span><span class="kn">import</span> <span class="n">AtomIndexer</span><span class="p">,</span> <span class="n">Network</span><span class="p">,</span> <span class="n">PairIndexer</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">Charges</span><span class="p">,</span> <span class="n">Energies</span><span class="p">,</span> <span class="n">Encoder</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.indexers</span><span class="w"> </span><span class="kn">import</span> <span class="n">PaddingIndexer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdxType</span><span class="p">,</span> <span class="n">index_type_coercion</span>
@@ -124,7 +124,7 @@
 
 <div class="viewcode-block" id="HEnergyNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HEnergyNode">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">HEnergyNode</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">_DeprecatedNamesMixin</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HEnergyNode</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoModule</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">_DeprecatedNamesMixin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Predict a system-level scalar such as energy from a sum over local components.</span>
 <span class="sd">    """</span>
@@ -164,7 +164,7 @@
 
 <div class="viewcode-block" id="HChargeNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HChargeNode">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">HChargeNode</span><span class="p">(</span><span class="n">Charges</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span>  <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HChargeNode</span><span class="p">(</span><span class="n">Charges</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span>  <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoModule</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Predict an atom-level scalar such as charge from local features.</span>
 <span class="sd">    """</span>
@@ -192,7 +192,7 @@
 
 <div class="viewcode-block" id="LocalChargeEnergy">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.LocalChargeEnergy">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">LocalChargeEnergy</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">_DeprecatedNamesMixin</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LocalChargeEnergy</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoModule</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">_DeprecatedNamesMixin</span><span class="p">):</span>
     <span class="n">_DEPRECATED_NAMES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"mol_energies"</span><span class="p">:</span> <span class="s2">"system_energy"</span><span class="p">}</span>
     <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"charges"</span><span class="p">,</span> <span class="s2">"features"</span><span class="p">,</span> <span class="s2">"system_index"</span><span class="p">,</span> <span class="s2">"n_systems"</span>
     <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"system_energy"</span><span class="p">,</span> <span class="s2">"atom_energies"</span>
@@ -221,7 +221,7 @@
 
 <div class="viewcode-block" id="HBondNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.HBondNode">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">HBondNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HBondNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoModule</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Predict an pair-level scalar such as bond order from local features on both atoms</span>
 <span class="sd">    """</span>
@@ -264,9 +264,8 @@
 
 <div class="viewcode-block" id="AtomizationEnergyNode">
 <a class="viewcode-back" href="../../../../api_documentation/hippynn.graphs.nodes.targets.html#hippynn.graphs.nodes.targets.AtomizationEnergyNode">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">AtomizationEnergyNode</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoKw</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">_DeprecatedNamesMixin</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AtomizationEnergyNode</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">HAtomRegressor</span><span class="p">,</span> <span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoModule</span><span class="p">,</span> <span class="n">MultiNode</span><span class="p">,</span> <span class="n">_DeprecatedNamesMixin</span><span class="p">):</span>
     <span class="n">_DEPRECATED_NAMES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"mol_energy"</span><span class="p">:</span> <span class="s2">"system_energy"</span><span class="p">}</span>
-
     <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"hier_features"</span><span class="p">,</span> <span class="s2">"vac_features"</span><span class="p">,</span> <span class="s2">"encoding"</span><span class="p">,</span> <span class="s2">"system_index"</span><span class="p">,</span> <span class="s2">"n_systems"</span>
     <span class="n">output_names</span> <span class="o">=</span> <span class="s2">"system_energy"</span><span class="p">,</span> <span class="s2">"partial_energies"</span><span class="p">,</span> <span class="s2">"hierarchicality"</span>
     <span class="n">output_index_states</span> <span class="o">=</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">IdxType</span><span class="o">.</span><span class="n">Systems</span>

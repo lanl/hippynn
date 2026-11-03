@@ -110,6 +110,7 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.experiment.html">experiment</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">graphs</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.graphs.GraphModule"><code class="docutils literal notranslate"><span class="pre">GraphModule</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.GraphModule.from_evaluation_order"><code class="docutils literal notranslate"><span class="pre">GraphModule.from_evaluation_order()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.GraphModule.extra_repr"><code class="docutils literal notranslate"><span class="pre">GraphModule.extra_repr()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.GraphModule.forward"><code class="docutils literal notranslate"><span class="pre">GraphModule.forward()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hippynn.graphs.GraphModule.get_module"><code class="docutils literal notranslate"><span class="pre">GraphModule.get_module()</span></code></a></li>
@@ -172,6 +173,7 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.networks.html">networks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.optimizer.html">optimizer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.plotting.html">plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.serializer.html">serializer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.pretraining.html">pretraining module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.tools.html">tools module</a></li>
 </ul>
@@ -221,6 +223,23 @@ which attempt to hide book-keeping from the end-user.</p>
 <dt class="sig sig-object py" id="hippynn.graphs.GraphModule">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">GraphModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">required_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes_to_compute</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/graph.html#GraphModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.GraphModule" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.GraphModule.from_evaluation_order">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_evaluation_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">required_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes_to_compute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/graph.html#GraphModule.from_evaluation_order"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.GraphModule.from_evaluation_order" title="Link to this definition"></a></dt>
+<dd><p>Construct a graph module with an explicit evaluation order, rather than one recomputed
+from the nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>required_inputs</strong> – inputs</p></li>
+<li><p><strong>nodes_to_compute</strong> – outputs</p></li>
+<li><p><strong>evaluation_order</strong> – evaluation order to key the module dict with; must contain the
+same set of nodes that <cite>compute_evaluation_order</cite> would produce for these inputs/outputs.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="hippynn.graphs.GraphModule.extra_repr">
 <span class="sig-name descname"><span class="pre">extra_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/graph.html#GraphModule.extra_repr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.GraphModule.extra_repr" title="Link to this definition"></a></dt>
@@ -429,9 +448,9 @@ parameters from that graph to the model_device.</p></li>
 <dd class="field-odd"><p><strong>all_nodes</strong> – The nodes to compute</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>outputs_list, inputs_list
-Outputs list is the node to evaluate next, which is fed the inputs in the
-corresponding entry of inputs_list</p>
+<dd class="field-even"><p>outputs_list
+The nodes to evaluate, in an order where each node’s parents already precede it
+(an input to a node is either an <cite>InputNode</cite> or already earlier in the list).</p>
 </dd>
 </dl>
 </dd></dl>

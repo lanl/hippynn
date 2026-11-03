@@ -114,8 +114,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">....layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">physics</span> <span class="k">as</span> <span class="n">physics_layers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...indextypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">IdxType</span><span class="p">,</span> <span class="n">elementwise_compare_reduce</span><span class="p">,</span> <span class="n">index_type_coercion</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..base</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">AutoKw</span><span class="p">,</span>
-    <span class="n">AutoNoKw</span><span class="p">,</span>
+    <span class="n">AutoModule</span><span class="p">,</span>
     <span class="n">ExpandParents</span><span class="p">,</span>
     <span class="n">MultiNode</span><span class="p">,</span>
     <span class="n">SingleNode</span><span class="p">,</span>
@@ -129,7 +128,7 @@
 
 <div class="viewcode-block" id="ChargeMomentNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.charges.html#hippynn.graphs.nodes.physics.charges.ChargeMomentNode">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ChargeMomentNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">AutoNoKw</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ChargeMomentNode</span><span class="p">(</span><span class="n">ExpandParents</span><span class="p">,</span> <span class="n">SingleNode</span><span class="p">):</span>
     <span class="n">input_names</span> <span class="o">=</span> <span class="s2">"charges"</span><span class="p">,</span> <span class="s2">"positions"</span><span class="p">,</span> <span class="s2">"system_index"</span><span class="p">,</span> <span class="s2">"n_systems"</span>
 
 <div class="viewcode-block" id="ChargeMomentNode.expansion0">
@@ -166,7 +165,7 @@
 
 <div class="viewcode-block" id="DipoleNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.charges.html#hippynn.graphs.nodes.physics.charges.DipoleNode">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">DipoleNode</span><span class="p">(</span><span class="n">ChargeMomentNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DipoleNode</span><span class="p">(</span><span class="n">AutoModule</span><span class="p">,</span> <span class="n">ChargeMomentNode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute the dipole of point charges.</span>
 <span class="sd">    """</span>
@@ -178,7 +177,7 @@
 
 <div class="viewcode-block" id="QuadrupoleNode">
 <a class="viewcode-back" href="../../../../../api_documentation/hippynn.graphs.nodes.physics.charges.html#hippynn.graphs.nodes.physics.charges.QuadrupoleNode">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">QuadrupoleNode</span><span class="p">(</span><span class="n">ChargeMomentNode</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">QuadrupoleNode</span><span class="p">(</span><span class="n">AutoModule</span><span class="p">,</span> <span class="n">ChargeMomentNode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Compute the traceless quadrupole of point charges.</span>
 <span class="sd">    """</span>

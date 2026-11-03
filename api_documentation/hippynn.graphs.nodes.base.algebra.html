@@ -20,7 +20,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="base module" href="hippynn.graphs.nodes.base.base.html" />
+    <link rel="next" title="automodule module" href="hippynn.graphs.nodes.base.automodule.html" />
     <link rel="prev" title="base" href="hippynn.graphs.nodes.base.html" /> 
 </head>
 
@@ -125,16 +125,27 @@
 <li class="toctree-l3 current"><a class="reference internal" href="hippynn.graphs.nodes.html">nodes</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="hippynn.graphs.nodes.base.html">base</a><ul class="current">
 <li class="toctree-l5 current"><a class="current reference internal" href="#">algebra module</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.algebra.BinNode"><code class="docutils literal notranslate"><span class="pre">BinNode</span></code></a></li>
-<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.algebra.UnaryNode"><code class="docutils literal notranslate"><span class="pre">UnaryNode</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.algebra.BinNode"><code class="docutils literal notranslate"><span class="pre">BinNode</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.algebra.BinNode.from_record"><code class="docutils literal notranslate"><span class="pre">BinNode.from_record()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.algebra.BinNode.serialization_attributes"><code class="docutils literal notranslate"><span class="pre">BinNode.serialization_attributes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.algebra.UnaryNode"><code class="docutils literal notranslate"><span class="pre">UnaryNode</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.algebra.UnaryNode.from_record"><code class="docutils literal notranslate"><span class="pre">UnaryNode.from_record()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.algebra.UnaryNode.serialization_attributes"><code class="docutils literal notranslate"><span class="pre">UnaryNode.serialization_attributes</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.algebra.coerces_values_to_nodes"><code class="docutils literal notranslate"><span class="pre">coerces_values_to_nodes()</span></code></a></li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.algebra.wrap_as_node"><code class="docutils literal notranslate"><span class="pre">wrap_as_node()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.graphs.nodes.base.automodule.html">automodule module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.graphs.nodes.base.base.html">base module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html">definition_helpers module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.graphs.nodes.base.multi.html">multi module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.graphs.nodes.base.node_functions.html">node_functions module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.graphs.nodes.base.parent_expander.html">parent_expander module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.graphs.nodes.base.serializable.html">serializable module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.graphs.nodes.base.value.html">value module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.nodes.physics.html">physics</a></li>
@@ -162,6 +173,7 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.networks.html">networks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.optimizer.html">optimizer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.plotting.html">plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.serializer.html">serializer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.pretraining.html">pretraining module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.tools.html">tools module</a></li>
 </ul>
@@ -193,7 +205,7 @@
       </li>
   </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
         <a href="hippynn.graphs.nodes.base.html" class="btn btn-neutral float-left" title="base" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="hippynn.graphs.nodes.base.base.html" class="btn btn-neutral float-right" title="base module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hippynn.graphs.nodes.base.automodule.html" class="btn btn-neutral float-right" title="automodule module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
   </div>
   <hr/>
 </div>
@@ -209,13 +221,33 @@ such as addition, multiplication, subtraction.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="hippynn.graphs.nodes.base.algebra.BinNode">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">BinNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/algebra.html#BinNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.algebra.BinNode" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.base.serializable.html#hippynn.graphs.nodes.base.serializable.SerializableNode" title="hippynn.graphs.nodes.base.serializable.SerializableNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">SerializableNode</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.base.algebra.BinNode.from_record">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/algebra.html#BinNode.from_record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.algebra.BinNode.from_record" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.base.algebra.BinNode.serialization_attributes">
+<span class="sig-name descname"><span class="pre">serialization_attributes</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">()</span></span><a class="headerlink" href="#hippynn.graphs.nodes.base.algebra.BinNode.serialization_attributes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="hippynn.graphs.nodes.base.algebra.UnaryNode">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">UnaryNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/algebra.html#UnaryNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.algebra.UnaryNode" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.base.serializable.html#hippynn.graphs.nodes.base.serializable.SerializableNode" title="hippynn.graphs.nodes.base.serializable.SerializableNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">SerializableNode</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.base.algebra.UnaryNode.from_record">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/algebra.html#UnaryNode.from_record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.algebra.UnaryNode.from_record" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.base.algebra.UnaryNode.serialization_attributes">
+<span class="sig-name descname"><span class="pre">serialization_attributes</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">()</span></span><a class="headerlink" href="#hippynn.graphs.nodes.base.algebra.UnaryNode.serialization_attributes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py function">
@@ -236,7 +268,7 @@ such as addition, multiplication, subtraction.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="hippynn.graphs.nodes.base.html" class="btn btn-neutral float-left" title="base" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="hippynn.graphs.nodes.base.base.html" class="btn btn-neutral float-right" title="base module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hippynn.graphs.nodes.base.automodule.html" class="btn btn-neutral float-right" title="automodule module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

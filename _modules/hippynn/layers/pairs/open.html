@@ -110,11 +110,15 @@
   <h1>Source code for hippynn.layers.pairs.open</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">..._deprecations</span><span class="w"> </span><span class="kn">import</span> <span class="n">_DeprecatedNamesMixin</span>
 
-<span class="k">class</span><span class="w"> </span><span class="nc">_PairIndexer</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hard_dist_cutoff</span><span class="p">):</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_PairIndexer</span><span class="p">(</span><span class="n">_DeprecatedNamesMixin</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="n">_DEPRECATED_NAMES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"hard_dist_cutoff"</span><span class="p">:</span> <span class="s2">"dist_hard_max"</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist_hard_max</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hard_dist_cutoff</span> <span class="o">=</span> <span class="n">hard_dist_cutoff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dist_hard_max</span> <span class="o">=</span> <span class="n">dist_hard_max</span>
 
 
 <div class="viewcode-block" id="OpenPairIndexer">
@@ -150,8 +154,8 @@
             <span class="c1"># Don't connect an atom to itself</span>
             <span class="n">nonself_atoms</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">namax_box</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">nonblank</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">cur_device</span><span class="p">))</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
             <span class="c1"># Only take pairs that are close enough</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hard_dist_cutoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">close_atoms</span> <span class="o">=</span> <span class="n">pair_dists</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">hard_dist_cutoff</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_hard_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">close_atoms</span> <span class="o">=</span> <span class="n">pair_dists</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_hard_max</span>
                 <span class="n">pair_presence</span> <span class="o">=</span> <span class="n">nonblank_pair</span> <span class="o">&amp;</span> <span class="n">nonself_atoms</span> <span class="o">&amp;</span> <span class="n">close_atoms</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">pair_presence</span> <span class="o">=</span> <span class="n">nonblank_pair</span> <span class="o">&amp;</span> <span class="n">nonself_atoms</span>
@@ -208,7 +212,6 @@
         <span class="k">if</span> <span class="n">dist_hard_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hard_dist_cutoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dist_hard_max</span> <span class="o">!=</span> <span class="n">hard_dist_cutoff</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Must only specify one of 'dist_hard_max' and 'hard_dist_cutoff.'"</span><span class="p">)</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">hard_dist_cutoff</span> <span class="o">=</span> <span class="p">(</span><span class="n">dist_hard_max</span> <span class="ow">or</span> <span class="n">hard_dist_cutoff</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dist_hard_max</span> <span class="o">=</span> <span class="p">(</span><span class="n">dist_hard_max</span> <span class="ow">or</span> <span class="n">hard_dist_cutoff</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_skin</span><span class="p">(</span><span class="n">skin</span><span class="p">)</span>
 
@@ -221,10 +224,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">set_skin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skin</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_skin</span> <span class="o">=</span> <span class="n">skin</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pair_indexer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pair_indexer_class</span><span class="p">(</span><span class="n">hard_dist_cutoff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skin</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">hard_dist_cutoff</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pair_indexer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pair_indexer_class</span><span class="p">(</span><span class="n">dist_hard_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skin</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">hard_dist_cutoff</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pair_indexer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pair_indexer_class</span><span class="p">(</span><span class="n">dist_hard_max</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_skin</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dist_hard_max</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_reuse_percentage</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initialize_buffers</span><span class="p">()</span></div>

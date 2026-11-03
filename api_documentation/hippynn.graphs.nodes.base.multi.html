@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="node_functions module" href="hippynn.graphs.nodes.base.node_functions.html" />
-    <link rel="prev" title="definition_helpers module" href="hippynn.graphs.nodes.base.definition_helpers.html" /> 
+    <link rel="prev" title="base module" href="hippynn.graphs.nodes.base.base.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -125,11 +125,15 @@
 <li class="toctree-l3 current"><a class="reference internal" href="hippynn.graphs.nodes.html">nodes</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="hippynn.graphs.nodes.base.html">base</a><ul class="current">
 <li class="toctree-l5"><a class="reference internal" href="hippynn.graphs.nodes.base.algebra.html">algebra module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.graphs.nodes.base.automodule.html">automodule module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.graphs.nodes.base.base.html">base module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="hippynn.graphs.nodes.base.definition_helpers.html">definition_helpers module</a></li>
 <li class="toctree-l5 current"><a class="current reference internal" href="#">multi module</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.multi.IndexNode"><code class="docutils literal notranslate"><span class="pre">IndexNode</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.multi.IndexNode.auto_module_class"><code class="docutils literal notranslate"><span class="pre">IndexNode.auto_module_class</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.multi.IndexNode.from_record"><code class="docutils literal notranslate"><span class="pre">IndexNode.from_record()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.multi.IndexNode.auto_module_kwargs"><code class="docutils literal notranslate"><span class="pre">IndexNode.auto_module_kwargs</span></code></a></li>
 <li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.multi.IndexNode.input_names"><code class="docutils literal notranslate"><span class="pre">IndexNode.input_names</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#hippynn.graphs.nodes.base.multi.IndexNode.serialization_attributes"><code class="docutils literal notranslate"><span class="pre">IndexNode.serialization_attributes</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l6"><a class="reference internal" href="#hippynn.graphs.nodes.base.multi.MultiNode"><code class="docutils literal notranslate"><span class="pre">MultiNode</span></code></a><ul>
@@ -145,6 +149,9 @@
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="hippynn.graphs.nodes.base.node_functions.html">node_functions module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.graphs.nodes.base.parent_expander.html">parent_expander module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.graphs.nodes.base.serializable.html">serializable module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="hippynn.graphs.nodes.base.value.html">value module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="hippynn.graphs.nodes.physics.html">physics</a></li>
@@ -172,6 +179,7 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.networks.html">networks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.optimizer.html">optimizer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.plotting.html">plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.serializer.html">serializer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.pretraining.html">pretraining module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.tools.html">tools module</a></li>
 </ul>
@@ -202,7 +210,7 @@
             <a href="../_sources/api_documentation/hippynn.graphs.nodes.base.multi.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
-        <a href="hippynn.graphs.nodes.base.definition_helpers.html" class="btn btn-neutral float-left" title="definition_helpers module" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hippynn.graphs.nodes.base.base.html" class="btn btn-neutral float-left" title="base module" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="hippynn.graphs.nodes.base.node_functions.html" class="btn btn-neutral float-right" title="node_functions module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
   </div>
   <hr/>
@@ -217,11 +225,32 @@
 <p id="module-hippynn.graphs.nodes.base.multi">A base node that provides several output tensors.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="hippynn.graphs.nodes.base.multi.IndexNode">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">IndexNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/multi.html#IndexNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.multi.IndexNode" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.SingleNode" title="hippynn.graphs.nodes.base.base.SingleNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">SingleNode</span></code></a></p>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">IndexNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_repr_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/multi.html#IndexNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.multi.IndexNode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="hippynn.graphs.nodes.base.automodule.html#hippynn.graphs.nodes.base.automodule.AutoModule" title="hippynn.graphs.nodes.base.automodule.AutoModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoModule</span></code></a>, <a class="reference internal" href="hippynn.graphs.nodes.base.base.html#hippynn.graphs.nodes.base.base.SingleNode" title="hippynn.graphs.nodes.base.base.SingleNode"><code class="xref py py-class docutils literal notranslate"><span class="pre">SingleNode</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.base.multi.IndexNode.auto_module_class">
+<span class="sig-name descname"><span class="pre">auto_module_class</span></span><a class="headerlink" href="#hippynn.graphs.nodes.base.multi.IndexNode.auto_module_class" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="hippynn.layers.algebra.html#hippynn.layers.algebra.Idx" title="hippynn.layers.algebra.Idx"><code class="xref py py-class docutils literal notranslate"><span class="pre">Idx</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.base.multi.IndexNode.from_record">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/graphs/nodes/base/multi.html#IndexNode.from_record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.graphs.nodes.base.multi.IndexNode.from_record" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.base.multi.IndexNode.auto_module_kwargs">
+<span class="sig-name descname"><span class="pre">auto_module_kwargs</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'index':</span> <span class="pre">'index',</span> <span class="pre">'repr_info':</span> <span class="pre">'_repr_info'}</span></span><a class="headerlink" href="#hippynn.graphs.nodes.base.multi.IndexNode.auto_module_kwargs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="hippynn.graphs.nodes.base.multi.IndexNode.input_names">
 <span class="sig-name descname"><span class="pre">input_names</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('parent',)</span></span><a class="headerlink" href="#hippynn.graphs.nodes.base.multi.IndexNode.input_names" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="hippynn.graphs.nodes.base.multi.IndexNode.serialization_attributes">
+<span class="sig-name descname"><span class="pre">serialization_attributes</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('db_name',</span> <span class="pre">'index_state',</span> <span class="pre">'module_kwargs')</span></span><a class="headerlink" href="#hippynn.graphs.nodes.base.multi.IndexNode.serialization_attributes" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -273,7 +302,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="hippynn.graphs.nodes.base.definition_helpers.html" class="btn btn-neutral float-left" title="definition_helpers module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hippynn.graphs.nodes.base.base.html" class="btn btn-neutral float-left" title="base module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="hippynn.graphs.nodes.base.node_functions.html" class="btn btn-neutral float-right" title="node_functions module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

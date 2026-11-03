@@ -115,6 +115,7 @@
 <li class="toctree-l2"><a class="reference internal" href="hippynn.networks.html">networks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.optimizer.html">optimizer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.plotting.html">plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hippynn.serializer.html">serializer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hippynn.pretraining.html">pretraining module</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">tools module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.GetAttrMixin"><code class="docutils literal notranslate"><span class="pre">GetAttrMixin</span></code></a></li>
@@ -128,10 +129,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.add_safe_globals"><code class="docutils literal notranslate"><span class="pre">add_safe_globals()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.arrdict_len"><code class="docutils literal notranslate"><span class="pre">arrdict_len()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.device_fallback"><code class="docutils literal notranslate"><span class="pre">device_fallback()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.infer_filetype"><code class="docutils literal notranslate"><span class="pre">infer_filetype()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.is_equal_state_dict"><code class="docutils literal notranslate"><span class="pre">is_equal_state_dict()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.isiterable"><code class="docutils literal notranslate"><span class="pre">isiterable()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.log_terminal"><code class="docutils literal notranslate"><span class="pre">log_terminal()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.np_of_torchdefaultdtype"><code class="docutils literal notranslate"><span class="pre">np_of_torchdefaultdtype()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.open_if_needed"><code class="docutils literal notranslate"><span class="pre">open_if_needed()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.pad_np_array_to_length_with_zeros"><code class="docutils literal notranslate"><span class="pre">pad_np_array_to_length_with_zeros()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.param_print"><code class="docutils literal notranslate"><span class="pre">param_print()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hippynn.tools.print_lr"><code class="docutils literal notranslate"><span class="pre">print_lr()</span></code></a></li>
@@ -254,6 +257,25 @@ Use create=None create a directory if you are okay with either alternative.</p>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="hippynn.tools.infer_filetype">
+<span class="sig-name descname"><span class="pre">infer_filetype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filetype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filetypes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aliases</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#infer_filetype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.infer_filetype" title="Link to this definition"></a></dt>
+<dd><p>Resolve the file format to use: <cite>filetype</cite> if given, else inferred from <cite>file</cite>’s extension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> – filename (<cite>str</cite>) or an already-open file object; the format is only inferred
+when this is a string.</p></li>
+<li><p><strong>filetype</strong> – explicit format to use; returned as-is if not None.</p></li>
+<li><p><strong>filetypes</strong> – allowed format strings; the inferred (possibly alias-resolved) extension
+must be one of these.</p></li>
+<li><p><strong>aliases</strong> – optional mapping from alternate extension spellings to a canonical entry in
+<cite>filetypes</cite> (e.g. <code class="docutils literal notranslate"><span class="pre">{&quot;yaml&quot;:</span> <span class="pre">&quot;yml&quot;}</span></code>).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="hippynn.tools.is_equal_state_dict">
 <span class="sig-name descname"><span class="pre">is_equal_state_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_where</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#is_equal_state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.is_equal_state_dict" title="Link to this definition"></a></dt>
 <dd><p>Checks if two pytorch state dictionaries are equal. Calls itself recursively
@@ -302,6 +324,23 @@ be piped into the terminal.</p>
 <dt class="sig sig-object py" id="hippynn.tools.np_of_torchdefaultdtype">
 <span class="sig-name descname"><span class="pre">np_of_torchdefaultdtype</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#np_of_torchdefaultdtype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.np_of_torchdefaultdtype" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hippynn.tools.open_if_needed">
+<span class="sig-name descname"><span class="pre">open_if_needed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hippynn/tools.html#open_if_needed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hippynn.tools.open_if_needed" title="Link to this definition"></a></dt>
+<dd><p>Context manager yielding an open file object.</p>
+<p>If <cite>file</cite> is already an open file object, it is yielded as-is (<cite>mode</cite> is ignored, and it is
+not closed on exit); otherwise <cite>file</cite> is treated as a filename, opened with <cite>mode</cite>, and closed
+on exit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> – filename or an already-open file object</p></li>
+<li><p><strong>mode</strong> – passed to <code class="docutils literal notranslate"><span class="pre">open()</span></code> if <cite>file</cite> is a filename</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hippynn.tools.pad_np_array_to_length_with_zeros">
