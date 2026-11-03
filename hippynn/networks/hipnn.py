@@ -173,6 +173,8 @@ class Hipnn(torch.nn.Module):
         else:
             raise TypeError("Invalid sensitivity type:", sensitivity_type)
 
+
+
         interaction_kwargs = {k: kwargs.pop(k) for k in self._interaction_kwargs if k in kwargs}
 
         if len(kwargs) > 0:

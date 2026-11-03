@@ -18,7 +18,7 @@ from collections import OrderedDict
 
 import torch
 
-from .base import SingleNode, MultiNode, AutoKw, ExpandParents
+from .base import SingleNode, MultiNode, AutoModule, ExpandParents
 
 
 class _OptionModule(torch.nn.Module):
@@ -36,7 +36,7 @@ class _OptionModule(torch.nn.Module):
         raise RuntimeError("No criteria satisfied for option {}".format(option_input))
 
 
-class OptionalMixin(ExpandParents, AutoKw):
+class OptionalMixin(ExpandParents, AutoModule):
     auto_module_class = _OptionModule
 
     @parent_expander.match(SingleNode)

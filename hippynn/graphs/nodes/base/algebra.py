@@ -9,10 +9,11 @@ from ....layers import algebra as algebra_mods
 
 
 from ...indextypes import elementwise_compare_reduce
+from .serializable import SerializableNode
 
 
 def wrap_as_node(obj):
-    from .base import ValueNode, Node
+    from . import Node, ValueNode
     return obj.main_output if isinstance(obj, Node) else ValueNode(obj)
 
 
@@ -40,7 +41,6 @@ class _NodeAlgebra():
         full_name = "__" + operation + "__"
         method = _make_node_method(operation, cls)
         setattr(_NodeAlgebra, full_name, method)
-        return
 
 def _make_node_method(operation, cls):
 
@@ -73,23 +73,34 @@ class _AlgebraicOperation():
 
         cls.torch_module = algebra_mods.LambdaModule(base_function)
         cls._classname = operation
-        return 
 
 
-class UnaryNode():
+class UnaryNode(SerializableNode):
     def __init__(self, in_node):
-        #name = "{}({})".format(self._classname, in_node)
         super().__init__(self._classname, (in_node,), module=None)
         self.index_state = in_node.index_state
 
+    @classmethod
+    def from_record(cls, name, parents, db_name, **kwargs):
+        p, = parents
+        node = cls(p)
+        node.db_name = db_name
+        return node
 
-class BinNode():
+
+class BinNode(SerializableNode):
     def __init__(self, left, right):
         left, right = left.main_output, right.main_output
         left, right = elementwise_compare_reduce(left, right)
-        #name = "{}({}, {})".format(self._classname, left.name, right.name)
         super().__init__(self._classname, (left, right), module=None)
         self.index_state = left.index_state
+
+    @classmethod
+    def from_record(cls, name, parents, db_name, **kwargs):
+        left, right = parents
+        node = cls(left, right)
+        node.db_name = db_name
+        return node
 
 def __getattr__(name: str):
     """
@@ -97,8 +108,12 @@ def __getattr__(name: str):
     """
     if name.endswith("Node") or name == "AtLeast2D":
         # Backwards compatibility for unpickling prior models
-        from . import base
-        answer = getattr(base, name) # error if not found.
+        from . import base 
+        answer = getattr(base, name, None)
+        if answer is None:
+            from ..import base # Note, this is the higher-level base; not the one parallel to this file.
+            answer = getattr(base, name) # error if not found.
+            
         # Warn if found.
         from ...._deprecations import warn_name_change
         warn_name_change(name,answer, old_module=__name__, stacklevel=2)

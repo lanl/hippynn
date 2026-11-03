@@ -54,7 +54,7 @@ class StaticImagePeriodicPairIndexer(_PairIndexer):
             # Find pairs/images close enough to be within the cutoff
             # shape n_shifts, pair
             pair_dist = (pair_diffcoords.unsqueeze(0) + offsets).norm(dim=2)
-            close_pairs = (pair_dist < self.hard_dist_cutoff) & (pair_dist > 1e-5)  # get rid of self-pairs
+            close_pairs = (pair_dist < self.dist_hard_max) & (pair_dist > 1e-5)  # get rid of self-pairs
             cp_offset, cp_pair = torch.nonzero(close_pairs, as_tuple=True)
             # cp_pair holds the indices of pairs
             # cp_offset holds the indices of the offsets
@@ -228,7 +228,7 @@ class PeriodicPairIndexer(_PairIndexer):
             atom_index = atom_index[:, :n_atoms_max_batch]
 
             inv_cell, coordinates, wrapped_offsets, nbounds = (
-                wrap_systems_torch(coordinates, cells, self.hard_dist_cutoff)
+                wrap_systems_torch(coordinates, cells, self.dist_hard_max)
             )
             # inv cell: n_sys, n_cartesian, n_basis
             # wraped_coords: nsys, n_atoms, 3 (coords)
@@ -306,7 +306,7 @@ class PeriodicPairIndexer(_PairIndexer):
             del nb_p2
 
             # Compute close pairs.
-            close_pairs = (pair_dist < self.hard_dist_cutoff) & nonself_pairs  # get rid of self-pairs
+            close_pairs = (pair_dist < self.dist_hard_max) & nonself_pairs  # get rid of self-pairs
             del nonself_pairs, pair_dist
             close_pairs = torch.nonzero(close_pairs)[:, 0]
             # close_pairs holds the indices of pairs
@@ -384,7 +384,7 @@ class PeriodicPairIndexerMemory(PairMemory):
             distflat = paircoord.norm(dim=1)
 
         # We filter the lists to only send forward relevant pairs (those with distance under cutoff), improving performance.   
-        return filter_pairs(self.hard_dist_cutoff, distflat, self.pair_first, self.pair_second, paircoord, self.cell_offsets, self.offset_num)
+        return filter_pairs(self.dist_hard_max, distflat, self.pair_first, self.pair_second, paircoord, self.cell_offsets, self.offset_num)
     
 
 class SparsePairIndexer(_PairIndexer):
@@ -394,7 +394,7 @@ class SparsePairIndexer(_PairIndexer):
         # pass those in instead (in case atoms are numbered differently) 
 
         if cutoff is None:
-            cutoff = self.hard_dist_cutoff
+            cutoff = self.dist_hard_max
        
         with torch.no_grad():
             pair_first, pair_second, pair_system, cell_offsets = calc_neighbors(coordinates, nonblank, cells, cutoff, return_displacements=False)

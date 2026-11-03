@@ -2,11 +2,11 @@
 Nodes not otherwise categorized.
 """
 from ..indextypes import IdxType
-from .base import AutoNoKw, SingleNode, MultiNode, ExpandParents
+from .base import AutoModule, SingleNode, MultiNode, ExpandParents
 from ...layers import algebra as algebra_modules
 
 
-class ListNode(AutoNoKw, SingleNode):
+class ListNode(AutoModule, SingleNode):
     input_names = "features"
     output_names = "wrapped_features"
     auto_module_class = algebra_modules.ListMod
@@ -15,7 +15,7 @@ class ListNode(AutoNoKw, SingleNode):
         super().__init__(name, parents, module=module)
 
 
-class EnsembleTarget(ExpandParents, AutoNoKw, MultiNode):
+class EnsembleTarget(ExpandParents, AutoModule, MultiNode):
     auto_module_class = algebra_modules.EnsembleTarget
     input_names = NotImplemented  # NotImplemented tells __init_subclass__ that we will fill this in later.
     output_names = "mean", "std", "all"

@@ -1,10 +1,14 @@
 import torch
 
+from ..._deprecations import _DeprecatedNamesMixin
 
-class _PairIndexer(torch.nn.Module):
-    def __init__(self, hard_dist_cutoff):
+
+class _PairIndexer(_DeprecatedNamesMixin, torch.nn.Module):
+    _DEPRECATED_NAMES = {"hard_dist_cutoff": "dist_hard_max"}
+
+    def __init__(self, dist_hard_max):
         super().__init__()
-        self.hard_dist_cutoff = hard_dist_cutoff
+        self.dist_hard_max = dist_hard_max
 
 
 class OpenPairIndexer(_PairIndexer):
@@ -36,8 +40,8 @@ class OpenPairIndexer(_PairIndexer):
             # Don't connect an atom to itself
             nonself_atoms = (~torch.eye(namax_box, dtype=nonblank.dtype, device=cur_device)).unsqueeze(0)
             # Only take pairs that are close enough
-            if self.hard_dist_cutoff is not None:
-                close_atoms = pair_dists < self.hard_dist_cutoff
+            if self.dist_hard_max is not None:
+                close_atoms = pair_dists < self.dist_hard_max
                 pair_presence = nonblank_pair & nonself_atoms & close_atoms
             else:
                 pair_presence = nonblank_pair & nonself_atoms
@@ -87,7 +91,6 @@ class PairMemory(torch.nn.Module):
         if dist_hard_max is not None and hard_dist_cutoff is not None and dist_hard_max != hard_dist_cutoff:
             raise ValueError("Must only specify one of 'dist_hard_max' and 'hard_dist_cutoff.'")
         
-        self.hard_dist_cutoff = (dist_hard_max or hard_dist_cutoff)
         self.dist_hard_max = (dist_hard_max or hard_dist_cutoff)
         self.set_skin(skin)
 
@@ -98,10 +101,7 @@ class PairMemory(torch.nn.Module):
     def set_skin(self, skin):
         self._skin = skin
 
-        try:
-            self._pair_indexer = self._pair_indexer_class(hard_dist_cutoff = self._skin + self.hard_dist_cutoff)
-        except TypeError:
-            self._pair_indexer = self._pair_indexer_class(dist_hard_max = self._skin + self.hard_dist_cutoff)
+        self._pair_indexer = self._pair_indexer_class(dist_hard_max=self._skin + self.dist_hard_max)
 
         self.reset_reuse_percentage()
         self.initialize_buffers()

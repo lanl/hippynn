@@ -3,7 +3,7 @@ Nodes for finding and manipulating pairs and distances.
 """
 
 from .base.node_functions import NodeNotFound
-from .base import AutoNoKw, AutoKw, ExpandParents, SingleNode, MultiNode, find_unique_relative, Node
+from .base import AutoModule, ExpandParents, SingleNode, MultiNode, find_unique_relative, Node
 from .indexers import PaddingIndexer, acquire_encoding_padding, OneHotEncoder
 from .tags import Encoder, PairIndexer, AtomIndexer, PairCache
 from .inputs import PositionsNode, CellNode, SpeciesNode
@@ -11,12 +11,10 @@ from ..indextypes import IdxType
 from ...layers import pairs as pairs_modules
 
 
-class OpenPairIndexer(AutoKw, ExpandParents, PairIndexer, MultiNode):
+class OpenPairIndexer(AutoModule, ExpandParents, PairIndexer, MultiNode):
     input_names = "coordinates", "nonblank", "real_atoms", "inv_real_atoms"
     auto_module_class = pairs_modules.OpenPairIndexer
-    auto_module_kwargs = {
-        "hard_dist_cutoff": "dist_hard_max",
-    }
+    auto_module_kwargs = "dist_hard_max",
 
     @parent_expander.match(PositionsNode, SpeciesNode)
     def expand0(self, pos, spec, *, purpose, **kwargs):
@@ -33,7 +31,6 @@ class OpenPairIndexer(AutoKw, ExpandParents, PairIndexer, MultiNode):
     parent_expander.require_idx_states(IdxType.SysAtom, None, None, None)
 
     def __init__(self, name, parents, dist_hard_max, **kwargs):
-        self.dist_hard_max = dist_hard_max
         super().__init__(name, parents, dist_hard_max=dist_hard_max, **kwargs)
 
 
@@ -43,12 +40,10 @@ class PeriodicPairOutputs:
     output_index_states = (IdxType.Pairs,) * len(output_names)
 
 
-class PeriodicPairIndexer(AutoKw, ExpandParents,  PeriodicPairOutputs, PairIndexer, MultiNode):
+class PeriodicPairIndexer(AutoModule, ExpandParents,  PeriodicPairOutputs, PairIndexer, MultiNode):
     input_names = "coordinates", "nonblank", "real_atoms", "inv_real_atoms", "cell"
     auto_module_class = pairs_modules.PeriodicPairIndexer
-    auto_module_kwargs = {
-        "hard_dist_cutoff": "dist_hard_max",
-    }
+    auto_module_kwargs = "dist_hard_max",
 
     @parent_expander.match(PositionsNode, SpeciesNode, CellNode)
     def expand0(self, pos, spec, cell, *, purpose, **kwargs):
@@ -62,7 +57,6 @@ class PeriodicPairIndexer(AutoKw, ExpandParents,  PeriodicPairOutputs, PairIndex
     parent_expander.assertlen(5)
     parent_expander.get_main_outputs()
     def __init__(self, name, parents, dist_hard_max, **kwargs):
-        self.dist_hard_max = dist_hard_max
         super().__init__(name, parents, dist_hard_max=dist_hard_max, **kwargs)
 
 class SparsePairIndexer(PeriodicPairIndexer):
@@ -98,6 +92,7 @@ class PeriodicPairIndexerMemory(PeriodicPairIndexer, Memory):
     '''
     
     auto_module_class = pairs_modules.periodic.PeriodicPairIndexerMemory
+    auto_module_kwargs = "dist_hard_max", "skin"
 
     def __init__(self, name, parents, dist_hard_max, skin, module="auto", module_kwargs=None, **kwargs):
         if module_kwargs is None:
@@ -107,10 +102,10 @@ class PeriodicPairIndexerMemory(PeriodicPairIndexer, Memory):
         super().__init__(name, parents, dist_hard_max, module=module, module_kwargs=self.module_kwargs, **kwargs)
 
 
-class ExternalNeighborIndexer(AutoKw, ExpandParents, PairIndexer,  MultiNode):
+class ExternalNeighborIndexer(AutoModule, ExpandParents, PairIndexer,  MultiNode):
     input_names = "coordinates", "real_atoms", "shifts", "cell", "ext_pair_first", "ext_pair_second"
     auto_module_class = pairs_modules.ExternalNeighbors
-    auto_module_kwargs = "hard_dist_cutoff",
+    auto_module_kwargs = {"dist_hard_max": "hard_dist_cutoff"}
 
     parent_expander.get_main_outputs()
     parent_expander.assertlen(len(input_names))
@@ -118,7 +113,7 @@ class ExternalNeighborIndexer(AutoKw, ExpandParents, PairIndexer,  MultiNode):
 
 
 # Pair reindexer to re-use existing pairs
-class PairReIndexer(ExpandParents, AutoNoKw, SingleNode):
+class PairReIndexer(ExpandParents, AutoModule, SingleNode):
     """
     For re-using index information to convert
     from IdxType.SysAtomAtom -> IdxType.Pairs
@@ -154,7 +149,7 @@ class PairReIndexer(ExpandParents, AutoNoKw, SingleNode):
 # Pair deindexer to convert pair features back to padded form
 
 
-class PairDeIndexer(ExpandParents, AutoNoKw, SingleNode):
+class PairDeIndexer(ExpandParents, AutoModule, SingleNode):
     """
     For converting from IdxType.Pairs to IdxType.SysAtomAtom
     (Padded form)
@@ -193,7 +188,7 @@ class PairDeIndexer(ExpandParents, AutoNoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class PairCacher(AutoKw, ExpandParents, PairCache, SingleNode):
+class PairCacher(AutoModule, ExpandParents, PairCache, SingleNode):
     input_names = (
         "pair_first",
         "pair_second",
@@ -230,12 +225,11 @@ class PairCacher(AutoKw, ExpandParents, PairCache, SingleNode):
     parent_expander.require_idx_states(IdxType.Pairs, IdxType.Pairs, None, None, None, None, None, None)
 
 
-class PairUncacher(ExpandParents, AutoNoKw, PairIndexer, MultiNode):
+class PairUncacher(ExpandParents, AutoModule, PairIndexer, MultiNode):
     input_names = "sparsepairs", "coordinates", "cells", "real_atoms", "inv_real_atoms", "n_atoms_max", "n_systems"
     output_names = "pair_dist", "pair_first", "pair_second", "pair_coord", "cell_offsets", "offset_index"
     output_index_states = (IdxType.Pairs,) * len(output_names)
     auto_module_class = pairs_modules.PairUncacher
-    auto_module_kwargs = "dist_hard_max",
     index_state = IdxType.Unlabeled
 
     @parent_expander.match(PairCache)
@@ -257,11 +251,10 @@ class PairUncacher(ExpandParents, AutoNoKw, PairIndexer, MultiNode):
     parent_expander.assertlen(7)
 
     def __init__(self, name, parents, dist_hard_max, **kwargs):
-        self.dist_hard_max = dist_hard_max
         super().__init__(name, parents, dist_hard_max=dist_hard_max, **kwargs)
 
 
-class RDFBins(AutoKw, ExpandParents, SingleNode):
+class RDFBins(AutoModule, ExpandParents, SingleNode):
     input_names = "pair_dists", "pair_first", "pair_second", "one_hot", "n_systems"
     index_state = IdxType.Scalar # Computes over whole batch.
     auto_module_class = pairs_modules.RDFBins
@@ -309,7 +302,7 @@ class RDFBins(AutoKw, ExpandParents, SingleNode):
         super().__init__(name, parents, bins=bins, dist_hard_max=dist_hard_max, **kwargs)
 
 
-class _DispatchNeighbors(AutoKw, ExpandParents, PeriodicPairOutputs, PairIndexer, MultiNode):
+class _DispatchNeighbors(AutoModule, ExpandParents, PeriodicPairOutputs, PairIndexer, MultiNode):
     """
     Superclass for nodes that compute neighbors for systems one at a time.
     These should be capable of searching all feasible neighbors (no limit on number of images)
@@ -358,7 +351,6 @@ class _DispatchNeighbors(AutoKw, ExpandParents, PeriodicPairOutputs, PairIndexer
     parent_expander.require_idx_states(IdxType.SysAtom, None, None, None, None, None, None, None)
 
     def __init__(self, name, parents, dist_hard_max, **kwargs):
-        self.dist_hard_max = dist_hard_max
         super().__init__(name, parents, dist_hard_max=dist_hard_max, **kwargs)
 
 
@@ -395,7 +387,7 @@ class KDTreePairsMemory(_DispatchNeighbors, Memory):
     set to zero while training for fastest results.
     '''
     auto_module_class = pairs_modules.dispatch.KDTreePairsMemory
-    auto_module_kwargs = "dist_hard_max",
+    auto_module_kwargs = "dist_hard_max", "skin"
 
     def __init__(self, name, parents, dist_hard_max, skin, module="auto", module_kwargs=None, **kwargs):
         if module_kwargs is None:
@@ -404,7 +396,7 @@ class KDTreePairsMemory(_DispatchNeighbors, Memory):
 
         super().__init__(name, parents, dist_hard_max, module=module, module_kwargs=module_kwargs, **kwargs)
 
-class PaddedNeighborNode(ExpandParents, AutoNoKw, MultiNode):
+class PaddedNeighborNode(ExpandParents, AutoModule, MultiNode):
     input_names = "pair_first", "pair_second", "pair_coord"
     output_names = (
         "j_list",
@@ -438,7 +430,7 @@ class PaddedNeighborNode(ExpandParents, AutoNoKw, MultiNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class MinDistNode(ExpandParents, AutoNoKw, MultiNode):
+class MinDistNode(ExpandParents, AutoModule, MultiNode):
     input_names = "rij_list", "j_list", "system_index", "atom_index", "inv_real_atoms", "n_atoms_max", "n_systems"
     output_names = "min_dist_mol", "mol_locs", "min_dist_atom", "atom_pairlocs"
     output_index_states = IdxType.Systems, IdxType.Systems, IdxType.Atoms, IdxType.Atoms
@@ -481,8 +473,9 @@ class MinDistNode(ExpandParents, AutoNoKw, MultiNode):
 
 
 # Graph Nodes for Filter Pair Indexer. Works with PeriodicPairs, OpenPairs, External Neighbors.
-class PairFilter(AutoKw, PairIndexer, ExpandParents, MultiNode):
+class PairFilter(AutoModule, PairIndexer, ExpandParents, MultiNode):
     auto_module_class = pairs_modules.FilterDistance
+    auto_module_kwargs = "dist_hard_max",
 
     @parent_expander.match(PairIndexer)
     def expand0(self, pair_indexer, purpose):
@@ -510,7 +503,5 @@ class PairFilter(AutoKw, PairIndexer, ExpandParents, MultiNode):
         return parents
 
     def __init__(self, name, parents, dist_hard_max, module="auto", **kwargs):
-        self.module_kwargs = {"hard_dist_cutoff": dist_hard_max}  # passes to PairIndexer superclass
-        self.dist_hard_max = dist_hard_max
         parents = self.expand_parents(parents)
-        super().__init__(name, parents, module=module, **kwargs)
+        super().__init__(name, parents, dist_hard_max=dist_hard_max, module=module, **kwargs)

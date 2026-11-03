@@ -3,25 +3,38 @@ A base node that provides several output tensors.
 """
 from ....layers.algebra import Idx
 from .base import SingleNode, Node
-from .. import _debprint
+from . import AutoModule
 from ...indextypes import IdxType
 from ...._deprecations import _DeprecatedNamesMixin
 
 
-class IndexNode(SingleNode):
+class IndexNode(AutoModule, SingleNode):
     input_names = ("parent",)
+    auto_module_class = Idx
+    # _repr_info required so this node can be serailized cleanly;
+    # auto-modules must allow the keywords to be passed at the node level.
+    auto_module_kwargs = {"repr_info": "_repr_info", "index": "index"}
 
-    def __init__(self, name, parents, index, index_state=None):
+    def __init__(self, name, parents, index, index_state=None, _repr_info=None, module_kwargs=None):
         if len(parents) != 1:
             raise TypeError("Index node takes exactly one parent.")
         par = parents[0]
         iname = par.output_names[index] if hasattr(par, "output_names") else "<{index}>".format(index=index)
         repr_info = {"parent_name": par.name, "index": iname}
-        module = Idx(index, repr_info=repr_info)
-        self.index = index
         self.index_state = IdxType.Unlabeled if index_state is None else index_state
-        super().__init__(name, parents, module=module)
-            
+        super().__init__(name, parents, _repr_info=repr_info, index=index, module="auto")
+
+    @classmethod
+    def from_record(cls, name, parents, module_kwargs, db_name, index_state, state_dict):
+        # `state_dict` is dropped: `Idx` holds no weights, and the child already exists on the parent.
+        (parent,) = parents
+        index = module_kwargs['index']
+        child = parent.children[index]
+        child.name = name
+        child.db_name = db_name
+        child.index_state = index_state
+        return child
+
 
 class MultiNode(Node,_DeprecatedNamesMixin):  # Multinode
     output_names = NotImplemented
@@ -108,7 +121,6 @@ class MultiNode(Node,_DeprecatedNamesMixin):  # Multinode
             pass
 
         return super().__getattr__(item)
-            
 
     @property
     def main_output(self):

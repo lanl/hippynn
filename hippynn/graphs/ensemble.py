@@ -121,7 +121,7 @@ def get_graphs(models: Union[List[Union[str, GraphModule, Node]], str], weights_
 
     Models can be a list with entries that are one of the following:
 
-    - str: directory to use with :func:`~hippynn.experiment.serialization.load_model_from_cwd`
+    - str: directory to use with :func:`~hippynn.experiment.checkpoints.load_model_from_cwd`
     - GraphModule: already built model
     - node: an output target, which will be converted to a GraphModule with automatically defined inputs.
 
@@ -145,7 +145,7 @@ def get_graphs(models: Union[List[Union[str, GraphModule, Node]], str], weights_
     device = None
     for model in models:
         if isinstance(model, str):
-            from ..experiment.serialization import load_model_from_cwd
+            from ..experiment.checkpoints import load_model_from_cwd
 
             # Get graph from disk
             if device is None:

@@ -6,12 +6,12 @@ import torch
 
 from ...layers import excited as excited_layers
 from .. import IdxType, find_unique_relative
-from .base import AutoKw, SingleNode, ExpandParents, MultiNode
+from .base import AutoModule, SingleNode, ExpandParents, MultiNode
 from .loss import _BaseCompareLoss
 from .tags import Energies, HAtomRegressor, Network, AtomIndexer
 
 
-class NACRNode(AutoKw, SingleNode):
+class NACRNode(AutoModule, SingleNode):
     """
     Compute the non-adiabatic coupling vector multiplied by the energy difference
     between two states.
@@ -53,7 +53,7 @@ class NACRNode(AutoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class NACRMultiStateNode(AutoKw, SingleNode):
+class NACRMultiStateNode(AutoModule, SingleNode):
     """
     Compute the non-adiabatic coupling vector multiplied by the energy difference
     between all pairs of states.

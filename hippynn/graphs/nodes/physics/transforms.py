@@ -7,8 +7,7 @@ from ....layers import pairs as pair_layers
 from ....layers import physics as physics_layers
 from ...indextypes import IdxType, elementwise_compare_reduce, index_type_coercion
 from ..base import (
-    AutoKw,
-    AutoNoKw,
+    AutoModule,
     ExpandParents,
     MultiNode,
     SingleNode,
@@ -23,7 +22,7 @@ from ..tags import Charges, Encoder, Energies, PairIndexer
 from ...._deprecations import _DeprecatedNamesMixin
 
 
-class VecMag(ExpandParents, AutoNoKw, SingleNode):
+class VecMag(ExpandParents, AutoModule, SingleNode):
     input_names = ("vector",)
     auto_module_class = physics_layers.VecMag
     index_state = IdxType.Unlabeled
@@ -45,7 +44,7 @@ class VecMag(ExpandParents, AutoNoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class PerAtom(ExpandParents, AutoNoKw, SingleNode):
+class PerAtom(ExpandParents, AutoModule, SingleNode):
     input_names = "features", "species"
     index_state = IdxType.Systems
     auto_module_class = physics_layers.PerAtom
@@ -68,7 +67,7 @@ class PerAtom(ExpandParents, AutoNoKw, SingleNode):
 
 
 
-class AtomToMolSummer(ExpandParents, AutoNoKw, SingleNode):
+class AtomToMolSummer(ExpandParents, AutoModule, SingleNode):
     input_names = "features", "system_index", "n_systems"
     auto_module_class = index_layers.MolSummer
     index_state = IdxType.Systems
@@ -92,7 +91,7 @@ class AtomToMolSummer(ExpandParents, AutoNoKw, SingleNode):
 
 
 # TODO: This seems broken for parent expanders, check the signature of the layer.
-class BondToMolSummmer(ExpandParents, AutoNoKw, SingleNode):
+class BondToMolSummmer(ExpandParents, AutoModule, SingleNode):
     input_names = "pairfeatures", "system_index", "n_systems", "pair_first"
     auto_module_class = pair_layers.MolPairSummer
     index_state = IdxType.Systems
@@ -116,7 +115,7 @@ class BondToMolSummmer(ExpandParents, AutoNoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class CombineEnergyNode(AutoNoKw, Energies,  ExpandParents, MultiNode, _DeprecatedNamesMixin):
+class CombineEnergyNode(AutoModule, Energies,  ExpandParents, MultiNode, _DeprecatedNamesMixin):
     """
     Combines Local atom energies from different Energy Nodes.
     """

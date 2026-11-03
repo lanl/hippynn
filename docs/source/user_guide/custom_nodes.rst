@@ -66,7 +66,7 @@ Note that we have added the ``input_names`` tuple as well, this attribute can be
 both SingleNode and MultiNode classes.
 
 The ``main_output_name`` attribute specifies what tensor to use by default when sending information
-to a child node. This class also makes use of the ``AutoKw`` mix-in for defining a new module
+to a child node. This class also makes use of the ``AutoModule`` mix-in for defining a new module
 using keyword arguments. These arguments will be passed to a new instance of the attribute
 ``auto_module_class``. To use this node, we now only need to supply the arguments for the pytorch module:
 
@@ -152,7 +152,7 @@ This is the base class for the Dipole and Quadrupole Nodes. It uses several pare
    :func:`~hippynn.graphs.indextypes.index_type_coercion`.
 
 A full list of available methods is  at the API documentation for the
-:func:`~hippynn.graphs.nodes.base.definition_helpers.ParentExpander`.
+:func:`~hippynn.graphs.nodes.base.parent_expander.ParentExpander`.
 These directives are executed when the node's ``expand_parents`` method is run, which
 should be performed *before* calling to the ``super().__init__()`` method.
 In combination, these directives allow for a powerful flexibility in building graphs

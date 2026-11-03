@@ -84,7 +84,7 @@ def test_build_coulomb(network_parameters):
     hcharge = targets.HChargeNode("Charges", neural_network_node)
 
     pairfinder.dist_hard_max = None
-    pairfinder.torch_module.hard_dist_cutoff = None
+    pairfinder.torch_module.dist_hard_max = None
 
     coula = physics.CoulombEnergyNode("coulomb energy",hcharge,energy_conversion_factor=1)
 

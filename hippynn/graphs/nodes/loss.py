@@ -7,7 +7,7 @@ import torch.nn.functional
 from ... import settings
 from ..indextypes import IdxType, elementwise_compare_reduce
 from ..indextypes.reduce_funcs import db_state_of
-from .base import SingleNode, Node, InputNode, AutoKw
+from .base import SingleNode, Node, InputNode, AutoModule
 from ...layers import algebra as algebra_modules
 from ...layers import regularization as reg_modules
 
@@ -160,7 +160,7 @@ class HuberLoss(_BaseCompareLoss, op=torch.nn.functional.huber_loss):
     pass
 
 
-class _LPReg(AutoKw, SingleNode):
+class _LPReg(AutoModule, SingleNode):
     index_state = IdxType.Scalar
     auto_module_class = reg_modules.LPReg
     auto_module_kwargs = "network",

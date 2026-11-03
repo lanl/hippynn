@@ -39,9 +39,9 @@ def compute_evaluation_order(all_nodes):
 
     :param all_nodes: The nodes to compute
 
-    :return:  outputs_list, inputs_list
-        Outputs list is the node to evaluate next, which is fed the inputs in the
-        corresponding entry of inputs_list
+    :return: outputs_list
+        The nodes to evaluate, in an order where each node's parents already precede it
+        (an input to a node is either an `InputNode` or already earlier in the list).
 
     """
 
@@ -49,7 +49,6 @@ def compute_evaluation_order(all_nodes):
     # It's computationally inefficient, but it's very easy to implement.
     # The strategy is greedy and brute-force --  it won't scale to large numbers of nodes."""
 
-    evaluation_inputs_list = []
     evaluation_outputs_list = []
     # need to sort to get stable results between runs/processes.
     unsatisfied_nodes = list(sorted(all_nodes, key=lambda node: node.name))
@@ -69,7 +68,6 @@ def compute_evaluation_order(all_nodes):
                 satisfied_nodes.add(considered_node)
                 # Input nodes need not be considered; their values are given to `forward()`
                 if not isinstance(considered_node, InputNode):
-                    evaluation_inputs_list.append(parents)
                     evaluation_outputs_list.append(considered_node)
                 break  # This break is necessary to make the `else` clause work;
                 # if we find a node, we break and the `else` statement won't be hit.
@@ -78,24 +76,23 @@ def compute_evaluation_order(all_nodes):
             # If we made it through all the unsatisfied nodes, something must be wrong.
             raise ValueError("Graph inputs do not seem to specify outputs! Iteration: {}".format(n))
 
-    check_evaluation_order(evaluation_outputs_list, evaluation_inputs_list)
-    return evaluation_outputs_list, evaluation_inputs_list
+    check_evaluation_order(evaluation_outputs_list)
+    return evaluation_outputs_list
 
 
-def check_evaluation_order(evaluation_outputs_list, evaluation_inputs_list):
+def check_evaluation_order(evaluation_outputs_list):
     """
     Validate an evaluation order.
 
     :param evaluation_outputs_list:
-    :param evaluation_inputs_list:
     :return:
     """
     pseudo_evaluated = list()
-    for out_node, inputs_for_node in zip(evaluation_outputs_list, evaluation_inputs_list):
-        for in_node in inputs_for_node:
+    for out_node in evaluation_outputs_list:
+        for in_node in out_node.parents:
             if in_node not in pseudo_evaluated:
                 if not isinstance(in_node, InputNode):
-                    raise AssertionError("Nodes are not ordered correctly.")
+                    raise GraphInconsistency("Nodes are not ordered correctly.")
                 else:
                     pseudo_evaluated.append(in_node)
         pseudo_evaluated.append(out_node)
@@ -383,14 +380,12 @@ def merge_children(start_nodes):
 
         # Extra code to handle merging of pair indexers.
         # Even if we clean up the pair indexer with an extra state we would still need logic to merge them.
-        # TODO: Clean up hard_dist_cutoff vs dist_hard max and make it impossible for the node and
-        # TODO module to disagree.
         if isinstance(first, PairIndexer):
-            max_r = first.torch_module.hard_dist_cutoff
+            max_r = first.torch_module.dist_hard_max
             max_r_node = first
             swap_first_in = False
             for other_node in rest:
-                this_r = other_node.torch_module.hard_dist_cutoff
+                this_r = other_node.torch_module.dist_hard_max
                 if this_r > max_r:
                     max_r_node = other_node
                     max_r = this_r

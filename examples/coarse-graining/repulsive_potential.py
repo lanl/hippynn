@@ -6,9 +6,8 @@ import numpy as np
 import torch
 
 from hippynn.graphs import IdxType
-from hippynn.graphs.nodes.base import ExpandParents, find_unique_relative
+from hippynn.graphs.nodes.base import ExpandParents, AutoModule, find_unique_relative
 from hippynn.graphs.nodes.base.multi import MultiNode
-from hippynn.graphs.nodes.base.definition_helpers import AutoKw
 from hippynn.graphs.nodes.inputs import SpeciesNode, PositionsNode
 from hippynn.graphs.nodes.tags import PairIndexer, AtomIndexer
 from hippynn.layers import pairs
@@ -44,7 +43,7 @@ class RepulsivePotential(torch.nn.Module):
         mol_energy = self.summer(pair_energies, mol_index, n_molecules, pair_first)
         return mol_energy, atom_energies
 
-class RepulsivePotentialNode(ExpandParents, AutoKw, MultiNode):
+class RepulsivePotentialNode(ExpandParents, AutoModule, MultiNode):
     input_names = "pair_dist", "pair_first", "mol_index", "n_molecules", "n_atoms_max"
     output_names = "mol_energy", "atom_energies",
     auto_module_class = RepulsivePotential
@@ -97,7 +96,7 @@ class RepulsivePotentialBySpecies(torch.nn.Module):
         mol_energy = self.summer(pair_energies, mol_index, n_molecules, pair_first)
         return mol_energy, atom_energies,
 
-class RepulsivePotentialBySpeciesNode(ExpandParents, AutoKw, MultiNode):
+class RepulsivePotentialBySpeciesNode(ExpandParents, AutoModule, MultiNode):
     input_names = "pair_dist", "pair_first", "pair_second", "mol_index", "n_molecules", "n_atoms_max", "spec"
     output_names = "mol_energy", "atom_energies",
     auto_module_class = RepulsivePotentialBySpecies

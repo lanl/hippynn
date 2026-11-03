@@ -18,6 +18,8 @@ ignore_cusp_warning = pytest.mark.filterwarnings("ignore:.*'cusp_reg' parameter*
 ignore_sensitivity_warning = pytest.mark.filterwarnings("ignore:.*underneath sensitivity range*.")
 ignore_optional_key_warning = pytest.mark.filterwarnings("ignore:.*Optional key not found for possible keys.*")
 ignore_pin_memory_mps_warning = pytest.mark.filterwarnings("ignore:.*pin_memory.*not supported on MPS.*")
+# Origin: test_serialization_registry deliberately leaves a clashing class pair in the global registry.
+ignore_registry_mismatch_warning = pytest.mark.filterwarnings("ignore:Registry round-trip mismatch")
 
 
 @pytest.fixture

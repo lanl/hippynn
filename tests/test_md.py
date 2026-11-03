@@ -275,7 +275,7 @@ def test_md_verlet():
     force_node.db_name = "forces"
 
     pair_indexer_node = model.unique_node_from_name("PairIndexer")
-    cutoff = pair_indexer_node.torch_module.hard_dist_cutoff
+    cutoff = pair_indexer_node.torch_module.dist_hard_max
 
     cell_node = inputs.CellNode(name="C", db_name="C")
 

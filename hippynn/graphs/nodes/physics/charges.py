@@ -4,8 +4,7 @@
 from ....layers import physics as physics_layers
 from ...indextypes import IdxType, elementwise_compare_reduce, index_type_coercion
 from ..base import (
-    AutoKw,
-    AutoNoKw,
+    AutoModule,
     ExpandParents,
     MultiNode,
     SingleNode,
@@ -17,7 +16,7 @@ from ..inputs import PositionsNode
 from ..tags import Charges
 
 
-class ChargeMomentNode(ExpandParents, AutoNoKw, SingleNode):
+class ChargeMomentNode(ExpandParents, SingleNode):
     input_names = "charges", "positions", "system_index", "n_systems"
 
     @parent_expander.matchlen(1)
@@ -42,7 +41,7 @@ class ChargeMomentNode(ExpandParents, AutoNoKw, SingleNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class DipoleNode(ChargeMomentNode):
+class DipoleNode(AutoModule, ChargeMomentNode):
     """
     Compute the dipole of point charges.
     """
@@ -51,7 +50,7 @@ class DipoleNode(ChargeMomentNode):
     index_state = IdxType.Systems
 
 
-class QuadrupoleNode(ChargeMomentNode):
+class QuadrupoleNode(AutoModule, ChargeMomentNode):
     """
     Compute the traceless quadrupole of point charges.
     """

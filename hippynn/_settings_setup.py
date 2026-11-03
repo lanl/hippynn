@@ -137,6 +137,7 @@ DEFAULT_SETTINGS = {
     "DEBUG_GRAPH_EXECUTION": (False, bool_or_strtobool),
     "DEBUG_NODE_CREATION": (False, bool_or_strtobool),
     "DEBUG_AUTOINDEXING": (False, bool_or_strtobool),
+    "DEBUG_EXPERIMENT": (False, bool_or_strtobool),
     "USE_CUSTOM_KERNELS": ("auto", kernel_handler),
     "WARN_LOW_DISTANCES": (True, bool_or_strtobool),
     "TIMEPLOT_AUTOSCALING": (True, bool_or_strtobool),

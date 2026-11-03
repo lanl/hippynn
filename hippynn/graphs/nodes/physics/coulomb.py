@@ -5,7 +5,7 @@ from ...._deprecations import _DeprecatedNamesMixin
 
 from ....layers import physics as physics_layers 
 
-from ..base import MultiNode, AutoKw, find_unique_relative, find_relatives, ExpandParents, Node
+from ..base import MultiNode, AutoModule, find_unique_relative, find_relatives, ExpandParents, Node
 from ...indextypes import IdxType
 from ..networks import Network
 from ..targets import HChargeNode
@@ -74,7 +74,7 @@ class ChargePairSetup(ExpandParents):
 
 
 
-class CoulombEnergyNode(AutoKw, ChargePairSetup, Energies,  MultiNode, _DeprecatedNamesMixin):
+class CoulombEnergyNode(AutoModule, ChargePairSetup, Energies,  MultiNode, _DeprecatedNamesMixin):
     """
     Besides the normal 'name' and 'parents' arguments, this node requires an `energy_conversion` parameter.
     This corresponds to coulomb's constant k in the equation E = kqq/r.
@@ -105,14 +105,14 @@ class CoulombEnergyNode(AutoKw, ChargePairSetup, Energies,  MultiNode, _Deprecat
                 "Coulomb energy module is not compatible with closed boundary conditions."
             )
 
-        if pairfinder.torch_module.hard_dist_cutoff is not None:
+        if pairfinder.torch_module.dist_hard_max is not None:
             raise ValueError(
-                "hard_dist_cutoff is set to a finite value,\n"
+                "dist_hard_max is set to a finite value,\n"
                 "coulomb energy requires summing over the entire set of pairs"
             )
 
 
-class ScreenedCoulombEnergyNode(AutoKw, ChargePairSetup, Energies, MultiNode, _DeprecatedNamesMixin):
+class ScreenedCoulombEnergyNode(AutoModule, ChargePairSetup, Energies, MultiNode, _DeprecatedNamesMixin):
     """
     Besides the normal 'name' and 'parents' arguments, this node requires an `energy_conversion` parameter.
     This corresponds to coulomb's constant k in the equation E = kqq/r.
@@ -131,7 +131,7 @@ class ScreenedCoulombEnergyNode(AutoKw, ChargePairSetup, Energies, MultiNode, _D
 
     @staticmethod
     def _validate_pairfinder(pairfinder, cutoff_distance):
-        existing_cutoff = pairfinder.torch_module.hard_dist_cutoff
+        existing_cutoff = pairfinder.torch_module.dist_hard_max
         if existing_cutoff is not None and existing_cutoff < cutoff_distance:
             raise ValueError(
                 f"Distance cutoff ({existing_cutoff}) is set to less than\n"
@@ -149,7 +149,7 @@ class ScreenedCoulombEnergyNode(AutoKw, ChargePairSetup, Energies, MultiNode, _D
         
         
         # Dev Note: the _pe_cutoff_distance argument duplicates the cutoff_distance argument
-        # because the AutoKw and ExpandParent mixins both consume their keywords.
+        # because the AutoModule and ExpandParent mixins both consume their keywords.
         # Since both of them require the cutoff, we have it supplied with two different names.
         # Would be nice if the workflow didn't require this, but the workaround is not costly,
         # just confusing to find.
@@ -163,7 +163,7 @@ class ScreenedCoulombEnergyNode(AutoKw, ChargePairSetup, Energies, MultiNode, _D
                          **kwargs)
 
 
-class ChEQNode(ExpandParents, AutoKw, MultiNode):
+class ChEQNode(ExpandParents, AutoModule, MultiNode):
     input_names = "species", "coordinates", "U", "chi"
     output_names = "charge", "coul_energy", "dipole", "out_U", "out_chi"
     output_index_states = (

@@ -15,7 +15,7 @@ import torch
 
 import pickle
 
-from . import serialization
+from . import checkpoints
 from .metric_tracker import MetricTracker
 from .controllers import Controller, is_scheduler_like
 from .device import set_devices
@@ -206,7 +206,7 @@ def setup_training(
         )
 
     optimizer = controller.optimizer
-    model, evaluator, optimizer = serialization.set_devices(
+    model, evaluator, optimizer = set_devices(
         model, loss, evaluator, optimizer, setup_params.device or tools.device_fallback()
     )
 
@@ -291,7 +291,7 @@ def train_model(
     database.align(**evaluator.db_info)
 
     if store_structure_file:
-        serialization.create_structure_file(training_modules, database, controller)
+        checkpoints.create_structure_file(training_modules, database, controller)
 
     try:
         training_loop(
@@ -545,7 +545,7 @@ def training_loop(
                 with open("best_model.pt", "wb") as pfile:
                     torch.save(best_model, pfile)
 
-                state = serialization.create_state(model, controller, metric_tracker)
+                state = checkpoints.create_state(model, controller, metric_tracker)
 
                 # Write the checkpoint
                 with open("best_checkpoint.pt", "wb") as pfile:
@@ -556,7 +556,7 @@ def training_loop(
             with open(f"model_epoch_{epoch}.pt", "wb") as pfile:
                 torch.save(model.state_dict(), pfile)
             
-            state = serialization.create_state(model, controller, metric_tracker)
+            state = checkpoints.create_state(model, controller, metric_tracker)
 
             # Write the checkpoint
             with open(f"checkpoint_epoch_{epoch}.pt", "wb") as pfile:

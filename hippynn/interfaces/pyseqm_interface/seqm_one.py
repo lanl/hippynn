@@ -138,7 +138,7 @@ from hippynn.graphs.nodes.targets import HChargeNode  # , HBondNode
 from hippynn.graphs.nodes.inputs import PositionsNode, SpeciesNode
 from hippynn.graphs.nodes.base import InputNode
 from hippynn.graphs.indextypes import IdxType
-from hippynn.graphs.nodes.base import MultiNode, AutoKw, find_unique_relative, ExpandParents, SingleNode
+from hippynn.graphs.nodes.base import MultiNode, AutoModule, find_unique_relative, ExpandParents, SingleNode
 
 
 class NotConvergedNode(InputNode):
@@ -151,7 +151,7 @@ class DensityMatrixNode(InputNode):
     input_type_str = "single_particle_density_matrix"
 
 
-class SEQM_One_EnergyNode(ExpandParents, AutoKw, MultiNode):
+class SEQM_One_EnergyNode(ExpandParents, AutoModule, MultiNode):
     input_names = "par_atom", "Positions", "Species", "single_particle_density_matrix"
     output_names = "mol_energy", "Etot_m_Eiso"
     main_output_name = "Etot_m_Eiso"

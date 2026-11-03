@@ -4,7 +4,7 @@ Nodes for prediction of variables from network features.
 
 import torch
 
-from .base import MultiNode, AutoKw, ExpandParents, find_unique_relative, Node
+from .base import MultiNode, AutoModule, ExpandParents, find_unique_relative, Node
 from .tags import AtomIndexer, Network, PairIndexer, HAtomRegressor, Charges, Energies, Encoder
 from .indexers import PaddingIndexer
 from ..indextypes import IdxType, index_type_coercion
@@ -12,7 +12,7 @@ from ...layers import targets as target_modules
 from ..._deprecations import _DeprecatedNamesMixin
 
 
-class HEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, MultiNode, _DeprecatedNamesMixin):
+class HEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoModule, MultiNode, _DeprecatedNamesMixin):
     """
     Predict a system-level scalar such as energy from a sum over local components.
     """
@@ -46,7 +46,7 @@ class HEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, MultiNode, _D
         super().__init__(name, parents, first_is_interacting=first_is_interacting, **kwargs)
 
 
-class HChargeNode(Charges, HAtomRegressor,  ExpandParents, AutoKw, MultiNode):
+class HChargeNode(Charges, HAtomRegressor,  ExpandParents, AutoModule, MultiNode):
     """
     Predict an atom-level scalar such as charge from local features.
     """
@@ -68,7 +68,7 @@ class HChargeNode(Charges, HAtomRegressor,  ExpandParents, AutoKw, MultiNode):
         super().__init__(name, parents, module=module, **kwargs)
 
 
-class LocalChargeEnergy(Energies, ExpandParents, AutoKw, HAtomRegressor, MultiNode, _DeprecatedNamesMixin):
+class LocalChargeEnergy(Energies, ExpandParents, AutoModule, HAtomRegressor, MultiNode, _DeprecatedNamesMixin):
     _DEPRECATED_NAMES = {"mol_energies": "system_energy"}
     input_names = "charges", "features", "system_index", "n_systems"
     output_names = "system_energy", "atom_energies"
@@ -91,7 +91,7 @@ class LocalChargeEnergy(Energies, ExpandParents, AutoKw, HAtomRegressor, MultiNo
         super().__init__(name, parents, **kwargs)
 
 
-class HBondNode(ExpandParents, AutoKw, MultiNode):
+class HBondNode(ExpandParents, AutoModule, MultiNode):
     """
     Predict an pair-level scalar such as bond order from local features on both atoms
     """
@@ -122,9 +122,8 @@ class HBondNode(ExpandParents, AutoKw, MultiNode):
         super().__init__(name, parents, **kwargs)
 
 
-class AtomizationEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoKw, MultiNode, _DeprecatedNamesMixin):
+class AtomizationEnergyNode(Energies, HAtomRegressor, ExpandParents, AutoModule, MultiNode, _DeprecatedNamesMixin):
     _DEPRECATED_NAMES = {"mol_energy": "system_energy"}
-
     input_names = "hier_features", "vac_features", "encoding", "system_index", "n_systems"
     output_names = "system_energy", "partial_energies", "hierarchicality"
     output_index_states = IdxType.Systems, None, IdxType.Systems

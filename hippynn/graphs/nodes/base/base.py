@@ -6,6 +6,7 @@ from ...indextypes import IdxType
 from .algebra import _NodeAlgebra
 
 from .node_functions import _NodeFunctions
+from .serializable import SerializableNode
 from .algebra import UnaryNode, BinNode, _AlgebraicOperation
 from ....layers import algebra as algebra_mods
 from ...._deprecations import _DeprecatedNamesMixin
@@ -14,12 +15,12 @@ from typing import Optional
 
 
 class Node(_NodeFunctions, _NodeAlgebra):
-    pass
-
+    serialization_attributes = ("db_name",)  # hack
 
 
 class SingleNode(Node, _DeprecatedNamesMixin):
     index_state: Optional[IdxType] = IdxType.Unlabeled
+    serialization_attributes = ("index_state",)
     _DEPRECATED_NAMES = {
         "_index_state" : "index_state",
         }
@@ -32,7 +33,7 @@ class SingleNode(Node, _DeprecatedNamesMixin):
         if self._pred is None:
             if self.is_in_loss_graph():
                 raise TypeError("Node {} of type {} already in loss graph".format(self, type(self)))
-            self._pred = LossPredNode(self.name + "-pred", origin_node=self, db_name=self.db_name)
+            return LossPredNode(self.name + "-pred", origin_node=self) # sets backlink when created
         return self._pred
 
     @property
@@ -40,34 +41,12 @@ class SingleNode(Node, _DeprecatedNamesMixin):
         if self._true is None:
             if self.is_in_loss_graph():
                 raise TypeError("Node {} of type {} already in loss graph".format(self, type(self)))
-            self._true = LossTrueNode(self.name + "-true", origin_node=self, db_name=self.db_name)
+            return LossTrueNode(self.name + "-true", origin_node=self) # sets backlink when created
         return self._true
-    
-    @property
-    def db_name(self):
-        return self._db_name
-
-    @db_name.setter
-    def db_name(self, value):
-        self._db_name = value
-        if not self.is_in_loss_graph():
-            self.true.db_name = value
-            self.pred.db_name = value
     
     @property
     def main_output(self):
         return self
-    
-
-
-class ValueNode(SingleNode):
-    index_state = IdxType.Scalar  # By definition abstract values do not have a batch axis.
-    def __init__(self, value, convert=True):
-        name = "Value({})".format(str(value))
-        self.value = value
-        self._converted = convert
-        module = algebra_mods.ValueMod(self.value, convert=self._converted)
-        super().__init__(name, parents=(), module=module)
 
 
 class InvNode(UnaryNode, SingleNode, _AlgebraicOperation, operation="invert"):
@@ -99,63 +78,79 @@ class PowNode(BinNode, SingleNode , _AlgebraicOperation, operation="pow"):
 # have at least two dimensions.
 # See nodes/loss.py and turn on `debug_loss_broadcast` if you have concerns about
 # broadcasting behavior.
-class AtLeast2D(SingleNode):
+class AtLeast2D(UnaryNode, SingleNode):
     torch_module = algebra_mods.AtLeast2D()
-    index_state = IdxType.Unlabeled
+    _classname = "Atleast2D"
 
-    def __init__(self, parents, *args, **kwargs):
-        if len(parents) != 1:
-            raise ValueError("AtLeast2D can only have 1 parent, got {}".format(len(parents)))
-        p = parents[0]
-        self.index_state = p.index_state
-        super().__init__("Atleast2D({})".format(p), parents, *args, module=None, **kwargs)
-        self.origin_node = p.origin_node
+    def __init__(self, in_node):
+        super().__init__(in_node)
+        self.origin_node = in_node.origin_node
 
 
-class InputNode(SingleNode):
-    input_names = ()
+class InputNode(SingleNode, SerializableNode):
     """Node for getting information for the database."""
-    requires_grad = False
+    input_names = ()
     input_type_str = "Input"
+    requires_grad: bool = False
+    serialization_attributes = ("requires_grad",)
 
     def __init__(self, name=None, db_name=None, index_state=None):
 
-        if hasattr(self, "index_state") and self.index_state is not IdxType.Unlabeled:
-            if index_state is not None:
-                if index_state != self.index_state:
-                    raise ValueError(f"Cannot override IdxType {self.index_state} of node type {self.__class__.__name__} "
-                                     f"with user-specified type {index_state}.")
-        else:
-            if index_state is not None:
-                self.index_state = index_state
+        self.requires_grad = False
+
+        # todo: just reduce signature on subclasses?        
+        if index_state is not None:
+            cls_index_state = getattr(self, "index_state", IdxType.Unlabeled)
+            if (index_state != cls_index_state) and (cls_index_state is not IdxType.Unlabeled):
+                raise ValueError(f"Cannot override IdxType {cls_index_state} of node type {self.__class__.__name__} "
+                                 f"with user-specified type {index_state}.")                            
+            self.index_state = index_state 
         
         if db_name is None and name is None:
             raise TypeError("Input node requires name or db_name arguments.")
         if name is None and db_name is not None:
-            name = self.input_type_str + "(db_name='{}')".format(db_name)
+            name = db_name
         super().__init__(name=name, parents=(), db_name=db_name, module=None)
 
+
+    @classmethod
+    def from_record(cls, name, db_name, index_state, requires_grad, **kwargs):
+        node = cls(name=name, db_name=db_name, index_state=index_state)
+        if requires_grad:
+            node.requires_grad = requires_grad
+        return node
 
 
 class LossInputNode(InputNode):
     """Node for getting information from the model (predicted) or database (true) into the loss."""
+    serialization_attributes = ("origin_node",)
 
-    def __init__(self, name, origin_node, db_name):
-        super().__init__(name, db_name)
+    def __init__(self, name, origin_node):
+        super().__init__(name, db_name=None)
         self.origin_node = origin_node
+
+    @classmethod
+    def from_record(cls, name, origin_node, index_state=None, **kwargs):
+        node = cls(name=name, origin_node=origin_node)
+        # **kwargs contains unneeded things for these classes, db_name, parents, etc
+        if index_state is not None:
+            node.index_state = index_state
+        return node
 
 
 class LossPredNode(LossInputNode):
-    def __init__(self, name, origin_node, db_name):
-        super().__init__(name, origin_node, db_name)
+    def __init__(self, name, origin_node):
+        super().__init__(name, origin_node)
         self.index_state = getattr(origin_node, "index_state", IdxType.Unlabeled)
+        self.origin_node._pred = self
 
 
 class LossTrueNode(LossInputNode):
-    def __init__(self, name, origin_node, db_name):
-        super().__init__(name, origin_node, db_name)
+    def __init__(self, name, origin_node):
+        super().__init__(name, origin_node)
         self.index_state = indextypes.reduce_funcs.db_state_of(origin_node.index_state)
-        self._main_output = AtLeast2D((self,))
+        self._main_output = AtLeast2D(self)
+        self.origin_node._true = self
 
     @property
     def main_output(self):
