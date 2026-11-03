@@ -41,7 +41,7 @@ class RepulsivePotential(torch.nn.Module):
         pair_energies = -1 * self.g * torch.exp(-1 * self.a  * pair_dist)
         atom_energies = torch.zeros((n_molecules * n_atoms_max, 1), device=pair_energies.device, dtype=pair_energies.dtype)
         atom_energies.index_add_(0, pair_first, pair_energies.unsqueeze(-1))
-        mol_energy = self.summer(pair_energies, mol_index, n_molecules, pair_first)
+        mol_energy = self.summer(pair_energies.unsqueeze(-1), mol_index, n_molecules, pair_first)
         return mol_energy, atom_energies
 
 class RepulsivePotentialNode(ExpandParents, AutoKw, MultiNode):
@@ -94,7 +94,7 @@ class RepulsivePotentialBySpecies(torch.nn.Module):
         pair_energies = -1 * self.g[idx1,idx2].reshape(pair_dist.shape) * torch.exp(-1 * self.a  * pair_dist)
         atom_energies = torch.zeros((n_molecules * n_atoms_max, 1), device=pair_energies.device, dtype=pair_energies.dtype)
         atom_energies.index_add_(0, pair_first, pair_energies.unsqueeze(-1))
-        mol_energy = self.summer(pair_energies, mol_index, n_molecules, pair_first)
+        mol_energy = self.summer(pair_energies.unsqueeze(-1), mol_index, n_molecules, pair_first)
         return mol_energy, atom_energies,
 
 class RepulsivePotentialBySpeciesNode(ExpandParents, AutoKw, MultiNode):
@@ -166,7 +166,7 @@ class RepulsivePotentialPolynomialBySpecies(torch.nn.Module):
         pair_energies = a * (t - pair_dist) ** self.n * (pair_dist < t).to(pair_dist.dtype)
         atom_energies = torch.zeros((n_molecules * n_atoms_max, 1), device=pair_energies.device, dtype=pair_energies.dtype)
         atom_energies.index_add_(0, pair_first, pair_energies.unsqueeze(-1))
-        mol_energy = self.summer(pair_energies, mol_index, n_molecules, pair_first)
+        mol_energy = self.summer(pair_energies.unsqueeze(-1), mol_index, n_molecules, pair_first)
         return mol_energy, atom_energies,
 
 class RepulsivePotentialPolynomialBySpeciesNode(ExpandParents, AutoKw, MultiNode):
