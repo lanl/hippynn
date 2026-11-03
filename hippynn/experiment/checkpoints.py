@@ -134,7 +134,7 @@ def load_saved_tensors(structure_fname: str, state_fname: str, weights_only: boo
         structure = torch.load(pfile, weights_only=weights_only, **kwargs)
 
     with open(state_fname, "rb") as pfile:
-        state = torch.load(pfile, **kwargs)
+        state = torch.load(pfile, weights_only=weights_only, **kwargs)
     return structure, state
 
 
