@@ -3,22 +3,10 @@
 
 from itertools import combinations_with_replacement
 
-import numpy as np                                   
-import torch
+import numpy as np
 
 from .pbc_tools import find_mic, extract_multicell_diagonal
-from ..layers.pairs.indexing import padded_neighlist
 from ..tools import progress_bar
-
-try:
-    from numba import jit
-except ImportError:
-    # Dummy jit
-    def jit(*args, **kwargs):
-        def decorator(func):
-            return func
-        return decorator
-
 
 def ensure_positions_cells_compatibility(positions, cells):
     n_frames, _, _ = positions.shape
@@ -97,12 +85,14 @@ def calculate_rdf(positions: np.ndarray, cutoff: float, cells: np.ndarray, speci
     check_KDTree_compatibility(cells, cutoff=cutoff)
 
     bins = np.linspace(lower_cutoff, cutoff, n_bins + 1)
+    bin_width = (cutoff - lower_cutoff) / n_bins
     
     counts_running = np.zeros(n_bins)
     norm_running = 0.0  # sum over frames of N^2 / V
 
     if species is not None:
         unique_species = np.unique(species)
+        n_species = len(unique_species)
         species_pairs = list(combinations_with_replacement(unique_species, 2))
         counts_running_species = {f"rdf_values_{j}-{k}": np.zeros(n_bins) for j, k in species_pairs}
         norm_running_species = {f"rdf_values_{j}-{k}": 0.0 for j, k in species_pairs}
@@ -112,24 +102,28 @@ def calculate_rdf(positions: np.ndarray, cutoff: float, cells: np.ndarray, speci
         volume = np.prod(cell)
 
         tree = get_KDTree_tree(positions[i], cell)
-        tree_dict = tree.sparse_distance_matrix(tree, cutoff)
+        pair_data = tree.sparse_distance_matrix(tree, cutoff, output_type="ndarray")
 
-        pairs = np.array(list(tree_dict.keys()))
-        dists = np.array(list(tree_dict.values()))
-
-        pairs = pairs[np.where(dists > lower_cutoff)]
-        dists = dists[np.where(dists > lower_cutoff)]
+        keep = pair_data["v"] > lower_cutoff
+        pair_first, pair_second, dists = pair_data["i"][keep], pair_data["j"][keep], pair_data["v"][keep]
 
         counts, _ = np.histogram(dists, bins=bins)
         counts_running += counts
         norm_running += len(positions[i]) ** 2 / volume
 
         if species is not None:
+            # Assign each distance to its bin (the bins are uniform, so divide, then adjust at the edges to match np.histogram).
+            bin_index = np.clip(((dists - lower_cutoff) / bin_width).astype(np.int64), 0, n_bins - 1)
+            bin_index -= dists < bins[bin_index]
+            bin_index += (dists >= bins[bin_index + 1]) & (bin_index < n_bins - 1)
+            # Count distances by species pair and bin.
+            species_index = np.searchsorted(unique_species, species[i])
+            pair_code = species_index[pair_first] * n_species + species_index[pair_second]
+            counts_all = np.bincount(pair_code * n_bins + bin_index, minlength=n_species**2 * n_bins).reshape(n_species, n_species, n_bins)
             for j, k in species_pairs:
                 key = f"rdf_values_{j}-{k}"
-                dists_spec = dists[(species[i][pairs[:,0]] == j) & (species[i][pairs[:,1]] == k)]
-                counts, _ = np.histogram(dists_spec, bins=bins)
-                counts_running_species[key] += counts
+                a, b = np.searchsorted(unique_species, [j, k])
+                counts_running_species[key] += counts_all[a, b]
                 norm_running_species[key] += (species[i] == j).sum() * (species[i] == k).sum() / volume
 
     # Volume of each spherical shell
@@ -146,33 +140,9 @@ def calculate_rdf(positions: np.ndarray, cutoff: float, cells: np.ndarray, speci
 
     return (bin_centers, rdf) if species is None else (bin_centers, rdf, species_rdfs)
 
-@jit(nopython=True)
-def find_triples(jlist_pad, rijlist_pad):
-    n_centers, max_pairs = jlist_pad.shape
-    max_triples = max_pairs * (max_pairs + 1) // 2
-
-    triples = np.zeros((n_centers, max_triples, 2), dtype=np.int64) - 1
-    triples_vec = np.zeros((n_centers, max_triples, 2, 3), dtype=np.float64)
-    for j in range(n_centers):
-        idx = 0
-        row = jlist_pad[j]
-        row_vec = rijlist_pad[j]
-        n_real = np.count_nonzero(row + 1)
-        for k in range(n_real):
-            for l in range(k+1, n_real):
-                triples[j, idx, 0] = row[k]
-                triples[j, idx, 1] = row[l]
-                triples_vec[j, idx, 0] = row_vec[k]
-                triples_vec[j, idx, 1] = row_vec[l]
-                idx += 1
-
-    return triples, triples_vec
-
 def calculate_adf(positions, cutoffs, cells, species=None):
     """
     Computes ADFs for given cutoffs. If `species` is not provided, also computes species triple specific ADFs. 
-
-    This code will be quite slow if numba is not available.
 
     :param positions: Shape (n_frames, n_particles, 3).
     :type positions: np.ndarray
@@ -209,6 +179,7 @@ def calculate_adf(positions, cutoffs, cells, species=None):
 
     if species is not None:
         unique_species = np.unique(species)
+        n_species = len(unique_species)
         for center in unique_species:
             for end1, end2 in combinations_with_replacement(unique_species, 2):
                 for cutoff in cutoffs:
@@ -218,6 +189,7 @@ def calculate_adf(positions, cutoffs, cells, species=None):
     for i in progress_bar(range(len(positions))):
         cell = cells[i]
 
+        # Find all pairs of particles within the largest cutoff.
         tree = get_KDTree_tree(positions[i], cell)
         pairs = tree.query_pairs(max(cutoffs), output_type='ndarray')
 
@@ -225,62 +197,58 @@ def calculate_adf(positions, cutoffs, cells, species=None):
             continue
 
         cell = np.diag(cell)
-        vecs = find_mic(positions[i][pairs[:,0]] - positions[i][pairs[:,1]], cell=cell)
-        vecs = np.array(vecs)
+        vecs = find_mic(positions[i][pairs[:,1]] - positions[i][pairs[:,0]], cell=cell)
 
-        vecs = vecs
-
-        pairs = np.concatenate((pairs, pairs[:,::-1]))
+        # Build the neighbor list: list each pair in both directions, grouped by center, with the vector from center to neighbor.
+        centers = np.concatenate((pairs[:, 0], pairs[:, 1]))
+        neighbors = np.concatenate((pairs[:, 1], pairs[:, 0]))
         vecs = np.concatenate((vecs, -vecs))
+        order = np.argsort(centers)
+        centers, neighbors, vecs = centers[order], neighbors[order], vecs[order]
 
-        jlist_pad, rijlist_pad = padded_neighlist(torch.as_tensor(pairs[:,0]), torch.as_tensor(pairs[:,1]), torch.as_tensor(vecs), torch.as_tensor(positions[i]))
-        jlist_pad, rijlist_pad = np.asarray(jlist_pad), np.asarray(rijlist_pad)
+        # Enumerate the triples: for each center, every pair of its neighbors (n neighbors give n(n-1)/2 triples).
+        n_neigh = np.bincount(centers, minlength=len(positions[i]))
+        row_start = np.concatenate(([0], np.cumsum(n_neigh)[:-1]))
+        if not (n_neigh >= 2).any():
+            continue
+        first, second, center_of_triple = [], [], []
+        for c in range(len(n_neigh)):
+            k, l = np.triu_indices(n_neigh[c], 1)
+            first.append(row_start[c] + k)
+            second.append(row_start[c] + l)
+            center_of_triple.append(np.full(len(k), c))
+        first, second, center_of_triple = np.concatenate(first), np.concatenate(second), np.concatenate(center_of_triple)
 
-        triples, triples_vec = find_triples(jlist_pad, rijlist_pad)
+        # Calculate the angle between the two arms of each triple, and the arm lengths.
+        v1, v2 = vecs[first].astype(np.float64, copy=False), vecs[second].astype(np.float64, copy=False)
+        d1, d2 = np.linalg.norm(v1, axis=-1), np.linalg.norm(v2, axis=-1)
+        cosines = np.clip((v1 / d1[:, None] * (v2 / d2[:, None])).sum(axis=-1), -1.0, 1.0)
+        angles = np.arccos(cosines) / np.pi * 180
+        # Assign each angle to a 1-degree bin (same adjustment at the edges as in the RDF).
+        angle_bin = np.minimum(np.floor(angles).astype(np.int64), 179)
+        angle_bin -= angles < angle_bin
+        angle_bin += (angles >= angle_bin + 1) & (angle_bin < 179)
 
-        triples_dists = np.linalg.norm(triples_vec, axis=-1)
+        longest_arm = np.maximum(d1, d2)
 
-        triples_vec = triples_vec / triples_dists[...,None]
-
-        for cutoff in cutoffs:
-            mask = (triples_dists[:, :, 0] <= cutoff) & (triples_dists[:, :, 1] <= cutoff)
-            triples_vec_cutoff = triples_vec[mask]
-
-            angles = np.arccos((triples_vec_cutoff[:,0] * triples_vec_cutoff[:,1]).sum(axis=-1)) / np.pi * 180 
-            counts, _ = np.histogram(angles, bins=np.arange(0,181,dtype=angles.dtype))
-
-            adfs[f"adf_values_all-all-all_cutoff_{cutoff}"] += counts
-
+        # Label each triple by the species of its center and its two arms (the order of the arms does not matter).
         if species is not None:
-            for center in unique_species:
-                mask1 = species[i] == center
-                jlist_pad_center = jlist_pad[mask1]
-                rijlist_pad_center = rijlist_pad[mask1]
+            species_index = np.searchsorted(unique_species, species[i])
+            center_index = species_index[center_of_triple]
+            arm1, arm2 = species_index[neighbors[first]], species_index[neighbors[second]]
+            lo, hi = np.minimum(arm1, arm2), np.maximum(arm1, arm2)
+            species_key = (center_index * n_species + lo) * n_species + hi
 
-                triples, triples_vec = find_triples(jlist_pad_center, rijlist_pad_center)
-
-                for end1, end2 in combinations_with_replacement(unique_species, 2):
-                    mask2 = (triples != -1)
-                    triples_species = np.zeros_like(triples) - 1
-                    triples_species[mask2] = species[i][triples[mask2]]  
-
-                    target1 = (triples_species[:, :, 0] == end1) & (triples_species[:, :, 1] == end2)
-                    target2 = (triples_species[:, :, 0] == end2) & (triples_species[:, :, 1] == end1)
-                    mask3 = np.where(target1 | target2)                  
-
-                    triples_ends = triples_vec[mask3]
-                    triples_dists = np.linalg.norm(triples_ends, axis=-1)
-
-                    triples_ends = triples_ends / triples_dists[...,None]
-
-                    for cutoff in cutoffs:
-                        mask4 = (triples_dists[:, 0] <= cutoff) & (triples_dists[:, 1] <= cutoff)
-                        triples_ends_cutoff = triples_ends[mask4]
-
-                        angles = np.arccos((triples_ends_cutoff[:,0] * triples_ends_cutoff[:,1]).sum(axis=-1)) / np.pi * 180 
-                        counts, _ = np.histogram(angles, bins=np.arange(0,181,dtype=angles.dtype))
-
-                        adfs[f"adf_values_{center}-{end1}-{end2}_cutoff_{cutoff}"] += counts
+        # Count the angles in each bin for every cutoff, for all triples and for each species combination (a triple counts if both arms are within the cutoff).
+        for cutoff in cutoffs:
+            inside = longest_arm <= cutoff
+            adfs[f"adf_values_all-all-all_cutoff_{cutoff}"] += np.bincount(angle_bin[inside], minlength=180)
+            if species is not None:
+                counts = np.bincount(species_key[inside] * 180 + angle_bin[inside], minlength=n_species**3 * 180).reshape(n_species, n_species, n_species, 180)
+                for center_idx, center in enumerate(unique_species):
+                    for end1_idx, end2_idx in combinations_with_replacement(range(n_species), 2):
+                        end1, end2 = unique_species[end1_idx], unique_species[end2_idx]
+                        adfs[f"adf_values_{center}-{end1}-{end2}_cutoff_{cutoff}"] += counts[center_idx, end1_idx, end2_idx]
 
     for key, value in adfs.items():
         adfs[key] = value / value.sum()
