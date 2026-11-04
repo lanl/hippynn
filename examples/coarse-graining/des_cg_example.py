@@ -222,18 +222,11 @@ if run_training:
             force_rmse = loss.MSELoss.of_node(force) ** (1 / 2)
             force_mae = loss.MAELoss.of_node(force)
 
-            # The model is trained to the force MAE. The regularized TotalLoss (weight L2 norm and
-            # energy hierarchicality) is used only for early stopping and the batch size schedule.
-            l2_reg = loss.l2reg(network)
-            hierarchicality = henergy.batch_hier.pred
-            total_loss = force_mae + (1e-6 * l2_reg + 10 * hierarchicality) / 10
-
             validation_losses.update(
                 {
                     "ForceRMSE": force_rmse,
                     "ForceMAE": force_mae,
                     "ForceRsq": force_rsq,
-                    "TotalLoss": total_loss,
                 }
             )
 
@@ -263,7 +256,7 @@ if run_training:
                 eval_batch_size=1,
                 max_epochs=max_epochs,
                 termination_patience=20,
-                stopping_key="TotalLoss",
+                stopping_key="ForceMAE",
             )
 
             experiment_params = SetupParams(controller=controller)
@@ -386,6 +379,7 @@ if run_analysis:
                     n_bins=300,
                 )
             cg_rdfs = {key.replace("-", "_"): value for key, value in cg_rdfs.items()}
+            np.savez("cg_rdfs.npz", rdf_bins=rdf_bins, **cg_rdfs)
 
             with np.load(paper_cg_file) as paper_cg_data:
                 paper_cg_rdfs = {key: paper_cg_data[key] for key in aa_rdfs}
