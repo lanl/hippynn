@@ -11,9 +11,9 @@ same level as hippynn/, or change ``data_dir`` below. Choose ``system``, ``tempe
 ``mapping`` below. Only the COG and COM mappings can be used for training: the Martini files
 store the merged one-bead-per-molecule trajectories and the Martini CG files have no forces.
 
-The training settings reproduce the paper models with a degree-3 polynomial repulsion. Some
-paper models instead used degree 2 and a strength of mean(|F_x|)/10. Results will not match
-the paper bit for bit, since the training frames and seeds differ slightly.
+The repulsive potential settings (degree 2, strength mean(|F_x|)/10) are those of the paper's
+ethaline models; the paper's reline 298 COG and 333 COM models instead used degree 3 and a
+strength of mean(|F|)/10. Results will not match the paper bit for bit, since the seeds differ.
 
 Approx. GPU performance (one A100): training 30-60 min; MD ~5 h for the paper-length run
 (0.1 ns burn-in + 1 ns production). Lower ``n_burnin_steps`` and ``n_production_steps``
@@ -56,7 +56,7 @@ torch.set_default_dtype(torch.float32)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # ----- User parameters -----
-system = "reline"  # "reline" or "ethaline"
+system = "ethaline"  # "reline" or "ethaline"
 temperature = 298  # 298 or 333 (K)
 mapping = "COM"  # "COG" or "COM"
 data_dir = os.path.abspath(os.path.join(os.pardir, os.pardir, os.pardir, "datasets", "des_cg"))
@@ -121,7 +121,7 @@ if run_training:
             repulsive_potential_dr = find_taper_point(unique_species, aa_rdfs, rdf_bins, dr_fn)
             # Placeholder width for the unused null species, avoids division by zero
             repulsive_potential_dr[repulsive_potential_dr == 0] = 1.0
-            repulsive_potential_strength = np.linalg.norm(arr_dict["forces"], axis=-1).mean() / 10
+            repulsive_potential_strength = np.abs(arr_dict["forces"]).mean() / 10
 
             print(f"Repulsive potential taper points:\n{repulsive_potential_taper_point}")
             print(f"Repulsive potential widths:\n{repulsive_potential_dr}")
@@ -173,7 +173,7 @@ if run_training:
                 taper_point=repulsive_potential_taper_point,
                 strength=repulsive_potential_strength,
                 dr=repulsive_potential_dr,
-                degree=3,
+                degree=2,
             )
 
             # Combined energy prediction
