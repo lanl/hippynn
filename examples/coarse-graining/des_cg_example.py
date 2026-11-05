@@ -57,6 +57,8 @@ from hippynn.tools import active_directory, log_terminal
 
 from repulsive_potential import RepulsivePotentialPolynomialBySpeciesNode, find_taper_point
 
+AA_COLOR, CG_PAPER_COLOR, CG_RUN_COLOR = "#0072B2", "#E69F00", "#D55E00"
+
 torch.set_default_dtype(torch.float32)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -68,7 +70,8 @@ data_dir = os.path.abspath(os.path.join(os.pardir, os.pardir, os.pardir, "datase
 
 run_training = True
 run_md = True
-run_analysis = True
+run_analysis = True  # computes the CG RDFs and saves cg_rdfs.npz
+run_plotting = True  # compares RDFs and plots; needs the saved cg_rdfs.npz
 
 n_burnin_steps = 100_000
 n_production_steps = 1_000_000
@@ -422,6 +425,13 @@ if run_analysis:
             cg_rdfs = {key.replace("-", "_"): value for key, value in cg_rdfs.items()}
             np.savez("cg_rdfs.npz", rdf_bins=rdf_bins, **cg_rdfs)
 
+if run_plotting:
+    with active_directory(results_folder):
+        with log_terminal("plotting_log.txt", "wt"):
+
+            with np.load("cg_rdfs.npz") as saved_rdfs:
+                cg_rdfs = {key: saved_rdfs[key] for key in saved_rdfs.files if key.startswith("rdf_values_")}
+
             with np.load(paper_cg_file) as paper_cg_data:
                 paper_cg_rdfs = {key: paper_cg_data[key] for key in ref_rdfs}
 
@@ -435,16 +445,19 @@ if run_analysis:
                 pair_name = f"{analysis_species_names[i]}-{analysis_species_names[j]}"
                 print(f"{pair_name:>10s} {rdf_error(cg_rdfs[key], ref_rdfs[key]):10.4f} {rdf_error(paper_cg_rdfs[key], ref_rdfs[key]):10.4f}")
 
-                fig, ax = plt.subplots()
-                ax.plot(rdf_bins, ref_rdfs[key], label="AA", color="black")
-                ax.plot(rdf_bins, paper_cg_rdfs[key], label="CG (paper)", linestyle="--")
-                ax.plot(rdf_bins, cg_rdfs[key], label="CG (this run)")
-                ax.set_title(f"{system} {temperature} K {mapping}: {pair_name}")
-                ax.set_xlabel("r ($\\AA$)")
-                ax.set_ylabel("g(r)")
-                ax.set_xlim((3, 13))
-                ax.legend()
+                fig, ax = plt.subplots(figsize=(4.6, 3.4))
+                ax.plot(rdf_bins, ref_rdfs[key], label="AA", color=AA_COLOR, linewidth=2)
+                ax.plot(rdf_bins, paper_cg_rdfs[key], label="CG (paper)", color=CG_PAPER_COLOR, linestyle="--", linewidth=2)
+                ax.plot(rdf_bins, cg_rdfs[key], label="CG (this run)", color=CG_RUN_COLOR, linestyle="--", linewidth=2)
+                ax.set_title(f"{system} {temperature} K, {mapping} mapping: {pair_name}", fontsize=12)
+                ax.set_xlabel(r"$r$ ($\mathrm{\AA}$)", fontsize=11)
+                ax.set_ylabel(r"$g(r)$ (-)", fontsize=11)
+                ax.tick_params(labelsize=10)
+                ax.set_xlim((3.1, 12.9))
+                ax.legend(fontsize=9, loc="upper right")
+                ax.text(0.97, 0.06, f"SSE: {rdf_error(cg_rdfs[key], ref_rdfs[key]):.2f} " + r"$\mathrm{\AA}$",
+                        transform=ax.transAxes, ha="right", va="bottom", fontsize=10)
                 fig.tight_layout()
-                fig.savefig(f"rdf_{analysis_species_names[i]}_{analysis_species_names[j]}.png")
+                fig.savefig(f"rdf_{analysis_species_names[i]}_{analysis_species_names[j]}.png", dpi=150)
                 plt.close(fig)
             print(f"RDF plots saved in {os.path.abspath(os.curdir)}")
