@@ -47,6 +47,7 @@ New Features:
   AA data to use in training CG model, capability to use a species-pair-specific 
   repulsive potential, extended processing of data from CG MD, and a notebook 
   for visualizing the repulsive potentials. 
+- Added a coarse-graining example for mixtures.
 - Additional examples for pytorch lightning and simple inference
 - Efficient Hessian training using matrix probing techniques.
 - New profiling tool for easily capturing the CPU/GPU efficiency of your experiment.
@@ -65,6 +66,7 @@ Improvements:
 - New variant of ``AseDatabase`` named ``AseDatabaseIterable``. Accepts an 
   iterable of ``ase.Atoms`` objects (e.g., the result of ``ase.io.read`` 
   or ``ase.io.iread``).
+- Improve speed of `calculate_rdf` and `calculate_adf` functions.
 
 
 

@@ -36,9 +36,11 @@ any way, besides potential effects of uncontrolled random variables.
 One should first download the files for the desired configuration from XXXX. They should be placed in
 ``datasets/des_cg/``, where ``datasets/`` is at the same level as the hippynn repository.
 
-``des_cg_example.py`` trains a HIP-HOP-NN CG model for ethaline or reline, runs CG MD with the hippynn MD driver, and
-compares the CG partial RDFs to the all-atom reference and to the CG trajectory from the paper. Choose the system,
-temperature, and mapping at the top of the script. Training takes 30-60 minutes on a GPU and the paper-length MD takes
+``des_cg_example.py`` trains a HIP-HOP-NN CG model for ethaline, reline, or hydrated reline, runs CG MD with the hippynn
+MD driver, and compares the CG partial RDFs to the all-atom reference and to the CG trajectory from the paper. Choose
+the system, temperature, and mapping (COM, COG, or Martini for reline) at the top of the script. For the Martini mapping,
+which splits choline into two beads, the model is trained on all four bead types and the two choline beads are merged
+back into one before the RDFs are computed. Training takes 30-60 minutes on a GPU and the paper-length MD takes
 several hours; the stage flags and step counts at the top of the script can be used to rerun individual stages or to
 shorten the run. The polynomial repulsive potential it uses is ``RepulsivePotentialPolynomialBySpeciesNode`` in
 ``repulsive_potential.py``.

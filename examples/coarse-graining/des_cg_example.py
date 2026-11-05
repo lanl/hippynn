@@ -8,17 +8,22 @@ radial distribution functions (RDFs) to the AA reference.
 BEFORE RUNNING:
 Download the DES dataset and place its .npz files in a folder called datasets/des_cg/ at the
 same level as hippynn/, or change ``data_dir`` below. Choose ``system``, ``temperature``, and
-``mapping`` below. Only the COG and COM mappings can be used for training: the Martini files
-store the merged one-bead-per-molecule trajectories and the Martini CG files have no forces.
+``mapping`` below. The Martini mapping (reline and hydrated reline only) splits choline into two
+beads, Ch1 and Ch2, and the model is trained on all four bead types. After the CG MD, the two
+choline beads are merged back into one at their center of mass so that the RDFs can be compared
+to the one-bead-per-molecule reference and paper CG data. Hydrated reline (250 choline, 250
+chloride, 500 urea, 84 water; water removed before coarse-graining) is only available at 298 K
+with the COM and Martini mappings.
 
-The repulsive potential settings (degree 2, strength mean(|F_x|)/10) are those of the paper's
-ethaline models; the paper's reline 298 COG and 333 COM models instead used degree 3 and a
-strength of mean(|F|)/10. Results will not match the paper bit for bit, since the seeds differ.
+The repulsive potential settings and the number of epochs follow the paper models. Ethaline, reline
+298 K COM and reline 333 K COG used degree 2 and strength mean(|F_x|)/10; the other
+reline models, including Martini and hydrated reline, used degree 3 and strength mean(|F|)/10.
+Results may differ slightly from the stored RDFs, since the seeds differ.
 
 Approx. GPU performance (one A100): training 30-60 min; MD ~5 h for the paper-length run
 (0.1 ns burn-in + 1 ns production). Lower ``n_burnin_steps`` and ``n_production_steps``
 for a quick test. The analysis computes the RDF over every recorded frame, which takes
-~1.5 h for 10,000 frames; set ``rdf_stride`` to use fewer frames.
+~30 min for 10,000 frames on one CPU core; set ``rdf_stride`` to use fewer frames.
 """
 
 import os
@@ -56,26 +61,34 @@ torch.set_default_dtype(torch.float32)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # ----- User parameters -----
-system = "ethaline"  # "reline" or "ethaline"
+system = "ethaline"  # "reline", "reline_hydrated", or "ethaline"
 temperature = 298  # 298 or 333 (K)
-mapping = "COM"  # "COG" or "COM"
+mapping = "COM"  # "COG", "COM", or "Martini" (reline and reline_hydrated only)
 data_dir = os.path.abspath(os.path.join(os.pardir, os.pardir, os.pardir, "datasets", "des_cg"))
 
 run_training = True
 run_md = True
 run_analysis = True
 
-max_epochs = 80
 n_burnin_steps = 100_000
 n_production_steps = 1_000_000
 record_every = 100
 rdf_stride = 1  # use every n-th recorded frame in the RDF analysis
 # ---------------------------
 
-assert mapping in ("COG", "COM"), "Only the COG and COM mappings have CG-mapped forces for training."
-assert system in ("reline", "ethaline"), "Only 'reline' and 'ethaline' are possible systems."
+assert system in ("reline", "reline_hydrated", "ethaline"), "Only 'reline', 'reline_hydrated', and 'ethaline' are possible systems."
+assert mapping in ("COG", "COM", "Martini"), "Only the COG, COM, and Martini mappings are available."
+assert not (mapping == "Martini" and system == "ethaline"), "The Martini mapping is only available for reline."
+assert not (system == "reline_hydrated" and (temperature != 298 or mapping == "COG")), "Hydrated reline is only available at 298 K with COM or Martini."
 
-species_names = {1: "Cho", 2: "Cl", 3: ("Urea" if system == "reline" else "EG")}
+# Repulsive potential settings and epochs of the paper models
+paper_group_a = system == "ethaline" or (system, temperature, mapping) in [("reline", 298, "COM"), ("reline", 333, "COG")]
+rp_degree = 2 if paper_group_a else 3
+max_epochs = 80 if paper_group_a else 20
+
+# Species of the (merged) one-bead-per-molecule systems, used to compare RDFs. The Martini model has four bead types.
+analysis_species_names = {1: "Cho", 2: "Cl", 3: ("EG" if system == "ethaline" else "Urea")}
+species_names = {1: "Ch1", 2: "Ch2", 3: "Cl", 4: "Urea"} if mapping == "Martini" else analysis_species_names
 unique_species = sorted(species_names)
 results_folder = f"{system}_{temperature}_{mapping}"
 aa_file = os.path.join(data_dir, f"{system}_{temperature}_{mapping}_aa.npz")
@@ -97,6 +110,9 @@ with np.load(aa_file) as data:
     masses = data["masses"][frames]
     rdf_bins = data["rdf_bins"]
     aa_rdfs = {key: data[key] for key in data.files if key.startswith("rdf_values_")}
+    # Reference RDFs for the comparison; for Martini these are between the merged choline, chloride, and urea beads
+    ref_prefix = "merged_rdf_values_" if mapping == "Martini" else "rdf_values_"
+    ref_rdfs = {key.replace("merged_", ""): data[key] for key in data.files if key.startswith(ref_prefix)}
 
 if run_training:
     with active_directory(results_folder):
@@ -121,7 +137,10 @@ if run_training:
             repulsive_potential_dr = find_taper_point(unique_species, aa_rdfs, rdf_bins, dr_fn)
             # Placeholder width for the unused null species, avoids division by zero
             repulsive_potential_dr[repulsive_potential_dr == 0] = 1.0
-            repulsive_potential_strength = np.abs(arr_dict["forces"]).mean() / 10
+            if paper_group_a:
+                repulsive_potential_strength = np.abs(arr_dict["forces"]).mean() / 10
+            else:
+                repulsive_potential_strength = np.linalg.norm(arr_dict["forces"], axis=-1).mean() / 10
 
             print(f"Repulsive potential taper points:\n{repulsive_potential_taper_point}")
             print(f"Repulsive potential widths:\n{repulsive_potential_dr}")
@@ -173,7 +192,7 @@ if run_training:
                 taper_point=repulsive_potential_taper_point,
                 strength=repulsive_potential_strength,
                 dr=repulsive_potential_dr,
-                degree=2,
+                degree=rp_degree,
             )
 
             # Combined energy prediction
@@ -365,37 +384,59 @@ if run_md:
             )
             print(f"CG trajectory saved at {os.path.abspath('cg_trajectory.npz')}")
 
+def merge_choline_beads(positions, masses, cells, species):
+    """Merge each Ch1 (species 1) and Ch2 (species 2) bead into one choline bead at their center of mass.
+
+    The k-th Ch1 bead is paired with the k-th Ch2 bead. Returns positions and species ordered as choline (1),
+    chloride (2), urea (3).
+    """
+    masses = masses.reshape(len(masses), -1)[0]
+    ch1, ch2, cl, urea = (species[0] == s for s in (1, 2, 3, 4))
+    box = np.diagonal(cells, axis1=1, axis2=2)[:, None, :]
+    separation = positions[:, ch2] - positions[:, ch1]
+    separation -= box * np.round(separation / box)  # minimum image
+    m1, m2 = masses[ch1][:, None], masses[ch2][:, None]
+    choline = positions[:, ch1] + separation * m2 / (m1 + m2)
+    merged_positions = np.concatenate([choline, positions[:, cl], positions[:, urea]], axis=1)
+    merged_species = np.repeat([1, 2, 3], [ch1.sum(), cl.sum(), urea.sum()])
+    return merged_positions, merged_species
+
 if run_analysis:
     with active_directory(results_folder):
         with log_terminal("analysis_log.txt", "wt"):
 
             ## Partial RDFs of the new CG trajectory, on the same bins as the AA reference RDFs
             with np.load("cg_trajectory.npz") as cg_data:
+                cg_positions = cg_data["position"][::rdf_stride]
+                cg_cells = cg_data["cells"][::rdf_stride]
+                cg_species = cg_data["species"][::rdf_stride]
+                if mapping == "Martini":
+                    cg_positions, cg_species = merge_choline_beads(cg_positions, cg_data["masses"][::rdf_stride], cg_cells, cg_species)
                 _, _, cg_rdfs = calculate_rdf(
-                    positions=cg_data["position"][::rdf_stride],
+                    positions=cg_positions,
                     cutoff=22,  # 300 bins up to 22 Å reproduces the dataset rdf_bins
-                    cells=cg_data["cells"][::rdf_stride],
-                    species=cg_data["species"][::rdf_stride],
+                    cells=cg_cells,
+                    species=cg_species,
                     n_bins=300,
                 )
             cg_rdfs = {key.replace("-", "_"): value for key, value in cg_rdfs.items()}
             np.savez("cg_rdfs.npz", rdf_bins=rdf_bins, **cg_rdfs)
 
             with np.load(paper_cg_file) as paper_cg_data:
-                paper_cg_rdfs = {key: paper_cg_data[key] for key in aa_rdfs}
+                paper_cg_rdfs = {key: paper_cg_data[key] for key in ref_rdfs}
 
             def rdf_error(cg_rdf, aa_rdf):
                 return (rdf_bins[1] - rdf_bins[0]) * np.sum((cg_rdf - aa_rdf) ** 2)
 
             print("RDF error vs AA, dr * sum (g_CG - g_AA)^2 (Å)")
             print(f"{'pair':>10s} {'this run':>10s} {'paper CG':>10s}")
-            for i, j in itertools.combinations_with_replacement(unique_species, 2):
+            for i, j in itertools.combinations_with_replacement(sorted(analysis_species_names), 2):
                 key = f"rdf_values_{i}_{j}"
-                pair_name = f"{species_names[i]}-{species_names[j]}"
-                print(f"{pair_name:>10s} {rdf_error(cg_rdfs[key], aa_rdfs[key]):10.4f} {rdf_error(paper_cg_rdfs[key], aa_rdfs[key]):10.4f}")
+                pair_name = f"{analysis_species_names[i]}-{analysis_species_names[j]}"
+                print(f"{pair_name:>10s} {rdf_error(cg_rdfs[key], ref_rdfs[key]):10.4f} {rdf_error(paper_cg_rdfs[key], ref_rdfs[key]):10.4f}")
 
                 fig, ax = plt.subplots()
-                ax.plot(rdf_bins, aa_rdfs[key], label="AA", color="black")
+                ax.plot(rdf_bins, ref_rdfs[key], label="AA", color="black")
                 ax.plot(rdf_bins, paper_cg_rdfs[key], label="CG (paper)", linestyle="--")
                 ax.plot(rdf_bins, cg_rdfs[key], label="CG (this run)")
                 ax.set_title(f"{system} {temperature} K {mapping}: {pair_name}")
@@ -404,6 +445,6 @@ if run_analysis:
                 ax.set_xlim((3, 13))
                 ax.legend()
                 fig.tight_layout()
-                fig.savefig(f"rdf_{species_names[i]}_{species_names[j]}.png")
+                fig.savefig(f"rdf_{analysis_species_names[i]}_{analysis_species_names[j]}.png")
                 plt.close(fig)
             print(f"RDF plots saved in {os.path.abspath(os.curdir)}")
