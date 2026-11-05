@@ -136,6 +136,6 @@ class PairMemory(torch.nn.Module):
             return True
         if self.skin == 0:
             return True
-        if (self.cells != cells).any() or (((self.positions - coordinates)**2).sum(1).max() > (self._skin/2)**2):
+        if (self.cells != cells).any() or (((self.positions - coordinates)**2).sum(-1).max() > (self._skin/2)**2):
             return True
         return False

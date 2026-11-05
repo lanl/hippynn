@@ -88,6 +88,7 @@ Bug Fixes:
 - Fix ``extract_trajectory_data`` modifying a shared default ``mda_universe_kwargs``
   between calls, raising an error for files without velocities or forces, and
   silently ignoring non-orthorhombic cell angles (now a ``ValueError``).
+- Fix pair-list reuse check in ``PairMemory`` to use per-atom displacement.
 
 
 0.1.0
