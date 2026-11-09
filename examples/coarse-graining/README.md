@@ -33,7 +33,7 @@ any way, besides potential effects of uncontrolled random variables.
 
 ### Deep eutectic solvent (DES) example
 
-One should first download the files for the desired configuration from XXXX. They should be placed in
+One should first download the files for the desired configuration from <https://doi.org/10.5281/zenodo.24089819>. They should be placed in
 ``datasets/des_cg/``, where ``datasets/`` is at the same level as the hippynn repository.
 
 ``des_cg_example.py`` trains a HIP-HOP-NN CG model for ethaline, reline, or hydrated reline, runs CG MD with the hippynn

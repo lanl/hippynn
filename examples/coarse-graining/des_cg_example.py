@@ -6,14 +6,14 @@ DES trajectory, runs CG MD with the hippynn MD driver, and compares the CG parti
 radial distribution functions (RDFs) to the AA reference.
 
 BEFORE RUNNING:
-Download the DES dataset and place its .npz files in a folder called datasets/des_cg/ at the
-same level as hippynn/, or change ``data_dir`` below. Choose ``system``, ``temperature``, and
-``mapping`` below. The Martini mapping (reline and hydrated reline only) splits choline into two
-beads, Ch1 and Ch2, and the model is trained on all four bead types. After the CG MD, the two
-choline beads are merged back into one at their center of mass so that the RDFs can be compared
-to the one-bead-per-molecule reference and paper CG data. Hydrated reline (250 choline, 250
-chloride, 500 urea, 84 water; water removed before coarse-graining) is only available at 298 K
-with the COM and Martini mappings.
+Download the DES dataset from https://doi.org/10.5281/zenodo.24089819 and place its .npz files in a
+folder called datasets/des_cg/ at the same level as hippynn/, or change ``data_dir`` below. Choose
+``system``, ``temperature``, and ``mapping`` below. The Martini mapping (reline and hydrated reline
+only) splits choline into two beads, Ch1 and Ch2, and the model is trained on all four bead types.
+After the CG MD, the two choline beads are merged back into one at their center of mass so that the
+RDFs can be compared to the one-bead-per-molecule reference and paper CG data. Hydrated reline (250
+choline, 250 chloride, 500 urea, 84 water; water removed before coarse-graining) is only available
+at 298 K with the COM and Martini mappings.
 
 The repulsive potential settings and the number of epochs follow the paper models. Ethaline, reline
 298 K COM and reline 333 K COG used degree 2 and strength mean(|F_x|)/10; the other
