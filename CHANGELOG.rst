@@ -56,6 +56,7 @@ New Features:
   AA data to use in training CG model, capability to use a species-pair-specific 
   repulsive potential, extended processing of data from CG MD, and a notebook 
   for visualizing the repulsive potentials. 
+- Added a coarse-graining example for mixtures.
 - Additional examples for pytorch lightning and simple inference
 - Efficient Hessian training using matrix probing techniques.
 - New profiling tool for easily capturing the CPU/GPU efficiency of your experiment.
@@ -80,6 +81,7 @@ Improvements:
 - New variant of ``AseDatabase`` named ``AseDatabaseIterable``. Accepts an 
   iterable of ``ase.Atoms`` objects (e.g., the result of ``ase.io.read`` 
   or ``ase.io.iread``).
+- Improve speed of `calculate_rdf` and `calculate_adf` functions.
 
 
 
@@ -101,6 +103,7 @@ Bug Fixes:
 - Fix ``extract_trajectory_data`` modifying a shared default ``mda_universe_kwargs``
   between calls, raising an error for files without velocities or forces, and
   silently ignoring non-orthorhombic cell angles (now a ``ValueError``).
+- Fix pair-list reuse check in ``PairMemory`` to use per-atom displacement.
 
 
 0.1.0
