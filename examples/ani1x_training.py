@@ -12,7 +12,6 @@ https://doi.org/10.1038/s41597-020-0473-z
 
 The script can also train on the ANI-2x h5 file (wB97X/6-31G*, grouped by number of atoms)
 by passing `--dataset ani2x --anidata_location /path/to/ANI-2x-wB97X-631Gd.h5`.
-Note that self energies for F, S, and Cl are not included in SELF_ENERGY_APPROX, and are treated as zero.
 
 """
 
@@ -92,8 +91,9 @@ def make_loss(henergy, force, force_training):
 # From nick, to support ani2x at wb97x/6-31g*
 SELF_ENERGY_APPROX =   {"C": -37.8338348241, "H": -0.499321232652, "N": -54.5732824171, "O": -75.0424612698,
                         "S": -398.081452756, "F": -99.6949027491, "Cl": -460.116722912}
-SELF_ENERGY_APPROX = {k: SELF_ENERGY_APPROX[v] for k, v in zip([6, 1, 7, 8], "CHNO")}
+SELF_ENERGY_APPROX = {k: SELF_ENERGY_APPROX[v] for k, v in zip([6, 1, 7, 8, 16, 9, 17], ["C", "H", "N", "O", "S", "F", "Cl"])}
 SELF_ENERGY_APPROX[0] = 0
+# Only the entries for a dataset's possible_species are used (CHNO for ani1x, CHNOSFCl for ani2x).
 
 
 def load_db(db_info, en_name, force_name, seed, anidata_location, n_workers, use_ccx_subset, species_key, possible_species):
@@ -116,11 +116,11 @@ def load_db(db_info, en_name, force_name, seed, anidata_location, n_workers, use
 
     # compute (approximate) atomization energy by subtracting self energies
 
-    # Build a lookup tensor for self energies; species without an entry get zero.
+    # Build a lookup tensor for self energies of the dataset's species
     max_z = max(possible_species) + 1  # +1 in case max Z is the last index
     lookup_table = torch.zeros(max_z, dtype=torch.float32)
-    for z, energy in SELF_ENERGY_APPROX.items():
-        lookup_table[z] = energy
+    for z in possible_species:
+        lookup_table[z] = SELF_ENERGY_APPROX[z]
 
     database.arr_dict[species_key] = database.arr_dict[species_key].long()
 
@@ -132,7 +132,7 @@ def load_db(db_info, en_name, force_name, seed, anidata_location, n_workers, use
     database.arr_dict[en_name] = database.arr_dict[en_name].float() * conversion
 
     if force_name in database.arr_dict:
-        database.arr_dict[force_name] = database.arr_dict[force_name] * conversion
+        database.arr_dict[force_name] = database.arr_dict[force_name].float() * conversion
     torch.set_default_dtype(torch.float32)
 
     # Drop indices where computed energy not retrieved.
