@@ -88,7 +88,10 @@ def make_loss(henergy, force, force_training):
 # # # Old values with singlet/triplet multiplicity only
 # # SELF_ENERGY_APPROX = {'C': -37.764142, 'H': -0.4993212, 'N': -54.4628753, 'O': -74.940046}
 # Recalculated with appropriate vacuum multiplicity
-SELF_ENERGY_APPROX = {"C": -37.8338334397, "H": -0.499321232710, "N": -54.5732824628, "O": -75.0424519384}
+# SELF_ENERGY_APPROX = {"C": -37.8338334397, "H": -0.499321232710, "N": -54.5732824628, "O": -75.0424519384}
+# From nick, to support ani2x at wb97x/6-31g*
+SELF_ENERGY_APPROX =   {"C": -37.8338348241, "H": -0.499321232652, "N": -54.5732824171, "O": -75.0424612698,
+                        "S": -398.081452756, "F": -99.6949027491, "Cl": -460.116722912}
 SELF_ENERGY_APPROX = {k: SELF_ENERGY_APPROX[v] for k, v in zip([6, 1, 7, 8], "CHNO")}
 SELF_ENERGY_APPROX[0] = 0
 
