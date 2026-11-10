@@ -10,6 +10,9 @@ The ANI-1ccx and ANI-1x data sets, coupled-cluster and density functional
 theory properties for molecules. Sci Data 7, 134 (2020).
 https://doi.org/10.1038/s41597-020-0473-z
 
+The script can also train on the ANI-2x h5 file (wB97X/6-31G*, grouped by number of atoms)
+by passing `--dataset ani2x --anidata_location /path/to/ANI-2x-wB97X-631Gd.h5`.
+
 """
 
 import argparse
@@ -18,7 +21,7 @@ import hippynn
 import ase.units
 
 
-def make_model(network_params, tensor_model, tensor_order, tensor_factors, atomization_consistent):
+def make_model(network_params, tensor_model, tensor_order, tensor_factors, atomization_consistent, species_key):
     """
     Build the model graph for energy and potentially force prediction.
     """
@@ -37,7 +40,7 @@ def make_model(network_params, tensor_model, tensor_order, tensor_factors, atomi
             network_params["l_max"] = tensor_order
             network_params["n_max"] = tensor_factors
 
-    species = inputs.SpeciesNode(db_name="atomic_numbers")
+    species = inputs.SpeciesNode(db_name=species_key)
     positions = inputs.PositionsNode(db_name="coordinates")
     network = net_class("hipnn_model", (species, positions), module_kwargs=network_params)
 
@@ -84,12 +87,16 @@ def make_loss(henergy, force, force_training):
 # # # Old values with singlet/triplet multiplicity only
 # # SELF_ENERGY_APPROX = {'C': -37.764142, 'H': -0.4993212, 'N': -54.4628753, 'O': -74.940046}
 # Recalculated with appropriate vacuum multiplicity
-SELF_ENERGY_APPROX = {"C": -37.8338334397, "H": -0.499321232710, "N": -54.5732824628, "O": -75.0424519384}
-SELF_ENERGY_APPROX = {k: SELF_ENERGY_APPROX[v] for k, v in zip([6, 1, 7, 8], "CHNO")}
+# SELF_ENERGY_APPROX = {"C": -37.8338334397, "H": -0.499321232710, "N": -54.5732824628, "O": -75.0424519384}
+# From nick, to support ani2x at wb97x/6-31g*
+SELF_ENERGY_APPROX =   {"C": -37.8338348241, "H": -0.499321232652, "N": -54.5732824171, "O": -75.0424612698,
+                        "S": -398.081452756, "F": -99.6949027491, "Cl": -460.116722912}
+SELF_ENERGY_APPROX = {k: SELF_ENERGY_APPROX[v] for k, v in zip([6, 1, 7, 8, 16, 9, 17], ["C", "H", "N", "O", "S", "F", "Cl"])}
 SELF_ENERGY_APPROX[0] = 0
+# Only the entries for a dataset's possible_species are used (CHNO for ani1x, CHNOSFCl for ani2x).
 
 
-def load_db(db_info, en_name, force_name, seed, anidata_location, n_workers, use_ccx_subset):
+def load_db(db_info, en_name, force_name, seed, anidata_location, n_workers, use_ccx_subset, species_key, possible_species):
     """
     Load the database.
     """
@@ -103,21 +110,21 @@ def load_db(db_info, en_name, force_name, seed, anidata_location, n_workers, use
     CCX_EN_NAME = "ccsd(t)_cbs.energy"
     if use_ccx_subset and en_name != CCX_EN_NAME:
         db_info["targets"].append(CCX_EN_NAME) # note, this is in-place and affects the evaluator.
-    database = PyAniFileDB(file=anidata_location, seed=seed, num_workers=n_workers, **db_info)
+    database = PyAniFileDB(file=anidata_location, seed=seed, num_workers=n_workers, species_key=species_key, **db_info)
     if use_ccx_subset and en_name != CCX_EN_NAME:
         database.targets.remove(CCX_EN_NAME) # undo in-place addition
 
     # compute (approximate) atomization energy by subtracting self energies
 
-    # Build a lookup tensor for self energies
-    max_z = max(SELF_ENERGY_APPROX.keys()) + 1  # +1 in case max Z is the last index
+    # Build a lookup tensor for self energies of the dataset's species
+    max_z = max(possible_species) + 1  # +1 in case max Z is the last index
     lookup_table = torch.zeros(max_z, dtype=torch.float32)
-    for z, energy in SELF_ENERGY_APPROX.items():
-        lookup_table[z] = energy
+    for z in possible_species:
+        lookup_table[z] = SELF_ENERGY_APPROX[z]
 
-    database.arr_dict["atomic_numbers"] = database.arr_dict["atomic_numbers"].long()
+    database.arr_dict[species_key] = database.arr_dict[species_key].long()
 
-    self_energy = lookup_table[database.arr_dict["atomic_numbers"]]
+    self_energy = lookup_table[database.arr_dict[species_key]]
     self_energy = self_energy.sum(dim=1)
     database.arr_dict[en_name] = database.arr_dict[en_name] - self_energy
     kcalpmol = ase.units.kcal / ase.units.mol
@@ -125,7 +132,7 @@ def load_db(db_info, en_name, force_name, seed, anidata_location, n_workers, use
     database.arr_dict[en_name] = database.arr_dict[en_name].float() * conversion
 
     if force_name in database.arr_dict:
-        database.arr_dict[force_name] = database.arr_dict[force_name] * conversion
+        database.arr_dict[force_name] = database.arr_dict[force_name].float() * conversion
     torch.set_default_dtype(torch.float32)
 
     # Drop indices where computed energy not retrieved.
@@ -204,15 +211,33 @@ ANI1X_DSETS_KEYS = [
 AVAIL_METHODS = ["hf", "wb97x", "ccsd(t)", "mp2"]
 AVAIL_BASIS = ["dz", "tz", "qz", "cbs"]
 
+# Dataset-specific key names and species.
+# The ANI-2x file only contains wB97X/6-31G* data (equivalent to "wb97x_dz" in ANI-1x).
+DATASET_PRESETS = {
+    "ani1x": dict(species_key="atomic_numbers", possible_species=[0, 1, 6, 7, 8]),
+    "ani2x": dict(
+        species_key="species",
+        possible_species=[0, 1, 6, 7, 8, 9, 16, 17],
+        en_name="energies",
+        force_name="forces",
+    ),
+}
 
-def get_data_names(qm_method, basis_set):
+
+def get_data_names(dataset, qm_method, basis_set, force_training):
+    preset = DATASET_PRESETS[dataset]
+    if "en_name" in preset:
+        if (qm_method, basis_set) != ("wb97x", "dz"):
+            print(f"Warning: dataset '{dataset}' only has wb97x_dz data; ignoring qm_method/basis_set arguments.")
+        return preset["en_name"], preset["force_name"]
+
     assert qm_method in AVAIL_METHODS, f"Method not found: {qm_method}"
     assert basis_set in AVAIL_BASIS, f"Basis set not found: {basis_set}"
-    data_spec = f"{qm_method}_{args.basis_set}"
+    data_spec = f"{qm_method}_{basis_set}"
     en_name = f"{data_spec}.energy"
     force_name = f"{data_spec}.forces"
     assert en_name in ANI1X_DSETS_KEYS, f"Method-basis combination not available: {data_spec}"
-    if args.force_training:
+    if force_training:
         assert f"{data_spec}.forces" in ANI1X_DSETS_KEYS, f"Force training not available for data spec: {data_spec}"
     return en_name, force_name
 
@@ -227,13 +252,17 @@ def main(args):
     if not args.progress:
         hippynn.settings.PROGRESS = None
 
+    preset = DATASET_PRESETS[args.dataset]
+    if args.use_ccx_subset:
+        assert args.dataset == "ani1x", "The ANI-1ccx subset is only available with the ani1x dataset."
+
     netname = f"{args.tag}_GPU{args.gpu}"
     network_parameters = {
-        "possible_species": [0, 1, 6, 7, 8],
+        "possible_species": preset["possible_species"],
         "n_features": args.n_features,
         "n_sensitivities": args.n_sensitivities,
         "dist_soft_min": args.lower_cutoff,
-        "dist_soft_max": args.cutoff_distance - 1,
+        "dist_soft_max": args.cutoff_distance - 0.5,
         "dist_hard_max": args.cutoff_distance,
         "n_interaction_layers": args.n_interactions,
         "n_atom_layers": args.n_atom_layers,
@@ -247,9 +276,10 @@ def main(args):
                 tensor_order=args.tensor_order,
                 tensor_factors=args.tensor_factors,
                 atomization_consistent=args.atomization_consistent,
+                species_key=preset["species_key"],
             )
 
-            en_name, force_name = get_data_names(args.qm_method, args.basis_set)
+            en_name, force_name = get_data_names(args.dataset, args.qm_method, args.basis_set, args.force_training)
 
             henergy.mol_energy.db_name = en_name
             force.db_name = force_name
@@ -270,6 +300,8 @@ def main(args):
                 seed=args.seed,
                 anidata_location=args.anidata_location,
                 use_ccx_subset=args.use_ccx_subset,
+                species_key=preset["species_key"],
+                possible_species=preset["possible_species"],
             )
 
             from hippynn.pretraining import hierarchical_energy_initialization
@@ -344,6 +376,13 @@ if __name__ == "__main__":
     parser.add_argument("--tensor_factors", type=int, default=4, help="number of factors used (in HIP-HOP-NN only)")
     parser.add_argument("--atomization_consistent", type=bool, default=False)
 
+    parser.add_argument(
+        "--dataset",
+        type=str.lower,
+        default="ani1x",
+        choices=list(DATASET_PRESETS),
+        help="Which dataset format `anidata_location` points to.",
+    )
     parser.add_argument("--anidata_location", type=str, default="../../../datasets/ani1x_release/ani1x-release.h5")
     parser.add_argument("--qm_method", type=str, default="wb97x")
     parser.add_argument("--basis_set", type=str, default="dz")
