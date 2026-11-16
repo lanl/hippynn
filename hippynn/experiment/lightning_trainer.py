@@ -43,7 +43,7 @@ class HippynnLightningModule(pl.LightningModule):
         eval_names: list[str],
         stopping_key: str,
         optimizer_list: list[torch.optim.Optimizer],
-        scheduler_list: list[torch.optim.lr_scheduler],
+        scheduler_list: list[torch.optim.lr_scheduler.LRScheduler],
         controller: Controller,
         metric_tracker: MetricTracker,
         inputs: list[str],

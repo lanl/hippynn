@@ -66,7 +66,6 @@ def neighbor_list_np(cutoff, coords, cell):
     return pair_first, pair_second, pair_image
 
 
-@torch.jit.script
 def wrap_points_torch(coords, cell, inv_cell):
     # cell is (basis,cartesian)
     # inv is (cartesian,basis)
@@ -78,7 +77,6 @@ def wrap_points_torch(coords, cell, inv_cell):
     return wrapped_coords, wrapped_offset.to(torch.int64)
 
 
-@torch.jit.script
 def compute_offset_range(inv_cell, cutoff: float):
     dev = inv_cell.device
     eps = 1e-5
@@ -94,7 +92,6 @@ def compute_offset_range(inv_cell, cutoff: float):
     return offset_range
 
 
-@torch.jit.script
 def neighbor_list_torch(cutoff: float, coords, cell):
     # cell is (basis,cartesian)
     # inv is (cartesian,basis)

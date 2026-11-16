@@ -180,10 +180,8 @@ def param_print(module):
 def device_fallback():
     if torch.cuda.is_available():
         device = torch.device(torch.cuda.current_device())
-    elif hasattr(torch, "get_default_device"):
-        device = torch.get_default_device()
     else:
-        device = torch.device("cpu")
+        device = torch.get_default_device()
     print("Device was not specified. Attempting to default to device:", device)
     device = torch.device(device.type)
     return device
@@ -302,21 +300,8 @@ def recursive_param_count(state_dict, n=0):
     return n
 
 
-try:
-    torch.serialization.add_safe_globals
-    def add_safe_globals(*args,**kwargs):
-        """
-        Backwards-compatible alias of torch.serialization.add_safe_globals
-        """
-        return torch.serialization.add_safe_globals(*args,**kwargs)
-
-except AttributeError:
-    # Older version of pytorch.
-    def add_safe_globals(*args,**kwargs):
-        """
-        Backwards-compatible alias of torch.serialization.add_safe_globals
-        """
-        pass
+# Backwards-compatible alias.
+add_safe_globals = torch.serialization.add_safe_globals
 
 
 class SetStateMixin:

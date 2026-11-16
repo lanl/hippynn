@@ -61,7 +61,7 @@ class SetupParams:
     stopping_key: Optional[str] = None
     optimizer: Union[torch.optim.Optimizer, Callable] = torch.optim.Adam
     learning_rate: Optional[float] = None
-    scheduler: Union[torch.optim.lr_scheduler._LRScheduler, Callable] = None
+    scheduler: Union[torch.optim.lr_scheduler.LRScheduler, Callable] = None
     batch_size: Optional[int] = None
     eval_batch_size: Optional[int] = None
     max_epochs: Optional[int] = None

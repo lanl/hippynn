@@ -1,6 +1,9 @@
 Breaking changes:
 -----------------
 
+- The minimum python version has been increased to 3.14, and the minimum pytorch version to 2.15.
+- ``torch.jit.script`` is no longer used, as it is unsupported in python 3.14. The hidden
+  ``_legacy_jit`` and ``_pytorch_jit`` custom kernel implementations have been removed.
 - ``calculate_min_dists`` signature changed: ``dist_hard_max`` is now the second
   positional argument, and ``species_name``/``positions_name`` are now optional
   keyword arguments that are auto-detected if omitted. ``cell_name`` now also

@@ -27,7 +27,7 @@ class Database:
         arr_dict: dict[str, torch.Tensor],
         inputs: list[str],
         targets: list[str],
-        seed: list[int, torch.Generator],
+        seed: Union[int, torch.Generator, torch.Tensor],
         test_size: Union[float, int] = None,
         valid_size: Union[float, int] = None,
         num_workers: int = 0,
@@ -42,7 +42,8 @@ class Database:
         :param arr_dict: dictionary mapping strings to numpy arrays
         :param inputs:   list of strings for input db_names
         :param targets:  list of strings for output db_namees
-        :param seed:     int, for random splitting, or existing torch.Generator object
+        :param seed:     int, for random splitting, an existing torch.Generator object,
+          or a generator state tensor (as from ``torch.Generator.get_state()``)
         :param test_size: fraction of data to use in test split
         :param valid_size: fraction of data to use in train split
         :param num_workers: passed to pytorch dataloaders
@@ -285,7 +286,7 @@ class Database:
         return
 
     def make_explicit_split_bool(self, split_name: str,
-                                 split_mask: Union[np.ndarray, torch.tensor]):
+                                 split_mask: Union[np.ndarray, torch.Tensor]):
         """
 
         :param split_name: name for split, typically 'train', 'valid', 'test'
@@ -761,7 +762,7 @@ class Database:
         device = devices.pop()
         return device
 
-    def make_database_cache(self, file: str = "./hippynn_db_cache.npz", overwrite: bool = False, compress=True, **override_kwargs) -> "Database":
+    def make_database_cache(self, file: str = "./hippynn_db_cache.npz", overwrite: bool = False, compress=True, **override_kwargs) -> Database:
         """
         Cache the database as-is, and re-open it.
 
